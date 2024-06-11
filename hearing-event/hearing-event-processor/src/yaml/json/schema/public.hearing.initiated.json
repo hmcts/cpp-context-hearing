@@ -11,6 +11,27 @@
       "items": {
         "$ref": "#/definitions/uuid"
       }
+    },
+    "hearingDateTime:": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "caseDetails": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "http://justice.gov.uk/hearing/courts/hearing.case-details.json"
+      }
+    },
+    "applicationDetails": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "http://justice.gov.uk/hearing/courts/hearing.application-details.json"
+      }
+    },
+    "jurisdictionType": {
+      "$ref": "http://justice.gov.uk/core/courts/jurisdictionType.json"
     }
   },
   "required": [

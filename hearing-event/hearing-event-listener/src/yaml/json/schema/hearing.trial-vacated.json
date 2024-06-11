@@ -20,6 +20,30 @@
     },
     "courtCentreId": {
       "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "hasInterpreter": {
+      "type": "boolean"
+    },
+    "caseDetails": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "http://justice.gov.uk/hearing/courts/hearing.case-details.json"
+      }
+    },
+    "applicationDetails": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "http://justice.gov.uk/hearing/courts/hearing.application-details.json"
+      }
+    },
+    "jurisdictionType": {
+      "$ref": "http://justice.gov.uk/core/courts/jurisdictionType.json"
+    },
+    "hearingDay": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [

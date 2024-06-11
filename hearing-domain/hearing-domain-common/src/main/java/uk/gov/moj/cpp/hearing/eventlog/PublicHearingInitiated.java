@@ -7,13 +7,11 @@ import java.util.List;
 import java.util.UUID;
 
 @SuppressWarnings({"squid:S2384"})
-public class PublicHearingEventTrialVacated {
+public class PublicHearingInitiated {
 
     private UUID hearingId;
 
-    private UUID vacatedTrialReasonId;
-
-    private Boolean hasInterpreter;
+    private List<UUID> cases;
 
     private ZonedDateTime hearingDateTime;
 
@@ -24,17 +22,21 @@ public class PublicHearingEventTrialVacated {
     private JurisdictionType jurisdictionType;
 
 
-    public static PublicHearingEventTrialVacated publicHearingEventTrialVacated() {
-        return new PublicHearingEventTrialVacated();
+    public static PublicHearingInitiated publicHearingInitiated() {
+        return new PublicHearingInitiated();
     }
 
-    public PublicHearingEventTrialVacated setHearingId(final UUID hearingId) {
+    public PublicHearingInitiated setHearingId(final UUID hearingId) {
         this.hearingId = hearingId;
         return this;
     }
 
-    public PublicHearingEventTrialVacated setVacatedTrialReasonId(final UUID vacatedTrialReasonId) {
-        this.vacatedTrialReasonId = vacatedTrialReasonId;
+    public List<UUID> getCases() {
+        return cases;
+    }
+
+    public PublicHearingInitiated setCases(final List<UUID> cases) {
+        this.cases = cases;
         return this;
     }
 
@@ -42,15 +44,12 @@ public class PublicHearingEventTrialVacated {
         return hearingId;
     }
 
-    public UUID getVacatedTrialReasonId() {
-        return vacatedTrialReasonId;
-    }
 
     public ZonedDateTime getHearingDateTime() {
         return hearingDateTime;
     }
 
-    public PublicHearingEventTrialVacated setHearingDateTime(final ZonedDateTime hearingDateTime) {
+    public PublicHearingInitiated setHearingDateTime(final ZonedDateTime hearingDateTime) {
         this.hearingDateTime = hearingDateTime;
         return this;
     }
@@ -60,17 +59,8 @@ public class PublicHearingEventTrialVacated {
         return caseDetails;
     }
 
-    public PublicHearingEventTrialVacated setCaseDetails(final List<HearingCaseDetail> caseDetails) {
+    public PublicHearingInitiated setCaseDetails(final List<HearingCaseDetail> caseDetails) {
         this.caseDetails = caseDetails;
-        return this;
-    }
-
-    public Boolean getHasInterpreter() {
-        return hasInterpreter;
-    }
-
-    public PublicHearingEventTrialVacated setHasInterpreter(final Boolean hasInterpreter) {
-        this.hasInterpreter = hasInterpreter;
         return this;
     }
 
@@ -78,7 +68,7 @@ public class PublicHearingEventTrialVacated {
         return applicationDetails;
     }
 
-    public PublicHearingEventTrialVacated setApplicationDetails(final List<HearingApplicationDetail> applicationDetails) {
+    public PublicHearingInitiated setApplicationDetails(final List<HearingApplicationDetail> applicationDetails) {
         this.applicationDetails = applicationDetails;
         return this;
     }
@@ -87,7 +77,7 @@ public class PublicHearingEventTrialVacated {
         return jurisdictionType;
     }
 
-    public PublicHearingEventTrialVacated setJurisdictionType(final JurisdictionType jurisdictionType) {
+    public PublicHearingInitiated setJurisdictionType(final JurisdictionType jurisdictionType) {
         this.jurisdictionType = jurisdictionType;
         return this;
     }

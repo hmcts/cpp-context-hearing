@@ -6,7 +6,9 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.isNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -32,6 +34,7 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 
@@ -41,11 +44,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,7 +77,7 @@ public class InitiateHearingEventProcessorTest {
             APPLICATION_TO_REOPEN_CASE_ID.toString(), APPEAL_AGAINST_CONVICTION_ID.toString(), APPEAL_AGAINST_SENTENCE_ID.toString(), APPEAL_AGAINST_CONVICTION_AND_SENTENCE_ID.toString());
 
     @DataProvider
-    public static Object[] applicationTypes(){
+    public static Object[] applicationTypes() {
         return new String[][]{
                 {APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_ID.toString(), "STAT_DEC"},
                 {APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_SJP_CASE_ID.toString(), "STAT_DEC"},
@@ -81,6 +87,7 @@ public class InitiateHearingEventProcessorTest {
                 {APPEAL_AGAINST_CONVICTION_AND_SENTENCE_ID.toString(), "APPEAL"}
         };
     }
+
     @Spy
     private final Enveloper enveloper = createEnveloper();
 
@@ -106,6 +113,9 @@ public class InitiateHearingEventProcessorTest {
         MockitoAnnotations.initMocks(this);
     }
 
+    @Captor
+    protected ArgumentCaptor<JsonEnvelope> jsonEnvelopeArgumentCaptor;
+
     @Test
     public void publishHearingInitiatedEvent() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
@@ -117,11 +127,29 @@ public class InitiateHearingEventProcessorTest {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         initiateHearingCommand.getHearing().setProsecutionCases(null);
         publishHearingInitiatedEvent(initiateHearingCommand);
+        verify(sender, times(1)).send(jsonEnvelopeArgumentCaptor.capture());
+
+        final Metadata metadata = jsonEnvelopeArgumentCaptor.getValue().metadata();
+        Assert.assertThat(metadata.name(), is("public.hearing.initiated"));
+
+        final JsonObject jsonObject = jsonEnvelopeArgumentCaptor.getValue().asJsonObject();
+
+        final JsonArray applicationDetailsList = jsonObject.getJsonArray("applicationDetails");
+        final JsonObject applicationDetails = (JsonObject) applicationDetailsList.get(0);
+        final JsonObject subject = applicationDetails.getJsonObject("subject");
+
+        Assert.assertThat(jsonObject.getString("hearingId"), notNullValue());
+        Assert.assertThat(jsonObject.getJsonArray("cases").size(), is(0));
+        Assert.assertThat(jsonObject.getString("hearingDateTime"), notNullValue());
+        Assert.assertThat(jsonObject.getJsonArray("caseDetails").size(), is(0));
+        Assert.assertThat(jsonObject.getString("jurisdictionType"), is("CROWN"));
+        Assert.assertThat(subject.getString("defendantFirstName"), is("Lauren"));
+        Assert.assertThat(subject.getString("defendantLastName"), is("Michelle"));
     }
 
     @UseDataProvider("applicationTypes")
     @Test
-    public void shouldRaiseEventForEmailWhenApplicationTypeMatches(final String applicationTypeId, final String applicationType){
+    public void shouldRaiseEventForEmailWhenApplicationTypeMatches(final String applicationTypeId, final String applicationType) {
         final UUID masterDefendantId = randomUUID();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingWithApplicationTemplate(singletonList(CourtApplication.courtApplication()
                 .withType(CourtApplicationType.courtApplicationType()
@@ -158,29 +186,29 @@ public class InitiateHearingEventProcessorTest {
     }
 
 
-    private void publishHearingInitiatedEvent(final InitiateHearingCommand initiateHearingCommand ) {
+    private void publishHearingInitiatedEvent(final InitiateHearingCommand initiateHearingCommand) {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.initiated"),
                 objectToJsonObjectConverter.convert(initiateHearingCommand));
 
         this.initiateHearingEventProcessor.hearingInitiated(event);
 
-        int caseCount = initiateHearingCommand.getHearing().getProsecutionCases()==null?0:initiateHearingCommand.getHearing().getProsecutionCases().size();
-        int expectedInvocations = 1+ (3*caseCount);
-        if(initiateHearingCommand.getHearing().getCourtApplications() != null && APPLICATION_TYPE_LIST.contains(initiateHearingCommand.getHearing().getCourtApplications().get(0).getType().getId().toString())){
-            expectedInvocations ++;
+        int caseCount = initiateHearingCommand.getHearing().getProsecutionCases() == null ? 0 : initiateHearingCommand.getHearing().getProsecutionCases().size();
+        int expectedInvocations = 1 + (3 * caseCount);
+        if (initiateHearingCommand.getHearing().getCourtApplications() != null && APPLICATION_TYPE_LIST.contains(initiateHearingCommand.getHearing().getCourtApplications().get(0).getType().getId().toString())) {
+            expectedInvocations++;
         }
 
 
         verify(this.sender, times(expectedInvocations)).send(this.envelopeArgumentCaptor.capture());
 
-        final  List<Envelope<JsonObject>> envelopes = this.envelopeArgumentCaptor.getAllValues();
+        final List<Envelope<JsonObject>> envelopes = this.envelopeArgumentCaptor.getAllValues();
 
         final List<UUID> prosecutionCaseIds = new ArrayList<>();
         final List<UUID> defendantIds = new ArrayList<>();
         final List<UUID> offenceIds = new ArrayList<>();
 
-        if (caseCount>0) {
+        if (caseCount > 0) {
             initiateHearingCommand.getHearing().getProsecutionCases().forEach(prosecutionCase -> {
                 prosecutionCaseIds.add(prosecutionCase.getId());
                 prosecutionCase.getDefendants().forEach(defendant -> {
@@ -190,9 +218,9 @@ public class InitiateHearingEventProcessorTest {
             });
         }
 
-        if (caseCount>0) {
+        if (caseCount > 0) {
             assertThat(
-                    envelopeFrom(envelopes.get(0).metadata(), objectToJsonObjectConverter.convert(envelopes.get(0).payload())), is( jsonEnvelope(
+                    envelopeFrom(envelopes.get(0).metadata(), objectToJsonObjectConverter.convert(envelopes.get(0).payload())), is(jsonEnvelope(
                             metadata().withName("hearing.command.register-hearing-against-defendant"),
                             payloadIsJson(allOf(
                                     withJsonPath("$.defendantId", is(defendantIds.get(0).toString())),

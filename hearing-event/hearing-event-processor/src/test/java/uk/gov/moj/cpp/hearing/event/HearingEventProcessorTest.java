@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.time.ZoneId.of;
@@ -31,6 +32,7 @@ import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_
 import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_EVENT_AMENDED;
 
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -39,6 +41,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
@@ -52,6 +55,10 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
+import uk.gov.moj.cpp.hearing.eventlog.HearingApplicationDetail;
+import uk.gov.moj.cpp.hearing.eventlog.HearingCaseDetail;
+import uk.gov.moj.cpp.hearing.eventlog.HearingDefendantDetail;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAddedToHearing;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
@@ -260,12 +267,12 @@ public class HearingEventProcessorTest {
 
         UUID userId = UUID.randomUUID();
         HearingState newHearingState = HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
-        HearingAmended hearingAmended = new HearingAmended(HEARING_ID,userId,newHearingState);
+        HearingAmended hearingAmended = new HearingAmended(HEARING_ID, userId, newHearingState);
 
         final JsonObjectBuilder result = createObjectBuilder()
                 .add(NEW_HEARING_STATE, newHearingState.toString())
                 .add(FIELD_HEARING_ID, HEARING_ID.toString());
-        final JsonEnvelope eventIn =  envelopeFrom(metadataWithRandomUUID("hearing.event.amended"), result.build());
+        final JsonEnvelope eventIn = envelopeFrom(metadataWithRandomUUID("hearing.event.amended"), result.build());
 
         final InOrder inOrder = inOrder(sender);
         this.hearingEventProcessor.publicHearingAmended(eventIn);
@@ -287,13 +294,13 @@ public class HearingEventProcessorTest {
 
         UUID userId = UUID.randomUUID();
         HearingState newHearingState = HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
-        HearingAmended hearingAmended = new HearingAmended(HEARING_ID,userId,newHearingState);
+        HearingAmended hearingAmended = new HearingAmended(HEARING_ID, userId, newHearingState);
 
         final JsonObjectBuilder result = createObjectBuilder()
                 .add(FIELD_AMENDED_BY_USER_ID, userId.toString())
                 .add(FIELD_HEARING_DAY, "2021-01-03")
                 .add(FIELD_HEARING_ID, HEARING_ID.toString());
-        final JsonEnvelope eventIn =  envelopeFrom(metadataWithRandomUUID("hearing.draft-result-deleted-v2"), result.build());
+        final JsonEnvelope eventIn = envelopeFrom(metadataWithRandomUUID("hearing.draft-result-deleted-v2"), result.build());
 
         final InOrder inOrder = inOrder(sender);
         this.hearingEventProcessor.publicDraftResultDeletedV2PublicEvent(eventIn);
@@ -353,6 +360,7 @@ public class HearingEventProcessorTest {
     @Test
     public void shouldTriggerPublicHearingTrialVacatedEventForEffectiveTrial() {
         final UUID hearingId = randomUUID();
+
         final HearingEffectiveTrial hearingEffectiveTrial = new HearingEffectiveTrial(hearingId, true);
         final JsonEnvelope eventIn = createJsonEnvelope(hearingEffectiveTrial);
 
@@ -370,6 +378,7 @@ public class HearingEventProcessorTest {
     public void shouldTriggerPublicHearingTrialVacatedEventForCrackedTrial() {
         final UUID hearingId = randomUUID();
         final UUID trialTypeId = randomUUID();
+
         final HearingTrialType hearingTrialType = new HearingTrialType(hearingId, trialTypeId, "code", "cracked", "desc");
         final JsonEnvelope eventIn = createJsonEnvelope(hearingTrialType);
 
@@ -412,32 +421,114 @@ public class HearingEventProcessorTest {
 
     @Test
     public void shouldTriggerPublicHearingTrialVacatedEventForVacatedTrial() {
-        this.hearingEventProcessor.publicHearingEventVacateTrialTypeSetPublicEvent(buildJsonEnvelopeToVacateHearing());
+        final UUID hearingId = randomUUID();
+        final UUID trialTypeId = randomUUID();
+
+        HearingCaseDetail caseDetail = new HearingCaseDetail();
+        caseDetail.setCaseId(randomUUID());
+        HearingDefendantDetail defendantDetail = new HearingDefendantDetail();
+        defendantDetail.setDefendantId(randomUUID());
+        defendantDetail.setDefendantFirstName("firstName");
+        defendantDetail.setDefendantLastName("lastName");
+        defendantDetail.setDefendantRemandStatus("status");
+        caseDetail.setDefendantDetails(of(defendantDetail));
+
+
+        HearingApplicationDetail applicationCaseDetail = new HearingApplicationDetail();
+        applicationCaseDetail.setApplicationId(randomUUID());
+        applicationCaseDetail.setApplicationReference("TFL34652354");
+        HearingDefendantDetail applicationDefendantDetail = new HearingDefendantDetail();
+        applicationDefendantDetail.setDefendantId(randomUUID());
+        applicationDefendantDetail.setDefendantFirstName("firstName");
+        applicationDefendantDetail.setDefendantLastName("lastName");
+        applicationDefendantDetail.setDefendantRemandStatus("status");
+        applicationCaseDetail.setSubject(applicationDefendantDetail);
+
+        final UtcClock utcClock = new UtcClock();
+        final HearingTrialVacated hearingTrialType = new HearingTrialVacated(hearingId, trialTypeId, "code", "cracked", "desc", courtCentreId, false, utcClock.now(), of(caseDetail), of(applicationCaseDetail), JurisdictionType.CROWN);
+        final JsonEnvelope eventIn = createJsonEnvelope(hearingTrialType);
+
+        this.hearingEventProcessor.publicHearingEventVacateTrialTypeSetPublicEvent(eventIn);
 
         verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_TRIAL_VACATED));
+        final PublicHearingEventTrialVacated publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingEventTrialVacated.class);
+        assertThat(publicEventOut.getHearingId(), is(hearingTrialType.getHearingId()));
+        assertThat(publicEventOut.getVacatedTrialReasonId(), is(hearingTrialType.getVacatedTrialReasonId()));
+        assertThat(publicEventOut.getJurisdictionType(), is(hearingTrialType.getJurisdictionType()));
+        assertThat(publicEventOut.getCaseDetails().size(), is(hearingTrialType.getCaseDetails().size()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getCaseId(), is(hearingTrialType.getCaseDetails().get(0).getCaseId()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getCaseUrn(), is(hearingTrialType.getCaseDetails().get(0).getCaseUrn()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getDefendantDetails().size(), is(hearingTrialType.getCaseDetails().get(0).getDefendantDetails().size()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantId(), is(hearingTrialType.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantId()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantFirstName(), is(hearingTrialType.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantFirstName()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantLastName(), is(hearingTrialType.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantLastName()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantRemandStatus(), is(hearingTrialType.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantRemandStatus()));
+        assertThat(publicEventOut.getApplicationDetails().size(), is(hearingTrialType.getApplicationDetails().size()));
+        assertThat(publicEventOut.getApplicationDetails().get(0).getApplicationId(), is(hearingTrialType.getApplicationDetails().get(0).getApplicationId()));
+        assertThat(publicEventOut.getApplicationDetails().get(0).getApplicationReference(), is(hearingTrialType.getApplicationDetails().get(0).getApplicationReference()));
+        assertThat(publicEventOut.getApplicationDetails().get(0).getSubject().getDefendantLastName(), is(hearingTrialType.getApplicationDetails().get(0).getSubject().getDefendantLastName()));
+        assertThat(publicEventOut.getApplicationDetails().get(0).getSubject().getDefendantFirstName(), is(hearingTrialType.getApplicationDetails().get(0).getSubject().getDefendantFirstName()));
+        assertThat(publicEventOut.getApplicationDetails().get(0).getSubject().getDefendantRemandStatus(), is(hearingTrialType.getApplicationDetails().get(0).getSubject().getDefendantRemandStatus()));
+        assertThat(publicEventOut.getApplicationDetails().get(0).getSubject().getDefendantId(), is(hearingTrialType.getApplicationDetails().get(0).getSubject().getDefendantId()));
 
-        List<JsonEnvelope> capturedMessages = this.envelopeArgumentCaptor.getAllValues();
-        final JsonEnvelope vacatedEvent = capturedMessages.get(0);
-        final JsonObject vacatedEventPayload = vacatedEvent.payloadAsJsonObject();
-
-        assertThat(vacatedEvent.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_TRIAL_VACATED));
-        assertThat(vacatedEventPayload.getString(FIELD_HEARING_ID), is(hearingId.toString()));
-        assertThat(vacatedEventPayload.getString(FIELD_VACATED_TRIAL_REASON_ID), is(vacatedTrialReasonId.toString()));
     }
 
     @Test
     public void shouldTriggerPublicHearingTrialVacatedEventForVacatedTrialAndCourtCentreIdIsNotExist() {
-        this.hearingEventProcessor.publicHearingEventVacateTrialTypeSetPublicEvent(buildJsonEnvelopeToVacateHearingWithoutCourtCentreId());
+        final UUID hearingId = randomUUID();
+        final UUID trialTypeId = randomUUID();
 
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        HearingCaseDetail caseDetail = new HearingCaseDetail();
+        caseDetail.setCaseId(randomUUID());
+        HearingDefendantDetail defendantDetail = new HearingDefendantDetail();
+        defendantDetail.setDefendantId(randomUUID());
+        defendantDetail.setDefendantFirstName("firstName");
+        defendantDetail.setDefendantLastName("lastName");
+        defendantDetail.setDefendantRemandStatus("status");
+        caseDetail.setDefendantDetails(of(defendantDetail));
 
-        List<JsonEnvelope> capturedMessages = this.envelopeArgumentCaptor.getAllValues();
-        final JsonEnvelope vacatedEvent = capturedMessages.get(0);
-        final JsonObject vacatedEventPayload = vacatedEvent.payloadAsJsonObject();
 
-        assertThat(vacatedEvent.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_TRIAL_VACATED));
-        assertThat(vacatedEventPayload.getString(FIELD_HEARING_ID), is(hearingId.toString()));
-        assertThat(vacatedEventPayload.getString(FIELD_VACATED_TRIAL_REASON_ID), is(vacatedTrialReasonId.toString()));
+        HearingApplicationDetail applicationCaseDetail = new HearingApplicationDetail();
+        applicationCaseDetail.setApplicationId(randomUUID());
+        applicationCaseDetail.setApplicationReference("TFL34652354");
+        HearingDefendantDetail applicationDefendantDetail = new HearingDefendantDetail();
+        applicationDefendantDetail.setDefendantId(randomUUID());
+        applicationDefendantDetail.setDefendantFirstName("firstName");
+        applicationDefendantDetail.setDefendantLastName("lastName");
+        applicationDefendantDetail.setDefendantRemandStatus("status");
+        applicationCaseDetail.setSubject(applicationDefendantDetail);
+
+        final UtcClock utcClock = new UtcClock();
+        final HearingTrialVacated hearingTrialType = new HearingTrialVacated(hearingId, trialTypeId, "code", "cracked", "desc", null, false, utcClock.now(), of(caseDetail), of(applicationCaseDetail), JurisdictionType.CROWN);
+        final JsonEnvelope eventIn = createJsonEnvelope(hearingTrialType);
+
+        this.hearingEventProcessor.publicHearingEventVacateTrialTypeSetPublicEvent(eventIn);
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_TRIAL_VACATED));
+        final PublicHearingEventTrialVacated publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingEventTrialVacated.class);
+        assertThat(publicEventOut.getHearingId(), is(hearingTrialType.getHearingId()));
+        assertThat(publicEventOut.getVacatedTrialReasonId(), is(hearingTrialType.getVacatedTrialReasonId()));
+        assertThat(publicEventOut.getJurisdictionType(), is(hearingTrialType.getJurisdictionType()));
+        assertThat(publicEventOut.getCaseDetails().size(), is(hearingTrialType.getCaseDetails().size()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getCaseId(), is(hearingTrialType.getCaseDetails().get(0).getCaseId()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getCaseUrn(), is(hearingTrialType.getCaseDetails().get(0).getCaseUrn()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getDefendantDetails().size(), is(hearingTrialType.getCaseDetails().get(0).getDefendantDetails().size()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantId(), is(hearingTrialType.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantId()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantFirstName(), is(hearingTrialType.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantFirstName()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantLastName(), is(hearingTrialType.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantLastName()));
+        assertThat(publicEventOut.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantRemandStatus(), is(hearingTrialType.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantRemandStatus()));
+        assertThat(publicEventOut.getApplicationDetails().size(), is(hearingTrialType.getApplicationDetails().size()));
+        assertThat(publicEventOut.getApplicationDetails().get(0).getApplicationId(), is(hearingTrialType.getApplicationDetails().get(0).getApplicationId()));
+        assertThat(publicEventOut.getApplicationDetails().get(0).getApplicationReference(), is(hearingTrialType.getApplicationDetails().get(0).getApplicationReference()));
+        assertThat(publicEventOut.getApplicationDetails().get(0).getSubject().getDefendantLastName(), is(hearingTrialType.getApplicationDetails().get(0).getSubject().getDefendantLastName()));
+        assertThat(publicEventOut.getApplicationDetails().get(0).getSubject().getDefendantFirstName(), is(hearingTrialType.getApplicationDetails().get(0).getSubject().getDefendantFirstName()));
+        assertThat(publicEventOut.getApplicationDetails().get(0).getSubject().getDefendantRemandStatus(), is(hearingTrialType.getApplicationDetails().get(0).getSubject().getDefendantRemandStatus()));
+        assertThat(publicEventOut.getApplicationDetails().get(0).getSubject().getDefendantId(), is(hearingTrialType.getApplicationDetails().get(0).getSubject().getDefendantId()));
+
     }
 
     @Test
@@ -692,26 +783,5 @@ public class HearingEventProcessorTest {
 
     private String getStringFromResource(final String path) throws IOException {
         return Resources.toString(getResource(path), defaultCharset());
-    }
-
-    private JsonEnvelope buildJsonEnvelopeToVacateHearing() {
-        return envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
-                .add("hearingId", hearingId.toString())
-                .add("vacatedTrialReasonId", vacatedTrialReasonId.toString())
-                .add("code", "code")
-                .add("type", "cracked")
-                .add("description", "desc")
-                .add("courtCentreId", courtCentreId.toString())
-                .build());
-    }
-
-    private JsonEnvelope buildJsonEnvelopeToVacateHearingWithoutCourtCentreId() {
-        return envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
-                .add("hearingId", hearingId.toString())
-                .add("vacatedTrialReasonId", vacatedTrialReasonId.toString())
-                .add("code", "code")
-                .add("type", "cracked")
-                .add("description", "desc")
-                .build());
     }
 }

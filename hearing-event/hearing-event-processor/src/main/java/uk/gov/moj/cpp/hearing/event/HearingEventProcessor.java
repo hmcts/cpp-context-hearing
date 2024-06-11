@@ -209,7 +209,6 @@ public class HearingEventProcessor {
         final HearingTrialType hearingTrialType = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), HearingTrialType.class);
 
-
         final PublicHearingEventTrialVacated publicHearingEventTrialVacated = PublicHearingEventTrialVacated.publicHearingEventTrialVacated()
                 .setHearingId(hearingTrialType.getHearingId())
                 .setVacatedTrialReasonId(null);
@@ -228,12 +227,17 @@ public class HearingEventProcessor {
             LOGGER.debug("hearing.trial-vacated event received {}", event.toObfuscatedDebugString());
         }
 
-        final HearingTrialVacated hearingTrialType = this.jsonObjectToObjectConverter
+        final HearingTrialVacated hearingTrialVacated = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), HearingTrialVacated.class);
 
         final PublicHearingEventTrialVacated publicHearingEventTrialVacated = PublicHearingEventTrialVacated.publicHearingEventTrialVacated()
-                .setHearingId(hearingTrialType.getHearingId())
-                .setVacatedTrialReasonId(hearingTrialType.getVacatedTrialReasonId());
+                .setHearingId(hearingTrialVacated.getHearingId())
+                .setVacatedTrialReasonId(hearingTrialVacated.getVacatedTrialReasonId())
+                .setHasInterpreter(hearingTrialVacated.getHasInterpreter())
+                .setApplicationDetails(hearingTrialVacated.getApplicationDetails())
+                .setHearingDateTime(hearingTrialVacated.getHearingDay())
+                .setJurisdictionType(hearingTrialVacated.getJurisdictionType())
+                .setCaseDetails(hearingTrialVacated.getCaseDetails());
 
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingEventTrialVacated);
 
