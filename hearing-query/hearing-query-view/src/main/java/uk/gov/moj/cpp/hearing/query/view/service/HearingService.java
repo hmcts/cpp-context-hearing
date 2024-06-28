@@ -483,6 +483,7 @@ public class HearingService {
                 hearing.getAmendedByUserId()
         );
         hearingDetailsResponse.setWitnesses(hearing.getWitnesses().stream().map(x -> x.getName()).collect(toList()));
+        hearingDetailsResponse.setFirstSharedDate(hearing.getFirstSharedDate());
 
         if (hearing.getTrialTypeId() != null) {
 

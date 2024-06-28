@@ -407,6 +407,9 @@ public class HearingEventListener {
                 hearing.getHearingDays().stream().filter(hd -> hearingDay.equals(hd.getDate())).forEach(hd -> hd.setHasSharedResults(true));
                 listOfTargets.forEach(targetIn -> updateDraftResultV2(hearing, targetIn));
                 hearing.setHearingState(HearingState.SHARED);
+                if(null == hearing.getFirstSharedDate()) {
+                    hearing.setFirstSharedDate(resultsShared.getSharedTime());
+                }
                 hearingRepository.save(hearing);
                 LOGGER.info("Saved {} result(s) for hearing : {}", hearing.getTargets().size(), hearing.getId());
                 if (resultsShared.getHearing().getYouthCourt() != null) {

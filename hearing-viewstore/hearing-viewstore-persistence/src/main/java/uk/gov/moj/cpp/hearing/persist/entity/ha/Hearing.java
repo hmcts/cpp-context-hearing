@@ -5,14 +5,6 @@ import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -23,6 +15,13 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "ha_hearing")
@@ -139,6 +138,10 @@ public class Hearing {
 
     @Column(name = "restrict_court_list_json", columnDefinition = "TEXT")
     private String restrictCourtListJson;
+
+
+    @Column(name = "first_shared_date")
+    private ZonedDateTime firstSharedDate;
 
     public Hearing() {
         //For JPA
@@ -453,6 +456,14 @@ public class Hearing {
     @SuppressWarnings({"squid:S2384"})
     public void setWitnesses(List<Witness> witnesses) {
         this.witnesses = witnesses;
+    }
+
+    public ZonedDateTime getFirstSharedDate() {
+        return firstSharedDate;
+    }
+
+    public void setFirstSharedDate(ZonedDateTime firstSharedDate) {
+        this.firstSharedDate = firstSharedDate;
     }
 
     @Override
