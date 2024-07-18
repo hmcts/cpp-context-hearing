@@ -25,6 +25,7 @@ import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupReportingRestr
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DefendantJudicialResult;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultCategory;
 import uk.gov.justice.core.courts.Offence;
@@ -175,17 +176,20 @@ public class PublishResultsDelegate {
 
         mapDefendantLevelJudicialResults(resultsShared, restructuredResults);
 
-        mapDefendantCaseLevelJudicialResults(resultsShared, restructuredResults);
+        if (!doesHearingHaveBulkCases(resultsShared.getHearing())) {
+            mapDefendantCaseLevelJudicialResults(resultsShared, restructuredResults);
+        }
 
         mapOffenceLevelJudicialResults(resultsShared, restructuredResults);
 
         mapAcquittalDate(resultsShared);
 
-        bailStatusHelper.mapBailStatuses(context, resultsShared.getHearing());
-
-        this.custodyTimeLimitCalculator.calculate(resultsShared.getHearing());
-        this.custodyTimeLimitCalculator.calculateDateHeldInCustody(resultsShared.getHearing(), resultsShared.getHearingDay());
-        this.custodyTimeLimitCalculator.updateExtendedCustodyTimeLimit(resultsShared);
+        if (!doesHearingHaveBulkCases(resultsShared.getHearing())) {
+            bailStatusHelper.mapBailStatuses(context, resultsShared.getHearing());
+            this.custodyTimeLimitCalculator.calculate(resultsShared.getHearing());
+            this.custodyTimeLimitCalculator.calculateDateHeldInCustody(resultsShared.getHearing(), resultsShared.getHearingDay());
+            this.custodyTimeLimitCalculator.updateExtendedCustodyTimeLimit(resultsShared);
+        }
 
         new ResultsSharedHelper().setIsDisposedFlagOnOffence(resultsShared);
         new BailStatusReasonHelper().setReason(resultsShared.getHearing());
@@ -211,6 +215,10 @@ public class PublishResultsDelegate {
             LOGGER.debug("Payload for event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope);
         }
         sender.send(jsonEnvelope);
+    }
+
+    private boolean doesHearingHaveBulkCases(final Hearing hearing) {
+        return nonNull(hearing.getIsGroupProceedings()) && hearing.getIsGroupProceedings();
     }
 
     private void sendCommandToExtendCustodyTimeLimit(final JsonEnvelope context, final Sender sender, final ExtendedCustodyTimeLimit extendedCustodyTimeLimit) {

@@ -32,6 +32,7 @@ public class HearingAggregateMomento implements Serializable {
     private final Map<UUID, InterpreterIntermediary> interpreterIntermediary = new HashMap<>();
     private Map<UUID, Target2> sharedTargets = new HashMap<>();
     private Map<UUID, Target2> transientTargets = new HashMap<>();
+    private Map<UUID, UUID> groupAndMaster = new HashMap<>();
 
     private Hearing hearing;
     private List<Variant> variantDirectory = new ArrayList<>();
@@ -208,5 +209,9 @@ public class HearingAggregateMomento implements Serializable {
 
     public void setBreachApplicationsToBeAdded(final List<UUID> breachApplicationsToBeAdded) {
         this.breachApplicationsToBeAdded = breachApplicationsToBeAdded;
+    }
+
+    public Map<UUID, UUID> getGroupAndMaster() {
+        return this.groupAndMaster;
     }
 }

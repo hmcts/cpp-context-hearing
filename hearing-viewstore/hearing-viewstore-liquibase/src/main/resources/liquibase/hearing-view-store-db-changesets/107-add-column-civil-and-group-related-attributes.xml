@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="107" author="hearing"
+               logicalFilePath="107-add-column-civil-and-group-related-attributes.xml">
+
+        <addColumn tableName="ha_hearing">
+            <column name="is_group_proceedings" type="BOOLEAN"/>
+        </addColumn>
+
+        <addColumn tableName="ha_case">
+            <column name="is_civil" type="BOOLEAN"/>
+        </addColumn>
+        <addColumn tableName="ha_case">
+            <column name="group_id" type="UUID"/>
+        </addColumn>
+        <addColumn tableName="ha_case">
+            <column name="is_group_member" type="BOOLEAN"/>
+        </addColumn>
+        <addColumn tableName="ha_case">
+            <column name="is_group_master" type="BOOLEAN"/>
+        </addColumn>
+
+
+        <addColumn tableName="ha_offence">
+            <column name="civil_offence_is_exparte" type="BOOLEAN"/>
+        </addColumn>
+        <addColumn tableName="ha_offence">
+            <column name="civil_offence_is_respondent" type="BOOLEAN"/>
+        </addColumn>
+
+    </changeSet>
+
+</databaseChangeLog>

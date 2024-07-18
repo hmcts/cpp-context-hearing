@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
 import uk.gov.justice.core.courts.Defendant;
@@ -10,6 +11,7 @@ import uk.gov.justice.core.courts.Prosecutor;
 import uk.gov.moj.cpp.hearing.domain.event.AddCaseDefendantsForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.CasesUpdatedAfterCaseRemovedFromGroupCases;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
 
@@ -17,6 +19,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ProsecutionCaseDelegate implements Serializable {
@@ -108,6 +111,30 @@ public class ProsecutionCaseDelegate implements Serializable {
                 .filter(prosecutionCase -> prosecutionCase.getId().equals(caseId))
                 .findFirst().ifPresent(prosecutionCase ->
                             prosecutionCase.getDefendants().addAll(newDefendants));
+    }
+
+    public void onCasesUpdatedAfterCaseRemovedFromGroupCases(final CasesUpdatedAfterCaseRemovedFromGroupCases casesUpdatedAfterCaseRemovedFromGroupCases) {
+        final UUID groupId = casesUpdatedAfterCaseRemovedFromGroupCases.getGroupId();
+        final ProsecutionCase removedCase = casesUpdatedAfterCaseRemovedFromGroupCases.getRemovedCase();
+        final ProsecutionCase newGroupMaster = casesUpdatedAfterCaseRemovedFromGroupCases.getNewGroupMaster();
+
+        this.momento.getHearing().setProsecutionCases(this.momento.getHearing().getProsecutionCases().stream()
+                .map(o -> nonNull(removedCase) && o.getId().equals(removedCase.getId()) ? removedCase : o)
+                .map(o -> nonNull(newGroupMaster) && o.getId().equals(newGroupMaster.getId()) ? newGroupMaster : o)
+                .collect(Collectors.toList()));
+
+        if (this.momento.getHearing().getProsecutionCases().stream()
+                .noneMatch(pc -> pc.getId().equals(removedCase.getId()))) {
+            this.momento.getHearing().getProsecutionCases().add(removedCase);
+        }
+
+        if (nonNull(newGroupMaster)) {
+            if (this.momento.getHearing().getProsecutionCases().stream()
+                    .noneMatch(pc -> pc.getId().equals(newGroupMaster.getId()))) {
+                this.momento.getHearing().getProsecutionCases().add(newGroupMaster);
+            }
+            this.momento.getGroupAndMaster().put(groupId, newGroupMaster.getId());
+        }
     }
 
     private void setCaseMarkers(final ProsecutionCase prosecutionCase, final List<Marker> markers) {

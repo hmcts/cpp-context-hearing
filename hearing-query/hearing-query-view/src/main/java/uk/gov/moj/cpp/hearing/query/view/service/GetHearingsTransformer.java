@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.time.LocalDate.now;
 import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
@@ -41,9 +42,13 @@ public class GetHearingsTransformer {
                 .withCourtApplicationSummaries(isEmpty(hearing.getCourtApplications()) ? emptyList() :
                         hearing.getCourtApplications().stream().map(courtApplication -> summary(courtApplication).build())
                                 .collect(toList()))
+                .withIsGroupProceedings(hearing.getIsGroupProceedings())
+                .withNumberOfGroupCases(hearing.getNumberOfGroupCases())
                 .withProsecutionCaseSummaries(
                         isEmpty(hearing.getProsecutionCases()) ? emptyList() :
-                                hearing.getProsecutionCases().stream().map(pc -> summary(pc).build())
+                                hearing.getProsecutionCases().stream()
+                                        .filter(pc -> shouldCaseBeIncluded(hearing, pc))
+                                        .map(pc -> summary(pc).build())
                                         .collect(toList())
                 );
     }
@@ -53,9 +58,13 @@ public class GetHearingsTransformer {
                 .withHearingDays(getHearingDaysForToday(hearing.getHearingDays()))
                 .withCourtCentreId(hearing.getCourtCentre().getId())
                 .withRoomId(hearing.getCourtCentre().getRoomId())
+                .withIsGroupProceedings(hearing.getIsGroupProceedings())
+                .withNumberOfGroupCases(hearing.getNumberOfGroupCases())
                 .withProsecutionCaseSummaries(
                         hearing.getProsecutionCases() == null ? emptyList() :
-                                hearing.getProsecutionCases().stream().map(pc -> summaryForToday(pc).build())
+                                hearing.getProsecutionCases().stream()
+                                        .filter(pc -> shouldCaseBeIncluded(hearing, pc))
+                                        .map(pc -> summaryForToday(pc).build())
                                         .collect(toList())
                 );
     }
@@ -70,6 +79,18 @@ public class GetHearingsTransformer {
                                 hearing.getProsecutionCases().stream().map(pc -> summaryForToday(pc).build())
                                         .collect(toList())
                 );
+    }
+
+    private boolean shouldCaseBeIncluded(final Hearing hearing, final ProsecutionCase pc) {
+        if (nonNull(hearing.getIsGroupProceedings()) && hearing.getIsGroupProceedings()) {
+            if (nonNull(pc.getIsGroupMaster()) && pc.getIsGroupMaster()) {
+                return true;
+            } else {
+                return isNull(pc.getIsGroupMember()) || !(pc.getIsGroupMember());
+            }
+        } else {
+            return true;
+        }
     }
 
     private HearingSummaries.Builder buildHearingSummary(final Hearing hearing) {
@@ -179,6 +200,10 @@ public class GetHearingsTransformer {
         return ProsecutionCaseSummaries.prosecutionCaseSummaries()
                 .withId(prosecutionCase.getId())
                 .withProsecutionCaseIdentifier(prosecutionCase.getProsecutionCaseIdentifier())
+                .withIsCivil(prosecutionCase.getIsCivil())
+                .withGroupId(prosecutionCase.getGroupId())
+                .withIsGroupMember(prosecutionCase.getIsGroupMember())
+                .withIsGroupMaster(prosecutionCase.getIsGroupMaster())
                 .withDefendants(prosecutionCase.getDefendants() == null ? emptyList() :
                         prosecutionCase.getDefendants().stream().map(d -> summary(d).build())
                                 .collect(toList()));
@@ -188,6 +213,10 @@ public class GetHearingsTransformer {
         return ProsecutionCaseSummaries.prosecutionCaseSummaries()
                 .withId(prosecutionCase.getId())
                 .withProsecutionCaseIdentifier(prosecutionCase.getProsecutionCaseIdentifier())
+                .withIsCivil(prosecutionCase.getIsCivil())
+                .withGroupId(prosecutionCase.getGroupId())
+                .withIsGroupMember(prosecutionCase.getIsGroupMember())
+                .withIsGroupMaster(prosecutionCase.getIsGroupMaster())
                 .withDefendants(prosecutionCase.getDefendants() == null ? emptyList() :
                         prosecutionCase.getDefendants().stream().map(d -> summaryForToday(d).build())
                                 .collect(toList()));

@@ -9,6 +9,8 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary.TimelineHearingSummaryBuilder;
 
+import org.apache.commons.lang3.StringUtils;
+
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
@@ -26,6 +28,10 @@ import uk.gov.moj.cpp.hearing.query.view.response.Application;
 import uk.gov.moj.cpp.hearing.query.view.response.Person;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,12 +41,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-
-import org.apache.commons.lang3.StringUtils;
-
 public class TimelineHearingSummaryHelper {
 
     private static final String HEARING_OUTCOME_EFFECTIVE = "Effective";
@@ -49,7 +49,7 @@ public class TimelineHearingSummaryHelper {
     @Inject
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
-    private TimelineHearingSummaryBuilder createTimelineHearingSummaryBuilder(final HearingDay hearingDay, final Hearing hearing, final CrackedIneffectiveTrial crackedIneffectiveTrial, final JsonObject allCourtRooms, final List<HearingYouthCourtDefendants> hearingYouthCourtDefendants) {
+    private TimelineHearingSummaryBuilder createTimelineHearingSummaryBuilder(final HearingDay hearingDay, final Hearing hearing, final CrackedIneffectiveTrial crackedIneffectiveTrial, final JsonObject allCourtRooms, final List<HearingYouthCourtDefendants> hearingYouthCourtDefendants, final UUID caseId) {
         final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = new TimelineHearingSummaryBuilder();
         timelineHearingSummaryBuilder.withHearingId(hearing.getId());
         timelineHearingSummaryBuilder.withHearingDate(hearingDay.getDate());
@@ -72,8 +72,7 @@ public class TimelineHearingSummaryHelper {
             timelineHearingSummaryBuilder.withYouthCourt(youthCourtBuilder.build());
         }
 
-
-        final List<uk.gov.moj.cpp.hearing.query.view.response.Defendant> defendants = getDefendants(hearing);
+        final List<uk.gov.moj.cpp.hearing.query.view.response.Defendant> defendants = getDefendants(hearing, caseId);
 
         if (!defendants.isEmpty()) {
             timelineHearingSummaryBuilder.withDefendants(defendants);
@@ -101,9 +100,9 @@ public class TimelineHearingSummaryHelper {
                                                                final Hearing hearing,
                                                                final CrackedIneffectiveTrial crackedIneffectiveTrial,
                                                                final JsonObject allCourtRooms,
-                                                               final List<HearingYouthCourtDefendants> hearingYouthCourtDefendants) {
-        final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = createTimelineHearingSummaryBuilder(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendants);
-
+                                                               final List<HearingYouthCourtDefendants> hearingYouthCourtDefendants,
+                                                               final UUID caseId) {
+        final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = createTimelineHearingSummaryBuilder(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendants, caseId);
         final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(hearing.getCourtApplicationsJson());
         if (isNotEmpty(courtApplications)) {
             final List<Application> applications = new ArrayList<>();
@@ -129,24 +128,33 @@ public class TimelineHearingSummaryHelper {
                                                                final CrackedIneffectiveTrial crackedIneffectiveTrial,
                                                                final JsonObject allCourtRooms,
                                                                final List<HearingYouthCourtDefendants> hearingYouthCourtDefendants,
-                                                               final UUID applicationId) {
-        final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = createTimelineHearingSummaryBuilder(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendants);
-        final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(hearing.getCourtApplicationsJson());
-        final List<String> applicantNames = courtApplications.stream()
-                .filter(courtApplication -> courtApplication.getId().equals(applicationId))
-                .map(courtApplication -> getApplicantName(courtApplication.getApplicant()).orElse(EMPTY))
-                .collect(Collectors.toList());
-        of(applicantNames).ifPresent(timelineHearingSummaryBuilder::withApplicants);
+                                                               final UUID applicationId,
+                                                               final UUID caseId) {
+        final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = createTimelineHearingSummaryBuilder(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms,hearingYouthCourtDefendants, caseId);
+        final List<String> applicantNames = getApplicantNames(hearing.getCourtApplicationsJson(), applicationId);
+        if (!applicantNames.isEmpty()) {
+            timelineHearingSummaryBuilder.withApplicants(applicantNames);
+        }
         return timelineHearingSummaryBuilder.build();
     }
 
-    private List<uk.gov.moj.cpp.hearing.query.view.response.Defendant> getDefendants(final Hearing hearing) {
-        return hearing.getProsecutionCases()
+    private List<uk.gov.moj.cpp.hearing.query.view.response.Defendant> getDefendants(final Hearing hearing, final UUID caseId) {
+        if (nonNull(caseId)) {
+            return hearing.getProsecutionCases()
+                .stream()
+                .filter(pCase -> nonNull(pCase.getId()) && pCase.getId().getId().equals(caseId))
+                .map(ProsecutionCase::getDefendants)
+                .flatMap(Collection::stream)
+                .map(this::getDefendant)
+                .collect(toList());
+        }else{
+            return hearing.getProsecutionCases()
                 .stream()
                 .map(ProsecutionCase::getDefendants)
                 .flatMap(Collection::stream)
                 .map(this::getDefendant)
                 .collect(toList());
+        }
     }
 
     private Optional<String> getApplicantName(final CourtApplicationParty applicant) {
@@ -212,6 +220,17 @@ public class TimelineHearingSummaryHelper {
                 .filter(courtApplication -> nonNull(courtApplication.getApplicant()))
                 .map(courtApplication -> buildApplicant(courtApplication.getApplicant()))
                 .collect(Collectors.toList());
+    }
+
+    private List<String> getApplicantNames(final String courtApplicationJson, UUID applicationId) {
+        final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationJson);
+
+        return courtApplications
+            .stream()
+            .filter(courtApplication -> courtApplication.getId().equals(applicationId))
+            .map(courtApplication ->
+                getApplicantName(courtApplication.getApplicant()).orElse(EMPTY))
+            .collect(Collectors.toList());
     }
 
     private List<Person> getSubject(final UUID applicationId, final List<CourtApplication> courtApplications) {

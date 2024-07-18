@@ -1,8 +1,10 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import uk.gov.justice.core.courts.BailStatus;
+import uk.gov.justice.core.courts.CivilOffence;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
@@ -110,19 +112,19 @@ public class OffenceJPAMapper {
         offence.setLaidDate(pojo.getLaidDate());
 
         offence.setLaaApplnReference(laaApplnReferenceJPAMapper.toJpa(pojo.getLaaApplnReference()));
-        if(nonNull(pojo.getIsDiscontinued())) {
+        if (nonNull(pojo.getIsDiscontinued())) {
             offence.setDiscontinued(pojo.getIsDiscontinued());
         }
-        if(nonNull(pojo.getIntroducedAfterInitialProceedings())) {
+        if (nonNull(pojo.getIntroducedAfterInitialProceedings())) {
             offence.setIntroduceAfterInitialProceedings(pojo.getIntroducedAfterInitialProceedings());
         }
-        if(nonNull(pojo.getProceedingsConcluded())) {
+        if (nonNull(pojo.getProceedingsConcluded())) {
             offence.setProceedingsConcluded(pojo.getProceedingsConcluded());
         }
-        if(nonNull(pojo.getReportingRestrictions())) {
+        if (nonNull(pojo.getReportingRestrictions())) {
             offence.setReportingRestrictions(reportingRestrictionJPAMapper.toJPA(hearing, pojo.getId(), pojo.getReportingRestrictions()));
         }
-        if(nonNull(pojo.getEndorsableFlag())) {
+        if (nonNull(pojo.getEndorsableFlag())) {
             offence.setEndorsableFlag(pojo.getEndorsableFlag());
         }
         if (nonNull(pojo.getCtlClockStopped())) {
@@ -142,6 +144,10 @@ public class OffenceJPAMapper {
         offence.setPreviousDaysHeldInCustody(pojo.getPreviousDaysHeldInCustody());
         offence.setDateHeldInCustodySince(pojo.getDateHeldInCustodySince());
         offence.setListingNumber(pojo.getListingNumber());
+        if (nonNull(pojo.getCivilOffence())) {
+            offence.setCivilOffenceIsExparte(pojo.getCivilOffence().getIsExParte());
+            offence.setCivilOffenceIsRespondent(pojo.getCivilOffence().getIsRespondent());
+        }
         return offence;
     }
 
@@ -191,6 +197,7 @@ public class OffenceJPAMapper {
                 .withDateHeldInCustodySince(entity.getDateHeldInCustodySince())
                 .withPreviousDaysHeldInCustody(entity.getPreviousDaysHeldInCustody())
                 .withListingNumber(entity.getListingNumber())
+                .withCivilOffence(getCivilOffence(entity))
                 .build();
     }
 
@@ -230,4 +237,13 @@ public class OffenceJPAMapper {
         }
     }
 
+    private CivilOffence getCivilOffence(final Offence entity) {
+        if (isNull(entity.getCivilOffenceIsExparte()) && isNull(entity.getCivilOffenceIsRespondent())) {
+            return null;
+        }
+        return CivilOffence.civilOffence()
+                .withIsExParte(entity.getCivilOffenceIsExparte())
+                .withIsRespondent(entity.getCivilOffenceIsRespondent())
+                .build();
+    }
 }

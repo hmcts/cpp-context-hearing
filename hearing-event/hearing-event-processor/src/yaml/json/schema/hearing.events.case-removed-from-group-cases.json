@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.case-removed-from-group-cases.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "groupId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "removedCase": {
+      "$ref": "http://justice.gov.uk/core/courts/prosecutionCase.json"
+    },
+    "newGroupMaster": {
+      "$ref": "http://justice.gov.uk/core/courts/prosecutionCase.json"
+    }
+  },
+  "required": [
+    "hearingId",
+    "groupId",
+    "removedCase"
+  ]
+}

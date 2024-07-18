@@ -18,6 +18,14 @@ import static uk.gov.justice.core.courts.LegalEntityDefendant.legalEntityDefenda
 import static uk.gov.justice.core.courts.Organisation.organisation;
 import static uk.gov.justice.core.courts.Person.person;
 
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
@@ -42,6 +50,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.YouthCourt;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 
+import javax.json.JsonObject;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -52,15 +62,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.json.JsonObject;
 
 import com.google.common.collect.ImmutableList;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TimelineHearingSummaryHelperTest {
@@ -78,6 +81,7 @@ public class TimelineHearingSummaryHelperTest {
     private UUID courtCentreId;
     private UUID courtRoomId;
     private UUID defendantId;
+    private UUID caseId;
     @InjectMocks
     private TimelineHearingSummaryHelper timelineHearingSummaryHelper;
     private Person person;
@@ -119,7 +123,8 @@ public class TimelineHearingSummaryHelperTest {
         personDefendant1.setPersonDetails(person);
         final Defendant defendant1 = new Defendant();
         final HearingSnapshotKey hearingSnapshotKey1 = new HearingSnapshotKey();
-        hearingSnapshotKey1.setId(defendantId);
+        caseId = randomUUID();
+        hearingSnapshotKey1.setId(caseId);
         defendant1.setId(hearingSnapshotKey1);
         defendant1.setPersonDefendant(personDefendant1);
         final Defendant defendant2 = new Defendant();
@@ -131,6 +136,7 @@ public class TimelineHearingSummaryHelperTest {
         defendant2.setLegalEntityOrganisation(organisation);
         final Set<Defendant> defendants = of(defendant1, defendant2);
         prosecutionCase = new ProsecutionCase();
+        prosecutionCase.setId(hearingSnapshotKey1);
         prosecutionCase.setDefendants(defendants);
         hearing.setProsecutionCases(of(prosecutionCase));
         crackedIneffectiveTrial = new CrackedIneffectiveTrial(STRING.next(), LocalDate.now(), STRING.next(), randomUUID(), STRING.next());
@@ -157,7 +163,7 @@ public class TimelineHearingSummaryHelperTest {
         UUID subjectMasterDefendantId = randomUUID();
         when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplication(applicationId, applicantMasterDefendantId, resMasterDefendantId, subjectMasterDefendantId)));
 
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList, caseId);
         assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
         assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
@@ -169,7 +175,7 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getEstimatedDuration(), is(hearingDay.getListedDurationMinutes()));
         assertThat(timeLineHearingSummary.getDefendants().size(), is(2));
         assertThat(timeLineHearingSummary.getDefendants().get(0).getName(), is(format("%s %s", person.getFirstName(), person.getLastName())));
-        assertThat(timeLineHearingSummary.getDefendants().get(0).getId(), is(defendantId));
+        assertThat(timeLineHearingSummary.getDefendants().get(0).getId(), is(caseId));
 
         assertThat(timeLineHearingSummary.getDefendants().get(1).getName(), is(organisation.getName()));
         assertThat(timeLineHearingSummary.getOutcome(), is(crackedIneffectiveTrial.getType()));
@@ -185,7 +191,7 @@ public class TimelineHearingSummaryHelperTest {
     @Test
     public void shouldCreateTimelineHearingSummaryWithIsBoxHearing() {
         hearing.setIsBoxHearing(true);
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList, caseId);
         assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
         assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
@@ -197,7 +203,7 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getEstimatedDuration(), is(hearingDay.getListedDurationMinutes()));
         assertThat(timeLineHearingSummary.getDefendants().size(), is(2));
         assertThat(timeLineHearingSummary.getDefendants().get(0).getName(), is(format("%s %s", person.getFirstName(), person.getLastName())));
-        assertThat(timeLineHearingSummary.getDefendants().get(0).getId(), is(defendantId));
+        assertThat(timeLineHearingSummary.getDefendants().get(0).getId(), is(caseId));
         assertThat(timeLineHearingSummary.getDefendants().get(1).getName(), is(organisation.getName()));
         assertThat(timeLineHearingSummary.getOutcome(), is(crackedIneffectiveTrial.getType()));
         assertThat(timeLineHearingSummary.getIsBoxHearing(), is(true));
@@ -206,7 +212,7 @@ public class TimelineHearingSummaryHelperTest {
     @Test
     public void shouldCreateTimelineHearingSummaryWithoutIsBoxHearing() {
         hearing.setIsBoxHearing(false);
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, null);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, null, caseId);
         assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
         assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
@@ -218,7 +224,7 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getEstimatedDuration(), is(hearingDay.getListedDurationMinutes()));
         assertThat(timeLineHearingSummary.getDefendants().size(), is(2));
         assertThat(timeLineHearingSummary.getDefendants().get(0).getName(), is(format("%s %s", person.getFirstName(), person.getLastName())));
-        assertThat(timeLineHearingSummary.getDefendants().get(0).getId(), is(defendantId));
+        assertThat(timeLineHearingSummary.getDefendants().get(0).getId(), is(caseId));
         assertThat(timeLineHearingSummary.getDefendants().get(1).getName(), is(organisation.getName()));
         assertThat(timeLineHearingSummary.getOutcome(), is(crackedIneffectiveTrial.getType()));
         assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
@@ -233,7 +239,7 @@ public class TimelineHearingSummaryHelperTest {
         when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplication(applicationId, applicantMasterDefendantId, resMasterDefendantId, subjectMasterDefendantId)));
 
         final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper
-                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList, applicationId);
+                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList, applicationId, caseId);
 
         assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
@@ -254,7 +260,7 @@ public class TimelineHearingSummaryHelperTest {
         when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplicationApplicantAsOrganisation(applicationId)));
 
         final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper
-                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, null, applicationId);
+                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, null, applicationId, caseId);
 
         assertThat(timeLineHearingSummary.getApplicants().size(), is(1));
         assertThat(timeLineHearingSummary.getApplicants().get(0), is(organisation.getName()));
@@ -266,7 +272,7 @@ public class TimelineHearingSummaryHelperTest {
         when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplicationApplicantAsMasterDefendant(applicationId)));
 
         final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper
-                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, null, applicationId);
+                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, null, applicationId, caseId);
 
         assertThat(timeLineHearingSummary.getApplicants().size(), is(1));
         assertThat(timeLineHearingSummary.getApplicants().get(0), is(organisation.getName()));
@@ -278,7 +284,7 @@ public class TimelineHearingSummaryHelperTest {
         when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplicationApplicantAsProsecutingAuthority(applicationId)));
 
         final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper
-                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, null, applicationId);
+                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, null, applicationId, caseId);
 
         assertThat(timeLineHearingSummary.getApplicants().size(), is(1));
         assertThat(timeLineHearingSummary.getApplicants().get(0), is(prosecutionCaseIdentifier.getProsecutionAuthorityCode()));
@@ -329,7 +335,7 @@ public class TimelineHearingSummaryHelperTest {
 
     @Test
     public void shouldHandleEmptyFields() {
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(new HearingDay(), new Hearing(), new CrackedIneffectiveTrial(null, null, null, null, null), createObjectBuilder().build(), hearingYouthCourtDefendantList);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(new HearingDay(), new Hearing(), new CrackedIneffectiveTrial(null, null,  null,null, null),createObjectBuilder().build(), hearingYouthCourtDefendantList, caseId);
         assertThat(timeLineHearingSummary, is(notNullValue()));
     }
 
@@ -338,7 +344,7 @@ public class TimelineHearingSummaryHelperTest {
 
         prosecutionCase = new ProsecutionCase();
         hearing.setProsecutionCases(of(prosecutionCase));
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList, null);
         assertThat(timeLineHearingSummary, is(notNullValue()));
     }
 
@@ -346,7 +352,7 @@ public class TimelineHearingSummaryHelperTest {
     public void shouldIndicateEffectiveOutcomeInTimelineHearingSummary() {
         hearing.setIsEffectiveTrial(true);
 
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null, null, hearingYouthCourtDefendantList);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null,null, hearingYouthCourtDefendantList, caseId);
         assertThat(timeLineHearingSummary.getOutcome(), is("Effective"));
     }
 
@@ -354,7 +360,7 @@ public class TimelineHearingSummaryHelperTest {
     public void shouldIndicateVacatedOutcomeInTimelineHearingSummary() {
         hearing.setIsVacatedTrial(true);
 
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null, null, hearingYouthCourtDefendantList);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null,null, hearingYouthCourtDefendantList, caseId);
         assertThat(timeLineHearingSummary.getOutcome(), is("Vacated"));
     }
 

@@ -68,6 +68,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class HearingJPAMapperTest {
 
+    public static final int NUMBER_OF_GROUP_CASES = 7;
     @Mock
     private CourtCentreJPAMapper courtCentreJPAMapper;
     @Mock
@@ -498,7 +499,9 @@ public class HearingJPAMapperTest {
         hearingEntity.setHearingType(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType.class));
         hearingEntity.setHearingCaseNotes(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote.class)));
         hearingEntity.setIsVacatedTrial(Boolean.TRUE);
+        hearingEntity.setNumberOfGroupCases(NUMBER_OF_GROUP_CASES);
         hearingEntity.setApprovalsRequested(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.ApprovalRequested.class)));
+        hearingEntity.setIsGroupProceedings(Boolean.TRUE);
 
         CourtCentre courtCentreMock = mock(CourtCentre.class);
         when(courtCentreJPAMapper.fromJPA(hearingEntity.getCourtCentre())).thenReturn(courtCentreMock);
@@ -569,6 +572,8 @@ public class HearingJPAMapperTest {
 
                 .withValue(Hearing::getCourtApplications, null)
                 .with(Hearing::getIsVacatedTrial, is(Boolean.TRUE))
+                .with(Hearing::getIsGroupProceedings, is(Boolean.TRUE))
+                .with(Hearing::getNumberOfGroupCases, is(NUMBER_OF_GROUP_CASES))
         );
     }
 
@@ -593,6 +598,7 @@ public class HearingJPAMapperTest {
                 .withCourtApplications(asList())
                 .withIsVacatedTrial(Boolean.FALSE)
                 .withApprovalsRequested(asList(mock(ApprovalRequest.class)))
+                .withIsGroupProceedings(Boolean.TRUE)
                 .build();
 
 
@@ -646,6 +652,7 @@ public class HearingJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getHearingCaseNotes, first(is(hearingCaseNoteMock)))
                 .withValue(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getCourtApplicationsJson, expectedCourtApplicationsJson)
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getIsVacatedTrial, is(Boolean.FALSE))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getIsGroupProceedings, is(Boolean.TRUE))
         );
     }
 

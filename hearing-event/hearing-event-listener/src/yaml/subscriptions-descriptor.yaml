@@ -332,6 +332,10 @@ subscriptions_descriptor:
         - name: hearing.events.replicate.results-shared-v3
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.replicate.results-shared-v3.json
 
+        # Cases Updated After Case Removed From Group Cases
+        - name: hearing.events.cases-updated-after-case-removed-from-group-cases
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.cases-updated-after-case-removed-from-group-cases.json
+
         - name: hearing.event.witness-added-to-hearing
           schema_uri: http://justice.gov.uk/core/courts/hearing.event.witness-added-to-hearing.json
 

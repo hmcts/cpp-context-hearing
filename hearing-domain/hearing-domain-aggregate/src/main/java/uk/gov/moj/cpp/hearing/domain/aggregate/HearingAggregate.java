@@ -105,6 +105,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantsInYouthCourtUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantsWelshInformationRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateCleared;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.CasesUpdatedAfterCaseRemovedFromGroupCases;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingBreachApplicationsAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingBreachApplicationsToBeAddedReceived;
@@ -319,6 +320,7 @@ public class HearingAggregate implements Aggregate {
                 when(CpsProsecutorUpdated.class).apply(prosecutionCaseDelegate::handleProsecutorUpdated),
                 when(DefendantLegalAidStatusUpdatedForHearing.class).apply(prosecutionCaseDelegate::onDefendantLegalaidStatusTobeUpdatedForHearing),
                 when(CaseDefendantsUpdatedForHearing.class).apply(prosecutionCaseDelegate::onCaseDefendantUpdatedForHearing),
+                when(CasesUpdatedAfterCaseRemovedFromGroupCases.class).apply(prosecutionCaseDelegate::onCasesUpdatedAfterCaseRemovedFromGroupCases),
                 when(AddCaseDefendantsForHearing.class).apply(prosecutionCaseDelegate::onCaseDefendantsAddedForHearing),
                 when(HearingEventVacatedTrialCleared.class).apply(hearingEventVacatedTrialCleared -> hearingDelegate.handleVacatedTrialCleared()),
                 when(TargetRemoved.class).apply(targetRemoved -> hearingDelegate.handleTargetRemoved(targetRemoved.getTargetId())),
@@ -391,6 +393,29 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> updateProsecutionCounsel(final ProsecutionCounsel prosecutionCounsel, final UUID hearingId) {
         return apply(prosecutionCounselDelegate.updateProsecutionCounsel(prosecutionCounsel, hearingId));
+    }
+
+    public Stream<Object> updateProsecutionCounsel(final UUID hearingId, final ProsecutionCounsel prosecutionCounsel,
+                                                   final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
+        final ProsecutionCounsel updated = ProsecutionCounsel.prosecutionCounsel()
+                .withValuesFrom(prosecutionCounsel)
+                .withProsecutionCases(getUpdatedProsecutionCases(prosecutionCounsel.getProsecutionCases(), removedCase, newGroupMaster))
+                .build();
+        return apply(prosecutionCounselDelegate.updateProsecutionCounsel(updated, hearingId));
+    }
+
+    private List<UUID> getUpdatedProsecutionCases(final List<UUID> prosecutionCases, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
+        final List<UUID> updatedProsecutionCases = new ArrayList<>(prosecutionCases);
+
+        if (nonNull(removedCase) && !updatedProsecutionCases.contains(removedCase.getId())) {
+            updatedProsecutionCases.add(removedCase.getId());
+        }
+
+        if (nonNull(newGroupMaster) && !updatedProsecutionCases.contains(newGroupMaster.getId())) {
+            updatedProsecutionCases.add(newGroupMaster.getId());
+        }
+
+        return updatedProsecutionCases;
     }
 
     public Stream<Object> addDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId) {
@@ -1073,6 +1098,14 @@ public class HearingAggregate implements Aggregate {
         return this.momento.getHearing();
     }
 
+    public Map<UUID, ProsecutionCounsel> getProsecutionCounsels() {
+        return this.momento.getProsecutionCounsels();
+    }
+
+    public Map<UUID, UUID> getGroupAndMaster() {
+        return this.momento.getGroupAndMaster();
+    }
+
     private boolean isTargetValid(final HearingAggregateMomento momento, final Target newTarget, final LocalDate hearingDay) {
 
         if (!isValidTarget(newTarget)) {
@@ -1203,6 +1236,9 @@ public class HearingAggregate implements Aggregate {
         this.momento.getHearing().setDefendantsWithWelshTranslationList(defendantsWelshRequiringList);
     }
 
+    public Stream<Object> updateCasesAfterCaseRemovedFromGroupCases(final UUID hearingId, final UUID groupId, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
+        return apply(Stream.of(new CasesUpdatedAfterCaseRemovedFromGroupCases(hearingId, groupId, removedCase, newGroupMaster)));
+    }
 
     public Stream<Object> addWitnessToHearing(final UUID hearingId, final String witness) {
         return apply(Stream.of(new WitnessAddedToHearing(witness, hearingId)));

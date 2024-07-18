@@ -342,6 +342,10 @@ subscriptions_descriptor:
         - name: hearing.events.existing-hearing-updated
           schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.existing-hearing-updated.json
 
+        # Prosecution Case Removed From Group Cases
+        - name: hearing.events.case-removed-from-group-cases
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.case-removed-from-group-cases.json
+
         - name: hearing.event.witness-added-to-hearing
           schema_uri: http://justice.gov.uk/core/courts/hearing.event.witness-added-to-hearing.json
 
@@ -451,5 +455,9 @@ subscriptions_descriptor:
         - name: public.progression.breach-applications-to-be-added-to-hearing
           schema_uri: http://justice.gov.uk/progression/courts/public.progression.breach-applications-to-be-added-to-hearing.json
 
+
+        # Progression Case Removed From Group Cases
+        - name: public.progression.case-removed-from-group-cases
+          schema_uri: http://moj.gov.uk/cpp/progression/events/public.progression.case-removed-from-group-cases.json
 
       event_source_name: public.event.source

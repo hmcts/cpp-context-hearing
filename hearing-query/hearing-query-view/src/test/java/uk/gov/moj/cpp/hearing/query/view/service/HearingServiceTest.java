@@ -6,6 +6,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -33,6 +34,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.END_DATE_1;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.START_DATE_1;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildCivilBulkCase;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildDefendant1;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildDefendant2;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearing;
@@ -884,6 +886,142 @@ public class HearingServiceTest {
     }
 
     @Test
+    public void shouldFilterHearingProsecutionCasesForCivilBulkGroup_WhenSomeCasesRemoved() {
+        final UUID hearingId = randomUUID();
+        final UUID groupId = randomUUID();
+        final Defendant defendant = buildDefendant1(hearingId);
+        final Integer numberOfGroupCases = 1000;
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase1 = buildCivilBulkCase(hearingId, asSet(defendant), groupId, true, true);
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase2 = buildCivilBulkCase(hearingId, asSet(defendant), groupId, true, false);
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase3 = buildCivilBulkCase(hearingId, asSet(defendant), groupId, false, false);
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase4 = buildCivilBulkCase(hearingId, asSet(defendant), groupId, true, false);
+
+        final Hearing hearing = populateHearing(hearingId, START_DATE_1, END_DATE_1, asSet(prosecutionCase1, prosecutionCase2, prosecutionCase3, prosecutionCase4), Boolean.TRUE, numberOfGroupCases);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing()
+                .withIsGroupProceedings(Boolean.TRUE)
+                .withNumberOfGroupCases(numberOfGroupCases)
+                .withProsecutionCases(asList(
+                        ProsecutionCase.prosecutionCase()
+                                .withId(prosecutionCase1.getId().getId())
+                                .withIsCivil(true)
+                                .withGroupId(groupId)
+                                .withIsGroupMember(true)
+                                .withIsGroupMaster(true)
+                                .withDefendants(asList(uk.gov.justice.core.courts.Defendant.defendant()
+                                        .withId(defendant.getId().getId())
+                                        .build()))
+                                .build(),
+                        ProsecutionCase.prosecutionCase()
+                                .withId(prosecutionCase2.getId().getId())
+                                .withIsCivil(true)
+                                .withGroupId(groupId)
+                                .withIsGroupMember(true)
+                                .withIsGroupMaster(false)
+                                .withDefendants(asList(uk.gov.justice.core.courts.Defendant.defendant()
+                                        .withId(defendant.getId().getId())
+                                        .build()))
+                                .build(),
+                        ProsecutionCase.prosecutionCase()
+                                .withId(prosecutionCase3.getId().getId())
+                                .withIsCivil(true)
+                                .withGroupId(groupId)
+                                .withIsGroupMember(false)
+                                .withIsGroupMaster(false)
+                                .withDefendants(asList(uk.gov.justice.core.courts.Defendant.defendant()
+                                        .withId(defendant.getId().getId())
+                                        .build()))
+                                .build(),
+                        ProsecutionCase.prosecutionCase()
+                                .withId(prosecutionCase4.getId().getId())
+                                .withIsCivil(true)
+                                .withGroupId(groupId)
+                                .withIsGroupMember(true)
+                                .withIsGroupMaster(false)
+                                .withDefendants(asList(uk.gov.justice.core.courts.Defendant.defendant()
+                                        .withId(defendant.getId().getId())
+                                        .build()))
+                                .build()))
+                .build();
+        when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearingPojo);
+
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId, null, null, false);
+
+        final List<UUID> filteredCases = asList(prosecutionCase1.getId().getId(), prosecutionCase3.getId().getId());
+        assertThat(response, isBean(HearingDetailsResponse.class));
+        assertThat(response.getHearing().getProsecutionCases().size(), equalTo(2));
+        assertThat(response.getHearing().getProsecutionCases().get(0).getIsCivil(), is(true));
+        assertTrue(filteredCases.contains(response.getHearing().getProsecutionCases().get(0).getId()));
+        assertTrue(filteredCases.contains(response.getHearing().getProsecutionCases().get(1).getId()));
+    }
+
+    @Test
+    public void shouldNotFilterHearingProsecutionCasesForCivilBulkGroup_WhenAllCasesRemoved() {
+        final UUID hearingId = randomUUID();
+        final UUID groupId = randomUUID();
+        final Defendant defendant = buildDefendant1(hearingId);
+        final Integer numberOfGroupCases = 100;
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase1 = buildCivilBulkCase(hearingId, asSet(defendant), groupId, false, false);
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase2 = buildCivilBulkCase(hearingId, asSet(defendant), groupId, false, false);
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase3 = buildCivilBulkCase(hearingId, asSet(defendant), groupId, false, false);
+
+        final Hearing hearing = populateHearing(hearingId, START_DATE_1, END_DATE_1, asSet(prosecutionCase1, prosecutionCase2, prosecutionCase3), Boolean.TRUE, numberOfGroupCases);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing()
+                .withIsGroupProceedings(Boolean.TRUE)
+                .withNumberOfGroupCases(numberOfGroupCases)
+                .withProsecutionCases(asList(
+                        ProsecutionCase.prosecutionCase()
+                                .withId(prosecutionCase1.getId().getId())
+                                .withIsCivil(true)
+                                .withGroupId(groupId)
+                                .withIsGroupMember(false)
+                                .withIsGroupMaster(false)
+                                .withDefendants(asList(uk.gov.justice.core.courts.Defendant.defendant()
+                                        .withId(defendant.getId().getId())
+                                        .build()))
+                                .build(),
+                        ProsecutionCase.prosecutionCase()
+                                .withId(prosecutionCase2.getId().getId())
+                                .withIsCivil(true)
+                                .withGroupId(groupId)
+                                .withIsGroupMember(false)
+                                .withIsGroupMaster(false)
+                                .withDefendants(asList(uk.gov.justice.core.courts.Defendant.defendant()
+                                        .withId(defendant.getId().getId())
+                                        .build()))
+                                .build(),
+                        ProsecutionCase.prosecutionCase()
+                                .withId(prosecutionCase3.getId().getId())
+                                .withIsCivil(true)
+                                .withGroupId(groupId)
+                                .withIsGroupMember(false)
+                                .withIsGroupMaster(false)
+                                .withDefendants(asList(uk.gov.justice.core.courts.Defendant.defendant()
+                                        .withId(defendant.getId().getId())
+                                        .build()))
+                                .build()))
+                .build();
+        when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearingPojo);
+
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId, null, null, false);
+
+        final List<UUID> filteredCases = asList(prosecutionCase1.getId().getId(), prosecutionCase2.getId().getId(), prosecutionCase3.getId().getId());
+        assertThat(response, isBean(HearingDetailsResponse.class));
+        assertThat(response.getHearing().getProsecutionCases().size(), equalTo(3));
+        assertThat(response.getHearing().getProsecutionCases().get(0).getIsCivil(), is(true));
+        assertTrue(filteredCases.contains(response.getHearing().getProsecutionCases().get(0).getId()));
+        assertTrue(filteredCases.contains(response.getHearing().getProsecutionCases().get(1).getId()));
+        assertTrue(filteredCases.contains(response.getHearing().getProsecutionCases().get(2).getId()));
+    }
+
+    @Test
     public void shouldNotFindHearingListWhenJudicialUserIsNotMatched() {
 
         final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
@@ -986,7 +1124,7 @@ public class HearingServiceTest {
         final TimelineHearingSummary hearingSummary = mock(TimelineHearingSummary.class);
         List<HearingYouthCourtDefendants> hearingYouthCourtDefendants = Arrays.asList(new HearingYouthCourtDefendants());
 
-        when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any(), any(), any(List.class))).thenReturn(hearingSummary);
+        when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any(), any(), any(List.class), any())).thenReturn(hearingSummary);
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypesMock = mock(CrackedIneffectiveVacatedTrialTypes.class);
         when(crackedIneffectiveVacatedTrialTypesMock.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(emptyList());
 
@@ -1017,7 +1155,7 @@ public class HearingServiceTest {
         when(hearingRepository.findAllHearingsByApplicationId(applicationId)).thenReturn(hearings);
         when(entity.getHearingDays()).thenReturn(hearingDays);
         final TimelineHearingSummary hearingSummary = mock(TimelineHearingSummary.class);
-        when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any(), any(), any(List.class), any())).thenReturn(hearingSummary);
+        when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any(), any(), any(List.class), any(), any())).thenReturn(hearingSummary);
 
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypesMock = mock(CrackedIneffectiveVacatedTrialTypes.class);
         when(crackedIneffectiveVacatedTrialTypesMock.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(emptyList());

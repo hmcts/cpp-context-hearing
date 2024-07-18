@@ -5,6 +5,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.text.MessageFormat.format;
 import static java.time.ZonedDateTime.now;
 import static java.time.format.DateTimeFormatter.ofPattern;
+import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.AllOf.allOf;
@@ -18,7 +19,9 @@ import static uk.gov.moj.cpp.hearing.command.TrialType.builder;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.UseCases.setTrialType;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithGroupProceedings;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithIsBoxHearing;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE_ID;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VACATED_TRIAL_TYPE_ID;
@@ -30,9 +33,14 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingVacatedTrialDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.test.TestUtilities;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -156,5 +164,39 @@ public class CaseTimelineIT extends AbstractIT {
                 .until(
                         status().is(OK),
                         payload().isJson(timelineMatcher));
+    }
+
+    @Test
+    public void shouldFetchDefndantCorrespondingToCaseId() throws Exception {
+        final UUID groupId = randomUUID();
+        final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = getUuidMapForCivilCaseStructure(3);
+        final Iterator<UUID> iterator = caseStructure.keySet().iterator();
+        final UUID masterCaseId = iterator.next();
+
+        final InitiateHearingCommand hearingCommand = standardInitiateHearingTemplateWithGroupProceedings(caseStructure, groupId, masterCaseId);
+        h(initiateHearing(getRequestSpec(), hearingCommand));
+        final Hearing hearing = hearingCommand.getHearing();
+
+        final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(1);
+        final UUID prosecutionCaseId = prosecutionCase.getId();
+
+        final Person personDetails = prosecutionCase.getDefendants().get(0).getPersonDefendant().getPersonDetails();
+
+        final String defendantName = String.format("%s %s", personDetails.getFirstName(), personDetails.getLastName());
+
+        final Matcher<ReadContext> timelineMatcher = allOf(
+                withJsonPath("$.hearingSummaries[0].hearingId", is(hearing.getId().toString())),
+                withJsonPath("$.hearingSummaries[0].defendants[0].name", is(defendantName))
+        );
+
+        pollForHearingSummaryTimeline(timelineMatcher, prosecutionCaseId);
+    }
+
+    private HashMap<UUID, Map<UUID, List<UUID>>> getUuidMapForCivilCaseStructure(int count) {
+        final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
+        for (int i = 0; i < count; i++) {
+            caseStructure.put(randomUUID(), toMap(randomUUID(), TestUtilities.asList(randomUUID())));
+        }
+        return caseStructure;
     }
 }

@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.test;
 
 
 import static com.google.common.collect.ImmutableList.of;
+import static java.lang.Boolean.TRUE;
 import static java.time.LocalDate.now;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
@@ -106,6 +107,7 @@ public class CoreTestTemplates {
     private static final String JSON_STRING = "{\"results\":[{\"isDeleted\":false,\"isModified\":false,\"resultCode\":\"d0a369c9-5a28-40ec-99cb-da7943550b13\",\"orderedDate\":\"2021-05-27\"}]}";
     private static final String REPORTING_RESTRICTION_LABEL_YES = "Yes";
     private static final String REPORTING_RESTRICTION_LABEL_SECOND = "Second";
+    public static final int NUMBER_OF_GROUP_CASES = 1000;
     public static final String VALUE = "2017-05-20";
     public static final String COURT_CENTRE_ID = "b52f805c-2821-4904-a0e0-26f7fda6dd08";
 
@@ -761,7 +763,7 @@ public class CoreTestTemplates {
                 .withProsecutionCaseId(prosecutionCaseId)
                 .withNumberOfPreviousConvictionsCited(INTEGER.next())
                 .withProsecutionAuthorityReference(STRING.next())
-                .withIsYouth(Boolean.TRUE)
+                .withIsYouth(TRUE)
                 .withOffences(
                         structure.getV().stream()
                                 .map(offenceId -> offence(args, offenceId, withConvictionDate).build())
@@ -788,7 +790,7 @@ public class CoreTestTemplates {
                 .withProsecutionCaseId(prosecutionCaseId)
                 .withNumberOfPreviousConvictionsCited(INTEGER.next())
                 .withProsecutionAuthorityReference(STRING.next())
-                .withIsYouth(Boolean.TRUE)
+                .withIsYouth(TRUE)
                 .withDefendantCaseJudicialResults(asList(JudicialResult.judicialResult()
                         .withJudicialResultTypeId(fromString("8c67b30a-418c-11e8-842f-0ed5f89f718b"))
                         .withLabel("Defendant's details changed")
@@ -888,7 +890,11 @@ public class CoreTestTemplates {
                                         defendant(structure.getK(), args, p(entry.getKey(), entry.getValue()), withConvictionDate).build()
                                 )
                                 .collect(toList())
-                );
+                )
+                .withGroupId(args.getGroupId())
+                .withIsCivil(args.getIsCivil())
+                .withIsGroupMaster(structure.getK().equals(args.getMasterProsecutionCaseId()))
+                .withIsGroupMember(args.getIsGroupMember());
     }
 
     private static List<Marker> buildCaseMarkers() {
@@ -1012,7 +1018,9 @@ public class CoreTestTemplates {
 
                 .withCourtApplications(asList((new HearingFactory().courtApplication().build())))
                 .withCourtCentre(courtCentre)
-                .withIsBoxHearing(args.getIsBoxHearing());
+                .withIsBoxHearing(args.getIsBoxHearing())
+                .withIsGroupProceedings(args.getIsGroupProceedings())
+                .withNumberOfGroupCases(args.getNumberOfGroupCases());
 
         return hearingBuilder;
     }
@@ -1478,6 +1486,12 @@ public class CoreTestTemplates {
         private boolean putCustodialEstablishment = true;
         private Boolean isBoxHearing;
         private Boolean reportingRestriction = true;
+        private Boolean isGroupProceedings = false;
+        private Integer numberOfGroupCases = 0;
+        private UUID groupId;
+        private UUID masterProsecutionCaseId;
+        private Boolean isCivil;
+        private Boolean isGroupMember;
 
         private Map<UUID, Map<UUID, List<UUID>>> structure = toMap(randomUUID(), toMap(randomUUID(), asList(randomUUID())));
 
@@ -1496,6 +1510,15 @@ public class CoreTestTemplates {
         public CoreTemplateArguments setJurisdictionType(final JurisdictionType jurisdictionType) {
             this.jurisdictionType = jurisdictionType;
             return this;
+        }
+
+        public CoreTemplateArguments setNumberOfGroupCases(final Integer numberOfGroupCases) {
+            this.numberOfGroupCases = numberOfGroupCases;
+            return this;
+        }
+
+        public Integer getNumberOfGroupCases() {
+            return numberOfGroupCases;
         }
 
         public CoreTemplateArguments setHearingLanguage(final HearingLanguage hearingLanguage) {
@@ -1625,6 +1648,51 @@ public class CoreTestTemplates {
 
         public CoreTemplateArguments setReportingRestriction(final boolean reportingRestriction) {
             this.reportingRestriction = reportingRestriction;
+            return this;
+        }
+
+        public Boolean getIsGroupProceedings() {
+            return isGroupProceedings;
+        }
+
+        public CoreTemplateArguments setIsGroupProceedings(final Boolean groupProceedings) {
+            this.isGroupProceedings = groupProceedings;
+            return this;
+        }
+
+        public UUID getGroupId() {
+            return groupId;
+        }
+
+        public CoreTemplateArguments setGroupId(final UUID groupId) {
+            this.groupId = groupId;
+            return this;
+        }
+
+        public UUID getMasterProsecutionCaseId() {
+            return masterProsecutionCaseId;
+        }
+
+        public CoreTemplateArguments setMasterProsecutionCaseId(final UUID masterProsecutionCaseId) {
+            this.masterProsecutionCaseId = masterProsecutionCaseId;
+            return this;
+        }
+
+        public Boolean getIsCivil() {
+            return isCivil;
+        }
+
+        public CoreTemplateArguments setIsCivil(final Boolean civil) {
+            isCivil = civil;
+            return this;
+        }
+
+        public Boolean getIsGroupMember() {
+            return isGroupMember;
+        }
+
+        public CoreTemplateArguments setIsGroupMember(final Boolean groupMember) {
+            isGroupMember = groupMember;
             return this;
         }
     }

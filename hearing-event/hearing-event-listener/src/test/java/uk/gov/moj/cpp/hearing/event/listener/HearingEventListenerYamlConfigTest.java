@@ -13,6 +13,8 @@ import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.CaseRemovedFromGroupCases;
+import uk.gov.moj.cpp.hearing.domain.event.CasesUpdatedAfterCaseRemovedFromGroupCases;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
@@ -50,9 +52,14 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingResultLineSharedDatesUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnlockFailed;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnlocked;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.MasterCaseUpdatedForHearing;
+import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
+import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesRequested;
 import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.MasterCaseUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
@@ -180,8 +187,10 @@ public class HearingEventListenerYamlConfigTest {
             PublicSelectedOffencesRemovedFromExistingHearing.class.getAnnotation(Event.class).value(),
             EnrichAssociatedHearingsWithIndicatedPlea.class.getAnnotation(Event.class).value(),
             PublicSelectedOffencesRemovedFromExistingHearing.class.getAnnotation(Event.class).value(),
+            CaseRemovedFromGroupCases.class.getAnnotation(Event.class).value(),
             HearingBreachApplicationsAdded.class.getAnnotation(Event.class).value(),
-            HearingBreachApplicationsToBeAddedReceived.class.getAnnotation(Event.class).value()
+            HearingBreachApplicationsToBeAddedReceived.class.getAnnotation(Event.class).value(),
+            MasterCaseUpdatedForHearing.class.getAnnotation(Event.class).value()
 
     );
 
@@ -229,6 +238,9 @@ public class HearingEventListenerYamlConfigTest {
                 HearingUnallocatedEventListener.class,
                 ReusableInfoEventListener.class,
                 CourtListRestrictionEventListener.class,
+                CustodyTimeLimitEventListener.class,
+                CaseRemovedFromGroupCasesEventListener.class,
+                MasterCaseUpdatedForHearing.class,
                 CustodyTimeLimitEventListener.class,
                 IndicatedPleaUpdated.class));
 
