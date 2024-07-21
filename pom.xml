@@ -27,10 +27,10 @@
         <coredomain.version>8.0.3</coredomain.version>
         <referencedata.version>8.0.67</referencedata.version>
         <material.version>8.0.9</material.version>
-        <results.version>8.0.53</results.version>
-        <notification.notify.version>7.0.13</notification.notify.version>
-        <stagingenforcement.version>8.0.2</stagingenforcement.version>
-        <progression.version>8.0.190</progression.version>
+        <results.version>8.0.54</results.version>
+        <notification.notify.version>8.0.16</notification.notify.version>
+        <stagingenforcement.version>8.0.26</stagingenforcement.version>
+        <progression.version>8.0.193</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
@@ -38,9 +38,9 @@
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
         <test-utils-enveloper-provider.version>5.1.2</test-utils-enveloper-provider.version>
         <usersgroups.version>8.0.39</usersgroups.version>
-        <listing.version>8.0.90</listing.version>
+        <listing.version>8.0.91</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
-        <systemdocgenerator.version>8.0.87</systemdocgenerator.version>
+        <systemdocgenerator.version>8.0.91</systemdocgenerator.version>
         <liquibase.core.version>3.6.1</liquibase.core.version> <!-- TODO remove this property when merging java 17. version will be fetched from common bom -->
         <sonar.coverage.exclusions>
             **/uk/gov/moj/cpp/hearing/nows/events/**/*,
