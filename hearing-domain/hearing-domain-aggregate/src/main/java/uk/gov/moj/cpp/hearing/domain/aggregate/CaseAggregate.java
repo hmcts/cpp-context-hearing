@@ -11,9 +11,11 @@ import uk.gov.justice.progression.events.SendingSheetCompleted;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.CaseRemovedFromGroupCases;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForProsecutionCase;
+import uk.gov.moj.cpp.hearing.domain.event.MasterCaseUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
@@ -26,7 +28,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S1068", "squid:S1948"})
 public class CaseAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 101L;
+    private static final long serialVersionUID = 102L;
 
     private Boolean sendingSheetCompleteProcessed = false;
 
@@ -41,6 +43,7 @@ public class CaseAggregate implements Aggregate {
                 when(HearingMarkedAsDuplicateForCase.class).apply(e -> hearingIds.remove(e.getHearingId())),
                 when(HearingDeletedForProsecutionCase.class).apply(e -> hearingIds.remove(e.getHearingId())),
                 when(HearingRemovedForProsecutionCase.class).apply(e -> hearingIds.remove(e.getHearingId())),
+                when(MasterCaseUpdatedForHearing.class).apply(e -> hearingIds.add(e.getHearingId())),
                 otherwiseDoNothing());
     }
 
@@ -101,5 +104,17 @@ public class CaseAggregate implements Aggregate {
 
     public Stream<Object> removeHearingForProsecutionCase(final UUID prosecutionCaseId, final UUID hearingId) {
         return apply(Stream.of(new HearingRemovedForProsecutionCase(prosecutionCaseId, hearingId)));
+    }
+
+    public Stream<Object> removeCaseFromGroupCases(final UUID hearingId, final UUID groupId, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
+        return apply(Stream.of(new CaseRemovedFromGroupCases(hearingId, groupId, removedCase, newGroupMaster)));
+    }
+
+    /* when the master case of a group is changed, newGroupMaster comes to hearing context for the first time
+    this method is here just to initiate the aggregate for that new case (newGroupMaster)
+    and the event created (MasterCaseUpdatedForHearing) is not being consumed by any listener/processor
+    * */
+    public Stream<Object> updateMasterCaseForHearing(final UUID newGroupMaster, final UUID hearingId) {
+        return apply(Stream.of(new MasterCaseUpdatedForHearing(newGroupMaster, hearingId)));
     }
 }

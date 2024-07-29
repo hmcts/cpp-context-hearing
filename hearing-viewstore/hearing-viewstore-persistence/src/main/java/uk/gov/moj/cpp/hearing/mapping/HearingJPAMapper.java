@@ -130,6 +130,8 @@ public class HearingJPAMapper {
         hearing.setHearingType(hearingTypeJPAMapper.toJPA(pojo.getType()));
         hearing.setCourtApplicationsJson(courtApplicationsSerializer.json(pojo.getCourtApplications()));
         hearing.setApprovalsRequested(approvalRequestedJPAMapper.toJPA(pojo.getApprovalsRequested()));
+        hearing.setIsGroupProceedings(pojo.getIsGroupProceedings());
+        hearing.setNumberOfGroupCases(pojo.getNumberOfGroupCases());
         return hearing;
     }
 
@@ -168,6 +170,8 @@ public class HearingJPAMapper {
                 .withApprovalsRequested(approvalRequestedJPAMapper.fromJPA(entity.getApprovalsRequested()))
                 .withYouthCourtDefendantIds(getDefendantsSelectedForYouthDefendant(entity))
                 .withEarliestNextHearingDate(entity.getEarliestNextHearingDate())
+                .withIsGroupProceedings(entity.getIsGroupProceedings())
+                .withNumberOfGroupCases(entity.getNumberOfGroupCases())
                 .build();
     }
 

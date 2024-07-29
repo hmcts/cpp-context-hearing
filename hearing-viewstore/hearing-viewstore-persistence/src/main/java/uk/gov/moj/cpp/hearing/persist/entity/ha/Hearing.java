@@ -37,6 +37,9 @@ public class Hearing {
     @Column(name = "id", nullable = false)
     private UUID id;
 
+    @Column(name="number_of_group_cases")
+    private Integer numberOfGroupCases;
+
     @Embedded
     private HearingType hearingType;
 
@@ -139,6 +142,8 @@ public class Hearing {
     @Column(name = "restrict_court_list_json", columnDefinition = "TEXT")
     private String restrictCourtListJson;
 
+    @Column(name = "is_group_proceedings")
+    private Boolean isGroupProceedings;
 
     @Column(name = "first_shared_date")
     private ZonedDateTime firstSharedDate;
@@ -441,6 +446,22 @@ public class Hearing {
 
     public void setRestrictCourtListJson(String restrictCourtListJson) {
         this.restrictCourtListJson = restrictCourtListJson;
+    }
+
+    public Integer getNumberOfGroupCases() {
+        return numberOfGroupCases;
+    }
+
+    public void setNumberOfGroupCases(Integer numberOfGroupCases) {
+        this.numberOfGroupCases = numberOfGroupCases;
+    }
+
+    public Boolean getIsGroupProceedings() {
+        return isGroupProceedings;
+    }
+
+    public void setIsGroupProceedings(final Boolean isGroupProceedings) {
+        this.isGroupProceedings = isGroupProceedings;
     }
 
     @Override

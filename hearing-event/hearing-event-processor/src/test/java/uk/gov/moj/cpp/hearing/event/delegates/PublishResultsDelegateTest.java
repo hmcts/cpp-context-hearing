@@ -53,6 +53,7 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.BailStatusHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.OffenceHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.AbstractRestructuringTest;
@@ -63,6 +64,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 import uk.gov.moj.cpp.hearing.event.relist.RelistReferenceDataService;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -98,10 +100,19 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     private ArgumentCaptor<Envelope> envelopeArgumentCaptor;
 
     @Captor
+    private ArgumentCaptor<JsonEnvelope> jsonEnvelopeArgumentCaptor;
+
+    @Captor
     private ArgumentCaptor<Hearing> custodyLimitCalculatorHearingIn;
 
     @Mock
     protected ResultTextConfHelper resultTextConfHelper = Mockito.mock(ResultTextConfHelper.class);
+
+    @Captor
+    private ArgumentCaptor<LocalDate> hearingDayArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<ResultsSharedV2> resultsSharedV2ArgumentCaptor;
 
     @Spy
     private ResultTreeBuilder resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper, resultTextConfHelper);
@@ -149,6 +160,25 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
         assertThat(defendant.isPresent(), is(true));
+    }
+
+    @Test
+    public void shouldNotEnrichPayloadWithCTLOrBailStatusInformationForBulkCases() throws IOException {
+        final ResultsSharedV2 resultsShared = fileResourceObjectMapper.convertFromFile("hearing.events.results-shared-v2.json", ResultsSharedV2.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        target.shareResults(envelope, sender, resultsShared);
+
+        verify(sender,times(2)).send(envelopeArgumentCaptor.capture());
+
+        final Envelope<JsonObject> sharedResultsMessage = envelopeArgumentCaptor.getValue();
+
+        assertThat(sharedResultsMessage.metadata().name(), is("public.events.hearing.hearing-resulted"));
+        verify(custodyTimeLimitCalculator, times(0)).calculate(custodyLimitCalculatorHearingIn.capture());
+        verify(custodyTimeLimitCalculator, times(0)).calculateDateHeldInCustody(custodyLimitCalculatorHearingIn.capture(), hearingDayArgumentCaptor.capture());
+        verify(custodyTimeLimitCalculator, times(0)).updateExtendedCustodyTimeLimit(resultsSharedV2ArgumentCaptor.capture());
+
+        verify(bailStatusHelper, times(0)).mapBailStatuses(jsonEnvelopeArgumentCaptor.capture(), custodyLimitCalculatorHearingIn.capture());
+
     }
 
     @Test

@@ -1,13 +1,18 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
+import static java.lang.Boolean.TRUE;
 import static java.time.ZonedDateTime.now;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.NUMBER_OF_GROUP_CASES;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
@@ -35,9 +40,11 @@ import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -66,6 +73,8 @@ public class GetHearingsTransformerTest {
         assertThat(hearingSummary, isBean(HearingSummaries.class)
                 .withValue(HearingSummaries::getId, hearing.getId())
                 .withValue(HearingSummaries::getHearingLanguage, hearing.getHearingLanguage().name())
+                .withValue(HearingSummaries::getIsGroupProceedings, hearing.getIsGroupProceedings())
+                .withValue(HearingSummaries::getNumberOfGroupCases, hearing.getNumberOfGroupCases())
                 .withValue(hs -> hs.getType().getId(), hearing.getType().getId())
                 .withValue(HearingSummaries::getHearingDays, hearing.getHearingDays())
                 .withValue(hs -> hs.getJurisdictionType().name(), hearing.getJurisdictionType().name())
@@ -335,5 +344,120 @@ public class GetHearingsTransformerTest {
                                 .withValue(Subject::getMiddleName, courtApplication.getSubject().getPersonDetails().getMiddleName())
                                 .withValue(Subject::getOrganisationName, courtApplication.getSubject().getOrganisation().getName()))
                 )));
+    }
+
+    @Test
+    public void shouldTransformHearingWithCivilBulkCases_WhenSomeCasesRemoved() {
+        final UUID groupId = randomUUID();
+
+        final ProsecutionCase prosecutionCase1 = ProsecutionCase.prosecutionCase()
+                .withId(randomUUID())
+                .withIsCivil(true)
+                .withGroupId(groupId)
+                .withIsGroupMember(true)
+                .withIsGroupMaster(true)
+                .build();
+
+        final ProsecutionCase prosecutionCase2 = ProsecutionCase.prosecutionCase()
+                .withId(randomUUID())
+                .withIsCivil(true)
+                .withGroupId(groupId)
+                .withIsGroupMember(true)
+                .withIsGroupMaster(false)
+                .build();
+
+        final ProsecutionCase prosecutionCase3 = ProsecutionCase.prosecutionCase()
+                .withId(randomUUID())
+                .withIsCivil(true)
+                .withGroupId(groupId)
+                .withIsGroupMember(false)
+                .withIsGroupMaster(false)
+                .build();
+
+        final ProsecutionCase prosecutionCase4 = ProsecutionCase.prosecutionCase()
+                .withId(randomUUID())
+                .withIsCivil(true)
+                .withGroupId(groupId)
+                .withIsGroupMember(true)
+                .withIsGroupMaster(false)
+                .build();
+
+        final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments())
+                .withIsGroupProceedings(TRUE)
+                .withNumberOfGroupCases(NUMBER_OF_GROUP_CASES)
+                .withProsecutionCases(asList(prosecutionCase1, prosecutionCase2, prosecutionCase3, prosecutionCase4))
+                .build();
+
+        final List<UUID> filteredCases = asList(prosecutionCase1.getId(), prosecutionCase3.getId());
+
+        final HearingSummaries hearingSummary = target.summary(hearing).build();
+        assertThat(hearingSummary.getIsGroupProceedings(), CoreMatchers.equalTo(TRUE));
+        assertThat(hearingSummary.getNumberOfGroupCases().intValue(), CoreMatchers.equalTo(NUMBER_OF_GROUP_CASES));
+        assertThat(hearingSummary.getProsecutionCaseSummaries().size(), equalTo(2));
+        assertThat(hearingSummary.getProsecutionCaseSummaries().get(0).getIsCivil(), equalTo(true));
+        assertTrue(filteredCases.contains(hearingSummary.getProsecutionCaseSummaries().get(0).getId()));
+        assertTrue(filteredCases.contains(hearingSummary.getProsecutionCaseSummaries().get(1).getId()));
+
+        final HearingSummaries hearingSummaryForToday = target.summaryForHearingsForToday(hearing).build();
+        assertThat(hearingSummaryForToday.getIsGroupProceedings(), CoreMatchers.equalTo(TRUE));
+        assertThat(hearingSummaryForToday.getNumberOfGroupCases().intValue(), CoreMatchers.equalTo(NUMBER_OF_GROUP_CASES));
+        assertThat(hearingSummaryForToday.getProsecutionCaseSummaries().size(), equalTo(2));
+        assertThat(hearingSummaryForToday.getProsecutionCaseSummaries().get(0).getIsCivil(), equalTo(true));
+        assertTrue(filteredCases.contains(hearingSummaryForToday.getProsecutionCaseSummaries().get(0).getId()));
+        assertTrue(filteredCases.contains(hearingSummaryForToday.getProsecutionCaseSummaries().get(1).getId()));
+    }
+
+    @Test
+    public void shouldTransformHearingWithCivilBulkCases_WhenAllCasesRemoved() {
+        final UUID groupId = randomUUID();
+
+        final ProsecutionCase prosecutionCase1 = ProsecutionCase.prosecutionCase()
+                .withId(randomUUID())
+                .withIsCivil(true)
+                .withGroupId(groupId)
+                .withIsGroupMember(false)
+                .withIsGroupMaster(false)
+                .build();
+
+        final ProsecutionCase prosecutionCase2 = ProsecutionCase.prosecutionCase()
+                .withId(randomUUID())
+                .withIsCivil(true)
+                .withGroupId(groupId)
+                .withIsGroupMember(false)
+                .withIsGroupMaster(false)
+                .build();
+
+        final ProsecutionCase prosecutionCase3 = ProsecutionCase.prosecutionCase()
+                .withId(randomUUID())
+                .withIsCivil(true)
+                .withGroupId(groupId)
+                .withIsGroupMember(false)
+                .withIsGroupMaster(false)
+                .build();
+
+        final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments())
+                .withIsGroupProceedings(TRUE)
+                .withNumberOfGroupCases(NUMBER_OF_GROUP_CASES)
+                .withProsecutionCases(asList(prosecutionCase1, prosecutionCase2, prosecutionCase3))
+                .build();
+
+        final List<UUID> filteredCases = asList(prosecutionCase1.getId(), prosecutionCase2.getId(), prosecutionCase3.getId());
+
+        final HearingSummaries hearingSummary = target.summary(hearing).build();
+        assertThat(hearingSummary.getIsGroupProceedings(), CoreMatchers.equalTo(TRUE));
+        assertThat(hearingSummary.getNumberOfGroupCases().intValue(), CoreMatchers.equalTo(NUMBER_OF_GROUP_CASES));
+        assertThat(hearingSummary.getProsecutionCaseSummaries().size(), equalTo(3));
+        assertThat(hearingSummary.getProsecutionCaseSummaries().get(0).getIsCivil(), equalTo(true));
+        assertTrue(filteredCases.contains(hearingSummary.getProsecutionCaseSummaries().get(0).getId()));
+        assertTrue(filteredCases.contains(hearingSummary.getProsecutionCaseSummaries().get(1).getId()));
+        assertTrue(filteredCases.contains(hearingSummary.getProsecutionCaseSummaries().get(2).getId()));
+
+        final HearingSummaries hearingSummaryForToday = target.summaryForHearingsForToday(hearing).build();
+        assertThat(hearingSummaryForToday.getNumberOfGroupCases().intValue(), CoreMatchers.equalTo(NUMBER_OF_GROUP_CASES));
+        assertThat(hearingSummaryForToday.getProsecutionCaseSummaries().size(), equalTo(3));
+        assertThat(hearingSummaryForToday.getProsecutionCaseSummaries().get(0).getIsCivil(), equalTo(true));
+        assertTrue(filteredCases.contains(hearingSummaryForToday.getProsecutionCaseSummaries().get(0).getId()));
+        assertTrue(filteredCases.contains(hearingSummaryForToday.getProsecutionCaseSummaries().get(1).getId()));
+        assertTrue(filteredCases.contains(hearingSummaryForToday.getProsecutionCaseSummaries().get(2).getId()));
     }
 }

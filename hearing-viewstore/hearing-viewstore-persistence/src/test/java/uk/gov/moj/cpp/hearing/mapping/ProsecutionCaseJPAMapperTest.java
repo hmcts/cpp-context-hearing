@@ -72,7 +72,11 @@ public class ProsecutionCaseJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getProsecutionCaseIdentifier, whenProsecutionCaseIdentifier(
                         isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier.class), pojo.getProsecutionCaseIdentifier()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getCpsProsecutor, whenProsecutor(
-                        isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.CpsProsecutor.class), pojo.getProsecutor()));
+                        isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.CpsProsecutor.class), pojo.getProsecutor()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getIsCivil, is(pojo.getIsCivil()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getIsGroupMaster, is(pojo.getIsGroupMaster()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getIsGroupMember, is(pojo.getIsGroupMember()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getGroupId, is(pojo.getGroupId()));
     }
 
     @Test

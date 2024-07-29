@@ -81,6 +81,18 @@ public class HearingDelegate implements Serializable {
             this.momento.getHearing().getProsecutionCases().forEach(
                     prosecutionCase -> prosecutionCase.getDefendants().forEach(
                             defendant -> defendant.getOffences().forEach(this::keepOffence)));
+
+            if (nonNull(hearing.getIsGroupProceedings()) && hearing.getIsGroupProceedings()) {
+                final List<ProsecutionCase> groupMasters = hearing.getProsecutionCases().stream()
+                        .filter(pc -> nonNull(pc.getIsGroupMaster()) && pc.getIsGroupMaster())
+                        .collect(toList());
+
+                groupMasters.forEach(groupMaster -> {
+                    if (nonNull(groupMaster) && nonNull(groupMaster.getGroupId())) {
+                        this.momento.getGroupAndMaster().put(groupMaster.getGroupId(), groupMaster.getId());
+                    }
+                });
+            }
         }
         if (nonNull(hearing.getCourtApplications())) {
             this.momento.getHearing().getCourtApplications().stream()

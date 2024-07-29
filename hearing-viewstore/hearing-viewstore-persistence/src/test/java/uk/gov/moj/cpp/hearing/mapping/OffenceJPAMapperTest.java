@@ -162,6 +162,7 @@ public class OffenceJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::isProceedingsConcluded, is(pojo.getProceedingsConcluded()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getLaidDate, is(pojo.getLaidDate()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getListingNumber, is(pojo.getListingNumber()))
-                ;
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getCivilOffenceIsExparte, is(pojo.getCivilOffence().getIsExParte()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getCivilOffenceIsRespondent, is(pojo.getCivilOffence().getIsRespondent()));
     }
 }

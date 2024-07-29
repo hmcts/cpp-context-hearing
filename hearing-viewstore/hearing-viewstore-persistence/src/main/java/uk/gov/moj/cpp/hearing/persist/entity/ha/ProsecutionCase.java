@@ -5,6 +5,7 @@ import uk.gov.justice.core.courts.InitiationCode;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -54,6 +55,18 @@ public class ProsecutionCase {
 
     @Column(name = "trial_receipt_type")
     private String trialReceiptType;
+
+    @Column(name = "is_civil")
+    private Boolean isCivil;
+
+    @Column(name = "group_id")
+    private UUID groupId;
+
+    @Column(name = "is_group_member")
+    private Boolean isGroupMember;
+
+    @Column(name = "is_group_master")
+    private Boolean isGroupMaster;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "prosecutionCase", orphanRemoval = true)
     private Set<Defendant> defendants = new HashSet<>();
@@ -171,6 +184,38 @@ public class ProsecutionCase {
 
     public void setCourtListRestricted(Boolean courtListRestricted) {
         isCourtListRestricted = courtListRestricted;
+    }
+
+    public Boolean getIsCivil() {
+        return this.isCivil;
+    }
+
+    public void setIsCivil(final Boolean isCivil) {
+        this.isCivil = isCivil;
+    }
+
+    public UUID getGroupId() {
+        return this.groupId;
+    }
+
+    public void setGroupId(final UUID groupId) {
+        this.groupId = groupId;
+    }
+
+    public Boolean getIsGroupMember() {
+        return this.isGroupMember;
+    }
+
+    public void setIsGroupMember(final Boolean isGroupMember) {
+        this.isGroupMember = isGroupMember;
+    }
+
+    public Boolean getIsGroupMaster() {
+        return this.isGroupMaster;
+    }
+
+    public void setIsGroupMaster(final Boolean isGroupMaster) {
+        this.isGroupMaster = isGroupMaster;
     }
 
     @Override

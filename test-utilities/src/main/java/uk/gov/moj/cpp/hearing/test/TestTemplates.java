@@ -32,6 +32,7 @@ import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.hearingDay;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.legalEntityDefendant;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.organisation;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.personDefendant;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.NUMBER_OF_GROUP_CASES;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 
 import uk.gov.justice.core.courts.ApplicantCounsel;
@@ -460,6 +461,7 @@ public class TestTemplates {
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
                             .setHearingLanguage(ENGLISH)
+                                    .setNumberOfGroupCases(NUMBER_OF_GROUP_CASES)
                             .setJurisdictionType(CROWN)
                     ,false, withConvictingCourt).build());
         }
@@ -469,6 +471,7 @@ public class TestTemplates {
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
                             .setHearingLanguage(ENGLISH)
+                                    .setNumberOfGroupCases(NUMBER_OF_GROUP_CASES)
                             .setJurisdictionType(CROWN)
                             .setIsBoxHearing(isBoxHearing)
                     ).build());
@@ -676,6 +679,24 @@ public class TestTemplates {
                             .setJurisdictionType(CROWN)
                             .setIndicatedPleaValue(indicatedPleaValue)
                             .setAllocationDecision(isAllocationDecision)
+                    ).build());
+        }
+
+        public static InitiateHearingCommand standardInitiateHearingTemplateWithGroupProceedings(final Map<UUID, Map<UUID, List<UUID>>> caseStructure,
+                                                                                                 final UUID groupId,
+                                                                                                 final UUID masterProsecutionCaseId) {
+            return initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setStructure(caseStructure)
+                            .setIsGroupProceedings(Boolean.TRUE)
+                            .setIsCivil(Boolean.TRUE)
+                            .setGroupId(groupId)
+                            .setIsGroupMember(Boolean.TRUE)
+                            .setMasterProsecutionCaseId(masterProsecutionCaseId)
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
+                            .setNumberOfGroupCases(100)
+                            .setJurisdictionType(CROWN)
                     ).build());
         }
 
@@ -1708,13 +1729,17 @@ public class TestTemplates {
         }
 
         public static AddProsecutionCounsel addProsecutionCounselCommandTemplate(final UUID hearingId) {
+            return addProsecutionCounselCommandTemplateWithCases(hearingId, Arrays.asList(UUID.randomUUID()));
+        }
+
+        public static AddProsecutionCounsel addProsecutionCounselCommandTemplateWithCases(final UUID hearingId, final List<UUID> prosecutionCases) {
             final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
                     Arrays.asList(now()),
                     STRING.next(),
                     randomUUID(),
                     STRING.next(),
                     STRING.next(),
-                    Arrays.asList(UUID.randomUUID()),
+                    prosecutionCases,
                     STRING.next(),
                     STRING.next(),
                     randomUUID()

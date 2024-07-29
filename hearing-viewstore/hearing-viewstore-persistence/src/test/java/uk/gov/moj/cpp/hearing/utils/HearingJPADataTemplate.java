@@ -60,6 +60,10 @@ public final class HearingJPADataTemplate {
                     prosecutionCase.setId(aNewHearingSnapshotKey(hearingEntity.getId()));
                     prosecutionCase.setHearing(hearingEntity);
                     prosecutionCase.setCourtListRestricted(true);
+                    prosecutionCase.setIsGroupMember(Boolean.TRUE);
+                    prosecutionCase.setIsGroupMaster(Boolean.TRUE);
+                    prosecutionCase.setGroupId(randomUUID());
+                    prosecutionCase.setIsCivil(Boolean.TRUE);
                     hearingEntity.getProsecutionCases().add(prosecutionCase);
                 });
         //
@@ -121,6 +125,10 @@ public final class HearingJPADataTemplate {
 
                     offence.setLaidDate(LocalDate.of(2019, 1, 1));
                     offence.setListingNumber(1);
+
+                    offence.setCivilOffenceIsExparte(Boolean.TRUE);
+
+                    offence.setCivilOffenceIsRespondent(Boolean.TRUE);
 
                     hearingEntity.getProsecutionCases().iterator().next().getDefendants().iterator().next().getOffences().add(offence);
                 });

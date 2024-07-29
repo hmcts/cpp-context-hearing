@@ -7,6 +7,7 @@ import static java.time.LocalDate.now;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
@@ -1930,6 +1931,58 @@ public class ShareResultsIT extends AbstractIT {
                         )));
     }
 
+    @Test
+    public void shouldShareHearingWithCivilCases() {
+
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+
+        final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = getUuidMapForCivilCaseStructure();
+        final UUID masterProsecutionCaseId = caseStructure.keySet().iterator().next();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommandForCivilCases(caseStructure, masterProsecutionCaseId);
+        final Hearing hearing = hearingCommand.getHearing();
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
+
+        stubCourtRoom(hearing);
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingCommand.it(), orderedDate, LocalDate.now());
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
+
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+
+        saveDaysDraftResult(saveDraftResultCommand);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        shareDaysResultWithCourtClerk(hearing, targets, LocalDate.now());
+
+        assertPublicHearingResultedEventPublished(hearing);
+    }
+
+    private void assertPublicHearingResultedEventPublished(final Hearing hearing) {
+        try(final EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+                .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId()))
+                                .with(Hearing::getIsGroupProceedings, is(true)))))) {
+
+            final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+            assertThat(publicHearingResulted.getBoolean("hearing.prosecutionCases[0].isGroupMaster"), is(true));
+            assertThat(publicHearingResulted.getJsonObject("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults"), is(notNullValue()));
+            assertThat(publicHearingResulted.getBoolean("hearing.prosecutionCases[1].isGroupMaster"), is(false));
+            assertThat(publicHearingResulted.getJsonObject("hearing.prosecutionCases[1].defendants[0].offences[0].judicialResults"), is(nullValue()));
+            assertThat(publicHearingResulted.getBoolean("hearing.prosecutionCases[2].isGroupMaster"), is(false));
+            assertThat(publicHearingResulted.getJsonObject("hearing.prosecutionCases[2].defendants[0].offences[0].judicialResults"), is(nullValue()));
+        }
+    }
+
     private CommandHelpers.UpdateVerdictCommandHelper updateDefendantAndChangeVerdict(InitiateHearingCommandHelper initiateHearingCommandHelper) {
         updateDefendantAttendance(initiateHearingCommandHelper);
 
@@ -2114,6 +2167,23 @@ public class ShareResultsIT extends AbstractIT {
                         ).build())));
     }
 
+    private InitiateHearingCommandHelper getHearingCommandForCivilCases(final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure, final UUID masterProsecutionCaseID) {
+        return h(UseCases.initiateHearing(getRequestSpec(),
+                InitiateHearingCommand.initiateHearingCommand()
+                        .setHearing(CoreTestTemplates.hearing(
+                                defaultArguments().setStructure(caseStructure)
+                                        .setDefendantType(PERSON)
+                                        .setHearingLanguage(ENGLISH)
+                                        .setJurisdictionType(CROWN)
+                                        .setIsGroupProceedings(true)
+                                        .setNumberOfGroupCases(100)
+                                        .setIsCivil(true)
+                                .setGroupId(randomUUID())
+                                .setIsGroupMember(true)
+                                .setMasterProsecutionCaseId(masterProsecutionCaseID)
+                        ).build())));
+    }
+
     private InitiateHearingCommandHelper getHearingCommandForApplicationCases(final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure) {
         return h(UseCases.initiateHearing(getRequestSpec(),
                 InitiateHearingCommand.initiateHearingCommand()
@@ -2137,7 +2207,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     private HashMap<UUID, Map<UUID, List<UUID>>> getUuidMapForMultipleCaseStructure() {
-        HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
+        final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
         Map<UUID, List<UUID>> value = new HashMap<>();
         value.put(randomUUID(), TestUtilities.asList(randomUUID(), randomUUID()));
         value.put(randomUUID(), TestUtilities.asList(randomUUID()));
@@ -2147,6 +2217,13 @@ public class ShareResultsIT extends AbstractIT {
         return caseStructure;
     }
 
+    private HashMap<UUID, Map<UUID, List<UUID>>> getUuidMapForCivilCaseStructure() {
+        final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
+        caseStructure.put(randomUUID(), toMap(randomUUID(), TestUtilities.asList(randomUUID())));
+        caseStructure.put(randomUUID(), toMap(randomUUID(), TestUtilities.asList(randomUUID())));
+        caseStructure.put(randomUUID(), toMap(randomUUID(), TestUtilities.asList(randomUUID())));
+        return caseStructure;
+    }
 
     private void shareResultsShouldNotHaveDDCH(final List<Target> targets, final InitiateHearingCommandHelper hearingOne) {
         final DelegatedPowers courtClerk2 = DelegatedPowers.delegatedPowers()
@@ -3300,6 +3377,13 @@ public class ShareResultsIT extends AbstractIT {
 
 
     private void assertHearingWithMultipleCasesCreatedAndResultAreNotShared(final Hearing hearing) {
+        final List<ProsecutionCase> prosecutionCases;
+        if (nonNull(hearing.getIsGroupProceedings()) && hearing.getIsGroupProceedings()) {
+            prosecutionCases = hearing.getProsecutionCases().stream().filter(ProsecutionCase::getIsGroupMaster).collect(Collectors.toList());
+        } else {
+            prosecutionCases = hearing.getProsecutionCases();
+        }
+
         final HearingDay hearingDay = hearing.getHearingDays().get(0);
         Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -3315,7 +3399,7 @@ public class ShareResultsIT extends AbstractIT {
                                 .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
                                 .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
                                 .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
-                        .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(hearing.getProsecutionCases()))
+                        .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(prosecutionCases))
                         .with(Hearing::getHasSharedResults, is(false))
                 )
         );

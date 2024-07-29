@@ -11,6 +11,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static javax.json.Json.createObjectBuilder;
 import static java.util.Collections.emptyList;
@@ -485,6 +486,14 @@ public class HearingService {
         hearingDetailsResponse.setWitnesses(hearing.getWitnesses().stream().map(x -> x.getName()).collect(toList()));
         hearingDetailsResponse.setFirstSharedDate(hearing.getFirstSharedDate());
 
+        updateTrialAttributes(crackedIneffectiveVacatedTrialTypes, hearing, hearingDetailsResponse);
+
+        filterProsecutionCases(hearingDetailsResponse);
+
+        return hearingDetailsResponse;
+    }
+
+    private void updateTrialAttributes(final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final Hearing hearing, final HearingDetailsResponse hearingDetailsResponse) {
         if (hearing.getTrialTypeId() != null) {
 
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
@@ -519,8 +528,17 @@ public class HearingService {
         } else {
             hearingDetailsResponse.getHearing().setIsVacatedTrial(FALSE);
         }
+    }
+    private void filterProsecutionCases(final HearingDetailsResponse hearingDetailsResponse) {
+        if (nonNull(hearingDetailsResponse.getHearing().getIsGroupProceedings())
+                && hearingDetailsResponse.getHearing().getIsGroupProceedings()
+                && isNotEmpty(hearingDetailsResponse.getHearing().getProsecutionCases())) {
 
-        return hearingDetailsResponse;
+            hearingDetailsResponse.getHearing().getProsecutionCases()
+                    .removeIf(pc -> nonNull(pc.getIsGroupMember())
+                            && pc.getIsGroupMember()
+                            && (isNull(pc.getIsGroupMaster()) || !pc.getIsGroupMaster()));
+        }
     }
 
     private HearingState getHearingState(final Hearing hearing) {
@@ -740,7 +758,7 @@ public class HearingService {
     public Timeline getTimeLineByCaseId(final UUID caseId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms) {
         final List<TimelineHearingSummary> hearingSummaries = hearingRepository.findByCaseId(caseId)
                 .stream()
-                .map(e -> this.populateTimeLineHearingSummaries(e, crackedIneffectiveVacatedTrialTypes, allCourtRooms))
+                .map(e -> this.populateTimeLineHearingSummaries(e, crackedIneffectiveVacatedTrialTypes, allCourtRooms, caseId))
                 .flatMap(Collection::stream)
                 .collect(toList());
 
@@ -759,12 +777,12 @@ public class HearingService {
         return new Timeline(hearingSummaries);
     }
 
-    private List<TimelineHearingSummary> populateTimeLineHearingSummaries(final Hearing hearing, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms) {
+    private List<TimelineHearingSummary> populateTimeLineHearingSummaries(final Hearing hearing, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms, final UUID caseId) {
         final CrackedIneffectiveTrial crackedIneffectiveTrial = fetchCrackedIneffectiveTrial(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
         final List<HearingYouthCourtDefendants> hearingYouthCourtDefendants = this.hearingYouthCourtDefendantsRepository.findAllByHearingId(hearing.getId());
         return hearing.getHearingDays()
                 .stream()
-                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendants))
+                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendants, caseId))
                 .collect(toList());
     }
 
@@ -776,7 +794,7 @@ public class HearingService {
         final List<HearingYouthCourtDefendants> hearingYouthCourtDefendants = this.hearingYouthCourtDefendantsRepository.findAllByHearingId(hearing.getId());
         return hearing.getHearingDays()
                 .stream()
-                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendants, applicationId))
+                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendants, applicationId, null))
                 .collect(toList());
     }
 

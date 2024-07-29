@@ -55,6 +55,10 @@ public class ProsecutionCaseJPAMapper {
         }
         prosecutionCase.setProsecutionCaseIdentifier(prosecutionCaseIdentifierJPAMapper.toJPA(pojo.getProsecutionCaseIdentifier()));
 
+        prosecutionCase.setIsCivil(pojo.getIsCivil());
+        prosecutionCase.setGroupId(pojo.getGroupId());
+        prosecutionCase.setIsGroupMember(pojo.getIsGroupMember());
+        prosecutionCase.setIsGroupMaster(pojo.getIsGroupMaster());
         prosecutionCase.setOriginatingOrganisation(pojo.getOriginatingOrganisation());
         prosecutionCase.setInitiationCode(pojo.getInitiationCode());
         prosecutionCase.setCaseStatus(pojo.getCaseStatus());
@@ -78,6 +82,10 @@ public class ProsecutionCaseJPAMapper {
 
         final uk.gov.justice.core.courts.ProsecutionCase.Builder prosecutionCase = uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase()
                 .withId(entity.getId().getId())
+                .withIsCivil(entity.getIsCivil())
+                .withGroupId(entity.getGroupId())
+                .withIsGroupMember(entity.getIsGroupMember())
+                .withIsGroupMaster(entity.getIsGroupMaster())
                 .withOriginatingOrganisation(entity.getOriginatingOrganisation())
                 .withInitiationCode(entity.getInitiationCode())
                 .withCaseStatus(entity.getCaseStatus())

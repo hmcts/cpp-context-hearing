@@ -51,6 +51,13 @@
             "$ref": "#/definitions/courtApplicationSummary"
           }
         },
+        "isGroupProceedings": {
+          "description": "The hearing is a logical grouping of cases when it is true",
+          "type": "boolean"
+        },
+        "numberOfGroupCases": {
+          "type": "integer"
+        },
         "prosecutionCaseSummaries": {
           "type": "array",
           "minItems": 1,
@@ -68,6 +75,18 @@
         },
         "prosecutionCaseIdentifier": {
           "$ref": "http://justice.gov.uk/core/courts/prosecutionCaseIdentifier.json"
+        },
+        "isCivil": {
+          "type": "boolean"
+        },
+        "groupId": {
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+        },
+        "isGroupMember": {
+          "type": "boolean"
+        },
+        "isGroupMaster": {
+          "type": "boolean"
         },
         "defendants": {
           "type": "array",

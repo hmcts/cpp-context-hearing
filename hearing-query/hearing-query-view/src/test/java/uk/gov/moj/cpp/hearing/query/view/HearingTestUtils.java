@@ -53,6 +53,7 @@ public class HearingTestUtils {
     private static final String lexicon = "ABCDEFGHIJKLMNOPQRSTUVWXYZ12345674890";
     private static final Set<String> identifiers = new HashSet<>();
     private static final java.util.Random rand = new java.util.Random();
+    public static final int NUMBER_OF_GROUP_CASES = 1000;
 
     public static Hearing buildHearing() {
         final UUID hearingId = randomUUID();
@@ -190,7 +191,12 @@ public class HearingTestUtils {
     }
 
     public static Hearing populateHearing(final UUID hearingId, final ZonedDateTime startDateTime, final ZonedDateTime endDateTime,
-                                          final Set<ProsecutionCase> cases) {
+                                        final Set<ProsecutionCase> cases) {
+        return populateHearing(hearingId, startDateTime, endDateTime, cases, Boolean.FALSE, 0);
+    }
+
+    public static Hearing populateHearing(final UUID hearingId, final ZonedDateTime startDateTime, final ZonedDateTime endDateTime,
+                                        final Set<ProsecutionCase> cases, final boolean isGroupProceedings, final Integer numberOfGroupCases) {
         final Hearing hearing = new Hearing();
         hearing.setId(hearingId);
         hearing.setProsecutionCases(cases);
@@ -211,6 +217,8 @@ public class HearingTestUtils {
         courtCentre.setRoomName("3-1");
 
         hearing.setCourtCentre(courtCentre);
+        hearing.setIsGroupProceedings(isGroupProceedings);
+        hearing.setNumberOfGroupCases(numberOfGroupCases);
 
         return hearing;
     }
@@ -355,6 +363,21 @@ public class HearingTestUtils {
         prosecutionCase.setId(new HearingSnapshotKey(randomUUID(), hearingId));
         prosecutionCase.setDefendants(defendants);
         prosecutionCase.setProsecutionCaseIdentifier(buildProsecutionCaseIdentifier());
+
+        return prosecutionCase;
+    }
+
+    public static ProsecutionCase buildCivilBulkCase(final UUID hearingId, final Set<Defendant> defendants,
+                                                     final UUID groupId, final Boolean isGroupMember, final Boolean isGroupMaster) {
+        // TODO add more fields
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
+        prosecutionCase.setId(new HearingSnapshotKey(randomUUID(), hearingId));
+        prosecutionCase.setDefendants(defendants);
+        prosecutionCase.setProsecutionCaseIdentifier(buildProsecutionCaseIdentifier());
+        prosecutionCase.setIsCivil(true);
+        prosecutionCase.setGroupId(groupId);
+        prosecutionCase.setIsGroupMember(isGroupMember);
+        prosecutionCase.setIsGroupMaster(isGroupMaster);
 
         return prosecutionCase;
     }

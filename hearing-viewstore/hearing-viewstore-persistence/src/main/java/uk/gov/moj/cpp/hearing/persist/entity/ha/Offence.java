@@ -156,6 +156,12 @@ public class Offence {
     @Column(name = "listing_number")
     private Integer listingNumber;
 
+    @Column(name = "civil_offence_is_exparte")
+    private Boolean civilOffenceIsExparte;
+
+    @Column(name = "civil_offence_is_respondent")
+    private Boolean civilOffenceIsRespondent;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "offence", orphanRemoval = true)
     private Set<ReportingRestriction> reportingRestrictions = new HashSet<>();
 
@@ -525,5 +531,21 @@ public class Offence {
 
     public void setListingNumber(final Integer listingNumber) {
         this.listingNumber = listingNumber;
+    }
+
+    public Boolean getCivilOffenceIsExparte() {
+        return civilOffenceIsExparte;
+    }
+
+    public void setCivilOffenceIsExparte(Boolean civilOffenceIsExparte) {
+        this.civilOffenceIsExparte = civilOffenceIsExparte;
+    }
+
+    public Boolean getCivilOffenceIsRespondent() {
+        return civilOffenceIsRespondent;
+    }
+
+    public void setCivilOffenceIsRespondent(Boolean civilOffenceIsRespondent) {
+        this.civilOffenceIsRespondent = civilOffenceIsRespondent;
     }
 }

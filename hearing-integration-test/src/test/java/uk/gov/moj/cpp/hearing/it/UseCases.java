@@ -124,6 +124,7 @@ import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -221,19 +222,26 @@ public class UseCases {
                     .withPayload(initiateHearing)
                     .executeSuccessfully();
 
-            publicEventTopic.waitFor();
-            publicEventTopic.close();
-            BeanMatcher<HearingDetailsResponse> resultMatcher = isBean(HearingDetailsResponse.class);
-            final List<ProsecutionCase> prosecutionCases = hearing.getProsecutionCases();
-            if (prosecutionCases != null && !prosecutionCases.isEmpty()) {
+        publicEventTopic.waitFor();
+        publicEventTopic.close();
+        BeanMatcher<HearingDetailsResponse> resultMatcher = isBean(HearingDetailsResponse.class);
+        final List<ProsecutionCase> prosecutionCases = hearing.getProsecutionCases();
+        if (isNotEmpty(prosecutionCases)) {
+            if (nonNull(hearing.getIsGroupProceedings()) && hearing.getIsGroupProceedings()) {
+                ProsecutionCase masterProsecutionCase = hearing.getProsecutionCases().stream()
+                        .filter(prosecutionCase -> prosecutionCase.getIsGroupMaster().equals(true))
+                        .findFirst().get();
                 resultMatcher.with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
-                        .with(Hearing::getProsecutionCases, getProsecutionCasesMatcher(prosecutionCases))
-                );
+                        .with(Hearing::getProsecutionCases, getProsecutionCasesMatcher(Arrays.asList(masterProsecutionCase))));
+
+            } else {
+                resultMatcher.with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getProsecutionCases, getProsecutionCasesMatcher(prosecutionCases)));
             }
-            Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, 0, resultMatcher);
+        }
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, 0, resultMatcher);
 
-            return initiateHearing;
-
+        return initiateHearing;
     }
 
     private static Matcher<Iterable<ProsecutionCase>> getProsecutionCasesMatcher(final List<ProsecutionCase> prosecutionCases) {
@@ -1326,6 +1334,24 @@ public class UseCases {
 
     }
 
+    public static void removeCaseFromGroupCases(final UUID groupId, final UUID masterCaseId, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) throws Exception {
+        final String eventName = "public.progression.case-removed-from-group-cases";
+        final JsonObjectBuilder jsonObjectBuilder = createObjectBuilder()
+                .add("groupId", groupId.toString())
+                .add("masterCaseId", masterCaseId.toString())
+                .add("removedCase", objectToJsonObject(removedCase));
+
+        if (nonNull(newGroupMaster)) {
+            jsonObjectBuilder.add("newGroupMaster", objectToJsonObject(newGroupMaster));
+        }
+
+        sendMessage(
+                getPublicTopicInstance().createProducer(),
+                eventName,
+                jsonObjectBuilder.build(),
+                metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
+    }
+
     public static void changeNextHearingDate(final UUID seedingHearingId, final UUID hearingId, final ZonedDateTime nextHearingStartDate) throws Exception {
 
         final String eventName = "public.events.listing.next-hearing-day-changed";
@@ -1381,7 +1407,8 @@ public class UseCases {
 
     }
 
-    private static void callCommand(final RequestSpecification requestSpec, final UUID hearingId, final List<ProvisionalHearingSlotInfo> hearingSlots, final String payload) throws IOException {
+    private static void callCommand(final RequestSpecification requestSpec, final UUID hearingId, final List<ProvisionalHearingSlotInfo> hearingSlots, final String payload)
+        throws IOException {
         final String commandPayloadString = getStringFromResource(payload)
                 .replace("UUID1", hearingSlots.get(0).getCourtScheduleId().toString())
                 .replace("UUID2", hearingSlots.get(1).getCourtScheduleId().toString())
