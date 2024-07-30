@@ -167,7 +167,7 @@ public class CaseTimelineIT extends AbstractIT {
     }
 
     @Test
-    public void shouldFetchDefndantCorrespondingToCaseId() throws Exception {
+    public void shouldFetchDefendantCorrespondingToCaseId() {
         final UUID groupId = randomUUID();
         final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = getUuidMapForCivilCaseStructure(3);
         final Iterator<UUID> iterator = caseStructure.keySet().iterator();
