@@ -686,7 +686,6 @@ public class HearingQueryViewTest {
         }
 
         when(reusableInfoService.getCaseDetailReusableInformation(anyList(), anyList(), anyMap())).thenReturn(new ArrayList(asList(promptData)));
-        when(reusableInfoService.getApplicationDetailReusableInformation(anyCollection(),  anyList())).thenReturn(asList(applicationPromptData));
         when(reusableInfoService.getViewStoreReusableInformation(anyList(), anyList())).thenReturn(reusableInfo);
         when(hearingService.getHearingDomainById(hearingId)).thenReturn(Optional.of(hearing));
 
@@ -698,6 +697,66 @@ public class HearingQueryViewTest {
         assertThat(reusablePrompts.size(), is(2));
         assertThat(reusableResults.size(), is(1));
     }
+
+    @Test
+    public void shouldGetApplicationProsecutorReusableInformation() {
+
+        final UUID promptId = randomUUID();
+        final List<Prompt> resultPrompts = prepareResultPromptsData(promptId);
+
+        final UUID masterDefendantId = UUID.fromString("2e576a1b-2c62-476d-a556-4c24d6bbc1a2");
+        final UUID hearingId = randomUUID();
+        final Hearing hearing = Hearing.hearing().withId(hearingId).withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                .withDefendants(asList(Defendant.defendant().withId(randomUUID()).withMasterDefendantId(masterDefendantId).build())).build()))
+                .withCourtApplications(singletonList(CourtApplication.courtApplication()
+
+                        .build()))
+                .build();
+        final JsonObject promptData = createObjectBuilder()
+                .add("value", "Brent Borough Council")
+                .add("masterDefendantId", masterDefendantId.toString())
+                .add("promptRef", "designatedLocalAuthority")
+                .build();
+        final JsonObject applicationPromptData = createObjectBuilder()
+                .add("value", "APP Brent Borough Council")
+                .add("masterDefendantId", masterDefendantId.toString())
+                .add("promptRef", "APP designatedLocalAuthority")
+                .build();
+        final JsonObject applicationPromptData2= createObjectBuilder()
+                .add("value", "APP Brent Borough Council")
+                .add("prosecutortobenotifiedAddress1", "abc")
+                .add("promptRef", "prosecutortobenotified")
+                .build();
+        final JsonEnvelope query = envelopeFrom(
+                metadataBuilder().withId(randomUUID()).withName("hearing.query.reusable-info"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, String.valueOf(hearingId))
+                        .build());
+        final Map<Defendant, List<JsonObject>> caseDetailInfo = new HashMap<>();
+        final Defendant defendant = Defendant.defendant().withId(randomUUID()).withMasterDefendantId(masterDefendantId).build();
+        caseDetailInfo.put(defendant, asList(promptData));
+        JsonObject reusableInfo = null;
+        try {
+            JsonNode payload = objectMapper.readTree(FileUtil.getPayload("reusable-info-prosecutor-and-defendant.json"));
+            reusableInfo = objectMapper.treeToValue(payload, JsonObject.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        when(reusableInfoService.getCaseDetailReusableInformation(anyList(), anyList(), anyMap())).thenReturn(new ArrayList(asList(promptData)));
+        when(reusableInfoService.getApplicationDetailReusableInformation(anyCollection(),  anyList())).thenReturn(asList(applicationPromptData, applicationPromptData2));
+        when(reusableInfoService.getViewStoreReusableInformation(anyList(), anyList())).thenReturn(reusableInfo);
+        when(hearingService.getHearingDomainById(hearingId)).thenReturn(Optional.of(hearing));
+
+        final JsonObject result = target.getReusableInformation(query, resultPrompts, emptyMap()).payloadAsJsonObject();
+        JsonArray reusablePrompts = result.getJsonArray("reusablePrompts");
+        JsonArray reusableResults = result.getJsonArray("reusableResults");
+
+        verify(reusableInfoService).getApplicationDetailReusableInformation(anyCollection(),  anyList());
+        assertThat(reusablePrompts.size(), is(3));
+        assertThat(reusableResults.size(), is(1));
+    }
+
 
     @Test
     public void shouldThrowRuntimeExceptionWhenHearingNotFound() {
