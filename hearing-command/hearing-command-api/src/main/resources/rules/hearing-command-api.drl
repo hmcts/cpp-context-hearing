@@ -112,7 +112,7 @@ rule "Command - API - Action - hearing.add-defence-counsel"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.add-defence-counsel");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers","Defence Users","Advocates","Court Associate", "Defence Lawyers", "Court Administrators"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers","Defence Users","Advocates","Court Associate", "Defence Lawyers", "Court Administrators", "Non CPS Prosecutors"));
   then
     $outcome.setSuccess(true);
 end

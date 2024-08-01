@@ -150,7 +150,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToAddDefenceCounsel() {
         final Action action = createActionFor(ACTION_NAME_ADD_DEFENCE_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks", "Legal Advisers","Defence Users","Advocates", "Court Associate", "Defence Lawyers", "Court Administrators"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks", "Legal Advisers","Defence Users","Advocates", "Court Associate", "Defence Lawyers", "Court Administrators", "Non CPS Prosecutors"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
