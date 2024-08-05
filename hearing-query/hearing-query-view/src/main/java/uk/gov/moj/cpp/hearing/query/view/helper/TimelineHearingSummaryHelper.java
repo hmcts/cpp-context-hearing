@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.helper;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
@@ -79,7 +80,7 @@ public class TimelineHearingSummaryHelper {
         }
 
         setHearingOutcome(hearing, crackedIneffectiveTrial, timelineHearingSummaryBuilder);
-        if (Boolean.TRUE.equals(hearing.getIsBoxHearing())) {
+        if (TRUE.equals(hearing.getIsBoxHearing())) {
             timelineHearingSummaryBuilder.withIsBoxHearing(hearing.getIsBoxHearing());
         }
 
@@ -139,22 +140,26 @@ public class TimelineHearingSummaryHelper {
     }
 
     private List<uk.gov.moj.cpp.hearing.query.view.response.Defendant> getDefendants(final Hearing hearing, final UUID caseId) {
-        if (nonNull(caseId)) {
+        if (nonNull(caseId) && isGroupCivilCaseHearing(hearing)) {
             return hearing.getProsecutionCases()
-                .stream()
-                .filter(pCase -> nonNull(pCase.getId()) && pCase.getId().getId().equals(caseId))
-                .map(ProsecutionCase::getDefendants)
-                .flatMap(Collection::stream)
-                .map(this::getDefendant)
-                .collect(toList());
-        }else{
+                    .stream()
+                    .filter(pCase -> nonNull(pCase.getId()) && pCase.getId().getId().equals(caseId))
+                    .map(ProsecutionCase::getDefendants)
+                    .flatMap(Collection::stream)
+                    .map(this::getDefendant)
+                    .collect(toList());
+        } else {
             return hearing.getProsecutionCases()
-                .stream()
-                .map(ProsecutionCase::getDefendants)
-                .flatMap(Collection::stream)
-                .map(this::getDefendant)
-                .collect(toList());
+                    .stream()
+                    .map(ProsecutionCase::getDefendants)
+                    .flatMap(Collection::stream)
+                    .map(this::getDefendant)
+                    .collect(toList());
         }
+    }
+
+    private boolean isGroupCivilCaseHearing(final Hearing hearing) {
+        return nonNull(hearing.getIsGroupProceedings()) && TRUE.equals(hearing.getIsGroupProceedings()) && hearing.getNumberOfGroupCases() > 1;
     }
 
     private Optional<String> getApplicantName(final CourtApplicationParty applicant) {
