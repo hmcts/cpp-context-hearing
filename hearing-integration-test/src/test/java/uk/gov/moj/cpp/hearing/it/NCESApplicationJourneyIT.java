@@ -36,8 +36,7 @@ public class NCESApplicationJourneyIT extends AbstractIT {
                         withJsonPath("$.applicationType", is("APPEAL")),
                         withJsonPath("$.masterDefendantId", is(masterDefendantId.toString())),
                         withJsonPath("$.listingDate", notNullValue()),
-                        withJsonPath("$.caseUrns[0]", is("prosecutionAuthorityReference")),
-                        withJsonPath("$.hearingCourtCentreName", notNullValue())
+                        withJsonPath("$.caseUrns[0]", is("prosecutionAuthorityReference"))
                 )));
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(),

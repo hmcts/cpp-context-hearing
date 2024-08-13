@@ -43,8 +43,6 @@ public class ResultLine {
     private final List<UUID> parentResultLineIds;
     private final String amendmentReason;
     private final String amendmentsLog;
-    private final String category;
-    private final Boolean nonStandaloneAncillaryResult;
 
     public ResultLine(final LocalDate orderedDate, final LocalDate sharedDate, final UUID resultLineId, final UUID offenceId,
                       final UUID defendantId, final UUID masterDefendantId, final UUID resultDefinitionId, final List<Prompt> prompts, final Level level,
@@ -52,7 +50,7 @@ public class ResultLine {
                       final Boolean shadowListed, final String draftResult, final UUID applicationId, final UUID caseId, final ZonedDateTime amendmentDate,
                       final UUID amendmentReasonId, final String shortCode, final DelegatedPowers fourEyesApproval,
                       final LocalDate approvedDate, final Boolean isDeleted, final List<UUID> childResultLineIds,
-                      final List<UUID> parentResultLineIds, final String amendmentReason, final String amendmentsLog, final String category, final boolean nonStandaloneAncillaryResult) {
+                      final List<UUID> parentResultLineIds, final String amendmentReason, final String amendmentsLog) {
         this.orderedDate = orderedDate;
         this.sharedDate = sharedDate;
         this.resultLineId = resultLineId;
@@ -80,8 +78,6 @@ public class ResultLine {
         this.parentResultLineIds = parentResultLineIds;
         this.amendmentReason = amendmentReason;
         this.amendmentsLog = amendmentsLog;
-        this.category = category;
-        this.nonStandaloneAncillaryResult = nonStandaloneAncillaryResult;
     }
 
     public LocalDate getOrderedDate() {
@@ -192,14 +188,6 @@ public class ResultLine {
         return amendmentsLog;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
-    public boolean isNonStandaloneAncillaryResult() {
-        return nonStandaloneAncillaryResult;
-    }
-
     public static class Builder {
 
         private LocalDate orderedDate;
@@ -229,14 +217,12 @@ public class ResultLine {
         private List<UUID> childResultLineIds;
         private List<UUID> parentResultLineIds;
         private String amendmentsLog;
-        private String category;
-        private Boolean nonStandaloneAncillaryResult;
 
         public ResultLine build() {
             return new ResultLine(orderedDate, sharedDate, resultLineId, offenceId, defendantId, masterDefendantId,resultDefinitionId,
                     prompts, level, delegatedPowers, resultLabel, isModified, isComplete, shadowListed, draftResult,
                     applicationId, caseId, amendmentDate, amendmentReasonId, shortCode, fourEyesApproval, approvedDate,
-                    isDeleted, childResultLineIds, parentResultLineIds, amendmentReason, amendmentsLog, category, nonStandaloneAncillaryResult);
+                    isDeleted, childResultLineIds, parentResultLineIds, amendmentReason, amendmentsLog);
         }
 
         public ResultLine.Builder withOrderedDate(final LocalDate orderedDate) {
@@ -374,14 +360,5 @@ public class ResultLine {
             return this;
         }
 
-        public Builder withNonStandaloneAncillaryResult(final boolean nonStandaloneAncillaryResult) {
-            this.nonStandaloneAncillaryResult = nonStandaloneAncillaryResult;
-            return this;
-        }
-
-        public Builder withCategory(final String category) {
-            this.category = category;
-            return this;
-        }
     }
 }

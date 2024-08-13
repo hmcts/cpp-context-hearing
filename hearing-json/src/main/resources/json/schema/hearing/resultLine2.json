@@ -105,12 +105,6 @@
     },
     "amendmentsLog": {
       "type": "string"
-    },
-    "category": {
-      "type": "string"
-    },
-    "nonStandaloneAncillaryResult": {
-      "type": "boolean"
     }
   },
   "required": [

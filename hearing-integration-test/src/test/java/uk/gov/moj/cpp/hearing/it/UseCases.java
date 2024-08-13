@@ -39,7 +39,6 @@ import java.io.IOException;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantCase;
 import uk.gov.justice.core.courts.Gender;
@@ -52,7 +51,6 @@ import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
-import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.RespondentCounsel;
@@ -154,24 +152,24 @@ public class UseCases {
 
     public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
-        return initiateHearing(requestSpec, initiateHearing, true, true, true, false, false, false);
+        return initiateHearing(requestSpec, initiateHearing, true, true, true, false, false);
     }
 
     public static InitiateHearingCommand initiateHearingWithoutBreachApplication(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
-        return initiateHearing(requestSpec, initiateHearing, false, false, true, false, false, false);
+        return initiateHearing(requestSpec, initiateHearing, false, false, true, false, false);
     }
 
     public static InitiateHearingCommand initiateHearingWithNsp(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
-        return initiateHearing(requestSpec, initiateHearing, false, false, true, false, true, false);
+        return initiateHearing(requestSpec, initiateHearing, false, false, true, false, true);
     }
 
     public static InitiateHearingCommand initiateHearingForApplication(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
-        return initiateHearing(requestSpec, initiateHearing, true, true, false, false, false, false);
+        return initiateHearing(requestSpec, initiateHearing, true, true, false, false, false);
     }
 
-    public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, final boolean includeApplicationCases, final boolean includeApplicationOrder, final boolean includeProsecutionCase, final boolean includeMasterDefandantInSubject, final boolean isNsp, final boolean includeProsecutingAuthority) {
+    public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, final boolean includeApplicationCases, final boolean includeApplicationOrder, final boolean includeProsecutionCase, final boolean includeMasterDefandantInSubject, final boolean isNsp) {
 
         Hearing hearing = initiateHearing.getHearing();
         final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
@@ -187,50 +185,28 @@ public class UseCases {
             if (includeMasterDefandantInSubject) {
                 final UUID masterDefendantId = randomUUID();
 
-            hearing.getCourtApplications().get(0).getSubject().setMasterDefendant(MasterDefendant.masterDefendant()
-                    .withMasterDefendantId(masterDefendantId)
-                    .withDefendantCase(Arrays.asList(DefendantCase.defendantCase()
-                            .withDefendantId(masterDefendantId)
-                            .withCaseId(hearing.getProsecutionCases().get(0).getId())
-                            .withCaseReference(hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference())
-                            .build()))
-                    .withPersonDefendant(PersonDefendant.personDefendant()
-                            .withPersonDetails(Person.person()
-                                    .withLastName(STRING.next())
-                                    .withGender(Gender.MALE)
-                                    .build())
-                            .withDriverNumber("DVLA12345")
-                            .build())
-                    .build());
-        }
-        if (nonNull(hearing.getCourtApplications()) && nonNull(hearing.getCourtApplications().get(0))) {
-            hearing.getCourtApplications().get(0).setHearingIdToBeVacated(UUID.randomUUID());
-
-            if (includeProsecutingAuthority) {
-                Address address = Address.address().withAddress1("address1")
-                        .withAddress2("address2")
-                        .withPostcode("CB3 0GU").build();
-                ContactNumber contact = ContactNumber.contactNumber().withPrimaryEmail("James.Thomas@gmail.com").build();
-                ProsecutingAuthority prosecutingAuthority = ProsecutingAuthority.prosecutingAuthority()
-                        .withProsecutionAuthorityId(randomUUID())
-                        .withProsecutionAuthorityCode("ABC")
-                        .withName("ABC Org")
-                        .withAddress(address)
-                        .withContact(contact)
-                        .build();
-                CourtApplicationParty party = CourtApplicationParty.courtApplicationParty()
-                        .withProsecutingAuthority(prosecutingAuthority)
-                        .withId(randomUUID())
-                        .withSummonsRequired(false)
-                        .withNotificationRequired(false)
-                        .build();
-                hearing.getCourtApplications().get(0).setRespondents(Arrays.asList(party));
+                hearing.getCourtApplications().get(0).getSubject().setMasterDefendant(MasterDefendant.masterDefendant()
+                        .withMasterDefendantId(masterDefendantId)
+                        .withDefendantCase(Arrays.asList(DefendantCase.defendantCase()
+                                .withDefendantId(masterDefendantId)
+                                .withCaseId(hearing.getProsecutionCases().get(0).getId())
+                                .withCaseReference(hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference())
+                                .build()))
+                        .withPersonDefendant(PersonDefendant.personDefendant()
+                                .withPersonDetails(Person.person()
+                                        .withLastName(STRING.next())
+                                        .withGender(Gender.MALE)
+                                        .build())
+                                .withDriverNumber("DVLA12345")
+                                .build())
+                        .build());
             }
-
-        }
-        if (!includeProsecutionCase) {
-            hearing.setProsecutionCases(null);
-        }
+            if (nonNull(hearing.getCourtApplications()) && nonNull(hearing.getCourtApplications().get(0))) {
+                hearing.getCourtApplications().get(0).setHearingIdToBeVacated(UUID.randomUUID());
+            }
+            if (!includeProsecutionCase) {
+                hearing.setProsecutionCases(null);
+            }
 
             if (isNsp) {
                 hearing.getProsecutionCases().stream().forEach(prosecutionCase -> prosecutionCase.getProsecutionCaseIdentifier().setAddress(Address.address()
@@ -769,9 +745,7 @@ public class UseCases {
                         resultLineIn.getParentResultLineIds(),
                         target.getShadowListed(),
                         target.getDraftResult(),
-                        "AMENDMENTS_LOG",
-                        "I",
-                        false));
+                        "AMENDMENTS_LOG"));
     }
 
     private static Stream<SharedResultsCommandResultLineV2> sharedResultsResultLinePerDay(final Target target, final UUID caseId) {
@@ -805,9 +779,7 @@ public class UseCases {
                         resultLineIn.getParentResultLineIds(),
                         target.getShadowListed(),
                         target.getDraftResult(),
-                        "AMENDMENTS_LOG",
-                        "A",
-                        true));
+                        "AMENDMENTS_LOG"));
 
     }
 

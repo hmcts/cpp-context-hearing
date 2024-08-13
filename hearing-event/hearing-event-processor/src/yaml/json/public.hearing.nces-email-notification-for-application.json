@@ -2,6 +2,5 @@
   "applicationType" : "REOPEN",
   "masterDefendantId" : "16b09d9f-5f60-3ace-be27-a6efa7ab3907",
   "listingDate" : "2018-05-19T15:45:21.671Z",
-  "caseUrns": ["REF1"],
-  "hearingCourtCentreName": "Croydon Crown Court"
+  "caseUrns": ["REF1"]
 }

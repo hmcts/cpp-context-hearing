@@ -5,14 +5,12 @@ import java.util.UUID;
 public class ReusableInformation<T> {
     public enum IdType{
         DEFENDANT,
-        CASE,
-        APPLICATION
+        CASE
     }
     private T value;
     private String promptRef;
     private UUID masterDefendantId;
     private UUID caseId;
-    private UUID applicationId;
     private Integer cacheable;
     private String cacheDataPath;
 
@@ -27,9 +25,6 @@ public class ReusableInformation<T> {
                 break;
             case CASE:
                 this.caseId = id;
-                break;
-            case APPLICATION:
-                this.applicationId = id;
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + idType);
@@ -50,10 +45,6 @@ public class ReusableInformation<T> {
 
     public UUID getCaseId() {
         return caseId;
-    }
-
-    public UUID getApplicationId() {
-        return applicationId;
     }
 
     public Integer getCacheable() {

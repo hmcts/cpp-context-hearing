@@ -27,7 +27,7 @@ import java.util.UUID;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class ReusableInfoQueryIT extends AbstractIT {
+public class ReusableInfoQueryIT extends AbstractIT{
 
     @BeforeClass
     public static void setupPerClass() {
@@ -36,7 +36,7 @@ public class ReusableInfoQueryIT extends AbstractIT {
     }
 
     @Test
-    public void shouldNotReturnReusableInfoForMajorCreditor() {
+   public void shouldNotReturnReusableInfoForMajorCreditor(){
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -57,7 +57,7 @@ public class ReusableInfoQueryIT extends AbstractIT {
     }
 
     @Test
-    public void shouldReturnReusableInfoForMinorCreditor() {
+    public void shouldReturnReusableInfoForMinorCreditor(){
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearingWithNsp(getRequestSpec(), standardInitiateHearingTemplate()));
         final UUID caseId = hearingOne.getHearing().getProsecutionCases().get(0).getId();
@@ -90,9 +90,9 @@ public class ReusableInfoQueryIT extends AbstractIT {
 
 
     @Test
-    public void shouldReturnReusableInfoForApplication() {
+    public void shouldReturnReusableInfoForApplication(){
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate(), true, true, true, true, false, true));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate(),true, true, true, true, false));
 
         Queries.getHearingPollForMatch(hearingOne.getHearing().getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -103,20 +103,12 @@ public class ReusableInfoQueryIT extends AbstractIT {
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
-                                withJsonPath("$.reusablePrompts", hasSize(4)),
+                                withJsonPath("$.reusablePrompts", hasSize(3)),
                                 withJsonPath("$.reusablePrompts[0].promptRef", is("defendantDrivingLicenceNumber")),
                                 withJsonPath("$.reusablePrompts[1].promptRef", is("defendantDrivingLicenceNumber")),
                                 withJsonPath("$.reusablePrompts[1].value", is("")),
-                                withJsonPath("$.reusablePrompts[2].applicationId", is(hearingOne.getCourtApplication().getId().toString())),
-                                withJsonPath("$.reusablePrompts[2].promptRef", is("prosecutortobenotified")),
-                                withJsonPath("$.reusablePrompts[2].type", is("NAMEADDRESS")),
-                                withJsonPath("$.reusablePrompts[2].value.prosecutortobenotifiedOrganisationName", is("ABC Org")),
-                                withJsonPath("$.reusablePrompts[2].value.prosecutortobenotifiedAddress1", is("address1")),
-                                withJsonPath("$.reusablePrompts[2].value.prosecutortobenotifiedAddress2", is("address2")),
-                                withJsonPath("$.reusablePrompts[2].value.prosecutortobenotifiedPostCode", is("CB3 0GU")),
-                                withJsonPath("$.reusablePrompts[2].value.prosecutortobenotifiedEmailAddress1", is("James.Thomas@gmail.com")),
-                                withJsonPath("$.reusablePrompts[3].promptRef", is("defendantDrivingLicenceNumber")),
-                                withJsonPath("$.reusablePrompts[3].value", is("DVLA12345"))
+                                withJsonPath("$.reusablePrompts[2].promptRef", is("defendantDrivingLicenceNumber")),
+                                withJsonPath("$.reusablePrompts[2].value", is("DVLA12345"))
                         ))
                 );
     }

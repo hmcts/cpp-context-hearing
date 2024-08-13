@@ -45,8 +45,6 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
     private boolean shadowListed;
     private String draftResult;
     private String amendmentsLog;
-    private String category;
-    private boolean nonStandaloneAncillaryResult;
 
     @SuppressWarnings({"squid:S2384", "squid:S1067"})
     @JsonCreator
@@ -77,9 +75,7 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
             @JsonProperty("parentResultLineIds") final List<UUID> parentResultLineIds,
             @JsonProperty("shadowListed") final boolean shadowListed,
             @JsonProperty("draftResult") final String draftResult,
-            @JsonProperty("amendmentsLog") final String amendmentsLog,
-            @JsonProperty("category") final String category,
-            @JsonProperty("nonStandaloneAncillaryResult") final boolean nonStandaloneAncillaryResult
+            @JsonProperty("amendmentsLog") final String amendmentsLog
     ) {
         this.shortCode = shortCode;
         this.delegatedPowers = delegatedPowers;
@@ -108,8 +104,6 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
         this.shadowListed = shadowListed;
         this.draftResult = draftResult;
         this.amendmentsLog = amendmentsLog;
-        this.category = category;
-        this.nonStandaloneAncillaryResult = nonStandaloneAncillaryResult;
     }
 
     public String getShortCode() {
@@ -331,22 +325,6 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
         this.amendmentsLog = amendmentsLog;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(final String category) {
-        this.category = category;
-    }
-
-    public boolean getNonStandaloneAncillaryResult() {
-        return nonStandaloneAncillaryResult;
-    }
-
-    public void setNonStandaloneAncillaryResult(final boolean nonStandaloneAncillaryResult) {
-        this.nonStandaloneAncillaryResult = nonStandaloneAncillaryResult;
-    }
-
     public static Builder sharedResultsCommandResultLine(){
         return new Builder();
     }
@@ -379,8 +357,6 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
         private boolean shadowListed;
         private String draftResult;
         private String amendmentsLog;
-        private String category;
-        private boolean nonStandaloneAncillaryResult;
 
         public Builder withShortCode(final String shortCode) {
             this.shortCode = shortCode;
@@ -515,16 +491,6 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
             return this;
         }
 
-        public Builder withNonStandaloneAncillaryResult(final boolean nonStandaloneAncillaryResult) {
-            this.nonStandaloneAncillaryResult = nonStandaloneAncillaryResult;
-            return this;
-        }
-
-        public Builder withCategory(final String category) {
-            this.category = category;
-            return this;
-        }
-
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -560,14 +526,12 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
                     Objects.equals(childResultLineIds, builder.childResultLineIds) &&
                     Objects.equals(parentResultLineIds, builder.parentResultLineIds) &&
                     Objects.equals(draftResult, builder.draftResult) &&
-                    Objects.equals(amendmentsLog, builder.amendmentsLog) &&
-                    Objects.equals(category, builder.category)&&
-                    Objects.equals(nonStandaloneAncillaryResult, builder.nonStandaloneAncillaryResult);
+                    Objects.equals(amendmentsLog, builder.amendmentsLog);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(shortCode, delegatedPowers, orderedDate, sharedDate, resultLineId, offenceId, defendantId, masterDefendantId, resultDefinitionId, prompts, resultLabel, level, isModified, isComplete, applicationId, caseId, amendmentDate, amendmentReasonId, amendmentReason, fourEyesApproval, approvedDate, isDeleted, childResultLineIds, parentResultLineIds, shadowListed, draftResult, amendmentsLog, category, nonStandaloneAncillaryResult);
+            return Objects.hash(shortCode, delegatedPowers, orderedDate, sharedDate, resultLineId, offenceId, defendantId, masterDefendantId, resultDefinitionId, prompts, resultLabel, level, isModified, isComplete, applicationId, caseId, amendmentDate, amendmentReasonId, amendmentReason, fourEyesApproval, approvedDate, isDeleted, childResultLineIds, parentResultLineIds, shadowListed, draftResult, amendmentsLog);
         }
 
         public SharedResultsCommandResultLineV2 build() {
@@ -599,9 +563,7 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
                     shadowListed,
 
                     draftResult,
-                    amendmentsLog,
-                    category,
-                    nonStandaloneAncillaryResult
+                    amendmentsLog
             );
         }
     }

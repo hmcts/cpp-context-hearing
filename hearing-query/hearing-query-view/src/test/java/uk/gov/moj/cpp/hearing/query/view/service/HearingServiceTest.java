@@ -1755,8 +1755,6 @@ public class HearingServiceTest {
                 .withSharedDate(sharedDate)
                 .withIsDeleted(false)
                 .withShortCode(shortCode)
-                .withCategory("I")
-                .withNonStandaloneAncillaryResult(false)
                 .build();
         when(hearingRepository.findTargetsByFilters(hearingId, hearingDate.toString()))
                 .thenReturn(targetList);

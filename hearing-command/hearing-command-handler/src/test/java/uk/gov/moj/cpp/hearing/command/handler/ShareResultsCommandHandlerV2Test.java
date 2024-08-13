@@ -287,9 +287,7 @@ public class ShareResultsCommandHandlerV2Test {
                         parentResultLineIds,
                         targetDraft.getShadowListed(),
                         targetDraft.getDraftResult(),
-                        "",
-                        "I",
-                        false
+                        ""
                 )
         ));
 
