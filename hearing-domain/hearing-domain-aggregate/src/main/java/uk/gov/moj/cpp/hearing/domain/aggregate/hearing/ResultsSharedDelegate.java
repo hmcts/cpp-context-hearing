@@ -369,7 +369,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .withDraftResult(target2.getDraftResult())
                 .withamendmentsLog(resultLine2.getAmendmentsLog())
                 .withCategory(resultLine2.getCategory())
-                .withNonStandaloneAncillaryResult(resultLine2.getNonStandaloneAncillaryResult())
+                .withNonStandaloneAncillaryResult(nonNull(resultLine2.getNonStandaloneAncillaryResult()) && resultLine2.getNonStandaloneAncillaryResult())
                 .build();
     }
 
