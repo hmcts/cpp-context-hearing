@@ -22,7 +22,6 @@ import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target2;
-
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
@@ -41,7 +40,6 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVacatedTrialDetailUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
-
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 
 import java.io.Serializable;
@@ -62,7 +60,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S3655", "squid:S1871","PMD:BeanMembersShouldSerialize"})
 public class HearingDelegate implements Serializable {
 
-    private static final long serialVersionUID = 6948738797633524094L;
+    private static final long serialVersionUID = 6948738797633524093L;
 
     private final HearingAggregateMomento momento;
 
@@ -121,10 +119,6 @@ public class HearingDelegate implements Serializable {
 
         if (nonNull(offence.getVerdict())) {
             this.momento.getVerdicts().put(offenceId, offence.getVerdict());
-        }
-
-        if(nonNull(offence.getIndicatedPlea())) {
-            this.momento.getIndicatedPlea().put(offenceId, offence.getIndicatedPlea());
         }
     }
 

@@ -19,6 +19,7 @@ public abstract class ReusableInformationBaseConverter<T> {
     private static final String PROMPT_REF = "promptRef";
     private static final String MASTER_DEFENDANT_ID = "masterDefendantId";
     private static final String CASE_ID = "caseId";
+    private static final String APPLICATION_ID = "applicationId";
 
     protected JsonObjectBuilder convert(final ReusableInformation<T> reusableInformation) {
         final JsonObjectBuilder builder = createObjectBuilder()
@@ -28,6 +29,8 @@ public abstract class ReusableInformationBaseConverter<T> {
                 .add(CACHEABLE, reusableInformation.getCacheable());
         ofNullable(reusableInformation.getMasterDefendantId()).ifPresent(id -> builder.add(MASTER_DEFENDANT_ID, id.toString()));
         ofNullable(reusableInformation.getCaseId()).ifPresent(id -> builder.add(CASE_ID, id.toString()));
+        ofNullable(reusableInformation.getApplicationId()).ifPresent(id -> builder.add(APPLICATION_ID, id.toString()));
+
         return builder;
     }
 }

@@ -180,7 +180,8 @@ public class InitiateHearingEventProcessorTest {
                                 withJsonPath("$.masterDefendantId", is(masterDefendantId.toString())),
                                 withJsonPath("$.listingDate", is(dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))),
                                 withJsonPath("$.caseUrns[0]", is("caseURN1")),
-                                withJsonPath("$.caseUrns[1]", is("caseURN2"))
+                                withJsonPath("$.caseUrns[1]", is("caseURN2")),
+                                withJsonPath("$.hearingCourtCentreName", is(notNullValue()))
                         ))));
 
     }

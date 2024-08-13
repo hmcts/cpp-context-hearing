@@ -134,6 +134,7 @@ public class InitiateHearingEventProcessor {
                                     .add("masterDefendantId", courtApplication.getSubject().getMasterDefendant().getMasterDefendantId().toString())
                                     .add("listingDate", dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))
                                     .add("caseUrns", createCaseUrns(courtApplication).build())
+                                    .add("hearingCourtCentreName", initiateHearingCommand.getHearing().getCourtCentre().getName())
                                     .build()).withName("public.hearing.nces-email-notification-for-application").withMetadataFrom(event))
                 );
     }

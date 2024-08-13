@@ -364,99 +364,6 @@ public class CoreTestTemplates {
         return result;
     }
 
-    public static Offence.Builder offenceWithIndicatedPlea(final CoreTemplateArguments args, final UUID offenceId, final boolean withConvictionDate) {
-
-        if (args.isMinimumOffence()) {
-            return Offence.offence()
-                    .withId(offenceId)
-                    .withStartDate(PAST_LOCAL_DATE.next())
-                    .withOffenceDefinitionId(randomUUID())
-                    .withOffenceCode(STRING.next())
-                    .withCount(INTEGER.next())
-                    .withWording(STRING.next())
-                    .withOrderIndex(INTEGER.next())
-                    .withIntroducedAfterInitialProceedings(true)
-                    .withIsDiscontinued(true)
-                    .withProceedingsConcluded(true)
-                    .withEndorsableFlag(true)
-                    .withConvictionDate(withConvictionDate ? LocalDate.now().minusDays(2) : null)
-                    .withIndicatedPlea(IndicatedPlea.indicatedPlea().withOffenceId(offenceId)
-                            .withIndicatedPleaValue(IndicatedPleaValue.INDICATED_GUILTY)
-                            .withSource(Source.IN_COURT)
-                            .build())
-                    .withReportingRestrictions(of(ReportingRestriction.reportingRestriction()
-                                    .withId(randomUUID())
-                                    .withLabel(REPORTING_RESTRICTION_LABEL_YES)
-                                    .withJudicialResultId(randomUUID()).build(),
-                            ReportingRestriction.reportingRestriction()
-                                    .withId(randomUUID())
-                                    .withLabel(REPORTING_RESTRICTION_LABEL_SECOND)
-                                    .withJudicialResultId(randomUUID()).build()))
-                    .withOffenceDateCode(args.getOffenceDateCode());
-        }
-
-        final Offence.Builder result = Offence.offence()
-                .withId(offenceId)
-                .withStartDate(PAST_LOCAL_DATE.next())
-                .withEndDate(PAST_LOCAL_DATE.next())
-                .withArrestDate(PAST_LOCAL_DATE.next())
-                .withChargeDate(PAST_LOCAL_DATE.next())
-                .withIndicatedPlea(args.indicatedPlea == null ? null : indicatedPlea(offenceId, args.indicatedPlea).build())
-                .withNotifiedPlea(notifiedPlea(offenceId).build())
-                .withOffenceDefinitionId(randomUUID())
-                .withOffenceTitle(STRING.next())
-                .withOffenceTitleWelsh(STRING.next())
-                .withOffenceCode(STRING.next())
-                .withOffenceFacts(offenceFacts().build())
-                .withOffenceLegislation(STRING.next())
-                .withOffenceLegislationWelsh(STRING.next())
-                .withWording(STRING.next())
-                .withWordingWelsh(STRING.next())
-                .withModeOfTrial("Either Way")
-                .withOrderIndex(INTEGER.next())
-                .withProceedingsConcluded(true)
-                .withIsDiscontinued(true)
-                .withIntroducedAfterInitialProceedings(true)
-                .withLaidDate(PAST_LOCAL_DATE.next())
-                .withListingNumber(INTEGER.next())
-                .withEndorsableFlag(true)
-                .withOffenceDateCode(args.getOffenceDateCode())
-                .withConvictionDate(withConvictionDate ? LocalDate.now().minusDays(2) : null)
-                .withIndicatedPlea(IndicatedPlea.indicatedPlea().withOffenceId(offenceId)
-                        .withIndicatedPleaValue(IndicatedPleaValue.INDICATED_GUILTY)
-                        .withSource(Source.IN_COURT)
-                        .build())
-                .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
-                        .withDaysSpent(INTEGER.next())
-                        .withTimeLimit(PAST_LOCAL_DATE.next())
-                        .withIsCtlExtended(false)
-                        .build())
-                .withReportingRestrictions(of(ReportingRestriction.reportingRestriction()
-                        .withId(randomUUID())
-                        .withJudicialResultId(randomUUID())
-                        .withLabel(REPORTING_RESTRICTION_LABEL_YES)
-                        .withOrderedDate(now())
-                        .build()));
-
-        if (!args.isOffenceCountNull) {
-            result.withCount(INTEGER.next());
-        }
-        if (args.jurisdictionType == JurisdictionType.MAGISTRATES) {
-            final LocalDate convictionDate = PAST_LOCAL_DATE.next();
-            result.withConvictionDate(convictionDate);
-        }
-
-        if (args.convicted) {
-            final LocalDate convictionDate = PAST_LOCAL_DATE.next();
-            result.withConvictionDate(convictionDate);
-        }
-
-        if (args.isAllocationDecision) {
-            result.withAllocationDecision(allocationDecision(offenceId).build());
-        }
-
-        return result;
-    }
     public static Offence.Builder offenceWithPlea(final CoreTemplateArguments args, final UUID offenceId, final boolean withConvictionDate) {
 
         if (args.isMinimumOffence()) {
@@ -801,30 +708,6 @@ public class CoreTestTemplates {
                 .withIsAssociatedByLAA(true);
     }
 
-    public static Defendant.Builder defendantWithOffenceIndicatedPlea(final UUID prosecutionCaseId, final CoreTemplateArguments args, final Pair<UUID, List<UUID>> structure, final boolean withConvictionDate) {
-
-        return Defendant.defendant()
-                .withId(structure.getK())
-                .withMasterDefendantId(args.getDifferentMasterDefendantId() != null ? args.getDifferentMasterDefendantId() : structure.getK())
-                .withProsecutionCaseId(prosecutionCaseId)
-                .withNumberOfPreviousConvictionsCited(INTEGER.next())
-                .withProsecutionAuthorityReference(STRING.next())
-                .withIsYouth(Boolean.TRUE)
-                .withOffences(
-                        structure.getV().stream()
-                                .map(offenceId -> offenceWithIndicatedPlea(args, offenceId, withConvictionDate).build())
-                                .collect(toList())
-                )
-                .withAssociatedPersons(args.isMinimumAssociatedPerson() ? asList(associatedPerson(args).build()) : null)
-                .withDefenceOrganisation(args.isMinimumDefenceOrganisation() ? organisation(args).build() : null)
-                .withPersonDefendant(args.defendantType == PERSON ? personDefendant(args).build() : null)
-                .withLegalEntityDefendant(args.defendantType == ORGANISATION ? legalEntityDefendant(args).build() : null)
-                .withCourtProceedingsInitiated(args.getCourtProceedingsInitiated() != null ? args.getCourtProceedingsInitiated() : ZonedDateTime.now(ZoneOffset.UTC))
-                .withProceedingsConcluded(Boolean.FALSE);
-
-    }
-
-
     public static Defendant.Builder defendantWithOffencePlea(final UUID prosecutionCaseId, final CoreTemplateArguments args, final Pair<UUID, List<UUID>> structure, final boolean withConvictionDate) {
 
         return Defendant.defendant()
@@ -967,28 +850,6 @@ public class CoreTestTemplates {
                 );
     }
 
-    public static ProsecutionCase.Builder prosecutionCaseWithOffenceIndicatedPlea(final CoreTemplateArguments args, final Pair<UUID, Map<UUID, List<UUID>>> structure, final boolean withJudicialResults, final boolean withConvictionDate) {
-
-        return ProsecutionCase.prosecutionCase()
-                .withId(structure.getK())
-                .withProsecutionCaseIdentifier(prosecutionCaseIdentifier(args).build())
-                .withCaseStatus(STRING.next())
-                .withOriginatingOrganisation(STRING.next())
-                .withInitiationCode(RandomGenerator.values(InitiationCode.values()).next())
-                .withStatementOfFacts(STRING.next())
-                .withStatementOfFactsWelsh(STRING.next())
-                .withClassOfCase("Class 1")
-                .withCaseMarkers(buildCaseMarkers())
-                .withDefendants(
-                        structure.getV().entrySet().stream()
-                                .map(entry -> withJudicialResults ? defendantJudicialResults(structure.getK(), args, p(entry.getKey(), entry.getValue())).build() :
-                                        defendantWithOffenceIndicatedPlea(structure.getK(), args, p(entry.getKey(), entry.getValue()), withConvictionDate).build()
-                                )
-                                .collect(toList())
-                );
-    }
-
-
     public static ProsecutionCase.Builder prosecutionCaseWithOffenceVerdict(final CoreTemplateArguments args, final Pair<UUID, Map<UUID, List<UUID>>> structure, final boolean withJudicialResults, final boolean withConvictionDate) {
 
         return ProsecutionCase.prosecutionCase()
@@ -1057,42 +918,6 @@ public class CoreTestTemplates {
                 .withId(hearingTypeId.orElse(fromString("9cc41e45-b594-4ba6-906e-1a4626b08fed")))
                 .withDescription(STRING.next())
                 .withWelshDescription(STRING.next());
-    }
-
-    public static Hearing.Builder hearingWithOffenceIndicatedPlea(final CoreTemplateArguments args, final boolean withJudicialResults, final boolean withConvictionDate) {
-
-        final Hearing.Builder hearingBuilder = Hearing.hearing();
-        CourtCentre courtCentre;
-
-        if (args.hearingLanguage == WELSH) {
-            hearingBuilder.withHearingLanguage(HearingLanguage.WELSH);
-            courtCentre = courtCentreWithArgs("welshCourtRoom").build();
-        } else {
-            hearingBuilder.withHearingLanguage(HearingLanguage.ENGLISH);
-            courtCentre = courtCentre().build();
-        }
-
-        final ZonedDateTime sittingDay = withConvictionDate ? ZonedDateTime.now(ZoneOffset.UTC).minusDays(2) : RandomGenerator.PAST_UTC_DATE_TIME.next();
-
-        hearingBuilder.withId(randomUUID())
-                .withType(hearingType(Optional.empty()).build())
-                .withJurisdictionType(args.jurisdictionType)
-                .withReportingRestrictionReason(STRING.next())
-                .withHearingDays(asList(hearingDay(sittingDay, courtCentre).build()))
-                .withJudiciary(singletonList(judiciaryRole(args).build()))
-                .withDefendantReferralReasons(singletonList(referralReason().build()))
-                .withProsecutionCases(
-                        args.structure.entrySet().stream()
-                                .map(entry -> prosecutionCaseWithOffenceIndicatedPlea(args, p(entry.getKey(), entry.getValue()), withJudicialResults, withConvictionDate).build())
-                                .collect(toList())
-                )
-
-                .withCourtApplications(asList((new HearingFactory().courtApplication().build())))
-                .withCourtCentre(courtCentre)
-                .withIsBoxHearing(args.getIsBoxHearing());
-
-        return hearingBuilder;
-
     }
 
     public static Hearing.Builder hearingWithOffencePlea(final CoreTemplateArguments args, final boolean withJudicialResults, final boolean withConvictionDate) {
@@ -1239,10 +1064,6 @@ public class CoreTestTemplates {
 
     public static Hearing.Builder hearingWithOffencePlea(final CoreTemplateArguments args) {
         return hearingWithOffencePlea(args, false, false);
-    }
-
-    public static Hearing.Builder hearingWithOffenceIndicatedPlea(final CoreTemplateArguments args) {
-        return hearingWithOffenceIndicatedPlea(args, false, false);
     }
 
     public static Hearing.Builder hearingWithOffenceVerdict(final CoreTemplateArguments args) {

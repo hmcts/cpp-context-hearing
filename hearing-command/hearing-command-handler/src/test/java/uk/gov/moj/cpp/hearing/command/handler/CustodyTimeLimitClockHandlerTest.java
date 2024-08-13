@@ -143,6 +143,8 @@ public class CustodyTimeLimitClockHandlerTest {
                         .withCaseId(caseId)
                         .withLevel(Level.OFFENCE)
                         .withOffenceId(offenceId1)
+                        .withNonStandaloneAncillaryResult(false)
+                        .withCategory("I")
                         .build()))
                 .withHearingDay(hearingDay)
                 .build();
@@ -158,6 +160,8 @@ public class CustodyTimeLimitClockHandlerTest {
                         .withCaseId(caseId)
                         .withLevel(Level.OFFENCE)
                         .withOffenceId(offenceId2)
+                        .withNonStandaloneAncillaryResult(false)
+                        .withCategory("I")
                         .build()))
                 .build();
 
