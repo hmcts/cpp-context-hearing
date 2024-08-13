@@ -368,7 +368,8 @@ public class ResultsSharedDelegate implements Serializable {
                         prompt.getFixedListCode(), prompt.getValue(), prompt.getWelshValue(), prompt.getWelshLabel(), prompt.getPromptRef())).collect(Collectors.toList()))
                 .withDraftResult(target2.getDraftResult())
                 .withamendmentsLog(resultLine2.getAmendmentsLog())
-
+                .withCategory(resultLine2.getCategory())
+                .withNonStandaloneAncillaryResult(resultLine2.getNonStandaloneAncillaryResult())
                 .build();
     }
 
@@ -412,6 +413,8 @@ public class ResultsSharedDelegate implements Serializable {
                 .withChildResultLineIds(resultLineIn.getChildResultLineIds())
                 .withParentResultLineIds(resultLineIn.getParentResultLineIds())
                 .withAmendmentsLog(resultLineIn.getAmendmentsLog())
+                .withCategory(resultLineIn.getCategory())
+                .withNonStandaloneAncillaryResult(resultLineIn.getNonStandaloneAncillaryResult())
                 .build();
     }
 

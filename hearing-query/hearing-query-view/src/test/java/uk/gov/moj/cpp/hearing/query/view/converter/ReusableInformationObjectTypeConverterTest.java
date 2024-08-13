@@ -6,13 +6,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.common.ReusableInformation.IdType.APPLICATION;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformation.IdType.DEFENDANT;
+import static java.util.UUID.randomUUID;
 
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.common.AddressReusableInformation;
 import uk.gov.moj.cpp.hearing.common.NameAddressReusableInformation;
+import uk.gov.moj.cpp.hearing.common.NameAddressReusableInformationForApplication;
 import uk.gov.moj.cpp.hearing.common.ReusableInformation;
 import uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType;
 import uk.gov.moj.cpp.hearing.query.view.convertor.ReusableInformationObjectTypeConverter;
@@ -157,5 +160,54 @@ public class ReusableInformationObjectTypeConverterTest {
         final JsonObject jsonObject = reusableInformationObjectTypeConverter.toJsonObject(null, null);
         assertNull(jsonObject);
 
+    }
+
+    @Test
+    public void shouldConvertToNameAddressForApplication() {
+        reusableInformationObjectTypeConverter = new ReusableInformationObjectTypeConverter();
+        setField(this.reusableInformationObjectTypeConverter, "objectToJsonObjectConverter", objectToJsonObjectConverter);
+
+        final UUID applicationId = randomUUID();
+        final String promptRef = "prosecutortobenotified";
+
+        final NameAddressReusableInformationForApplication nameAddressReusableInformationForApplication = new NameAddressReusableInformationForApplication.Builder()
+                .withOrganisationName(STRING.next())
+                .withAddress1(STRING.next())
+                .withAddress2(STRING.next())
+                .withAddress3(STRING.next())
+                .withAddress4(STRING.next())
+                .withAddress5(STRING.next())
+                .withPostCode("CB53XA")
+                .withPrimaryEmail("Mark.Taylor@gmail.com")
+                .withSecondaryEmail("Mark.Taylor@yahoo.com")
+                .build();
+
+        final ReusableInformation reusableInformation = new ReusableInformation.Builder<NameAddressReusableInformationForApplication>()
+                .withValue(nameAddressReusableInformationForApplication)
+                .withIdType(APPLICATION)
+                .withId(applicationId)
+                .withPromptRef(promptRef)
+                .withCacheable(2)
+                .withCacheDataPath(STRING.next())
+                .build();
+
+        final JsonObject jsonObject = reusableInformationObjectTypeConverter.toJsonObject(reusableInformation, ReusableInformationConverterType.NAMEADDRESS);
+
+        assertNotNull(jsonObject);
+        assertThat(jsonObject.getString("promptRef"), is(reusableInformation.getPromptRef()));
+        assertThat(jsonObject.getString("type"), is(ReusableInformationConverterType.NAMEADDRESS.name()));
+
+        final JsonObject nameAddressJsonObject = jsonObject.getJsonObject("value");
+        assertNotNull(nameAddressJsonObject);
+
+        assertThat(nameAddressJsonObject.getString("organisationName"), is(nameAddressReusableInformationForApplication.getOrganisationName()));
+        assertThat(nameAddressJsonObject.getString("address1"), is(nameAddressReusableInformationForApplication.getAddress1()));
+        assertThat(nameAddressJsonObject.getString("address2"), is(nameAddressReusableInformationForApplication.getAddress2()));
+        assertThat(nameAddressJsonObject.getString("address3"), is(nameAddressReusableInformationForApplication.getAddress3()));
+        assertThat(nameAddressJsonObject.getString("address4"), is(nameAddressReusableInformationForApplication.getAddress4()));
+        assertThat(nameAddressJsonObject.getString("address5"), is(nameAddressReusableInformationForApplication.getAddress5()));
+        assertThat(nameAddressJsonObject.getString("postCode"), is(nameAddressReusableInformationForApplication.getPostCode()));
+        assertThat(nameAddressJsonObject.getString("primaryEmail"), is(nameAddressReusableInformationForApplication.getPrimaryEmail()));
+        assertThat(nameAddressJsonObject.getString("secondaryEmail"), is(nameAddressReusableInformationForApplication.getSecondaryEmail()));
     }
 }

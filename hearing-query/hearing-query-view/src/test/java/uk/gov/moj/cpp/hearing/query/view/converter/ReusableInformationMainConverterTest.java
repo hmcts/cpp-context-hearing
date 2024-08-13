@@ -15,14 +15,19 @@ import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.INT
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.INTC;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.NAMEADDRESS;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.TXT;
+import static java.util.UUID.randomUUID;
+import static java.util.Arrays.asList;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AssociatedPerson;
 import uk.gov.justice.core.courts.ContactNumber;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
+import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -185,6 +190,81 @@ public class ReusableInformationMainConverterTest {
 
         assertThat(promptJsonObjects.get(2).getString("promptRef"), is("defendantDrivingLicenceNumber"));
         assertThat(promptJsonObjects.get(2).getString("value"), is(""));
+    }
+
+
+    @Test
+    public void shouldConvertForApplicationWithRespondent() {
+        final List<CourtApplication> courtApplications = singletonList(prepareCourtApplicationWithRespondent());
+        final List<Prompt> prompts = prepareApplicationPrompts();
+        final Map<CourtApplication, List<JsonObject>> applicationListMap = reusableInformationMainConverter.convertApplication(courtApplications, prompts);
+
+        assertThat(applicationListMap.size(), is(courtApplications.size()));
+
+        final List<JsonObject> promptJsonObjects = applicationListMap.get(courtApplications.get(0));
+        assertThat(promptJsonObjects.get(0).getString("promptRef"), is("prosecutortobenotified"));
+        assertThat(promptJsonObjects.get(0).getString("type"), is("NAMEADDRESS"));
+        assertThat(promptJsonObjects.get(0).getString("applicationId"), is(courtApplications.get(0).getId().toString()));
+
+        final ProsecutingAuthority prosecutingAuthority = courtApplications.get(0).getRespondents().get(0).getProsecutingAuthority();
+        final Address address = prosecutingAuthority.getAddress();
+        final ContactNumber contact = prosecutingAuthority.getContact();
+
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedOrganisationName"), is(prosecutingAuthority.getName()));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedAddress1"), is(address.getAddress1()));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedAddress2"), is(address.getAddress2()));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedPostCode"), is(address.getPostcode()));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedEmailAddress1"), is(contact.getPrimaryEmail()));
+    }
+
+    @Test
+    public void shouldConvertForApplicationWithApplicant() {
+        final List<CourtApplication> courtApplications = singletonList(prepareCourtApplicationWithApplicant());
+        final List<Prompt> prompts = prepareApplicationPrompts();
+        final Map<CourtApplication, List<JsonObject>> applicationListMap = reusableInformationMainConverter.convertApplication(courtApplications, prompts);
+
+        assertThat(applicationListMap.size(), is(courtApplications.size()));
+
+        final List<JsonObject> promptJsonObjects = applicationListMap.get(courtApplications.get(0));
+        assertThat(promptJsonObjects.get(0).getString("promptRef"), is("prosecutortobenotified"));
+        assertThat(promptJsonObjects.get(0).getString("type"), is("NAMEADDRESS"));
+        assertThat(promptJsonObjects.get(0).getString("applicationId"), is(courtApplications.get(0).getId().toString()));
+
+        final ProsecutingAuthority prosecutingAuthority = courtApplications.get(0).getApplicant().getProsecutingAuthority();
+        final Address address = prosecutingAuthority.getAddress();
+        final ContactNumber contact = prosecutingAuthority.getContact();
+
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedOrganisationName"), is(prosecutingAuthority.getName()));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedAddress1"), is(address.getAddress1()));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedAddress2"), is(address.getAddress2()));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedPostCode"), is(address.getPostcode()));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedEmailAddress1"), is(contact.getPrimaryEmail()));
+    }
+
+    @Test
+    public void shouldConvertForApplicationWithApplicantWhenPromptsInAnyOrder() {
+        final List<CourtApplication> courtApplications = singletonList(prepareCourtApplicationWithApplicant());
+        final List<Prompt> prompts = prepareApplicationPrompts();
+
+        List<Prompt> randomPromptList = asList(prompts.get(1), prompts.get(4), prompts.get(2), prompts.get(3), prompts.get(0));
+        final Map<CourtApplication, List<JsonObject>> applicationListMap = reusableInformationMainConverter.convertApplication(courtApplications, randomPromptList);
+
+        assertThat(applicationListMap.size(), is(courtApplications.size()));
+
+        final List<JsonObject> promptJsonObjects = applicationListMap.get(courtApplications.get(0));
+        assertThat(promptJsonObjects.get(0).getString("promptRef"), is("prosecutortobenotified"));
+        assertThat(promptJsonObjects.get(0).getString("type"), is("NAMEADDRESS"));
+        assertThat(promptJsonObjects.get(0).getString("applicationId"), is(courtApplications.get(0).getId().toString()));
+
+        final ProsecutingAuthority prosecutingAuthority = courtApplications.get(0).getApplicant().getProsecutingAuthority();
+        final Address address = prosecutingAuthority.getAddress();
+        final ContactNumber contact = prosecutingAuthority.getContact();
+
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedOrganisationName"), is(prosecutingAuthority.getName()));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedAddress1"), is(address.getAddress1()));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedAddress2"), is(address.getAddress2()));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedPostCode"), is(address.getPostcode()));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("prosecutortobenotifiedEmailAddress1"), is(contact.getPrimaryEmail()));
     }
 
     private void assertFixlType(final Defendant defendant, final List<JsonObject> promptJsonObjects) {
@@ -583,5 +663,93 @@ public class ReusableInformationMainConverterTest {
                         .withAddress(Address.address().withAddress1("line 1").withPostcode("E14 4XA").build())
                         .build())
                 .build();
+    }
+
+    public CourtApplication prepareCourtApplicationWithRespondent() {
+        final Address address = Address.address()
+                .withAddress1("28 Burlton Road")
+                .withAddress2("Oxford")
+                .withPostcode("OX23MX")
+                .build();
+        final ContactNumber contact = ContactNumber.contactNumber()
+                .withPrimaryEmail("John.Joseph@gmail.com").build();
+        final ProsecutingAuthority prosecutingAuthority = ProsecutingAuthority.prosecutingAuthority()
+                .withName("John")
+                .withAddress(address)
+                .withContact(contact)
+                .build();
+        final CourtApplicationParty courtApplicationParty = CourtApplicationParty.courtApplicationParty().withProsecutingAuthority(prosecutingAuthority).build();
+
+        return CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withRespondents(asList(courtApplicationParty))
+                .build();
+    }
+
+    public CourtApplication prepareCourtApplicationWithApplicant() {
+        final Address address = Address.address()
+                .withAddress1("28 Burlton Road")
+                .withAddress2("Oxford")
+                .withPostcode("OX23MX")
+                .build();
+        final ContactNumber contact = ContactNumber.contactNumber()
+                .withPrimaryEmail("John.Joseph@gmail.com").build();
+        final ProsecutingAuthority prosecutingAuthority = ProsecutingAuthority.prosecutingAuthority()
+                .withName("John")
+                .withAddress(address)
+                .withContact(contact)
+                .build();
+        final CourtApplicationParty courtApplicationParty = CourtApplicationParty.courtApplicationParty().withProsecutingAuthority(prosecutingAuthority).build();
+
+        return CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withApplicant(courtApplicationParty)
+                .build();
+    }
+
+    private List<Prompt> prepareApplicationPrompts() {
+        final UUID promtId = randomUUID();
+
+        final Prompt prompt1 = new Prompt()
+                .setId(promtId)
+                .setType(NAMEADDRESS.name())
+                .setCacheable(2)
+                .setCacheDataPath("respondents[0].prosecutingAuthority.name;applicant.prosecutingAuthority.name")
+                .setReference("prosecutortobenotifiedOrganisationName")
+                .setPartName("OrganisationName");
+
+        final Prompt prompt2 = new Prompt()
+                .setId(promtId)
+                .setType(NAMEADDRESS.name())
+                .setCacheable(2)
+                .setCacheDataPath("respondents[0].prosecutingAuthority.address.address1; applicant.prosecutingAuthority.address.address1")
+                .setReference("prosecutortobenotifiedAddress1")
+                .setPartName("Address1Line1");
+
+        final Prompt prompt3 = new Prompt()
+                .setId(promtId)
+                .setType(NAMEADDRESS.name())
+                .setCacheable(2)
+                .setCacheDataPath(" respondents[0].prosecutingAuthority.address.address2; applicant.prosecutingAuthority.address.address2")
+                .setReference("prosecutortobenotifiedAddress2")
+                .setPartName("AddressLine2");;
+
+        final Prompt prompt4 = new Prompt()
+                .setId(promtId)
+                .setType(NAMEADDRESS.name())
+                .setCacheable(2)
+                .setCacheDataPath(" respondents[0].prosecutingAuthority.address.postcode ; applicant.prosecutingAuthority.address.postcode ")
+                .setReference("prosecutortobenotifiedPostCode")
+                .setPartName("PostCode");
+
+        final Prompt prompt5 = new Prompt()
+                .setId(promtId)
+                .setType(NAMEADDRESS.name())
+                .setCacheable(2)
+                .setCacheDataPath("respondents[0].prosecutingAuthority.contact.primaryEmail;applicant.prosecutingAuthority.contact.primaryEmail")
+                .setReference("prosecutortobenotifiedEmailAddress1")
+                .setPartName("EmailAddress1");
+
+        return asList(prompt1, prompt2, prompt3, prompt4, prompt5);
     }
 }

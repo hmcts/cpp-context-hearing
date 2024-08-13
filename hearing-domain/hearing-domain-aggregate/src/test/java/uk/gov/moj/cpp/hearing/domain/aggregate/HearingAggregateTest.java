@@ -782,6 +782,8 @@ public class HearingAggregateTest {
                         .withCaseId(caseId)
                         .withLevel(Level.OFFENCE)
                         .withOffenceId(offenceId1)
+                        .withNonStandaloneAncillaryResult(false)
+                        .withCategory("I")
                         .build()))
                 .withHearingDay(hearingDay)
                 .build();
@@ -797,6 +799,8 @@ public class HearingAggregateTest {
                         .withCaseId(caseId)
                         .withLevel(Level.OFFENCE)
                         .withOffenceId(offenceId2)
+                        .withNonStandaloneAncillaryResult(false)
+                        .withCategory("I")
                         .build()))
                 .build();
 
@@ -2292,6 +2296,8 @@ public class HearingAggregateTest {
                         .withCaseId(caseId)
                         .withLevel(Level.OFFENCE)
                         .withOffenceId(offenceId1)
+                        .withNonStandaloneAncillaryResult(false)
+                        .withCategory("I")
                         .build()))
                 .withHearingDay(hearingDay)
                 .build();
@@ -2307,6 +2313,8 @@ public class HearingAggregateTest {
                         .withCaseId(caseId)
                         .withLevel(Level.OFFENCE)
                         .withOffenceId(offenceId2)
+                        .withNonStandaloneAncillaryResult(false)
+                        .withCategory("I")
                         .build()))
                 .build();
 
@@ -2393,6 +2401,8 @@ public class HearingAggregateTest {
                         .withCaseId(caseId)
                         .withLevel(Level.OFFENCE)
                         .withOffenceId(offenceId1)
+                        .withNonStandaloneAncillaryResult(false)
+                        .withCategory("I")
                         .build()))
                 .withHearingDay(hearingDay)
                 .build();
@@ -2408,6 +2418,8 @@ public class HearingAggregateTest {
                         .withCaseId(caseId)
                         .withLevel(Level.OFFENCE)
                         .withOffenceId(offenceId2)
+                        .withNonStandaloneAncillaryResult(false)
+                        .withCategory("I")
                         .build()))
                 .build();
 
@@ -2807,7 +2819,9 @@ public class HearingAggregateTest {
                 null,
                 targetDraft.getShadowListed(),
                 targetDraft.getDraftResult(),
-                "log"
+                "log",
+                "I",
+                false
         );
         final ResultsSharedSuccess resultsShared = (ResultsSharedSuccess) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), Lists.newArrayList(sharedResultsCommandResultLine), HearingState.SHARED, null, LocalDate.now())
                 .collect(Collectors.toList()).get(0);
@@ -2870,7 +2884,9 @@ public class HearingAggregateTest {
                 null,
                 targetDraft.getShadowListed(),
                 targetDraft.getDraftResult(),
-                "log"
+                "log",
+                "I",
+                false
         );
         final ResultsSharedSuccess resultsShared = (ResultsSharedSuccess) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), Lists.newArrayList(sharedResultsCommandResultLine), HearingState.SHARED, null, LocalDate.now())
                 .collect(Collectors.toList()).get(0);
@@ -2991,7 +3007,9 @@ public class HearingAggregateTest {
                 null,
                 targetDraft.getShadowListed(),
                 targetDraft.getDraftResult(),
-                "log"
+                "log",
+                "A",
+                true
         );
         final ShareResultsFailed resultsShared = (ShareResultsFailed) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), Lists.newArrayList(sharedResultsCommandResultLine), INITIALISED, null, LocalDate.now())
                 .collect(Collectors.toList()).get(0);
