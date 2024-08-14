@@ -600,6 +600,8 @@ public class ReusableInfoEventListenerTest {
         return prompt.build();
     }
 
+
+
     private JsonObject createResult(final UUID masterDefendantId, final String value, final UUID offenceId) {
         final JsonObjectBuilder baic = createObjectBuilder();
         baic.add("shortCode","BAIC");
@@ -619,4 +621,6 @@ public class ReusableInfoEventListenerTest {
         baic.add("offenceId", offenceId.toString());
         return baic.build();
     }
+
+
 }

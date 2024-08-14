@@ -60,7 +60,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S3655", "squid:S1871","PMD:BeanMembersShouldSerialize"})
 public class HearingDelegate implements Serializable {
 
-    private static final long serialVersionUID = 6948738797633524093L;
+    private static final long serialVersionUID = 6948738797633524094L;
 
     private final HearingAggregateMomento momento;
 
@@ -119,6 +119,10 @@ public class HearingDelegate implements Serializable {
 
         if (nonNull(offence.getVerdict())) {
             this.momento.getVerdicts().put(offenceId, offence.getVerdict());
+        }
+
+        if(nonNull(offence.getIndicatedPlea())) {
+            this.momento.getIndicatedPlea().put(offenceId, offence.getIndicatedPlea());
         }
     }
 

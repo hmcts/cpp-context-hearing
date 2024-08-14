@@ -35,6 +35,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithAllLevelJudicialResults;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithIsBoxHearing;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithOffenceIndicatedPlea;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithOffencePlea;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithOffenceVerdict;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
@@ -106,6 +107,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingUnlocked;
 import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffencesRemovedFromExistingHearing;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
@@ -294,6 +296,41 @@ public class HearingAggregateTest {
         assertThat(event.getPlea().getDelegatedPowers().getUserId(), is(command.getPlea().getDelegatedPowers().getUserId()));
         assertThat(event.getPlea().getDelegatedPowers().getFirstName(), is(command.getPlea().getDelegatedPowers().getFirstName()));
         assertThat(event.getPlea().getDelegatedPowers().getLastName(), is(command.getPlea().getDelegatedPowers().getLastName()));
+    }
+
+    @Test
+    public void shouldUpdateOffenceWithIndicatedPleaRetained() {
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithOffenceIndicatedPlea();
+
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        final Hearing hearing =hearingAggregate.getHearing();
+        final UUID offenceId =hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
+        final  UUID defendantId = hearing.getProsecutionCases().get(0).getDefendants().get(0).getId();
+        final Offence offence = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
+
+        assertThat(offence.getIndicatedPlea().getIndicatedPleaValue(), is(IndicatedPleaValue.INDICATED_GUILTY));
+
+        final Offence offenceWithOutIndicatedPlea = Offence.offence()
+                .withValuesFrom(offence)
+                .withIndicatedPlea(null)
+                .build();
+
+        final Stream<Object> eventStreams = hearingAggregate.updateOffence(hearing.getId(), defendantId, offenceWithOutIndicatedPlea);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), Matchers.is(1));
+
+        final OffenceUpdated offenceUpdated = (OffenceUpdated) eventCollection.get(0);
+
+        assertThat(offenceUpdated.getHearingId(), is(hearing.getId()));
+        assertThat(offenceUpdated.getDefendantId(), is(defendantId));
+        assertThat(offenceUpdated.getOffence().getId(), is(offenceId));
+        assertThat(offenceUpdated.getOffence().getIndicatedPlea().getIndicatedPleaValue(), is(IndicatedPleaValue.INDICATED_GUILTY));
+
+
     }
 
     @Test

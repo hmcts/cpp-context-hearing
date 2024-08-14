@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
@@ -67,6 +68,11 @@ public class OffenceUpdated implements Serializable {
 
     public OffenceUpdated withPlea(final Plea plea) {
         this.offence.setPlea(plea);
+        return this;
+    }
+
+    public OffenceUpdated withIndicatedPlea(final IndicatedPlea indicatedPlea) {
+        this.offence.setIndicatedPlea(indicatedPlea);
         return this;
     }
 

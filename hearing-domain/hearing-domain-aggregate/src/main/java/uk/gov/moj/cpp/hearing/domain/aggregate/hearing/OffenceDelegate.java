@@ -30,7 +30,7 @@ import org.apache.commons.collections.CollectionUtils;
 
 public class OffenceDelegate implements Serializable {
 
-    private static final long serialVersionUID = 4L;
+    private static final long serialVersionUID = 5L;
 
     private final HearingAggregateMomento momento;
 
@@ -181,6 +181,7 @@ public class OffenceDelegate implements Serializable {
                 .withDefendantId(defendantId)
                 .withOffence(offence)
                 .withPlea(this.momento.getPleas().get(offence.getId()))
+                .withIndicatedPlea(this.momento.getIndicatedPlea().get(offence.getId()))
                 .withVerdict(this.momento.getVerdicts().get(offence.getId()))
                 .withConvictionDate(this.momento.getConvictionDates().get(offence.getId())));
     }

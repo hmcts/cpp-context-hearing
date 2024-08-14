@@ -24,6 +24,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesCha
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantArguments;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithOffenceIndicatedPlea;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
@@ -295,6 +296,8 @@ public class UpdateOffencesForDefendantCommandHandlerTest {
                                 withJsonPath("$.offence.id", is(foundHearingsForEditOffence.getOffence().getId().toString()))
                         )))));
     }
+
+
 
     @Test
     public void testDeleteOffence() throws EventStreamException {
