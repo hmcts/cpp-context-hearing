@@ -414,7 +414,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .withParentResultLineIds(resultLineIn.getParentResultLineIds())
                 .withAmendmentsLog(resultLineIn.getAmendmentsLog())
                 .withCategory(resultLineIn.getCategory())
-                .withNonStandaloneAncillaryResult(resultLineIn.getNonStandaloneAncillaryResult())
+                .withNonStandaloneAncillaryResult(nonNull(resultLineIn.getNonStandaloneAncillaryResult()) && resultLineIn.getNonStandaloneAncillaryResult())
                 .build();
     }
 

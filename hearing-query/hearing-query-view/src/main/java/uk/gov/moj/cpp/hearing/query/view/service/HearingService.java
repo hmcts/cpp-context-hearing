@@ -723,7 +723,7 @@ public class HearingService {
                 .withApprovedDate(resultLine.getApprovedDate())
                 .withAmendmentsLog(resultLine.getAmendmentsLog())
                 .withIsDeleted(resultLine.getIsDeleted())
-                .withNonStandaloneAncillaryResult(resultLine.getNonStandaloneAncillaryResult())
+                .withNonStandaloneAncillaryResult(nonNull(resultLine.getNonStandaloneAncillaryResult()) && resultLine.getNonStandaloneAncillaryResult())
                 .withCategory(resultLine.getCategory());
 
 
