@@ -47,6 +47,7 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.fixedDate;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.hCHOUSEOrganisationName;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.hmiSlots;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.imprisonmentPeriod;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.isPresent;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.judgeReservesReviewHearing;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.probationteamtobenotifiedAddress1;
@@ -62,6 +63,8 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.totalCustodialPeriod;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.valueOf;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.weekCommencing;
+import static java.util.UUID.fromString;
+import static java.util.Arrays.asList;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.CourtCentre;
@@ -106,6 +109,7 @@ import javax.inject.Inject;
 import javax.json.JsonObject;
 
 import com.google.common.collect.Sets;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,7 +127,10 @@ public class NextHearingHelperV3 {
     public static final String COMMUNITY_REQUIREMENT = "b2dab2b7-3edd-4223-b1be-3819173ec54d";
     public static final String COMMUNITY_ORDER = "418b3aa7-65ab-4a4a-bab9-2f96b698118c";
     public static final String CUSTODIAL_PERIOD_JUDICIAL_RESULT_TYPE_ID = "b65fb5f1-b11d-4a95-a198-3b81333c7cf9";
+    public static final String SUSPENDED_SENTENCE_ORDER_SHORT_CODE = "SUSPS";
     public static final String TOTAL_CUSTODIAL_PERIOD_SHORT_CODE = "STIMP";
+    public static final String CROWN_L1_CODE = "C";
+    public static final String MAGISTRATE_L1_CODE = "B";
 
     @Inject
     private HearingTypeReverseLookup hearingTypeReverseLookup;
@@ -137,6 +144,8 @@ public class NextHearingHelperV3 {
     private StringToJsonObjectConverter stringToJsonObjectConverter;
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+
 
     public Optional<NextHearing> getNextHearing(final JsonEnvelope context,
                                                 final ResultDefinition resultDefinition,
@@ -158,6 +167,9 @@ public class NextHearingHelperV3 {
                 if (nonNull(nextHearing.getReservedJudiciary()) && nextHearing.getReservedJudiciary().equals(true)) {
                     nextHearing.setJudiciary(resultSharedV3.getHearing().getJudiciary());
                 }
+
+                LOGGER.info("CCT-1527: next hearing Jurisdiction Type : {}", nextHearing.getJurisdictionType());
+
                 return Optional.of(nextHearing);
             }
         }
@@ -220,7 +232,7 @@ public class NextHearingHelperV3 {
         populateCourtCentre(builder, context, promptsMap, courtCentreOrgOptional);
         populateAdjournmentReasons(builder, context, resultLines, resultLine);
         populateHearingType(builder, context, promptsMap);
-        populateJurisdictionType(builder, resultDefinition.getId().toString());
+        populateJurisdictionType(builder, courtCentreOrgOptional);
         populateExistingHearingId(builder, promptsMap);
         populateReservedJudiciary(builder, promptsMap);
         populateWeekCommencingDate(builder, promptsMap);
@@ -237,7 +249,9 @@ public class NextHearingHelperV3 {
                                                    final List<ResultDefinition> resultDefinitions) {
 
         final List<ResultLine2> allResultLines = new ArrayList<>();
-        getAllResultLines(resultLine, resultLines, allResultLines);
+        getAllTargetResultLines(resultLine, resultLines, allResultLines);
+
+        final List<UUID> resultDefinitionList = asList(fromString(COMMUNITY_ORDER), fromString(CUSTODIAL_PERIOD_JUDICIAL_RESULT_TYPE_ID), fromString(SUSPENDED_SENTENCE_ORDER));
 
         final List<ResultLine2> allParentResultLines = new ArrayList<>();
         getParentResultLines(resultLine, resultLines, allParentResultLines);
@@ -252,13 +266,19 @@ public class NextHearingHelperV3 {
                     .findFirst()
                     .orElse(null);
 
-            if (nonNull(resultDefinition1) && nonNull(resultDefinition1.getShortCode()) && "STIMP,CO,SUSPS".toLowerCase().contains(resultDefinition1.getShortCode().toLowerCase())) {
+            if (nonNull(resultDefinition1) && nonNull(resultDefinition1.getShortCode()) && resultDefinitionList.contains(resultDefinition1.getId())) {
                 final List<JudicialResultPrompt> judicialResultPrompts = buildJudicialResultPrompt(resultDefinition1, lineId.getPrompts());
                 final Map<NextHearingPromptReference, JudicialResultPrompt> parentPromptsMap = getPromptsMap(judicialResultPrompts);
-                populateProbationTeam(builder, parentPromptsMap);
+                if (!fromString(SUSPENDED_SENTENCE_ORDER).equals(resultDefinition1.getId())) {
+                    populateProbationTeam(builder, parentPromptsMap);
+                }
 
                 if (TOTAL_CUSTODIAL_PERIOD_SHORT_CODE.equalsIgnoreCase(resultDefinition1.getShortCode())) {
                     populateTotalCustodialPeriod(builder, parentPromptsMap);
+                    populateSuspendedPeriod(builder, parentPromptsMap);
+                }
+
+                if (SUSPENDED_SENTENCE_ORDER_SHORT_CODE.equalsIgnoreCase(resultDefinition1.getShortCode())) {
                     populateSuspendedPeriod(builder, parentPromptsMap);
                 }
             }
@@ -270,7 +290,7 @@ public class NextHearingHelperV3 {
                     .findFirst()
                     .orElse(null);
 
-            if (nonNull(parentResultDefinition) && nonNull(parentResultDefinition.getShortCode()) && (parentResultDefinition.getShortCode().equalsIgnoreCase(TOTAL_CUSTODIAL_PERIOD_SHORT_CODE)))
+            if (nonNull(parentResultDefinition) && nonNull(parentResultDefinition.getShortCode()) && (parentResultDefinition.getShortCode().equalsIgnoreCase(TOTAL_CUSTODIAL_PERIOD_SHORT_CODE) || SUSPENDED_SENTENCE_ORDER_SHORT_CODE.equalsIgnoreCase(parentResultDefinition.getShortCode())))
             {
                 final List<JudicialResultPrompt> judicialResultPrompts = buildJudicialResultPrompt(parentResultDefinition, resultLine3.getPrompts());
                 final Map<NextHearingPromptReference, JudicialResultPrompt> parentPromptsMap = getPromptsMap(judicialResultPrompts);
@@ -309,11 +329,36 @@ public class NextHearingHelperV3 {
         allParentResultLines.add(resultLine);
     }
 
-    private void getAllResultLines(final ResultLine2 resultLine, final List<ResultLine2> resultLines, final List<ResultLine2> allParentResultLines) {
+    private void getAllTargetResultLines(final ResultLine2 resultLine, final List<ResultLine2> resultLines, final List<ResultLine2> allTargetResultLines) {
         if (nonNull(resultLine)) {
-            allParentResultLines.add(resultLine);
+            final ResultLine2 parentResultLine = findFirstParentResultLine(resultLine, resultLines);
+            allTargetResultLines.add(parentResultLine);
+            addAllChildrenResultLines(parentResultLine, resultLines, allTargetResultLines);
         }
-        allParentResultLines.addAll(resultLines);
+    }
+
+    private ResultLine2 findFirstParentResultLine(final ResultLine2 resultLine, final List<ResultLine2> resultLines) {
+        final Optional<ResultLine2> parentResultLine = resultLines.stream()
+                .filter(r -> CollectionUtils.isNotEmpty(resultLine.getParentResultLineIds()) && resultLine.getParentResultLineIds().contains(r.getResultLineId()))
+                .findFirst();
+
+        if (parentResultLine.isPresent()) {
+            return findFirstParentResultLine(parentResultLine.get(), resultLines);
+        } else {
+            return resultLine;
+        }
+    }
+
+
+    private void addAllChildrenResultLines(final ResultLine2 resultLine, final List<ResultLine2> resultLines, final List<ResultLine2> allParentResultLines) {
+        final List<ResultLine2> childrenResultLines = resultLines.stream()
+                .filter(r -> CollectionUtils.isNotEmpty(resultLine.getChildResultLineIds()) && resultLine.getChildResultLineIds().contains(r.getResultLineId()))
+                .collect(toList());
+        childrenResultLines.forEach(child -> {
+                    allParentResultLines.add(child);
+                    addAllChildrenResultLines(child, resultLines, allParentResultLines);
+                }
+        );
     }
 
 
@@ -345,7 +390,7 @@ public class NextHearingHelperV3 {
     }
 
     private void populateTotalCustodialPeriod(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> parentPromptsMap) {
-        final String promptValue = getPromptValue(parentPromptsMap, totalCustodialPeriod);
+        final String promptValue = getPromptValue(parentPromptsMap, totalCustodialPeriod) == null ? getPromptValue(parentPromptsMap, imprisonmentPeriod) : getPromptValue(parentPromptsMap, totalCustodialPeriod) ;
         builder.withTotalCustodialPeriod(promptValue);
     }
 
@@ -576,14 +621,17 @@ public class NextHearingHelperV3 {
         return courtHouseReverseLookup.getCourtCentreByName(context, courtHouse.get().getValue());
     }
 
-    private static void populateJurisdictionType(final NextHearing.Builder builder,
-                                                 final String resultDefinitionId) {
-        if (CROWN_COURT_RESULT_DEFINITION_ID.equals(resultDefinitionId)) {
-            LOGGER.info("Populating jurisdiction type: {}", JurisdictionType.CROWN);
-            builder.withJurisdictionType(JurisdictionType.CROWN);
-        } else if (MAGISTRATE_RESULT_DEFINITION_ID.equals(resultDefinitionId)) {
-            LOGGER.info("Populating jurisdiction type: {}", JurisdictionType.MAGISTRATES);
-            builder.withJurisdictionType(JurisdictionType.MAGISTRATES);
+    private static void populateJurisdictionType(final NextHearing.Builder builder, final Optional<CourtCentreOrganisationUnit> courtCentreOrgOptional) {
+
+        if(courtCentreOrgOptional.isPresent()) {
+            LOGGER.info("CCT-1527: resultDefinitionId : {}", courtCentreOrgOptional.get());
+            if (CROWN_L1_CODE.equals(courtCentreOrgOptional.get().getOucodeL1Code())) {
+                LOGGER.info("Populating jurisdiction type: {}", JurisdictionType.CROWN);
+                builder.withJurisdictionType(JurisdictionType.CROWN);
+            } else if (MAGISTRATE_L1_CODE.equals(courtCentreOrgOptional.get().getOucodeL1Code())) {
+                LOGGER.info("Populating jurisdiction type: {}", JurisdictionType.MAGISTRATES);
+                builder.withJurisdictionType(JurisdictionType.MAGISTRATES);
+            }
         }
     }
 

@@ -50617,6 +50617,49 @@
           "hidden": false,
           "nameEmail": false,
           "associatedWithReferenceData": false
+        },{
+          "id": "95618691-0742-417e-82b9-c4d4bff94585",
+          "label": "Suspended period",
+          "welshLabel": "Cyfnod Gohiriedig",
+          "resultPromptRule": "mandatory",
+          "type": "INT",
+          "sequence": 200,
+          "duration": "Years",
+          "financial": "N",
+          "reference": "suspendedPeriod",
+          "wordGroup": [
+            "Years"
+          ],
+          "userGroups": [],
+          "durationSequence": 2,
+          "welshDuration": "Flynedd",
+          "courtExtract": "Y",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameEmail": false,
+          "associatedWithReferenceData": false
+        },
+        {
+          "id": "95618691-0742-417e-82b9-c4d4bff94585",
+          "label": "Suspended period",
+          "welshLabel": "Cyfnod Gohiriedig",
+          "resultPromptRule": "mandatory",
+          "type": "INT",
+          "sequence": 200,
+          "duration": "Months",
+          "financial": "N",
+          "reference": "suspendedPeriod",
+          "wordGroup": [
+            "Months"
+          ],
+          "userGroups": [],
+          "durationSequence": 2,
+          "welshDuration": "Mis",
+          "courtExtract": "Y",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameEmail": false,
+          "associatedWithReferenceData": false
         },
         {
           "id": "7784b81d-44d2-43c0-a903-a53b0e73683b",
