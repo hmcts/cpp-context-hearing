@@ -38,7 +38,7 @@
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
         <test-utils-enveloper-provider.version>5.1.2</test-utils-enveloper-provider.version>
         <usersgroups.version>8.0.39</usersgroups.version>
-        <listing.version>8.0.99</listing.version>
+        <listing.version>8.0.102</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>8.0.91</systemdocgenerator.version>
         <liquibase.core.version>3.6.1</liquibase.core.version> <!-- TODO remove this property when merging java 17. version will be fetched from common bom -->

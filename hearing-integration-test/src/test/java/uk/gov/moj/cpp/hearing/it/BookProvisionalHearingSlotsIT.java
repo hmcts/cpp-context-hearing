@@ -5,7 +5,7 @@ import static java.time.ZonedDateTime.parse;
 import static uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo.bookProvisionalHearingSlotsCommand;
 import static uk.gov.moj.cpp.hearing.it.UseCases.bookHearingSlots;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
-import static uk.gov.moj.cpp.hearing.utils.AzureScheduleServiceStub.stubProvisionalBookSlots;
+import static uk.gov.moj.cpp.hearing.utils.CourtSchedulerStub.stubProvisionalBookSlots;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 
 import java.time.ZonedDateTime;

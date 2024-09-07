@@ -1,33 +1,29 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-import static org.apache.http.HttpStatus.SC_OK;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-
-
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
-import uk.gov.moj.cpp.listing.common.azure.ProvisionalBookingService;
-
-import java.time.format.DateTimeFormatter;
-import java.util.Objects;
+import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingServiceResponse;
+import uk.gov.moj.cpp.hearing.event.service.ProvisionalBookingService;
 
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
-import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
+
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 @ServiceComponent(EVENT_PROCESSOR)
 public class BookProvisionalHearingSlotsProcessor {
@@ -35,7 +31,6 @@ public class BookProvisionalHearingSlotsProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(BookProvisionalHearingSlotsProcessor.class);
     private final Sender sender;
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
-    private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
     private final ProvisionalBookingService provisionalBookingService;
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -43,11 +38,9 @@ public class BookProvisionalHearingSlotsProcessor {
     @Inject
     public BookProvisionalHearingSlotsProcessor(final Sender sender,
                                                 final JsonObjectToObjectConverter jsonObjectToObjectConverter,
-                                                final ObjectToJsonObjectConverter objectToJsonObjectConverter,
                                                 final ProvisionalBookingService provisionalBookingService) {
         this.sender = sender;
         this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
-        this.objectToJsonObjectConverter = objectToJsonObjectConverter;
         this.provisionalBookingService = provisionalBookingService;
     }
 
@@ -63,7 +56,7 @@ public class BookProvisionalHearingSlotsProcessor {
         bookProvisionalHearingSlots.getSlots().forEach(
                 bookProvisionalHearingSlotsCommand -> {
                     final String hearingStartTimeStr = Objects.nonNull(bookProvisionalHearingSlotsCommand.getHearingStartTime()) ?
-                            bookProvisionalHearingSlotsCommand.getHearingStartTime().format(DATE_TIME_FORMATTER): StringUtils.EMPTY;
+                            bookProvisionalHearingSlotsCommand.getHearingStartTime().format(DATE_TIME_FORMATTER) : StringUtils.EMPTY;
                     arrayBuilder.add(
                             createObjectBuilder().add("courtScheduleId", bookProvisionalHearingSlotsCommand.getCourtScheduleId().toString())
                                     .add("hearingStartTime", hearingStartTimeStr)
@@ -73,19 +66,20 @@ public class BookProvisionalHearingSlotsProcessor {
 
         );
 
-        final Response response = provisionalBookingService.bookSlots(arrayBuilder.build());
+        final JsonObject payload = createObjectBuilder().add("provisionalSlots",arrayBuilder.build()).build();
 
-        final JsonObject responseJson = objectToJsonObjectConverter.convert(response.getEntity());
+        final ProvisionalBookingServiceResponse provisionalBookingServiceResponse = provisionalBookingService.bookSlots(payload);
+
+
         //raise public event for UI
-        if (response.getStatus() == SC_OK) {
-            sender.send(Enveloper.envelop(Json.createObjectBuilder().add("bookingId", responseJson.getString("bookingId")).build())
+        if (!provisionalBookingServiceResponse.hasError()) {
+            sender.send(Enveloper.envelop(Json.createObjectBuilder().add("bookingId", provisionalBookingServiceResponse.getBookingId()).build())
                     .withName("public.hearing.hearing-slots-provisionally-booked")
                     .withMetadataFrom(event));
         } else {
-            sender.send(Enveloper.envelop(Json.createObjectBuilder().add("error", responseJson.getString("errorMessage")).build())
+            sender.send(Enveloper.envelop(Json.createObjectBuilder().add("error", provisionalBookingServiceResponse.getErrorMessage()).build())
                     .withName("public.hearing.hearing-slots-provisionally-booked")
                     .withMetadataFrom(event));
         }
-
     }
 }

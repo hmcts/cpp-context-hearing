@@ -1,39 +1,31 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
-import static uk.gov.moj.cpp.hearing.test.FileUtil.getPayload;
-
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.*;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
-import uk.gov.moj.cpp.listing.common.azure.ProvisionalBookingService;
+import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingServiceResponse;
+import uk.gov.moj.cpp.hearing.event.service.ProvisionalBookingService;
 
-import javax.json.Json;
 import javax.json.JsonObject;
-import javax.ws.rs.core.Response;
+import java.io.UnsupportedEncodingException;
+import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.test.FileUtil.getPayload;
 
-public class BookProvisionalHearingSlotsProcessorTest {
+public class
+BookProvisionalHearingSlotsProcessorTest {
 
     @Mock
     private Sender sender;
@@ -41,8 +33,6 @@ public class BookProvisionalHearingSlotsProcessorTest {
     private ArgumentCaptor<DefaultEnvelope> envelopeArgumentCaptor;
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-    @Spy
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
     @InjectMocks
     private BookProvisionalHearingSlotsProcessor bookProvisionalHearingSlotsProcessor;
     @Mock
@@ -54,7 +44,6 @@ public class BookProvisionalHearingSlotsProcessorTest {
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
-        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
 
     @Test
@@ -63,9 +52,7 @@ public class BookProvisionalHearingSlotsProcessorTest {
 
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
 
-        final JsonObject bookingReference = Json.createObjectBuilder().add("bookingId", randomUUID().toString()).build();
-        final Response bookingReferenceResponse = Response.status(Response.Status.OK).entity(bookingReference).build();
-        when(provisionalBookingService.bookSlots(any())).thenReturn(bookingReferenceResponse);
+        when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
 
         bookProvisionalHearingSlotsProcessor.handleBookProvisionalHearingSlots(event);
 
@@ -75,15 +62,13 @@ public class BookProvisionalHearingSlotsProcessorTest {
 
     }
 
+
     @Test
-    public void testHandleBookProvisionalHearingSlotsForV2() {
+    public void testHandleBookProvisionalHearingSlotsForV2() throws UnsupportedEncodingException {
         final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload("hearing.event.book-provisional-hearing-slots-v2.json"));
 
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
-
-        final JsonObject bookingReference = Json.createObjectBuilder().add("bookingId", randomUUID().toString()).build();
-        final Response bookingReferenceResponse = Response.status(Response.Status.OK).entity(bookingReference).build();
-        when(provisionalBookingService.bookSlots(any())).thenReturn(bookingReferenceResponse);
+        when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
 
         bookProvisionalHearingSlotsProcessor.handleBookProvisionalHearingSlots(event);
 
@@ -91,5 +76,9 @@ public class BookProvisionalHearingSlotsProcessorTest {
 
         assertThat(envelopeArgumentCaptor.getValue().metadata().name(), is("public.hearing.hearing-slots-provisionally-booked"));
 
+    }
+
+    private static ProvisionalBookingServiceResponse getNormalResponse() {
+        return ProvisionalBookingServiceResponse.normal(UUID.randomUUID().toString());
     }
 }
