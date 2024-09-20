@@ -7,7 +7,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_COURT_APPLICATION_WITH_INDICATED_PLEA_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_HEARING_DAY_WITHOUT_COURT_CENTRE_ID;
@@ -47,14 +47,14 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class OffenceHelperTest {
 
     @Mock
@@ -99,7 +99,7 @@ public class OffenceHelperTest {
     private LjaDetails ljaDetailsWithCourtCentre = LjaDetails.ljaDetails().withLjaCode("2575").withLjaName("South East London Magistrates' Court").build();
 
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         when(referenceDataService.getVerdictTypes(context)).thenReturn(allVerdictTypes);
         when(referenceDataService.getAlcoholLevelMethods(context)).thenReturn(allAlcoholLevelMethod);
@@ -231,7 +231,6 @@ public class OffenceHelperTest {
                 .build();
 
         when(referenceDataLoader.getOrganisationUnitById(any())).thenReturn(organisationalUnit);
-        when(referenceDataLoader.getLjaDetails(any())).thenReturn(ljaDetailsOfCourtCentre);
 
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_JURISDICTION_CROWN_JSON, ResultsShared.class);
         offenceHelper.enrichOffence(context, resultsShared.getHearing());
@@ -256,8 +255,6 @@ public class OffenceHelperTest {
                 .build();
 
         when(referenceDataLoader.getOrganisationUnitById(UUID.fromString("f8254db1-1683-483e-afb3-b87fde5a0a26"))).thenReturn(organisationalUnit);
-        when(referenceDataLoader.getOrganisationUnitById(null)).thenThrow(NullPointerException.class);
-        ;
         when(referenceDataLoader.getLjaDetails(any())).thenReturn(ljaDetailsOfCourtCentre);
 
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_HEARING_DAY_WITHOUT_COURT_CENTRE_ID, ResultsShared.class);

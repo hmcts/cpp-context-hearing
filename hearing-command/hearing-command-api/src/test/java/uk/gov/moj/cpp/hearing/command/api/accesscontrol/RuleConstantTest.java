@@ -11,26 +11,31 @@ import uk.gov.moj.cpp.accesscontrol.drools.Action;
 import uk.gov.moj.cpp.accesscontrol.test.utils.BaseDroolsAccessControlTest;
 import uk.gov.moj.cpp.hearing.command.api.accescontrol.RuleConstants;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.kie.api.runtime.ExecutionResults;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.kie.api.runtime.ExecutionResults;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class RuleConstantTest extends BaseDroolsAccessControlTest {
+@ExtendWith(MockitoExtension.class)
+public class RuleConstantTest extends BaseDroolsAccessControlTest
+{
 
     private Action action;
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
+
+    public RuleConstantTest()
+    {
+        super("COMMAND_API_SESSION");
+    }
 
     @Test
     public void shouldAllowAuthorisedUserToInitiateHearing() throws JsonProcessingException {
@@ -78,8 +83,8 @@ public class RuleConstantTest extends BaseDroolsAccessControlTest {
     }
 
     @Override
-    protected Map<Class, Object> getProviderMocks() {
-        return ImmutableMap.<Class, Object>builder().put(UserAndGroupProvider.class, userAndGroupProvider).build();
+    protected Map<Class<?>, Object> getProviderMocks() {
+        return ImmutableMap.<Class<?>, Object>builder().put(UserAndGroupProvider.class, userAndGroupProvider).build();
     }
 
     @Override

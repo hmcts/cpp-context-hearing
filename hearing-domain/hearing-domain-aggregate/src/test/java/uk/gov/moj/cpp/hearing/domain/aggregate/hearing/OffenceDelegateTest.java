@@ -27,8 +27,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 
 public class OffenceDelegateTest {
@@ -39,7 +39,7 @@ public class OffenceDelegateTest {
     private HearingAggregate hearingAggregate;
 
 
-    @Before
+    @BeforeEach
     public void setup() {
 
         hearingAggregateMomento = new HearingAggregateMomento();

@@ -65,7 +65,6 @@ public class XmlUtils {
         try {
             final Marshaller jaxbMarshaller = getWpJaxbContext(contextPath).createMarshaller();
 
-            jaxbMarshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new XhibitNamespacePrefixMapper());
             jaxbMarshaller.setProperty(JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(documentRoot, sw);
         } catch (final JAXBException e) {

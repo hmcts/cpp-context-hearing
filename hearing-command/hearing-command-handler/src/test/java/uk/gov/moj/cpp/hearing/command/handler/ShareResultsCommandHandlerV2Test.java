@@ -80,14 +80,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Creating a new test file for V2 due to the poor static implementation of {@link
@@ -95,7 +95,7 @@ import org.mockito.runners.MockitoJUnitRunner;
  * but pass in isolation.
  */
 @SuppressWarnings({"serial", "unchecked"})
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ShareResultsCommandHandlerV2Test {
 
     private static final String HEARING_RESULTS_SHARED_V2_EVENT_NAME = "hearing.events.results-shared-v2";
@@ -127,7 +127,7 @@ public class ShareResultsCommandHandlerV2Test {
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
-    @BeforeClass
+    @BeforeAll
     public static void init() {
         initiateHearingCommand = standardInitiateHearingTemplate();
         metadataId = randomUUID();
@@ -191,12 +191,11 @@ public class ShareResultsCommandHandlerV2Test {
         return defendant;
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
         when(this.eventSource.getStreamById(initiateHearingCommand.getHearing().getId())).thenReturn(this.hearingEventStream);
-        when(this.clock.now()).thenReturn(sharedTime);
         defendantDetailsUpdated = new DefendantDetailsUpdated(initiateHearingCommand.getHearing().getId(), convert(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0), "Test"));
     }
 

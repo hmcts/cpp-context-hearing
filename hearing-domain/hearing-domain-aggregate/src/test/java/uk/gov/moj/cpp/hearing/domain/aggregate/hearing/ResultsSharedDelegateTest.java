@@ -48,8 +48,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ResultsSharedDelegateTest {
 
@@ -63,7 +63,7 @@ public class ResultsSharedDelegateTest {
     private static final String VACATED_TRIAL_REASON_ID = "05d90ca2-2009-40aa-b5a1-5b7720807e54";
 
 
-    @Before
+    @BeforeEach
     public void setup() {
         hearingDaySharedResults = new HearingDaySharedResults();
         hearingAggregateMomento = new HearingAggregateMomento();

@@ -14,13 +14,6 @@ import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -29,16 +22,27 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import javax.json.JsonObject;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@RunWith(MockitoJUnitRunner.class)
+import javax.json.JsonObject;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
 public class AddMasterDefendantIdToDefendantCommandHandlerTest {
 
     private static final String HEARING_COMMAND = "hearing.command.add-master-defendant-id-to-defendant";
@@ -58,7 +62,7 @@ public class AddMasterDefendantIdToDefendantCommandHandlerTest {
     private AggregateService aggregateService;
 
     @Spy
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter= new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
 
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
@@ -66,11 +70,6 @@ public class AddMasterDefendantIdToDefendantCommandHandlerTest {
     @InjectMocks
     private AddMasterDefendantIdToDefendantCommandHandler handler;
 
-    @Before
-    public void setup() {
-        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
-        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
-    }
 
     @Test
     public void eventMasterDefendantIdAddedShouldBeRaised() throws Exception {

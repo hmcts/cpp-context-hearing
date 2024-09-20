@@ -9,7 +9,7 @@ import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Contact;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ContactNumberJPAMapperTest {
 

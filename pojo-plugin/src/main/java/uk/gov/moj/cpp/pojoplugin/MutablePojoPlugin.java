@@ -25,6 +25,7 @@ import com.squareup.javapoet.TypeSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+//TODO: There is a ticket, DD-33676, which is created for this issue.
 public class MutablePojoPlugin implements ClassModifyingPlugin {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MutablePojoPlugin.class.getName());
@@ -72,7 +73,6 @@ public class MutablePojoPlugin implements ClassModifyingPlugin {
 
                 final Field modifiers = FieldSpec.class.getDeclaredField("modifiers");
                 modifiers.setAccessible(true);
-                removeFinalModifierFromField(modifiers);
                 modifiers.set(fieldSpec, Collections.unmodifiableSet(new LinkedHashSet<>(asList(PRIVATE))));
 
             }

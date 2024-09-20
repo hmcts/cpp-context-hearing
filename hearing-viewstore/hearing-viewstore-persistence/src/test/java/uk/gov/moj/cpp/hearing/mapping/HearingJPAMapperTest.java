@@ -1,13 +1,12 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
-import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,7 +38,6 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.ReferralReason;
 import uk.gov.justice.core.courts.RespondentCounsel;
-import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantReferralReason;
@@ -56,16 +54,16 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HearingJPAMapperTest {
 
     public static final int NUMBER_OF_GROUP_CASES = 7;
@@ -518,9 +516,6 @@ public class HearingJPAMapperTest {
         ProsecutionCase prosecutionCaseMock = mock(ProsecutionCase.class);
         when(prosecutionCaseJPAMapper.fromJPA(hearingEntity.getProsecutionCases())).thenReturn(asList(prosecutionCaseMock));
 
-        Target targetMock = mock(Target.class);
-        when(targetJPAMapper.fromJPA(hearingEntity.getTargets(), emptySet())).thenReturn(asList(targetMock));
-
         HearingType hearingTypeMock = mock(HearingType.class);
         when(hearingTypeJPAMapper.fromJPA(hearingEntity.getHearingType())).thenReturn(hearingTypeMock);
 
@@ -689,12 +684,6 @@ public class HearingJPAMapperTest {
 
         uk.gov.justice.core.courts.JudicialRole judicialRoleMock = mock(uk.gov.justice.core.courts.JudicialRole.class);
         when(judicialRoleJPAMapper.fromJPA(hearingEntity.getJudicialRoles())).thenReturn(asList(judicialRoleMock));
-
-        ProsecutionCase prosecutionCaseMock = mock(ProsecutionCase.class);
-        when(prosecutionCaseJPAMapper.fromJPA(hearingEntity.getProsecutionCases())).thenReturn(asList(prosecutionCaseMock));
-
-        Target targetMock = mock(Target.class);
-        when(targetJPAMapper.fromJPA(hearingEntity.getTargets(), emptySet())).thenReturn(asList(targetMock));
 
         HearingType hearingTypeMock = mock(HearingType.class);
         when(hearingTypeJPAMapper.fromJPA(hearingEntity.getHearingType())).thenReturn(hearingTypeMock);

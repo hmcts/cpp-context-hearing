@@ -6,7 +6,7 @@
 
     <changeSet id="041" author="hearing">
         <dropForeignKeyConstraint baseTableName="nows_result"
-                                  constraintName="fk_nows_nows_result "></dropForeignKeyConstraint>
+                                  constraintName="fk_nows_nows_result"></dropForeignKeyConstraint>
         <dropColumn tableName="nows_result" columnName="nows_id"/>
         <addColumn tableName="nows_result">
             <column name="nows_material_id" type="UUID">

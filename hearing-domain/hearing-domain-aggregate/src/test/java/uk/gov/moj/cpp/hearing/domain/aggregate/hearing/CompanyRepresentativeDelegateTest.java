@@ -2,14 +2,9 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.CompanyRepresentative;
-import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeAdded;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeRemoved;
@@ -20,9 +15,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
 public class CompanyRepresentativeDelegateTest {
 

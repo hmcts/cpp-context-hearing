@@ -1,17 +1,14 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 import uk.gov.moj.cpp.hearing.command.sessiontime.CourtSession;
 import uk.gov.moj.cpp.hearing.command.sessiontime.CourtSessionJudiciary;
 import uk.gov.moj.cpp.hearing.command.sessiontime.RecordSessionTime;
-import uk.gov.moj.cpp.hearing.domain.event.HearingCaseNoteSaved;
 import uk.gov.moj.cpp.hearing.domain.event.sessiontime.SessionTimeRecorded;
 
-import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -19,13 +16,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SessionTimeAggregateTest {
     @InjectMocks
     private SessionTimeAggregate sessionTimeAggregate;
@@ -73,7 +69,7 @@ public class SessionTimeAggregateTest {
         final SessionTimeRecorded sessionTimeRecorded = (SessionTimeRecorded) events.get(0);
 
         assertThat(events.size(), is(1));
-        assertThat(sessionTimeRecorded, is(SessionTimeRecorded.class) );
+        assertThat(sessionTimeRecorded.getClass(), is(SessionTimeRecorded.class) );
         assertThat(sessionTimeRecorded.getCourtRoomId(), is(courtRoomId));
         assertThat(sessionTimeRecorded.getCourtHouseId(), is(courtHouseId));
         assertThat(sessionTimeRecorded.getCourtSessionId(), is(courtSessionId));

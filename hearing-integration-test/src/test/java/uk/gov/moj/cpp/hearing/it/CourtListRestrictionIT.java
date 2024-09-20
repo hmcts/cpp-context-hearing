@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.time.ZonedDateTime.now;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
@@ -37,13 +36,13 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.InitiationCode;
 import uk.gov.justice.core.courts.ReportingRestriction;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.steps.CourtListRestrictionSteps;
 import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -52,8 +51,8 @@ import java.util.UUID;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.json.JsonObject;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 
 @NotThreadSafe
@@ -62,10 +61,10 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
     private ZonedDateTime eventTime;
 
 
-    @Before
+    @BeforeEach
     public void setUpTest() {
         cleanDatabase("ha_hearing");
-        eventTime = now().minusMinutes(5L).withZoneSameLocal(ZoneId.of("UTC"));
+        eventTime = new UtcClock().now().minusMinutes(5L);
     }
 
     @Test
@@ -134,13 +133,12 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
         final UUID hearingId = randomUUID();
         final UUID courtCentreId = randomUUID();
         final UUID roomId = randomUUID();
-        final Hearing hearing =  createHearingForToday(hearingId, courtCentreId, roomId, userId, null);
+        final Hearing hearing = createHearingForToday(hearingId, courtCentreId, roomId, userId, null);
 
-        courtListRestrictionSteps.hideCaseFromXhibit(hearing , true);
+        courtListRestrictionSteps.hideCaseFromXhibit(hearing, true);
 
         try (final Utilities.EventListener eventTopic = listenFor("hearing.hearing-change-ignored", "hearing.event")
-                .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString())))))
-        {
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString()))))) {
             eventTopic.waitFor();
         }
 

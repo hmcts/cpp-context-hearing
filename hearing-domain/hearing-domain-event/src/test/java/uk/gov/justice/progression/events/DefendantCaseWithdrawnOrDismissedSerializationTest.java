@@ -12,7 +12,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
 import java.util.UUID;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DefendantCaseWithdrawnOrDismissedSerializationTest {
 

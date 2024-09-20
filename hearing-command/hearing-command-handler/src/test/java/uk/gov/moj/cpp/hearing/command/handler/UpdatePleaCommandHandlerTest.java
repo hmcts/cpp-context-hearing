@@ -23,17 +23,6 @@ import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.IndicatedPlea;
@@ -70,7 +59,19 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@RunWith(MockitoJUnitRunner.class)
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
 public class UpdatePleaCommandHandlerTest {
     private static final String GUILTY = "GUILTY";
     private static final String NOT_GUILTY = "NOT_GUILTY";
@@ -104,7 +105,7 @@ public class UpdatePleaCommandHandlerTest {
 
     private Set<String> guiltyPleaTypes;
 
-    @Before
+    @BeforeEach
     public void setup() {
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         setField(this.jsonObjectToObjectConverter, "objectMapper", objectMapper);

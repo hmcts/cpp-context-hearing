@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -17,18 +17,20 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
-import com.jayway.restassured.response.Response;
-import org.junit.Test;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+
+import java.time.LocalDate;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import java.time.LocalDate;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+
+import io.restassured.response.Response;
+import org.junit.jupiter.api.Test;
 
 public class SessionTimeIT extends AbstractIT {
 

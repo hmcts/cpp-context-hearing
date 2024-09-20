@@ -4,7 +4,7 @@ import static java.util.UUID.randomUUID;
 import static javax.json.Json.createReader;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.Envelope.metadataBuilder;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -17,13 +17,13 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ProgressionServiceTest {
 
     @Mock
@@ -42,7 +42,7 @@ public class ProgressionServiceTest {
     public void shouldRetrieveAAAGDetailsByApplicationId() {
 
         JsonEnvelope jsonEnvelope = getUserEnvelope(PROGRESSION_QUERY_APPLICATIONS);
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(jsonEnvelope);
+        when(requester.request(any(), any(Class.class))).thenReturn(jsonEnvelope);
 
         Optional<JsonObject> aagResponse = progressionService.getApplication(jsonEnvelope, APPLICATION_ID.toString());
 

@@ -16,7 +16,7 @@ import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PersonDefendantJPAMapperTest {
 

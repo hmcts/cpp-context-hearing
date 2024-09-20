@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import uk.gov.moj.cpp.hearing.query.view.service.ctl.model.PublicHoliday;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,16 +15,15 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
-import junit.framework.TestCase;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("squid:S2187")
-@RunWith(MockitoJUnitRunner.class)
-public class PublicHolidaysWeekendsServiceTest extends TestCase {
+@ExtendWith(MockitoExtension.class)
+public class PublicHolidaysWeekendsServiceTest {
     private static final String ENGLAND_AND_WALES_DIVISION = "england-and-wales";
 
     @Mock

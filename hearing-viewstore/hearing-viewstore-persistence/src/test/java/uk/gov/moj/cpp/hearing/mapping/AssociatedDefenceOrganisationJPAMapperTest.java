@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.mapping;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.core.courts.AssociatedDefenceOrganisation.associatedDefenceOrganisation;
 import static uk.gov.justice.core.courts.DefenceOrganisation.defenceOrganisation;
 
@@ -15,7 +15,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceOrganisation;
 
 import java.time.LocalDate;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AssociatedDefenceOrganisationJPAMapperTest {
     private static final String LAA_CONTRACT_NUMBER = "ABC LTD";

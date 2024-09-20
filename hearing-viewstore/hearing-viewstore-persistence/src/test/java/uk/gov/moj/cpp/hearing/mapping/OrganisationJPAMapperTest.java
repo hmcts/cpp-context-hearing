@@ -12,7 +12,7 @@ import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class OrganisationJPAMapperTest {
 

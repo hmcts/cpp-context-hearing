@@ -8,7 +8,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class VerdictTypeJPAMapperTest {
 

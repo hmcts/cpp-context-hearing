@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.hearing.courts.AddApplicantCounsel;
 import uk.gov.justice.hearing.courts.RemoveApplicantCounsel;

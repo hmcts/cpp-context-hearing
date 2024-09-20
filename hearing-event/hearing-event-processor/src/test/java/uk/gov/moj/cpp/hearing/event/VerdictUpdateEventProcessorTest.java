@@ -32,8 +32,8 @@ import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -62,7 +62,7 @@ public class VerdictUpdateEventProcessorTest {
     private VerdictUpdateEventProcessor verdictUpdateEventProcessor;
 
 
-    @Before
+    @BeforeEach
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
     }

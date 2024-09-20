@@ -1,8 +1,8 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.justice.progression.events.SendingSheetCompleted;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Address;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.CrownCourtHearing;
@@ -27,7 +27,7 @@ public class HearingsTransformerTest {
     private HearingTransformer hearingTransformer;
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    @Before
+    @BeforeEach
     public void setup() {
         hearingTransformer = new HearingTransformer();
     }

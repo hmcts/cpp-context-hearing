@@ -25,7 +25,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SetHearingTrialTypeIT extends AbstractIT {
     private static final UUID USER_ID = randomUUID();

@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-viewstore</artifactId>
-        <version>8.0.151-SNAPSHOT</version>
+        <version>17.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-viewstore-liquibase</artifactId>
 
@@ -21,20 +21,12 @@
                         <id>Create hearing context schema</id>
                         <configuration>
                             <propertyFile>src/main/resources/liquibase.properties</propertyFile>
-                            <contexts>${liquibase.context}</contexts>
                         </configuration>
                         <goals>
                             <goal>update</goal>
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.liquibase</groupId>
-                        <artifactId>liquibase-core</artifactId>
-                        <version>${liquibase.core.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>

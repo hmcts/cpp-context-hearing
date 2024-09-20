@@ -10,7 +10,7 @@ import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class JudicialRoleJPAMapperTest {
 

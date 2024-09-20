@@ -19,7 +19,6 @@ import static uk.gov.moj.cpp.hearing.event.Framework5Fix.toJsonEnvelope;
 import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
-import com.google.common.collect.Lists;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
@@ -30,6 +29,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichAssociatedHearingsWithIndicatedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
@@ -37,8 +37,9 @@ import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
+import com.google.common.collect.Lists;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -63,7 +64,7 @@ public class PleaUpdateEventProcessorTest {
     private Sender sender;
 
     @Captor
-    private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+    private ArgumentCaptor<DefaultEnvelope> envelopeArgumentCaptor;
 
     @InjectMocks
     private PleaUpdateEventProcessor pleaUpdateEventProcessor;
@@ -73,7 +74,7 @@ public class PleaUpdateEventProcessorTest {
     private UUID defendantId;
     private UUID courtApplicationId;
 
-    @Before
+    @BeforeEach
     public void initMocks() {
         this.offenceId = randomUUID();
         this.defendantId = randomUUID();
@@ -104,7 +105,7 @@ public class PleaUpdateEventProcessorTest {
 
         verify(this.sender, times(3)).send(this.envelopeArgumentCaptor.capture());
 
-        List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
+        List<DefaultEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
 
         assertThat(toJsonEnvelope(events.get(0)).metadata().name(), is("hearing.command.update-plea-against-offence"));
 
@@ -157,7 +158,7 @@ public class PleaUpdateEventProcessorTest {
 
         verify(this.sender, times(2)).send(this.envelopeArgumentCaptor.capture());
 
-        List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
+        List<DefaultEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
 
         assertThat(toJsonEnvelope(events.get(0)).metadata().name(), is("public.hearing.plea-updated"));
 
@@ -194,7 +195,7 @@ public class PleaUpdateEventProcessorTest {
 
         verify(this.sender, times(3)).send(this.envelopeArgumentCaptor.capture());
 
-        List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
+        List<DefaultEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
 
         assertThat(toJsonEnvelope(events.get(0)).metadata().name(), is("hearing.command.update-plea-against-offence"));
 
@@ -248,7 +249,7 @@ public class PleaUpdateEventProcessorTest {
 
         verify(this.sender, times(3)).send(this.envelopeArgumentCaptor.capture());
 
-        List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
+        List<DefaultEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
 
         assertThat(toJsonEnvelope(events.get(0)).metadata().name(), is("hearing.command.update-plea-against-offence"));
 
@@ -293,7 +294,7 @@ public class PleaUpdateEventProcessorTest {
 
         verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
 
-        List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
+        List<DefaultEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
 
         assertThat(toJsonEnvelope(events.get(0)).metadata().name(), is("hearing.command.enrich-associated-hearings-with-indicated-plea"));
 

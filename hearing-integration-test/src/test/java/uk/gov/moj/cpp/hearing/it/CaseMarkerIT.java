@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Marker;
@@ -26,10 +27,6 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC
 
 public class CaseMarkerIT extends AbstractIT {
 
-    @Override
-    public void setUpPerTest() {
-        super.setUpPerTest();
-    }
 
     @Test
     public void shouldUpdateCaseMarkers() throws Exception {

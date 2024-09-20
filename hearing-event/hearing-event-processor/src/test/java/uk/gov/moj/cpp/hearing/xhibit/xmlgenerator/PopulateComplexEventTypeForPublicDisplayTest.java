@@ -4,7 +4,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
@@ -20,13 +20,13 @@ import uk.gov.moj.cpp.hearing.xhibit.ProgressionCaseRetriever;
 import java.util.Collections;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PopulateComplexEventTypeForPublicDisplayTest {
     private PopulateComplexEventTypeForPublicDisplay populateComplexEventTypeForPublicDisplay;
 
@@ -41,7 +41,7 @@ public class PopulateComplexEventTypeForPublicDisplayTest {
 
     private ComplexTypeDataProcessor complexTypeDataProcessor;
 
-    @Before
+    @BeforeEach
     public void setup() {
         populateComplexEventTypeForPublicDisplay = new PopulateComplexEventTypeForPublicDisplay();
         complexTypeDataProcessor = new ComplexTypeDataProcessor();

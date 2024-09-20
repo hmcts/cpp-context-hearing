@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.event.service;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.justice.hearing.courts.referencedata.HearingTypes.hearingTypes;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
@@ -13,14 +13,14 @@ import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.hearing.courts.referencedata.HearingTypesResult;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HearingTypeReverseLookupTest extends ReferenceDataClientTestBase {
 
     @InjectMocks

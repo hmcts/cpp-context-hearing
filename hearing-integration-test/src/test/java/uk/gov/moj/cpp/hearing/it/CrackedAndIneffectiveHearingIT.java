@@ -73,15 +73,15 @@ import java.util.stream.Collectors;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @NotThreadSafe
 public class CrackedAndIneffectiveHearingIT extends AbstractIT {
     private LocalDate orderDate;
     private AllNowsReferenceDataHelper allNowsReferenceDataHelper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         orderDate = PAST_LOCAL_DATE.next();
         allNowsReferenceDataHelper = setupNowsReferenceData(orderDate);

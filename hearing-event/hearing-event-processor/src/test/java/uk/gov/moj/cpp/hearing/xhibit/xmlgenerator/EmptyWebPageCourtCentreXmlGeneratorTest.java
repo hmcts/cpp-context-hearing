@@ -15,13 +15,13 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EmptyWebPageCourtCentreXmlGeneratorTest {
 
     private static final String DUMMY_PUBLIC_DISPLAY_FILE_PATH = "xhibit/expectedDummyWebPage.xml";

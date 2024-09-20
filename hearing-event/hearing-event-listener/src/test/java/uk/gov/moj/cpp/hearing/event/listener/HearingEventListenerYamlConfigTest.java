@@ -102,8 +102,8 @@ import java.util.List;
 import java.util.Map;
 
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class HearingEventListenerYamlConfigTest {
 
@@ -197,7 +197,7 @@ public class HearingEventListenerYamlConfigTest {
     private final Map<String, String> handlerNames = new HashMap<>();
     private List<String> yamlEventNames;
 
-    @Before
+    @BeforeEach
     public void setup() throws MalformedURLException {
 
         handlerNames.putAll(getMethodsToHandlerNamesMapFor(HearingEventListener.class,

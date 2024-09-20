@@ -4,18 +4,18 @@ import javax.json.JsonObject;
 import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.core.courts.notification.EmailChannel;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -28,7 +28,7 @@ import uk.gov.moj.cpp.hearing.nces.DocumentContent;
 import uk.gov.moj.cpp.hearing.nces.FinancialOrderForDefendant;
 import uk.gov.moj.cpp.hearing.nces.NCESNotificationRequested;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"squid:S2699"})
 public class NCESNotificationRequestedEventProcessorTest {
 
@@ -48,7 +48,7 @@ public class NCESNotificationRequestedEventProcessorTest {
     private ArgumentCaptor<DefaultEnvelope> senderJsonEnvelopeCaptor;
 
 	@Test
-	@Before
+	@BeforeEach
 	public void setup() {
 		setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
 		setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
@@ -94,14 +94,14 @@ public class NCESNotificationRequestedEventProcessorTest {
         verify(sender).send(senderJsonEnvelopeCaptor.capture());
 
 		DefaultEnvelope value = senderJsonEnvelopeCaptor.getValue();
-		Assert.assertThat(value.metadata().name(),is("public.hearing.event.nces-notification-requested"));
+		assertThat(value.metadata().name(),is("public.hearing.event.nces-notification-requested"));
 		JsonObject convert = objectToJsonObjectConverter.convert(value.payload());
-		Assert.assertThat(convert.getJsonString("caseId").getString(), is(publicFinancialOrderForDefendant.getCaseId().toString()));
-		Assert.assertThat(convert.getJsonString("defendantId").getString(), is(publicFinancialOrderForDefendant.getDefendantId().toString()));
-		Assert.assertThat(convert.getJsonString("hearingId").getString(), is(publicFinancialOrderForDefendant.getHearingId().toString()));
-		Assert.assertThat(convert.getJsonString("materialId").getString(), is(publicFinancialOrderForDefendant.getMaterialId().toString()));
+		assertThat(convert.getJsonString("caseId").getString(), is(publicFinancialOrderForDefendant.getCaseId().toString()));
+		assertThat(convert.getJsonString("defendantId").getString(), is(publicFinancialOrderForDefendant.getDefendantId().toString()));
+		assertThat(convert.getJsonString("hearingId").getString(), is(publicFinancialOrderForDefendant.getHearingId().toString()));
+		assertThat(convert.getJsonString("materialId").getString(), is(publicFinancialOrderForDefendant.getMaterialId().toString()));
 		String actualTemplate = ((JsonObject) convert.getJsonArray("emailNotifications").get(0)).getJsonString("templateId").getString();
-		Assert.assertThat(actualTemplate, is(publicFinancialOrderForDefendant.getEmailNotifications().get(0).getTemplateId().toString()));
+		assertThat(actualTemplate, is(publicFinancialOrderForDefendant.getEmailNotifications().get(0).getTemplateId().toString()));
 
 	}
 

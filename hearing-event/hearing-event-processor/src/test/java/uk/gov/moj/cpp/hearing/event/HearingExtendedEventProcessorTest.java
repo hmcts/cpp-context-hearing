@@ -21,16 +21,16 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HearingExtendedEventProcessorTest {
 
     @Spy
@@ -54,7 +54,6 @@ public class HearingExtendedEventProcessorTest {
         final ExtendHearingCommand extendHearingCommand = new ExtendHearingCommand();
         extendHearingCommand.setHearingId(randomUUID());
         extendHearingCommand.setCourtApplication(CourtApplication.courtApplication()
-                //.withLinkedCaseId(randomUUID())
                 .build());
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.events.hearing-extended"),

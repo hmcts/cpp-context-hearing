@@ -1,10 +1,10 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
-import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
-import static org.mockito.Matchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
@@ -17,13 +17,12 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CourtHouseReverseLookupTest extends ReferenceDataClientTestBase {
 
     public static final String ORG_UNIT = randomUUID().toString();
@@ -80,14 +79,14 @@ public class CourtHouseReverseLookupTest extends ReferenceDataClientTestBase {
 
         Optional<CourtCentreOrganisationUnit> result = courtHouseReverseLookup.getCourtCentreByName(requestEnvelope, "abcdEFg");
 
-        Assert.assertEquals(expectedCourtHouseByNameResult.getId(), result.get().getId());
+        assertEquals(expectedCourtHouseByNameResult.getId(), result.get().getId());
 
     }
 
     @Test
     public void courtRoomByName() {
         Optional<Courtrooms> result = courtHouseReverseLookup.getCourtRoomByRoomName(expectedCourtHouseByNameResult, "abCdefGh");
-        Assert.assertEquals(result.get().getCourtroomId(), expectedCourtRoomResult.getCourtroomId());
+        assertEquals(result.get().getCourtroomId(), expectedCourtRoomResult.getCourtroomId());
 
     }
 
@@ -111,6 +110,6 @@ public class CourtHouseReverseLookupTest extends ReferenceDataClientTestBase {
 
         Optional<CourtCentreOrganisationUnit> result = courtHouseReverseLookup.getCourtCentreById(requestEnvelope, UUID.fromString(ORG_UNIT));
 
-        Assert.assertEquals(expectedCourtHouseByNameResult.getId(), result.get().getId());
+        assertEquals(expectedCourtHouseByNameResult.getId(), result.get().getId());
     }
 }

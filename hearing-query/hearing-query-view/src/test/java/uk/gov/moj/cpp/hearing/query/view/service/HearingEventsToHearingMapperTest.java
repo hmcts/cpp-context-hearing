@@ -6,10 +6,7 @@ import static java.util.Comparator.comparing;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.core.courts.Hearing.hearing;
 import static uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent.hearingEvent;
 
@@ -27,16 +24,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.ejb.Init;
-import javax.inject.Inject;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HearingEventsToHearingMapperTest {
     private static final UUID FINISHED_EVENT = UUID.fromString("0df93f18-0a21-40f5-9fb3-da4749cd70fe");
 

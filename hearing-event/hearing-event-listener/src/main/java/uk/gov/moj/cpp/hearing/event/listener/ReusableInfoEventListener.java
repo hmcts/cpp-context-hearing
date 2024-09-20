@@ -83,7 +83,7 @@ public class ReusableInfoEventListener {
 
     private  List<ReusableInfo> getExistingReusablePrompts(final UUID defendantId, final List<uk.gov.moj.cpp.hearing.persist.entity.ha.ReusableInfo> existingReusableInfos) {
         final Optional<uk.gov.moj.cpp.hearing.persist.entity.ha.ReusableInfo> reusableInfo = existingReusableInfos.stream().filter(re -> re.getId().equals(defendantId)).findFirst();
-        final List<JsonNode> list = new ArrayList();
+        final List<JsonNode> list = new ArrayList<>();
         reusableInfo.ifPresent(re -> {
             final JsonNode reusablePrompts = re.getPayload().get("reusablePrompts");
             if (nonNull(reusablePrompts) && reusablePrompts.isArray()) {
@@ -108,7 +108,7 @@ public class ReusableInfoEventListener {
 
     private  List<ReusableInfoResults> getExistingReusableResults(final UUID defendantId, final List<uk.gov.moj.cpp.hearing.persist.entity.ha.ReusableInfo> existingReusableInfos) {
         final Optional<uk.gov.moj.cpp.hearing.persist.entity.ha.ReusableInfo> reusableInfo = existingReusableInfos.stream().filter(re -> re.getId().equals(defendantId)).findFirst();
-        final List<JsonNode> list = new ArrayList();
+        final List<JsonNode> list = new ArrayList<>();
         reusableInfo.ifPresent(re -> {
             final JsonNode reusableResults = re.getPayload().get("reusableResults");
             if (nonNull(reusableResults) && reusableResults.isArray()) {
@@ -129,7 +129,7 @@ public class ReusableInfoEventListener {
     }
 
     private void populateReusableResults(final ReusableInfoSaved reusableInfoSaved, final UUID defendantId, final JsonArrayBuilder resultsArrBuilder, final List<ReusableInfoResults> existingReusableResultsForDefendant) {
-        final List<UUID> inputOffenceListForDefendant  = new ArrayList();
+        final List<UUID> inputOffenceListForDefendant  = new ArrayList<>();
         reusableInfoSaved.getResultsList().stream()
                 .filter(resultsCache -> defendantId.equals(resultsCache.getMasterDefendantId()))
                 .map(resultsCache -> {
@@ -156,7 +156,7 @@ public class ReusableInfoEventListener {
     }
 
     private void populateReusablePrompts(final ReusableInfoSaved reusableInfoSaved, final UUID defendantId, final JsonArrayBuilder promptsArrBuilder, final List<ReusableInfo> existingReusablePromptsForDefendant) {
-        final List<UUID> inputOffenceListForDefendant  = new ArrayList();
+        final List<UUID> inputOffenceListForDefendant  = new ArrayList<>();
         reusableInfoSaved.getPromptList().stream()
                 .filter(prompt -> defendantId.equals(prompt.getMasterDefendantId()))
                 .map(prompt -> {

@@ -6,11 +6,14 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.LONG;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
+
+import org.junit.After;
 import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
@@ -69,6 +72,16 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
     @Inject
     private HearingRepository hearingRepository;
 
+
+    @After
+    public void clearRepository(){
+        hearingRepository.findAll().forEach(hearing ->
+                hearingRepository.remove(hearing));
+      hearingEventRepository.findAll().forEach(hearingEvent ->
+                hearingEventRepository.remove(hearingEvent));
+
+    }
+    
     @Test
     public void shouldLogAnHearingEvent() {
         givenNoHearingEventsExist();
@@ -165,6 +178,7 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
         assertThat(hearingEvents.get(1).isDeleted(), is(false));
     }
 
+    
     @Test
     public void shouldReturnEmptyEventsWhenNoHearingEventsExistForAHearing() {
         givenNoHearingEventsExist();
@@ -276,8 +290,8 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
         assertThat(hearingEvents.get(0).getHearingEventDefinitionId(), is(HEARING_EVENT_DEFINITION_ID_2));
         assertThat(hearingEvents.get(0).getId(), is(HEARING_EVENT_ID_2));
         assertThat(hearingEvents.get(0).getRecordedLabel(), is(RECORDED_LABEL_2));
-        assertThat(hearingEvents.get(0).getEventTime(), is(EVENT_TIME_2));
-        assertThat(hearingEvents.get(0).getLastModifiedTime(), is(LAST_MODIFIED_TIME_2));
+        assertTrue(hearingEvents.get(0).getEventTime().isEqual(EVENT_TIME_2));
+        assertTrue(hearingEvents.get(0).getLastModifiedTime().isEqual(LAST_MODIFIED_TIME_2));
     }
 
     @Test
@@ -307,8 +321,10 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
         assertThat(hearingEvents.get(1).getRecordedLabel(), is(RECORDED_LABEL_2));
         assertThat(hearingEvents.get(1).getEventTime(), is(EVENT_TIME_2));
         assertThat(hearingEvents.get(1).getLastModifiedTime(), is(LAST_MODIFIED_TIME_2));
+
     }
 
+    
     @Test
     public void shouldGetHearingEventLogCountByHearingId() {
         populateAndSaveHearingEvent();
@@ -316,6 +332,7 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
         assertThat(eventLogCount, is(2L));
     }
 
+    
     @Test
     public void shouldGetHearingEventLogCountByHearingIdAndEventDate() {
         populateAndSaveHearingEvent();

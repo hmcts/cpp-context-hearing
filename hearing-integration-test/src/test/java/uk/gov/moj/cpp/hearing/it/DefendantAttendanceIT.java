@@ -26,7 +26,7 @@ import java.util.UUID;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @NotThreadSafe
 public class DefendantAttendanceIT extends AbstractIT {

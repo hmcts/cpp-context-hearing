@@ -30,7 +30,7 @@ import java.util.UUID;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import com.google.common.collect.ImmutableSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @NotThreadSafe
 public class CorrectHearingDaysWithoutCourtCentreIdIT extends AbstractIT {

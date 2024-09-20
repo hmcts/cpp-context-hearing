@@ -15,8 +15,6 @@ import uk.gov.moj.cpp.hearing.nces.FinancialOrderForDefendant;
 import uk.gov.moj.cpp.hearing.nces.NCESNotificationRequested;
 import uk.gov.moj.cpp.hearing.nces.RemoveGrantedApplicationDetailsForDefendant;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -26,16 +24,15 @@ import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(Parameterized.class)
 public class NCESNotificationDecisionDelegateTest {
 
 
@@ -66,18 +63,13 @@ public class NCESNotificationDecisionDelegateTest {
     @InjectMocks
     private NCESNotificationDecisionDelegate ncesNotificationDecisionDelegateUnderTest;
 
-    private String scenarioType;
-    private UUID applicationTypeId;
-    private UUID applicationOutcomeTypeId;
-    private String amendmentType;
-
     private UUID hearingId;
     private UUID caseId;
     private UUID defendantId;
     private String scenarioName;
 
 
-    @Before
+    @BeforeEach
     public void setUp(){
         MockitoAnnotations.initMocks(this);
         hearingId = UUID.randomUUID();
@@ -86,43 +78,33 @@ public class NCESNotificationDecisionDelegateTest {
     }
 
 
-    @Parameterized.Parameters(name = "should return \"{3}\" as amendment type when we have this combination : {4}")
-    public static Collection amendmentType() {
-        return Arrays.asList(new Object[][] {
-                {WITHDRAWN_SCENARIO_TYPE, APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_ID, WITHDRAWN_APPLICATION_OUTCOME_ID, "Stat dec withdrawn", "stat dec / withdrawn"},
-                {WITHDRAWN_SCENARIO_TYPE, APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_SJP_CASE_ID, WITHDRAWN_APPLICATION_OUTCOME_ID, "Stat dec withdrawn",  "stat dec sjp case id / withdrawn"},
-                {WITHDRAWN_SCENARIO_TYPE, APPEAL_AGAINST_CONVICTION_ID, WITHDRAWN_APPLICATION_OUTCOME_ID, "Appeal withdrawn", "appeal against conviction / withdrawn"},
-                {WITHDRAWN_SCENARIO_TYPE, APPEAL_AGAINST_SENTENCE_ID, WITHDRAWN_APPLICATION_OUTCOME_ID, "Appeal withdrawn", "appeal against sentence / withdrawn"},
-                {WITHDRAWN_SCENARIO_TYPE, APPLICATION_TO_REOPEN_CASE_ID, WITHDRAWN_APPLICATION_OUTCOME_ID, "Reopen withdrawn", "application to reopen / withdrawn"},
+    public static Stream<Arguments> amendmentType() {
+        return Stream.of(
+                Arguments.of(WITHDRAWN_SCENARIO_TYPE, APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_ID, WITHDRAWN_APPLICATION_OUTCOME_ID, "Stat dec withdrawn", "stat dec / withdrawn"),
+                Arguments.of(WITHDRAWN_SCENARIO_TYPE, APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_SJP_CASE_ID, WITHDRAWN_APPLICATION_OUTCOME_ID, "Stat dec withdrawn",  "stat dec sjp case id / withdrawn"),
+                Arguments.of(WITHDRAWN_SCENARIO_TYPE, APPEAL_AGAINST_CONVICTION_ID, WITHDRAWN_APPLICATION_OUTCOME_ID, "Appeal withdrawn", "appeal against conviction / withdrawn"),
+                Arguments.of(WITHDRAWN_SCENARIO_TYPE, APPEAL_AGAINST_SENTENCE_ID, WITHDRAWN_APPLICATION_OUTCOME_ID, "Appeal withdrawn", "appeal against sentence / withdrawn"),
+                Arguments.of(WITHDRAWN_SCENARIO_TYPE, APPLICATION_TO_REOPEN_CASE_ID, WITHDRAWN_APPLICATION_OUTCOME_ID, "Reopen withdrawn", "application to reopen / withdrawn"),
 
-                {REFUSED_SCENARIO_TYPE, APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_ID, REFUSED_APPLICATION_OUTCOME_ID, "Stat dec refused", "stat dec / refused"},
-                {REFUSED_SCENARIO_TYPE, APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_SJP_CASE_ID, REFUSED_APPLICATION_OUTCOME_ID, "Stat dec refused" , "stat dec sjp case id / refused"},
-                {REFUSED_SCENARIO_TYPE, APPEAL_AGAINST_CONVICTION_ID, REFUSED_APPLICATION_OUTCOME_ID, "Appeal refused", "appeal against conviction / refused"},
-                {REFUSED_SCENARIO_TYPE, APPEAL_AGAINST_SENTENCE_ID, REFUSED_APPLICATION_OUTCOME_ID, "Appeal refused", "appeal against sentence / refused"},
-                {REFUSED_SCENARIO_TYPE, APPLICATION_TO_REOPEN_CASE_ID, REFUSED_APPLICATION_OUTCOME_ID, "Reopen refused", "application to reopen / refused"},
+                Arguments.of(REFUSED_SCENARIO_TYPE, APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_ID, REFUSED_APPLICATION_OUTCOME_ID, "Stat dec refused", "stat dec / refused"),
+                Arguments.of(REFUSED_SCENARIO_TYPE, APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_SJP_CASE_ID, REFUSED_APPLICATION_OUTCOME_ID, "Stat dec refused" , "stat dec sjp case id / refused"),
+                Arguments.of(REFUSED_SCENARIO_TYPE, APPEAL_AGAINST_CONVICTION_ID, REFUSED_APPLICATION_OUTCOME_ID, "Appeal refused", "appeal against conviction / refused"),
+                Arguments.of(REFUSED_SCENARIO_TYPE, APPEAL_AGAINST_SENTENCE_ID, REFUSED_APPLICATION_OUTCOME_ID, "Appeal refused", "appeal against sentence / refused"),
+                Arguments.of(REFUSED_SCENARIO_TYPE, APPLICATION_TO_REOPEN_CASE_ID, REFUSED_APPLICATION_OUTCOME_ID, "Reopen refused", "application to reopen / refused"),
 
-                {GRANTED_SCENARIO_TYPE, APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_ID, GRANTED_APPLICATION_OUTCOME_ID, "Stat dec granted",  "stat dec / granted"},
-                {GRANTED_SCENARIO_TYPE, APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_SJP_CASE_ID, GRANTED_APPLICATION_OUTCOME_ID, "Stat dec granted", "stat dec sjp case id / granted"},
-                {GRANTED_SCENARIO_TYPE, APPEAL_AGAINST_CONVICTION_ID, GRANTED_APPLICATION_OUTCOME_ID, "Appeal granted", "appeal against conviction / granted"},
-                {GRANTED_SCENARIO_TYPE, APPEAL_AGAINST_SENTENCE_ID, GRANTED_APPLICATION_OUTCOME_ID, "Appeal granted", "appeal against conviction / granted"},
-                {GRANTED_SCENARIO_TYPE, APPLICATION_TO_REOPEN_CASE_ID, GRANTED_APPLICATION_OUTCOME_ID, "Reopen granted", "application to reopen / granted"}
-        });
+                Arguments.of(GRANTED_SCENARIO_TYPE, APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_ID, GRANTED_APPLICATION_OUTCOME_ID, "Stat dec granted",  "stat dec / granted"),
+                Arguments.of(GRANTED_SCENARIO_TYPE, APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_SJP_CASE_ID, GRANTED_APPLICATION_OUTCOME_ID, "Stat dec granted", "stat dec sjp case id / granted"),
+                Arguments.of(GRANTED_SCENARIO_TYPE, APPEAL_AGAINST_CONVICTION_ID, GRANTED_APPLICATION_OUTCOME_ID, "Appeal granted", "appeal against conviction / granted"),
+                Arguments.of(GRANTED_SCENARIO_TYPE, APPEAL_AGAINST_SENTENCE_ID, GRANTED_APPLICATION_OUTCOME_ID, "Appeal granted", "appeal against conviction / granted"),
+                Arguments.of(GRANTED_SCENARIO_TYPE, APPLICATION_TO_REOPEN_CASE_ID, GRANTED_APPLICATION_OUTCOME_ID, "Reopen granted", "application to reopen / granted")
+        );
     }
 
 
-
-    // TODO : refactor tests after all scenarios are stable.
-    public NCESNotificationDecisionDelegateTest(String scenarioType, UUID applicationTypeId, UUID applicationOutcomeTypeId,
-                                                String amendmentType, String scenarioName) {
-        this.scenarioType =scenarioType;
-        this.applicationTypeId = applicationTypeId;
-        this.applicationOutcomeTypeId = applicationOutcomeTypeId;
-        this.amendmentType = amendmentType;
-        this.scenarioName = scenarioName;
-    }
-
-    @Test
-    public void should_not_notify_NCES_with_defendant_and_application_details_when_it_was_not_shared_before() {
+    @ParameterizedTest
+    @MethodSource("amendmentType")
+    public void should_not_notify_NCES_with_defendant_and_application_details_when_it_was_not_shared_before(final String scenarioType,final  UUID applicationTypeId,final  UUID applicationOutcomeTypeId,
+                                                                                                            final String amendmentType, final String scenarioName) {
 
         ApplicationDetailsForDefendant expectedApplicationDetailsForDefendant = createAppDetailsForDefendant(applicationTypeId, applicationOutcomeTypeId);
 
@@ -139,8 +121,10 @@ public class NCESNotificationDecisionDelegateTest {
         Assert.assertThat(actualApplicationDetailsForDefendant.getApplicationOutcomeTypeId(), is(expectedApplicationDetailsForDefendant.getApplicationOutcomeTypeId()));
     }
 
-    @Test
-    public void should_notify_NCES_with_defendant_and_application_details_when_refused_or_withdrawn() {
+    @ParameterizedTest
+    @MethodSource("amendmentType")
+    public void should_notify_NCES_with_defendant_and_application_details_when_refused_or_withdrawn(final String scenarioType,final  UUID applicationTypeId,final  UUID applicationOutcomeTypeId,
+                                                                                                    final String amendmentType, final String scenarioName) {
 
         Assume.assumeTrue(WITHDRAWN_SCENARIO_TYPE.equals(scenarioType) || REFUSED_SCENARIO_TYPE.equals(scenarioType));
         ApplicationDetailsForDefendant expectedApplicationDetailsForDefendant = createAppDetailsForDefendant(applicationTypeId, applicationOutcomeTypeId);
@@ -164,8 +148,10 @@ public class NCESNotificationDecisionDelegateTest {
         Assert.assertThat(actualFinancialOrderForDefendantFromTheSecondEvent.getDocumentContent().getAmendmentType(), is(amendmentType));
     }
 
-    @Test
-    public void should_NOT_notify_NCES_when_we_share_and_there_is_NO_deemed_served_results() {
+    @ParameterizedTest
+    @MethodSource("amendmentType")
+    public void should_NOT_notify_NCES_when_we_share_and_there_is_NO_deemed_served_results(final String scenarioType,final  UUID applicationTypeId,final  UUID applicationOutcomeTypeId,
+                                                                                           final String amendmentType, final String scenarioName) {
         Optional<List<UUID>> noDeemedServedResults = empty();
         FinancialOrderForDefendant expectedSharedFinancialOrderForDefendant = createFinancialOrderForDefendant(empty(), noDeemedServedResults);
 
@@ -184,8 +170,10 @@ public class NCESNotificationDecisionDelegateTest {
     }
 
 
-    @Test
-    public void should_notify_NCES_when_we_share_with_deemed_served_results() {
+    @ParameterizedTest
+    @MethodSource("amendmentType")
+    public void should_notify_NCES_when_we_share_with_deemed_served_results(final String scenarioType,final  UUID applicationTypeId,final  UUID applicationOutcomeTypeId,
+                                                                            final String amendmentType, final String scenarioName) {
         FinancialOrderForDefendant expectedSharedFinancialOrderForDefendant = createFinancialOrderForDefendant(empty(), Optional.of(DEEMED_SERVED_RESULTS));
 
         FinancialOrderForDefendant noExistingFinancialOrderForDefendant = null;
@@ -204,8 +192,10 @@ public class NCESNotificationDecisionDelegateTest {
         Assert.assertThat(actualFinancialOrderForDefendantFromTheSecondEvent.getDocumentContent().getAmendmentType(), is("Write off one day deemed served"));
     }
 
-    @Test
-    public void should_notify_NCES_when_we_reshare_with_an_existing_application() {
+    @ParameterizedTest
+    @MethodSource("amendmentType")
+    public void should_notify_NCES_when_we_reshare_with_an_existing_application(final String scenarioType,final  UUID applicationTypeId,final  UUID applicationOutcomeTypeId,
+                                                                                final String amendmentType, final String scenarioName) {
 
         Assume.assumeTrue(GRANTED_SCENARIO_TYPE.equals(scenarioType));
 
@@ -231,8 +221,10 @@ public class NCESNotificationDecisionDelegateTest {
 
     }
 
-    @Test
-    public void should_notify_NCES_when_we_reshare_having_NO_deemed_served_results_without_an_existing_application() {
+    @ParameterizedTest
+    @MethodSource("amendmentType")
+    public void should_notify_NCES_when_we_reshare_having_NO_deemed_served_results_without_an_existing_application(final String scenarioType,final  UUID applicationTypeId,final  UUID applicationOutcomeTypeId,
+                                                                                                                   final String amendmentType, final String scenarioName) {
 
         Assume.assumeTrue(GRANTED_SCENARIO_TYPE.equals(scenarioType));
 
@@ -260,8 +252,10 @@ public class NCESNotificationDecisionDelegateTest {
 
 
 
-    @Test
-    public void should_notify_NCES_when_we_reshare_having_deemed_served_results_without_an_existing_application() {
+    @ParameterizedTest
+    @MethodSource("amendmentType")
+    public void should_notify_NCES_when_we_reshare_having_deemed_served_results_without_an_existing_application(final String scenarioType,final  UUID applicationTypeId,final  UUID applicationOutcomeTypeId,
+                                                                                                                final String amendmentType, final String scenarioName) {
 
         Assume.assumeTrue(GRANTED_SCENARIO_TYPE.equals(scenarioType));
 

@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.Organisation;
@@ -10,7 +10,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Contact;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceOrganisation;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DefenceOrganisationJPAMapperTest {
 

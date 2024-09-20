@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.randomUUID;
@@ -16,12 +16,13 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static uk.gov.justice.services.integrationtest.utils.jms.JmsMessageConsumerClientProvider.newPublicJmsMessageConsumerClientProvider;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.USER_ID_VALUE_AS_ADMIN;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.getStringFromResource;
+import static uk.gov.moj.cpp.hearing.it.MatcherUtil.getPastDate;
 import static uk.gov.moj.cpp.hearing.it.Utilities.JsonUtil.objectToJsonObject;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
@@ -34,8 +35,6 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupNoProsecutionCaseByHearingId;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupProsecutionCaseByHearingId;
 
-
-import java.io.IOException;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtApplication;
@@ -74,10 +73,15 @@ import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
 import uk.gov.justice.hearing.courts.UpdateInterpreterIntermediary;
 import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
 import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
+import uk.gov.justice.hearing.courts.referencedata.EnforcementAreaBacs;
+import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.integrationtest.utils.jms.JmsMessageConsumerClient;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.moj.cpp.hearing.command.HearingVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.command.TrialType;
@@ -111,12 +115,14 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetails
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
@@ -131,9 +137,9 @@ import javax.json.JsonObjectBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.ReadContext;
-import com.jayway.restassured.response.Header;
-import com.jayway.restassured.response.Response;
-import com.jayway.restassured.specification.RequestSpecification;
+import io.restassured.http.Header;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import org.apache.http.HttpStatus;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -144,8 +150,14 @@ import org.json.JSONObject;
 public class UseCases {
 
     private static final String FIELD_OVERRIDE = "override";
+    private static final long RETRIEVE_TIMEOUT = 90000;
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+    private static final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+
+    private static JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverter(objectMapper);
+
 
     public static <T> Consumer<T> asDefault() {
         return c -> {
@@ -177,7 +189,7 @@ public class UseCases {
         final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString()))));
 
-            if (!includeApplicationCases && !includeApplicationOrder) {
+        if (!includeApplicationCases && !includeApplicationOrder) {
                 hearing.setCourtApplications(null);
             } else if (!includeApplicationCases) {
                 hearing.getCourtApplications().forEach(app -> app.setCourtApplicationCases(null));
@@ -265,6 +277,86 @@ public class UseCases {
         }
         Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, 0, resultMatcher);
 
+
+        return initiateHearing;
+    }
+
+    public static InitiateHearingCommand initiateHearingWithNewJMS(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, final boolean includeApplicationCases, final boolean includeApplicationOrder, final boolean includeProsecutionCase, final boolean includeMasterDefandantInSubject, final boolean isNsp) {
+
+        Hearing hearing = initiateHearing.getHearing();
+        final JmsMessageConsumerClient jmsMessageConsumerClientPublicHearingInitiated = newPublicJmsMessageConsumerClientProvider()
+                .withEventNames("public.hearing.initiated").getMessageConsumerClient(); //No need to call startConsumer() explicitly
+
+
+
+        if (!includeApplicationCases && !includeApplicationOrder) {
+            hearing.setCourtApplications(null);
+        } else if (!includeApplicationCases) {
+            hearing.getCourtApplications().forEach(app -> app.setCourtApplicationCases(null));
+        } else if (!includeApplicationOrder) {
+            hearing.getCourtApplications().forEach(app -> app.setCourtOrder(null));
+        }
+        if (includeMasterDefandantInSubject) {
+            final UUID masterDefendantId = randomUUID();
+
+            hearing.getCourtApplications().get(0).getSubject().setMasterDefendant(MasterDefendant.masterDefendant()
+                    .withMasterDefendantId(masterDefendantId)
+                    .withDefendantCase(Arrays.asList(DefendantCase.defendantCase()
+                            .withDefendantId(masterDefendantId)
+                            .withCaseId(hearing.getProsecutionCases().get(0).getId())
+                            .withCaseReference(hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference())
+                            .build()))
+                    .withPersonDefendant(PersonDefendant.personDefendant()
+                            .withPersonDetails(Person.person()
+                                    .withLastName(STRING.next())
+                                    .withGender(Gender.MALE)
+                                    .build())
+                            .withDriverNumber("DVLA12345")
+                            .build())
+                    .build());
+        }
+        if (nonNull(hearing.getCourtApplications()) && nonNull(hearing.getCourtApplications().get(0))) {
+            hearing.getCourtApplications().get(0).setHearingIdToBeVacated(UUID.randomUUID());
+        }
+        if (!includeProsecutionCase) {
+            hearing.setProsecutionCases(null);
+        }
+
+        if (isNsp) {
+            hearing.getProsecutionCases().stream().forEach(prosecutionCase -> prosecutionCase.getProsecutionCaseIdentifier().setAddress(Address.address()
+                    .withPostcode("E14 4EX").withAddress1("line 1").withAddress2("line 2").withAddress3("line 3").withAddress4("line 4").withAddress5("line 5").build())
+                    .setProsecutionAuthorityName("ProsecutionAuthorityName")
+                    .setContact(ContactNumber.contactNumber().withPrimaryEmail("contact@cpp.co.uk").build())
+                    .setProsecutorCategory("Charity")
+                    .setMajorCreditorCode(null));
+        }
+
+        makeCommand(requestSpec, "hearing.initiate")
+                .ofType("application/vnd.hearing.initiate+json")
+                .withPayload(initiateHearing)
+                .executeSuccessfully();
+
+        final Optional<JsonObject> message = jmsMessageConsumerClientPublicHearingInitiated.retrieveMessageAsJsonEnvelope(RETRIEVE_TIMEOUT).map(JsonEnvelope::payloadAsJsonObject);
+
+
+        BeanMatcher<HearingDetailsResponse> resultMatcher = isBean(HearingDetailsResponse.class);
+        final List<ProsecutionCase> prosecutionCases = hearing.getProsecutionCases();
+        if (isNotEmpty(prosecutionCases)) {
+            if (nonNull(hearing.getIsGroupProceedings()) && hearing.getIsGroupProceedings()) {
+                ProsecutionCase masterProsecutionCase = hearing.getProsecutionCases().stream()
+                        .filter(prosecutionCase -> prosecutionCase.getIsGroupMaster().equals(true))
+                        .findFirst().get();
+                resultMatcher.with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getProsecutionCases, getProsecutionCasesMatcher(Arrays.asList(masterProsecutionCase))));
+
+            } else {
+                resultMatcher.with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getProsecutionCases, getProsecutionCasesMatcher(prosecutionCases)));
+            }
+        }
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, 0, resultMatcher);
+
+
         return initiateHearing;
     }
 
@@ -279,11 +371,12 @@ public class UseCases {
                                                 .with(Defendant::getOffences, hasItems(
                                                         defendant.getOffences().stream().map(offence ->
                                                                 isBean(Offence.class).with(Offence::getId, Matchers.is(offence.getId()))
-                                                        ).toArray((IntFunction<Matcher<? super Offence>[]>) Matcher[]::new)
+                                                        ).toArray((IntFunction<Matcher<Offence>[]>) Matcher[]::new)
                                                 ))
-                                ).toArray((IntFunction<Matcher<? super Defendant>[]>) Matcher[]::new)
+                                ).toArray((IntFunction<Matcher<Defendant>[]>) Matcher[]::new)
 
-                        ))).toArray((IntFunction<Matcher<? super ProsecutionCase>[]>) Matcher[]::new)
+                        ))
+                ).toArray((IntFunction<Matcher<ProsecutionCase>[]>) Matcher[]::new)
         );
     }
 
@@ -369,13 +462,39 @@ public class UseCases {
                                            final String recordedLabel, String note) {
         ReferenceDataStub.stubOrganisationUnit(initiateHearingCommand.getHearing().getCourtCentre().getId().toString());
 
+
+        final EnforcementAreaBacs enforcementAreaBacs = EnforcementAreaBacs.enforcementAreaBacs()
+                .withBankAccntName("account name")
+                .withBankAccntNum(1)
+                .withBankAccntSortCode("867878")
+                .withBankAddressLine1("address1")
+                .withRemittanceAdviceEmailAddress("test@test.com")
+                .build();
+
+        final OrganisationalUnit organisationalUnit = OrganisationalUnit.organisationalUnit()
+                .withOucode(null)
+                .withLja(null)
+                .withId(initiateHearingCommand.getHearing().getCourtCentre().getId().toString())
+                .withIsWelsh(true)
+                .withWelshAddress1("Welsh address1")
+                .withWelshAddress2("Welsh address2")
+                .withWelshAddress3("Welsh address3")
+                .withWelshAddress4("Welsh address4")
+                .withWelshAddress4("Welsh address5")
+                .withPostcode("Post Code")
+                .withOucodeL3WelshName(initiateHearingCommand.getHearing().getCourtCentre().getWelshName())
+                .withEnforcementArea(enforcementAreaBacs)
+                .build();
+        ReferenceDataStub.stub(organisationalUnit);
+//        "referencedata.query.organisation-unit.v2"
+
         final LogEventCommand logEvent = with(
                 LogEventCommand.builder()
                         .withHearingEventId(hearingEventId)
                         .withHearingEventDefinitionId(hearingEventDefinitionId)
                         .withHearingId(initiateHearingCommand.getHearing().getId())
                         .withEventTime(eventTime)
-                        .withLastModifiedTime(PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC")))
+                        .withLastModifiedTime(getPastDate())
                         .withRecordedLabel(recordedLabel)
                         .withDefenceCounselId(defenceCounselId)
                         .withAlterable(alterable)

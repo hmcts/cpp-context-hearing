@@ -1,21 +1,49 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.io.Resources;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import static com.google.common.io.Resources.getResource;
+import static java.lang.Boolean.TRUE;
+import static java.nio.charset.Charset.defaultCharset;
+import static java.time.LocalDate.now;
+import static java.time.ZoneOffset.UTC;
+import static java.util.Collections.singletonList;
+import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_USER_ERROR;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.targetTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.JurisdictionType;
@@ -23,6 +51,7 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
@@ -49,8 +78,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.DraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import uk.gov.moj.cpp.hearing.repository.ApprovalRequestedRepository;
 import uk.gov.moj.cpp.hearing.repository.DraftResultRepository;
@@ -60,13 +89,11 @@ import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -74,50 +101,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.google.common.io.Resources.getResource;
-import static java.lang.Boolean.TRUE;
-import static java.nio.charset.Charset.defaultCharset;
-import static java.time.LocalDate.now;
-import static java.time.ZoneOffset.UTC;
-import static java.util.Collections.singletonList;
-import static java.util.UUID.fromString;
-import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.core.Is.is;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
-import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
-import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_USER_ERROR;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.targetTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -128,18 +111,18 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HearingEventListenerTest {
     private static final UUID RI_UNKNOWN_RESULT_DEFINITON_ID = UUID.randomUUID();
 
@@ -222,7 +205,7 @@ public class HearingEventListenerTest {
     private static final String RESULTS = "results";
     private static final String CHILD_RESULT_LINES = "childResultLines";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
     }
@@ -257,8 +240,6 @@ public class HearingEventListenerTest {
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
-        final Offence offence = new Offence();
-        when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
 
         hearingEventListener.draftResultSaved(envelopeFrom(metadataWithRandomUUID("hearing.draft-result-saved"),
                 objectToJsonObjectConverter.convert(draftResultSaved)
@@ -715,7 +696,6 @@ public class HearingEventListenerTest {
         final JsonArray emptyResults = createArrayBuilder().build();
         draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", emptyResults).build().toString());
 
-        when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(null);
 
         final Hearing dbHearing = new Hearing()
                 .setHasSharedResults(true)
@@ -1007,19 +987,9 @@ public class HearingEventListenerTest {
                         .build())
                 .build();
 
-        JsonNode draftResultPayload = toJsonNode(draftResultJsonObject);
-
-        when(draftResult.getDraftResultPayload()).thenReturn(draftResultPayload);
-
         final String draftResultPK = resultsShared.getHearingId().toString() + resultsShared.getHearingDay().toString();
         when(draftResultRepository.findBy(draftResultPK)).thenReturn(null);
         when(hearingRepository.findBy(resultsShared.getHearingId())).thenReturn(dbHearing);
-        when(hearingRepository.findTargetsByHearingId(resultsShared.getHearingId())).thenReturn(asList(target, target2));
-        when(hearingRepository.findProsecutionCasesByHearingId(dbHearing.getId()))
-                .thenReturn(Lists.newArrayList(dbHearing.getProsecutionCases()));
-        when(targetJPAMapper.setMasterDefandantId(anyObject(), anyObject())).thenReturn(targets);
-        when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForToday))).thenReturn(target);
-        when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForTomorrow))).thenReturn(target2);
 
         hearingEventListener.resultsSharedV3(envelopeFrom(metadataWithRandomUUID("hearing.results-shared-v3"),
                 objectToJsonObjectConverter.convert(resultsShared)
@@ -1093,12 +1063,6 @@ public class HearingEventListenerTest {
         final String draftResultPK = resultsShared.getHearingId().toString() + resultsShared.getHearingDay().toString();
         when(draftResultRepository.findBy(draftResultPK)).thenReturn(draftResult);
         when(hearingRepository.findBy(resultsShared.getHearingId())).thenReturn(dbHearing);
-        when(hearingRepository.findTargetsByHearingId(resultsShared.getHearingId())).thenReturn(asList(target, target2));
-        when(hearingRepository.findProsecutionCasesByHearingId(dbHearing.getId()))
-                .thenReturn(Lists.newArrayList(dbHearing.getProsecutionCases()));
-        when(targetJPAMapper.setMasterDefandantId(anyObject(), anyObject())).thenReturn(targets);
-        when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForToday))).thenReturn(target);
-        when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForTomorrow))).thenReturn(target2);
 
         hearingEventListener.resultsSharedV3(envelopeFrom(metadataWithRandomUUID("hearing.results-shared-v3"),
                 objectToJsonObjectConverter.convert(resultsShared)
@@ -1171,12 +1135,6 @@ public class HearingEventListenerTest {
         final String draftResultPK = resultsShared.getHearingId().toString() + resultsShared.getHearingDay().toString();
         when(draftResultRepository.findBy(draftResultPK)).thenReturn(draftResult);
         when(hearingRepository.findBy(resultsShared.getHearingId())).thenReturn(dbHearing);
-        when(hearingRepository.findTargetsByHearingId(resultsShared.getHearingId())).thenReturn(asList(target, target2));
-        when(hearingRepository.findProsecutionCasesByHearingId(dbHearing.getId()))
-                .thenReturn(Lists.newArrayList(dbHearing.getProsecutionCases()));
-        when(targetJPAMapper.setMasterDefandantId(anyObject(), anyObject())).thenReturn(targets);
-        when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForToday))).thenReturn(target);
-        when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForTomorrow))).thenReturn(target2);
 
         hearingEventListener.replicateResultsSharedV3(envelopeFrom(metadataWithRandomUUID("hearing.results-shared-v3"),
                 objectToJsonObjectConverter.convert(resultsShared)
@@ -1472,7 +1430,7 @@ public class HearingEventListenerTest {
 
     @Test
     public void shouldCancelHearingDaysWhenHearingNotNull() {
-        final ZonedDateTime sittingDay = ZonedDateTime.now();
+        final ZonedDateTime sittingDay = new UtcClock().now();
         final UUID hearingId = randomUUID();
         final Hearing hearing = new Hearing().setId(hearingId);
         final List<HearingDay> hearingDayList = Arrays.asList(new HearingDay.Builder().withSittingDay(sittingDay).withIsCancelled(TRUE).build());
@@ -1661,7 +1619,7 @@ public class HearingEventListenerTest {
 
         final UUID hearingId = randomUUID();
         final UUID seedingHearingId = randomUUID();
-        final ZonedDateTime earliestNextHearingDate = ZonedDateTime.now(ZoneId.of("UTC"));
+        final ZonedDateTime earliestNextHearingDate = new UtcClock().now().withZoneSameInstant(ZoneId.of("UTC"));
 
         final Hearing hearingEntity = new Hearing()
                 .setId(hearingId);
@@ -1754,4 +1712,5 @@ public class HearingEventListenerTest {
     private String getDraftResultFromResource(final String path) throws IOException {
         return Resources.toString(getResource(path), defaultCharset());
     }
+
 }

@@ -7,7 +7,7 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -26,6 +26,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.HearingEventDefinitionsT
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.logEvent.CreateHearingEventDefinitionsCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
@@ -36,23 +37,27 @@ import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HearingLogEventListenerTest {
 
     @Mock
@@ -76,7 +81,7 @@ public class HearingLogEventListenerTest {
     @InjectMocks
     private HearingLogEventListener hearingLogEventListener;
 
-    @Before
+    @BeforeEach
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
@@ -86,7 +91,7 @@ public class HearingLogEventListenerTest {
     public void shouldPersistAHearingEventLog() {
 
         final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), randomUUID(), randomUUID(), STRING.next(), STRING.next(),
-                PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), BOOLEAN.next(), randomUUID(), Arrays.asList(randomUUID()), randomUUID());
+                getPastDate(), getPastDate(), BOOLEAN.next(), randomUUID(), Arrays.asList(randomUUID()), randomUUID());
 
         final JsonEnvelope jsonEnvelopCommand = envelopeFrom(metadataWithRandomUUID("hearing.log-hearing-event"), objectToJsonObjectConverter.convert(logEventCommand));
 
@@ -281,5 +286,9 @@ public class HearingLogEventListenerTest {
         assertThat(actualEntities.get(2).isDeleted(), is(true));
 
         verifyNoMoreInteractions(hearingEventDefinitionRepository);
+    }
+
+    private ZonedDateTime getPastDate() {
+        return new UtcClock().now().minusDays(new Random().nextInt(100));
     }
 }

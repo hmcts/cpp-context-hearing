@@ -10,13 +10,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
-import static java.time.LocalDate.now;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
@@ -29,14 +27,13 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory;
 import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.LinkedApplicationsSummary;
 import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCase;
-import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
-import uk.gov.moj.cpp.hearing.query.api.service.usergroups.UserGroupQueryService;
 import uk.gov.moj.cpp.hearing.query.api.service.progression.ProgressionService;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.PIEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.XhibitEventMapperCache;
+import uk.gov.moj.cpp.hearing.query.api.service.usergroups.UserGroupQueryService;
 import uk.gov.moj.cpp.hearing.query.view.HearingEventQueryView;
 import uk.gov.moj.cpp.hearing.query.view.HearingQueryView;
 import uk.gov.moj.cpp.hearing.query.view.SessionTimeQueryView;
@@ -64,15 +61,15 @@ import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HearingQueryApiTest {
 
     private static final String PATH_TO_RAML = "src/raml/hearing-query-api.raml";
@@ -170,7 +167,7 @@ public class HearingQueryApiTest {
 
     private Map<String, String> apiMethodsToHandlerNames;
 
-    @Before
+    @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
         apiMethodsToHandlerNames = stream(HearingQueryApi.class.getMethods())
@@ -196,8 +193,8 @@ public class HearingQueryApiTest {
     @Test
     public void shouldReturnTimelineForApplication() {
 
-        when(hearingQueryView.getTimelineByApplicationId(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class))).thenReturn(mockApplicationTimelineEnvelope);
-        when(mockEnvelopePayloadTypeConverter.convert(any(JsonEnvelope.class), any(Class.class))).thenReturn(mockJsonValueEnvelope);
+        when(hearingQueryView.getTimelineByApplicationId(any(), any(), any())).thenReturn(mockApplicationTimelineEnvelope);
+        when(mockEnvelopePayloadTypeConverter.convert(any(), any(Class.class))).thenReturn(mockJsonValueEnvelope);
         when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(mockJsonEnvelope);
 
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.application.timeline.", createObjectBuilder()
@@ -208,7 +205,7 @@ public class HearingQueryApiTest {
 
         verify(referenceDataService, times(1)).listAllCrackedIneffectiveVacatedTrialTypes();
         verify(referenceDataService, times(1)).getAllCourtRooms(any(JsonEnvelope.class));
-        verify(hearingQueryView, times(1)).getTimelineByApplicationId(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class));
+        verify(hearingQueryView, times(1)).getTimelineByApplicationId(any(), any(), any());
 
         assertThat(result, is(mockJsonEnvelope));
 
@@ -222,8 +219,7 @@ public class HearingQueryApiTest {
 
         final Timeline expectedTimeline = new Timeline(timelineHearingSummaries);
 
-        when(progressionService.getProsecutionCaseDetails(CASE_ID)).thenReturn(null);
-        when(hearingQueryView.getTimeline(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class))).thenReturn(mockCaseTimelineEnvelope);
+        when(hearingQueryView.getTimeline(any(), any(), any())).thenReturn(mockCaseTimelineEnvelope);
         when(mockCaseTimelineEnvelope.payload()).thenReturn(expectedTimeline);
 
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.case.timeline", createObjectBuilder()
@@ -234,7 +230,7 @@ public class HearingQueryApiTest {
 
         verify(referenceDataService, times(1)).listAllCrackedIneffectiveVacatedTrialTypes();
         verify(referenceDataService, times(1)).getAllCourtRooms(any(JsonEnvelope.class));
-        verify(hearingQueryView, times(1)).getTimeline(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class));
+        verify(hearingQueryView, times(1)).getTimeline(any(), any(), any());
         verify(hearingQueryView, times(0)).getTimelineByApplicationId(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class));
     }
 
@@ -247,7 +243,7 @@ public class HearingQueryApiTest {
         final Timeline expectedTimeline = new Timeline(timelineHearingSummaries);
 
         when(progressionService.getProsecutionCaseDetails(CASE_ID)).thenReturn(ProsecutionCase.prosecutionCase().build());
-        when(hearingQueryView.getTimeline(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class))).thenReturn(mockCaseTimelineEnvelope);
+        when(hearingQueryView.getTimeline(any(), any(), any())).thenReturn(mockCaseTimelineEnvelope);
         when(mockCaseTimelineEnvelope.payload()).thenReturn(expectedTimeline);
 
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.case.timeline", createObjectBuilder()
@@ -258,7 +254,7 @@ public class HearingQueryApiTest {
 
         verify(referenceDataService, times(1)).listAllCrackedIneffectiveVacatedTrialTypes();
         verify(referenceDataService, times(1)).getAllCourtRooms(any(JsonEnvelope.class));
-        verify(hearingQueryView, times(1)).getTimeline(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class));
+        verify(hearingQueryView, times(1)).getTimeline(any(JsonEnvelope.class), any(), any());
         verify(hearingQueryView, times(0)).getTimelineByApplicationId(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class));
     }
 
@@ -271,7 +267,7 @@ public class HearingQueryApiTest {
         final Timeline expectedTimeline = new Timeline(timelineHearingSummaries);
 
         when(progressionService.getProsecutionCaseDetails(CASE_ID)).thenReturn(ProsecutionCase.prosecutionCase().build());
-        when(hearingQueryView.getTimeline(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class))).thenReturn(mockCaseTimelineEnvelope);
+        when(hearingQueryView.getTimeline(any(), any(), any())).thenReturn(mockCaseTimelineEnvelope);
         when(mockCaseTimelineEnvelope.payload()).thenReturn(expectedTimeline);
 
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.case.timeline", createObjectBuilder()
@@ -288,7 +284,7 @@ public class HearingQueryApiTest {
 
         verify(referenceDataService, times(1)).listAllCrackedIneffectiveVacatedTrialTypes();
         verify(referenceDataService, times(1)).getAllCourtRooms(any(JsonEnvelope.class));
-        verify(hearingQueryView, times(1)).getTimeline(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class));
+        verify(hearingQueryView, times(1)).getTimeline(any(), any(), any());
         verify(hearingQueryView, times(0)).getTimelineByApplicationId(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class));
     }
 
@@ -304,7 +300,7 @@ public class HearingQueryApiTest {
         hearingQueryApi.findHearingsForFuture(query);
 
         verify(referenceDataService, times(1)).getAllHearingTypes();
-        verify(hearingQueryView, times(1)).findHearingsForFuture(any(JsonEnvelope.class), any(HearingTypes.class));
+        verify(hearingQueryView, times(1)).findHearingsForFuture(any(), any());
     }
 
     @Test
@@ -314,7 +310,7 @@ public class HearingQueryApiTest {
         final String caseIdString = caseId1 + "," + caseId2;
 
         when(hearingQueryView.getFutureHearingsByCaseIds(any(JsonEnvelope.class))).thenReturn(mockGetHearingsEnvelope);
-        when(mockEnvelopePayloadTypeConverter.convert(any(JsonEnvelope.class), any(Class.class))).thenReturn(mockJsonValueEnvelope);
+        when(mockEnvelopePayloadTypeConverter.convert(any(), any(Class.class))).thenReturn(mockJsonValueEnvelope);
         when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(mockJsonEnvelope);
 
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get.hearings", createObjectBuilder()
@@ -358,7 +354,7 @@ public class HearingQueryApiTest {
 
         when(piEventMapperCache.getCppHearingEventIds()).thenReturn(buildPIEventCache());
         when(hearingQueryView.getProsecutionCaseForHearing(any(JsonEnvelope.class))).thenReturn(mockGetProsecutionCaseEnvelope);
-        when(mockEnvelopePayloadTypeConverter.convert(any(JsonEnvelope.class), any(Class.class))).thenReturn(mockJsonValueEnvelope);
+        when(mockEnvelopePayloadTypeConverter.convert(any(), any(Class.class))).thenReturn(mockJsonValueEnvelope);
         when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(mockJsonEnvelope);
 
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.prosecution-case-by-hearingid", createObjectBuilder()
@@ -378,8 +374,6 @@ public class HearingQueryApiTest {
         final String hearingEventId = String.valueOf(randomUUID());
 
         when(piEventMapperCache.getCppHearingEventIds()).thenReturn(buildPIEventCache());
-        when(mockEnvelopePayloadTypeConverter.convert(any(JsonEnvelope.class), any(Class.class))).thenReturn(mockJsonValueEnvelope);
-        when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(mockJsonEnvelope);
 
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.prosecution-case-by-hearingid", createObjectBuilder()
                 .add(FIELD_HEARING_ID, hearingId)
@@ -408,7 +402,6 @@ public class HearingQueryApiTest {
     @Test
     public void shouldNotProcessGetHearingEventLogForCdesDocumentForNonHMCTSUser() {
         when(userGroupQueryService.doesUserBelongsToHmctsOrganisation(any())).thenReturn(false);
-        when(hearingEventQueryView.getHearingEventLogForDocuments(any())).thenReturn(null);
 
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-log-for-cdes-document", createObjectBuilder()
                 .add("hearingId", UUID.randomUUID().toString())
@@ -422,7 +415,6 @@ public class HearingQueryApiTest {
     @Test
     public void shouldProcessGetHearingEventLogCount() {
         when(userGroupQueryService.doesUserBelongsToHmctsOrganisation(any())).thenReturn(true);
-        when(hearingEventQueryView.getHearingEventLogForDocuments(any())).thenReturn(null);
 
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-log-count", createObjectBuilder()
                 .add("hearingId", UUID.randomUUID().toString())
@@ -437,7 +429,6 @@ public class HearingQueryApiTest {
     @Test
     public void shouldNotProcessGetHearingEventLogCountForNonHMCTSUser() {
         when(userGroupQueryService.doesUserBelongsToHmctsOrganisation(any())).thenReturn(false);
-        when(hearingEventQueryView.getHearingEventLogForDocuments(any())).thenReturn(null);
 
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-log-count", createObjectBuilder()
                 .add("hearingId", UUID.randomUUID().toString())
@@ -493,7 +484,6 @@ public class HearingQueryApiTest {
 
     @Test
     public void shouldGetHearingEventLog(){
-        when(userGroupQueryService.doesUserBelongsToHmctsOrganisation(any())).thenReturn(true);
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-log", createObjectBuilder()
                 .add("hearingId", UUID.randomUUID().toString())
                 .add("date", LocalDate.now().toString())

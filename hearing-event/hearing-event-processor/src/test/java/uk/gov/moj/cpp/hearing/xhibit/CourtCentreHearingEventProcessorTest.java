@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.xhibit;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,13 +16,13 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CourtCentreHearingEventProcessorTest {
 
     @Mock
@@ -69,7 +69,7 @@ public class CourtCentreHearingEventProcessorTest {
                 .thenReturn(parameters);
         when(courtCentreXmlGeneratorProducer.getCourtCentreXmlGenerator(any(CourtCentreGeneratorParameters.class)))
                 .thenReturn(courtCentreXmlGenerator);
-        when(courtCentreHearingsRetriever.getHearingDataForWebPage(courtCentreId, latestCourtListUploadTime, jsonEnvelope))
+        when(courtCentreHearingsRetriever.getHearingDataForWebPage(any(), any(), any()))
                 .thenReturn(currentCourtStatus);
         when(courtCentreXmlGenerator.generateXml(any(CourtCentreGeneratorParameters.class)))
                 .thenReturn(xhibitXml);

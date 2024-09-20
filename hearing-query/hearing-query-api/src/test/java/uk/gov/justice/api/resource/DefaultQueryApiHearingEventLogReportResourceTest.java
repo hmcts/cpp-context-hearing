@@ -5,9 +5,8 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,16 +29,16 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DefaultQueryApiHearingEventLogReportResourceTest {
 
     @InjectMocks
@@ -81,11 +80,9 @@ public class DefaultQueryApiHearingEventLogReportResourceTest {
         final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
         final byte[] documentGeneratorClientResponse = pdfContent.getBytes();
 
-        when(jsonEnvelope.payloadAsJsonObject()).thenReturn(new StringToJsonObjectConverter().convert(payload));
         when(hearingEventQueryView.getHearingEventLogForDocuments(any())).thenReturn(responseEnvelope);
         when(documentGeneratorClientProducer.documentGeneratorClient()).thenReturn(documentGeneratorClient);
         when(systemUserProvider.getContextSystemUserId()).thenReturn(of(UUID.randomUUID()));
-        when(interceptorChainProcessor.process(any())).thenReturn(of(jsonEnvelope));
         when(documentGeneratorClient.generatePdfDocument(any(), any(), any())).thenReturn(documentGeneratorClientResponse);
 
         defaultQueryApiHearingsEventLogExtractResource.getHearingsEventLogExtract(hearingId, caseId, applicationId, hearingDate,  userId);

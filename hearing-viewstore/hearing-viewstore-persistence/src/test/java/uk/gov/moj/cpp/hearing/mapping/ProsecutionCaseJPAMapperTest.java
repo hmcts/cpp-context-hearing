@@ -18,7 +18,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ProsecutionCaseJPAMapperTest {
 

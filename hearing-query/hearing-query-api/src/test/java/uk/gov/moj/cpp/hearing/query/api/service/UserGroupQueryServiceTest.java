@@ -4,7 +4,7 @@ import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.core.requester.Requester;
@@ -14,14 +14,13 @@ import uk.gov.moj.cpp.hearing.query.api.service.usergroups.UserGroupQueryService
 
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UserGroupQueryServiceTest {
     @Mock
     private JsonEnvelope jsonEnvelope;
@@ -37,33 +36,24 @@ public class UserGroupQueryServiceTest {
     @Mock
     private JsonEnvelope responseJsonEnvelope;
 
-    @Before
-    public void setup() {
-        when(jsonEnvelope.metadata()).thenReturn(getMetadataBuilder(UUID.randomUUID()).build());
-    }
 
     @Test
     public void shouldReturnFalseWhenQueryResponseIsNull() {
 
-        JsonEnvelope jsonEnvelope = buildJsonEnvelope();
-        JsonEnvelope orgJsonEnvelope = buildEmptyOrganisationJsonEnvelope();
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(jsonEnvelope);
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(orgJsonEnvelope);
+        when(requester.request(any(), any(Class.class))).thenReturn(buildEmptyOrganisationJsonEnvelope());
         assertThat(userGroupQueryService.doesUserBelongsToHmctsOrganisation(userId), is(false));
     }
 
     @Test
     public void shouldReturnTrueWhenResponseWithMatchingOrgId() {
 
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(buildJsonEnvelope());
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(buildNoMatchingOrganisationJsonEnvelope());
+        when(requester.request(any(), any(Class.class))).thenReturn(buildNoMatchingOrganisationJsonEnvelope());
         assertThat(userGroupQueryService.doesUserBelongsToHmctsOrganisation(userId), is(false));
     }
 
     @Test
     public void shouldReturnFalseWhenResponseWithNoMatchingOrgId() {
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(buildJsonEnvelope());
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(buildOrganisationJsonEnvelope());
+        when(requester.request(any(), any(Class.class))).thenReturn(buildOrganisationJsonEnvelope());
         assertThat(userGroupQueryService.doesUserBelongsToHmctsOrganisation(userId), is(true));
     }
 

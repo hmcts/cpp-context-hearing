@@ -3,13 +3,17 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.BAIL_CONDITIONS_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.BAIL_CONDITION_ASSESSMENTS_REPORTS_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.DUMMY_NAME;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.FIXED_LIST_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_ID;
@@ -19,31 +23,40 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_IN_CUSTODY_TO_HOSPITAL_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_ON_CONDITIONAL_BAIL_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMAND_IN_CUSTODY_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.RESULT_DEFINITIONS_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.SEND_TO_CROWN_COURT_ON_CONDITIONAL_BAIL_ID;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.metadataFor;
 
-
-import java.time.LocalDate;
-import org.mockito.Mockito;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.AbstractRestructuringTest;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTextConfHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTreeBuilder;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllFixedList;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.FixedList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 
 
@@ -55,11 +68,18 @@ public class PublishResultsDelegateTreeMapTest extends AbstractRestructuringTest
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         ResultTextConfHelper resultTextConfHelper = Mockito.mock(ResultTextConfHelper.class);
         when(resultTextConfHelper.isOldResultDefinition(any(LocalDate.class))).thenReturn(false);
-        super.setUp();
+        resultDefinitions = fileResourceObjectMapper.convertFromFile(RESULT_DEFINITIONS_JSON, AllResultDefinitions.class).getResultDefinitions();
+        final List<FixedList> fixedLists = fileResourceObjectMapper.convertFromFile(FIXED_LIST_JSON, AllFixedList.class).getFixedListCollection();
+        final Metadata metadata = metadataFor(DUMMY_NAME, UUID.randomUUID());
+        final Envelope fixedListsEnvelopeDefinition = uk.gov.justice.services.messaging.Envelope.envelopeFrom(metadata, new AllFixedList().setFixedListCollection(fixedLists));
+        final JsonEnvelope resultEnvelopeDefinition = envelopeFrom(metadataWithRandomUUID(DUMMY_NAME), objectToJsonObjectConverter.convert(new AllResultDefinitions().setResultDefinitions(resultDefinitions)));
+
+        when(requester.requestAsAdmin(any())).thenReturn(resultEnvelopeDefinition);
+        when(requester.request(any(), any())).thenReturn(fixedListsEnvelopeDefinition);
         doReturn(Optional.empty()).when(nextHearingHelper).getNextHearing(any(), any(), any(), any());
         resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper, resultTextConfHelper);
     }

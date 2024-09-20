@@ -16,6 +16,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMa
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorizedAndSystemUser;
+import static org.awaitility.Durations.FIVE_MINUTES;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
@@ -27,8 +28,7 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import com.jayway.awaitility.Awaitility;
-import com.jayway.awaitility.Duration;
+import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +91,7 @@ public class PublishCourtListSteps extends AbstractIT {
 
     private void waitUntilDataPersist(final String tableName, final String criteria, final int count) {
         Awaitility.await()
-                .atMost(Duration.FIVE_MINUTES)
+                .atMost(FIVE_MINUTES)
                 .until(() -> countExportStatus(tableName, criteria) == count);
     }
 

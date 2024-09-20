@@ -1,8 +1,8 @@
 package uk.gov.moj.cpp.hearing.event;
 
 import com.google.common.io.Resources;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -38,7 +38,7 @@ public class HearingResultedCaseUpdatedProcessorTest {
     @InjectMocks
     private HearingResultedCaseUpdatedProcessor hearingResultedCaseUpdatedProcessor;
 
-    @Before
+    @BeforeEach
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
     }

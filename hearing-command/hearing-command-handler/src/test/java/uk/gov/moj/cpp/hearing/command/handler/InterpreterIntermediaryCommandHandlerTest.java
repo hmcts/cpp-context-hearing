@@ -1,7 +1,8 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.Envelope.envelopeFrom;
@@ -32,16 +33,15 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class InterpreterIntermediaryCommandHandlerTest {
 
     @Spy
@@ -81,7 +81,7 @@ public class InterpreterIntermediaryCommandHandlerTest {
         interpreterIntermediaryCommandHandler.addInterpreterIntermediary(envelope);
 
         JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
-        Assert.assertEquals("hearing.interpreter-intermediary-added", actualEventProduced.metadata().name());
+        assertEquals("hearing.interpreter-intermediary-added", actualEventProduced.metadata().name());
 
     }
 
@@ -101,7 +101,7 @@ public class InterpreterIntermediaryCommandHandlerTest {
         interpreterIntermediaryCommandHandler.removeInterpreterIntermediary(envelope);
 
         JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
-        Assert.assertEquals("hearing.interpreter-intermediary-removed", actualEventProduced.metadata().name());
+        assertEquals("hearing.interpreter-intermediary-removed", actualEventProduced.metadata().name());
 
     }
 
@@ -130,7 +130,7 @@ public class InterpreterIntermediaryCommandHandlerTest {
         interpreterIntermediaryCommandHandler.updateInterpreterIntermediary(envelope);
 
         JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
-        Assert.assertEquals("hearing.interpreter-intermediary-updated", actualEventProduced.metadata().name());
+        assertEquals("hearing.interpreter-intermediary-updated", actualEventProduced.metadata().name());
 
     }
 

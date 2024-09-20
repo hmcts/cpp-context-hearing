@@ -1,9 +1,9 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.hamcrest.collection.ArrayMatching.arrayContainingInAnyOrder;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -11,10 +11,10 @@ import uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider;
 import uk.gov.moj.cpp.accesscontrol.drools.Action;
 import uk.gov.moj.cpp.accesscontrol.test.utils.BaseDroolsAccessControlTest;
 
+import java.util.Collections;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -47,6 +47,10 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Captor
     private ArgumentCaptor<String[]> arrayCaptor;
+
+    public HearingQueryApiAccessControlTest() {
+        super("QUERY_API_SESSION");
+    }
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetHearing() {
@@ -206,8 +210,8 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     }
 
     @Override
-    protected Map<Class, Object> getProviderMocks() {
-        return ImmutableMap.<Class, Object>builder().put(UserAndGroupProvider.class, this.userAndGroupProvider).build();
+    protected Map<Class<?>, Object> getProviderMocks() {
+        return Collections.singletonMap(UserAndGroupProvider.class, this.userAndGroupProvider);
     }
 
     private void assertFailureOutcomeOnActionForTheSuppliedGroups(final String actionName, final String... groupNames) {
@@ -218,7 +222,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
         assertFailureOutcome(executeRulesWith(action));
 
         verify(this.userAndGroupProvider).isMemberOfAnyOfTheSuppliedGroups(eq(action), this.arrayCaptor.capture());
-        assertThat(this.arrayCaptor.getAllValues(), containsInAnyOrder(groupNames));
+        assertThat(this.arrayCaptor.getAllValues().get(0), arrayContainingInAnyOrder(groupNames));
         verifyNoMoreInteractions(this.userAndGroupProvider);
     }
 
@@ -230,7 +234,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
         assertSuccessfulOutcome(executeRulesWith(action));
 
         verify(this.userAndGroupProvider).isMemberOfAnyOfTheSuppliedGroups(eq(action), this.arrayCaptor.capture());
-        assertThat(this.arrayCaptor.getAllValues(), containsInAnyOrder(groupNames));
+        assertThat(this.arrayCaptor.getAllValues().get(0), arrayContainingInAnyOrder(groupNames));
         verifyNoMoreInteractions(this.userAndGroupProvider);
     }
 

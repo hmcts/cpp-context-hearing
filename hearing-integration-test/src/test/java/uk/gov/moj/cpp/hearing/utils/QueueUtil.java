@@ -14,10 +14,9 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.json.JsonObject;
 
-import com.jayway.restassured.path.json.JsonPath;
+import io.restassured.path.json.JsonPath;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.activemq.artemis.jms.client.ActiveMQTopic;
-import org.apache.activemq.command.ActiveMQTextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +30,11 @@ public class QueueUtil implements AutoCloseable {
     private static final String QUEUE_URI = "tcp://" + HOST + ":61616";
 
     private static final long RETRIEVE_TIMEOUT = 20000;
+    private static final String JMS_TOPIC_PREFIX = "jms.topic.";
     private final Topic topic;
-    private Session session;
+
+    private String topicName;
+    private static Session session;
     private MessageProducer messageProducer;
 
     private MessageConsumer messageConsumer;
@@ -46,6 +48,7 @@ public class QueueUtil implements AutoCloseable {
             connection.start();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             topic = new ActiveMQTopic(topicName);
+            this.topicName = topicName;
         } catch (final JMSException e) {
             LOGGER.error("Fatal error initialising Artemis", e);
             throw new RuntimeException(e);
@@ -53,11 +56,11 @@ public class QueueUtil implements AutoCloseable {
     }
 
     public static QueueUtil getPublicTopicInstance() {
-        return new QueueUtil("public.event");
+        return new QueueUtil(JMS_TOPIC_PREFIX + "public.event");
     }
 
     public static QueueUtil getPrivateTopicInstance(final String topicName) {
-        return new QueueUtil(topicName);
+        return new QueueUtil(JMS_TOPIC_PREFIX + topicName);
     }
 
     public static JsonPath retrieveMessage(final MessageConsumer consumer) {
@@ -71,7 +74,7 @@ public class QueueUtil implements AutoCloseable {
         final String json = jsonEnvelope.asJsonObject().toString();
 
         try {
-            final TextMessage message = new ActiveMQTextMessage();
+            final TextMessage message = session.createTextMessage();
 
             message.setText(json);
             message.setStringProperty("CPPNAME", eventName);
@@ -113,17 +116,25 @@ public class QueueUtil implements AutoCloseable {
         }
     }
 
+    public String getTopicName(){
+        return topicName;
+    }
+
     @Override
     public void close() {
         try {
-            session.close();
+            if(session != null) {
+                session.close();
+            }
             if (messageConsumer != null) {
                 messageConsumer.close();
             }
             if (messageProducer != null) {
                 messageProducer.close();
             }
-            connection.close();
+            if(connection != null) {
+                connection.close();
+            }
         } catch (JMSException ignored) {
         }
 

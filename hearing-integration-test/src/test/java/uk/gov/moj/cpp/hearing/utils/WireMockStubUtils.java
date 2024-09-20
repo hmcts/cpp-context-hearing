@@ -2,15 +2,15 @@ package uk.gov.moj.cpp.hearing.utils;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static com.jayway.awaitility.Awaitility.waitAtMost;
-import static com.jayway.awaitility.Duration.TEN_SECONDS;
+import static org.awaitility.Awaitility.waitAtMost;
+import static org.awaitility.Durations.TEN_SECONDS;
 import static java.text.MessageFormat.format;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
@@ -35,6 +35,8 @@ import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.external.domain.referencedata.PIEventMapping;
 import uk.gov.moj.cpp.external.domain.referencedata.PIEventMappingsList;
 
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,12 +45,13 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.json.JsonObject;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response.Status;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +75,8 @@ public class WireMockStubUtils {
     private final static String CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS = "application/vnd.usersgroups.get-logged-in-user-permissions+json";
 
     private static final String QUERY_ROLES_FOR_USER = "/usersgroups-service/query/api/rest/usersgroups/users/{0}/roles";
+    private static final String USERSGROUPS_SERVICE_QUERY_API_REST_USERSGROUPS_USERS = "/usersgroups-service/query/api/rest/usersgroups/users?userIds={0}";
+
     private static final String CONTENT_TYPE_QUERY_ROLES_FOR_USER = "application/vnd.usersgroups.roles+json";
     private static final String CONTENT_TYPE_QUERY_LOGGEDIN_USER_ORGANISATION = "application/vnd.usersgroups.get-organisation-details+json";
 
@@ -444,16 +449,20 @@ public class WireMockStubUtils {
 
     public static void stubUsersAndGroupsForNames(final UUID userId) {
         final String response = getPayload("stub-data/usersgroups.users.json");
-        final String url = format("/usersgroups-service/query/api/rest/usersgroups/users?userIds={0}", userId.toString());
 
-        final ResponseDefinitionBuilder responseDefBuilder = aResponse().withStatus(SC_OK)
-                .withHeader(ID, randomUUID().toString())
-                .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
-                .withBody(response);
-        stubFor(get(urlPathEqualTo(url))
-                .willReturn(responseDefBuilder));
 
-        waitForStubToBeReady(url, "application/vnd.usersgroups.search-users+json");
+        var query = "/usersgroups-service/query/api/rest/usersgroups/users";
+        var mediaType= "application/vnd.usersgroups.search-users+json";
+        stubFor(get(urlPathEqualTo(query))
+                .withQueryParam("userIds", containing(userId.toString()))
+                .withHeader("Accept", equalTo(mediaType))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", mediaType)
+                        .withBody(response)));
+        final String url = format(USERSGROUPS_SERVICE_QUERY_API_REST_USERSGROUPS_USERS,  URLEncoder.encode(StringUtils.lowerCase(userId.toString()), Charset.defaultCharset()));
+        waitForStubToBeReady(url, mediaType);
+
     }
 
     public static void stubUserAndOrganisation(final UUID userId, final String response) {

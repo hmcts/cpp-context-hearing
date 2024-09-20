@@ -19,7 +19,7 @@ import uk.gov.moj.cpp.hearing.test.HearingFactory;
 
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class NCESApplicationJourneyIT extends AbstractIT {

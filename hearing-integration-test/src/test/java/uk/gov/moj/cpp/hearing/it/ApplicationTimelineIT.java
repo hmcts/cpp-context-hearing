@@ -29,12 +29,13 @@ import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ApplicationTimelineIT extends AbstractIT {
 
@@ -43,7 +44,7 @@ public class ApplicationTimelineIT extends AbstractIT {
     private UUID applicationId;
     private TrialType addTrialType;
 
-    @Before
+    @BeforeEach
     public void setUpHearingWithApplication() {
 
 

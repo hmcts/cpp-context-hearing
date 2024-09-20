@@ -2,8 +2,8 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
@@ -13,21 +13,19 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
 import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
@@ -41,15 +39,14 @@ import java.util.UUID;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ApplicationDetailChangeCommandHandlerTest {
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
@@ -69,19 +66,13 @@ public class ApplicationDetailChangeCommandHandlerTest {
     private AggregateService aggregateService;
 
     @Spy
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
 
     @Spy
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
 
     @InjectMocks
     private ApplicationDetailChangeCommandHandler applicationDetailChangeCommandHandler;
-
-    @Before
-    public void setup() {
-        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
-        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
-    }
 
     @SuppressWarnings("unchecked")
     @Test
@@ -93,8 +84,8 @@ public class ApplicationDetailChangeCommandHandlerTest {
         final ApplicationAggregate applicationAggregate = new ApplicationAggregate() {{
             apply(RegisteredHearingAgainstApplication.builder().withApplicationId(courtApplication.getId()).withHearingId(arbitraryHearingId).build());
         }};
-        setupMockedEventStream(arbitraryHearingId, this.hearingEventStream, new HearingAggregate());
-        setupMockedEventStream(courtApplication.getId(), this.applicationEventStream, applicationAggregate);
+        when(this.eventSource.getStreamById(arbitraryHearingId)).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(new HearingAggregate());
         when(this.eventSource.getStreamById(courtApplication.getId())).thenReturn(this.applicationEventStream);
         when(this.aggregateService.get(this.applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
 
@@ -125,12 +116,10 @@ public class ApplicationDetailChangeCommandHandlerTest {
             apply(new HearingInitiated(arbitraryHearingObject.getHearing()));
         }};
 
-        setupMockedEventStream(arbitraryHearingId, this.hearingEventStream, new HearingAggregate());
-        setupMockedEventStream(courtApplication.getId(), this.applicationEventStream, applicationAggregate);
+        when(this.eventSource.getStreamById(arbitraryHearingId)).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
         when(this.eventSource.getStreamById(courtApplication.getId())).thenReturn(this.applicationEventStream);
         when(this.aggregateService.get(this.applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
-        when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
-        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
 
         JsonObject payload = Json.createObjectBuilder()
@@ -148,12 +137,5 @@ public class ApplicationDetailChangeCommandHandlerTest {
                                         withJsonPath("$.courtApplication.id", is(courtApplication.getId().toString()))
                                 ))
                 )));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate) {
-        when(this.eventSource.getStreamById(id)).thenReturn(eventStream);
-        Class<T> clz = (Class<T>) aggregate.getClass();
-        when(this.aggregateService.get(eventStream, clz)).thenReturn(aggregate);
     }
 }

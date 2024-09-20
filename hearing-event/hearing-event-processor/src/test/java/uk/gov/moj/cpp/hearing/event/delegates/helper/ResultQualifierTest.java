@@ -5,7 +5,7 @@ import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt;
 import static uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllFixedList.allFixedList;
@@ -21,13 +21,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class
-)
+@ExtendWith(MockitoExtension.class)
 public class ResultQualifierTest {
 
     JsonEnvelope commandJsonEnvelope;
@@ -72,7 +71,7 @@ public class ResultQualifierTest {
 
     @Test
     public void testPopulateResultQualifierWhenResultPromptsTypeIsFIXL() {
-        when(referenceDataService.getAllFixedList(anyObject(), anyObject())).thenReturn(allFixedList().setFixedListCollection(
+        when(referenceDataService.getAllFixedList(any(), any())).thenReturn(allFixedList().setFixedListCollection(
                 asList(FixedList.fixedList()
                         .setId(UUID.randomUUID())
                         .setStartDate(LocalDate.now())
@@ -96,7 +95,7 @@ public class ResultQualifierTest {
 
     @Test
     public void testPopulateResultQualifierWhenResultPromptsTypeIsFIXLM() {
-        when(referenceDataService.getAllFixedList(anyObject(), anyObject())).thenReturn(allFixedList().setFixedListCollection(
+        when(referenceDataService.getAllFixedList(any(), any())).thenReturn(allFixedList().setFixedListCollection(
                 asList(FixedList.fixedList()
                         .setId(UUID.randomUUID())
                         .setStartDate(LocalDate.now())
@@ -124,7 +123,7 @@ public class ResultQualifierTest {
 
     @Test
     public void shouldConcatenateQualifiers() {
-        when(referenceDataService.getAllFixedList(anyObject(), anyObject())).thenReturn(allFixedList().setFixedListCollection(
+        when(referenceDataService.getAllFixedList(any(), any())).thenReturn(allFixedList().setFixedListCollection(
                 asList(FixedList.fixedList()
                                 .setId(UUID.randomUUID())
                                 .setStartDate(LocalDate.now())
@@ -159,7 +158,7 @@ public class ResultQualifierTest {
 
     @Test
     public void shouldConcatenateQualifiersWhenForMultipleValues() {
-        when(referenceDataService.getAllFixedList(anyObject(), anyObject())).thenReturn(allFixedList().setFixedListCollection(
+        when(referenceDataService.getAllFixedList(any(), any())).thenReturn(allFixedList().setFixedListCollection(
                 asList(FixedList.fixedList()
                                 .setId(UUID.randomUUID())
                                 .setStartDate(LocalDate.now())
@@ -198,7 +197,7 @@ public class ResultQualifierTest {
 
     @Test
     public void shouldConcatenateQualifiersWhenForMultipleWelshValues() {
-        when(referenceDataService.getAllFixedList(anyObject(), anyObject())).thenReturn(allFixedList().setFixedListCollection(
+        when(referenceDataService.getAllFixedList(any(), any())).thenReturn(allFixedList().setFixedListCollection(
                 asList(FixedList.fixedList()
                                 .setId(UUID.randomUUID())
                                 .setStartDate(LocalDate.now())

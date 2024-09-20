@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.event.listener;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -29,17 +29,17 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CaseMarkerEventListenerTest {
 
     @Spy
@@ -60,7 +60,7 @@ public class CaseMarkerEventListenerTest {
     @Mock
     ProsecutionCaseRepository prosecutionCaseRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
@@ -93,7 +93,6 @@ public class CaseMarkerEventListenerTest {
         caseMarkers.add(caseMarker);
 
         when(this.prosecutionCaseRepository.findBy(any())).thenReturn(prosecutionCase);
-        when(this.caseMarkerJPAMapper.toJPA(hearing.getId(), prosecutionCase, markers)).thenReturn(caseMarkers);
         this.caseMarkerEventListener.caseMarkersUpdated(envelopeFrom(metadataWithRandomUUID("hearing.events.case-markers-updated"),
                 objectToJsonObjectConverter.convert(caseMarkersUpdated)));
 

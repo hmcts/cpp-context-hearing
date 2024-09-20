@@ -4,7 +4,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +18,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.utils.TestUtils.convertZonedDate;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.Defendant;
@@ -51,6 +52,7 @@ import uk.gov.moj.cpp.hearing.pi.ProsecutionCaseRetriever;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -58,14 +60,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.time.LocalDate;
 
-
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -74,7 +72,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 @SuppressWarnings({"unchecked", "unused"})
-@RunWith(DataProviderRunner.class)
 public class LogEventHearingEventProcessorTest {
 
     @Spy
@@ -107,7 +104,7 @@ public class LogEventHearingEventProcessorTest {
     @Mock
     private ProsecutionCaseRetriever prosecutionCaseRetriever;
 
-    @Before
+    @BeforeEach
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
     }
@@ -120,7 +117,7 @@ public class LogEventHearingEventProcessorTest {
     public void shouldPublishHearingEventLoggedPublicEvent() {
         final UUID courtCentreId = randomUUID();
         final HearingEventLogged hearingEventLogged = new HearingEventLogged(randomUUID(), null, randomUUID(), randomUUID(),
-                randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), BOOLEAN.next(),
+                randomUUID(), STRING.next(), convertZonedDate(PAST_ZONED_DATE_TIME.next()), convertZonedDate(PAST_ZONED_DATE_TIME.next()), BOOLEAN.next(),
                 new uk.gov.moj.cpp.hearing.domain.CourtCentre(courtCentreId, STRING.next(), randomUUID(), STRING.next(), STRING.next(), STRING.next()),
                 new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN, STRING.next(), randomUUID());
 
@@ -207,7 +204,7 @@ public class LogEventHearingEventProcessorTest {
     public void shouldPublishHearingEventTimeStampCorrectedPublicEvent() {
 
         final HearingEventLogged hearingEventLogged = new HearingEventLogged(randomUUID(), randomUUID(), randomUUID(), randomUUID(),
-                null, STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), BOOLEAN.next(),
+                null, STRING.next(), convertZonedDate(PAST_ZONED_DATE_TIME.next()), convertZonedDate(PAST_ZONED_DATE_TIME.next()), BOOLEAN.next(),
                 new uk.gov.moj.cpp.hearing.domain.CourtCentre(randomUUID(), STRING.next(), randomUUID(), STRING.next(), STRING.next(), STRING.next()),
                 new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN, STRING.next(), randomUUID());
 

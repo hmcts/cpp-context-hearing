@@ -52,7 +52,7 @@ import java.util.UUID;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.hamcrest.Matcher;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @NotThreadSafe
 public class DDJIT extends AbstractIT {

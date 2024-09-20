@@ -73,17 +73,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.hamcrest.core.IsNull;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings({"serial", "unchecked"})
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ShareResultsCommandHandlerTest {
 
     public static final String HEARING_RESULTS_SHARED_EVENT_NAME = "hearing.results-shared";
@@ -115,7 +115,7 @@ public class ShareResultsCommandHandlerTest {
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
-    @BeforeClass
+    @BeforeAll
     public static void init() {
         initiateHearingCommand = standardInitiateHearingTemplate();
         metadataId = randomUUID();
@@ -179,12 +179,11 @@ public class ShareResultsCommandHandlerTest {
         return defendant;
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
         when(this.eventSource.getStreamById(initiateHearingCommand.getHearing().getId())).thenReturn(this.hearingEventStream);
-        when(this.clock.now()).thenReturn(sharedTime);
         defendantDetailsUpdated = new DefendantDetailsUpdated(initiateHearingCommand.getHearing().getId(), convert(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0), "Test"));
     }
 

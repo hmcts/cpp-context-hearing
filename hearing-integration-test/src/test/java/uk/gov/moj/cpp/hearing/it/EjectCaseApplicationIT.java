@@ -30,8 +30,8 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class EjectCaseApplicationIT extends AbstractIT {
     private static final String CASE_STATUS_EJECTED = "EJECTED";
@@ -40,7 +40,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
     private final String REMOVAL_REASON = "LEGAL";
 
     @Test
-    @Ignore("Need to revisit this scenario to decide what needs to be done with courtapplication's status when case is rejected")
+    @Disabled("Need to revisit this scenario to decide what needs to be done with courtapplication's status when case is rejected")
     public void shouldEjectCaseAndApplication() throws Exception {
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));

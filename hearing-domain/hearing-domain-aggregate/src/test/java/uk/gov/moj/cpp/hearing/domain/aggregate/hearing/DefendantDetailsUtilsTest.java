@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.core.courts.Defendant.defendant;
 
 import uk.gov.justice.core.courts.Address;
@@ -18,11 +18,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(Theories.class)
@@ -49,7 +49,7 @@ public class DefendantDetailsUtilsTest {
             Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address55").withPostcode("xyz").build(), //Line 1 and 5
     };
 
-    @Before
+    @BeforeEach
     public void init() {
         offenceId = randomUUID();
         prosecutionCaseId = randomUUID();

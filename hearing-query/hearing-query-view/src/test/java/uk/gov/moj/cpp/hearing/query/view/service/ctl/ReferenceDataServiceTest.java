@@ -1,10 +1,16 @@
 package uk.gov.moj.cpp.hearing.query.view.service.ctl;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static java.time.LocalDate.now;
+import static java.util.UUID.randomUUID;
+import static javax.json.Json.createReader;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.Envelope.metadataBuilder;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.query.view.service.ctl.model.PublicHoliday;
@@ -12,18 +18,13 @@ import uk.gov.moj.cpp.hearing.query.view.service.ctl.model.PublicHoliday;
 import java.util.Arrays;
 import java.util.List;
 
-import static java.time.LocalDate.now;
-import static java.util.UUID.randomUUID;
-import static javax.json.Json.createReader;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.Envelope.metadataBuilder;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ReferenceDataServiceTest {
     private static final String ENGLAND_AND_WALES_DIVISION = "england-and-wales";
 
@@ -47,7 +48,7 @@ public class ReferenceDataServiceTest {
     @Test
     public void shouldReturnJudiciary() {
         final JsonEnvelope value = JudiciaryResponseEnvelope();
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(value);
+        when(requester.request(any(), any(Class.class))).thenReturn(value);
         String ids = "7e2f843e-d639-40b3-8611-8015f3a13444," +
                 "7e2f843e-d639-40b3-8611-8015f3a13333," +
                 "7e2f843e-d639-40b3-8611-8015f3a13334";
@@ -60,7 +61,7 @@ public class ReferenceDataServiceTest {
     @Test
     public void shouldReturnJudiciaryV1() {
         final JsonEnvelope value = JudiciaryResponseEnvelopeV1();
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(value);
+        when(requester.request(any(), any(Class.class))).thenReturn(value);
         String ids = "7e2f843e-d639-40b3-8611-8015f3a13444," +
                 "7e2f843e-d639-40b3-8611-8015f3a13333," +
                 "7e2f843e-d639-40b3-8611-8015f3a13334";
@@ -86,7 +87,7 @@ public class ReferenceDataServiceTest {
     @Test
     public void shouldReturnEmptyWhenNoRecordMatched() {
         final JsonEnvelope value = JudiciaryResponseEnvelopeWithEmptyJson();
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(value);
+        when(requester.request(any(), any(Class.class))).thenReturn(value);
 
         final List<String> judiciaries = referenceDataService.getJudiciaryTitle(value, "7e2f843e-d639-40b3-8611-8015f3a13444");
 

@@ -6,16 +6,11 @@
              version="1.0">
 
     <persistence-unit name="hearing-persistence-unit">
-        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <jta-data-source>java:/DS.hearing</jta-data-source>
         <class>uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing</class>
         <class>uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote</class>
         <class>uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome</class>
-
-        <properties>
-            <property name="jboss.as.jpa.providerModule" value="org.hibernate:5.2"/>
-        </properties>
-
     </persistence-unit>
 
 </persistence>

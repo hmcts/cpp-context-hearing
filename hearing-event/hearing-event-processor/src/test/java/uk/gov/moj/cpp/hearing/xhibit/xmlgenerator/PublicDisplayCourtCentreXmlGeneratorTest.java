@@ -7,8 +7,8 @@ import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.Envelope.metadataBuilder;
@@ -38,7 +38,6 @@ import uk.gov.moj.cpp.JudicialRoleTypeEnum;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Currentstatus;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.ObjectFactory;
-import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Publicnotices;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
@@ -55,15 +54,15 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PublicDisplayCourtCentreXmlGeneratorTest {
 
     private static final String PUBLIC_PAGE_FILE_PATH = "xhibit/expectedPublicPage.xml";
@@ -98,7 +97,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
     @InjectMocks
     private PublicDisplayCourtCentreXmlGenerator publicDisplayCourtCentreXmlGenerator;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
@@ -120,7 +119,6 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
         final JsonEnvelope hearingEnvelope = getHearingEnvelope();
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
-        when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
 
         when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
 
@@ -147,7 +145,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
         final JsonEnvelope hearingEnvelope = getHearingEnvelope();
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
-        when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
+//        when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
 
         when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
 
@@ -176,7 +174,6 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
         final JsonEnvelope hearingEnvelope = getHearingEnvelopeJustWithMagistrate();
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
-        when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
 
         when(publicDisplayEventGenerator.generate(cppCaseDetail)).thenReturn(currentstatus);
 
@@ -203,9 +200,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
         final JsonEnvelope hearingEnvelope = getHearingEnvelope();
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
-        when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
 
-        when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
 
         final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, currentCourtStatus, lastUpdatedTime, context);
 
@@ -232,7 +227,6 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
         final JsonEnvelope hearingEnvelope = getHearingEnvelope();
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
-        when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
 
         when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
 
@@ -260,7 +254,6 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
         final JsonEnvelope hearingEnvelope = getHearingEnvelope();
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
-        when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
 
         when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
 

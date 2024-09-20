@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
@@ -29,13 +29,6 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_NOT_HAPPENED_TIMEOU
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.jayway.restassured.path.json.JsonPath;
-import java.io.IOException;
-import javax.json.JsonObject;
-import org.hamcrest.Matchers;
-import org.junit.Before;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -43,12 +36,19 @@ import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.PublicSelectedOffencesRemovedFromExistingHearing;
 import uk.gov.moj.cpp.hearing.domain.event.RemoveOffencesFromExistingHearing;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import com.jayway.restassured.response.Response;
-import org.junit.Test;
+import javax.json.JsonObject;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 
 public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
@@ -68,7 +68,7 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
     UUID offenceId3 ;
     UUID prosecutionCaseId;
 
-    @Before
+    @BeforeEach
     public void setUp(){
         defendantId1 = UUID.randomUUID();
         defendantId2 = UUID.randomUUID();

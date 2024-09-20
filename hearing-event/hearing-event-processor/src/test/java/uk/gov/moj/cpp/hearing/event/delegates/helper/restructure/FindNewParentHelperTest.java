@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.FindNewParentHelper.findNewParent;
 import static uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition.resultDefinition;
 
@@ -13,7 +12,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 
 import java.util.Optional;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FindNewParentHelperTest {
     @Test

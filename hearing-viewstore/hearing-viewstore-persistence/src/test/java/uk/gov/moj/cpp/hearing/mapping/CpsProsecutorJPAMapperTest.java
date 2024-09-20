@@ -10,7 +10,7 @@ import uk.gov.justice.core.courts.Prosecutor;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CpsProsecutor;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CpsProsecutorJPAMapperTest {
 

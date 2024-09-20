@@ -22,7 +22,8 @@ import java.util.UUID;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
+
 
 public class DefendantLegalAidStatusUpdateIT extends AbstractIT {
 
@@ -30,7 +31,7 @@ public class DefendantLegalAidStatusUpdateIT extends AbstractIT {
 
     //TODO ignoring this test as we are not able to reproduce it locally. will revisit this test once again to figure out why it ia failing and will fix it.
     @SuppressWarnings("squid:S1607")
-    @Ignore
+    @Disabled
     public void updateDefendantLegalAidStatus() {
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));

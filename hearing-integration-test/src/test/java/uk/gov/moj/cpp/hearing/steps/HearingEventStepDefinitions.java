@@ -4,7 +4,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -49,8 +49,9 @@ import javax.json.JsonObjectBuilder;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
-import com.jayway.restassured.response.Response;
+import io.restassured.response.Response;
 import org.hamcrest.Matcher;
+
 
 public class HearingEventStepDefinitions {
 

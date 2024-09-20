@@ -10,12 +10,11 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit.courtCentreOrganisationUnit;
 import static uk.gov.justice.hearing.courts.referencedata.Courtrooms.courtrooms;
 
@@ -47,23 +46,24 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(DataProviderRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class NextHearingHelperTest extends ReferenceDataClientTestBase {
 
     private static final String DEFAULT_VALUE = "DefaultValue";
@@ -89,12 +89,12 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
     @InjectMocks
     private NextHearingHelper nextHearingHelper;
 
-    @DataProvider
-    public static Object[][] possibleDefaultStartTimes() {
-        return new Object[][]{
-                {"10:00"},
-                {"10:30:00"},
-        };
+
+    public static Stream<Arguments> possibleDefaultStartTimes() {
+        return Stream.of(
+                Arguments.of("10:00"),
+                Arguments.of("10:30:00")
+        );
     }
 
     private static final int COURT_ROOM_ID = 54321;
@@ -117,10 +117,6 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
 
     private final ResultDefinition adjournmentReasonsResultDefinition = ResultDefinition.resultDefinition().setResultDefinitionGroup("Adjournment Reasons");
 
-    @Before
-    public void setup() {
-        initMocks(this);
-    }
 
     @Test
     public void shouldPopulateNextHearingForCrownCourtHearing() {
@@ -210,8 +206,8 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
         assertValid(nextHearing, JurisdictionType.CROWN, ZonedDateTimes.fromString("2019-02-02T00:00Z"));
     }
 
-    @UseDataProvider("possibleDefaultStartTimes")
-    @Test
+    @ParameterizedTest
+    @MethodSource("possibleDefaultStartTimes")
     public void shouldPopulateNextHearingForCrownCourtHearingWithNoListedTimeAndDefaultTimeAvailableForCourt(final String defaultStartTime) {
         final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-with-nexthearing-crowncourt-no-listing-time.json");
 
@@ -229,11 +225,13 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
 
     private void setupMocks(final JsonEnvelope event, final String defaultStartTimeForCourt) {
         final CourtCentreOrganisationUnit courtCentre = getCourtCentre(defaultStartTimeForCourt);
-        when(courtHouseReverseLookup.getCourtCentreByName(event, COURT_NAME)).thenReturn(ofNullable(courtCentre));
-        when(courtHouseReverseLookup.getCourtRoomByRoomName(courtCentre, COURT_ROOM_NAME)).thenReturn(ofNullable(expectedCourtRoomResult));
-        when(courtRoomOuCodeReverseLookup.getcourtRoomOuCode(event, 291, "B47GL")).thenReturn("B47GL00");
-        when(hearingTypeReverseLookup.getHearingTypeByName(event, HEARING_TYPE_DESCRIPTION)).thenReturn(hearingType);
+        when(courtHouseReverseLookup.getCourtCentreByName(eq(event), eq(COURT_NAME))).thenReturn(ofNullable(courtCentre));
+        when(courtHouseReverseLookup.getCourtRoomByRoomName(eq(courtCentre), eq(COURT_ROOM_NAME))).thenReturn(ofNullable(expectedCourtRoomResult));
+        when(courtRoomOuCodeReverseLookup.getcourtRoomOuCode(any(), any(), any())).thenReturn("B47GL00");
+        when(hearingTypeReverseLookup.getHearingTypeByName(eq(event), eq(HEARING_TYPE_DESCRIPTION))).thenReturn(hearingType);
+        when(referenceDataService.getResultDefinitionById(any(), any(), any())).thenReturn(null);
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(fromString("1d55fdeb-7dbc-46ec-b3ff-7b15fe08a476")))).thenReturn(adjournmentReasonsResultDefinition);
+
     }
 
     private JsonEnvelope getJsonEnvelop(final String filePath) {

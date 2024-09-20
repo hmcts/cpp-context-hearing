@@ -17,13 +17,13 @@ import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MagistratesCourtHearingAggregateTest {
 
 
@@ -49,7 +49,7 @@ public class MagistratesCourtHearingAggregateTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         final List<Defendant> defendants = new ArrayList<>();
         originatingHearing = new Hearing(CASE_ID, CASE_URN, COURT_CENTRE_ID, COURT_CENTRE_NAME, defendants, SENDING_COMMITTAL_DATE, TYPE);

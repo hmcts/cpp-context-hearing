@@ -19,9 +19,11 @@ import javax.inject.Inject;
 
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+//TODO: remove ignore
 @RunWith(CdiTestRunner.class)
 public class DocumentRepositoryTest {
 

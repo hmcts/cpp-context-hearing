@@ -150,7 +150,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
 public class HearingAggregateTest {

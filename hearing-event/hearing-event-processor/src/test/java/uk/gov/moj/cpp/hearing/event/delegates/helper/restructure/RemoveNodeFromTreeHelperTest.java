@@ -4,7 +4,6 @@ import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
 import static uk.gov.justice.core.courts.ResultLine.resultLine;
 
 import uk.gov.justice.core.courts.ResultLine;
@@ -14,7 +13,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class RemoveNodeFromTreeHelperTest {
 

@@ -8,10 +8,14 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Random;
 
 import org.hamcrest.Matcher;
 
@@ -56,6 +60,10 @@ public class MatcherUtil {
 
     public static Matcher<Iterable<ProsecutionCase>> getProsecutionCasesMatchers(final List<ProsecutionCase> prosecutionCases) {
         return hasItems(prosecutionCases.stream().map(MatcherUtil::getProsecutionCaseMatcher).toArray(BeanMatcher[]::new));
+    }
+
+    public static ZonedDateTime getPastDate() {
+        return new UtcClock().now().minusDays(new Random().nextInt(100));
     }
 
 }

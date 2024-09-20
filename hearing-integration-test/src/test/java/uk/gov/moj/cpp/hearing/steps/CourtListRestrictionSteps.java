@@ -43,7 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.AllOf;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 public class CourtListRestrictionSteps  extends AbstractIT {
 
@@ -55,7 +55,7 @@ public class CourtListRestrictionSteps  extends AbstractIT {
 
     ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(objectMapper);
 
-    @Before
+    @BeforeEach
     public void setUpTest() {
         givenAUserHasLoggedInAsACourtClerk(randomUUID());
     }

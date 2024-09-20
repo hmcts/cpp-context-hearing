@@ -40,7 +40,6 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
 
-import com.jayway.restassured.path.json.JsonPath;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -83,7 +82,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import io.restassured.path.json.JsonPath;
+import org.junit.jupiter.api.Test;
 
 
 @SuppressWarnings({"squid:S2699"})

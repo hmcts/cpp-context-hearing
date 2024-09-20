@@ -4,7 +4,7 @@ import static java.time.ZonedDateTime.*;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class PublishCourtListRequestParametersParserTest {

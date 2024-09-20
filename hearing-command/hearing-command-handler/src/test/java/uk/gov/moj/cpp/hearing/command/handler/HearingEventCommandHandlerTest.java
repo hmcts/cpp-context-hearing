@@ -11,9 +11,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.HearingEventDefinitionsTemplates.buildCreateHearingEventDefinitionsCommand;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
@@ -24,14 +22,13 @@ import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
-import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CreateHearingEventDefinitionsCommand;
@@ -48,22 +45,23 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hamcrest.core.IsNull;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings({"unchecked"})
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HearingEventCommandHandlerTest {
 
     @Spy
@@ -78,17 +76,12 @@ public class HearingEventCommandHandlerTest {
     @Mock
     private AggregateService aggregateService;
     @Spy
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
     @Spy
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
     @InjectMocks
     private HearingEventCommandHandler hearingEventCommandHandler;
 
-    @Before
-    public void setup() {
-        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
-        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
-    }
 
     @Test
     public void shouldAlwaysRaiseHearingEventDefinitionsDeletedAndCreatedEvents() throws Exception {
@@ -125,7 +118,7 @@ public class HearingEventCommandHandlerTest {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
         final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId, randomUUID(), STRING.next(), STRING.next(),
-                PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, randomUUID(), Arrays.asList(randomUUID()), randomUUID());
+                getPastDate(), getPastDate(), false, randomUUID(), Arrays.asList(randomUUID()), randomUUID());
 
         setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
             a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
@@ -170,7 +163,7 @@ public class HearingEventCommandHandlerTest {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
         final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId,
-                randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, null, Arrays.asList(randomUUID()), randomUUID());
+                randomUUID(), STRING.next(), STRING.next(), getPastDate(), getPastDate(), false, null, Arrays.asList(randomUUID()), randomUUID());
 
         setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
             a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
@@ -225,10 +218,10 @@ public class HearingEventCommandHandlerTest {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
         final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId,
-                randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, null, Arrays.asList(randomUUID()), randomUUID());
+                randomUUID(), STRING.next(), STRING.next(), getPastDate(), getPastDate(), false, null, Arrays.asList(randomUUID()), randomUUID());
 
         final CorrectLogEventCommand correctLogEvenCommand = new CorrectLogEventCommand(logEventCommand.getHearingEventId(), randomUUID(), hearingId,
-                randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, randomUUID() );
+                randomUUID(), STRING.next(), STRING.next(), getPastDate(), getPastDate(), false, randomUUID());
 
         setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
             a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
@@ -303,7 +296,7 @@ public class HearingEventCommandHandlerTest {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
         final CorrectLogEventCommand correctLogEventCommand = new CorrectLogEventCommand(randomUUID(), randomUUID(), hearingId,
-                randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, randomUUID() );
+                randomUUID(), STRING.next(), STRING.next(), getPastDate(), getPastDate(), false, randomUUID());
 
         setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
             a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
@@ -332,5 +325,10 @@ public class HearingEventCommandHandlerTest {
         when(this.eventSource.getStreamById(id)).thenReturn(eventStream);
         final Class<T> clz = (Class<T>) aggregate.getClass();
         when(this.aggregateService.get(eventStream, clz)).thenReturn(aggregate);
+    }
+
+
+    private ZonedDateTime getPastDate() {
+        return new UtcClock().now().minusDays(new Random().nextInt(100));
     }
 }

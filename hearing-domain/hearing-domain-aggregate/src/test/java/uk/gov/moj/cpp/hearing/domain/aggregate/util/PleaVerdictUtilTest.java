@@ -8,7 +8,7 @@ import uk.gov.justice.core.courts.VerdictType;
 
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PleaVerdictUtilTest {
 

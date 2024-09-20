@@ -30,6 +30,7 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingVacatedTrialDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -40,6 +41,7 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +50,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import com.jayway.jsonpath.ReadContext;
 import org.hamcrest.Matcher;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @NotThreadSafe
 public class CaseTimelineIT extends AbstractIT {
@@ -58,7 +60,7 @@ public class CaseTimelineIT extends AbstractIT {
 
     @Test
     public void shouldDisplayCaseTimeline() throws Exception {
-        setUpHearing(now(ZoneId.of("UTC")).plusDays(1L), null);
+        setUpHearing(new UtcClock().now().plusDays(1L), null);
         stubCourtRoom(hearing);
         stubProsecutionCases(hearing);
         stubCourtRoom(hearing);

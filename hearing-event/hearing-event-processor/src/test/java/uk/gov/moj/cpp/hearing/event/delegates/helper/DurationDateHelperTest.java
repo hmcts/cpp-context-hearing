@@ -9,16 +9,15 @@ import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.JudicialResultPromptDurationElement;
 
 import java.time.ZonedDateTime;
-import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class DurationDateHelperTest {
 
     private final Hearing hearing = new Hearing.Builder()
@@ -31,41 +30,27 @@ public class DurationDateHelperTest {
 
     private JudicialResultPromptDurationElement.Builder builder;
 
-    @Parameterized.Parameter(0)
-    public String unit;
-
-    @Parameterized.Parameter(1)
-    public Integer value;
-
-    Pair<String, Integer> values;
-
-    @Parameterized.Parameter(2)
-    public Object expectedStartDate;
-
-    @Parameterized.Parameter(3)
-    public Object expectedEndDate;
-
-    @Parameterized.Parameters(name = "Duration Unit: {0} Duration Value: {1} expectedStartDate: {2} expectedEndDate: {3}")
-    public static Collection<Object[]> testData() {
-        return asList(new Object[][]{
-                {"H", 1200, "2019-09-13", "2019-11-01"},
-                {"W", 1000, "2019-09-13", "2038-11-11"},
-                {"M", 1000, "2019-09-13", "2103-01-12"},
-                {"Y", 1000, "2019-09-13", "3019-09-12"},
-                {"T", 1000, "2019-09-13", "2019-09-13"},
-                {"D", 1000, "2019-09-13", "2022-06-08"}
-        });
+    public static Stream<Arguments> testData() {
+        return Stream.of(
+                Arguments.of("H", 1200, "2019-09-13", "2019-11-01"),
+                Arguments.of("W", 1000, "2019-09-13", "2038-11-11"),
+                Arguments.of("M", 1000, "2019-09-13", "2103-01-12"),
+                Arguments.of("Y", 1000, "2019-09-13", "3019-09-12"),
+                Arguments.of("T", 1000, "2019-09-13", "2019-09-13"),
+                Arguments.of("D", 1000, "2019-09-13", "2022-06-08")
+        );
     }
 
-    @Before
+    @BeforeEach
     public void init() {
-        this.values = Pair.of(unit, value);
+
         this.builder = new JudicialResultPromptDurationElement.Builder();
     }
 
-    @Test
-    public void test() {
-
+    @ParameterizedTest
+    @MethodSource("testData")
+    public void test(final String unit, final Integer value, final Object expectedStartDate,final  Object expectedEndDate) {
+        Pair<String, Integer> values = Pair.of(unit, value);
         DurationDateHelper.populateStartAndEndDates(builder, hearing, values);
 
         final JudicialResultPromptDurationElement actualJudicialResultPromptDurationElement = builder.build();

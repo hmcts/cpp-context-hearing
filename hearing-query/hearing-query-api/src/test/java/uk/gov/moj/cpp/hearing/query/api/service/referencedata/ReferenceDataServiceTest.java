@@ -7,11 +7,11 @@ import static javax.json.Json.createObjectBuilder;
 import static javax.json.Json.createReader;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.Envelope.metadataBuilder;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -32,32 +32,25 @@ import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 
-import java.util.AbstractMap;
-import java.util.HashMap;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonValue;
 
-import com.google.common.collect.testing.SafeTreeMap;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.google.common.cache.LoadingCache;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.slf4j.LoggerFactory;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ReferenceDataServiceTest {
 
     @Spy
@@ -75,7 +68,7 @@ public class ReferenceDataServiceTest {
     @InjectMocks
     private ReferenceDataService referenceDataService;
 
-    @Before
+    @BeforeEach
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
@@ -105,9 +98,12 @@ public class ReferenceDataServiceTest {
         assertThat(resultPrompts.get(0).getReference(), is(promptRef));
     }
 
+
     @Test
-    public void shouldNotGetCacheableResultDefinitionsAndThrowException() {
-        when(requester.requestAsAdmin(any(JsonEnvelope.class), any(Class.class))).thenThrow(ExecutionException.class);
+    public void shouldNotGetCacheableResultDefinitionsAndThrowException() throws ExecutionException {
+        final LoadingCache<LocalDate, List<Prompt>> promptsCacheLoader = mock(LoadingCache.class);
+        setField(referenceDataService, "promptsCacheLoader", promptsCacheLoader);
+        when(promptsCacheLoader.get(any())).thenThrow(ExecutionException.class);
         final List<Prompt> resultPrompts = referenceDataService.getCacheableResultPrompts(Optional.empty());
         assertThat(resultPrompts.size(), is(0));
     }
@@ -155,7 +151,7 @@ public class ReferenceDataServiceTest {
 
     @Test
     public void shouldGetAllCourtRooms() {
-        when(requester.requestAsAdmin(any(JsonEnvelope.class), any(Class.class))).thenReturn(courtRoomsResponseEnvelope());
+        when(requester.requestAsAdmin(any(), any(Class.class))).thenReturn(courtRoomsResponseEnvelope());
         JsonObject obj = referenceDataService.getAllCourtRooms(courtRoomsRequestEnvelope());
         assertEquals(1, obj.getJsonArray("organisationunits").size());
         assertEquals("oucodeL3Name", obj.getJsonArray("organisationunits").getJsonObject(0).getString("oucodeL3Name"));

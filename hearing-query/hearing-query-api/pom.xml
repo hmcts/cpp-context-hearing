@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-query</artifactId>
-        <version>8.0.151-SNAPSHOT</version>
+        <version>17.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-query-api</artifactId>
     <packaging>war</packaging>
@@ -19,6 +19,11 @@
                 <groupId>uk.gov.justice.framework-generators</groupId>
                 <artifactId>rest-client-generator-plugin</artifactId>
                 <dependencies>
+                    <dependency>
+                        <groupId>javax</groupId>
+                        <artifactId>javaee-api</artifactId>
+                        <version>${javaee-api.version}</version>
+                    </dependency>
                     <dependency>
                         <groupId>uk.gov.moj.cpp.staging.enforcement</groupId>
                         <artifactId>stagingenforcement-query-api</artifactId>
@@ -97,11 +102,6 @@
         </dependency>
 
         <dependency>
-            <groupId>uk.gov.moj.cpp.system.authorisation</groupId>
-            <artifactId>authorisation-interceptor</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>uk.gov.moj.cpp.hearing</groupId>
             <artifactId>hearing-query-view</artifactId>
             <version>${project.version}</version>
@@ -131,6 +131,12 @@
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>test-utils-enveloper-provider</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.moj.cpp.access-control</groupId>
+            <artifactId>access-control-common-providers</artifactId>
+            <version>8.3.21</version>
             <scope>test</scope>
         </dependency>
 

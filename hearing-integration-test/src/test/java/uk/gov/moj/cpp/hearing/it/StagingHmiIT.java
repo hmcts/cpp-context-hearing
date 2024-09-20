@@ -19,7 +19,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import javax.json.JsonObject;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class StagingHmiIT extends AbstractIT {
 

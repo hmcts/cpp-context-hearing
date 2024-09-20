@@ -19,18 +19,14 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import org.junit.Ignore;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class ChangeNextHearingDateIT extends AbstractIT {
 
-    @Override
-    public void setUpPerTest() {
-        super.setUpPerTest();
-    }
-
     @Test
-    @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
+    @Disabled("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
     public void shouldUpdateEarliestNextHearingDate() throws Exception {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();

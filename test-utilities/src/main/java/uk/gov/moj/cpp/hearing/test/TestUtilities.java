@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.test;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.justice.services.messaging.Envelope.metadataBuilder;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -27,7 +28,6 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.junit.Assert;
 
 public class TestUtilities {
 
@@ -92,7 +92,7 @@ public class TestUtilities {
             if (jsonEnvelope.metadata().name().equals(eventName)) {
                 matched = true;
                 final JsonNode actualEvent = generatedEventAsJsonNode(jsonEnvelope.payloadAsJsonObject());
-                Assert.assertThat(actualEvent, CoreMatchers.equalTo(generatedEventAsJsonNode(expectedResultPayload)));
+                assertThat(actualEvent, CoreMatchers.equalTo(generatedEventAsJsonNode(expectedResultPayload)));
                 break;
             }
         }

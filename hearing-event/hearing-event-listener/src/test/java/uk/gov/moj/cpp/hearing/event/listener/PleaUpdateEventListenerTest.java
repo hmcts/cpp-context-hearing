@@ -5,13 +5,12 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.AllocationDecision.allocationDecision;
 import static uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers;
@@ -23,7 +22,6 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 
-import com.google.common.collect.Lists;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
@@ -62,17 +60,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PleaUpdateEventListenerTest {
     private static final String GUILTY = "GUILTY";
 
@@ -110,7 +108,7 @@ public class PleaUpdateEventListenerTest {
     @Mock
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
-    @Before
+    @BeforeEach
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
@@ -377,7 +375,7 @@ public class PleaUpdateEventListenerTest {
                 objectToJsonObjectConverter.convert(offencePleaUpdated)));
 
         verify(this.offenceRepository).save(offence);
-        verifyZeroInteractions(allocationDecisionJPAMapper);
+        verifyNoMoreInteractions(allocationDecisionJPAMapper);
 
         final AllocationDecision offenceAllocationDecision = offencePleaUpdated.getPleaModel().getAllocationDecision();
         assertThat(offenceAllocationDecision, is(nullValue()));
@@ -595,9 +593,8 @@ public class PleaUpdateEventListenerTest {
         indicatedPlea.setIndicatedPleaDate(indicatedPleaPojo.getIndicatedPleaDate());
         indicatedPlea.setIndicatedPleaValue(indicatedPleaPojo.getIndicatedPleaValue());
         indicatedPlea.setIndicatedPleaSource(indicatedPleaPojo.getSource());
-        when(indicatedPleaJPAMapper.toJPA(Mockito.any())).thenReturn(indicatedPlea);
         when(this.hearingRepository.findBy(offencePleaUpdated.getHearingId())).thenReturn(hearing);
-        when(this.courtApplicationsSerializer.courtApplications(anyString())).thenReturn(courtApplications);
+        when(this.courtApplicationsSerializer.courtApplications(any())).thenReturn(courtApplications);
 
         doCallRealMethod().when(this.hearingJPAMapper).updatePleaOnOffencesInCourtApplication(hearing.getCourtApplicationsJson(), offencePleaUpdated.getPleaModel());
 
@@ -650,9 +647,8 @@ public class PleaUpdateEventListenerTest {
         indicatedPlea.setIndicatedPleaDate(indicatedPleaPojo.getIndicatedPleaDate());
         indicatedPlea.setIndicatedPleaValue(indicatedPleaPojo.getIndicatedPleaValue());
         indicatedPlea.setIndicatedPleaSource(indicatedPleaPojo.getSource());
-        when(indicatedPleaJPAMapper.toJPA(Mockito.any())).thenReturn(indicatedPlea);
         when(this.hearingRepository.findBy(offencePleaUpdated.getHearingId())).thenReturn(hearing);
-        when(this.courtApplicationsSerializer.courtApplications(anyString())).thenReturn(courtApplications);
+        when(this.courtApplicationsSerializer.courtApplications(any())).thenReturn(courtApplications);
 
         doCallRealMethod().when(this.hearingJPAMapper).updatePleaOnOffencesInCourtApplication(hearing.getCourtApplicationsJson(), offencePleaUpdated.getPleaModel());
 

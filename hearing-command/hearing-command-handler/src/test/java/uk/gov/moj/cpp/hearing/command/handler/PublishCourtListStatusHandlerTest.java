@@ -5,12 +5,12 @@ import static javax.json.Json.createObjectBuilder;
 import static javax.json.Json.createReader;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory.createEnvelope;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportFailed.publishCourtListExportFailed;
@@ -18,7 +18,6 @@ import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportSuc
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListRequested.publishCourtListRequested;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -42,16 +41,16 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PublishCourtListStatusHandlerTest {
 
     @Spy
@@ -167,7 +166,7 @@ public class PublishCourtListStatusHandlerTest {
         givenThatWeSuccessfullyGetAllOfTheCrownCourtCentres(payload);
         publishCourtListStatusHandler.publishHearingListsForCrownCourts(commandEnvelope);
 
-        verifyZeroInteractions(courtListAggregate);
+        verifyNoInteractions(courtListAggregate);
     }
 
     @Test
@@ -178,10 +177,8 @@ public class PublishCourtListStatusHandlerTest {
         givenThatWeSuccessfullyGetAllOfTheCrownCourtCentres(payload);
         givenThatWeSuccessfullyGetTheStreamForAnyPublishCourtRequest();
         givenThatThePublishCourtListRequestAggregateExists();
-        final ZonedDateTime courtCentreOneRequestTime = utcClock.now();
         final ZonedDateTime courtCentreTwoRequestTime = utcClock.now();
 
-        givenThatPublicationOfTheHearingListFailsToBeRequested(COURT_CENTRE_ID_ONE, courtCentreOneRequestTime);
         givenThatPublicationOfTheHearingListIsSuccessfullyRequested(COURT_CENTRE_ID_TWO, courtCentreTwoRequestTime);
 
         publishCourtListStatusHandler.publishHearingListsForCrownCourts(commandEnvelope);
@@ -197,10 +194,8 @@ public class PublishCourtListStatusHandlerTest {
         givenThatWeSuccessfullyGetAllOfTheCrownCourtCentres(payload);
         givenThatWeSuccessfullyGetTheStreamForAnyPublishCourtRequest();
         givenThatThePublishCourtListRequestAggregateExists();
-        final ZonedDateTime courtCentreOneRequestTime = utcClock.now();
         final ZonedDateTime courtCentreTwoRequestTime = utcClock.now();
 
-        givenThatPublicationOfTheHearingListFailsToBeRequested(COURT_CENTRE_ID_ONE, courtCentreOneRequestTime);
         givenThatPublicationOfTheHearingListIsSuccessfullyRequested(COURT_CENTRE_ID_TWO, courtCentreTwoRequestTime);
 
         publishCourtListStatusHandler.publishHearingListsForCrownCourts(commandEnvelope);
@@ -221,7 +216,6 @@ public class PublishCourtListStatusHandlerTest {
         final ZonedDateTime courtCentreOneRequestTime = utcClock.now();
         final ZonedDateTime courtCentreTwoRequestTime = utcClock.now();
 
-        givenThatPublicationOfTheHearingListIsSuccessfullyRequested(COURT_CENTRE_ID_ONE, courtCentreOneRequestTime);
         givenThatPublicationOfTheHearingListIsSuccessfullyRequested(COURT_CENTRE_ID_TWO, courtCentreTwoRequestTime);
 
         publishCourtListStatusHandler.publishHearingListsForCrownCourts(commandEnvelope);

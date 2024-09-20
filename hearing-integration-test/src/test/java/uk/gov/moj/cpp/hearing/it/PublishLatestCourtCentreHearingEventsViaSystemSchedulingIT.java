@@ -9,7 +9,7 @@ import static javax.json.Json.createObjectBuilder;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
@@ -22,6 +22,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationalUnit;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
@@ -37,8 +38,8 @@ import javax.annotation.concurrent.NotThreadSafe;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,10 +56,10 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     private CommandHelpers.InitiateHearingCommandHelper hearing;
     private ZonedDateTime eventTime;
 
-    @Before
+    @BeforeEach
     public void setup() throws NoSuchAlgorithmException {
         stubUsersAndGroupsUserRoles(getLoggedInUser());
-        eventTime = now().withZoneSameLocal(ZoneId.of("UTC"));
+        eventTime = new UtcClock().now().withZoneSameLocal(ZoneId.of("UTC"));
         hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", eventTime.toLocalDate(), randomUUID(), caseId, of(hearingTypeId))));
         stubGetReferenceDataCourtRooms(hearing.getHearing().getCourtCentre(), ENGLISH, ouId3, ouId4);
         stubOrganisationalUnit(fromString(courtCentreId), "OUCODE");

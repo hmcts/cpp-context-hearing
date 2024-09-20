@@ -56,8 +56,8 @@ import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hamcrest.CoreMatchers;
 import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class OffenceAggregateTest {
 
@@ -65,7 +65,7 @@ public class OffenceAggregateTest {
 
     private OffenceAggregate offenceAggregate;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         offenceAggregate = new OffenceAggregate();
     }

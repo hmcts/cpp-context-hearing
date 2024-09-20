@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.command.api;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.stream;
-import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
@@ -12,7 +11,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerClassMatcher.isHandlerClass;
@@ -28,7 +26,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.command.api.service.ReferenceDataService;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -39,18 +36,18 @@ import java.util.stream.Stream;
 import javax.json.JsonObject;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HearingCommandApiTest {
 
     private static final String PATH_TO_RAML = "src/raml/hearing-command-api.raml";
@@ -106,7 +103,7 @@ public class HearingCommandApiTest {
     @InjectMocks
     private HearingCommandApi hearingCommandApi;
 
-    @Before
+    @BeforeEach
     public void setup() {
         apiMethodsToHandlerNames = apiMethodsToHandlerNames(HearingCommandApi.class);
         eventApiMethodsToHandlerNames = apiMethodsToHandlerNames(HearingEventCommandApi.class);
@@ -148,7 +145,6 @@ public class HearingCommandApiTest {
         final Metadata metadata = CommandAPITestBase.metadataFor(HEARING_INITIATE, randomUUID().toString());
         final JsonEnvelope envelope = JsonEnvelope.envelopeFrom(metadata, jsonObjectPayload);
 
-        when(referenceDataService.getResults(envelope, "DDCH")).thenReturn(ResultDefinition.resultDefinition().setId(fromString("8c67b30a-418c-11e8-842f-0ed5f89f718b")));
 
         hearingCommandApi.initiateHearing(envelope);
 

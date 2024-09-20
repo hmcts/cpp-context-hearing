@@ -3,11 +3,11 @@ package uk.gov.moj.cpp.hearing.event;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,6 +35,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.common.ReferenceDataLoader;
 import uk.gov.moj.cpp.hearing.domain.OffenceResult;
@@ -48,23 +49,22 @@ import uk.gov.moj.cpp.hearing.event.relist.ResultsSharedFilter;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PublishResultsEventProcessorTest {
 
     @Spy
@@ -110,12 +110,15 @@ public class PublishResultsEventProcessorTest {
     private ArgumentCaptor<JsonEnvelope> eventArgumentCaptor;
 
     @Captor
+    private ArgumentCaptor<DefaultEnvelope> defaultEnvelopeArgumentCaptor;
+
+    @Captor
     private ArgumentCaptor<ResultsShared> publishResultDelegateCaptor;
 
     @Captor
     private ArgumentCaptor<List<Target>> targetsArgumentCaptor;
 
-    @Before
+    @BeforeEach
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
     }
@@ -127,7 +130,7 @@ public class PublishResultsEventProcessorTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
 
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
         when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
@@ -144,8 +147,6 @@ public class PublishResultsEventProcessorTest {
                         .build());
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
 
-        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
-
         publishResultsEventProcessor.resultsShared(event);
 
         verify(updateDefendantWithApplicationDetailsDelegate, times(1)).execute(sender, event, resultsShared);
@@ -154,10 +155,10 @@ public class PublishResultsEventProcessorTest {
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
 
-        verify(this.sender).send(this.eventArgumentCaptor.capture());
+        verify(this.sender).send(this.defaultEnvelopeArgumentCaptor.capture());
 
         //TODO the toJsonEnvelope serves to eliminate a framework issue with FW5
-        assertThat(toJsonEnvelope(this.eventArgumentCaptor.getValue()),
+        assertThat(toJsonEnvelope(this.defaultEnvelopeArgumentCaptor.getValue()),
                 jsonEnvelope(metadata().withName("hearing.command.handler.update-offence-results"), payloadIsJson(CoreMatchers.allOf(
                         withJsonPath("$.caseId", is(resultsShared.getHearing().getProsecutionCases().get(0).getId().toString()))))));
     }
@@ -169,7 +170,7 @@ public class PublishResultsEventProcessorTest {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
         when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
@@ -184,7 +185,6 @@ public class PublishResultsEventProcessorTest {
                         .withPostcode("LL55 2DF")
                         .build());
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
-        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 
@@ -211,7 +211,7 @@ public class PublishResultsEventProcessorTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
 
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
         when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
@@ -226,8 +226,6 @@ public class PublishResultsEventProcessorTest {
                         .withPostcode("LL55 2DF")
                         .build());
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
-
-        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 
@@ -245,7 +243,7 @@ public class PublishResultsEventProcessorTest {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
         when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
@@ -266,7 +264,7 @@ public class PublishResultsEventProcessorTest {
                 .filter(ResultLine::getIsComplete)
                 .collect(Collectors.toList()).get(0);
 
-        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
+//        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), any())).thenReturn(getResultDefinitionForOffenceResult(resultLine, "F"));
 
@@ -276,10 +274,10 @@ public class PublishResultsEventProcessorTest {
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
 
-        verify(this.sender).send(this.eventArgumentCaptor.capture());
+        verify(this.sender).send(this.defaultEnvelopeArgumentCaptor.capture());
 
         //TODO the toJsonEnvelope serves to eliminate a framework issue with FW5
-        assertThat(toJsonEnvelope(this.eventArgumentCaptor.getValue()),
+        assertThat(toJsonEnvelope(this.defaultEnvelopeArgumentCaptor.getValue()),
                 jsonEnvelope(metadata().withName("hearing.command.handler.update-offence-results"), payloadIsJson(CoreMatchers.allOf(
                         withJsonPath("$.caseId", is(resultsShared.getHearing().getProsecutionCases().get(0).getId().toString()))
                         , withJsonPath("$.hearingId", is(resultsShared.getHearing().getId().toString()))
@@ -292,12 +290,13 @@ public class PublishResultsEventProcessorTest {
     @Test
     public void shouldShareResultForOffenceWhenOffenceisWithDrawnAndExpectWithdrawnResultLabelInPayload() {
 
-        final UUID dismissedResultDeifinitionId = UUID.fromString("16feb0f2e-8d1e-40c7-af2c-05b28c69e5fc");
+        final UUID dismissedResultDefinitionId = UUID.fromString("4d5f25a5-9102-472f-a2da-c58d1eeb9c93");
 
-        final ResultsShared resultsShared = resultsSharedTemplateForSendingResultSharedForOffence(dismissedResultDeifinitionId);
+        final ResultsShared resultsShared = resultsSharedTemplateForSendingResultSharedForOffence(dismissedResultDefinitionId);
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"), objectToJsonObjectConverter.convert(resultsShared));
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId()))).thenReturn(prosecutorTemplate());
+//        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId()))).thenReturn(prosecutorTemplate());
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId()))).thenReturn(prosecutorTemplate());
         when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
@@ -317,7 +316,6 @@ public class PublishResultsEventProcessorTest {
                 .filter(ResultLine::getIsComplete)
                 .collect(Collectors.toList()).get(0);
 
-        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), any())).thenReturn(getResultDefinitionForOffenceResult(resultLine, "F"));
 
@@ -327,10 +325,10 @@ public class PublishResultsEventProcessorTest {
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
 
-        verify(this.sender).send(this.eventArgumentCaptor.capture());
+        verify(this.sender).send(this.defaultEnvelopeArgumentCaptor.capture());
 
         //TODO the toJsonEnvelope serves to eliminate a framework issue with FW5
-        assertThat(toJsonEnvelope(this.eventArgumentCaptor.getValue()),
+        assertThat(toJsonEnvelope(this.defaultEnvelopeArgumentCaptor.getValue()),
                 jsonEnvelope(metadata().withName("hearing.command.handler.update-offence-results"), payloadIsJson(CoreMatchers.allOf(
                         withJsonPath("$.caseId", is(resultsShared.getHearing().getProsecutionCases().get(0).getId().toString()))
                         , withJsonPath("$.hearingId", is(resultsShared.getHearing().getId().toString()))
@@ -349,7 +347,7 @@ public class PublishResultsEventProcessorTest {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
         when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
@@ -370,8 +368,6 @@ public class PublishResultsEventProcessorTest {
                 .filter(ResultLine::getIsComplete)
                 .collect(Collectors.toList()).get(0);
 
-        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
-
         when(referenceDataService.getResultDefinitionById(any(), any(), any())).thenReturn(getResultDefinitionForOffenceResult(resultLine, "F"));
 
         publishResultsEventProcessor.resultsShared(event);
@@ -380,10 +376,10 @@ public class PublishResultsEventProcessorTest {
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
 
-        verify(this.sender).send(this.eventArgumentCaptor.capture());
+        verify(this.sender).send(this.defaultEnvelopeArgumentCaptor.capture());
 
         //TODO the toJsonEnvelope serves to eliminate a framework issue with FW5
-        assertThat(toJsonEnvelope(this.eventArgumentCaptor.getValue()),
+        assertThat(toJsonEnvelope(this.defaultEnvelopeArgumentCaptor.getValue()),
                 jsonEnvelope(metadata().withName("hearing.command.handler.update-offence-results"), payloadIsJson(CoreMatchers.allOf(
                         withJsonPath("$.caseId", is(resultsShared.getHearing().getProsecutionCases().get(0).getId().toString()))
                         , withJsonPath("$.hearingId", is(resultsShared.getHearing().getId().toString()))
@@ -402,7 +398,7 @@ public class PublishResultsEventProcessorTest {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
         when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
@@ -423,8 +419,6 @@ public class PublishResultsEventProcessorTest {
                 .filter(ResultLine::getIsComplete)
                 .collect(Collectors.toList()).get(0);
 
-        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
-
         when(referenceDataService.getResultDefinitionById(any(), any(), any())).thenReturn(getResultDefinitionForOffenceResult(resultLine, "A"));
 
         publishResultsEventProcessor.resultsShared(event);
@@ -433,10 +427,10 @@ public class PublishResultsEventProcessorTest {
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
 
-        verify(this.sender).send(this.eventArgumentCaptor.capture());
+        verify(this.sender).send(this.defaultEnvelopeArgumentCaptor.capture());
 
         //TODO the toJsonEnvelope serves to eliminate a framework issue with FW5
-        assertThat(toJsonEnvelope(this.eventArgumentCaptor.getValue()),
+        assertThat(toJsonEnvelope(this.defaultEnvelopeArgumentCaptor.getValue()),
                 jsonEnvelope(metadata().withName("hearing.command.handler.update-offence-results"), payloadIsJson(CoreMatchers.allOf(
                         withJsonPath("$.caseId", is(resultsShared.getHearing().getProsecutionCases().get(0).getId().toString()))
                         , withJsonPath("$.hearingId", is(resultsShared.getHearing().getId().toString()))
@@ -465,7 +459,7 @@ public class PublishResultsEventProcessorTest {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
         when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
@@ -479,7 +473,6 @@ public class PublishResultsEventProcessorTest {
                         .withWelshAddress5("Welsh 5")
                         .withPostcode("LL55 2DF")
                         .build());
-        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 
@@ -491,15 +484,8 @@ public class PublishResultsEventProcessorTest {
         final ResultsShared resultsShared = resultsSharedTemplate();
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
-                .thenReturn(prosecutorTemplate());
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getApplicant().getProsecutingAuthority().getProsecutionAuthorityId())))
-                .thenReturn(prosecutorTemplate());
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getSubject().getProsecutingAuthority().getProsecutionAuthorityId())))
-                .thenReturn(prosecutorTemplate());
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getRespondents().get(0).getProsecutingAuthority().getProsecutionAuthorityId())))
-                .thenReturn(prosecutorTemplate());
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getThirdParties().get(0).getProsecutingAuthority().getProsecutionAuthorityId())))
+
+        when(referenceDataService.getProsecutorById(any(), any()))
                 .thenReturn(prosecutorTemplate());
         when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
@@ -514,14 +500,13 @@ public class PublishResultsEventProcessorTest {
                         .withPostcode("LL55 2DF")
                         .build());
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
-        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 
         verify(updateDefendantWithApplicationDetailsDelegate, times(1)).execute(sender, event, resultsShared);
         verify(this.publishResultsDelegate).shareResults(eventArgumentCaptor.capture(), senderArgumentCaptor.capture(), this.publishResultDelegateCaptor.capture());
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
-        verify(this.sender).send(this.eventArgumentCaptor.capture());
+        verify(this.sender).send(this.defaultEnvelopeArgumentCaptor.capture());
         verifyProsecutionCaseIdentifier(this.publishResultDelegateCaptor.getValue());
     }
 
@@ -547,14 +532,13 @@ public class PublishResultsEventProcessorTest {
                         .build());
 
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
-        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 
         verify(updateDefendantWithApplicationDetailsDelegate, times(1)).execute(sender, event, resultsShared);
         verify(this.publishResultsDelegate).shareResults(eventArgumentCaptor.capture(), senderArgumentCaptor.capture(), this.publishResultDelegateCaptor.capture());
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
-        verify(this.sender).send(this.eventArgumentCaptor.capture());
+        verify(this.sender).send(this.defaultEnvelopeArgumentCaptor.capture());
         assertThat(this.publishResultDelegateCaptor.getValue().getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityName(), equalTo("ExistingAuthorityName"));
     }
 
@@ -580,14 +564,13 @@ public class PublishResultsEventProcessorTest {
                         .build());
 
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
-        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 
         verify(updateDefendantWithApplicationDetailsDelegate, times(1)).execute(sender, event, resultsShared);
         verify(this.publishResultsDelegate).shareResults(eventArgumentCaptor.capture(), senderArgumentCaptor.capture(), this.publishResultDelegateCaptor.capture());
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
-        verify(this.sender).send(this.eventArgumentCaptor.capture());
+        verify(this.sender).send(this.defaultEnvelopeArgumentCaptor.capture());
         assertThat(this.publishResultDelegateCaptor.getValue().getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityName(), equalTo("ExistingAuthorityName"));
     }
 
@@ -627,7 +610,7 @@ public class PublishResultsEventProcessorTest {
                 .withWelshAddress5("Welsh 5")
                 .withPostcode("LL55 2DF")
                 .build();
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
         when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(organisationalUnit);
@@ -638,14 +621,13 @@ public class PublishResultsEventProcessorTest {
                         .build());
 
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
-        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 
         verify(updateDefendantWithApplicationDetailsDelegate, times(1)).execute(sender, event, resultsShared);
         verify(this.publishResultsDelegate).shareResults(eventArgumentCaptor.capture(), senderArgumentCaptor.capture(), this.publishResultDelegateCaptor.capture());
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
-        verify(this.sender).send(this.eventArgumentCaptor.capture());
+        verify(this.sender).send(this.defaultEnvelopeArgumentCaptor.capture());
         verifyOrganisationalUnitInformation(this.publishResultDelegateCaptor.getValue());
     }
 

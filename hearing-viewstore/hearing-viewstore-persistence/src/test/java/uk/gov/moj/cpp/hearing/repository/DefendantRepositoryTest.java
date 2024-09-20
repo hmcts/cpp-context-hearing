@@ -21,10 +21,12 @@ import javax.inject.Inject;
 
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 
+//TODO:remove ignore
 @RunWith(CdiTestRunner.class)
 public class DefendantRepositoryTest {
 
@@ -34,7 +36,7 @@ public class DefendantRepositoryTest {
     private static final UUID hearingId = UUID.randomUUID();
     private static final UUID id = UUID.randomUUID();
 
-    @After
+  @After
     public void tearDown() throws Exception {
         List<Defendant> defendantList = defendantRepository.findAll();
         defendantList.forEach(defendant -> defendantRepository.remove(defendant));
@@ -56,13 +58,14 @@ public class DefendantRepositoryTest {
 
         final Defendant defendant1 = buildDefendant();
         final Defendant defendant2 = buildDefendant();
+        defendant2.getId().setId(UUID.randomUUID());
         defendant2.getId().setHearingId(UUID.randomUUID());
         defendant2.getAssociatedDefenceOrganisation().getDefenceOrganisation().setLaaContractNumber("ABCLT2");
 
         defendantRepository.save(defendant1);
         defendantRepository.save(defendant2);
 
-        DefendantSearch defendantDetailsForSearching = defendantRepository.getDefendantDetailsForSearching(id);
+        DefendantSearch defendantDetailsForSearching = defendantRepository.getDefendantDetailsForSearching(defendant1.getId().getId());
 
         assertThat(defendantDetailsForSearching, notNullValue());
 
@@ -74,6 +77,8 @@ public class DefendantRepositoryTest {
         defendant.setId(key);
         defendant.setDefenceOrganisation(buildDefendantOrganisation());
         defendant.setAssociatedDefenceOrganisation(buildAssociatedDefenceOrganisation());
+        defendant.setLegalEntityOrganisation(buildDefendantOrganisation());
+
         return defendant;
     }
 

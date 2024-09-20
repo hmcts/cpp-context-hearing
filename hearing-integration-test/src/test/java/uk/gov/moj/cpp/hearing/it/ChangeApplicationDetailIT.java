@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;

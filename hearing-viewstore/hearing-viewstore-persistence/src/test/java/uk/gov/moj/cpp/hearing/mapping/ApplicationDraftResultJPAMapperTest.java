@@ -1,20 +1,21 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-
-import java.util.UUID;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
-@RunWith(MockitoJUnitRunner.class)
+import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+
+import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
 public class ApplicationDraftResultJPAMapperTest {
 
 

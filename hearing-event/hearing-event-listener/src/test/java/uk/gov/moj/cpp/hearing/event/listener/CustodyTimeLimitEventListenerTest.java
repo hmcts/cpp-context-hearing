@@ -25,16 +25,16 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CustodyTimeLimitEventListenerTest {
 
     @Mock
@@ -49,7 +49,7 @@ public class CustodyTimeLimitEventListenerTest {
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
-    @Before
+    @BeforeEach
     public void setup() {
         final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
         setField(this.objectToJsonObjectConverter, "mapper", objectMapper);

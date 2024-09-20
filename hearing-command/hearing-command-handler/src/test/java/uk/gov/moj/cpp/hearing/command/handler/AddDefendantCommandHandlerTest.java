@@ -42,14 +42,14 @@ import java.util.UUID;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AddDefendantCommandHandlerTest {
 
     @Spy
@@ -87,8 +87,9 @@ public class AddDefendantCommandHandlerTest {
         final CaseAggregate caseAggregate = new CaseAggregate() {{
             apply(RegisteredHearingAgainstCase.builder().withCaseId(arbitraryDefendant.getProsecutionCaseId()).withHearingId(arbitraryHearingId).build());
         }};
-        setupMockedEventStream(arbitraryHearingId, this.hearingEventStream, new HearingAggregate());
-        setupMockedEventStream(arbitraryDefendant.getProsecutionCaseId(), this.caseEventStream, caseAggregate);
+
+        when(this.eventSource.getStreamById(arbitraryHearingId)).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(new HearingAggregate());
         when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
         when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
 
@@ -117,8 +118,9 @@ public class AddDefendantCommandHandlerTest {
         final CaseAggregate caseAggregate = new CaseAggregate() {{
             apply(RegisteredHearingAgainstCase.builder().withCaseId(arbitraryDefendant.getProsecutionCaseId()).withHearingId(arbitraryHearingObject.getHearingId()).build());
         }};
-        setupMockedEventStream(arbitraryHearingObject.getHearingId(), this.hearingEventStream, hearingAggregate);
-        setupMockedEventStream(arbitraryDefendant.getProsecutionCaseId(), this.caseEventStream, caseAggregate);
+
+        when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
         when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
         when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
 
@@ -153,8 +155,9 @@ public class AddDefendantCommandHandlerTest {
         final CaseAggregate caseAggregate = new CaseAggregate() {{
             apply(RegisteredHearingAgainstCase.builder().withCaseId(arbitraryDefendant.getProsecutionCaseId()).withHearingId(arbitraryHearingObject.getHearingId()).build());
         }};
-        setupMockedEventStream(arbitraryHearingObject.getHearingId(), this.hearingEventStream, hearingAggregate);
-        setupMockedEventStream(arbitraryDefendant.getProsecutionCaseId(), this.caseEventStream, caseAggregate);
+        when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
         when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
         when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
 
@@ -189,8 +192,9 @@ public class AddDefendantCommandHandlerTest {
         final CaseAggregate caseAggregate = new CaseAggregate() {{
             apply(RegisteredHearingAgainstCase.builder().withCaseId(arbitraryDefendant.getProsecutionCaseId()).withHearingId(arbitraryHearingObject.getHearingId()).build());
         }};
-        setupMockedEventStream(arbitraryHearingObject.getHearingId(), this.hearingEventStream, hearingAggregate);
-        setupMockedEventStream(arbitraryDefendant.getProsecutionCaseId(), this.caseEventStream, caseAggregate);
+
+        when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
         when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
         when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
 
@@ -232,8 +236,9 @@ public class AddDefendantCommandHandlerTest {
         final CaseAggregate caseAggregate = new CaseAggregate() {{
             apply(RegisteredHearingAgainstCase.builder().withCaseId(arbitraryDefendant.getProsecutionCaseId()).withHearingId(arbitraryHearingObject.getHearingId()).build());
         }};
-        setupMockedEventStream(arbitraryHearingObject.getHearingId(), this.hearingEventStream, hearingAggregate);
-        setupMockedEventStream(arbitraryDefendant.getProsecutionCaseId(), this.caseEventStream, caseAggregate);
+
+        when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
         when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
         when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
 

@@ -23,41 +23,35 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.correctLogEvent;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEventForOverrideCourtRoom;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEventThatIsIgnored;
-import static uk.gov.moj.cpp.hearing.it.UseCases.updateHearingEvents;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logPIEvent;
+import static uk.gov.moj.cpp.hearing.it.UseCases.updateHearingEvents;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.findEventDefinitionWithActionLabel;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.FileUtil.getPayload;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForCrowns;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.FileUtil.getPayload;
+import static uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub.stubDcumentCreateForHearingEventLog;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetPIReferenceDataEventMappings;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
-import static uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub.stubDcumentCreateForHearingEventLog;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubAaagDetails;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubGetUserOrganisation;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUserAndOrganisation;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsForNames;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
-import static uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub.stubDcumentCreateForHearingEventLog;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.test.utils.core.http.RestPoller;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubAaagDetails;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUserAndOrganisation;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsForNames;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubGetUserOrganisation;
-import uk.gov.moj.cpp.hearing.utils.FileUtil;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
@@ -74,8 +68,8 @@ import javax.json.JsonObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unchecked")
 @NotThreadSafe
@@ -86,7 +80,7 @@ public class HearingEventsIT extends AbstractIT {
     private static final String DOCUMENT_TEXT = STRING.next();
     private final StringToJsonObjectConverter stringToJsonObjectConverter = new StringToJsonObjectConverter();
 
-    @BeforeClass
+    @BeforeAll
     public static void setupPerClass() {
         UUID userId = randomUUID();
         setupAsAuthorisedUser(userId);
@@ -631,13 +625,13 @@ public class HearingEventsIT extends AbstractIT {
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, new UtcClock().now(), "testNote");
 
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote2");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, new UtcClock().now(), "testNote2");
 
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID,  ZonedDateTime.now().plusDays(1), "new note");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID,  new UtcClock().now().plusDays(1), "new note");
 
         poll(requestParams(getURL("hearing.get-hearing-event-log-for-document-by-hearing",hearingOne.getHearingId()),
                 "application/vnd.hearing.get-hearing-event-log-for-documents+json").withHeader(USER_ID, userId))
@@ -678,13 +672,13 @@ public class HearingEventsIT extends AbstractIT {
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, new UtcClock().now(), "testNote");
 
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote2");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, new UtcClock().now(), "testNote2");
 
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID,  ZonedDateTime.now().plusDays(1), "new note");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, new UtcClock().now().plusDays(1), "new note");
 
         poll(requestParams(getURL("hearing.get-hearing-event-log-for-document-by-hearing",hearingOne.getHearingId()),
                 "application/vnd.hearing.get-hearing-event-log-for-documents+json").withHeader(USER_ID, userId))
@@ -721,7 +715,7 @@ public class HearingEventsIT extends AbstractIT {
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, new UtcClock().now(), "testNote");
 
         poll(requestParams(getURL("hearing.get-hearing-event-log-for-document-by-case",hearingOne.getFirstCase().getId()),
                 "application/vnd.hearing.get-hearing-event-log-for-documents+json").withHeader(USER_ID, userId))
@@ -764,7 +758,7 @@ public class HearingEventsIT extends AbstractIT {
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, new UtcClock().now(), "testNote");
 
         poll(requestParams(getURL("hearing.get-hearing-event-log-for-document-by-application",hearingOne.getCourtApplication().getId()),
                 "application/vnd.hearing.get-hearing-event-log-for-documents+json").withHeader(USER_ID, userId))
@@ -810,11 +804,11 @@ public class HearingEventsIT extends AbstractIT {
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, new UtcClock().now(), "testNote");
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now().minusDays(1), "Hearing started", "testNote");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, new UtcClock().now().minusDays(1), "Hearing started", "testNote");
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now().minusDays(3), "Hearing started", "testNote");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, new UtcClock().now().minusDays(3), "Hearing started", "testNote");
 
 
         poll(requestParams(getURL("hearing.get-hearing-event-log-for-document-by-hearing",hearingOne.getHearingId()),
@@ -854,9 +848,9 @@ public class HearingEventsIT extends AbstractIT {
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "Hearing started", "testNote");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, new UtcClock().now(), "Hearing started", "testNote");
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now().minusDays(1), "Hearing started", "testNote");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, new UtcClock().now().minusDays(1), "Hearing started", "testNote");
 
         poll(requestParams(getURL("hearing.get-hearing-event-log-count",hearingOne.getHearingId(), LocalDate.now().toString()),
                 "application/vnd.hearing.get-hearing-event-log-count+json").withHeader(USER_ID, userId))
@@ -890,9 +884,9 @@ public class HearingEventsIT extends AbstractIT {
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "Hearing started", "testNote");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, new UtcClock().now(), "Hearing started", "testNote");
         logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now().minusDays(1), "Hearing started", "testNote");
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID,new UtcClock().now().minusDays(1), "Hearing started", "testNote");
 
         poll(requestParams(getURL("hearing.get-hearing-event-log-count",hearingOne.getHearingId(), LocalDate.now().toString()),
                 "application/vnd.hearing.get-hearing-event-log-count+json").withHeader(USER_ID, userId))

@@ -12,7 +12,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,6 +30,7 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_DRAFT_RESULT_DELETED_V2;
 import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_DRAFT_RESULT_SAVED;
 import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_EVENT_AMENDED;
+import static uk.gov.moj.cpp.hearing.utils.TestUtils.convertZonedDate;
 
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.JurisdictionType;
@@ -56,10 +57,10 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
+import uk.gov.moj.cpp.hearing.domain.event.WitnessAddedToHearing;
 import uk.gov.moj.cpp.hearing.eventlog.HearingApplicationDetail;
 import uk.gov.moj.cpp.hearing.eventlog.HearingCaseDetail;
 import uk.gov.moj.cpp.hearing.eventlog.HearingDefendantDetail;
-import uk.gov.moj.cpp.hearing.domain.event.WitnessAddedToHearing;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
@@ -69,6 +70,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -77,11 +79,9 @@ import javax.json.JsonValue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
@@ -91,7 +91,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 @SuppressWarnings({"unchecked", "unused"})
-@RunWith(DataProviderRunner.class)
+
 public class HearingEventProcessorTest {
     private static final String HEARING_INITIATED_EVENT = "hearing.initiated";
     private static final String RESULTS_SHARED_EVENT = "hearing.results-shared";
@@ -221,21 +221,21 @@ public class HearingEventProcessorTest {
     @Spy
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
 
-    @DataProvider
-    public static Object[][] provideListOfRequiredHearingField() {
+
+    public static Stream<Arguments> provideListOfRequiredHearingField() {
         // @formatter:off
-        return new Object[][]{
-                {FIELD_CASE_URN},
-                {FIELD_COURT_CENTER_ID},
-                {FIELD_COURT_CENTRE_NAME},
-                {FIELD_COURT_ROOM_NAME},
-                {FIELD_ROOM_ID},
-                {FIELD_HEARING_TYPE}
-        };
+        return Stream.of(
+                Arguments.of(FIELD_CASE_URN),
+                Arguments.of(FIELD_COURT_CENTER_ID),
+                Arguments.of(FIELD_COURT_CENTRE_NAME),
+                Arguments.of(FIELD_COURT_ROOM_NAME),
+                Arguments.of(FIELD_ROOM_ID),
+                Arguments.of(FIELD_HEARING_TYPE)
+        );
         // @formatter:on
     }
 
-    @Before
+    @BeforeEach
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
@@ -534,8 +534,8 @@ public class HearingEventProcessorTest {
     @Test
     public void shouldTriggerPublicHearingDaysCancelledForCrackedTrial() {
         final UUID hearingId = randomUUID();
-        final ZonedDateTime futureSittingDay = FUTURE_ZONED_DATE_TIME.next();
-        final ZonedDateTime pastSittingDay = PAST_ZONED_DATE_TIME.next();
+        final ZonedDateTime futureSittingDay = convertZonedDate(FUTURE_ZONED_DATE_TIME.next());
+        final ZonedDateTime pastSittingDay = convertZonedDate(PAST_ZONED_DATE_TIME.next());
         final List<HearingDay> hearingDayList = Arrays.asList(new HearingDay.Builder().withIsCancelled(true).withSittingDay(futureSittingDay).build(),
                 new HearingDay.Builder().withIsCancelled(false).withSittingDay(pastSittingDay).build());
         final HearingDaysCancelled hearingDaysCancelled = new HearingDaysCancelled(hearingId, hearingDayList);
@@ -560,8 +560,8 @@ public class HearingEventProcessorTest {
     @Test
     public void shouldTriggerPublicHearingExtended() {
         final UUID hearingId = randomUUID();
-        final ZonedDateTime futureSittingDay = FUTURE_ZONED_DATE_TIME.next();
-        final ZonedDateTime pastSittingDay = PAST_ZONED_DATE_TIME.next();
+        final ZonedDateTime futureSittingDay = convertZonedDate(FUTURE_ZONED_DATE_TIME.next());
+        final ZonedDateTime pastSittingDay = convertZonedDate(PAST_ZONED_DATE_TIME.next());
         final List<HearingDay> hearingDayList = Arrays.asList(new HearingDay.Builder().withIsCancelled(true).withSittingDay(futureSittingDay).build(),
                 new HearingDay.Builder().withIsCancelled(false).withSittingDay(pastSittingDay).build());
         final HearingExtended hearingExtended = new HearingExtended(hearingId, hearingDayList, null, null, null, null, null);
@@ -784,4 +784,6 @@ public class HearingEventProcessorTest {
     private String getStringFromResource(final String path) throws IOException {
         return Resources.toString(getResource(path), defaultCharset());
     }
+
+
 }

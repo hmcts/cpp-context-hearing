@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DefendantOffenceResultsUpdatedSerializationTest {
 

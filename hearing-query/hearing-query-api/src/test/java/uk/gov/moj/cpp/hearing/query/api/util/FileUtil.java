@@ -1,14 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.api.util;
 
 import static java.nio.charset.Charset.defaultCharset;
-import static javax.json.Json.createReader;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.io.Resources;
 import org.slf4j.Logger;

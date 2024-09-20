@@ -9,15 +9,18 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.JudicialResult.judicialResult;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.DUMMY_NAME;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.FIXED_LIST_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_CASE_LEVEL_SHARED_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_DEFENDANT_LEVEL_SHARED_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
@@ -30,12 +33,11 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE_FOR_COURTAPPLICATIONCASES;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE_FOR_COURTORDER;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_NO_PROMPTS_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.RESULT_DEFINITIONS_JSON;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.metadataFor;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
-
-import java.time.LocalDate;
-import org.mockito.Mockito;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantJudicialResult;
@@ -48,9 +50,12 @@ import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
+import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
@@ -60,6 +65,9 @@ import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.AbstractRestruc
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructuringHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTextConfHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTreeBuilder;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllFixedList;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.FixedList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.relist.RelistReferenceDataService;
 
@@ -75,14 +83,20 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-public class PublishResultsDelegateTest extends AbstractRestructuringTest {
+
+@ExtendWith(MockitoExtension.class)
+public class PublishResultsDelegateTest extends AbstractRestructuringTest
+{
 
     @Mock
     private Sender sender;
@@ -125,10 +139,10 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     private PublishResultsDelegate target;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
-        super.setUp();
-        when(resultTextConfHelper.isOldResultDefinition(any(LocalDate.class))).thenReturn(false);
+        stubResultDefinitionJson();
+        when(pleaTypeReferenceDataLoader.retrieveGuiltyPleaTypes()).thenReturn(createGuiltyPleaTypes());
 
         target = new PublishResultsDelegate(enveloper,
                 objectToJsonObjectConverter,
@@ -142,6 +156,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void shareResults() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         target.shareResults(envelope, sender, resultsShared);
@@ -164,6 +179,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldNotEnrichPayloadWithCTLOrBailStatusInformationForBulkCases() throws IOException {
+        stubFixedListJson();
         final ResultsSharedV2 resultsShared = fileResourceObjectMapper.convertFromFile("hearing.events.results-shared-v2.json", ResultsSharedV2.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         target.shareResults(envelope, sender, resultsShared);
@@ -183,6 +199,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldAssignDefendantLevelResultsToTheDefendantOnlyOncePerHearing() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_MULTIPLE_CASE_JSON, ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         target.shareResults(envelope, sender, resultsShared);
@@ -219,8 +236,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void shareResultsIncludingDDCH() throws IOException {
-
-        doNothing().when(bailStatusHelper).mapBailStatuses(any(JsonEnvelope.class), any(Hearing.class));
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile("hearing.results-shared-ddch.json", ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
 
@@ -257,6 +273,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void whenAnyJudicialResultCategorytIsFinal_Then_IsDiposed_Should_BeSetToTrue() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
         setJudicialResultsWithCategoryOf(resultsShared, JudicialResultCategory.FINAL);
 
@@ -268,6 +285,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void whenAnyJudicialResultsHaveResultsPrompts_Then_BailConditions_Should_BeSetBasedOnRank() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         target.shareResults(envelope, sender, resultsShared);
@@ -318,7 +336,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     public void whenNoJudicialResultArePresent_Then_IsDisposed_Flag_ShouldBe_False() throws IOException {
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
         resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setJudicialResults(Collections.EMPTY_LIST);
-
+        stubFixedListJson();
         target.shareResults(dummyEnvelope, sender, resultsShared);
 
         verify(sender).send(envelopeArgumentCaptor.capture());
@@ -333,8 +351,10 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         assertFalse(isDisposed);
     }
 
+
     @Test
     public void whenNoJudicialResultArePresent_Then_IsDisposed_Flag_ShouldBe_FalseWithOptionalPromptRef() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_OPTIONAL_PROMPT_REF_JSON, ResultsShared.class);
         resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setJudicialResults(Collections.EMPTY_LIST);
 
@@ -354,6 +374,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldShareResultsWhenJudicialResultCategoryIsNotFinalThenOffenceIsDisposedFalse() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
         setJudicialResultsWithCategoryOf(resultsShared, JudicialResultCategory.ANCILLARY);
         target.shareResults(dummyEnvelope, sender, resultsShared);
@@ -372,6 +393,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void whenJudicialResultCagtegory_Is_NotFinal_Then_Offence_IsDisposed_isFalse() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
         setJudicialResultsWithCategoryOf(resultsShared, JudicialResultCategory.ANCILLARY);
 
@@ -388,6 +410,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldShareResultsWhenResultDefinitionHavingCADate() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
         final ResultLine resultLine = resultsShared.getTargets().get(0).getResultLines().get(0);
         resultLine.setDelegatedPowers(DelegatedPowers.delegatedPowers().withUserId(randomUUID()).build());
@@ -431,7 +454,6 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
         verify(sender, times(1)).send(envelopeArgumentCaptor.capture());
         assertThat(resultsShared.getTargets().get(0).getResultLines().get(0).getOrderedDate().toString(), is("2020-08-19"));
-//        assertThat(resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getOffence().getAquittalDate().toString(), is("2020-08-19"));
     }
 
     @Test
@@ -477,8 +499,10 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         assertThat(resultsShared.getTargets().get(0).getResultLines().get(0).getOrderedDate().toString(), is("2020-08-19"));
         assertThat(resultsShared.getHearing().getCourtApplications().get(0).getCourtOrder().getCourtOrderOffences().get(0).getOffence().getAquittalDate().toString(), is("2020-08-18"));
     }
+
     @Test
     public void shouldOnlyPopulateDefendantLevelResultsWhenResultLinesPresentForDefendantLevel() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_DEFENDANT_LEVEL_SHARED_JSON, ResultsShared.class);
         final JudicialResult judicialResult1 = judicialResult().withJudicialResultId(randomUUID()).build();
 
@@ -501,6 +525,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldOnlyPopulateCaseLevelResultsWhenResultLinesPresentForCaseLevel() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_CASE_LEVEL_SHARED_JSON, ResultsShared.class);
         final JudicialResult judicialResult1 = judicialResult().withJudicialResultId(randomUUID()).build();
         final DefendantJudicialResult defendantJudicialResult = DefendantJudicialResult.defendantJudicialResult().withMasterDefendantId(randomUUID()).withJudicialResult(judicialResult1).build();
@@ -524,6 +549,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldOnlyPopulateOffenceLevelResultsWhenResultLinesPresentForOffenceLevel() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
         final JudicialResult judicialResult1 = judicialResult().withJudicialResultId(randomUUID()).build();
         final DefendantJudicialResult defendantJudicialResult = DefendantJudicialResult.defendantJudicialResult().withMasterDefendantId(randomUUID()).withJudicialResult(judicialResult1).build();
@@ -556,4 +582,6 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     private Boolean getIsDisposedValueForOffence(final Hearing hearingIn) {
         return hearingIn.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getIsDisposed();
     }
+
+
 }

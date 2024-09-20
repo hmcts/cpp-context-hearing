@@ -39,14 +39,14 @@ import java.util.stream.Stream;
 
 import javax.json.JsonObject;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class RestructureResultsIT extends AbstractIT {
 
     private FileResourceObjectMapper fileResourceObjectMapper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         fileResourceObjectMapper = new FileResourceObjectMapper();
         setupNowsReferenceData(now());

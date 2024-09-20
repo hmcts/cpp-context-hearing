@@ -12,13 +12,13 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("squid:S1607")
 public class BookProvisionalHearingSlotsIT extends AbstractIT {
 
-    @Before
+    @BeforeEach
     public void setUp() {
         stubProvisionalBookSlots();
     }

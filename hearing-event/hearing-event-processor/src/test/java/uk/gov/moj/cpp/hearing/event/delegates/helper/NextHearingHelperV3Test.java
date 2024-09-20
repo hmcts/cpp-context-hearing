@@ -1,7 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
-import static java.lang.Integer.valueOf;
-import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -14,13 +12,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit.courtCentreOrganisationUnit;
 import static uk.gov.justice.hearing.courts.referencedata.Courtrooms.courtrooms;
-import static uk.gov.moj.cpp.hearing.event.delegates.PublishResultUtil.reformatValue;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.RESULT_DEFINITIONS_JSON;
 
 import uk.gov.justice.core.courts.Address;
@@ -30,7 +27,6 @@ import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.NextHearing;
 import uk.gov.justice.core.courts.ResultLine2;
-import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -60,17 +56,15 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(DataProviderRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class NextHearingHelperV3Test  {
 
     private static final String DEFAULT_VALUE = "DefaultValue";
@@ -98,14 +92,6 @@ public class NextHearingHelperV3Test  {
 
     @InjectMocks
     private NextHearingHelperV3 nextHearingHelperV3;
-
-    @DataProvider
-    public static Object[][] possibleDefaultStartTimes() {
-        return new Object[][]{
-                {"10:00"},
-                {"10:30:00"},
-        };
-    }
 
     private static final int COURT_ROOM_ID = 54321;
     private static final int PSA_CODE = 3255;

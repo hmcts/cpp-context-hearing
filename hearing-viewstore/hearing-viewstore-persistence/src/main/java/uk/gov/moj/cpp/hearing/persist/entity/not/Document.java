@@ -30,7 +30,7 @@ public class Document {
     private LocalDate endDate;
 
     @OneToMany(cascade = ALL, fetch = LAZY, orphanRemoval = true)
-    @JoinColumn(name = "document_id", insertable = false, updatable = false, nullable = false)
+    @JoinColumn(name = "document_id", insertable = false, updatable = false , referencedColumnName = "id")
     private List<Subscription> subscriptions = new ArrayList<>();
 
     public UUID getId() {

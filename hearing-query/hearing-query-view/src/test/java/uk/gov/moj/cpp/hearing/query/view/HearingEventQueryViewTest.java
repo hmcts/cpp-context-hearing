@@ -12,6 +12,7 @@ import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.time.ZonedDateTime.now;
 import static java.time.ZonedDateTime.parse;
+import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
@@ -22,8 +23,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.Person.person;
@@ -33,7 +34,6 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
-import static java.util.Arrays.asList;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
@@ -93,16 +93,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings({"unchecked", "unused"})
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HearingEventQueryViewTest {
 
     public static final ZonedDateTime HEARING_DATE = parse("2018-02-22T10:30:00Z");
@@ -224,7 +224,7 @@ public class HearingEventQueryViewTest {
     @Spy
     private StringToJsonObjectConverter stringToJsonObjectConverter;
 
-    @Before
+    @BeforeEach
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
@@ -284,8 +284,7 @@ public class HearingEventQueryViewTest {
         when(hearingService.getCourtCenterByHearingId(HEARING_ID_1)).thenReturn(Optional.of(mockHearing().getCourtCentre()));
         when(hearingService
                 .getHearingEvents(
-                        COURT_CENTRE_ID,
-                        COURT_ROOM_ID,
+                        HEARING_ID_1,
                         EVENT_TIME.toLocalDate())
         ).thenReturn(mockActiveHearingEvents());
 
@@ -299,8 +298,7 @@ public class HearingEventQueryViewTest {
         final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLog(query);
 
         verify(hearingService).getCourtCenterByHearingId(HEARING_ID_1);
-        verify(hearingService).getHearingEvents(COURT_CENTRE_ID,
-                COURT_ROOM_ID,
+        verify(hearingService).getHearingEvents(HEARING_ID_1,
                 EVENT_TIME.toLocalDate());
 
         assertThat(actualHearingEventLog.metadata().name(), is(RESPONSE_NAME_HEARING_EVENT_LOG));
@@ -783,7 +781,6 @@ public class HearingEventQueryViewTest {
 
         when(hearingService.getHearingDetailsByHearingForDocuments(any())).thenReturn(hearing);
         when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(new ArrayList<>());
-        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
         when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
 
         final JsonEnvelope query = envelopeFrom(
@@ -1642,6 +1639,7 @@ public class HearingEventQueryViewTest {
         hearing.setJudicialRoles(new HashSet(Arrays.asList(mockJudicialRole())));
         hearing.setDefenceCounsels(new HashSet(Arrays.asList(mockDefenceCounsel())));
         hearing.setProsecutionCounsels(new HashSet(Arrays.asList(mockProsecutionCounsel())));
+        hearing.setCourtApplicationsJson("{}");
 
         return hearing;
     }

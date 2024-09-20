@@ -1,23 +1,16 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static java.time.LocalDate.now;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Stream.of;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.Envelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -35,13 +28,19 @@ import uk.gov.moj.cpp.hearing.domain.event.sessiontime.SessionTimeRecorded;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+
+@ExtendWith(MockitoExtension.class)
 public class SessionTimeCommandHandlerTest {
 
     @Spy
@@ -86,7 +85,6 @@ public class SessionTimeCommandHandlerTest {
         final Envelope<RecordSessionTime> envelope = envelopeFrom(metadata, payload);
 
         final UUID courtSessionId = randomUUID();
-        when(utcClock.now()).thenReturn(ZonedDateTime.now());
         when(uuidService.getCourtSessionId(any(UUID.class), any(UUID.class), any(LocalDate.class))).thenReturn(courtSessionId);
         when(eventSource.getStreamById(courtSessionId)).thenReturn(eventStream);
         when(aggregateService.get(eq(eventStream), any())).thenReturn(recordSessionTimeAggregate);
@@ -98,7 +96,7 @@ public class SessionTimeCommandHandlerTest {
         verify(recordSessionTimeAggregate).recordSessionTime(courtSessionId, payload, courtSessionDate);
         final List<JsonEnvelope> collect = verifyAppendAndGetArgumentFrom(eventStream).collect(Collectors.toList());
         final JsonEnvelope actualEventProduced = collect.get(0);
-        Assert.assertEquals("hearing.event.session-time-recorded", actualEventProduced.metadata().name());
+        assertEquals("hearing.event.session-time-recorded", actualEventProduced.metadata().name());
     }
 
     private RecordSessionTime recordSessionTime(final UUID courtHouseId, final UUID courtRoomId,

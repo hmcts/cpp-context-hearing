@@ -24,12 +24,12 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.util.UUID;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class ReusableInfoQueryIT extends AbstractIT {
 
-    @BeforeClass
+    @BeforeAll
     public static void setupPerClass() {
         UUID userId = randomUUID();
         setupAsAuthorisedUser(userId);

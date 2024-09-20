@@ -1,7 +1,8 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.Envelope.envelopeFrom;
@@ -9,10 +10,10 @@ import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.metadataFor;
 
+import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.hearing.courts.AddDefenceCounsel;
 import uk.gov.justice.hearing.courts.RemoveDefenceCounsel;
 import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
-import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
@@ -32,16 +33,15 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AddDefenceCounselCommandHandlerTest {
 
     @Spy
@@ -81,7 +81,7 @@ public class AddDefenceCounselCommandHandlerTest {
         defenceCounselCommandHandler.addDefenceCounsel(envelope);
 
         JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
-        Assert.assertEquals( "hearing.defence-counsel-added",actualEventProduced.metadata().name());
+        assertEquals( "hearing.defence-counsel-added",actualEventProduced.metadata().name());
 
     }
 
@@ -101,7 +101,7 @@ public class AddDefenceCounselCommandHandlerTest {
         defenceCounselCommandHandler.removeDefenceCounsel(envelope);
 
         JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
-        Assert.assertEquals( "hearing.defence-counsel-removed",actualEventProduced.metadata().name());
+        assertEquals( "hearing.defence-counsel-removed",actualEventProduced.metadata().name());
 
     }
 
@@ -130,7 +130,7 @@ public class AddDefenceCounselCommandHandlerTest {
         defenceCounselCommandHandler.updateDefenceCounsel(envelope);
 
         JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
-        Assert.assertEquals( "hearing.defence-counsel-updated",actualEventProduced.metadata().name());
+        assertEquals( "hearing.defence-counsel-updated",actualEventProduced.metadata().name());
 
     }
 }

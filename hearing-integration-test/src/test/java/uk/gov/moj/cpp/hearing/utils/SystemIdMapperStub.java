@@ -9,12 +9,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static com.jayway.restassured.path.json.JsonPath.from;
+import static io.restassured.path.json.JsonPath.from;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.http.HttpStatus.SC_OK;
-
-import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -23,7 +21,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import com.jayway.restassured.path.json.JsonPath;
+import io.restassured.path.json.JsonPath;
 
 public class SystemIdMapperStub {
 

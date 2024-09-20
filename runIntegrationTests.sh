@@ -1,22 +1,49 @@
 #!/usr/bin/env bash
 
-#Script that runs, liquibase, deploys wars and runs integration tests
+# Script that runs, liquibase, deploys wars and runs integration tests
 
-if [[ -z "${VAGRANT_DIR}" ]]; then
-  printf '%s\n' "Please export VAGRANT_DIR environment variable to point at atcm-vagrant";
-  exit 1;
-fi
+CONTEXT_NAME=hearing
 
-if [[ ! -d "${VAGRANT_DIR}" ]]; then
-  printf '%s\n' "${VAGRANT_DIR} does not exists."
-  exit 1;
-fi
+FRAMEWORK_LIBRARIES_VERSION=17.5.5
+FRAMEWORK_VERSION=17.5.5
+EVENT_STORE_VERSION=17.5.4
 
-declare -rx WILDFLY_DEPLOYMENT_DIR="${VAGRANT_DIR}/deployments"
+DOCKER_CONTAINER_REGISTRY_HOST_NAME=crmdvrepo01
+
+LIQUIBASE_COMMAND=update
+#LIQUIBASE_COMMAND=dropAll
+
 
 #fail script on error
 set -e
 
-source functions.sh
+[ -z "$CPP_DOCKER_DIR" ] && echo "Please export CPP_DOCKER_DIR environment variable pointing to cpp-developers-docker repo (https://github.com/hmcts/cpp-developers-docker) checked out locally" && exit 1
+WILDFLY_DEPLOYMENT_DIR="$CPP_DOCKER_DIR/containers/wildfly/deployments"
 
-buildDeployAndTest ${@}
+source $CPP_DOCKER_DIR/docker-utility-functions.sh
+source $CPP_DOCKER_DIR/build-scripts/integration-test-scipt-functions.sh
+
+runLiquibase() {
+   runEventLogLiquibase
+   runEventLogAggregateSnapshotLiquibase
+   runEventBufferLiquibase
+   runViewStoreLiquibase
+   runSystemLiquibase
+   runEventTrackingLiquibase
+   runFileServiceLiquibase
+  printf "${CYAN}All liquibase $LIQUIBASE_COMMAND scripts run${NO_COLOUR}\n\n"
+}
+
+buildDeployAndTest() {
+  loginToDockerContainerRegistry
+  buildWars
+  undeployWarsFromDocker
+  buildAndStartContainers
+  runLiquibase
+  deployWiremock
+  deployWars
+  healthchecks
+  integrationTests
+}
+
+buildDeployAndTest

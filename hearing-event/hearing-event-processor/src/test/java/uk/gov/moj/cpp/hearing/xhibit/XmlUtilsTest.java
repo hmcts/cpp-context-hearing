@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.math.BigInteger.valueOf;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.DaysOfWeekType.FRIDAY;
 import static uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.MonthsOfYearType.APRIL;
 
@@ -13,7 +13,7 @@ import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.Courtsites;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.Currentcourtstatus;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.Datetimestamp;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class XmlUtilsTest {
 

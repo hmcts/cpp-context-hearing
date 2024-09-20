@@ -4,8 +4,8 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.ADDRESS;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIXL;
@@ -55,14 +55,14 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ReusableInformationMainConverterTest {
 
     @InjectMocks
@@ -80,7 +80,7 @@ public class ReusableInformationMainConverterTest {
 
     private static final String TYPE = "type";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         setField(this.reusableInformationMainConverter, "reusableInformationTxtConverter", new ReusableInformationTxtConverter());
         setField(this.reusableInformationMainConverter, "reusableInformationIntConverter", new ReusableInformationIntConverter());

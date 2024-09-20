@@ -8,7 +8,8 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.guiltyPleaTypes;
@@ -23,7 +24,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.VerdictCategoryType.NOT_
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
-import com.google.common.collect.Lists;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
@@ -64,16 +64,17 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Lists;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class VerdictDelegateTest {
     private static final String PLEA_GUILTY = "GUILTY";
     private static final String PLEA_NOT_GUILTY = "NOT_GUILTY";
@@ -432,9 +433,6 @@ public class VerdictDelegateTest {
     @Test
     public void updateVerdict_whenOffenceDoesNotExist_shouldThrowException() {
 
-        exception.expect(RuntimeException.class);
-        exception.expectMessage("Offence id is not present");
-
         final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
 
         final CommandHelpers.UpdateVerdictCommandHelper verdict = h(updateVerdictTemplate(hearing.getHearingId(), randomUUID(), NOT_GUILTY));
@@ -442,12 +440,12 @@ public class VerdictDelegateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(hearing.getHearing()));
 
-        hearingAggregate.updateVerdict(
+        assertThrows(RuntimeException.class, () -> hearingAggregate.updateVerdict(
                 hearing.getHearingId(),
                 verdict.getFirstVerdict(),
                 guiltyPleaTypes()
-        );
-    }
+        ));
+        }
 
     @Test
     public void updateHearingAggregateAfterApplicationOffenceVerdictUpdateEventIsRaised() {

@@ -12,19 +12,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.LegalEntityDefendant.legalEntityDefendant;
 import static uk.gov.justice.core.courts.Organisation.organisation;
 import static uk.gov.justice.core.courts.Person.person;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
@@ -50,8 +42,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.YouthCourt;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 
-import javax.json.JsonObject;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -62,10 +52,17 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.json.JsonObject;
 
 import com.google.common.collect.ImmutableList;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TimelineHearingSummaryHelperTest {
     public static final Generator<String> STRING = new StringGenerator();
     private static final DateTimeFormatter DATE_FORMATTER = ofPattern("dd MMM yyyy");
@@ -93,7 +90,7 @@ public class TimelineHearingSummaryHelperTest {
     @Mock
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         defendantId = randomUUID();
         courtCentreId = UUID.randomUUID();
@@ -109,6 +106,7 @@ public class TimelineHearingSummaryHelperTest {
         hearingDay.setCourtCentreId(courtCentreId);
         hearingDay.setCourtRoomId(courtRoomId);
         hearing.setHearingDays(of(hearingDay));
+        hearing.setCourtApplicationsJson("{}");
         hearingType = new HearingType();
         hearingType.setDescription(STRING.next());
         hearing.setHearingType(hearingType);

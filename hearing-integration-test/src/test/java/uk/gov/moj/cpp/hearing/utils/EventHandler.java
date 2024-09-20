@@ -60,7 +60,7 @@ public class EventHandler {
     private Integer maxWaitTime = 15000;
 
     public static final String PUBLIC_ACTIVE_MQ_TOPIC = "public.event";
-    public static final String PRIVATE_ACTIVE_MQ_TOPIC = "hearing.event";
+    public static final String PRIVATE_ACTIVE_MQ_TOPIC = "jms.topic.hearing.event";
 
     public EventHandler() {
         this.eventsByName = new HashMap<>();
@@ -73,9 +73,14 @@ public class EventHandler {
 
     public EventHandler subscribe(final String... eventNames) {
         for (String eventName : eventNames) {
-            this.eventsByName.putIfAbsent(eventName, new LinkedList<>());
+
+            this.eventsByName.putIfAbsent(eventNameWithPrefix(eventName), new LinkedList<>());
         }
         return this;
+    }
+
+    private String eventNameWithPrefix(final String eventName){
+        return "jms.topic." + eventName;
     }
 
     public EventHandler unsubscribe(String eventName) {
@@ -109,7 +114,7 @@ public class EventHandler {
     }
 
     public Optional<JsonEnvelope> popEvent(String eventName) {
-        return ofNullable(this.eventsByName.get(eventName).poll());
+        return ofNullable(this.eventsByName.get(eventNameWithPrefix(eventName)).poll());
     }
 
     public Optional<JsonEnvelope> peekEvent(final String eventName) {

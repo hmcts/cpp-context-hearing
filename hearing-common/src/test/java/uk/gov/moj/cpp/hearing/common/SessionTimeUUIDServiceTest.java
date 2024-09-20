@@ -4,17 +4,22 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import uk.gov.moj.cpp.hearing.common.exception.ReferenceDataNotFoundException;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SessionTimeUUIDServiceTest {
 
     @InjectMocks
@@ -24,7 +29,7 @@ public class SessionTimeUUIDServiceTest {
     private UUID courtRoomId;
     private LocalDate courtSessionDate;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         courtHouseId = UUID.randomUUID();
         courtRoomId = UUID.randomUUID();
@@ -50,8 +55,8 @@ public class SessionTimeUUIDServiceTest {
         assertThat(courtListId2, is(not(courtListId)));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void shouldThrowNullPointerExceptionIfAnyInputIsNull() {
-        uuidService.getCourtSessionId(null, courtRoomId, courtSessionDate);
+        assertThrows(NullPointerException.class, () -> uuidService.getCourtSessionId(null, courtRoomId, courtSessionDate));
     }
 }

@@ -42,16 +42,16 @@ import javax.json.JsonObjectBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UpdateOffencesAndDefenceCounselsForDefendantEventListenerTest {
 
     public static final String HEARING = "Hearing";
@@ -80,7 +80,7 @@ public class UpdateOffencesAndDefenceCounselsForDefendantEventListenerTest {
     private final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
 
 
-    @Before
+    @BeforeEach
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
@@ -120,8 +120,6 @@ public class UpdateOffencesAndDefenceCounselsForDefendantEventListenerTest {
         when(hearingRepository.findBy(hearingId)).thenReturn(hearingDBEntity);
         when(hearingDefenceCounselJPAMapper.fromJPA(hearingDefenceCounsel1)).thenReturn(defenceCounsel1);
         when(hearingDefenceCounselJPAMapper.fromJPA(hearingDefenceCounsel2)).thenReturn(defenceCounsel2);
-        when(hearingDefenceCounselJPAMapper.toJPA(hearingDBEntity, defenceCounsel1)).thenReturn(hearingDefenceCounsel1);
-        when(hearingDefenceCounselJPAMapper.toJPA(hearingDBEntity, defenceCounsel2)).thenReturn(hearingDefenceCounsel2);
 
         updateOffencesForDefendantEventListener.removeOffencesFromExistingAllocatedHearing(envelope);
 
@@ -192,8 +190,6 @@ public class UpdateOffencesAndDefenceCounselsForDefendantEventListenerTest {
         when(hearingRepository.findBy(hearingId)).thenReturn(hearingDBEntity);
         when(hearingDefenceCounselJPAMapper.fromJPA(hearingDefenceCounsel1)).thenReturn(defenceCounsel1);
         when(hearingDefenceCounselJPAMapper.fromJPA(hearingDefenceCounsel2)).thenReturn(defenceCounsel2);
-        when(hearingDefenceCounselJPAMapper.toJPA(hearingDBEntity, defenceCounsel1)).thenReturn(hearingDefenceCounsel1);
-        when(hearingDefenceCounselJPAMapper.toJPA(hearingDBEntity, defenceCounsel2)).thenReturn(hearingDefenceCounsel2);
         when(hearingDefenceCounselJPAMapper.toJPA(hearingDBEntity, defenceCounsel2Updated)).thenReturn(hearingDefenceCounsel2Updated);
 
         updateOffencesForDefendantEventListener.removeOffencesFromExistingAllocatedHearing(envelope);

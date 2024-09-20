@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.justice.core.courts.Ethnicity;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 

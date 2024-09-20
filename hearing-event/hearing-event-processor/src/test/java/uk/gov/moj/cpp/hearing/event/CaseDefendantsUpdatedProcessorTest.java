@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -49,7 +49,7 @@ public class CaseDefendantsUpdatedProcessorTest {
     @InjectMocks
     private CaseDefendantsUpdatedProcessor caseDefendantsUpdatedProcessor;
 
-    @Before
+    @BeforeEach
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());

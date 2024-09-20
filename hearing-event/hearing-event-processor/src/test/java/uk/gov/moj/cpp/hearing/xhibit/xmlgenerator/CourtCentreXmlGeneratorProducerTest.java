@@ -5,25 +5,21 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
-import static uk.gov.moj.cpp.hearing.XmlProducerType.PUBLIC_DISPLAY;
 import static uk.gov.moj.cpp.hearing.XmlProducerType.WEB_PAGE;
 
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.xhibit.CourtCentreGeneratorParameters;
-import uk.gov.moj.cpp.hearing.xhibit.exception.GenerationFailedException;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CourtCentreXmlGeneratorProducerTest {
 
     @Mock
@@ -34,9 +30,6 @@ public class CourtCentreXmlGeneratorProducerTest {
 
     @InjectMocks
     private CourtCentreXmlGeneratorProducer courtCentreXmlGeneratorProducer;
-
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
 
     @Test
     public void shouldGenerateInstanceOfPublicDisplayCourtCentreXmlGenerator() {

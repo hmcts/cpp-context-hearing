@@ -384,7 +384,6 @@ public class HearingTestUtils {
 
     public static Offence buildOffence1(final Hearing hearing, final Defendant defendant) {
         final Offence offence = new Offence();
-//        offence.setId(UUID.fromString("4b1318e4-1517-4e4f-a89d-6af0eafa5058"));
         offence.setDefendant(defendant);
         offence.setOffenceCode("UNKNOWN");
         offence.setCount(1);
@@ -394,20 +393,7 @@ public class HearingTestUtils {
         offence.setStartDate(parse("2018-02-21T00:00:00Z").toLocalDate());
         offence.setEndDate(parse("2018-02-22T00:00:00Z").toLocalDate());
         offence.setConvictionDate(parse("2018-02-22T00:00:00Z").toLocalDate());
-        //offence.setPleaDate(parse("2016-06-08T00:00:00Z").toLocalDate());
-        //offence.setPleaValue(PleaValue.GUILTY.toString());
-        /*
-        offence.setLesserOffenceCode("A1");
-        offence.setLesserOffenceDefinitionId(UUID.fromString("1dbab0cf-3822-46ff-b3ea-ddcf99e71ab9"));
-        offence.setVerdictCategory("GUILTY");
-        offence.setLesserOffenceTitle("Guilty By Jury");
-        offence.setLesserOffenceLegislation("Guilty By Jury On Judges Direction");
-        offence.setVerdictTypeId(UUID.randomUUID());
-        offence.setVerdictDate(parse("2018-02-21T00:00:00Z").toLocalDate());
-        offence.setNumberOfJurors(10);
-        offence.setNumberOfSplitJurors(2);
-        offence.setUnanimous(false);
-        */
+
         return offence;
     }
 

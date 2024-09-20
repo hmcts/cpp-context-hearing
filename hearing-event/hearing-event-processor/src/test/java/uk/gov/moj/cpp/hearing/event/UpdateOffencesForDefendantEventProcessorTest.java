@@ -29,6 +29,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
@@ -40,19 +41,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import javax.json.JsonObject;
+import javax.json.JsonString;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import javax.json.JsonObject;
-import javax.json.JsonString;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UpdateOffencesForDefendantEventProcessorTest {
 
     @Spy
@@ -72,6 +74,9 @@ public class UpdateOffencesForDefendantEventProcessorTest {
 
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<DefaultEnvelope> defaultEnvelopeArgumentCaptor;
 
     @Captor
     private ArgumentCaptor<Envelope<JsonObject>> commandEnvelopeArgumentCaptor;
@@ -213,10 +218,10 @@ public class UpdateOffencesForDefendantEventProcessorTest {
 
         updateOffencesForDefendantEventProcessor.addOffence(event);
 
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        verify(this.sender).send(this.defaultEnvelopeArgumentCaptor.capture());
 
         assertThat(
-                toJsonEnvelope( this.envelopeArgumentCaptor.getValue()), jsonEnvelope(
+                toJsonEnvelope( this.defaultEnvelopeArgumentCaptor.getValue()), jsonEnvelope(
                         metadata().withName("hearing.command.register-hearing-against-offence"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.offenceId", is(offenceId.toString())),

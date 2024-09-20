@@ -48,16 +48,16 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
 import org.hamcrest.Matcher;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UpdateOffenceResultsCommandHandlerTest {
 
     public static final String HEARING_COMMAND_HANDLER_UPDATE_OFFENCE_RESULTS = "hearing.command.handler.update-offence-results";

@@ -3,21 +3,22 @@ package uk.gov.moj.cpp.hearing.xhibit;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Matchers.any;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
 import uk.gov.moj.cpp.listing.common.xhibit.exception.InvalidReferenceDataException;
 import uk.gov.moj.cpp.listing.domain.xhibit.CourtLocation;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class XhibitHelperTest {
     @Mock
     private CommonXhibitReferenceDataService commonXhibitReferenceDataService;
@@ -28,7 +29,7 @@ public class XhibitHelperTest {
     private String courtCentreId;
     private CourtLocation courtLocation;
 
-    @Before
+    @BeforeEach
     public void setup() {
         courtCentreId = randomUUID().toString();
         courtLocation = new CourtLocation("ouCode",
@@ -58,12 +59,11 @@ public class XhibitHelperTest {
         assertThat(crestCourtId, is("12345"));
     }
 
-    @Test(expected = InvalidReferenceDataException.class)
+    @Test
     public void shouldThrowInvalidReferenceDataExceptionWhenCourtCenterIdIsNotAvailableInBothCourts() {
         when(commonXhibitReferenceDataService.getCrownCourtDetails(any())).thenThrow(InvalidReferenceDataException.class);
         when(commonXhibitReferenceDataService.getMagsCourtDetails(any())).thenThrow(InvalidReferenceDataException.class);
 
-        final String crestCourtId = xhibitHelper.getCrestCourtId(courtCentreId);
-        assertThat(crestCourtId, is("12345"));
+        assertThrows(InvalidReferenceDataException.class, () -> xhibitHelper.getCrestCourtId(courtCentreId));
     }
 }

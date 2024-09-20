@@ -31,7 +31,7 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class HearingResultsCleanerUtilTest {
 

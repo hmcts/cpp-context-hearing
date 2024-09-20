@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class HearingDelegateTest {
     private static final String GUILTY = "GUILTY";

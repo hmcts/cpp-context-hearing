@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
@@ -36,9 +37,8 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -77,7 +77,7 @@ public class UpdateDefendantWithApplicationDetailsDelegateTest {
     private UUID defendantId;
 
 
-    @Before
+    @BeforeEach
     public void setUp(){
         MockitoAnnotations.initMocks(this);
         resultsSharedBuilder = ResultsShared.builder();
@@ -107,9 +107,9 @@ public class UpdateDefendantWithApplicationDetailsDelegateTest {
 
         UpdateDefendantWithApplicationDetails updateDefendantWithApplicationDetails = getNotificationFromPayloadWeSent();
 
-        Assert.assertThat(COMMAND_NAME, is(getCommandNameFromMetaDataWeSent()));
-        Assert.assertThat(updateDefendantWithApplicationDetails.getApplicationTypeId(), is(applicationTypeId));
-        Assert.assertThat(updateDefendantWithApplicationDetails.getDefendantId(), is(defendantId));
+        assertThat(COMMAND_NAME, is(getCommandNameFromMetaDataWeSent()));
+        assertThat(updateDefendantWithApplicationDetails.getApplicationTypeId(), is(applicationTypeId));
+        assertThat(updateDefendantWithApplicationDetails.getDefendantId(), is(defendantId));
     }
 
     @Test

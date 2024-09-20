@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.accesscontrol;
+package uk.gov.moj.cpp.hearing.command.api.accesscontrol;
 
 import uk.gov.moj.cpp.accesscontrol.drools.Outcome;
 import uk.gov.moj.cpp.accesscontrol.drools.Action;

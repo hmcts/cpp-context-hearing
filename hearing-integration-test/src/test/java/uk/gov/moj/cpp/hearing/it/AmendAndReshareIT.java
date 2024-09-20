@@ -48,11 +48,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("java:S2699")
-@Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
+@Disabled("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
 public class AmendAndReshareIT extends AbstractIT {
 
     private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";

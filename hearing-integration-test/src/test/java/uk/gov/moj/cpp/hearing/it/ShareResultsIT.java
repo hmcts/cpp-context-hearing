@@ -179,13 +179,13 @@ import java.util.stream.IntStream;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.json.JsonObject;
 
-import com.jayway.restassured.path.json.JsonPath;
+import io.restassured.path.json.JsonPath;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 
 @SuppressWarnings({"squid:S2699"})
@@ -201,7 +201,7 @@ public class ShareResultsIT extends AbstractIT {
     private static final String GUILTY = "GUILTY";
     private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
 
-    @Before
+    @BeforeEach
     public void setup() {
         setupNowsReferenceData(now());
     }
@@ -323,7 +323,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
-    @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
+    @Disabled("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
     public void shouldShareResultsForHearingWithMultipleCasesWithApplicationFeatureEnabled() {
 
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
@@ -410,7 +410,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
-    @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
+    @Disabled("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
     public void shouldUpdateOffencesAndSubjectWhenApplicationCasesExistFeatureEnabled() {
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         final LocalDate hearingDay = LocalDate.now();
@@ -519,7 +519,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
-    @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
+    @Disabled("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
     public void shouldUpdateOffencesAndSubjectWhenApplicationCourtOrderExistsFeatureEnabled() {
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         final LocalDate hearingDay = LocalDate.now();
@@ -608,7 +608,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
-    @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
+    @Disabled("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
     public void shouldShareResultsForHearingWithMultipleCasesWithApplicationAndOffenceFeatureEnabled() {
 
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
@@ -686,7 +686,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
-    @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
+    @Disabled("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
     public void shouldShareResultsPerDay() {
 
         LocalDate orderDate = PAST_LOCAL_DATE.next();
@@ -803,7 +803,7 @@ public class ShareResultsIT extends AbstractIT {
 
             assertThat(publicHearingResulted.getBoolean("isReshare"), is(false));
 
-            assertThat(publicHearingResulted.getInt("shadowListedOffences.size"), is(0));
+            assertThat(publicHearingResulted.getList("shadowListedOffences"), hasSize(0));
         }
     }
 
@@ -1392,7 +1392,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @SuppressWarnings("squid:S1607")
     @Test
-    @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
+    @Disabled("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
     public void saveDraftResultFailedWhenUnknownTargetIdUsedForKnownApplicationOffenceCombinationFeatureEnabled() {
 
         final LocalDate hearingDay = LocalDate.now();
@@ -1429,7 +1429,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @SuppressWarnings("squid:S1607")
     @Test
-    @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
+    @Disabled("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
     public void saveDraftResultFailedWhenUnknownTargetIdUsedForKnownApplicationFeatureEnabled() {
 
         final LocalDate hearingDay = LocalDate.now();
@@ -1491,7 +1491,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
-    @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
+    @Disabled("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
     public void shouldSaveDraftResultsForApplicationFeatureEnabled() {
 
         final LocalDate orderDate = PAST_LOCAL_DATE.next();
@@ -1592,7 +1592,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
-    @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
+    @Disabled("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
     public void shouldSaveDraftResultsForApplicationOffenceFeatureEnabled() {
 
         final LocalDate orderDate = PAST_LOCAL_DATE.next();
@@ -1839,7 +1839,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
-    @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
+    @Disabled("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
     public void shouldUpdateOffencesWithPleaAndVerdictWhenApplicationCasesExistFeatureEnabled() {
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         final LocalDate hearingDay = LocalDate.now();

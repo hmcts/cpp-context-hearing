@@ -16,6 +16,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.progression.events.SendingSheetCompleted;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -25,7 +26,6 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendant;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
@@ -37,16 +37,17 @@ import uk.gov.moj.cpp.hearing.test.TestTemplates.PleaValueType;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-
+@ExtendWith(MockitoExtension.class)
 public class MagistratesCourtInitiateHearingEventProcessorTest {
 
     @Spy
@@ -54,12 +55,11 @@ public class MagistratesCourtInitiateHearingEventProcessorTest {
     @Spy
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
     @Spy
-    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
+    private final JsonObjectToObjectConverter jsonObjectToObjectConverter  = new JsonObjectToObjectConverter();
     @Spy
-    @InjectMocks
-    private final ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(this.objectMapper);
+    private final ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(this.objectMapper);;
     @Spy
-    private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
+    private final ObjectToJsonObjectConverter objectToJsonObjectConverter= new ObjectToJsonObjectConverter();
     @Mock
     private Sender sender;
     @Captor
@@ -68,9 +68,12 @@ public class MagistratesCourtInitiateHearingEventProcessorTest {
     private MagistratesCourtInitiateHearingEventProcessor magistratesCourtInitiateHearingEventProcessor;
 
 
-    @Before
+    @BeforeEach
     public void initMocks() {
-        MockitoAnnotations.initMocks(this);
+        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.objectToJsonValueConverter, "mapper", new ObjectMapperProducer().objectMapper());
+
     }
 
     @Test

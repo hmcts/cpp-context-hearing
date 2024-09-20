@@ -4,11 +4,12 @@ package uk.gov.moj.cpp.hearing.common;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.core.courts.LjaDetails;
@@ -24,13 +25,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ReferenceDataLoaderTest {
 
     @InjectMocks
@@ -68,11 +69,11 @@ public class ReferenceDataLoaderTest {
         });
     }
 
-    @Test(expected = ReferenceDataNotFoundException.class)
+    @Test
     public void shouldThrowInvalidReferenceDataExceptionIfOrganisationUnitIsNotPresent() {
         when(requester.requestAsAdmin(any(), eq(OrganisationunitsResult.class)).payload()).thenReturn(null);
 
-        referenceDataLoader.getOrganisationUnitList();
+        assertThrows(ReferenceDataNotFoundException.class, () -> referenceDataLoader.getOrganisationUnitList());
     }
 
     @Test
@@ -86,17 +87,16 @@ public class ReferenceDataLoaderTest {
         assertThat(organisationalUnit.getLja(), is(organisationUnit.getLja()));
     }
 
-    @Test(expected = ReferenceDataNotFoundException.class)
+    @Test
     public void shouldThrowReferenceDataNotFoundExceptionIfResponseEnvelopeIsNull() {
         when(requester.requestAsAdmin(any(), eq(OrganisationalUnit.class)).payload()).thenReturn(null);
 
-        referenceDataLoader.getOrganisationUnitById(courtCentreId);
+        assertThrows(ReferenceDataNotFoundException.class, () -> referenceDataLoader.getOrganisationUnitById(courtCentreId));
     }
 
     @Test
     public void shouldGetLjaDetails() {
         final OrganisationalUnit organisationUnit = getOrganisationUnit();
-        final UUID courtCentreId = randomUUID();
         final String ljaName = "Lavender Hill Magistrates' Court";
         final String ljaWelshName = "Llys Ynadon Lavender Hill";
 
@@ -108,7 +108,6 @@ public class ReferenceDataLoaderTest {
                         .build())
                 .build();
 
-        when(requester.requestAsAdmin(any(), eq(OrganisationalUnit.class)).payload()).thenReturn(organisationUnit);
 
         when(requester.requestAsAdmin(any(), eq(EnforcementArea.class)).payload()).thenReturn(expectedEnforcementArea);
 
@@ -120,14 +119,13 @@ public class ReferenceDataLoaderTest {
         assertThat(ljaDetails.getWelshLjaName(), is(expectedEnforcementArea.getLocalJusticeArea().getWelshName()));
     }
 
-    @Test(expected = ReferenceDataNotFoundException.class)
+    @Test
     public void shouldThrowEnforcementAreaNotFoundExceptionIfEnforcementAreaIsNullWhilstGettingLjaDetails() {
         final OrganisationalUnit organisationUnit = getOrganisationUnit();
 
-        when(requester.requestAsAdmin(any(), eq(OrganisationalUnit.class)).payload()).thenReturn(organisationUnit);
         when(requester.requestAsAdmin(any(), eq(EnforcementArea.class)).payload()).thenReturn(null);
 
-        referenceDataLoader.getLjaDetails(organisationUnit);
+        assertThrows(ReferenceDataNotFoundException.class, () -> referenceDataLoader.getLjaDetails(organisationUnit));
     }
 
     private OrganisationalUnit getOrganisationUnit() {

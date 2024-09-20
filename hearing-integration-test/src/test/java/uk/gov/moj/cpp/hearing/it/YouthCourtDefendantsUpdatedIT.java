@@ -1,17 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.specification.RequestSpecification;
-import org.hamcrest.core.Is;
-import org.junit.Test;
-import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
-
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
-import java.util.List;
-import java.util.UUID;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.codehaus.groovy.runtime.InvokerHelper.asList;
@@ -22,6 +10,20 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandH
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubForYouthCourtForMagUUID;
+
+import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
+
+import java.util.List;
+import java.util.UUID;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+
+import io.restassured.path.json.JsonPath;
+import io.restassured.specification.RequestSpecification;
+import org.hamcrest.core.Is;
+import org.junit.jupiter.api.Test;
 
 
 public class YouthCourtDefendantsUpdatedIT extends AbstractIT {

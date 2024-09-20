@@ -41,18 +41,6 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.restassured.path.json.JsonPath;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.Is;
-import org.mockito.Spy;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.Defendant;
@@ -80,11 +68,22 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.path.json.JsonPath;
 import org.hamcrest.CoreMatchers;
-import org.junit.Test;
+import org.hamcrest.Matchers;
+import org.hamcrest.core.Is;
+import org.junit.jupiter.api.Test;
+import org.mockito.Spy;
 
 public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
     private static final String GET_HEARING_QUERY_ENDPOINT_NAME = "hearing.get.hearing";

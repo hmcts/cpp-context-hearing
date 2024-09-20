@@ -1,24 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import com.jayway.restassured.path.json.JsonPath;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.gov.justice.core.courts.ProsecutionCounsel;
-import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
-import uk.gov.justice.hearing.courts.RemoveProsecutionCounsel;
-import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
-import uk.gov.justice.services.common.http.HeaderConstants;
-import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
-import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Collections.singletonList;
@@ -48,6 +29,26 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateProsecutionCounsel
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
+
+import uk.gov.justice.core.courts.ProsecutionCounsel;
+import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
+import uk.gov.justice.hearing.courts.RemoveProsecutionCounsel;
+import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
+import uk.gov.justice.services.common.http.HeaderConstants;
+import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import io.restassured.path.json.JsonPath;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
 public class ProsecutionCounselIT extends AbstractIT {

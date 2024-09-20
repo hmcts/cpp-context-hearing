@@ -1,19 +1,20 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.util.UUID;
-
 import static java.util.UUID.randomUUID;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.waitForNotFoundResponse;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
+
+import java.util.UUID;
+
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unchecked")
 public class HearingEventsNotFoundResourceIT extends AbstractIT {
 
     private static final UUID userId = randomUUID();
-    @BeforeClass
+    @BeforeAll
     public static void setupPerClass() {
         setupAsAuthorisedUser(userId);
     }

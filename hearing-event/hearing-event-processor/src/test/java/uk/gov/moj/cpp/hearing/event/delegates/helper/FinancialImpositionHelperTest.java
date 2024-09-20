@@ -1,14 +1,14 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.core.courts.Prompt;
 
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FinancialImpositionHelperTest {
 

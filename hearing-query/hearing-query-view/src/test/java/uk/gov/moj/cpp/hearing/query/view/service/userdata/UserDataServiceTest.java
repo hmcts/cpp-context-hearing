@@ -1,23 +1,9 @@
 package uk.gov.moj.cpp.hearing.query.view.service.userdata;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.requester.Requester;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-
-import javax.json.JsonObject;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.IntStream;
-
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createReader;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,7 +13,23 @@ import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.messaging.Envelope.metadataBuilder;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 
-@RunWith(MockitoJUnitRunner.class)
+import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
+
+import javax.json.JsonObject;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
 public class UserDataServiceTest {
     public static final String EMPTY_USER_DETAILS_JSON = "emptyUserDetails.json";
     public static final String MULTIPLE_USER_DETAILS_JSON = "multipleUserDetails.json";
@@ -46,7 +48,7 @@ public class UserDataServiceTest {
                 "Marshall Douglas"
         );
         JsonEnvelope jsonEnvelope = getUserEnvelope(MULTIPLE_USER_DETAILS_JSON);
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(jsonEnvelope);
+        when(requester.request(any(), any(Class.class))).thenReturn(jsonEnvelope);
 
         List<String> users = userDataService.getUserDetails(jsonEnvelope, userId);
 
@@ -72,7 +74,7 @@ public class UserDataServiceTest {
     public void shouldGetUserDetailsWithWrongUserIds() {
         final String userId = randomUUID().toString();
         JsonEnvelope jsonEnvelope = getUserEnvelope(EMPTY_USER_DETAILS_JSON);
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(jsonEnvelope);
+        when(requester.request(any(), any(Class.class))).thenReturn(jsonEnvelope);
 
         List<String> users = userDataService.getUserDetails(jsonEnvelope, userId);
 

@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportFailed;
@@ -18,16 +18,16 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CourtListAggregateTest {
     private CourtListAggregate courtListAggregate;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         courtListAggregate = new CourtListAggregate();
     }

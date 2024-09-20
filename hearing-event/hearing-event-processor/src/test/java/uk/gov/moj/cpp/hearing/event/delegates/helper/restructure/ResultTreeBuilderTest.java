@@ -8,8 +8,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON;
@@ -23,9 +23,6 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMAND_IN_CUSTODY_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON;
 
-
-import java.time.LocalDate;
-import org.mockito.Mockito;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.SecondaryCJSCode;
@@ -36,21 +33,25 @@ import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 
 public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     private ResultTreeBuilder target;
     private List<ResultDefinition> resultDefinitionList;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         ResultTextConfHelper resultTextConfHelper = Mockito.mock(ResultTextConfHelper.class);
         when(resultTextConfHelper.isOldResultDefinition(any(LocalDate.class))).thenReturn(false);
-        super.setUp();
+        stubResultDefinitionJson();
+
         target = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper, resultTextConfHelper);
         resultDefinitionList = resultDefinitions.stream().filter(resultDefinition ->
                 REMAND_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
@@ -59,7 +60,8 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
     }
 
     @Test
-    public void shouldBuildSimpleTwoLayerTree() {
+    public void shouldBuildSimpleTwoLayerTree() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = getResultsShared(resultDefinitionList);
         final List<TreeNode<ResultLine>> results = target.build(dummyEnvelope, resultsShared);
         final TreeNode<ResultLine> firstTreeNode = results.stream().filter(jr -> fromString(REMAND_IN_CUSTODY_ID).equals(jr.getResultDefinitionId())).findAny().get();
@@ -82,7 +84,8 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
     }
 
     @Test
-    public void shouldBuildSimplePromptWithValues() {
+    public void shouldBuildSimplePromptWithValues() throws IOException {
+        stubFixedListJson();
         final String promptValue = "abc";
         final ResultsShared resultsShared = getResultsSharedWithPromptValue(resultDefinitionList, promptValue);
         final List<TreeNode<ResultLine>> results = target.build(dummyEnvelope, resultsShared);
@@ -98,7 +101,8 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
     }
 
     @Test
-    public void shouldBuildSimplePromptWithValuesCommaSeparated() {
+    public void shouldBuildSimplePromptWithValuesCommaSeparated() throws IOException {
+        stubFixedListJson();
         final String promptValue = "abc###def";
         final ResultsShared resultsShared = getResultsSharedWithPromptValue(resultDefinitionList, promptValue);
         final List<TreeNode<ResultLine>> results = target.build(dummyEnvelope, resultsShared);
@@ -114,7 +118,8 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
     }
 
     @Test
-    public void shouldBuildSimplePromptWithWelshValuesCommaSeparated() {
+    public void shouldBuildSimplePromptWithWelshValuesCommaSeparated() throws IOException {
+        stubFixedListJson();
         final String promptValue = "abc###def";
         final ResultsShared resultsShared = getResultsSharedWithWelshPromptValue(resultDefinitionList, promptValue);
         final List<TreeNode<ResultLine>> results = target.build(dummyEnvelope, resultsShared);
@@ -131,6 +136,7 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldBuildMultipleTrees() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON, ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
@@ -159,6 +165,7 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldBuildWhenOneDefendantAndOneOffenceResultShared() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
@@ -204,6 +211,7 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldBuildSuccessfullyScenario1ShortCodeSendToCCOnCB() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON, ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
@@ -218,6 +226,7 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldBuildSuccessfullyWithJudicialResult() throws IOException {
+        stubFixedListJson();
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON, ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
@@ -230,6 +239,7 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldBuildSuccessfullyWithJudicialResultWhenResultLineIdExistsInNewAmendedResults() throws IOException {
+        stubFixedListJson();
         final ResultsSharedV2 resultsShared = fileResourceObjectMapper.convertFromFile("judicial-result-with-newAmendedResults.json", ResultsSharedV2.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
@@ -243,6 +253,7 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldBuildSuccessfullyWithJudicialResultWhenResultLineIdNotExistsInNewAmendedResults() throws IOException {
+        stubFixedListJson();
         final ResultsSharedV2 resultsShared = fileResourceObjectMapper.convertFromFile("judicial-result-without-newAmendedResults.json", ResultsSharedV2.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
@@ -256,6 +267,7 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldOrderResultsForDependantResultDefinitionGroup() throws IOException {
+        stubFixedListJson();
         final ResultsSharedV2 resultsShared = fileResourceObjectMapper.convertFromFile("judicial-result-for-ordering.json", ResultsSharedV2.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
@@ -290,6 +302,7 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldOrderResultsForDependantResultDefinitionGroupForApplication() throws IOException {
+        stubFixedListJson();
         final ResultsSharedV2 resultsShared = fileResourceObjectMapper.convertFromFile("judicial-result-for-ordering-for-application.json", ResultsSharedV2.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);

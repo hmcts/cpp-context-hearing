@@ -122,6 +122,7 @@ import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -406,6 +407,8 @@ public class TestTemplates {
                             .setJurisdictionType(CROWN)
                             .setMinimumAssociatedPerson(true)
                             .setMinimumDefenceOrganisation(true)
+                            .setUnitTest(true)//
+
                     ).build());
         }
 

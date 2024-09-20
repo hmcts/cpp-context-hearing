@@ -18,7 +18,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -43,7 +43,7 @@ public class ReferenceDataClientTestBase {
     @Captor
     protected ArgumentCaptor<JsonEnvelope> enforcementAreaQueryEnvelopeCaptor;
 
-    @Before
+    @BeforeEach
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());

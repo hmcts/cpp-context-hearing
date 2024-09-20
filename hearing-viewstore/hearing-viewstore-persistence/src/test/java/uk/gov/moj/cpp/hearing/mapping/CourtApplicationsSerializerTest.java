@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.core.courts.CourtApplication;
@@ -11,15 +12,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CourtApplicationsSerializerTest {
 
     @Spy
@@ -31,7 +31,7 @@ public class CourtApplicationsSerializerTest {
     @InjectMocks
     CourtApplicationsSerializer courtApplicationsSerializer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         setField(objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
         setField(jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
@@ -47,7 +47,7 @@ public class CourtApplicationsSerializerTest {
         );
         final String json = courtApplicationsSerializer.json(courtApplications);
         final List<CourtApplication> courtApplicationsOut = courtApplicationsSerializer.courtApplications(json);
-        Assert.assertEquals(courtApplications.get(0).getId(), courtApplicationsOut.get(0).getId());
+        assertEquals(courtApplications.get(0).getId(), courtApplicationsOut.get(0).getId());
     }
 
     @Test
@@ -55,14 +55,14 @@ public class CourtApplicationsSerializerTest {
         final List<CourtApplication> courtApplications = null;
         final String json = courtApplicationsSerializer.json(courtApplications);
         final List<CourtApplication> courtApplicationsOut = courtApplicationsSerializer.courtApplications(json);
-        Assert.assertEquals(courtApplications, courtApplicationsOut);
+        assertEquals(courtApplications, courtApplicationsOut);
     }
 
     @Test
     public void testNullField() {
         final String json = null;
         final List<CourtApplication> courtApplicationsOut = courtApplicationsSerializer.courtApplications(json);
-        Assert.assertEquals(0, courtApplicationsOut.size());
+        assertEquals(0, courtApplicationsOut.size());
     }
 
 }

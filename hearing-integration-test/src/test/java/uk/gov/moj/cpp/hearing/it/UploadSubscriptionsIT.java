@@ -19,12 +19,12 @@ import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class UploadSubscriptionsIT extends AbstractIT {
 
-    @Ignore("DD-17628: The command (hearing.upload-subscriptions) was redundant and not used anymore.")
+    @Disabled("DD-17628: The command (hearing.upload-subscriptions) was redundant and not used anymore.")
     @Test
     public void testRetrieveSubscriptionsAfterUploading() {
 

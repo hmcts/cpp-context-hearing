@@ -5,7 +5,6 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
-import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
@@ -13,10 +12,10 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
@@ -33,28 +32,26 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher;
+import uk.gov.moj.cpp.hearing.command.api.service.ReferenceDataService;
 
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import javax.json.JsonObject;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import uk.gov.moj.cpp.hearing.command.api.service.ReferenceDataService;
 
 @SuppressWarnings({"unused", "unchecked"})
-@RunWith(DataProviderRunner.class)
 public class HearingEventCommandApiTest {
 
     private static final String FIELD_HEARING_ID = "hearingId";
@@ -98,22 +95,22 @@ public class HearingEventCommandApiTest {
     @Captor
     private ArgumentCaptor<JsonEnvelope> requesterArgumentCaptor;
 
-    @DataProvider
-    public static Object[][] provideCorrectAlterableFlags() {
-        return new Object[][]{
+
+    public static Stream<Arguments> provideCorrectAlterableFlags() {
+        return Stream.of(
                 //isAlterable, expectation
-                {true, true},
-                {false, false}
-        };
+                Arguments.of(true, true), // null strings should be considered blank
+                Arguments.of(false, false)
+        );
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
     }
 
-    @UseDataProvider("provideCorrectAlterableFlags")
-    @Test
+    @ParameterizedTest
+    @MethodSource("provideCorrectAlterableFlags")
     public void shouldEnrichWithCorrectAlterableFlagForHearingEventToBeLogged(final boolean alterable, final boolean expectation) {
         final JsonEnvelope command = prepareLogHearingEventCommand();
         fakeEventDefinitionResponse(alterable);
@@ -126,8 +123,8 @@ public class HearingEventCommandApiTest {
         assertGetHearingEventDefinitionEventRequested(command);
     }
 
-    @UseDataProvider("provideCorrectAlterableFlags")
-    @Test
+    @ParameterizedTest
+    @MethodSource("provideCorrectAlterableFlags")
     public void shouldEnrichWithCorrectAlterableFlagForCorrectHearingEventToBeLogged(final boolean alterable, final boolean expectation) {
         final JsonEnvelope command = prepareLogHearingEventCommand();
         fakeEventDefinitionResponse(alterable);
@@ -140,8 +137,8 @@ public class HearingEventCommandApiTest {
         assertGetHearingEventDefinitionEventRequested(command);
     }
 
-    @UseDataProvider("provideCorrectAlterableFlags")
-    @Test
+    @ParameterizedTest
+    @MethodSource("provideCorrectAlterableFlags")
     public void shouldLogEventWithCorrectAlterableFlagAnd_OverrideCourtRoomRequested(final boolean alterable, final boolean expectation) {
 
         final JsonEnvelope command = prepareLogHearingEventCommandWithOverrideFlag();

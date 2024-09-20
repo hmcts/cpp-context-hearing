@@ -1,11 +1,11 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
+
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
 import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
@@ -21,21 +21,23 @@ import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.UsersAndGroupsServi
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.Permissions;
 import uk.gov.moj.cpp.hearing.query.view.HearingQueryView;
 
-import javax.ws.rs.BadRequestException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
+import javax.ws.rs.BadRequestException;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FindHearingsQueryApiTest {
 
     @Mock
@@ -83,11 +85,11 @@ public class FindHearingsQueryApiTest {
     @InjectMocks
     private HearingQueryApi hearingQueryApi;
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void should_throw_bad_request_when_user_id_is_missing() {
         when(jsonInputEnvelope.metadata()).thenReturn(metadata);
         when(metadata.userId()).thenReturn(Optional.empty());
-        hearingQueryApi.findHearings(jsonInputEnvelope);
+        assertThrows(BadRequestException.class, () -> hearingQueryApi.findHearing(jsonInputEnvelope));
     }
 
     @Test
@@ -100,8 +102,6 @@ public class FindHearingsQueryApiTest {
         when(recorderChecker.isRecorder(permissions)).thenReturn(false);
         when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(getAccessibleCaseList());
         when(accessibleApplications.findApplications(permissions, userId.toString())).thenReturn(new ArrayList<>());
-        when(hearingQueryView.findHearings(jsonInputEnvelope, getAccessibleCasesAndApplicationsList(), false))
-                .thenReturn(jsonOutputEnvelope);
 
         hearingQueryApi.findHearings(jsonInputEnvelope);
         verify(ddjChecker, times(1)).isDDJ(permissions);
@@ -120,8 +120,6 @@ public class FindHearingsQueryApiTest {
         when(recorderChecker.isRecorder(permissions)).thenReturn(true);
         when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(getAccessibleCaseList());
         when(accessibleApplications.findApplications(permissions, userId.toString())).thenReturn(new ArrayList<>());
-        when(hearingQueryView.findHearings(jsonInputEnvelope, getAccessibleCaseList(), false))
-                .thenReturn(jsonOutputEnvelope);
 
         hearingQueryApi.findHearings(jsonInputEnvelope);
         verify(ddjChecker, times(1)).isDDJ(permissions);
@@ -136,11 +134,8 @@ public class FindHearingsQueryApiTest {
         when(jsonInputEnvelope.metadata()).thenReturn(metadata);
         when(metadata.userId()).thenReturn(Optional.of(userId.toString()));
         when(usersAndGroupsService.permissions(userId.toString())).thenReturn(permissions);
-        when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(getAccessibleCaseList());
         when(ddjChecker.isDDJ(permissions)).thenReturn(false);
         when(recorderChecker.isRecorder(permissions)).thenReturn(false);
-        when(hearingQueryView.findHearings(jsonInputEnvelope, getAccessibleCaseList(), false))
-                .thenReturn(jsonOutputEnvelope);
 
         hearingQueryApi.findHearings(jsonInputEnvelope);
         verify(accessibleCases, times(0)).findCases(permissions,userId.toString());

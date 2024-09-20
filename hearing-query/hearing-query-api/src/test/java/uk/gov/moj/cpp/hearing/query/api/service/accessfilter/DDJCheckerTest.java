@@ -1,19 +1,20 @@
 package uk.gov.moj.cpp.hearing.query.api.service.accessfilter;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.Permission;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.Permissions;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DDJCheckerTest {
 
     private static final String DDJ_PERMISSION_OBJECT = "DDJ-ROLE";

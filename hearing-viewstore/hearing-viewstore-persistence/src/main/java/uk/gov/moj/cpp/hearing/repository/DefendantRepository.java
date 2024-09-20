@@ -16,7 +16,7 @@ import java.util.UUID;
 public abstract class DefendantRepository extends AbstractEntityRepository<Defendant, HearingSnapshotKey> {
 
     @MappingConfig(DefendantSearchMapper.class)
-    @Query(value = "select * from ha_defendant where id = :defendantId LIMIT 1;", isNative = true)
+    @Query(value = "from Defendant d where d.id.id = :defendantId")
     public abstract DefendantSearch getDefendantDetailsForSearching(@QueryParam("defendantId") final UUID defendantId);
 
 }

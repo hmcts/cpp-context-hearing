@@ -57,15 +57,15 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
 import com.google.common.io.Resources;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.response.Header;
-import com.jayway.restassured.specification.RequestSpecification;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.http.Header;
+import io.restassured.specification.RequestSpecification;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -252,7 +252,7 @@ public class AbstractIT {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUpPerTest() {
         stubUsersAndGroupsUserRoles(getLoggedInUser());
         stubUsersAndGroupsGetLoggedInPermissionsWithoutCases();

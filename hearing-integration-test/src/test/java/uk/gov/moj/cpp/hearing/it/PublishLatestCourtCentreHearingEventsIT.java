@@ -9,9 +9,9 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
@@ -34,6 +34,7 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getFileForPath;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForPubDisplay;
 
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
@@ -50,13 +51,13 @@ import javax.annotation.concurrent.NotThreadSafe;
 import javax.json.JsonObject;
 
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 @NotThreadSafe
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLatestCourtCentreHearingIT {
 
     final private static UUID RESUME_ID_WHICH_IS_NOT_TO_BE_INCLUDED_IN_FILTER = RESUME_HEARING_EVENT_DEFINITION_ID;
@@ -68,9 +69,9 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
     private ZonedDateTime eventTime;
     private LocalDate localDate;
 
-    @Before
+    @BeforeEach
     public void setUpTest() {
-        eventTime = now().minusMinutes(5L).withZoneSameLocal(ZoneId.of("UTC"));
+        eventTime = new UtcClock().now().minusMinutes(5L);
         localDate = eventTime.toLocalDate();
     }
 

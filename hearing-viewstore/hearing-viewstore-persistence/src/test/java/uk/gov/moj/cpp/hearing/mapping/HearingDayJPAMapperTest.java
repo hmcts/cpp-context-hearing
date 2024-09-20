@@ -6,24 +6,14 @@ import static org.hamcrest.Matchers.is;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.services.test.utils.core.random.DateGenerator;
-import uk.gov.justice.services.test.utils.core.random.Generator;
-import uk.gov.justice.services.test.utils.core.random.ZonedDateTimeGenerator;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
-import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
 
-import java.time.Period;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HearingDayJPAMapperTest {
 
     private HearingDayJPAMapper hearingDayJPAMapper = new HearingDayJPAMapper();

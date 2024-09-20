@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AlwaysPublishHelperTest {
 

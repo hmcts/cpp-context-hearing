@@ -45,15 +45,15 @@ import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RemoveCaseFromGroupCasesCommandHandlerTest {
     private static final UUID HEARING1_ID = randomUUID();
     private static final UUID HEARING2_ID = randomUUID();
@@ -94,17 +94,13 @@ public class RemoveCaseFromGroupCasesCommandHandlerTest {
     private CaseAggregate case1Aggregate;
     private CaseAggregate case2Aggregate;
 
-    @Before
+    @BeforeEach
     public void setup() {
         masterCaseAggregate = new CaseAggregate();
         case1Aggregate = new CaseAggregate();
         case2Aggregate = new CaseAggregate();
         when(eventSource.getStreamById(MASTER_CASE_ID)).thenReturn(masterCaseEventStream);
-        when(eventSource.getStreamById(CASE1_ID)).thenReturn(case1EventStream);
-        when(eventSource.getStreamById(CASE2_ID)).thenReturn(case2EventStream);
         when(aggregateService.get(masterCaseEventStream, CaseAggregate.class)).thenReturn(masterCaseAggregate);
-        when(aggregateService.get(case1EventStream, CaseAggregate.class)).thenReturn(case1Aggregate);
-        when(aggregateService.get(case2EventStream, CaseAggregate.class)).thenReturn(case2Aggregate);
 
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
@@ -112,6 +108,8 @@ public class RemoveCaseFromGroupCasesCommandHandlerTest {
 
     @Test
     public void shouldCreatePrivateEvent_WhenCaseRemovedFromGroupCases() throws EventStreamException {
+        when(eventSource.getStreamById(CASE1_ID)).thenReturn(case1EventStream);
+        when(aggregateService.get(case1EventStream, CaseAggregate.class)).thenReturn(case1Aggregate);
         setInitialDataIntoCaseAggregate(MASTER_CASE_ID, asList(HEARING1_ID));
 
         handler.removeCaseFromGroupCases(getJsonEnvelopeForRemoveCommand(GROUP_ID, MASTER_CASE_ID,
@@ -137,6 +135,9 @@ public class RemoveCaseFromGroupCasesCommandHandlerTest {
 
     @Test
     public void shouldCreatePrivateEvent_WhenGroupMasterRemoved() throws EventStreamException {
+        when(eventSource.getStreamById(CASE2_ID)).thenReturn(case2EventStream);
+        when(aggregateService.get(case2EventStream, CaseAggregate.class)).thenReturn(case2Aggregate);
+
         setInitialDataIntoCaseAggregate(MASTER_CASE_ID, asList(HEARING1_ID));
 
         handler.removeCaseFromGroupCases(getJsonEnvelopeForRemoveCommand(GROUP_ID, MASTER_CASE_ID,
@@ -176,6 +177,9 @@ public class RemoveCaseFromGroupCasesCommandHandlerTest {
 
     @Test
     public void shouldCreatePrivateEvent_WhenCaseRemovedWithMultipleHearings() throws EventStreamException {
+        when(eventSource.getStreamById(CASE2_ID)).thenReturn(case2EventStream);
+        when(aggregateService.get(case2EventStream, CaseAggregate.class)).thenReturn(case2Aggregate);
+
         setInitialDataIntoCaseAggregate(MASTER_CASE_ID, asList(HEARING1_ID, HEARING2_ID, HEARING3_ID));
 
         handler.removeCaseFromGroupCases(getJsonEnvelopeForRemoveCommand(GROUP_ID, MASTER_CASE_ID,

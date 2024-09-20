@@ -29,13 +29,13 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"squid:S2699"})
 public class AddDefendantIT extends AbstractIT {
 
-    @Ignore("GPE-13308")
+    @Disabled("GPE-13308")
     @Test
     public void shouldAddNewDefendant() throws Exception {
 

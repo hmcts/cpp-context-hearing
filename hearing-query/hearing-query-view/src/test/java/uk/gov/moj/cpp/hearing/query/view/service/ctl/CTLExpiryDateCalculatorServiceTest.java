@@ -25,17 +25,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import junit.framework.TestCase;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("squid:S2187")
-@RunWith(MockitoJUnitRunner.class)
-public class CTLExpiryDateCalculatorServiceTest extends TestCase {
+@ExtendWith(MockitoExtension.class)
+public class CTLExpiryDateCalculatorServiceTest {
 
     @Mock
     private ReferenceDataService referenceData;
@@ -80,9 +79,7 @@ public class CTLExpiryDateCalculatorServiceTest extends TestCase {
         final List<PublicHoliday> publicHolidays = new ArrayList<>();
         final String division = "division";
 
-        when(referenceData.getPublicHolidays(division, LocalDate.now(), ctlExpiryOnSunday)).thenReturn(publicHolidays);
         when(offence.getModeOfTrial()).thenReturn(ModeOfTrial.INDICTABLE.type());
-        when(offence.getBailStatusCode()).thenReturn(REMANDED_IN_CUSTODY_PENDING_CONDITIONS.getCode());
         when(ctlExpiryDateCalculator.calculateCTLExpiryDate(offence, REMANDED_IN_CUSTODY_PENDING_CONDITIONS, now())).thenReturn(Optional.of(ctlExpiryOnSunday));
         final LocalDate adjustedDaysForWeekend = ctlExpiryOnSunday.minusDays(2);
         when(publicHolidaysWeekendsService.getCalenderBasedCTLExpiryDate(ctlExpiryOnSunday)).thenReturn(adjustedDaysForWeekend);
@@ -102,7 +99,6 @@ public class CTLExpiryDateCalculatorServiceTest extends TestCase {
         final List<PublicHoliday> publicHolidays = new ArrayList<>();
         publicHolidays.add(new PublicHoliday(UUID.randomUUID(), "", "", ctlExpiryOnMonday));
 
-        when(referenceData.getPublicHolidays(division, LocalDate.now(), ctlExpiryOnMonday)).thenReturn(publicHolidays);
         when(offence.getModeOfTrial()).thenReturn(ModeOfTrial.INDICTABLE.type());
         when(ctlExpiryDateCalculator.calculateCTLExpiryDate(offence, REMANDED_IN_CUSTODY_PENDING_CONDITIONS, now())).thenReturn(Optional.of(ctlExpiryOnMonday));
         final LocalDate adjustedDaysForPublicHolidays = ctlExpiryOnMonday.minusDays(4);
@@ -116,8 +112,6 @@ public class CTLExpiryDateCalculatorServiceTest extends TestCase {
 
     @Test
     public void shouldReturnNullForCTLExpiryDateWhenRemandStatusIsNull() {
-        when(ctlExpiryDateCalculator.calculateCTLExpiryDate(offence, null, now())).thenReturn(Optional.empty());
-
         final Optional<LocalDate> expiryDate = ctlExpiryDateCalculatorService
                 .calculateCTLExpiryDate(offence, LocalDate.now(), "C");
 
@@ -126,8 +120,6 @@ public class CTLExpiryDateCalculatorServiceTest extends TestCase {
 
     @Test
     public void shouldReturnNullForCTLExpiryDateWhenOffenceIsNull() {
-        when(ctlExpiryDateCalculator.calculateCTLExpiryDate(null, REMANDED_IN_CUSTODY_PENDING_CONDITIONS, now())).thenReturn(Optional.empty());
-
         final Optional<LocalDate> expiryDate = ctlExpiryDateCalculatorService
                 .calculateCTLExpiryDate(offence, LocalDate.now(), "C");
 

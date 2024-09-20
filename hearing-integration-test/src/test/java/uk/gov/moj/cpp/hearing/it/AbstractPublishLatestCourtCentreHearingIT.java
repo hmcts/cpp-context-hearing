@@ -21,7 +21,7 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 
 public class AbstractPublishLatestCourtCentreHearingIT extends AbstractIT {
 
@@ -41,7 +41,8 @@ public class AbstractPublishLatestCourtCentreHearingIT extends AbstractIT {
     protected static final String LISTING_COMMAND_PUBLISH_COURT_LIST = "hearing.command.publish-court-list";
     protected static final String MEDIA_TYPE_LISTING_COMMAND_PUBLISH_COURT_LIST = "application/vnd.hearing.publish-court-list+json";
     protected static final String E20903_PCO_TYPE = "E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type";
-    @BeforeClass
+
+    @BeforeAll
     public static void setUpBeforeClassAbstractPublishLatestCourtCentreHearingIT() {
         stubGetReferenceDataXhibitHearingTypes();
         stubGetReferenceDataCourtXhibitCourtMappings();

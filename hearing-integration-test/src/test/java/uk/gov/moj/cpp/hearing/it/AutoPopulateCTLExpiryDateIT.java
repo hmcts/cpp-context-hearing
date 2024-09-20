@@ -88,9 +88,9 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.jayway.restassured.path.json.JsonPath;
-import org.junit.Before;
-import org.junit.Test;
+import io.restassured.path.json.JsonPath;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
     private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
@@ -122,7 +122,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
     private final UtcClock utcClock = new UtcClock();
 
-    @Before
+    @BeforeEach
     public void setup() {
         stubPublicHolidays();
     }

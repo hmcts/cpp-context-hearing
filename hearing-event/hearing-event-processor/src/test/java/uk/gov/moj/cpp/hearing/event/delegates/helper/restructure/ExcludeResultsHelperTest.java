@@ -1,12 +1,12 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
 import static java.util.Arrays.asList;
-import static java.util.UUID.*;
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static uk.gov.justice.core.courts.ResultLine.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.justice.core.courts.ResultLine.resultLine;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ExcludeResultsHelper.removeExcludedResults;
 
 import uk.gov.justice.core.courts.ResultLine;
@@ -16,9 +16,8 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ExcludeResultsHelperTest {
 

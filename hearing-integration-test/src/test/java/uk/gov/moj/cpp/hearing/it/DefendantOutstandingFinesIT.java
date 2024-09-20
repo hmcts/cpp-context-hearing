@@ -3,8 +3,10 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
@@ -33,18 +35,12 @@ import javax.annotation.concurrent.NotThreadSafe;
 import javax.ws.rs.core.Response;
 
 import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unchecked")
 @NotThreadSafe
 public class DefendantOutstandingFinesIT extends AbstractIT {
 
-    @Before
-    public void setUp() {
-        super.setUpPerTest();
-    }
 
     @Test
     public void should_NOT_get_outstanding_fines_when_defendant_id_is_unknown() throws Exception {
@@ -55,8 +51,8 @@ public class DefendantOutstandingFinesIT extends AbstractIT {
                                       ).build();
 
         ResponseData responseData = makeRequest(build);
-        Assert.assertThat(responseData.getStatus(), is(OK));
-        Assert.assertTrue(new JSONObject(responseData.getPayload()).isNull("outstandingFines)"));
+        assertThat(responseData.getStatus(), is(OK));
+        assertTrue(new JSONObject(responseData.getPayload()).isNull("outstandingFines)"));
     }
 
     @Test

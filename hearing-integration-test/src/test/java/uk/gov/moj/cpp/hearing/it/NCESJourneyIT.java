@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Arrays.asList;
@@ -12,6 +11,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -25,10 +25,8 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.constants.ApplicationOutcome.GRANTED;
 import static uk.gov.moj.cpp.hearing.constants.ApplicationOutcome.WITHDRAWN;
 import static uk.gov.moj.cpp.hearing.constants.ApplicationType.APPEAL_AGAINST_SENTENCE;
-import static uk.gov.moj.cpp.hearing.constants.ApplicationType.APPEARANCE_TO_MAKE_STATUTORY_DECLARATION;
 import static uk.gov.moj.cpp.hearing.constants.EmailAmendmentTitles.AMEND_RESULT;
 import static uk.gov.moj.cpp.hearing.constants.EmailAmendmentTitles.APPEAL_WITHDRAWN;
 import static uk.gov.moj.cpp.hearing.constants.EmailAmendmentTitles.WRITE_OFF_ONE_DAY_DEEMED_SERVED;
@@ -80,7 +78,6 @@ import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.constants.ApplicationOutcome;
 import uk.gov.moj.cpp.hearing.constants.ApplicationType;
-import uk.gov.moj.cpp.hearing.constants.EmailAmendmentTitles;
 import uk.gov.moj.cpp.hearing.constants.EmailStatus;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
@@ -108,10 +105,10 @@ import javax.json.JsonObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-@Ignore("The NCES feature will be upgraded after NOWs feature. Due to this reason this IT Test has been ignored.")
+@Disabled("The NCES feature will be upgraded after NOWs feature. Due to this reason this IT Test has been ignored.")
 public class NCESJourneyIT extends AbstractIT {
 
     public static final String PUBLIC_EVENT_PROGRESSION_HEARING_EXTENDED = "public.progression.events.hearing-extended";

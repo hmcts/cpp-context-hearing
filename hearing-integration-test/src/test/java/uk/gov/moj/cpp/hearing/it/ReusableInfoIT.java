@@ -21,7 +21,7 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ReusableInfoIT extends AbstractIT{
 

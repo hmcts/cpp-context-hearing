@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import uk.gov.justice.core.courts.Prompt;
 
@@ -8,8 +10,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PenaltyPointTest {
 
@@ -19,7 +20,7 @@ public class PenaltyPointTest {
         final PenaltyPoint penaltyPoint = new PenaltyPoint();
         final BigDecimal actualPenaltyPoint = penaltyPoint.getPenaltyPointFromResults(promptReferenceData0, prompt0);
 
-        Assert.assertThat(actualPenaltyPoint, is(new BigDecimal("10.00")));
+        assertThat(actualPenaltyPoint, is(new BigDecimal("10.00")));
 
     }
 
@@ -28,7 +29,7 @@ public class PenaltyPointTest {
         final PenaltyPoint penaltyPoint = new PenaltyPoint();
         final BigDecimal actualPenaltyPoint = penaltyPoint.getPenaltyPointFromResults(promptReferenceData1, prompt0);
 
-        Assert.assertNull(actualPenaltyPoint);
+        assertNull(actualPenaltyPoint);
 
     }
 

@@ -3,9 +3,10 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers;
 import static uk.gov.justice.core.courts.Hearing.hearing;
@@ -83,14 +84,13 @@ import java.util.stream.Collectors;
 import javax.json.JsonValue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public abstract class AbstractRestructuringTest {
     protected static final String GUILTY = "GUILTY";
 
@@ -145,34 +145,33 @@ public abstract class AbstractRestructuringTest {
     @Spy
     protected final ResultLineHelper resultLineHelper = new ResultLineHelper();
 
-    @Spy
-    @InjectMocks
-    protected final NowsReferenceDataLoader nowsReferenceDataLoader = new NowsReferenceDataLoader();
 
-    @Spy
     @InjectMocks
-    protected final NowsReferenceCache nowsReferenceCache = new NowsReferenceCache();
+    protected final NowsReferenceDataLoader nowsReferenceDataLoader = spy(NowsReferenceDataLoader.class);
 
-    @Spy
-    @InjectMocks
-    protected final NextHearingHelper nextHearingHelper = new NextHearingHelper();
 
-    @Spy
     @InjectMocks
-    protected final NextHearingHelperV3 nextHearingHelperV3 = new NextHearingHelperV3();
+    protected final NowsReferenceCache nowsReferenceCache = spy(NowsReferenceCache.class);
+
+
+    @InjectMocks
+    protected final NextHearingHelper nextHearingHelper = spy(NextHearingHelper.class);
+
+
+    @InjectMocks
+    protected final NextHearingHelperV3 nextHearingHelperV3 = spy(NextHearingHelperV3.class);
 
     @Spy
     protected final ResultLineHelperV3 resultLineHelperV3 = new ResultLineHelperV3();
 
-    @Spy
+
     @InjectMocks
-    protected ReferenceDataService referenceDataService = new NowsReferenceDataServiceImpl(nowsReferenceCache, ljaReferenceDataLoader, fixedListLookup, bailStatusReferenceDataLoader, prosecutorDataLoader, organisationalUnitLoader, verdictTypesReferenceDataLoader, alcoholLevelMethodsReferenceDataLoader, pleaTypeReferenceDataLoader);
+    protected ReferenceDataService referenceDataService = spy(new NowsReferenceDataServiceImpl(nowsReferenceCache, ljaReferenceDataLoader, fixedListLookup, bailStatusReferenceDataLoader, prosecutorDataLoader, organisationalUnitLoader, verdictTypesReferenceDataLoader, alcoholLevelMethodsReferenceDataLoader, pleaTypeReferenceDataLoader));
 
     protected static final FileResourceObjectMapper fileResourceObjectMapper = new FileResourceObjectMapper();
     protected static final JsonEnvelope dummyEnvelope = envelopeFrom(metadataWithRandomUUID(DUMMY_NAME), JsonValue.NULL);
     protected List<ResultDefinition> resultDefinitions;
 
-    @Before
     public void setUp() throws IOException {
         resultDefinitions = fileResourceObjectMapper.convertFromFile(RESULT_DEFINITIONS_JSON, AllResultDefinitions.class).getResultDefinitions();
         final List<FixedList> fixedLists = fileResourceObjectMapper.convertFromFile(FIXED_LIST_JSON, AllFixedList.class).getFixedListCollection();
@@ -320,7 +319,7 @@ public abstract class AbstractRestructuringTest {
         return inputList.stream().filter(predicate).collect(Collectors.toList());
     }
 
-    private Courtrooms getCourtrooms() {
+    protected Courtrooms getCourtrooms() {
         return Courtrooms.courtrooms()
                 .withCourtroomId(COURT_ROOM_ID)
                 .withCourtroomName(COURT_ROOM_NAME)
@@ -328,7 +327,7 @@ public abstract class AbstractRestructuringTest {
                 .build();
     }
 
-    private CourtCentreOrganisationUnit getCourtCentreOrganisationUnit(Courtrooms expectedCourtRoomResult) {
+    protected CourtCentreOrganisationUnit getCourtCentreOrganisationUnit(Courtrooms expectedCourtRoomResult) {
         return CourtCentreOrganisationUnit.courtCentreOrganisationUnit()
                 .withId(randomUUID().toString())
                 .withLja("3255")
@@ -344,9 +343,24 @@ public abstract class AbstractRestructuringTest {
                 .build();
     }
 
-    private Set<String> createGuiltyPleaTypes() {
+    protected Set<String> createGuiltyPleaTypes() {
         Set<String> guiltyPleaTypes = new HashSet<>();
         guiltyPleaTypes.add(GUILTY);
         return guiltyPleaTypes;
+    }
+
+    protected void stubFixedListJson() throws IOException {
+        final List<FixedList> fixedLists = fileResourceObjectMapper.convertFromFile(FIXED_LIST_JSON, AllFixedList.class).getFixedListCollection();
+        final Metadata metadata = metadataFor(DUMMY_NAME, UUID.randomUUID());
+        final Envelope fixedListsEnvelopeDefinition = Envelope.envelopeFrom(metadata, new AllFixedList().setFixedListCollection(fixedLists));
+        when(requester.request(any(), any())).thenReturn(fixedListsEnvelopeDefinition);
+    }
+
+    protected void stubResultDefinitionJson() throws IOException {
+        resultDefinitions = fileResourceObjectMapper.convertFromFile(RESULT_DEFINITIONS_JSON, AllResultDefinitions.class).getResultDefinitions();
+        final JsonEnvelope resultEnvelopeDefinition = envelopeFrom(metadataWithRandomUUID(DUMMY_NAME), objectToJsonObjectConverter.convert(new AllResultDefinitions().setResultDefinitions(resultDefinitions)));
+
+        when(requester.requestAsAdmin(any())).thenReturn(resultEnvelopeDefinition);
+
     }
 }

@@ -31,7 +31,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-
+// TODO: remove commented code
 @RunWith(CdiTestRunner.class)
 public class ApprovalRequestedRepositoryTest extends BaseTransactionalTest {
 
@@ -59,7 +59,6 @@ public class ApprovalRequestedRepositoryTest extends BaseTransactionalTest {
         hearings.add(hearingCommand2.getHearing());
     }
 
-
     public void saveHearing(final uk.gov.justice.core.courts.Hearing hearing) {
         final Hearing hearingEntity = hearingJPAMapper.toJPA(hearing);
         hearingEntity.setCourtApplicationsJson(hearingEntity.getCourtApplicationsJson().substring(0, 255));
@@ -68,12 +67,6 @@ public class ApprovalRequestedRepositoryTest extends BaseTransactionalTest {
         hearingEntity.setApplicationDraftResults(Sets.newHashSet(ApplicationDraftResult.applicationDraftResult().setId(randomUUID()).setHearing(hearingEntity)));
         hearingRepository.save(hearingEntity);
     }
-
-    @After
-    public void teardown() {
-        hearings.forEach(hearing -> hearingRepository.attachAndRemove(hearingRepository.findBy(hearing.getId())));
-    }
-
 
     @Test
     public void shouldReturnUsersForHearing() {

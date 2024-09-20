@@ -12,7 +12,7 @@ import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class HearingEventDefinitionsIT extends AbstractIT {
 

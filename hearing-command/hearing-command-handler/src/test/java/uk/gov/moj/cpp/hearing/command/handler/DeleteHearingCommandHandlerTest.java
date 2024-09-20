@@ -19,12 +19,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.junit.Assert;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Offence;
@@ -41,32 +35,33 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForCourtApplication;
-import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForOffence;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForProsecutionCase;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 
 import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.TestTemplates;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DeleteHearingCommandHandlerTest {
 
     @Spy
@@ -274,7 +269,7 @@ public class DeleteHearingCommandHandlerTest {
         ArgumentCaptor<Stream> argumentCaptor = ArgumentCaptor.forClass(Stream.class);
         ((EventStream) Mockito.verify(hearingEventStream, times(2))).append((Stream)argumentCaptor.capture());
         final List eventss = ((List) argumentCaptor.getAllValues().stream().flatMap(i -> i).collect(Collectors.toList()));
-        Assert.assertThat(eventss.size(), is (1));
+        assertThat(eventss.size(), is (1));
     }
 
     private JsonEnvelope createHearingDeletedCommandEnvelopeForHearing(final UUID hearingId) {

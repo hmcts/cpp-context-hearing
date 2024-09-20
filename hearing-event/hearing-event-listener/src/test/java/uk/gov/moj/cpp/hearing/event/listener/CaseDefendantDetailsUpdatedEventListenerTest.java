@@ -4,7 +4,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,7 +13,6 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
-import org.mockito.Mockito;
 import uk.gov.justice.core.courts.FundingType;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -47,16 +46,17 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CaseDefendantDetailsUpdatedEventListenerTest {
 
     @Mock
@@ -78,7 +78,7 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
     @Mock
     private AssociatedDefenceOrganisationJPAMapper associatedDefenceOrganisationJPAMapper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
@@ -106,8 +106,6 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
         final Defendant defendant = getDefendant(hearingId, defendantDetailsUpdated);
 
         when(defendantRepository.findBy(defendant.getId())).thenReturn(defendant);
-
-        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
 
         when(associatedDefenceOrganisationJPAMapper.toJPA(any(uk.gov.justice.core.courts.AssociatedDefenceOrganisation.class)))
                 .thenReturn(getAssociatedDefenceOrganisation());
@@ -239,7 +237,6 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
 
         when(defendantRepository.findBy(defendant.getId())).thenReturn(defendant);
 
-        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
 
         when(associatedDefenceOrganisationJPAMapper.toJPA(any(uk.gov.justice.core.courts.AssociatedDefenceOrganisation.class)))
                 .thenReturn(getAssociatedDefenceOrganisation());

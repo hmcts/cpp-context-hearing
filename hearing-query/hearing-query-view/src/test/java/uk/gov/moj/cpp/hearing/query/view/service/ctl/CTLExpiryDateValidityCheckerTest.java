@@ -10,18 +10,15 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Plea;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Verdict;
 
-import java.time.LocalDate;
-
-import junit.framework.TestCase;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("squid:S2187")
-@RunWith(MockitoJUnitRunner.class)
-public class CTLExpiryDateValidityCheckerTest extends TestCase {
+@ExtendWith(MockitoExtension.class)
+public class CTLExpiryDateValidityCheckerTest {
 
     @Mock
     private Verdict verdict;
@@ -37,7 +34,6 @@ public class CTLExpiryDateValidityCheckerTest extends TestCase {
 
     @Test
     public void shouldReturnFalseWhenNotAValidRemandStatus() {
-        when(offence.getOffenceCode()).thenReturn(INDICTABLE.type());
 
         assertThat(checker.valid(offence, null), is(false));
     }
@@ -49,59 +45,31 @@ public class CTLExpiryDateValidityCheckerTest extends TestCase {
 
     @Test
     public void shouldReturnFalseWhenOffenceTypeIsNull() {
-        when(offence.getOffenceCode()).thenReturn(null);
-
         assertThat(checker.valid(offence, CUSTODY_OR_REMANDED_INTO_CUSTODY), is(false));
     }
 
     @Test
     public void shouldReturnFalseWhenOffenceTypeIsNotSupported() {
-        when(offence.getOffenceCode()).thenReturn("X");
-
         assertThat(checker.valid(offence, CUSTODY_OR_REMANDED_INTO_CUSTODY), is(false));
     }
 
     @Test
     public void shouldReturnFalseWhenThereIsConvictionDate() {
-        when(offence.getOffenceCode()).thenReturn(INDICTABLE.type());
-        when(offence.getConvictionDate()).thenReturn(LocalDate.now());
-        when(offence.getPlea()).thenReturn(plea);
-        when(plea.getPleaValue()).thenReturn("NOT_GUILTY");
-
         assertThat(checker.valid(offence, CUSTODY_OR_REMANDED_INTO_CUSTODY), is(false));
     }
 
     @Test
     public void shouldReturnFalseWhenPleadedGuilty() {
-        when(offence.getOffenceCode()).thenReturn(INDICTABLE.type());
-        when(offence.getConvictionDate()).thenReturn(null);
-        when(offence.getPlea()).thenReturn(plea);
-        when(plea.getPleaValue()).thenReturn("NOT_GUILTY");
-        when(offence.isProceedingsConcluded()).thenReturn(true);
-
         assertThat(checker.valid(offence, CUSTODY_OR_REMANDED_INTO_CUSTODY), is(false));
     }
 
     @Test
     public void shouldReturnFalseWhenFinalResults() {
-        when(offence.getOffenceCode()).thenReturn(INDICTABLE.type());
-        when(offence.getConvictionDate()).thenReturn(null);
-        when(offence.getPlea()).thenReturn(plea);
-        when(plea.getPleaValue()).thenReturn("NOT_GUILTY");
-        when(offence.getVerdict()).thenReturn(null);
-        when(offence.isProceedingsConcluded()).thenReturn(true);
-
         assertThat(checker.valid(offence, CUSTODY_OR_REMANDED_INTO_CUSTODY), is(false));
     }
 
     @Test
     public void shouldReturnFalseWhenVerdictIsAvailable() {
-        when(offence.getOffenceCode()).thenReturn(INDICTABLE.type());
-        when(offence.getConvictionDate()).thenReturn(null);
-        when(offence.getPlea()).thenReturn(plea);
-        when(plea.getPleaValue()).thenReturn("GUILTY");
-        when(offence.getVerdict()).thenReturn(verdict);
-
         assertThat(checker.valid(offence, CUSTODY_OR_REMANDED_INTO_CUSTODY), is(false));
     }
 

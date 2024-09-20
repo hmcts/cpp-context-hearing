@@ -330,9 +330,9 @@ public class HearingService {
                 final UUID roomUUID = hearing.getCourtCentre().getRoomId();
 
                 courtRooms.computeIfAbsent(roomUUID, room ->
-                        courtRooms.put(roomUUID, CourtRoom.courtRoom()
+                            CourtRoom.courtRoom()
                                 .withCourtRoomName(hearing.getCourtCentre().getRoomName())
-                                .withDefendantDetails(new ArrayList<>()).build()));
+                                .withDefendantDetails(new ArrayList<>()).build());
                 addDefendantDetailsToQueryResult(courtRooms, pc, roomUUID); //court room needs to be created
 
             }

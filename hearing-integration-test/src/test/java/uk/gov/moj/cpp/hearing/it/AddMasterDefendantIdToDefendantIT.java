@@ -28,7 +28,7 @@ import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
 import org.hamcrest.core.Is;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"squid:S2699", "squid:S1607"})
 public class AddMasterDefendantIdToDefendantIT extends AbstractIT {

@@ -80,6 +80,7 @@ import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.JudicialRoleTypeEnum;
 import uk.gov.moj.cpp.hearing.domain.event.result.HearingVacatedRequested;
@@ -384,7 +385,7 @@ public class CoreTestTemplates {
                             .withIndicatedPleaValue(IndicatedPleaValue.INDICATED_GUILTY)
                             .withSource(Source.IN_COURT)
                             .build())
-                    .withReportingRestrictions(of(ReportingRestriction.reportingRestriction()
+                    .withReportingRestrictions(java.util.List.of(ReportingRestriction.reportingRestriction()
                                     .withId(randomUUID())
                                     .withLabel(REPORTING_RESTRICTION_LABEL_YES)
                                     .withJudicialResultId(randomUUID()).build(),
@@ -431,7 +432,7 @@ public class CoreTestTemplates {
                         .withTimeLimit(PAST_LOCAL_DATE.next())
                         .withIsCtlExtended(false)
                         .build())
-                .withReportingRestrictions(of(ReportingRestriction.reportingRestriction()
+                .withReportingRestrictions(java.util.List.of(ReportingRestriction.reportingRestriction()
                         .withId(randomUUID())
                         .withJudicialResultId(randomUUID())
                         .withLabel(REPORTING_RESTRICTION_LABEL_YES)
@@ -813,7 +814,7 @@ public class CoreTestTemplates {
                 .withOffences(
                         structure.getV().stream()
                                 .map(offenceId -> offenceWithIndicatedPlea(args, offenceId, withConvictionDate).build())
-                                .collect(toList())
+                                .toList()
                 )
                 .withAssociatedPersons(args.isMinimumAssociatedPerson() ? asList(associatedPerson(args).build()) : null)
                 .withDefenceOrganisation(args.isMinimumDefenceOrganisation() ? organisation(args).build() : null)
@@ -890,7 +891,7 @@ public class CoreTestTemplates {
                 .withDefenceOrganisation(args.isMinimumDefenceOrganisation() ? organisation(args).build() : null)
                 .withPersonDefendant(args.defendantType == PERSON ? personDefendant(args).build() : null)
                 .withLegalEntityDefendant(args.defendantType == ORGANISATION ? legalEntityDefendant(args).build() : null)
-                .withCourtProceedingsInitiated(args.getCourtProceedingsInitiated() != null ? args.getCourtProceedingsInitiated() : ZonedDateTime.now(ZoneOffset.UTC))
+                .withCourtProceedingsInitiated(args.getCourtProceedingsInitiated() != null ? args.getCourtProceedingsInitiated() : new UtcClock().now())
                 .withProceedingsConcluded(Boolean.FALSE);
 
     }
@@ -984,7 +985,7 @@ public class CoreTestTemplates {
                                 .map(entry -> withJudicialResults ? defendantJudicialResults(structure.getK(), args, p(entry.getKey(), entry.getValue())).build() :
                                         defendantWithOffenceIndicatedPlea(structure.getK(), args, p(entry.getKey(), entry.getValue()), withConvictionDate).build()
                                 )
-                                .collect(toList())
+                                .toList()
                 );
     }
 
@@ -1084,7 +1085,7 @@ public class CoreTestTemplates {
                 .withProsecutionCases(
                         args.structure.entrySet().stream()
                                 .map(entry -> prosecutionCaseWithOffenceIndicatedPlea(args, p(entry.getKey(), entry.getValue()), withJudicialResults, withConvictionDate).build())
-                                .collect(toList())
+                                .toList()
                 )
 
                 .withCourtApplications(asList((new HearingFactory().courtApplication().build())))
@@ -1176,7 +1177,11 @@ public class CoreTestTemplates {
             courtCentre = courtCentre().build();
         }
 
-        final ZonedDateTime sittingDay = withConvictionDate ? ZonedDateTime.now(ZoneOffset.UTC).minusDays(2) : RandomGenerator.PAST_UTC_DATE_TIME.next();
+        ZonedDateTime sittingDay = withConvictionDate ? new UtcClock().now().minusDays(2) : new UtcClock().now().minusDays(10);
+
+        if (args.isUnitTest) {
+            sittingDay = withConvictionDate ? ZonedDateTime.now(ZoneOffset.UTC).minusDays(2) : RandomGenerator.PAST_UTC_DATE_TIME.next();
+        }
 
         hearingBuilder.withId(randomUUID())
                 .withType(hearingType(Optional.empty()).build())
@@ -1671,6 +1676,18 @@ public class CoreTestTemplates {
         private UUID masterProsecutionCaseId;
         private Boolean isCivil;
         private Boolean isGroupMember;
+
+        private Boolean isUnitTest = false;
+
+        public Boolean getUnitTest() {
+            return isUnitTest;
+        }
+
+        public CoreTemplateArguments setUnitTest(final Boolean unitTest) {
+            isUnitTest = unitTest;
+            return this;
+        }
+
 
         private Map<UUID, Map<UUID, List<UUID>>> structure = toMap(randomUUID(), toMap(randomUUID(), asList(randomUUID())));
 

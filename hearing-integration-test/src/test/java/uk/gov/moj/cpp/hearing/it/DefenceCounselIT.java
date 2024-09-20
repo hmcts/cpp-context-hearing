@@ -49,8 +49,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import com.jayway.restassured.path.json.JsonPath;
-import org.junit.Test;
+import io.restassured.path.json.JsonPath;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unchecked")
 @NotThreadSafe

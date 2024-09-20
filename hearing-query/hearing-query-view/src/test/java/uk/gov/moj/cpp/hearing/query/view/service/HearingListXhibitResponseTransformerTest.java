@@ -5,9 +5,9 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
@@ -56,14 +56,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HearingListXhibitResponseTransformerTest {
     private static final String COURT_NAME = "Court 1";
     private static final String REPORTING_RESTRICTION_LABEL_YES = "Yes";
@@ -114,10 +114,9 @@ public class HearingListXhibitResponseTransformerTest {
     @InjectMocks
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         setField(this.courtApplicationsSerializer, "jsonObjectToObjectConverter", jsonObjectToObjectConverter);
-        when(judgeNameMapper.getJudgeName(hearing)).thenReturn("judgeName");
     }
 
     @Test
@@ -139,7 +138,6 @@ public class HearingListXhibitResponseTransformerTest {
         final UUID eventDefinitionsId = randomUUID();
         eventDefinitionsIds.putIfAbsent(hearingId, eventDefinitionsId);
         when(hearingEventsToHearingMapper.getActiveHearingIds()).thenReturn(activeHearingIds);
-        when(hearingEventsToHearingMapper.getHearingIdAndEventDefinitionIds()).thenReturn(eventDefinitionsIds);
 
         when(prosecutionCase.getProsecutionCaseIdentifier()).thenReturn(prosecutionCaseIdentifier);
         when(prosecutionCase.getDefendants()).thenReturn(defendantList);
@@ -211,7 +209,6 @@ public class HearingListXhibitResponseTransformerTest {
         final Map<UUID, UUID> eventDefinitionsIds = new HashMap<>();
         final UUID eventDefinitionsId = randomUUID();
         eventDefinitionsIds.putIfAbsent(hearingId, eventDefinitionsId);
-        when(hearingEventsToHearingMapper.getHearingIdAndEventDefinitionIds()).thenReturn(eventDefinitionsIds);
         when(hearingEventsToHearingMapper.getActiveHearingIds()).thenReturn(activeHearingIds);
         when(commonXhibitReferenceDataService.getCourtRoomMappingBy(any(), any())).thenReturn(courtRoomMapping);
         when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");
@@ -269,7 +266,6 @@ public class HearingListXhibitResponseTransformerTest {
         when(hearing.getCourtCentre()).thenReturn(CourtCentre.courtCentre().withName(COURT_NAME).withRoomId(courtRoomId).withId(courtCentreId).build());
         when(hearingEventsToHearingMapper.getHearingList()).thenReturn(hearingList);
         when(hearingEventsToHearingMapper.getActiveHearingIds()).thenReturn(activeHearingIds);
-        when(hearingEventsToHearingMapper.getHearingIdAndEventDefinitionIds()).thenReturn(eventDefinitionsIds);
 
         when(hearingEventsToHearingMapper.getAllHearingEventBy(hearingId)).thenReturn(Optional.of(hearingEvent));
         when(commonXhibitReferenceDataService.getCourtRoomMappingBy(any(), any())).thenReturn(courtRoomMapping);
@@ -315,11 +311,6 @@ public class HearingListXhibitResponseTransformerTest {
 
         when(prosecutionCase.getProsecutionCaseIdentifier()).thenReturn(prosecutionCaseIdentifier);
         when(prosecutionCase.getDefendants()).thenReturn(defendantList);
-        when(defendant.getPersonDefendant()).thenReturn(personDefendant);
-        when(personDefendant.getPersonDetails()).thenReturn(person);
-        when(person.getFirstName()).thenReturn("firstName");
-        when(person.getMiddleName()).thenReturn("middleName");
-        when(person.getLastName()).thenReturn("lastName");
         when(hearing.getHearingDays()).thenReturn(hearingDays);
         when(hearingDay.getSittingDay()).thenReturn(ZonedDateTime.now());
         when(hearing.getId()).thenReturn(hearingId);
@@ -329,7 +320,6 @@ public class HearingListXhibitResponseTransformerTest {
         when(hearing.getCourtCentre()).thenReturn(CourtCentre.courtCentre().withName(COURT_NAME).withRoomId(courtRoomId).withId(courtCentreId).build());
         when(hearingEventsToHearingMapper.getHearingList()).thenReturn(hearingList);
         when(hearingEventsToHearingMapper.getAllHearingEventBy(hearingId)).thenReturn(Optional.of(hearingEvent));
-        when(hearingEventsToHearingMapper.getHearingIdAndEventDefinitionIds()).thenReturn(eventDefinitionsIds);
         when(commonXhibitReferenceDataService.getCourtRoomMappingBy(any(), any())).thenReturn(courtRoomMapping);
         when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");
         when(courtRoomMapping.getCrestCourtSiteUUID()).thenReturn(randomUUID());
@@ -374,7 +364,6 @@ public class HearingListXhibitResponseTransformerTest {
         final UUID eventDefinitionsId = randomUUID();
         eventDefinitionsIds.putIfAbsent(hearingId, eventDefinitionsId);
         when(hearingEventsToHearingMapper.getActiveHearingIds()).thenReturn(activeHearingIds);
-        when(hearingEventsToHearingMapper.getHearingIdAndEventDefinitionIds()).thenReturn(eventDefinitionsIds);
         when(hearing.getHearingDays()).thenReturn(hearingDays);
         when(hearingDay.getSittingDay()).thenReturn(ZonedDateTime.now());
         when(hearing.getId()).thenReturn(hearingId);
@@ -425,7 +414,6 @@ public class HearingListXhibitResponseTransformerTest {
         final UUID eventDefinitionsId = randomUUID();
         eventDefinitionsIds.putIfAbsent(hearingId, eventDefinitionsId);
         when(hearingEventsToHearingMapper.getActiveHearingIds()).thenReturn(activeHearingIds);
-        when(hearingEventsToHearingMapper.getHearingIdAndEventDefinitionIds()).thenReturn(eventDefinitionsIds);
         when(hearing.getHearingDays()).thenReturn(hearingDays);
         when(hearingDay.getSittingDay()).thenReturn(ZonedDateTime.now());
         when(hearing.getId()).thenReturn(hearingId);
@@ -533,7 +521,6 @@ public class HearingListXhibitResponseTransformerTest {
         when(hearingEventsToHearingMapper.getHearingList()).thenReturn(hearingList);
         when(hearingEventsToHearingMapper.getAllHearingEventBy(hearingId)).thenReturn(Optional.of(hearingEvent));
         when(hearingEventsToHearingMapper.getAllHearingEventBy(hearing2Id)).thenReturn(Optional.of(hearing2Event));
-        when(hearingEventsToHearingMapper.getHearingIdAndEventDefinitionIds()).thenReturn(eventDefinitionsIds);
         when(hearingEventsToHearingMapper.getActiveHearingIds()).thenReturn(activeHearingIds);
         when(commonXhibitReferenceDataService.getCourtRoomMappingBy(any(), any())).thenReturn(courtRoomMapping);
         when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");
@@ -597,7 +584,6 @@ public class HearingListXhibitResponseTransformerTest {
 
         when(hearingEventsToHearingMapper.getHearingList()).thenReturn(hearingList);
         when(hearingEventsToHearingMapper.getAllHearingEventBy(hearingId)).thenReturn(Optional.of(hearingEvent));
-        when(hearingEventsToHearingMapper.getHearingIdAndEventDefinitionIds()).thenReturn(eventDefinitionsIds);
         when(hearingEventsToHearingMapper.getActiveHearingIds()).thenReturn(activeHearingIds);
         when(commonXhibitReferenceDataService.getCourtRoomMappingBy(any(), any())).thenReturn(courtRoomMapping);
         when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");

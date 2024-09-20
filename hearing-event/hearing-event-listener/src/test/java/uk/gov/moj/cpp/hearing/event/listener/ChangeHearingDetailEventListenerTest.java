@@ -3,8 +3,7 @@ package uk.gov.moj.cpp.hearing.event.listener;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -36,17 +35,17 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ChangeHearingDetailEventListenerTest {
 
     private static final UUID HEARING_ID = randomUUID();
@@ -73,7 +72,7 @@ public class ChangeHearingDetailEventListenerTest {
     @Captor
     private ArgumentCaptor<Hearing> ahearingArgumentCaptor;
 
-    @Before
+    @BeforeEach
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
@@ -123,8 +122,8 @@ public class ChangeHearingDetailEventListenerTest {
         hearing.setHasSharedResults(false);
 
         when(this.hearingRepository.findBy(HEARING_ID)).thenReturn(hearing);
-        when(this.hearingDayJPAMapper.toJPA(eq(hearing), anyList())).thenReturn(hearingDays);
-        when(this.judicialRoleJPAMapper.toJPA(eq(hearing), anyList())).thenReturn(judicialRoles);
+        when(this.hearingDayJPAMapper.toJPA(any(), any())).thenReturn(hearingDays);
+        when(this.judicialRoleJPAMapper.toJPA(any(), any())).thenReturn(judicialRoles);
 
         HearingDetailChanged hearingDetailChanged = HearingDetailChanged.hearingDetailChanged()
                 .setId(HEARING_ID)

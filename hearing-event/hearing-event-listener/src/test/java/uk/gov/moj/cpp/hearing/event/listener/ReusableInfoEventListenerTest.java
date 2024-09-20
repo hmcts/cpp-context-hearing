@@ -4,7 +4,8 @@ import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.Envelope.envelopeFrom;
@@ -30,17 +31,15 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.restassured.internal.assertion.Assertion;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ReusableInfoEventListenerTest {
 
     @Mock
@@ -464,11 +463,8 @@ public class ReusableInfoEventListenerTest {
         /** existing data  **/
         final JsonObjectBuilder cacheBuilderExisting = createObjectBuilder();
         final JsonArrayBuilder promptArrayExisting = createArrayBuilder();
-//        final JsonArrayBuilder resultArrayExisting = createArrayBuilder();
         promptArrayExisting.add(createDBPrompt("bailExceptionReason",defendantId,"TXT","mnop", existingOffenceId));
-//        resultArrayExisting.add(createDBResult(defendantId,"TAIK", "Curfew Old", existingOffenceId));
         final JsonObject  row = cacheBuilderExisting.add("reusablePrompts", promptArrayExisting)
-//                .add("reusableResults", resultArrayExisting)
                 .build();
         ObjectMapper mapper = new ObjectMapper();
 

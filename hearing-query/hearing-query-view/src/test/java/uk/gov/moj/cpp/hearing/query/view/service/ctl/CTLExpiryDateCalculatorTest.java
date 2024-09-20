@@ -17,17 +17,17 @@ import uk.gov.moj.cpp.hearing.query.view.service.ctl.model.ModeOfTrial;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import junit.framework.TestCase;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("squid:S2187")
-@RunWith(MockitoJUnitRunner.class)
-public class CTLExpiryDateCalculatorTest extends TestCase {
+@ExtendWith(MockitoExtension.class)
+public class CTLExpiryDateCalculatorTest //extends TestCase
+{
     private static final String DEFENDANT_CONSENTS_TO_SUMMARY_TRIAL = "Defendant consents to summary trial";
     private static final String COURT_DIRECTS_TRIAL_BY_JURY = "Court directs trial by jury";
 
@@ -43,7 +43,7 @@ public class CTLExpiryDateCalculatorTest extends TestCase {
     @InjectMocks
     private CTLExpiryDateCalculatorImpl ctlExpiryDateCalculator;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(offence.getDefendant()).thenReturn(defendant);
     }
@@ -152,7 +152,6 @@ public class CTLExpiryDateCalculatorTest extends TestCase {
     public void shouldReturnCTLExpiryDateForEitherWayOffenceTypeWithNullAllocationForYouth() {
         mockModeOfTrialType(SUMMARY_ONLY);
         mockYouthDefendant(true);
-        when(offence.getAllocationDecision()).thenReturn(null);
 
         final Optional<LocalDate> expiryDate = ctlExpiryDateCalculator.calculateCTLExpiryDate(offence, REMANDED_IN_CUSTODY_PENDING_CONDITIONS, now());
 
