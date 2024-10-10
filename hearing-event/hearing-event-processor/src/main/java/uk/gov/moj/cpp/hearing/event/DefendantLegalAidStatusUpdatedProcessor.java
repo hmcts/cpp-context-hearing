@@ -10,6 +10,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
+import static javax.json.Json.createObjectBuilder;
 
 import javax.inject.Inject;
 import javax.json.Json;
@@ -30,6 +31,7 @@ public class DefendantLegalAidStatusUpdatedProcessor {
     private final Sender sender;
     private static final String LEGAL_AID_STATUS = "legalAidStatus";
     private static final String DEFENDANT_ID = "defendantId";
+    private static final String CASE_ID = "caseId";
     private static final String COMMAND_UPDATE_DEFENDANT_LEGALAID_STATUS_FOR_HEARING = "hearing.command.update-defendant-legalaid-status-for-hearing";
 
     @Inject
@@ -49,9 +51,16 @@ public class DefendantLegalAidStatusUpdatedProcessor {
             LOGGER.debug("progression.defendant-legalaid-status-updated event received {}", envelop.toObfuscatedDebugString());
         }
 
+        final JsonObject jsonObject = envelop.payloadAsJsonObject();
+        final JsonObject commandPayload = createObjectBuilder()
+                .add(CASE_ID, jsonObject.getString(CASE_ID))
+                .add(DEFENDANT_ID, jsonObject.getString(DEFENDANT_ID))
+                .add(LEGAL_AID_STATUS, jsonObject.getString(LEGAL_AID_STATUS))
+                .build();
+
         this.sender.send(this.enveloper
                 .withMetadataFrom(envelop, "hearing.command.update-defendant-legalaid-status")
-                .apply(envelop.payloadAsJsonObject()));
+                .apply(commandPayload));
     }
 
     @Handles("hearing.defendant-legalaid-status-updated")
