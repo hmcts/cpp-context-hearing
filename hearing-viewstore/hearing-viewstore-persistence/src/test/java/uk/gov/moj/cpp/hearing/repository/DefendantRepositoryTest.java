@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
 
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.After;
@@ -69,6 +70,28 @@ public class DefendantRepositoryTest {
 
         assertThat(defendantDetailsForSearching, notNullValue());
 
+    }
+
+    @Test
+    public void testDuplicateDefendantDetailsForSearching() {
+        final Defendant defendant = buildDefendant();
+        final Defendant defendantDupli = buildDefendant();
+        defendantDupli.getId().setHearingId(UUID.randomUUID());
+        defendantDupli.getAssociatedDefenceOrganisation().getDefenceOrganisation().setLaaContractNumber("ABCLT2");
+
+        defendantRepository.save(defendant);
+        defendantRepository.save(defendantDupli);
+
+        DefendantSearch defendantDetailsForSearching = defendantRepository.getDefendantDetailsForSearching(defendant.getId().getId());
+
+        assertThat(defendantDetailsForSearching, notNullValue());
+
+    }
+
+
+    @Test(expected = NoResultException.class)
+    public void testDefendantDetailsForSearchingNoResultFound() {
+        defendantRepository.getDefendantDetailsForSearching(UUID.randomUUID());
     }
 
     private Defendant buildDefendant() {
