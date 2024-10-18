@@ -24,23 +24,23 @@
         <datafactory.version>0.8</datafactory.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
         <authorisation.service.version>0.1.96</authorisation.service.version>
-        <coredomain.version>17.21.12</coredomain.version>
+        <coredomain.version>17.21.13</coredomain.version>
         <referencedata.version>17.0.22</referencedata.version>
-        <material.version>17.0.19</material.version>
-        <results.version>17.0.1</results.version>
+        <material.version>17.0.22</material.version>
+        <results.version>17.0.2</results.version>
         <notification.notify.version>17.0.1</notification.notify.version>
         <stagingenforcement.version>17.0.12</stagingenforcement.version>
-        <progression.version>17.0.11</progression.version>
+        <progression.version>17.0.12</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
 <!--        <test-utils-enveloper-provider.version>5.1.2</test-utils-enveloper-provider.version>-->
-        <usersgroups.version>17.0.19</usersgroups.version>
-        <listing.version>17.0.4</listing.version>
+        <usersgroups.version>17.0.21</usersgroups.version>
+        <listing.version>17.0.8</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
-        <systemdocgenerator.version>17.0.6</systemdocgenerator.version>
+        <systemdocgenerator.version>17.0.11</systemdocgenerator.version>
         <sonar.coverage.exclusions>
             **/uk/gov/moj/cpp/hearing/nows/events/**/*,
             **/uk/gov/moj/cpp/hearing/common/**/*,
