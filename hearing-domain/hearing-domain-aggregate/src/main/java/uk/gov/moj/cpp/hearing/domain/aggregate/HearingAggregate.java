@@ -33,6 +33,7 @@ import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.ListHearingRequest;
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
@@ -85,6 +86,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.CasesUpdatedAfterCaseRemovedFromGroupCases;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeAdded;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeUpdated;
@@ -105,7 +107,6 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantsInYouthCourtUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantsWelshInformationRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateCleared;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.CasesUpdatedAfterCaseRemovedFromGroupCases;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingBreachApplicationsAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingBreachApplicationsToBeAddedReceived;
@@ -860,8 +861,8 @@ public class HearingAggregate implements Aggregate {
         return apply(applicantCounselDelegate.updateApplicantCounsel(applicantCounsel, hearingId));
     }
 
-    public Stream<Object> addDefendant(final UUID hearingId, final uk.gov.justice.core.courts.Defendant defendant) {
-        return apply(hearingDelegate.addDefendant(hearingId, defendant));
+    public Stream<Object> addDefendant(final UUID hearingId, final uk.gov.justice.core.courts.Defendant defendant, final List<ListHearingRequest> listHearingRequests) {
+        return apply(hearingDelegate.addDefendant(hearingId, defendant, listHearingRequests));
     }
 
     public Stream<Object> updateCourtApplication(final UUID hearingId, final uk.gov.justice.core.courts.CourtApplication courtApplication) {
@@ -1085,12 +1086,12 @@ public class HearingAggregate implements Aggregate {
                 .build()));
     }
 
-    public Stream<Object> stopCustodyTimeLimitClock() {
+    public Stream<Object> stopCustodyTimeLimitClock(final List<UUID> resultIdList) {
 
         if (!SHARED.equals(this.hearingState) || this.momento.isDeleted()) {
             return Stream.empty();
         }
-        return  CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, this.momento.getSharedResultsCommandResultLineV2s());
+        return  CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, this.momento.getSharedResultsCommandResultLineV2s(), resultIdList);
 
     }
 
@@ -1243,6 +1244,4 @@ public class HearingAggregate implements Aggregate {
     public Stream<Object> addWitnessToHearing(final UUID hearingId, final String witness) {
         return apply(Stream.of(new WitnessAddedToHearing(witness, hearingId)));
     }
-
-
 }

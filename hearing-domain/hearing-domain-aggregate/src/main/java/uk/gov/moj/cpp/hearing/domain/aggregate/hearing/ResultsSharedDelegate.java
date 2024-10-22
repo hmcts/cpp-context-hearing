@@ -124,14 +124,14 @@ public class ResultsSharedDelegate implements Serializable {
         resultsShared.getNewAmendmentResults()
                 .forEach(newAmendmentResult -> this.momento.getResultsAmendmentDateMap().put(newAmendmentResult.getId(), newAmendmentResult.getAmendmentDateTime()));
         this.momento.setLastSharedTime(resultsShared.getSharedTime());
-        this.momento.getHearing().setYouthCourt(resultsShared.getHearing().getYouthCourt());
         new HearingDaySharedResults().setHasSharedResults(momento.getHearing(), resultsShared.getHearingDay());
-        this.momento.getHearing().setHasSharedResults(true);
         this.momento.setSharedResultsCommandResultLineV2s(
                 resultsShared.getTargets().stream()
                         .flatMap(target2 -> target2.getResultLines().stream()
                                 .map( resultLine -> convertResultLine2ToSharedResultsCommandResultLineV2(target2,resultLine))).collect(Collectors.toList()));
-
+        this.momento.setHearing(resultsShared.getHearing());
+        this.momento.getHearing().setYouthCourt(resultsShared.getHearing().getYouthCourt());
+        this.momento.getHearing().setHasSharedResults(true);
     }
 
 
@@ -520,7 +520,7 @@ public class ResultsSharedDelegate implements Serializable {
 
         final Stream<Object> streams = Stream.concat(enrichHearingV2(resultLines), streamBuilder.build());
         new HearingDaySharedResults().setHasSharedResults(momento.getHearing(), hearingDay);
-        return Stream.concat(streams, CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, resultLines));
+        return Stream.concat(streams, CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, resultLines, null));
     }
 
     /**

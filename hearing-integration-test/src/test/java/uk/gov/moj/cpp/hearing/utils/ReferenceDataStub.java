@@ -32,10 +32,6 @@ import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.hearing.courts.referencedata.Prosecutor;
 import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.moj.cpp.external.domain.referencedata.PIEventMapping;
-import uk.gov.moj.cpp.external.domain.referencedata.PIEventMappingsList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AlcoholLevelMethod;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AllAlcoholLevelMethods;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
@@ -105,6 +101,7 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_COUNTRIES = "/referencedata-service/query/api/rest/referencedata/country-nationality";
     private static final String REFERENCE_DATA_RESULT_LANGUAGES = "/referencedata-service/query/api/rest/referencedata/languages";
     private static final String REFERENCE_DATA_RESULT_DRINK_DRIVING_COURSE_PROVIDERS = "/referencedata-service/query/api/rest/referencedata/organisation?orgType=DDRP";
+    private static final String REFERENCE_DATA_RESULT_DEFINITION_WITH_CATEGORY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions";
     private static final String REFERENCE_DATA_RESULT_YOUTH_COURT_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/youth-courts";
     private static final String REFERENCE_DATA_ALCOHOL_LEVEL_METHODS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/alcohol-level-methods";
     private static final String REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-prompt-word-synonyms";
@@ -136,6 +133,7 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_PROMP_COUNTRIES_MEDIA_TYPE = "application/vnd.referencedata.query.country-nationality+json";
     private static final String REFERENCE_DATA_RESULT_PROMP_LANGUAGES_MEDIA_TYPE = "application/vnd.referencedata.query.languages+json";
     private static final String REFERENCE_DATA_RESULT_PROMPT_YOUTH_COURTS_MEDIA_TYPE = "application/vnd.referencedata.query.youth-courts+json";
+    private static final String REFERENCE_DATA_RESULT_DEFINITION_WITH_CATEGORY_MEDIA_TYPE = "application/vnd.referencedata.query-result-definitions-with-category+json";
     private static final String REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-prompt-word-synonyms+json";
     private static final String REFERENCE_DATA_RESULT_DEFINITION_RULE_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-definition-rules+json";
     private static final String REFERENCE_DATA_RESULT_NOWS_METADATA_MEDIA_TYPE = "application/vnd.referencedata.get-all-now-metadata+json";
@@ -157,6 +155,8 @@ public class ReferenceDataStub {
     private static final String COURT_ROOM_MEDIA_TYPE = "application/vnd.referencedata.ou-courtrooms+json";
     private static final String COURT_ROOM_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/courtrooms";
     private static final String REFERENCE_DATA_XHIBIT_EVENT_MAPPINGS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/cp-xhibit-hearing-event-mappings";
+    private static final String REFERENCEDATA_QUERY_ORGANISATION_UNIT_BY_ID_URL = "/referencedata-service/query/api/rest/referencedata/organisation-units/{0}";
+    private static final String REFERENCEDATA_QUERY_ORGANISATION_UNITS_MEDIA_TYPE_V2 = "application/vnd.referencedata.query.organisation-unit.v2+json";
     //CCT877 - TBD - End
     private static final String REFERENCE_DATA_XHIBIT_EVENT_MAPPINGS_MEDIA_TYPE = "application/vnd.referencedata.query.cp-xhibit-hearing-event-mappings+json";
     private static final String REFERENCE_DATA_JUDICIARIES_MEDIA_TYPE = "application/vnd.reference-data.judiciaries+json";
@@ -1099,6 +1099,23 @@ public class ReferenceDataStub {
         waitForStubToBeReady(REFERENCE_DATA_RESULT_ORGANISATION_UNIT_QUERY_URL + "/" + ouId, REFERENCE_DATA_RESULT_ORGANISATION_UNIT_V1_MEDIA_TYPE);
     }
 
+
+    public static void stubReferenceDataResultDefinitionWithCategory(){
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
+
+        String today = LocalDate.now().toString();
+        stubFor(get(urlPathMatching(REFERENCE_DATA_RESULT_DEFINITION_WITH_CATEGORY_URL))
+                .withHeader("Accept", equalTo(REFERENCE_DATA_RESULT_DEFINITION_WITH_CATEGORY_MEDIA_TYPE))
+                .withQueryParam("category",containing("F"))
+                .withQueryParam("on", containing(today))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", REFERENCE_DATA_RESULT_DEFINITION_WITH_CATEGORY_MEDIA_TYPE)
+                        .withBody(getPayload("stub-data/referencedata.result_definitions_with_category.json"))));
+        waitForStubToBeReady(REFERENCE_DATA_RESULT_DEFINITION_WITH_CATEGORY_URL+"?category=F&on="+today , REFERENCE_DATA_RESULT_DEFINITION_WITH_CATEGORY_MEDIA_TYPE);
+
+    }
+
     public static void stubOrganisationUnit(final String... ouIds) {
         InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
 
@@ -1223,5 +1240,21 @@ public class ReferenceDataStub {
                 .build();
 
         ReferenceDataStub.stub(organisationalUnit);
+    }
+
+    public static void stubOrganisationUnitById(final UUID id) {
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
+
+        final String stringUrl = MessageFormat.format(REFERENCEDATA_QUERY_ORGANISATION_UNIT_BY_ID_URL, id);
+        final String payload = getPayload("stub-data/referencedata.query.organisationunits.json")
+                .replace("OU_ID", id.toString());
+        stubFor(get(urlPathEqualTo(stringUrl))
+                .willReturn(aResponse()
+                        .withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", REFERENCEDATA_QUERY_ORGANISATION_UNITS_MEDIA_TYPE_V2)
+                        .withBody(payload)));
+
+        waitForStubToBeReady(stringUrl, REFERENCEDATA_QUERY_ORGANISATION_UNITS_MEDIA_TYPE_V2);
     }
 }

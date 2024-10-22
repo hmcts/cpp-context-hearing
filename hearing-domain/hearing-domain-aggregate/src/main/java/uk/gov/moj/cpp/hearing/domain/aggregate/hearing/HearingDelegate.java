@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
@@ -19,6 +20,7 @@ import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.ListHearingRequest;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target2;
@@ -54,10 +56,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"squid:S00107", "squid:S3655", "squid:S1871","PMD:BeanMembersShouldSerialize"})
+@SuppressWarnings({"squid:S00107", "squid:S3655", "squid:S1871", "PMD:BeanMembersShouldSerialize"})
 public class HearingDelegate implements Serializable {
 
     private static final long serialVersionUID = 6948738797633524094L;
@@ -300,13 +303,36 @@ public class HearingDelegate implements Serializable {
         return Stream.of(new HearingInitiateIgnored(hearingId, offences));
     }
 
-    public Stream<Object> addDefendant(final UUID hearingId, final Defendant defendant) {
+    public Stream<Object> addDefendant(final UUID hearingId, final Defendant defendant, final List<ListHearingRequest> hearingRequest) {
         if (this.momento.getHearing() == null) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.add-defendant' event as hearing not found", hearingId));
         } else if (checkIfHearingDateAlreadyPassed()) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.add-defendant' event as hearing date has already passed", hearingId));
+        } else if (isNonMatchHearingRequest(hearingRequest)) {
+            return Stream.of(generateHearingIgnoredMessage(format("Rejecting 'hearing.add-defendant' event as hearing court centre / hearing datetime not matching with hearing request for defendant: %s", defendant.getId()), hearingId));
         }
         return Stream.of(DefendantAdded.caseDefendantAdded().setHearingId(hearingId).setDefendant(defendant));
+    }
+
+    private boolean isNonMatchHearingRequest(final List<ListHearingRequest> hearingRequest) {
+        return isNotEmpty(hearingRequest) && hearingRequest.stream().noneMatch(isHearingRequestMatchThisHearing());
+    }
+
+    private Predicate<ListHearingRequest> isHearingRequestMatchThisHearing() {
+        return listHearingRequest ->
+                checkForSameCourtCentre(listHearingRequest)
+                        && checkForSameHearingDateTime(listHearingRequest);
+    }
+
+    private boolean checkForSameCourtCentre(final ListHearingRequest listHearingRequest) {
+        return nonNull(momento.getHearing().getCourtCentre()) && nonNull(listHearingRequest.getCourtCentre()) &&
+                Objects.equals(momento.getHearing().getCourtCentre().getId(), listHearingRequest.getCourtCentre().getId());
+    }
+
+    private boolean checkForSameHearingDateTime(final ListHearingRequest listHearingRequest) {
+        return nonNull(momento.getHearing().getHearingDays()) &&
+                momento.getHearing().getHearingDays().stream()
+                        .anyMatch(hearingDay -> hearingDay.getSittingDay().toLocalDateTime().isEqual(listHearingRequest.getListedStartDateTime().toLocalDateTime()));
     }
 
     private boolean checkIfHearingDateAlreadyPassed() {

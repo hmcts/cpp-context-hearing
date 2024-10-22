@@ -12,9 +12,11 @@ import static org.junit.Assert.assertNotNull;
 import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
 
 
+import java.io.IOException;
 import java.util.Objects;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DelegatedPowers;
@@ -30,6 +32,7 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
@@ -37,6 +40,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.HearingVacatedRequested;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedSuccess;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
+import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -62,6 +66,8 @@ public class ResultsSharedDelegateTest {
     private static final String HEARING_VACATED_RESULT_DEFINITION_ID = "8cdc7be1-fc94-485b-83ee-410e710f6665";
     private static final String VACATED_TRIAL_REASON_ID = "05d90ca2-2009-40aa-b5a1-5b7720807e54";
 
+    protected static final FileResourceObjectMapper fileResourceObjectMapper = new FileResourceObjectMapper();
+
 
     @BeforeEach
     public void setup() {
@@ -76,6 +82,7 @@ public class ResultsSharedDelegateTest {
         hearingAggregate = new HearingAggregate();
         setField(this.hearingAggregate, "resultsSharedDelegate", resultsSharedDelegate);
         setField(this.hearingAggregate, "momento", hearingAggregateMomento);
+        setField(this.hearingAggregate, "hearingState", SHARED);
     }
 
     @Test
@@ -1026,6 +1033,17 @@ public class ResultsSharedDelegateTest {
         assertThat(resultsSharedV3.getTargets().get(caseResulIndex).getResultLines().get(0).getShadowListed(), is(true));
         assertNotNull(resultsSharedSuccess);
 
+    }
+
+    @Test
+    public void handleResultsSharedV3ShouldCreateCustodyTimeLimitClockStoppedWhenGuiltyTypeVerdict() throws IOException {
+        final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile("json/verdictResultsShared.json", ResultsSharedV3.class);
+        resultsSharedDelegate.handleResultsSharedV3(resultsShared);
+        final  Stream<Object> eventStreams = hearingAggregate.stopCustodyTimeLimitClock(new ArrayList<>());
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(1));
+        final CustodyTimeLimitClockStopped custodyTimeLimitClockStopped = (CustodyTimeLimitClockStopped) eventCollection.get(0);
+        assertThat(custodyTimeLimitClockStopped.getHearingId().toString(), is("1800ad1e-fed9-4921-a6d6-ed5d87cf2004"));
     }
 
     private YouthCourt getYouthCourt() {

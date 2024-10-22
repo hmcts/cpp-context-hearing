@@ -16,8 +16,10 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
 
+import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.ListHearingRequest;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -36,6 +38,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -48,8 +51,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AddDefendantCommandHandlerTest {
 
     @Spy
@@ -249,6 +255,133 @@ public class AddDefendantCommandHandlerTest {
         when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
+
+        addDefendantCommandHandler.addDefendant(envelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.defendant-added"),
+                        payloadIsJson(allOf(withJsonPath("$.hearingId", is(arbitraryHearingObject.getHearingId().toString())),
+                                withJsonPath("$.defendant.id", is(arbitraryDefendant.getId().toString())))))
+        ));
+    }
+
+    @Test
+    public void shouldAddDefendantToAllHearingsWhenListHearingRequestsAreEmpty() throws EventStreamException {
+        //Given
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant arbitraryDefendant = defendantTemplate();
+        CommandHelpers.InitiateHearingCommandHelper arbitraryHearingObject = CommandHelpers.h(standardInitiateHearingTemplate());
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            Hearing hearing = arbitraryHearingObject.getHearing();
+            HearingDay hearingDay = hearing.getHearingDays().get(0);
+            hearingDay.setSittingDay(ZonedDateTime.now().plusDays(1));
+            apply(new HearingInitiated(hearing));
+        }};
+        final CaseAggregate caseAggregate = new CaseAggregate() {{
+            apply(RegisteredHearingAgainstCase.builder().withCaseId(arbitraryDefendant.getProsecutionCaseId()).withHearingId(arbitraryHearingObject.getHearingId()).build());
+        }};
+        setupMockedEventStream(arbitraryHearingObject.getHearingId(), this.hearingEventStream, hearingAggregate);
+        setupMockedEventStream(arbitraryDefendant.getProsecutionCaseId(), this.caseEventStream, caseAggregate);
+        when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
+        when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
+
+        JsonObject payload = Json.createObjectBuilder()
+                .add("defendants", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
+                .add("listHearingRequests", Json.createArrayBuilder().build())
+                .build();
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-defendant"), payload);
+        when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+
+        addDefendantCommandHandler.addDefendant(envelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.defendant-added"),
+                        payloadIsJson(allOf(withJsonPath("$.hearingId", is(arbitraryHearingObject.getHearingId().toString())),
+                                withJsonPath("$.defendant.id", is(arbitraryDefendant.getId().toString())))))
+        ));
+    }
+
+    @Test
+    public void shouldNotAddDefendantToAnyHearingsWhenNoMatchToListHearingRequests() throws EventStreamException {
+        //Given
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant arbitraryDefendant = defendantTemplate();
+        CommandHelpers.InitiateHearingCommandHelper arbitraryHearingObject = CommandHelpers.h(standardInitiateHearingTemplate());
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            Hearing hearing = arbitraryHearingObject.getHearing();
+            HearingDay hearingDay = hearing.getHearingDays().get(0);
+            hearingDay.setSittingDay(ZonedDateTime.now().plusDays(1));
+            apply(new HearingInitiated(hearing));
+        }};
+        final CaseAggregate caseAggregate = new CaseAggregate() {{
+            apply(RegisteredHearingAgainstCase.builder().withCaseId(arbitraryDefendant.getProsecutionCaseId()).withHearingId(arbitraryHearingObject.getHearingId()).build());
+        }};
+        setupMockedEventStream(arbitraryHearingObject.getHearingId(), this.hearingEventStream, hearingAggregate);
+        setupMockedEventStream(arbitraryDefendant.getProsecutionCaseId(), this.caseEventStream, caseAggregate);
+        when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
+        when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
+
+        final ListHearingRequest listHearingRequest = ListHearingRequest.listHearingRequest()
+                .withCourtCentre(CourtCentre.courtCentre()
+                .withId(arbitraryHearingObject.getHearing().getCourtCentre().getId()).build())
+                .withListedStartDateTime(ZonedDateTime.now().plusDays(1))
+                .build();
+
+
+        JsonObject payload = Json.createObjectBuilder()
+                .add("defendants", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
+                .add("listHearingRequests", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(listHearingRequest)).build())
+                .build();
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-defendant"), payload);
+        when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+        addDefendantCommandHandler.addDefendant(envelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.hearing-change-ignored"),
+                        payloadIsJson(allOf(withJsonPath("$.hearingId", is(arbitraryHearingObject.getHearingId().toString()))))
+                )));
+    }
+
+    @Test
+    public void shouldAddDefendantToHearingWithMatchingHearingRequest() throws EventStreamException {
+        //Given
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant arbitraryDefendant = defendantTemplate();
+        CommandHelpers.InitiateHearingCommandHelper arbitraryHearingObject = CommandHelpers.h(standardInitiateHearingTemplate());
+      
+      	final ZonedDateTime sittingDay = ZonedDateTime.now().plusDays(1).withNano(0).withZoneSameInstant(ZoneOffset.UTC);
+      
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            Hearing hearing = arbitraryHearingObject.getHearing();
+            HearingDay hearingDay = hearing.getHearingDays().get(0);
+            hearingDay.setSittingDay(sittingDay);
+            apply(new HearingInitiated(hearing));
+        }};
+        final CaseAggregate caseAggregate = new CaseAggregate() {{
+            apply(RegisteredHearingAgainstCase.builder().withCaseId(arbitraryDefendant.getProsecutionCaseId()).withHearingId(arbitraryHearingObject.getHearingId()).build());
+        }};
+        setupMockedEventStream(arbitraryHearingObject.getHearingId(), this.hearingEventStream, hearingAggregate);
+        setupMockedEventStream(arbitraryDefendant.getProsecutionCaseId(), this.caseEventStream, caseAggregate);
+        when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
+        when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
+
+
+        final ListHearingRequest listHearingRequest = ListHearingRequest.listHearingRequest()
+                .withCourtCentre(CourtCentre.courtCentre()
+                        .withId(arbitraryHearingObject.getHearing().getCourtCentre().getId()).build())
+                .withListedStartDateTime(sittingDay)
+                .build();
+
+
+        JsonObject payload = Json.createObjectBuilder()
+                .add("defendants", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
+                .add("listHearingRequests", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(listHearingRequest)).build())
+                .build();
+
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-defendant"), payload);
+        when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
         addDefendantCommandHandler.addDefendant(envelope);
 

@@ -816,7 +816,8 @@ public class HearingAggregateTest {
 
         );
 
-        final Stream<Object> stream = hearingAggregate.stopCustodyTimeLimitClock();
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
+        final Stream<Object> stream = hearingAggregate.stopCustodyTimeLimitClock(referenceResultIds);
 
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), Matchers.is(1));
@@ -885,8 +886,9 @@ public class HearingAggregateTest {
 
         final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
 
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
 
-        final Stream<Object> stream = hearingAggregate.stopCustodyTimeLimitClock();
+        final Stream<Object> stream = hearingAggregate.stopCustodyTimeLimitClock(referenceResultIds);
 
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), Matchers.is(0));

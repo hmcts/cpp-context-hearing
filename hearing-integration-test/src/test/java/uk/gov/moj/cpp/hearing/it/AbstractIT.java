@@ -15,6 +15,7 @@ import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBa
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.stubHearingEventDefinitions;
 import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubGetProgressionProsecutionCases;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnitById;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithoutCases;
@@ -230,6 +231,7 @@ public class AbstractIT {
         readConfig();
         setRequestSpecification();
         stubHearingEventDefinitions();
+        stubOrganisationUnitById(fromString("b52f805c-2821-4904-a0e0-26f7fda6dd08"));
     }
 
     public static RequestSpecification getRequestSpec() {

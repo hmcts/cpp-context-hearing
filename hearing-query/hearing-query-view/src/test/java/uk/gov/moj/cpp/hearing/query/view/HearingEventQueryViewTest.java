@@ -23,6 +23,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -64,6 +65,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.query.view.helper.TimeZoneHelper;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 import uk.gov.moj.cpp.hearing.query.view.service.ProgressionService;
 import uk.gov.moj.cpp.hearing.query.view.service.ctl.ReferenceDataService;
@@ -76,6 +78,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -223,6 +226,9 @@ public class HearingEventQueryViewTest {
 
     @Spy
     private StringToJsonObjectConverter stringToJsonObjectConverter;
+
+    @Mock
+    private TimeZoneHelper timeZone;
 
     @BeforeEach
     public void setup() {
@@ -581,7 +587,49 @@ public class HearingEventQueryViewTest {
     }
 
     @Test
-    public void shouldGetHearingEventReportForDocumentByHearing() throws IOException {
+    public void shouldGetHearingEventReportForDocumentByHearingWhenDateTimeBST() throws IOException {
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        UUID hearingId1 = randomUUID();
+        Hearing hearing = mockHearing(hearingId1, 2);
+        HearingEvent hearingEventInUTC = mockHearingEvent();
+        HearingEvent hearingEventInBST = mockHearingEvent();;
+
+
+        when(hearingService.getHearingDetailsByHearingForDocuments(any())).thenReturn(hearing);
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEventInUTC));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+        when(timeZone.isDayLightSavingOn()).thenReturn(true);
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("hearingId", hearingId1.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+
+        verify(hearingService).getHearingDetailsByHearingForDocuments(hearingId1);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf(hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "caseUrns"), equalTo("TFL102345")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEventInUTC.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEventInUTC.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEventInUTC.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "defendantAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "prosecutionAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+        assertEquals(hearingEventInUTC.getEventTime().truncatedTo(ChronoUnit.SECONDS), hearingEventInBST.getEventTime().plusHours(1).truncatedTo(ChronoUnit.SECONDS));
+    }
+
+    @Test
+    public void shouldGetHearingEventReportForDocumentByHearingWhenDateTimeUTC() throws IOException {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
         UUID hearingId1 = randomUUID();
         Hearing hearing = mockHearing(hearingId1, 2);
@@ -591,6 +639,7 @@ public class HearingEventQueryViewTest {
         when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
         when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
         when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+        when(timeZone.isDayLightSavingOn()).thenReturn(false);
 
         final JsonEnvelope query = envelopeFrom(
                 JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
@@ -1734,7 +1783,7 @@ public class HearingEventQueryViewTest {
         final HearingEvent hearingEvent = new HearingEvent();
         hearingEvent.setUserId(randomUUID());
         hearingEvent.setRecordedLabel("hearing started-3");
-        hearingEvent.setEventTime(now());
+        hearingEvent.setEventTime(ZonedDateTime.now().withZoneSameInstant(ZoneId.of("UTC")));
         hearingEvent.setNote("note3");
         return hearingEvent;
     }

@@ -4,6 +4,7 @@ import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
+import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaVerdictUtil.isGuiltyVerdict;
 
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Offence;
@@ -78,13 +79,15 @@ public class CustodyTimeLimitUtil implements Serializable {
     }
 
     @SuppressWarnings("squid:S1612")
-    public static Stream<Object> stopCTLExpiryForV2(final HearingAggregateMomento momento, final List<SharedResultsCommandResultLineV2> resultLines) {
+    public static Stream<Object> stopCTLExpiryForV2(final HearingAggregateMomento momento, final List<SharedResultsCommandResultLineV2> resultLines,
+                                                    final List<UUID> resultIdList) {
 
         if (isNotEmpty(momento.getHearing().getProsecutionCases())) {
             final Set<UUID> offenceIds = momento.getHearing().getProsecutionCases().stream()
                     .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                     .flatMap(defendant -> defendant.getOffences().stream())
-                    .filter(offence -> isGuiltyAndHasCTLExpiry(offence) || hasFinalResultAndHasCTLExpiryForV2(offence, resultLines) || isOnBailAndHasCTLExpiryForV2(offence, resultLines))
+                    .filter(offence -> isGuiltyAndHasCTLExpiry(offence) || hasFinalResultAndHasCTLExpiryForV2(offence, resultLines, resultIdList) ||
+                            isOnBailAndHasCTLExpiryForV2(offence, resultLines))
                     .map(Offence::getId)
                     .collect(Collectors.toSet());
 
@@ -190,10 +193,11 @@ public class CustodyTimeLimitUtil implements Serializable {
                 .anyMatch(result -> WITHDRAWN_RESULT_ID.equals(result.getResultDefinitionId()));
     }
 
-    private static boolean hasFinalResultAndHasCTLExpiryForV2(final Offence offence, final List<SharedResultsCommandResultLineV2> resultLines) {
+    private static boolean hasFinalResultAndHasCTLExpiryForV2(final Offence offence, final List<SharedResultsCommandResultLineV2> resultLines,
+                                                              final List<UUID> resultIdList) {
         return isCTLExpiryExists(offence) && nonNull(resultLines) && resultLines.stream().filter(Objects::nonNull)
                 .filter(result -> isResultNotDeletedAndAssociatedWithOffenceForV2(offence, result))
-                .anyMatch(result -> WITHDRAWN_RESULT_ID.equals(result.getResultDefinitionId()));
+                .anyMatch(result -> resultIdList != null && resultIdList.contains(result.getResultDefinitionId()));
     }
 
     private static boolean isResultNotDeletedAndAssociatedWithOffence(final Offence offence, final SharedResultsCommandResultLine result) {
@@ -209,6 +213,7 @@ public class CustodyTimeLimitUtil implements Serializable {
     }
 
     private static boolean isGuilty(final Offence offence) {
-        return nonNull(offence.getPlea()) && GUILTY.equalsIgnoreCase(offence.getPlea().getPleaValue());
+        return (nonNull(offence.getPlea()) && GUILTY.equalsIgnoreCase(offence.getPlea().getPleaValue())) ||
+                (nonNull(offence.getVerdict()) && isGuiltyVerdict(offence.getVerdict().getVerdictType())) ;
     }
 }

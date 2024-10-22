@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_NOT_GUILTY;
@@ -79,6 +80,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE_ID;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VERDICT_TYPE_GUILTY_CODE;
@@ -88,6 +90,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDef
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataResultDefinitionsWithDefaultValues;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubReferenceDataResultDefinitionWithCategory;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
@@ -157,6 +160,7 @@ import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 import uk.gov.moj.cpp.hearing.test.HearingFactory;
 import uk.gov.moj.cpp.hearing.test.TestUtilities;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
+import uk.gov.moj.cpp.hearing.utils.QueueUtil;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
 import java.io.IOException;
@@ -177,6 +181,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.annotation.concurrent.NotThreadSafe;
+import javax.jms.MessageConsumer;
 import javax.json.JsonObject;
 
 import io.restassured.path.json.JsonPath;
@@ -200,6 +205,7 @@ public class ShareResultsIT extends AbstractIT {
     private static final UUID WITHDRAWN_RESULT_DEF_ID = fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
     private static final String GUILTY = "GUILTY";
     private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
+    private static final MessageConsumer consumerForCourtDocumentUpdated = getPublicTopicInstance().createConsumer("public.events.hearing.custody-time-limit-clock-stopped");
 
     @BeforeEach
     public void setup() {
@@ -1964,6 +1970,47 @@ public class ShareResultsIT extends AbstractIT {
         shareDaysResultWithCourtClerk(hearing, targets, LocalDate.now());
 
         assertPublicHearingResultedEventPublished(hearing);
+    }
+
+    @Test
+    public void shouldCreateCTLClockStoppedWhenFinalResultIsShared() {
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+
+        final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = getUuidMapForCivilCaseStructure();
+        final UUID masterProsecutionCaseId = caseStructure.keySet().iterator().next();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommandForCivilCases(caseStructure, masterProsecutionCaseId);
+        final Hearing hearing = hearingCommand.getHearing();
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
+
+        stubCourtRoom(hearing);
+
+        stubReferenceDataResultDefinitionWithCategory();
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingCommand.it(), orderedDate, LocalDate.now());
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
+
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+
+        saveDaysDraftResult(saveDraftResultCommand);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        shareDaysResultWithCourtClerk(hearing, targets, LocalDate.now());
+
+        assertPublicHearingResultedEventPublished(hearing);
+
+        final JsonPath jsonPath = QueueUtil.retrieveMessage(consumerForCourtDocumentUpdated);
+
+        assertTrue(((List)jsonPath.get("offenceIds")).size() > 0);
+        assertNotNull(jsonPath.get("hearingId"));
     }
 
     private void assertPublicHearingResultedEventPublished(final Hearing hearing) {

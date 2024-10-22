@@ -33,6 +33,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.query.view.helper.DayLightSavingHelper;
+import uk.gov.moj.cpp.hearing.query.view.helper.TimeZoneHelper;
 import uk.gov.moj.cpp.hearing.query.view.model.EventLog;
 import uk.gov.moj.cpp.hearing.query.view.model.HearingEventReport;
 import uk.gov.moj.cpp.hearing.query.view.model.LoggedHearingEvent;
@@ -125,6 +127,8 @@ public class HearingEventQueryView {
     private static final String TARGET = "\"";
     private static final String REPLACEMENT = "";
 
+    @Inject
+    private TimeZoneHelper timeZoneHelper;
 
     @Inject
     private HearingService hearingService;
@@ -279,6 +283,7 @@ public class HearingEventQueryView {
     private JsonObject createResponsePayloadWithHearingEvents(final Map<UUID, HearingEventReport> hearingEventReportMap, final LocalDate hearingDate, final JsonEnvelope query){
         hearingEventReportMap.forEach((key, record)->{
             final List<HearingEvent> hearingEvents = hearingService.getHearingEvents(key, hearingDate);
+            hearingEvents.forEach(hearingEvent -> hearingEvent.setEventTime(DayLightSavingHelper.handleDST(timeZoneHelper.isDayLightSavingOn(),hearingEvent.getEventTime())));
             final Map<LocalDate, List<EventLog>> eventLogMap= populateEventLogsDatewise(hearingEvents);
             final List<LoggedHearingEvent> loggedHearingEvents = populateLoggedHearingEvents(eventLogMap, query);
             record.setLoggedHearingEvents(loggedHearingEvents);

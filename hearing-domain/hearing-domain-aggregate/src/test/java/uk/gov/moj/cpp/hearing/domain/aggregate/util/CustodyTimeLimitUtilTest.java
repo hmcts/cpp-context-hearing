@@ -27,6 +27,7 @@ import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -58,7 +59,8 @@ public class CustodyTimeLimitUtilTest {
         final HearingAggregateMomento momento = new HearingAggregateMomento();
         momento.setHearing(Hearing.hearing()
                 .build());
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null);
+        final List<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
 
         assertThat(stream.findFirst().isPresent(), is(false));
     }
@@ -99,7 +101,8 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null);
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
         assertThat(stream.findFirst().isPresent(), is(false));
     }
 
@@ -139,7 +142,9 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null);
+
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
         assertThat(stream.findFirst().isPresent(), is(false));
     }
 
@@ -186,7 +191,9 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null);
+
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
         assertThat(stream.findFirst().isPresent(), is(false));
     }
 
@@ -248,7 +255,9 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null);
+
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
@@ -330,7 +339,9 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null);
+
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
@@ -396,7 +407,9 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null);
+
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
@@ -479,7 +492,9 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null);
+
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
         assertThat(stream.findFirst().isPresent(), is(false));
     }
 
@@ -562,7 +577,9 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null);
+
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
@@ -634,7 +651,9 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null);
+
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
@@ -701,12 +720,13 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
+
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(WITHDRAWN_RESULT_ID));
         final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, asList(SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withOffenceId(offenceId)
                 .withDefendantId(defendantId)
                 .withResultDefinitionId(WITHDRAWN_RESULT_ID)
-
-                .build()));
+                .build()), referenceResultIds);
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
@@ -768,13 +788,14 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
+
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(WITHDRAWN_RESULT_ID));
         final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, asList(SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withIsDeleted(true)
                 .withOffenceId(offenceId)
                 .withDefendantId(defendantId)
                 .withResultDefinitionId(WITHDRAWN_RESULT_ID)
-
-                .build()));
+                .build()), referenceResultIds);
 
         assertThat(stream.findFirst().isPresent(), is(false));
     }
@@ -837,11 +858,14 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
+
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(WITHDRAWN_RESULT_ID));
         final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, asList(SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withOffenceId(offenceId)
                 .withDefendantId(defendantId)
                 .withPrompts(asList(geConditionalBailPrompt()))
-                .build()));
+                .build()), referenceResultIds);
+
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
@@ -937,12 +961,14 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
+
+        final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(WITHDRAWN_RESULT_ID));
         final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, asList(SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withOffenceId(offenceId)
                 .withDefendantId(defendantId)
                 .withIsDeleted(true)
                 .withPrompts(asList(getUnConditionalBailPrompt()))
-                .build()));
+                .build()), referenceResultIds);
 
         assertThat(stream.findFirst().isPresent(), is(false));
     }
@@ -970,11 +996,14 @@ public class CustodyTimeLimitUtilTest {
                                 .build()))
                         .build()))
                 .build());
+
+        final List<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
         final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, asList(SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withOffenceId(offenceId)
                 .withDefendantId(defendantId)
                 .withPrompts(asList(getUnConditionalBailPrompt()))
-                .build()));
+                .build()), referenceResultIds);
+
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
