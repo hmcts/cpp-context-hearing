@@ -15,6 +15,7 @@
     <description>Application and Cases has been resulted by Hearing context</description>
 
     <properties>
+        <jgitflow.maven.developBranchName>main</jgitflow.maven.developBranchName>
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec
         </sonar.jacoco.itReportPath>
         <sonar.report.export.path>sonar-report.json</sonar.report.export.path>
