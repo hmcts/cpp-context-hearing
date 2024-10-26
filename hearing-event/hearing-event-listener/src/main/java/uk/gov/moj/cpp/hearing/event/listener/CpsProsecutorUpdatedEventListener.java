@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -30,10 +31,12 @@ public class CpsProsecutorUpdatedEventListener {
     public void cpsProsecutorUpdated(final JsonEnvelope envelope) {
         final CpsProsecutorUpdated cpsProsecutorUpdated = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), CpsProsecutorUpdated.class);
         final ProsecutionCase prosecutionCase = prosecutionCaseRepository.findBy(new HearingSnapshotKey(cpsProsecutorUpdated.getProsecutionCaseId(), cpsProsecutorUpdated.getHearingId()));
-        final CpsProsecutor cpsProsecutor = new CpsProsecutor();
-        cpsProsecutor.setCpsProsecutorCode(cpsProsecutorUpdated.getProsecutionAuthorityCode());
-        cpsProsecutor.setCpsProsecutorId(cpsProsecutorUpdated.getProsecutionAuthorityId());
-        prosecutionCase.setCpsProsecutor(cpsProsecutor);
-        prosecutionCaseRepository.save(prosecutionCase);
+        if(nonNull(prosecutionCase)) {
+            final CpsProsecutor cpsProsecutor = new CpsProsecutor();
+            cpsProsecutor.setCpsProsecutorCode(cpsProsecutorUpdated.getProsecutionAuthorityCode());
+            cpsProsecutor.setCpsProsecutorId(cpsProsecutorUpdated.getProsecutionAuthorityId());
+            prosecutionCase.setCpsProsecutor(cpsProsecutor);
+            prosecutionCaseRepository.save(prosecutionCase);
+        }
     }
 }

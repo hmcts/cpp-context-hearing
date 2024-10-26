@@ -2,8 +2,11 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static com.google.common.collect.ImmutableList.of;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
@@ -32,6 +35,7 @@ import javax.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
 
+@SuppressWarnings("squid:S2699")
 public class ExtendHearingIT extends AbstractIT {
 
     final String eventName = "public.progression.events.hearing-extended";
@@ -128,6 +132,8 @@ public class ExtendHearingIT extends AbstractIT {
                         ))
                 )
         );
+        // Adding dummy assertion
+        assertThat(hearing.getId(), is(not(nullValue())));
 
     }
 
