@@ -10,7 +10,7 @@ trigger:
       - 'dev/release-*'
   paths:
     include:
-    - '*'
+      - '*'
 
 pr:
   - '*'

@@ -349,9 +349,9 @@ public class AddDefendantCommandHandlerTest {
         //Given
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant arbitraryDefendant = defendantTemplate();
         CommandHelpers.InitiateHearingCommandHelper arbitraryHearingObject = CommandHelpers.h(standardInitiateHearingTemplate());
-      
+
       	final ZonedDateTime sittingDay = ZonedDateTime.now().plusDays(1).withNano(0).withZoneSameInstant(ZoneOffset.UTC);
-      
+
         final HearingAggregate hearingAggregate = new HearingAggregate() {{
             Hearing hearing = arbitraryHearingObject.getHearing();
             HearingDay hearingDay = hearing.getHearingDays().get(0);

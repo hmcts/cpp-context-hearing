@@ -1,5 +1,3 @@
-#ARG base_image=crmdvrepo01.azurecr.io/wildfly:310122
-
 ARG baseImageTag
 FROM crmdvrepo01.azurecr.io/hmcts/wildfly:${baseImageTag}
 
@@ -7,7 +5,8 @@ ARG version
 ARG repo_loc=https://libraries-internal.mdv.cpp.nonlive/artifactory/repocentral
 ARG framework_version=17.5.5
 ARG eventstore_version=17.5.4
-ARG activiti_version=5.22.0
+ARG activiti_version=17.10.4
+
 ARG wildfly_home=/opt/jboss/wildfly
 ARG wildfly_user=jboss
 

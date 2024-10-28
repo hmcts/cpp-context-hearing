@@ -28,6 +28,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import static org.mockito.Mockito.never;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,6 +72,21 @@ public class CpsProsecutorUpdatedEventListenerTest {
         final CpsProsecutor capturedCpsProsecutor = prosecutionCaseArgumentCaptor.getAllValues().get(0).getCpsProsecutor();
         assertThat(capturedCpsProsecutor.getCpsProsecutorCode(), is(cpsProsecutorUpdated.getProsecutionAuthorityCode()));
         assertThat(capturedCpsProsecutor.getCpsProsecutorId(), is(cpsProsecutorUpdated.getProsecutionAuthorityId()));
+
+    }
+
+    @Test
+    public void shouldNotUpdateCPSProsecutorWhenHearingDoesnotHaveCase() {
+        //when
+        when(prosecutionCaseRepository.findBy(any(HearingSnapshotKey.class))).thenReturn(null);
+        final CpsProsecutorUpdated cpsProsecutorUpdated = getCpsProsecutorCaseEnvelope();
+        cpsProsecutorUpdatedEventListener.cpsProsecutorUpdated(envelopeFrom(metadataWithRandomUUID("hearing.cps-prosecutor-updated"),
+                objectToJsonObjectConverter.convert(cpsProsecutorUpdated)));
+
+        //then
+        verify(this.prosecutionCaseRepository, never()).save(any());
+
+
 
     }
 
