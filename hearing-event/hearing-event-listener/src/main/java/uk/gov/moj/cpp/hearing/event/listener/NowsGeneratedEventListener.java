@@ -35,6 +35,6 @@ public class NowsGeneratedEventListener {
     public void nowsGenerated(final JsonEnvelope event) {
         final NowsMaterialStatusUpdated nowsMaterialStatusUpdated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), NowsMaterialStatusUpdated.class);
         this.nowsMaterialRepository.updateStatus(nowsMaterialStatusUpdated.getMaterialId(), nowsMaterialStatusUpdated.getStatus());
-        LOGGER.info("{} event had updated the nows material viewstore successfully status", nowsMaterialStatusUpdated);
+        LOGGER.info("NOWs material status updated successfully in viewstore for Hearing Id {} with Material Id: {}", nowsMaterialStatusUpdated.getHearingId(), nowsMaterialStatusUpdated.getMaterialId());
     }
 }

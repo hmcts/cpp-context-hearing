@@ -47,8 +47,8 @@ public class HearingUnallocatedEventProcessor {
     public void handleHearingUnallocatedPublicEvent(final JsonEnvelope jsonEnvelope) {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{} event received with metadata {} and payload {}",
-                    PUBLIC_EVENTS_LISTING_HEARING_UNALLOCATED, jsonEnvelope.metadata(), jsonEnvelope.payloadAsJsonObject());
+            LOGGER.debug("{} event received: {}",
+                    PUBLIC_EVENTS_LISTING_HEARING_UNALLOCATED, jsonEnvelope.toObfuscatedDebugString());
         }
 
         final JsonObjectBuilder jsonObjectBuilder = createObjectBuilder();
@@ -62,8 +62,8 @@ public class HearingUnallocatedEventProcessor {
     @Handles(HEARING_EVENT_HEARING_UNALLOCATED)
     public void handleHearingUnallocatedPrivateEvent(final JsonEnvelope jsonEnvelope) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{} event received with metadata {} and payload {}",
-                    HEARING_EVENT_HEARING_UNALLOCATED, jsonEnvelope.metadata(), jsonEnvelope.payloadAsJsonObject());
+            LOGGER.debug("{} event received: {}",
+                    HEARING_EVENT_HEARING_UNALLOCATED, jsonEnvelope.toObfuscatedDebugString());
         }
 
         if (!jsonEnvelope.payloadAsJsonObject().getJsonArray(PROSECUTION_CASE_IDS_FIELD).isEmpty()) {

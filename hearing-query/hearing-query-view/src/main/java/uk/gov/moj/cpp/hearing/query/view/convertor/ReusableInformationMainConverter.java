@@ -207,7 +207,7 @@ public class ReusableInformationMainConverter {
 
             addReusableInformationForINTCIfPresent(idType, id, jsonObjects, defendantJsonObjectString, prompt);
         } else {
-            LOGGER.warn("Unsupported Prompt Type: {}", prompt.getType());
+            LOGGER.warn("Unsupported Prompt Type for Prompt Id: {}", prompt.getId());
         }
     }
 
@@ -465,7 +465,7 @@ public class ReusableInformationMainConverter {
                 return Optional.of(String.valueOf(objectValue));
             }
         } catch (InvalidPathException e) {
-            LOGGER.debug("Cannot find path: {} in defendantJson: {}", promptPath, defendantJsonObjectString);
+            LOGGER.debug("Cannot find path in defendantJson. Exception: {}", e.getMessage());
             return Optional.empty();
         }
     }

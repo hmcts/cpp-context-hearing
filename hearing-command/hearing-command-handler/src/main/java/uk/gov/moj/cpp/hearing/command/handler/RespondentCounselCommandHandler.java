@@ -40,7 +40,7 @@ public class RespondentCounselCommandHandler extends AbstractCommandHandler {
     public void updateRespondentCounsel(final Envelope<UpdateRespondentCounsel> envelope) throws EventStreamException {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.update-respondent-counsel event received {}", envelope.payload().getRespondentCounsel());
+            LOGGER.debug("hearing.update-respondent-counsel event received. RespondentCounsel Id: {}", envelope.payload().getRespondentCounsel().getId());
         }
         final RespondentCounsel respondentCounsel = envelope.payload().getRespondentCounsel();
         final UUID hearingId = envelope.payload().getHearingId();
@@ -55,7 +55,7 @@ public class RespondentCounselCommandHandler extends AbstractCommandHandler {
     public void addRespondentCounsel(final Envelope<AddRespondentCounsel> envelope) throws EventStreamException {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.add-respondent-counsel event received {}", envelope.payload().getRespondentCounsel());
+            LOGGER.debug("hearing.add-respondent-counsel event received. RespondentCounsel Id: {}", envelope.payload().getRespondentCounsel().getId());
         }
         final RespondentCounsel respondentCounsel = envelope.payload().getRespondentCounsel();
         final UUID hearingId = envelope.payload().getHearingId();

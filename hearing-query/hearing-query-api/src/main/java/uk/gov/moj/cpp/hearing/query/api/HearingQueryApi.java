@@ -365,8 +365,6 @@ public class HearingQueryApi {
                 .apply(viewResponseEnvelopePayload);
 
         enforcementResultEnvelope = requester.requestAsAdmin(enforcementRequestEnvelope);
-        final JsonObject outstandingFines = enforcementResultEnvelope.payloadAsJsonObject();
-        LOGGER.info(String.format("outstandingFines  : %s", outstandingFines));
         return enforcementResultEnvelope;
     }
 

@@ -369,7 +369,7 @@ public class HearingEventListener {
     @Handles("hearing.events.replicate.results-shared-v3")
     public void replicateResultsSharedV3(final JsonEnvelope event) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("hearing.events.replicate.results-shared-v3 {}", event);
+            LOGGER.info("hearing.events.replicate.results-shared-v3 {}", event.toObfuscatedDebugString());
         }
         final ResultsSharedV3 resultsShared = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsSharedV3.class);
 

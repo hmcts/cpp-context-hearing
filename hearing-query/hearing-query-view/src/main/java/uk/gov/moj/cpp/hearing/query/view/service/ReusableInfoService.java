@@ -116,7 +116,7 @@ public class ReusableInfoService {
                     payloadasJson.getJsonArray(REUSABLE_RESULTS).getValuesAs(JsonObject.class).stream().forEach(reusableResultsArray::add);
                 }
             } catch (final JsonProcessingException e) {
-                LOGGER.error(String.format("Json Parsing exception when parsing %s", reusableInfo.getPayload()), e);
+                LOGGER.error(String.format("Json Parsing exception when parsing ReusableInfo for MasterDefendant Id: %s", reusableInfo.getId()), e);
             }
         });
 

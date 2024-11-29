@@ -160,7 +160,7 @@ public class PublishResultsDelegate {
         final JsonObject payload = this.objectToJsonObjectConverter.convert(hearingResulted);
 
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Payload for event 'public.hearing.resulted': \n {}", payload);
+            LOGGER.info("Event 'public.hearing.resulted' for Hearing Id: {}", hearingResulted.getHearing().getId());
         }
 
         sender.send(Enveloper.envelop(payload).withName("public.hearing.resulted").withMetadataFrom(context));
@@ -212,7 +212,7 @@ public class PublishResultsDelegate {
         sender.send(successEvent);
         final JsonEnvelope jsonEnvelope = this.enveloper.withMetadataFrom(context, "public.events.hearing.hearing-resulted").apply(jsonObject);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Payload for event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope);
+            LOGGER.debug("Event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope.toObfuscatedDebugString());
         }
         sender.send(jsonEnvelope);
     }

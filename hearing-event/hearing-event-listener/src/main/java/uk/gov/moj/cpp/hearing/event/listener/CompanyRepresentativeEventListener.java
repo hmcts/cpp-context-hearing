@@ -50,7 +50,7 @@ public class CompanyRepresentativeEventListener {
     public void companyRepresentativeAdded(final JsonEnvelope envelope) {
         final CompanyRepresentativeAdded companyRepresentativeAdded = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), CompanyRepresentativeAdded.class);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Company representative added event payload {} ", companyRepresentativeAdded);
+            LOGGER.debug("Company representative added for hearingId {} ", companyRepresentativeAdded.getHearingId());
         }
         final Hearing hearing = getHearing(companyRepresentativeAdded.getHearingId());
         saveCompanyRepresentative(hearing, companyRepresentativeAdded.getCompanyRepresentative());

@@ -27,7 +27,7 @@ public class InterpreterIntermediaryCommandHandler extends AbstractCommandHandle
     public void addInterpreterIntermediary(final Envelope<AddInterpreterIntermediary> envelope) throws EventStreamException {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.add-interpreter-intermediary event received {}", envelope.payload().getInterpreterIntermediary());
+            LOGGER.debug("hearing.add-interpreter-intermediary event received. InterpreterIntermediary Id: {}", envelope.payload().getInterpreterIntermediary().getId());
         }
 
         final InterpreterIntermediary interpreterIntermediary = envelope.payload().getInterpreterIntermediary();
@@ -63,7 +63,7 @@ public class InterpreterIntermediaryCommandHandler extends AbstractCommandHandle
     public void updateInterpreterIntermediary(final Envelope<UpdateInterpreterIntermediary> envelope) throws EventStreamException {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.update-interpreter-intermediary event received {}", envelope.payload().getInterpreterIntermediary());
+            LOGGER.debug("hearing.update-interpreter-intermediary event received. InterpreterIntermediary Id: {}", envelope.payload().getInterpreterIntermediary().getId());
         }
 
         final InterpreterIntermediary interpreterIntermediary= envelope.payload().getInterpreterIntermediary();

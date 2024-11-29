@@ -160,7 +160,7 @@ public class PublishResultsDelegateV3 {
         final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingResulted);
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted"), jsonObject);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Payload for event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope.payloadAsJsonObject());
+            LOGGER.debug("Event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope.toObfuscatedDebugString());
         }
         sender.send(jsonEnvelope);
 

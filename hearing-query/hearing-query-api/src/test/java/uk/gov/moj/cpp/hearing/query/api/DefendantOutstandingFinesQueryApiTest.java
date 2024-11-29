@@ -78,7 +78,6 @@ public class DefendantOutstandingFinesQueryApiTest {
         when(enveloper.withMetadataFrom(jsonEnvelopeFromHearing, STAGINGENFORCEMENT_QUERY_OUTSTANDING_FINES)).thenReturn(function);
         when(function.apply(any())).thenReturn(jsonEnvelopeFromHearing);
         when(requester.requestAsAdmin(any())).thenReturn(jsonEnvelopeFromStaging);
-        when(jsonEnvelopeFromStaging.payloadAsJsonObject()).thenReturn(Json.createObjectBuilder().build());
 
 
         hearingQueryApi.getDefendantOutstandingFines(jsonEnvelopeFromHearing);

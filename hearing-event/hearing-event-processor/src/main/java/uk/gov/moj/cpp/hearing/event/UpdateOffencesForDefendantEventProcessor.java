@@ -86,7 +86,7 @@ public class UpdateOffencesForDefendantEventProcessor {
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(EVENT_RECEIVED_WITH_METADATA_AND_PAYLOAD,
-                    PUBLIC_EVENTS_LISTING_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING, jsonEnvelope.metadata(), jsonEnvelope.payloadAsJsonObject());
+                    PUBLIC_EVENTS_LISTING_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING, jsonEnvelope.metadata(), jsonEnvelope.toObfuscatedDebugString());
         }
 
         sender.send(envelopeFrom(metadataFrom(jsonEnvelope.metadata()).withName(HEARING_COMMAND_REMOVE_OFFENCES_FROM_EXISTING_ALLOCATED_HEARING),
@@ -98,7 +98,7 @@ public class UpdateOffencesForDefendantEventProcessor {
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(EVENT_RECEIVED_WITH_METADATA_AND_PAYLOAD,
-                    PUBLIC_PROGRESSION_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING, jsonEnvelope.metadata(), jsonEnvelope.payloadAsJsonObject());
+                    PUBLIC_PROGRESSION_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING, jsonEnvelope.metadata(), jsonEnvelope.toObfuscatedDebugString());
         }
 
         sender.send(envelopeFrom(metadataFrom(jsonEnvelope.metadata()).withName(HEARING_COMMAND_REMOVE_OFFENCES_FROM_EXISTING_HEARING),
@@ -109,7 +109,7 @@ public class UpdateOffencesForDefendantEventProcessor {
     public void handleOffenceOrDefendantRemovalToListAssist(final JsonEnvelope jsonEnvelope) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(EVENT_RECEIVED_WITH_METADATA_AND_PAYLOAD,
-                    "hearing.events.offences-removed-from-existing-hearing", jsonEnvelope.metadata(), jsonEnvelope.payloadAsJsonObject());
+                    "hearing.events.offences-removed-from-existing-hearing", jsonEnvelope.metadata(), jsonEnvelope.toObfuscatedDebugString());
         }
 
         if( jsonEnvelope.payloadAsJsonObject().containsKey(DEFENDANT_IDS) && !jsonEnvelope.payloadAsJsonObject().getJsonArray(DEFENDANT_IDS).isEmpty() ) {

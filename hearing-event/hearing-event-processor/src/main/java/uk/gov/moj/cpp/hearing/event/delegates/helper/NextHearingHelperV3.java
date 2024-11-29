@@ -182,8 +182,16 @@ public class NextHearingHelperV3 {
     private boolean canCreateNextHearing(final List<JudicialResultPrompt> prompts) {
 
         final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap = getPromptsMap(prompts);
-        LOGGER.info("Checking if next hearing can be created using Fixed date: {}, Hearing date: {}, Week commencing: {}, Hearing type: {}, Court centre: {}, Estimated duration: {}",
-                promptsMap.get(fixedDate), promptsMap.get(HDATE), promptsMap.get(weekCommencing), promptsMap.get(HTYPE), promptsMap.get(HCHOUSE), promptsMap.get(HEST));
+
+        LOGGER.info("Checking if next hearing can be created using the following data - "
+                        + "Fixed date present: {}, Hearing date present: {}, Week commencing present: {}, Hearing type present: {}, "
+                        + "Court centre present: {}, Estimated duration present: {}",
+                promptsMap.containsKey(NextHearingPromptReference.fixedDate),
+                promptsMap.containsKey(NextHearingPromptReference.HDATE),
+                promptsMap.containsKey(NextHearingPromptReference.weekCommencing),
+                promptsMap.containsKey(NextHearingPromptReference.HTYPE),
+                promptsMap.containsKey(NextHearingPromptReference.HCHOUSE),
+                promptsMap.containsKey(NextHearingPromptReference.HEST));
 
         final boolean isFixedDatePromptsPresent = ofNullable(promptsMap.get(fixedDate)).isPresent() || ofNullable(promptsMap.get(HDATE)).isPresent();
 
@@ -426,7 +434,7 @@ public class NextHearingHelperV3 {
         final String defaultStartTimeForOrganisationUnit = courtCentreOrganisationUnit.map(CourtCentreOrganisationUnit::getDefaultStartTime).orElse(null);
 
         final String timeToUse = isNotBlank(timeValueFromPrompt) ? timeValueFromPrompt : defaultStartTimeForOrganisationUnit;
-        LOGGER.info("Populating listed start date time using date: {} and time: {}", dateValue, timeToUse);
+        LOGGER.info("Populating listed start date and time");
         builder.withListedStartDateTime(convertDateTimeToUTC(dateValue, timeToUse));
     }
 
@@ -437,7 +445,6 @@ public class NextHearingHelperV3 {
         final String defaultStartTimeForOrganisationUnit = courtCentreOrganisationUnit.map(CourtCentreOrganisationUnit::getDefaultStartTime).orElse(null);
 
         final String timeToUse = isNotBlank(timeValueFromPrompt) ? timeValueFromPrompt : defaultStartTimeForOrganisationUnit;
-        LOGGER.info("Populating listed start date time using date: {} and time: {}", dateValue, timeToUse);
         builder.withListedStartDateTime(convertDateTimeToUTC(dateValue, timeToUse));
     }
 
@@ -449,25 +456,21 @@ public class NextHearingHelperV3 {
         final HashSet<String> distinctEstimatedDurations = Sets.newHashSet(promptsMap.get(HEST).getValue());
         final Optional<String> firstEstimatedDuration = distinctEstimatedDurations.stream().findFirst();
         final int estimatedMinutes = convertDurationIntoMinutes(firstEstimatedDuration);
-        LOGGER.info("Populating estimated duration minutes: {}", estimatedMinutes);
         builder.withEstimatedMinutes(estimatedMinutes);
 
         if (firstEstimatedDuration.isPresent()) {
             final String estimatedDuration = firstEstimatedDuration.get();
-            LOGGER.info("Populating estimated duration: {}", estimatedDuration);
             builder.withEstimatedDuration(estimatedDuration);
         }
     }
 
     private void populateBookingReference(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, bookingReference);
-        LOGGER.info("Populating booking reference: {}", promptValue);
         builder.withBookingReference(nonNull(promptValue) ? UUID.fromString(promptValue) : null);
     }
 
     private void populateHmiSlots(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, hmiSlots);
-        LOGGER.info("Populating booking reference: {}", promptValue);
         if (nonNull(promptValue)) {
             final JsonObject jsonObject = stringToJsonObjectConverter.convert(promptValue);
             final List<RotaSlot> hmiSlots = new ArrayList<>();
@@ -492,7 +495,6 @@ public class NextHearingHelperV3 {
 
     private void populateWeekCommencingDate(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, weekCommencing);
-        LOGGER.info("Populating week commencing date: {}", promptValue);
         builder.withWeekCommencingDate(nonNull(promptValue) ? LocalDate.parse(promptValue, DateTimeFormatter.ofPattern(PublishResultUtil.OUTGOING_PROMPT_DATE_FORMAT)) : null);
     }
 
@@ -503,7 +505,6 @@ public class NextHearingHelperV3 {
         final JudicialResultPrompt prompt = promptsMap.get(HTYPE);
         if (nonNull(prompt)) {
             final HearingType hearingType = hearingTypeReverseLookup.getHearingTypeByName(context, prompt.getValue());
-            LOGGER.info("Populating hearing type: {}", hearingType);
             builder.withType(hearingType);
         }
     }
@@ -519,7 +520,6 @@ public class NextHearingHelperV3 {
                 .collect(joining(format("%s", lineSeparator())));
 
 
-        LOGGER.info("Populating adjournment reason: {}", adjournmentReasons);
         builder.withAdjournmentReason(adjournmentReasons);
     }
 
@@ -567,7 +567,6 @@ public class NextHearingHelperV3 {
         }
 
         final CourtCentre courtCentre = extractCourtCentre(context, promptsMap, courtCentreOrgOptional.get());
-        LOGGER.info("Populating court centre: {}", courtCentre);
         if (courtCentre != null) {
             builder.withCourtCentre(courtCentre);
         }
@@ -624,19 +623,15 @@ public class NextHearingHelperV3 {
     private static void populateJurisdictionType(final NextHearing.Builder builder, final Optional<CourtCentreOrganisationUnit> courtCentreOrgOptional) {
 
         if(courtCentreOrgOptional.isPresent()) {
-            LOGGER.info("CCT-1527: resultDefinitionId : {}", courtCentreOrgOptional.get());
             if (CROWN_L1_CODE.equals(courtCentreOrgOptional.get().getOucodeL1Code())) {
-                LOGGER.info("Populating jurisdiction type: {}", JurisdictionType.CROWN);
                 builder.withJurisdictionType(JurisdictionType.CROWN);
             } else if (MAGISTRATE_L1_CODE.equals(courtCentreOrgOptional.get().getOucodeL1Code())) {
-                LOGGER.info("Populating jurisdiction type: {}", JurisdictionType.MAGISTRATES);
                 builder.withJurisdictionType(JurisdictionType.MAGISTRATES);
             }
         }
     }
 
     private static boolean isNextHearingResult(final String resultDefinitionId, final List<ResultLine2> resultLines) {
-        LOGGER.info("is result should create next hearing");
         final boolean isFirstReviewHearingCO = FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_CO.equals(resultDefinitionId);
         final boolean isFirstReviewHearingDRNRR = FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_DRNRR.equals(resultDefinitionId);
         final boolean isFirstReviewHearingSUSPS = FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_SUSPS.equals(resultDefinitionId);

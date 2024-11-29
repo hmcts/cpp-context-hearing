@@ -26,7 +26,7 @@ public class RemoveCaseFromGroupCasesCommandHandler extends AbstractCommandHandl
     public void removeCaseFromGroupCases(final JsonEnvelope envelope) throws EventStreamException {
         LOGGER.info("{} event received with payload {}",
                 "hearing.command.remove-case-from-group-cases",
-                envelope.payloadAsJsonObject());
+                envelope.toObfuscatedDebugString());
 
         final UUID groupId = fromString(envelope.payloadAsJsonObject().getString("groupId"));
         final UUID masterCaseId = fromString(envelope.payloadAsJsonObject().getString("masterCaseId"));

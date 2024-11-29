@@ -5,6 +5,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -66,6 +67,8 @@ public class CaseEjectedEventListenerTest {
                 .add("prosecutionCaseId", randomUUID().toString())
                 .add("hearingIds", Json.createArrayBuilder().add(hearingId.toString()))
                 .build();
-        return envelopeFrom((Metadata) null, payload);
+        final Metadata metadata = metadataOf(randomUUID(), "event-name").build();
+
+        return envelopeFrom(metadata, payload);
     }
 }

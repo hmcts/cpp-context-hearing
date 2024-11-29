@@ -25,7 +25,7 @@ public class ProsecutionCounselCommandHandler extends AbstractCommandHandler {
     @Handles("hearing.command.add-prosecution-counsel")
     public void addProsecutionCounsel(final Envelope<AddProsecutionCounsel> envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.add-prosecution-counsel event received {}", envelope.payload().getProsecutionCounsel());
+            LOGGER.debug("hearing.add-prosecution-counsel event received. ProsecutionCounsel Id: {}", envelope.payload().getProsecutionCounsel().getId());
         }
         final ProsecutionCounsel prosecutionCounsel = envelope.payload().getProsecutionCounsel();
         final UUID hearingId = envelope.payload().getHearingId();
@@ -54,7 +54,7 @@ public class ProsecutionCounselCommandHandler extends AbstractCommandHandler {
     public void updateProsecutionCounsel(final Envelope<UpdateProsecutionCounsel> envelope) throws EventStreamException {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.update-prosecution-counsel event received {}", envelope.payload().getProsecutionCounsel());
+            LOGGER.debug("hearing.update-prosecution-counsel event received. ProsecutionCounsel Id: {}", envelope.payload().getProsecutionCounsel().getId());
         }
         final ProsecutionCounsel prosecutionCounsel = envelope.payload().getProsecutionCounsel();
         final UUID hearingId = envelope.payload().getHearingId();

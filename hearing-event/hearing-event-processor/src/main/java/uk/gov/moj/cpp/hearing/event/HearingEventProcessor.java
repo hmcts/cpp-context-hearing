@@ -259,7 +259,7 @@ public class HearingEventProcessor {
     @Handles(PUBLIC_PROGRESSION_EVENTS_BREACH_APPLICATIONS_TO_BE_ADDED_TO_HEARING)
     public void handlePublicBreachApplicationsToBeAddedToHearing(final JsonEnvelope envelope) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.debug("public.progression.breach-applications-to-be-added-to-hearing event received {}", envelope.payloadAsJsonObject());
+            LOGGER.debug("public.progression.breach-applications-to-be-added-to-hearing event received {}", envelope.toObfuscatedDebugString());
         }
 
         this.sender.send(envelopeFrom(metadataFrom(envelope.metadata()).withName(COMMAND_BREACH_APPLICATIONS_TO_BE_ADDED),
@@ -270,7 +270,7 @@ public class HearingEventProcessor {
     @Handles("hearing.events.hearing-breach-applications-added")
     public void handleBreachApplicationsAddedToHearing(final JsonEnvelope envelope) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.debug("hearing.events.hearing-breach-applications-added {}", envelope.payloadAsJsonObject());
+            LOGGER.debug("hearing.events.hearing-breach-applications-added {}", envelope.toObfuscatedDebugString());
         }
 
         this.sender.send(envelopeFrom(metadataFrom(envelope.metadata()).withName("public.hearing.hearing-breach-applications-added"),
@@ -297,8 +297,6 @@ public class HearingEventProcessor {
         this.sender.send(envelopeFrom(metadataFrom(envelope.metadata()).withName(PUBLIC_HEARING_HEARING_WITNESS_ADDED),
                 envelope.payloadAsJsonObject()));
     }
-
-    //
 
     @Handles("hearing.events.hearing-extended")
     public void handleHearingExtended(final JsonEnvelope envelope) {

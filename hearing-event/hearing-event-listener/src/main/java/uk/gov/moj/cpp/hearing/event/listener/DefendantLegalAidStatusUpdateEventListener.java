@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 @ServiceComponent(EVENT_LISTENER)
 public class DefendantLegalAidStatusUpdateEventListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefendantAttendanceEventListener.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefendantLegalAidStatusUpdateEventListener.class.getName());
 
     @Inject
     private DefendantRepository defendantRepository;

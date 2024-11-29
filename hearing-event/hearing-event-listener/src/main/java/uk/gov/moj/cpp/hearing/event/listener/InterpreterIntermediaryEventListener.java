@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 @ServiceComponent(EVENT_LISTENER)
 public class InterpreterIntermediaryEventListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HearingCaseNoteSavedEventListener.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(InterpreterIntermediaryEventListener.class.getName());
 
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;

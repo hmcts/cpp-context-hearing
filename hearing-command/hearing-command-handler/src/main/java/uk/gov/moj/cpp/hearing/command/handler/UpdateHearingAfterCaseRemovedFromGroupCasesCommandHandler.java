@@ -28,7 +28,7 @@ public class UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandler extends A
     public void updateHearingAfterCaseRemovedFromGroupCases(final JsonEnvelope envelope) throws EventStreamException {
         LOGGER.info("{} event received with payload {}",
                 "hearing.command.update-hearing-after-case-removed-from-group-cases",
-                envelope.payloadAsJsonObject());
+                envelope.toObfuscatedDebugString());
 
         final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString("hearingId"));
         final UUID groupId = fromString(envelope.payloadAsJsonObject().getString("groupId"));

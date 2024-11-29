@@ -20,7 +20,7 @@ public class HearingApplicationsUpdatesCommandHandler extends AbstractCommandHan
     @Handles("hearing.command.breach-applications-to-be-added")
     public void recordApplicationsToBeAddedToHearing(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.breach-applications-to-be-added {}", envelope.payloadAsJsonObject());
+            LOGGER.debug("hearing.command.breach-applications-to-be-added {}", envelope.toObfuscatedDebugString());
         }
         final HearingApplicationsTobeAddedCommand hearingApplicationsTobeAddedCommand = convertToObject(envelope, HearingApplicationsTobeAddedCommand.class);
         aggregate(HearingAggregate.class, hearingApplicationsTobeAddedCommand.getHearingId(), envelope, a -> a.receiveBreachApplicationToBeAdded(

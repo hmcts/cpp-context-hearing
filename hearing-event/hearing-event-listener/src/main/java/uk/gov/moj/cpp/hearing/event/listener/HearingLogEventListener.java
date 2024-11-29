@@ -64,7 +64,7 @@ public class HearingLogEventListener {
     @Handles("hearing.hearing-event-definitions-deleted")
     public void hearingEventDefinitionsDeleted(final JsonEnvelope event) {
 
-        LOGGER.info("hearing.hearing-event-definitions-deleted {} ", event.payloadAsJsonObject());
+        LOGGER.info("hearing.hearing-event-definitions-deleted {} ", event.toObfuscatedDebugString());
 
         final List<HearingEventDefinition> activeEventDefinitions = hearingEventDefinitionRepository.findAllActive();
 

@@ -32,7 +32,7 @@ public class UploadSubscriptionsCommandHandler extends AbstractCommandHandler {
     @Handles("hearing.command.upload-subscriptions")
     public void uploadSubscriptions(final JsonEnvelope envelope) throws EventStreamException {
 
-        LOGGER.debug("hearing.command.upload-subscriptions {}", envelope.payloadAsJsonObject());
+        LOGGER.debug("hearing.command.upload-subscriptions {}", envelope.toObfuscatedDebugString());
 
         final UploadSubscriptionsCommand uploadSubscriptionsCommand = convertToObject(envelope, UploadSubscriptionsCommand.class);
 

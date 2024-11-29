@@ -71,7 +71,7 @@ public class UpdateDefendantCommandHandler extends AbstractCommandHandler {
     public void updateCaseDefendantWithFinancialOrderDetails(final JsonEnvelope envelope) throws EventStreamException {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.update-defendant-with-financial-order command received {}", envelope.payload());
+            LOGGER.debug("hearing.command.update-defendant-with-financial-order command received {}", envelope.toObfuscatedDebugString());
         }
 
         final UpdateDefendantWithFinancialOrderDetails updateDefendantWithFinancialOrderDetails
@@ -86,7 +86,7 @@ public class UpdateDefendantCommandHandler extends AbstractCommandHandler {
     public void updateCaseDefendantWithApplicationDetails(final JsonEnvelope envelope) throws EventStreamException {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.update-defendant-with-application-details event received {}", envelope.payload());
+            LOGGER.debug("hearing.command.update-defendant-with-application-details event received {}", envelope.toObfuscatedDebugString());
         }
         final UpdateDefendantWithApplicationDetails updateDefendantWithApplicationDetails = convertToObject(envelope.payloadAsJsonObject(), UpdateDefendantWithApplicationDetails.class);
 

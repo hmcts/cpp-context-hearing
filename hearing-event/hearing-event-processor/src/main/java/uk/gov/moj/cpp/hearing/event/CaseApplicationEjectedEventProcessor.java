@@ -31,9 +31,8 @@ public class CaseApplicationEjectedEventProcessor {
 
     @Handles(PUBLIC_EVENT_CASE_OR_APPLICATION_EJECTED)
     public void processCaseApplicationEjected(final JsonEnvelope event) {
-        final JsonObject payload = event.payloadAsJsonObject();
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(EVENT_RECEIVED_LOG_TEMPLATE, PUBLIC_EVENT_CASE_OR_APPLICATION_EJECTED, payload);
+            LOGGER.info(EVENT_RECEIVED_LOG_TEMPLATE, PUBLIC_EVENT_CASE_OR_APPLICATION_EJECTED, event.toObfuscatedDebugString());
         }
         this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_COMMAND_EJECT_CASE_OR_APPLICATION).apply(event.payloadAsJsonObject()));
 

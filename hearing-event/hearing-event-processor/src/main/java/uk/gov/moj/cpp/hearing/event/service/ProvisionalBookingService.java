@@ -48,7 +48,7 @@ public class ProvisionalBookingService {
 
 
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("ProvisionalBooking-bookSlots in S & L with payload '{}'", payload);
+            LOGGER.info("ProvisionalBooking-bookSlots in S & L");
         }
 
         final UUID systemUserId = systemUserProvider.getContextSystemUserId().orElseThrow(() -> new IllegalStateException("contextSystemUserId missing!!!"));

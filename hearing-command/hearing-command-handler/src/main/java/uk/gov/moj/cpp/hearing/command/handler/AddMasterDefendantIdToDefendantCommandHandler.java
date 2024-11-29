@@ -20,7 +20,7 @@ public class AddMasterDefendantIdToDefendantCommandHandler extends AbstractComma
     @Handles("hearing.command.add-master-defendant-id-to-defendant")
     public void addMasterDefendantIdToDefendant(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.add-master-defendant-id-to-defendant {}", envelope.payloadAsJsonString());
+            LOGGER.debug("hearing.command.add-master-defendant-id-to-defendant {}", envelope.toObfuscatedDebugString());
         }
         final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString("hearingId"));
         final UUID prosecutionCaseId = UUID.fromString(envelope.payloadAsJsonObject().getString("prosecutionCaseId"));

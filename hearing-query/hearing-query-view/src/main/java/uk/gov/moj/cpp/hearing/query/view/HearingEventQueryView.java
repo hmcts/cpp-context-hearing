@@ -548,7 +548,7 @@ public class HearingEventQueryView {
 
         activeHearings.addAll(hearingsWithStartEvents);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Active hearings received from same court room {}", activeHearings);
+            LOGGER.debug("Active hearings received from same court room count: {}", activeHearings.size());
         }
 
         return activeHearings;

@@ -24,7 +24,7 @@ public class CompanyRepresentativeCommandHandler extends AbstractCommandHandler 
     public void addCompanyRepresentative(final Envelope<AddCompanyRepresentative> envelope) throws EventStreamException {
 
     if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.add-company-representative event received {}", envelope.payload().getCompanyRepresentative());
+            LOGGER.debug("hearing.add-company-representative event received. CompanyRepresentative ID: {}", envelope.payload().getCompanyRepresentative().getId());
         }
         final CompanyRepresentative companyRepresentative = envelope.payload().getCompanyRepresentative();
         final UUID hearingId = envelope.payload().getHearingId();
@@ -39,7 +39,7 @@ public class CompanyRepresentativeCommandHandler extends AbstractCommandHandler 
     public void updateCompanyRepresentative(final Envelope<UpdateCompanyRepresentative> envelope) throws EventStreamException {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.update-company-representative event received {}", envelope.payload().getCompanyRepresentative());
+            LOGGER.debug("hearing.update-company-representative event received. CompanyRepresentative ID: {}", envelope.payload().getCompanyRepresentative().getId());
         }
         final CompanyRepresentative companyRepresentative = envelope.payload().getCompanyRepresentative();
         final UUID hearingId = envelope.payload().getHearingId();

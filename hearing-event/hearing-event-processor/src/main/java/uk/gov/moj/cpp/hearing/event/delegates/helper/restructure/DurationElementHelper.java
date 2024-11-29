@@ -28,6 +28,6 @@ public class DurationElementHelper {
         final LocalDate orderedDate = treeNode.getJudicialResult().getOrderedDate();
         final Optional<JudicialResultPromptDurationElement> resultPromptDurationElement = new JudicialResultPromptDurationHelper().populate(treeNode.getJudicialResult().getJudicialResultPrompts(), treeNode.getResultDefinition().getData(), orderedDate);
         resultPromptDurationElement.ifPresent(judicialResultPromptDurationElement -> treeNode.getJudicialResult().setDurationElement(judicialResultPromptDurationElement));
-        LOGGER.info("After setting duration element: {}", treeNode.getJudicialResult());
+        LOGGER.info("Duration element set for JudicialResult: {}", treeNode.getJudicialResult().getJudicialResultId());
     }
 }

@@ -45,8 +45,8 @@ public class HearingDeletedEventProcessor {
     public void handleHearingDeletedPublicEvent(final JsonEnvelope jsonEnvelope) {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{} event received with metadata {} and payload {}",
-                    PUBLIC_EVENT_LISTING_ALLOCATED_HEARING_DELETED, jsonEnvelope.metadata(), jsonEnvelope.payloadAsJsonObject());
+            LOGGER.debug("{} event received: {}",
+                    PUBLIC_EVENT_LISTING_ALLOCATED_HEARING_DELETED, jsonEnvelope.toObfuscatedDebugString());
         }
 
         final JsonObjectBuilder jsonObjectBuilder = createObjectBuilder();
@@ -60,8 +60,8 @@ public class HearingDeletedEventProcessor {
     public void handleHearingDeletedPrivateEvent(final JsonEnvelope jsonEnvelope) {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{} event received with metadata {} and payload {}",
-                    HEARING_EVENT_HEARING_DELETED, jsonEnvelope.metadata(), jsonEnvelope.payloadAsJsonObject());
+            LOGGER.debug("{} event received: {}",
+                    HEARING_EVENT_HEARING_DELETED, jsonEnvelope.toObfuscatedDebugString());
         }
 
         sendCommandFor(HEARING_COMMAND_DELETE_HEARING_FOR_PROSECUTION_CASES, PROSECUTION_CASE_IDS_FIELD, jsonEnvelope);

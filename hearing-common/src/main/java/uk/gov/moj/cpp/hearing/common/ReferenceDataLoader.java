@@ -78,7 +78,7 @@ public class ReferenceDataLoader {
             throw new ReferenceDataNotFoundException(format("Cannot find this organisationunit %s", courtCentreId + REFERENCEDATA_QUERY_ORGANISATION_UNIT));
         }
 
-        LOGGER.debug("'referencedata.query.organisation-unit' response with payload {}", responseEnvelope.payload());
+        LOGGER.debug("'referencedata.query.organisation-unit' response {}", responseEnvelope.metadata().asJsonObject());
         return responseEnvelope.payload();
     }
 

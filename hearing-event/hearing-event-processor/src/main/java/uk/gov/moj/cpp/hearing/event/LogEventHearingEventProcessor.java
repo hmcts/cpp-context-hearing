@@ -59,7 +59,7 @@ public class LogEventHearingEventProcessor {
     @SuppressWarnings({"squid:S3457", "squid:S2629"})
     public void publishHearingEventLoggedPublicEvent(final JsonEnvelope event) {
 
-        LOGGER.info("hearing.hearing-event-logged event received {}", event.toString());
+        LOGGER.info("hearing.hearing-event-logged event received {}", event.toObfuscatedDebugString());
 
         final HearingEventLogged hearingEventLogged = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), HearingEventLogged.class);
@@ -98,7 +98,7 @@ public class LogEventHearingEventProcessor {
     }
 
     private void processHearingEventForPI(final JsonEnvelope event, final HearingEventLogged hearingEventLogged) {
-        LOGGER.info("hearing.hearing-event-logged event received for P & I {}", event);
+        LOGGER.info("hearing.hearing-event-logged event received for P & I {}", event.toObfuscatedDebugString());
         if (JurisdictionType.CROWN.equals(hearingEventLogged.getJurisdictionType())) {
             LiveStatusPublished liveStatusPublished;
                 final Optional<ProsecutionCaseResponse> prosecutionCaseResponse = prosecutionCaseRetriever.getProsecutionCaseForHearing(hearingEventLogged.getHearingId(),hearingEventLogged.getHearingEventDefinitionId());

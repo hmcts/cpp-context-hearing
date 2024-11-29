@@ -38,7 +38,7 @@ public class CaseEjectedEventListener {
     @Handles("hearing.case-ejected")
     public void caseEjected(final JsonEnvelope event) {
         final CaseEjected caseEjectedEvent = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), CaseEjected.class);
-        LOGGER.info("Received event {} with payload {}", "hearing.case-ejected", event.payloadAsJsonObject());
+        LOGGER.info("Received event {}", event.toObfuscatedDebugString());
         final UUID prosecutionCaseId = caseEjectedEvent.getProsecutionCaseId();
         final List<UUID> hearingIds = caseEjectedEvent.getHearingIds();
         hearingIds.stream().forEach(hearingId -> {

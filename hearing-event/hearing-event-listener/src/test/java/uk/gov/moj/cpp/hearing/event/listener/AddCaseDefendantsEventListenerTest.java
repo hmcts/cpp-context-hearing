@@ -6,6 +6,7 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 
@@ -130,8 +131,9 @@ public class AddCaseDefendantsEventListenerTest {
     private JsonEnvelope createJsonEnvelope(final AddCaseDefendantsForHearing addCaseDefendantsForHearing) {
 
         final JsonObject jsonObject = objectToJsonObjectConverter.convert(addCaseDefendantsForHearing);
+        final Metadata metadata = metadataOf(randomUUID(), "event-name").build();
 
-        return envelopeFrom((Metadata) null, jsonObject);
+        return envelopeFrom(metadata, jsonObject);
     }
 
 }

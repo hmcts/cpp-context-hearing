@@ -25,9 +25,7 @@ public class CaseRemovedFromGroupCasesEventProcessor {
 
     @Handles("public.progression.case-removed-from-group-cases")
     public void processPublicProgressionCaseRemovedFromGroupCases(final JsonEnvelope jsonEnvelope) {
-        LOGGER.info("{} event received with payload {}",
-                "public.progression.case-removed-from-group-cases",
-                jsonEnvelope.payloadAsJsonObject());
+        LOGGER.info("Received event {}", jsonEnvelope.toObfuscatedDebugString());
 
         sender.send(envelopeFrom(metadataFrom(jsonEnvelope.metadata())
                         .withName("hearing.command.remove-case-from-group-cases"),
@@ -36,9 +34,7 @@ public class CaseRemovedFromGroupCasesEventProcessor {
 
     @Handles("hearing.events.case-removed-from-group-cases")
     public void processHearingEventsCaseRemovedFromGroupCases(final JsonEnvelope jsonEnvelope) {
-        LOGGER.info("{} event received with payload {}",
-                "hearing.events.case-removed-from-group-cases",
-                jsonEnvelope.payloadAsJsonObject());
+        LOGGER.info("Received event {}", jsonEnvelope.toObfuscatedDebugString());
 
         sender.send(envelopeFrom(metadataFrom(jsonEnvelope.metadata())
                         .withName("hearing.command.update-hearing-after-case-removed-from-group-cases"),

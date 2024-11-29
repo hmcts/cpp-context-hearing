@@ -39,13 +39,13 @@ public class AddCaseDefendantsEventListener {
     @Handles("hearing.add-case-defendants-for-hearing")
     public void addCaseDefendantsForHearing(final JsonEnvelope event) {
         final AddCaseDefendantsForHearing addCaseDefendantsForHearing = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), AddCaseDefendantsForHearing.class);
-        LOGGER.info("Received event {} with payload {}", "hearing.add-case-defendants-for-hearing", event.payloadAsJsonObject());
+        LOGGER.info("Received event {} ", event.toObfuscatedDebugString());
         final UUID hearingId = addCaseDefendantsForHearing.getHearingId();
         final UUID caseId = addCaseDefendantsForHearing.getCaseId();
         final List<Defendant> defendantList = addCaseDefendantsForHearing.getDefendants();
         final Hearing hearingEntity = hearingRepository.findBy(hearingId);
         if (isNull(hearingEntity)) {
-            LOGGER.info("Hearing not  found for hearing id {} ", hearingId);
+            LOGGER.info("Hearing not found for hearing id {} ", hearingId);
         } else {
 
             hearingEntity.getProsecutionCases().stream().filter(pc -> pc.getId().getId().equals(caseId)).findFirst().ifPresent(persistentCase -> {

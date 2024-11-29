@@ -383,7 +383,7 @@ public class HearingQueryView {
 
 
         } catch (final NoResultException nre) {
-            LOGGER.error("### No defendant found with courtCentreId = '{}' , courtRoomIds = '{}' and hearingDate = '{}'", payload.getString(FIELD_COURT_CENTRE_ID), payload.getString(FIELD_COURT_ROOM_IDS), payload.getString(FIELD_HEARING_DATE));
+            LOGGER.error("### No defendant found with {}. Exception: {}", envelope.toObfuscatedDebugString(), nre);
             return envelopeFrom(envelope.metadata(), Json.createObjectBuilder().build());
         }
     }
