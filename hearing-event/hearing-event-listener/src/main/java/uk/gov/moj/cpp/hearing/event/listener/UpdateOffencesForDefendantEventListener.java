@@ -11,8 +11,11 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceAddedV2;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdatedV2;
 import uk.gov.moj.cpp.hearing.domain.event.OffencesRemovedFromExistingHearing;
 import uk.gov.moj.cpp.hearing.mapping.HearingDefenceCounselJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.OffenceJPAMapper;
@@ -96,6 +99,30 @@ public class UpdateOffencesForDefendantEventListener {
     }
 
     @Transactional
+    @Handles("hearing.events.offence-added-v2")
+    public void addOffenceV2(final JsonEnvelope envelope) {
+
+        final OffenceAddedV2 offenceAdded = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceAddedV2.class);
+        final Hearing hearing = hearingRepository.findBy(offenceAdded.getHearingId());
+        if(isNull(hearing)){
+            return;
+        }
+
+        if(Optional.ofNullable(hearing.getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                .map(ProsecutionCase::getDefendants)
+                .flatMap(Collection::stream)
+                .map(Defendant::getId)
+                .noneMatch(id -> id.getId().equals(offenceAdded.getDefendantId()))){
+            return;
+        }
+
+        offenceAdded.getOffences().forEach(offencePojo -> {
+            final Offence offence = offenceJPAMapper.toJPA(hearing, offenceAdded.getDefendantId(), offencePojo);
+            offenceRepository.saveAndFlush(offence);
+        });
+    }
+
+    @Transactional
     @Handles("hearing.events.offence-updated")
     public void updateOffence(final JsonEnvelope envelope) {
 
@@ -115,6 +142,27 @@ public class UpdateOffencesForDefendantEventListener {
     }
 
     @Transactional
+    @Handles("hearing.events.offence-updated-v2")
+    public void updateOffenceV2(final JsonEnvelope envelope) {
+
+        final OffenceUpdatedV2 offenceUpdated = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceUpdatedV2.class);
+        final Hearing hearing = hearingRepository.findBy(offenceUpdated.getHearingId());
+        final Set<Offence> offences = offenceJPAMapper.toJPA(hearing, offenceUpdated.getDefendantId(), offenceUpdated.getOffences());
+
+        final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(offenceUpdated.getDefendantId(), offenceUpdated.getHearingId()));
+
+        if (nonNull(defendant)) {
+            offences.forEach(offence -> {
+                    if (defendant.getOffences().removeIf(o -> o.getId().getId().equals(offence.getId().getId()))) {
+                                defendant.getOffences().add(offence);
+                    }
+                });
+
+            defendantRepository.saveAndFlush(defendant);
+        }
+    }
+
+    @Transactional
     @Handles("hearing.events.offence-deleted")
     public void deleteOffence(final JsonEnvelope envelope) {
 
@@ -125,6 +173,21 @@ public class UpdateOffencesForDefendantEventListener {
         offence.getDefendant().getOffences().removeIf(o -> o.getId().getId().equals(offenceDeleted.getId()));
 
         defendantRepository.save(offence.getDefendant());
+    }
+
+    @Transactional
+    @Handles("hearing.events.offence-deleted-v2")
+    public void deleteOffenceV2(final JsonEnvelope envelope) {
+
+        final OffenceDeletedV2 offenceDeleted = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceDeletedV2.class);
+
+        offenceDeleted.getIds().forEach(offenceId -> {
+            final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(offenceId, offenceDeleted.getHearingId()));
+
+            offence.getDefendant().getOffences().removeIf(o -> o.getId().getId().equals(offenceId));
+
+            defendantRepository.save(offence.getDefendant());
+        });
     }
 
     @Transactional

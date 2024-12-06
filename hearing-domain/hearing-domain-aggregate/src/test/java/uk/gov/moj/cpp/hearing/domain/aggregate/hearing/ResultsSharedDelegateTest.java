@@ -15,9 +15,6 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
 
-
-import java.io.IOException;
-import java.util.Objects;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -42,6 +39,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -49,6 +47,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -1039,7 +1038,7 @@ public class ResultsSharedDelegateTest {
     public void handleResultsSharedV3ShouldCreateCustodyTimeLimitClockStoppedWhenGuiltyTypeVerdict() throws IOException {
         final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile("json/verdictResultsShared.json", ResultsSharedV3.class);
         resultsSharedDelegate.handleResultsSharedV3(resultsShared);
-        final  Stream<Object> eventStreams = hearingAggregate.stopCustodyTimeLimitClock(new ArrayList<>());
+        final  Stream<Object> eventStreams = hearingAggregate.stopCustodyTimeLimitClock(emptyList(), resultsShared.getHearing());
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(1));
         final CustodyTimeLimitClockStopped custodyTimeLimitClockStopped = (CustodyTimeLimitClockStopped) eventCollection.get(0);

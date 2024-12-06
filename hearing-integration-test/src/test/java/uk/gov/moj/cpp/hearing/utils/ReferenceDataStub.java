@@ -1231,12 +1231,13 @@ public class ReferenceDataStub {
                 .withOucode(oucode)
                 .withId(id.toString())
                 .withIsWelsh(true)
+                .withAddress1("address 1")
                 .withWelshAddress1("Welsh address1")
                 .withWelshAddress2("Welsh address2")
                 .withWelshAddress3("Welsh address3")
                 .withWelshAddress4("Welsh address4")
                 .withWelshAddress4("Welsh address5")
-                .withPostcode("Post Code")
+                .withPostcode("AL4 9LG")
                 .build();
 
         ReferenceDataStub.stub(organisationalUnit);

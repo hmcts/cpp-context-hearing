@@ -1,7 +1,13 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.stream.Collectors.toList;
+import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
+
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.requester.Requester;
@@ -14,22 +20,23 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.stream.Collectors.toList;
-import static javax.json.Json.createObjectBuilder;
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
-
 import javax.inject.Inject;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @ServiceComponent(COMMAND_HANDLER)
 public class CustodyTimeLimitClockHandler extends AbstractCommandHandler {
 
+    @Inject
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CustodyTimeLimitClockHandler.class);
 
-    private static final String HEARING_ID = "hearingId";
+    private static final String HEARING = "hearing";
 
     @Inject
     private Requester requester;
@@ -42,7 +49,8 @@ public class CustodyTimeLimitClockHandler extends AbstractCommandHandler {
             LOGGER.debug("'hearing.command.extend-custody-time-limit' received with payload {}", envelope.toObfuscatedDebugString());
         }
 
-        final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString(HEARING_ID));
+        final JsonObject hearingJsonObject = envelope.payloadAsJsonObject().getJsonObject(HEARING);
+        final Hearing hearing = jsonObjectToObjectConverter.convert(hearingJsonObject, Hearing.class);
 
         final JsonObject payload = createObjectBuilder().add("category", "F").add("on", LocalDate.now().toString()).build();
 
@@ -61,7 +69,7 @@ public class CustodyTimeLimitClockHandler extends AbstractCommandHandler {
 
         LOGGER.info("referencedata.query-result-definitions-with-category size {} ", resultIdList.size());
 
-        aggregate(HearingAggregate.class, hearingId, envelope, a -> a.stopCustodyTimeLimitClock(resultIdList));
+        aggregate(HearingAggregate.class, hearing.getId(), envelope, a -> a.stopCustodyTimeLimitClock(resultIdList, hearing));
 
     }
 }

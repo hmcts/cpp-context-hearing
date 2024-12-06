@@ -6,6 +6,7 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
@@ -466,6 +467,44 @@ public class InitiateHearingCommandHandlerTest {
         );
     }
 
+    public void initiateHearingOffenceV2() throws Throwable {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+
+        final UUID originHearingId = randomUUID();
+        final LocalDate pleaDate = PAST_LOCAL_DATE.next();
+        final String value = "GUILTY";
+
+        final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), createObjectBuilder()
+                .add("offenceId", offenceId.toString())
+                .add("hearingId", hearingId.toString())
+                .build());
+
+        final OffenceAggregate offenceAggregate = new OffenceAggregate();
+        offenceAggregate.apply(new OffencePleaUpdated(originHearingId,
+                pleaModel().withPlea(plea()
+                        .withOffenceId(offenceId)
+                        .withPleaDate(pleaDate)
+                        .withPleaValue(value)
+                        .withOriginatingHearingId(originHearingId)
+                        .build()).build()));
+        setupMockedEventStream(offenceId, this.offenceEventStream, offenceAggregate);
+
+        this.hearingCommandHandler.initiateHearingOffenceV2(command);
+
+        List<Object> events = verifyAppendAndGetArgumentFrom(this.offenceEventStream).collect(toList());
+
+        assertThat((JsonEnvelope) events.get(0),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName("hearing.events.registered-hearing-against-offence-v2"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.offenceId", is(offenceId.toString())),
+                                withJsonPath("$.hearingIds", hasItem(hearingId.toString()))
+                        ))).thatMatchesSchema()
+        );
+    }
 
     @Test
     public void recordHearingDefendant() throws EventStreamException {

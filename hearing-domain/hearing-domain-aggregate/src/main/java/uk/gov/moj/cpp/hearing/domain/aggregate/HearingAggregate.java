@@ -136,8 +136,11 @@ import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceAddedV2;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdatedV2;
 import uk.gov.moj.cpp.hearing.domain.event.OffencesRemovedFromExistingHearing;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
@@ -287,8 +290,11 @@ public class HearingAggregate implements Aggregate {
                 when(ConvictionDateRemoved.class).apply(convictionDateDelegate::handleConvictionDateRemoved),
                 when(DefendantDetailsUpdated.class).apply(defendantDelegate::handleDefendantDetailsUpdated),
                 when(OffenceAdded.class).apply(offenceDelegate::handleOffenceAdded),
+                when(OffenceAddedV2.class).apply(offenceDelegate::handleOffenceAddedV2),
                 when(OffenceUpdated.class).apply(offenceDelegate::handleOffenceUpdated),
+                when(OffenceUpdatedV2.class).apply(offenceDelegate::handleOffenceUpdatedV2),
                 when(OffenceDeleted.class).apply(offenceDelegate::handleOffenceDeleted),
+                when(OffenceDeletedV2.class).apply(offenceDelegate::handleOffenceDeletedV2),
                 when(NowsVariantsSavedEvent.class).apply(variantDirectoryDelegate::handleNowsVariantsSavedEvent),
                 when(DraftResultSaved.class).apply(draftResultSaved -> {
                             this.amendingSharedHearingUserId = draftResultSaved.getAmendedByUserId();
@@ -808,12 +814,31 @@ public class HearingAggregate implements Aggregate {
         return apply(this.offenceDelegate.addOffence(hearingId, defendantId, prosecutionCaseId, offence));
     }
 
+    public Stream<Object> addOffenceV2(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId, final List<Offence> offences) {
+        if(momento.isDeleted()){
+            return Stream.empty();
+        }
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'addOffence' event as hearing not found", hearingId));
+        }
+
+        return apply(this.offenceDelegate.addOffenceV2(hearingId, defendantId, prosecutionCaseId, offences));
+    }
+
     public Stream<Object> updateOffence(final UUID hearingId, final UUID defendantId, final Offence offence) {
         return apply(this.offenceDelegate.updateOffence(hearingId, defendantId, offence));
     }
 
+    public Stream<Object> updateOffenceV2(final UUID hearingId, final UUID defendantId, final List<Offence> offences) {
+        return apply(this.offenceDelegate.updateOffenceV2(hearingId, defendantId, offences));
+    }
+
     public Stream<Object> deleteOffence(final UUID offenceId, final UUID hearingId) {
         return apply(this.offenceDelegate.deleteOffence(offenceId, hearingId));
+    }
+
+    public Stream<Object> deleteOffenceV2(final List<UUID> offenceIds, final UUID hearingId) {
+        return apply(this.offenceDelegate.deleteOffenceV2(offenceIds, hearingId));
     }
 
     public Stream<Object> removeOffencesFromExistingHearing(final UUID hearingId, final List<UUID> offenceIds, final String source) {
@@ -1086,12 +1111,12 @@ public class HearingAggregate implements Aggregate {
                 .build()));
     }
 
-    public Stream<Object> stopCustodyTimeLimitClock(final List<UUID> resultIdList) {
+    public Stream<Object> stopCustodyTimeLimitClock(final List<UUID> resultIdList, final Hearing hearing) {
 
         if (!SHARED.equals(this.hearingState) || this.momento.isDeleted()) {
             return Stream.empty();
         }
-        return  CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, this.momento.getSharedResultsCommandResultLineV2s(), resultIdList);
+        return  CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, this.momento.getSharedResultsCommandResultLineV2s(), resultIdList, hearing);
 
     }
 

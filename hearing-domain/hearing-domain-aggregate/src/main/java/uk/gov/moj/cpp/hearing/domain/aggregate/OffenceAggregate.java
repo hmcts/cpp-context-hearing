@@ -4,21 +4,19 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
-import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichAssociatedHearingsWithIndicatedPlea;
-import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
-import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForOffence;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForOffence;
 import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForOffence;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffenceV2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +43,7 @@ public class OffenceAggregate implements Aggregate {
                 when(OffencePleaUpdated.class).apply(plea -> this.offencePleaUpdated = plea),
                 when(OffenceVerdictUpdated.class).apply(verdict -> this.offenceVerdictUpdated = verdict),
                 when(RegisteredHearingAgainstOffence.class).apply(offence -> hearingIds.add(offence.getHearingId())),
+                when(RegisteredHearingAgainstOffenceV2.class).apply(offence -> hearingIds.addAll(offence.getHearingIds())),
                 when(HearingMarkedAsDuplicateForOffence.class).apply(e -> hearingIds.remove(e.getHearingId())),
                 when(HearingDeletedForOffence.class).apply(e -> hearingIds.remove(e.getHearingId())),
                 when(HearingRemovedForOffence.class).apply(e -> hearingIds.remove(e.getHearingId())),
@@ -59,6 +58,18 @@ public class OffenceAggregate implements Aggregate {
         streamBuilder.add(RegisteredHearingAgainstOffence.builder()
                 .withOffenceId(offenceId)
                 .withHearingId(hearingId)
+                .build());
+
+        return apply(streamBuilder.build());
+    }
+
+    public Stream<Object> lookupOffenceForHearingV2(final List<UUID> hearingIds, final UUID offenceId) {
+
+        final Stream.Builder<Object> streamBuilder = Stream.builder();
+
+        streamBuilder.add(RegisteredHearingAgainstOffenceV2.builder()
+                .withOffenceId(offenceId)
+                .withHearingIds(hearingIds)
                 .build());
 
         return apply(streamBuilder.build());
@@ -91,20 +102,6 @@ public class OffenceAggregate implements Aggregate {
 
     public OffenceVerdictUpdated getVerdict() {
         return offenceVerdictUpdated;
-    }
-
-    public Stream<Object> lookupHearingsForEditOffenceOnOffence(final UUID defendantId, final Offence offence) {
-        return this.hearingIds.isEmpty() ? Stream.empty() : apply(Stream.of(FoundHearingsForEditOffence.foundHearingsForEditOffence()
-                .withHearingIds(hearingIds)
-                .withDefendantId(defendantId)
-                .withOffence(offence)));
-    }
-
-    public Stream<Object> lookupHearingsForDeleteOffenceOnOffence(final UUID offenceId) {
-        return this.hearingIds.isEmpty() ? Stream.empty() : apply(Stream.of(FoundHearingsForDeleteOffence.builder()
-                .withId(offenceId)
-                .withHearingIds(hearingIds)
-                .build()));
     }
 
     public Stream<Object> updateVerdict(final UUID hearingId, final Verdict verdict) {

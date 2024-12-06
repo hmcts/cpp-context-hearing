@@ -43,8 +43,8 @@ public class DefenceOrganisationJPAMapper {
         }
         final Organisation organisation = new Organisation(
                 addressJPAMapper.fromJPA(defenceOrganisation.getAddress()),
-                contactNumberJPAMapper.fromJPA(defenceOrganisation.getContact()),
-                defenceOrganisation.getIncorporationNumber(), defenceOrganisation.getName(),
+                contactNumberJPAMapper.fromJPA(defenceOrganisation.getContact()), null,
+                defenceOrganisation.getIncorporationNumber(), null, defenceOrganisation.getName(),
                 defenceOrganisation.getRegisteredCharityNumber());
         return new uk.gov.justice.core.courts.DefenceOrganisation(defenceOrganisation.getLaaContractNumber(),
                 organisation);

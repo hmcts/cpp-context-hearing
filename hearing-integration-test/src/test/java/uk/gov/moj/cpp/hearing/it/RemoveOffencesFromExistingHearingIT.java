@@ -146,7 +146,7 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
         // public.progression.defendant-offences-changed
         final UUID offenceId4 = UUID.randomUUID();
 
-        try (final Utilities.EventListener foundHearingsForNewOffence = listenFor("hearing.events.found-hearings-for-new-offence", "hearing.event")
+        try (final Utilities.EventListener foundHearingsForNewOffence = listenFor("hearing.events.found-hearings-for-new-offence-v2", "hearing.event")
                 .withFilter(convertStringTo(FoundHearingsForNewOffence.class, isBean(FoundHearingsForNewOffence.class)
                         .with(FoundHearingsForNewOffence::getDefendantId, Matchers.is(defendantId1))
                 ))) {

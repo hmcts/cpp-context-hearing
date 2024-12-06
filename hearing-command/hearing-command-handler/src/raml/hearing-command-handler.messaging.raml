@@ -22,6 +22,10 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.register-hearing-against-offence.json
             example: !include json/hearing.command.register-hearing-against-offence.json
 
+        application/vnd.hearing.command.register-hearing-against-offence-v2+json:
+            schema: !include json/schema/hearing.command.register-hearing-against-offence-v2.json
+            example: !include json/hearing.command.register-hearing-against-offence-v2.json
+
         application/vnd.hearing.command.register-hearing-against-defendant+json:
             schema: !include json/schema/hearing.command.register-hearing-against-defendant.json
             example: !include json/hearing.command.register-hearing-against-defendant.json
@@ -212,13 +216,25 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.add-new-offence-to-hearings.json
             example: !include json/hearing.command.add-new-offence-to-hearings.json
 
+        application/vnd.hearing.command.add-new-offence-to-hearings-v2+json:
+            schema: !include json/schema/hearing.command.add-new-offence-to-hearings-v2.json
+            example: !include json/hearing.command.add-new-offence-to-hearings-v2.json
+
         application/vnd.hearing.command.update-offence-on-hearings+json:
             schema: !include json/schema/hearing.command.update-offence-on-hearings.json
             example: !include json/hearing.command.update-offence-on-hearings.json
 
+        application/vnd.hearing.command.update-offence-on-hearings-v2+json:
+            schema: !include json/schema/hearing.command.update-offence-on-hearings-v2.json
+            example: !include json/hearing.command.update-offence-on-hearings-v2.json
+
         application/vnd.hearing.command.delete-offence-on-hearings+json:
             schema: !include json/schema/hearing.command.delete-offence-on-hearings.json
             example: !include json/hearing.command.delete-offence-on-hearings.json
+
+        application/vnd.hearing.command.delete-offence-on-hearings-v2+json:
+            schema: !include json/schema/hearing.command.delete-offence-on-hearings-v2.json
+            example: !include json/hearing.command.delete-offence-on-hearings-v2.json
 
 # Hearing Detail Change
         application/vnd.hearing.change-hearing-detail+json:

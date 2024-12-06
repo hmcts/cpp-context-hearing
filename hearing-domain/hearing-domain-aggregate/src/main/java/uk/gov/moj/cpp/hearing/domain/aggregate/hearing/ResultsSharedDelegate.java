@@ -520,7 +520,7 @@ public class ResultsSharedDelegate implements Serializable {
 
         final Stream<Object> streams = Stream.concat(enrichHearingV2(resultLines), streamBuilder.build());
         new HearingDaySharedResults().setHasSharedResults(momento.getHearing(), hearingDay);
-        return Stream.concat(streams, CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, resultLines, null));
+        return Stream.concat(streams, CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, resultLines, null, hearing));
     }
 
     /**

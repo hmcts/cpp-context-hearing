@@ -15,7 +15,11 @@ import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffenceV2;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffenceV2;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffenceV2;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForDefendant;
@@ -103,6 +107,15 @@ public class DefendantAggregate implements Aggregate {
                 .withDefendantId(defendantId)
                 .withProsecutionCaseId(prosecutionCaseId)
                 .withOffence(offence)
+                .withHearingIds(new ArrayList<>(hearingIds))
+        ));
+    }
+
+    public Stream<Object> lookupHearingsForNewOffenceOnDefendantV2(final UUID defendantId, final UUID prosecutionCaseId, final List<Offence> offences) {
+        return hearingIds.isEmpty() ? empty() : apply(Stream.of(FoundHearingsForNewOffenceV2.foundHearingsForNewOffenceV2()
+                .withDefendantId(defendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withOffences(offences)
                 .withHearingIds(new ArrayList<>(hearingIds))
         ));
     }
@@ -198,5 +211,18 @@ public class DefendantAggregate implements Aggregate {
 
     public Stream<Object> removeHearingForDefendant(final UUID defendantId, final UUID hearingId) {
         return apply(Stream.of(new HearingRemovedForDefendant(defendantId, hearingId)));
+    }
+
+    public Stream<Object> lookupHearingsForEditOffenceOnOffence(final UUID defendantId, final List<Offence> offences) {
+        return this.hearingIds.isEmpty() ? Stream.empty() : apply(Stream.of(FoundHearingsForEditOffenceV2.foundHearingsForEditOffenceV2()
+                .withHearingIds(hearingIds.stream().toList())
+                .withDefendantId(defendantId)
+                .withOffences(offences)));
+    }
+    public Stream<Object> lookupHearingsForDeleteOffenceOnOffence(final List<UUID> offences) {
+        return this.hearingIds.isEmpty() ? Stream.empty() : apply(Stream.of(FoundHearingsForDeleteOffenceV2.builder()
+                .withIds(offences)
+                .withHearingIds(hearingIds.stream().toList())
+                .build()));
     }
 }

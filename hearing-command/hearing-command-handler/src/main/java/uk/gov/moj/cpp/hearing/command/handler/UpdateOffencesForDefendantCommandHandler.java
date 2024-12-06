@@ -13,8 +13,11 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffenceV2;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffenceV2;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffenceV2;
 import uk.gov.moj.cpp.hearing.domain.event.RemoveOffencesFromExistingHearing;
 
 import java.util.List;
@@ -29,30 +32,24 @@ public class UpdateOffencesForDefendantCommandHandler extends AbstractCommandHan
         final UpdateOffencesForDefendantCommand command = convertToObject(envelope, UpdateOffencesForDefendantCommand.class);
 
         for (final DefendantCaseOffences addedOffence : command.getAddedOffences()) {
-            for (final uk.gov.justice.core.courts.Offence offence : addedOffence.getOffences()) {
-                aggregate(DefendantAggregate.class,
-                        addedOffence.getDefendantId(),
-                        envelope,
-                        defendantAggregate -> defendantAggregate.lookupHearingsForNewOffenceOnDefendant(addedOffence.getDefendantId(), addedOffence.getProsecutionCaseId(), offence));
-            }
+            aggregate(DefendantAggregate.class,
+                    addedOffence.getDefendantId(),
+                    envelope,
+                    defendantAggregate -> defendantAggregate.lookupHearingsForNewOffenceOnDefendantV2(addedOffence.getDefendantId(), addedOffence.getProsecutionCaseId(), addedOffence.getOffences()));
         }
 
         for (final DefendantCaseOffences updateOffence : command.getUpdatedOffences()) {
-            for (final uk.gov.justice.core.courts.Offence offence : updateOffence.getOffences()) {
-                aggregate(OffenceAggregate.class,
-                        offence.getId(),
-                        envelope,
-                        offenceAggregate -> offenceAggregate.lookupHearingsForEditOffenceOnOffence(updateOffence.getDefendantId(), offence));
-            }
+            aggregate(DefendantAggregate.class,
+                    updateOffence.getDefendantId(),
+                    envelope,
+                    defendantAggregate -> defendantAggregate.lookupHearingsForEditOffenceOnOffence(updateOffence.getDefendantId(), updateOffence.getOffences()));
         }
 
         for (final DeletedOffences deletedOffence : command.getDeletedOffences()) {
-            for (final UUID offenceId : deletedOffence.getOffences()) {
-                aggregate(OffenceAggregate.class,
-                        offenceId,
-                        envelope,
-                        offenceAggregate -> offenceAggregate.lookupHearingsForDeleteOffenceOnOffence(offenceId));
-            }
+            aggregate(DefendantAggregate.class,
+                    deletedOffence.getDefendantId(),
+                    envelope,
+                    defendantAggregate -> defendantAggregate.lookupHearingsForDeleteOffenceOnOffence(deletedOffence.getOffences()));
         }
     }
 
@@ -72,6 +69,22 @@ public class UpdateOffencesForDefendantCommandHandler extends AbstractCommandHan
         }
     }
 
+    @Handles("hearing.command.add-new-offence-to-hearings-v2")
+    public void addOffenceForExistingHearingV2(final JsonEnvelope envelope) throws EventStreamException {
+
+        final FoundHearingsForNewOffenceV2 foundHearingsForNewOffence = convertToObject(envelope, FoundHearingsForNewOffenceV2.class);
+
+        for (final UUID hearingId : foundHearingsForNewOffence.getHearingIds()) {
+            aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate ->
+                    hearingAggregate.addOffenceV2(
+                            hearingId,
+                            foundHearingsForNewOffence.getDefendantId(),
+                            foundHearingsForNewOffence.getProsecutionCaseId(),
+                            foundHearingsForNewOffence.getOffences())
+            );
+        }
+    }
+
     @Handles("hearing.command.update-offence-on-hearings")
     public void updateOffence(final JsonEnvelope envelope) throws EventStreamException {
 
@@ -80,6 +93,17 @@ public class UpdateOffencesForDefendantCommandHandler extends AbstractCommandHan
         for (final UUID hearingId : foundHearingsForEditOffence.getHearingIds()) {
             aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate ->
                     hearingAggregate.updateOffence(hearingId, foundHearingsForEditOffence.getDefendantId(), foundHearingsForEditOffence.getOffence()));
+        }
+    }
+
+    @Handles("hearing.command.update-offence-on-hearings-v2")
+    public void updateOffenceV2(final JsonEnvelope envelope) throws EventStreamException {
+
+        final FoundHearingsForEditOffenceV2 foundHearingsForEditOffence = convertToObject(envelope, FoundHearingsForEditOffenceV2.class);
+
+        for (final UUID hearingId : foundHearingsForEditOffence.getHearingIds()) {
+            aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate ->
+                    hearingAggregate.updateOffenceV2(hearingId, foundHearingsForEditOffence.getDefendantId(), foundHearingsForEditOffence.getOffences()));
         }
     }
 
@@ -94,6 +118,16 @@ public class UpdateOffencesForDefendantCommandHandler extends AbstractCommandHan
         }
     }
 
+    @Handles("hearing.command.delete-offence-on-hearings-v2")
+    public void deleteOffenceV2(final JsonEnvelope envelope) throws EventStreamException {
+
+        final FoundHearingsForDeleteOffenceV2 offenceWithHearingIds = convertToObject(envelope, FoundHearingsForDeleteOffenceV2.class);
+
+        for (UUID hearingId : offenceWithHearingIds.getHearingIds()) {
+            aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate ->
+                    hearingAggregate.deleteOffenceV2(offenceWithHearingIds.getIds(), hearingId));
+        }
+    }
 
     @Handles("hearing.command.remove-offences-from-existing-hearing")
     public void removeOffencesFromExistingHearing(final JsonEnvelope envelope) throws EventStreamException {

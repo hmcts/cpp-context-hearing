@@ -14,7 +14,6 @@ import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CaseRemovedFromGroupCases;
-import uk.gov.moj.cpp.hearing.domain.event.CasesUpdatedAfterCaseRemovedFromGroupCases;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
@@ -26,8 +25,11 @@ import uk.gov.moj.cpp.hearing.domain.event.EnrichAssociatedHearingsWithIndicated
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffenceV2;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffenceV2;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffenceV2;
 import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.FoundVerdictForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
@@ -59,19 +61,16 @@ import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesRequested;
 import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.MasterCaseUpdatedForHearing;
-import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
-import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesQueried;
-import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesRequested;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.PublicSelectedOffencesRemovedFromExistingHearing;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffenceV2;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
@@ -123,9 +122,13 @@ public class HearingEventListenerYamlConfigTest {
             CaseDefendantDetailsWithHearings.class.getAnnotation(Event.class).value(),
             RegisteredHearingAgainstDefendant.class.getAnnotation(Event.class).value(),
             FoundHearingsForNewOffence.class.getAnnotation(Event.class).value(),
+            FoundHearingsForNewOffenceV2.class.getAnnotation(Event.class).value(),
             FoundHearingsForEditOffence.class.getAnnotation(Event.class).value(),
+            FoundHearingsForEditOffenceV2.class.getAnnotation(Event.class).value(),
             FoundHearingsForDeleteOffence.class.getAnnotation(Event.class).value(),
+            FoundHearingsForDeleteOffenceV2.class.getAnnotation(Event.class).value(),
             RegisteredHearingAgainstOffence.class.getAnnotation(Event.class).value(),
+            RegisteredHearingAgainstOffenceV2.class.getAnnotation(Event.class).value(),
             RegisteredHearingAgainstCase.class.getAnnotation(Event.class).value(),
             NowsVariantsSavedEvent.class.getAnnotation(Event.class).value(),
             HearingAdjourned.class.getAnnotation(Event.class).value(),

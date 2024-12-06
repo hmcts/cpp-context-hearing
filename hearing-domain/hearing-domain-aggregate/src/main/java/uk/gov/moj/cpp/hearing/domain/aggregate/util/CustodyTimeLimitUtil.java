@@ -7,6 +7,7 @@ import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaVerdictUtil.isGuiltyVerdict;
 
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
@@ -80,7 +81,7 @@ public class CustodyTimeLimitUtil implements Serializable {
 
     @SuppressWarnings("squid:S1612")
     public static Stream<Object> stopCTLExpiryForV2(final HearingAggregateMomento momento, final List<SharedResultsCommandResultLineV2> resultLines,
-                                                    final List<UUID> resultIdList) {
+                                                    final List<UUID> resultIdList, final Hearing hearing) {
 
         if (isNotEmpty(momento.getHearing().getProsecutionCases())) {
             final Set<UUID> offenceIds = momento.getHearing().getProsecutionCases().stream()
@@ -93,7 +94,17 @@ public class CustodyTimeLimitUtil implements Serializable {
 
             momento.getHearing().getProsecutionCases().stream()
                     .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                    .filter(defendant -> isDefendantOnBail(defendant) || isAnyDefendantsOffencesVerdictIsDefendantFoundUnderADisability(defendant))
+                    .filter(CustodyTimeLimitUtil::isAnyDefendantsOffencesVerdictIsDefendantFoundUnderADisability)
+                    .flatMap(defendant -> defendant.getOffences().stream())
+                    .forEach(offence -> {
+                        if (isCTLExpiryExists(offence)) {
+                            offenceIds.add(offence.getId());
+                        }
+                    });
+
+            hearing.getProsecutionCases().stream()
+                    .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                    .filter(CustodyTimeLimitUtil::isDefendantOnBail)
                     .flatMap(defendant -> defendant.getOffences().stream())
                     .forEach(offence -> {
                         if (isCTLExpiryExists(offence)) {

@@ -60,7 +60,7 @@ public class CustodyTimeLimitUtilTest {
         momento.setHearing(Hearing.hearing()
                 .build());
         final List<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds, momento.getHearing());
 
         assertThat(stream.findFirst().isPresent(), is(false));
     }
@@ -102,7 +102,7 @@ public class CustodyTimeLimitUtilTest {
                         .build()))
                 .build());
         final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds, momento.getHearing());
         assertThat(stream.findFirst().isPresent(), is(false));
     }
 
@@ -144,7 +144,7 @@ public class CustodyTimeLimitUtilTest {
                 .build());
 
         final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds, momento.getHearing());
         assertThat(stream.findFirst().isPresent(), is(false));
     }
 
@@ -193,7 +193,7 @@ public class CustodyTimeLimitUtilTest {
                 .build());
 
         final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds, momento.getHearing());
         assertThat(stream.findFirst().isPresent(), is(false));
     }
 
@@ -257,7 +257,7 @@ public class CustodyTimeLimitUtilTest {
                 .build());
 
         final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds, momento.getHearing());
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
@@ -341,7 +341,7 @@ public class CustodyTimeLimitUtilTest {
                 .build());
 
         final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds, momento.getHearing());
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
@@ -409,7 +409,7 @@ public class CustodyTimeLimitUtilTest {
                 .build());
 
         final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds, momento.getHearing());
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
@@ -494,7 +494,7 @@ public class CustodyTimeLimitUtilTest {
                 .build());
 
         final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds, momento.getHearing());
         assertThat(stream.findFirst().isPresent(), is(false));
     }
 
@@ -579,7 +579,7 @@ public class CustodyTimeLimitUtilTest {
                 .build());
 
         final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds, momento.getHearing());
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
@@ -653,7 +653,7 @@ public class CustodyTimeLimitUtilTest {
                 .build());
 
         final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
-        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds);
+        final Stream<Object> stream = CustodyTimeLimitUtil.stopCTLExpiryForV2(momento, null, referenceResultIds, momento.getHearing());
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
@@ -726,7 +726,7 @@ public class CustodyTimeLimitUtilTest {
                 .withOffenceId(offenceId)
                 .withDefendantId(defendantId)
                 .withResultDefinitionId(WITHDRAWN_RESULT_ID)
-                .build()), referenceResultIds);
+                .build()), referenceResultIds, momento.getHearing());
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
@@ -795,7 +795,7 @@ public class CustodyTimeLimitUtilTest {
                 .withOffenceId(offenceId)
                 .withDefendantId(defendantId)
                 .withResultDefinitionId(WITHDRAWN_RESULT_ID)
-                .build()), referenceResultIds);
+                .build()), referenceResultIds, momento.getHearing());
 
         assertThat(stream.findFirst().isPresent(), is(false));
     }
@@ -864,7 +864,7 @@ public class CustodyTimeLimitUtilTest {
                 .withOffenceId(offenceId)
                 .withDefendantId(defendantId)
                 .withPrompts(asList(geConditionalBailPrompt()))
-                .build()), referenceResultIds);
+                .build()), referenceResultIds, momento.getHearing());
 
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));
@@ -968,7 +968,7 @@ public class CustodyTimeLimitUtilTest {
                 .withDefendantId(defendantId)
                 .withIsDeleted(true)
                 .withPrompts(asList(getUnConditionalBailPrompt()))
-                .build()), referenceResultIds);
+                .build()), referenceResultIds, momento.getHearing());
 
         assertThat(stream.findFirst().isPresent(), is(false));
     }
@@ -1002,7 +1002,7 @@ public class CustodyTimeLimitUtilTest {
                 .withOffenceId(offenceId)
                 .withDefendantId(defendantId)
                 .withPrompts(asList(getUnConditionalBailPrompt()))
-                .build()), referenceResultIds);
+                .build()), referenceResultIds, momento.getHearing());
 
         final List<Object> events = stream.collect(Collectors.toList());
         assertThat(events.size(), is(1));

@@ -58,14 +58,37 @@ public class UpdateOffencesForDefendantEventProcessor {
         sender.send(enveloper.withMetadataFrom(event, "hearing.command.add-new-offence-to-hearings").apply(event.payloadAsJsonObject()));
     }
 
+    @Handles("hearing.events.found-hearings-for-new-offence-v2")
+    public void addCaseDefendantOffenceV2(final JsonEnvelope event) {
+        LOGGER.info("hearing.events.found-hearings-for-new-offence-v2 {}", event.toObfuscatedDebugString());
+        sender.send(enveloper.withMetadataFrom(event, "hearing.command.add-new-offence-to-hearings-v2").apply(event.payloadAsJsonObject()));
+
+        final JsonObject payload = event.payloadAsJsonObject();
+        payload.getJsonArray("offences").stream().map(o -> (JsonObject)o).forEach(offence -> {
+            sender.send(enveloper.withMetadataFrom(event, "hearing.command.register-hearing-against-offence-v2").apply(Json.createObjectBuilder()
+                    .add("offenceId",offence.getString("id") ).add("hearingIds", payload.getJsonArray("hearingIds")).build()));
+        });
+
+    }
+
     @Handles("hearing.events.found-hearings-for-edit-offence")
     public void updateCaseDefendantOffence(final JsonEnvelope event) {
         sender.send(enveloper.withMetadataFrom(event, "hearing.command.update-offence-on-hearings").apply(event.payloadAsJsonObject()));
     }
 
+    @Handles("hearing.events.found-hearings-for-edit-offence-v2")
+    public void updateCaseDefendantOffenceV2(final JsonEnvelope event) {
+        sender.send(enveloper.withMetadataFrom(event, "hearing.command.update-offence-on-hearings-v2").apply(event.payloadAsJsonObject()));
+    }
+
     @Handles("hearing.events.found-hearings-for-delete-offence")
     public void deleteCaseDefendantOffence(final JsonEnvelope event) {
         sender.send(enveloper.withMetadataFrom(event, "hearing.command.delete-offence-on-hearings").apply(event.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.events.found-hearings-for-delete-offence-v2")
+    public void deleteCaseDefendantOffenceV2(final JsonEnvelope event) {
+        sender.send(enveloper.withMetadataFrom(event, "hearing.command.delete-offence-on-hearings-v2").apply(event.payloadAsJsonObject()));
     }
 
     @Handles("hearing.events.offence-added")

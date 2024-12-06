@@ -7,6 +7,7 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,8 +34,11 @@ import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffenceV2;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffenceV2;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffenceV2;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 
 import java.util.Collections;
@@ -145,6 +149,49 @@ public class UpdateOffencesForDefendantEventProcessorTest {
     }
 
     @Test
+    public void addCaseDefendantOffenceV2() {
+
+        final FoundHearingsForNewOffenceV2 foundHearingsForNewOffence = FoundHearingsForNewOffenceV2.foundHearingsForNewOffenceV2()
+                .withHearingIds(Collections.singletonList(randomUUID()))
+                .withDefendantId(randomUUID())
+                .withProsecutionCaseId(randomUUID())
+                .withOffences(Collections.singletonList(Offence.offence()
+                        .withId(randomUUID())
+                        .build()));
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.found-hearings-for-new-offence-v2"),
+                objectToJsonObjectConverter.convert(foundHearingsForNewOffence));
+
+        updateOffencesForDefendantEventProcessor.addCaseDefendantOffenceV2(event);
+
+        verify(this.sender, times(2)).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(
+                this.envelopeArgumentCaptor.getAllValues().get(0), jsonEnvelope(
+                        metadata().withName("hearing.command.add-new-offence-to-hearings-v2"),
+                        payloadIsJson(allOf(
+                                        withJsonPath("$.hearingIds[*]", hasItem(foundHearingsForNewOffence.getHearingIds().get(0).toString())),
+                                        withJsonPath("$.defendantId", is(foundHearingsForNewOffence.getDefendantId().toString())),
+                                        withJsonPath("$.prosecutionCaseId", is(foundHearingsForNewOffence.getProsecutionCaseId().toString())),
+                                        withJsonPath("$.offences[*].id", hasItem(foundHearingsForNewOffence.getOffences().get(0).getId().toString()))
+                                )
+                        )
+                )
+        );
+
+        assertThat(
+                this.envelopeArgumentCaptor.getAllValues().get(1), jsonEnvelope(
+                        metadata().withName("hearing.command.register-hearing-against-offence-v2"),
+                        payloadIsJson(allOf(
+                                        withJsonPath("$.hearingIds[*]", hasItem(foundHearingsForNewOffence.getHearingIds().get(0).toString())),
+                                       withJsonPath("$.offenceId", is(foundHearingsForNewOffence.getOffences().get(0).getId().toString()))
+                                )
+                        )
+                )
+        );
+    }
+
+    @Test
     public void updateCaseDefendantOffence() {
 
         final FoundHearingsForEditOffence foundHearingsForEditOffence = FoundHearingsForEditOffence.foundHearingsForEditOffence()
@@ -175,6 +222,36 @@ public class UpdateOffencesForDefendantEventProcessorTest {
     }
 
     @Test
+    public void updateCaseDefendantOffenceV2() {
+
+        final FoundHearingsForEditOffenceV2 foundHearingsForEditOffence = FoundHearingsForEditOffenceV2.foundHearingsForEditOffenceV2()
+                .withHearingIds(Collections.singletonList(randomUUID()))
+                .withDefendantId(randomUUID())
+                .withOffences(Collections.singletonList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(randomUUID())
+                        .build()));
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.found-hearings-for-edit-offence-v2"),
+                objectToJsonObjectConverter.convert(foundHearingsForEditOffence));
+
+        updateOffencesForDefendantEventProcessor.updateCaseDefendantOffenceV2(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(
+                this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                        metadata().withName("hearing.command.update-offence-on-hearings-v2"),
+                        payloadIsJson(allOf(
+                                        withJsonPath("$.hearingIds[0]", is(foundHearingsForEditOffence.getHearingIds().get(0).toString())),
+                                        withJsonPath("$.defendantId", is(foundHearingsForEditOffence.getDefendantId().toString())),
+                                        withJsonPath("$.offences[0].id", is(foundHearingsForEditOffence.getOffences().get(0).getId().toString()))
+                                )
+                        )
+                )
+        );
+    }
+
+    @Test
     public void deleteCaseDefendantOffence() {
 
         FoundHearingsForDeleteOffence offence = FoundHearingsForDeleteOffence.builder()
@@ -195,6 +272,33 @@ public class UpdateOffencesForDefendantEventProcessorTest {
                         payloadIsJson(allOf(
                                 withJsonPath("$.id", is(offence.getId().toString())),
                                 withJsonPath("$.hearingIds[0]", is(offence.getHearingIds().get(0).toString()))
+                                )
+                        )
+                )
+        );
+    }
+
+    @Test
+    public void deleteCaseDefendantOffenceV2() {
+
+        FoundHearingsForDeleteOffenceV2 offence = FoundHearingsForDeleteOffenceV2.builder()
+                .withIds(Collections.singletonList(randomUUID()))
+                .withHearingIds(Collections.singletonList(randomUUID()))
+                .build();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.found-hearings-for-delete-offence-v2"),
+                objectToJsonObjectConverter.convert(offence));
+
+        updateOffencesForDefendantEventProcessor.deleteCaseDefendantOffenceV2(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(
+                this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                        metadata().withName("hearing.command.delete-offence-on-hearings-v2"),
+                        payloadIsJson(allOf(
+                                        withJsonPath("$.ids", hasItem(offence.getIds().get(0).toString())),
+                                        withJsonPath("$.hearingIds[0]", is(offence.getHearingIds().get(0).toString()))
                                 )
                         )
                 )

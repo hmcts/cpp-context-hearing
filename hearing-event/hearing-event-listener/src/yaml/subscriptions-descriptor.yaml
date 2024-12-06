@@ -89,11 +89,20 @@ subscriptions_descriptor:
         - name: hearing.events.offence-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/offence-added.json
 
+        - name: hearing.events.offence-added-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/offence-added-v2.json
+
         - name: hearing.events.offence-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/offence-updated.json
 
+        - name: hearing.events.offence-updated-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/offence-updated-v2.json
+
         - name: hearing.events.offence-deleted
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/offence-deleted.json
+
+        - name: hearing.events.offence-deleted-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/offence-deleted-v2.json
 
         # Hearing events updated
         - name: hearing.hearing-events-updated

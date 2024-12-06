@@ -38,6 +38,7 @@ import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.hearing.courts.referencedata.Prosecutor;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -70,6 +71,7 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,6 +110,9 @@ public class PublishResultsV3EventProcessor {
 
     @Inject
     private ReferenceDataLoader referenceDataLoader;
+
+    @Inject
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     private static final String FIELD_HEARING_ID ="hearingId";
 
@@ -169,7 +174,7 @@ public class PublishResultsV3EventProcessor {
 
         updateResultLineStatusDelegate.updateDaysResultLineStatus(sender, event, resultsShared);
 
-        sendCommandToStopCustodyTimeLimitClock(event, resultsShared);
+        sendCommandToStopCustodyTimeLimitClock(event, resultsShared.getHearing());
 
     }
 
@@ -431,12 +436,8 @@ public class PublishResultsV3EventProcessor {
         return treeNodes;
     }
 
-    private void sendCommandToStopCustodyTimeLimitClock(final JsonEnvelope event, final ResultsSharedV3 resultsShared) {
-
-        this.sender.send(envelopeFrom(
-                metadataFrom(event.metadata()).withName("hearing.command.stop-custody-time-limit-clock"),
-                createObjectBuilder().add(FIELD_HEARING_ID, resultsShared.getHearingId().toString())));
-
-
+    private void sendCommandToStopCustodyTimeLimitClock(final JsonEnvelope event, final Hearing hearing) {
+        final JsonObjectBuilder commandPayload = createObjectBuilder().add("hearing", objectToJsonObjectConverter.convert(hearing));
+        sender.send(envelopeFrom(metadataFrom(event.metadata()).withName("hearing.command.stop-custody-time-limit-clock"), commandPayload.build()));
     }
 }

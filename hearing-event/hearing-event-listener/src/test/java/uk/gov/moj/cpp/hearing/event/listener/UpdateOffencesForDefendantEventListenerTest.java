@@ -26,8 +26,11 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceAddedV2;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdatedV2;
 import uk.gov.moj.cpp.hearing.domain.event.OffencesRemovedFromExistingHearing;
 import uk.gov.moj.cpp.hearing.mapping.AllocationDecisionJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.CourtIndicatedSentenceJPAMapper;
@@ -57,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -153,6 +157,45 @@ public class UpdateOffencesForDefendantEventListenerTest {
     }
 
     @Test
+    public void testAddOffenceV2() {
+
+        final OffenceAddedV2 offenceAdded = OffenceAddedV2.offenceAddedV2()
+                .withHearingId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withProsecutionCaseId(randomUUID())
+                .withOffence(Collections.singletonList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(randomUUID())
+                        .build()));
+
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceAdded));
+
+        final Hearing hearing = new Hearing() {{
+            setId(offenceAdded.getHearingId());
+            setProsecutionCases(new HashSet<>(Collections.singletonList(new ProsecutionCase(){{
+                setDefendants(new HashSet<>(Collections.singletonList(new Defendant(){{
+                    setId(new HearingSnapshotKey(){{
+                        setId(offenceAdded.getDefendantId());
+                    }});
+                }})));
+            }})));
+        }};
+
+        when(hearingRepository.findBy(offenceAdded.getHearingId())).thenReturn(hearing);
+
+        updateOffencesForDefendantEventListener.addOffenceV2(envelope);
+
+        final ArgumentCaptor<Offence> defendantExArgumentCaptor = ArgumentCaptor.forClass(Offence.class);
+
+        verify(offenceRepository).saveAndFlush(defendantExArgumentCaptor.capture());
+
+        final Offence offenceOut = defendantExArgumentCaptor.getValue();
+
+        assertThat(offenceAdded.getOffences().get(0).getId(), is(offenceOut.getId().getId()));
+        assertThat(offenceAdded.getHearingId(), is(offenceOut.getId().getHearingId()));
+    }
+
+
+    @Test
     public void testNoExceptionWhenAddOffenceToRemovedHearingDLQReplay() {
 
         final OffenceAdded offenceAdded = OffenceAdded.offenceAdded()
@@ -168,6 +211,28 @@ public class UpdateOffencesForDefendantEventListenerTest {
         when(hearingRepository.findBy(offenceAdded.getHearingId())).thenReturn(null);
 
         updateOffencesForDefendantEventListener.addOffence(envelope);
+
+        final ArgumentCaptor<Offence> defendantExArgumentCaptor = ArgumentCaptor.forClass(Offence.class);
+
+        verify(offenceRepository, never()).saveAndFlush(defendantExArgumentCaptor.capture());
+    }
+
+    @Test
+    public void testNoExceptionWhenAddOffenceV2ToRemovedHearingDLQReplay() {
+
+        final OffenceAddedV2 offenceAdded = OffenceAddedV2.offenceAddedV2()
+                .withHearingId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withProsecutionCaseId(randomUUID())
+                .withOffence(Collections.singletonList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(randomUUID())
+                        .build()));
+
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceAdded));
+
+        when(hearingRepository.findBy(offenceAdded.getHearingId())).thenReturn(null);
+
+        updateOffencesForDefendantEventListener.addOffenceV2(envelope);
 
         final ArgumentCaptor<Offence> defendantExArgumentCaptor = ArgumentCaptor.forClass(Offence.class);
 
@@ -200,6 +265,34 @@ public class UpdateOffencesForDefendantEventListenerTest {
         verify(offenceRepository, never()).saveAndFlush(defendantExArgumentCaptor.capture());
 
     }
+
+    @Test
+    public void shouldNotAddExistingOffencesToHearing() {
+
+        final OffenceAddedV2 offenceAdded = OffenceAddedV2.offenceAddedV2()
+                .withHearingId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withProsecutionCaseId(randomUUID())
+                .withOffence(Collections.singletonList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(randomUUID())
+                        .build()));
+
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceAdded));
+
+        final Hearing hearing = new Hearing() {{
+            setId(offenceAdded.getHearingId());
+        }};
+
+        when(hearingRepository.findBy(offenceAdded.getHearingId())).thenReturn(hearing);
+
+        updateOffencesForDefendantEventListener.addOffenceV2(envelope);
+
+        final ArgumentCaptor<Offence> defendantExArgumentCaptor = ArgumentCaptor.forClass(Offence.class);
+
+        verify(offenceRepository, never()).saveAndFlush(defendantExArgumentCaptor.capture());
+
+    }
+
 
     @Test
     public void testUpdateOffence() {
@@ -329,6 +422,141 @@ public class UpdateOffencesForDefendantEventListenerTest {
 
     }
 
+    @Test
+    public void testUpdateOffenceV2() {
+        final ReportingRestriction reportingRestriction = ReportingRestriction.reportingRestriction()
+                .withId(randomUUID())
+                .withJudicialResultId(randomUUID())
+                .withLabel("label")
+                .withOrderedDate(now()).build();
+
+        final OffenceUpdatedV2 offenceUpdated = OffenceUpdatedV2.offenceUpdatedV2()
+                .withHearingId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withOffences(asList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(randomUUID())
+                        .withIntroducedAfterInitialProceedings(true)
+                        .withIsDiscontinued(true)
+                        .withProceedingsConcluded(true)
+                        .withReportingRestrictions(asList(reportingRestriction))
+                        .build(), uk.gov.justice.core.courts.Offence.offence()
+                        .withId(randomUUID())
+                        .withIntroducedAfterInitialProceedings(true)
+                        .withIsDiscontinued(true)
+                        .withProceedingsConcluded(true)
+                        .withReportingRestrictions(asList(reportingRestriction))
+                        .build()));
+
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceUpdated));
+
+        final Hearing hearing = new Hearing() {{
+            setId(offenceUpdated.getHearingId());
+        }};
+
+        when(hearingRepository.findBy(hearing.getId())).thenReturn(hearing);
+
+        final Offence offence = new Offence() {{
+            setId(new HearingSnapshotKey(offenceUpdated.getOffences().get(0).getId(), offenceUpdated.getHearingId()));
+        }};
+
+        final Defendant defendant = new Defendant() {{
+            setId(new HearingSnapshotKey(offenceUpdated.getDefendantId(), offenceUpdated.getHearingId()));
+            setOffences(asSet(offence));
+        }};
+
+        when(defendantRepository.findBy(defendant.getId())).thenReturn(defendant);
+
+        updateOffencesForDefendantEventListener.updateOffenceV2(envelope);
+
+        final ArgumentCaptor<Defendant> defendantExArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
+
+        verify(defendantRepository).saveAndFlush(defendantExArgumentCaptor.capture());
+
+        final Set<Offence> offenceOuts = defendantExArgumentCaptor.getValue().getOffences();
+        final Offence offenceOut = offenceOuts.iterator().next();
+
+        assertThat(offenceOuts.size(), is(1));
+        assertThat(offenceUpdated.getOffences().get(0).getId(), is(offenceOut.getId().getId()));
+        assertThat(offenceUpdated.getHearingId(), is(offenceOut.getId().getHearingId()));
+        assertThat(offenceUpdated.getOffences().get(0).getProceedingsConcluded(), is(offenceOut.isProceedingsConcluded()));
+        assertThat(offenceUpdated.getOffences().get(0).getIntroducedAfterInitialProceedings(), is(offenceOut.isIntroduceAfterInitialProceedings()));
+        assertThat(offenceUpdated.getOffences().get(0).getIsDiscontinued(), is(offenceOut.isDiscontinued()));
+        assertThat(offenceUpdated.getOffences().get(0).getReportingRestrictions().get(0).getId(), is(reportingRestriction.getId()));
+        assertThat(offenceUpdated.getOffences().get(0).getReportingRestrictions().get(0).getJudicialResultId(), is(reportingRestriction.getJudicialResultId()));
+        assertThat(offenceUpdated.getOffences().get(0).getReportingRestrictions().get(0).getLabel(), is(reportingRestriction.getLabel()));
+        assertThat(offenceUpdated.getOffences().get(0).getReportingRestrictions().get(0).getOrderedDate(), is(reportingRestriction.getOrderedDate()));
+    }
+
+    @Test
+    public void testUpdateOffenceWithOutProceedingsConcludedDataV2() {
+
+        final OffenceUpdatedV2 offenceUpdated = OffenceUpdatedV2.offenceUpdatedV2()
+                .withHearingId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withOffences(Collections.singletonList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(randomUUID())
+                        .build()));
+
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceUpdated));
+
+        final Hearing hearing = new Hearing() {{
+            setId(offenceUpdated.getHearingId());
+        }};
+
+        when(hearingRepository.findBy(hearing.getId())).thenReturn(hearing);
+
+        final Offence offence = new Offence() {{
+            setId(new HearingSnapshotKey(offenceUpdated.getOffences().get(0).getId(), offenceUpdated.getHearingId()));
+        }};
+
+        final Defendant defendant = new Defendant() {{
+            setId(new HearingSnapshotKey(offenceUpdated.getDefendantId(), offenceUpdated.getHearingId()));
+            setOffences(asSet(offence));
+        }};
+
+        when(defendantRepository.findBy(defendant.getId())).thenReturn(defendant);
+
+        updateOffencesForDefendantEventListener.updateOffenceV2(envelope);
+
+        final ArgumentCaptor<Defendant> defendantExArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
+
+        verify(defendantRepository).saveAndFlush(defendantExArgumentCaptor.capture());
+
+        final Offence offenceOut = defendantExArgumentCaptor.getValue().getOffences().iterator().next();
+
+        assertThat(offenceUpdated.getOffences().get(0).getId(), is(offenceOut.getId().getId()));
+        assertThat(offenceUpdated.getHearingId(), is(offenceOut.getId().getHearingId()));
+        assertThat(offenceUpdated.getOffences().get(0).getProceedingsConcluded(), nullValue());
+        assertThat(offenceUpdated.getOffences().get(0).getIntroducedAfterInitialProceedings(), is(nullValue()));
+        assertThat(offenceUpdated.getOffences().get(0).getIsDiscontinued(), is(nullValue()));
+    }
+
+    @Test
+    public void testUpdateOffenceWhenDefendantNotPresentForCombinationOfHearingIdAndDefendantIdV2() {
+
+        final OffenceUpdatedV2 offenceUpdated = OffenceUpdatedV2.offenceUpdatedV2()
+                .withHearingId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withOffences(Collections.singletonList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(randomUUID())
+                        .build()));
+
+        final Hearing hearing = new Hearing() {{
+            setId(offenceUpdated.getHearingId());
+        }};
+
+        when(hearingRepository.findBy(hearing.getId())).thenReturn(hearing);
+
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceUpdated));
+
+        when(defendantRepository.findBy(new HearingSnapshotKey(offenceUpdated.getDefendantId(), offenceUpdated.getHearingId()))).thenReturn(null);
+
+        updateOffencesForDefendantEventListener.updateOffenceV2(envelope);
+
+
+        verify(defendantRepository, never()).saveAndFlush(any());
+
+    }
 
     @Test
     public void testDeleteOffence() {
@@ -348,6 +576,34 @@ public class UpdateOffencesForDefendantEventListenerTest {
         when(offenceRepository.findBy(offence.getId())).thenReturn(offence);
 
         updateOffencesForDefendantEventListener.deleteOffence(envelope);
+
+        final ArgumentCaptor<Defendant> defendantExArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
+
+        verify(defendantRepository).save(defendantExArgumentCaptor.capture());
+
+        final Defendant defendantOut = defendantExArgumentCaptor.getValue();
+
+        assertThat(defendant.getId().getId(), is(defendantOut.getId().getId()));
+    }
+
+    @Test
+    public void testDeleteOffenceV2() {
+
+        final OffenceDeletedV2 offenceDeleted = OffenceDeletedV2.builder().withIds(Collections.singletonList(randomUUID())).withHearingId(randomUUID()).build();
+
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceDeleted));
+
+        final Defendant defendant = new Defendant();
+        defendant.setId(new HearingSnapshotKey(randomUUID(), offenceDeleted.getHearingId()));
+        defendant.setOffences(Collections.emptySet());
+
+        final Offence offence = new Offence();
+        offence.setId(new HearingSnapshotKey(offenceDeleted.getIds().get(0), offenceDeleted.getHearingId()));
+        offence.setDefendant(defendant);
+
+        when(offenceRepository.findBy(offence.getId())).thenReturn(offence);
+
+        updateOffencesForDefendantEventListener.deleteOffenceV2(envelope);
 
         final ArgumentCaptor<Defendant> defendantExArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
 

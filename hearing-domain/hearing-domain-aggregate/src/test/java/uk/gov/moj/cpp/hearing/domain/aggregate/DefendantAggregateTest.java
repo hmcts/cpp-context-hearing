@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.hasItems;
@@ -11,6 +12,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -20,6 +22,7 @@ import static uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate.compute
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
 
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.domain.OffenceResult;
@@ -27,6 +30,8 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NCESDecisionConstants;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffenceV2;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForDefendant;
@@ -42,16 +47,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableMap;
+import junit.framework.TestCase;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.After;
 import org.junit.jupiter.api.Test;
@@ -485,7 +493,7 @@ public class DefendantAggregateTest {
 
     @Test
     public void shouldNotRaiseFoundHearingIdForNewOffences_when_hearingIdIsNotAssociatedWithCase() {
-        final List<Object> collect = defendantAggregate.lookupHearingsForNewOffenceOnDefendant(randomUUID(), randomUUID(), Offence.offence().build()).collect(toList());
+        final List<Object> collect = defendantAggregate.lookupHearingsForNewOffenceOnDefendantV2(randomUUID(), randomUUID(), singletonList(Offence.offence().build())).collect(toList());
         assertTrue(collect.isEmpty());
     }
 
@@ -495,7 +503,7 @@ public class DefendantAggregateTest {
         hearingIds.add(randomUUID());
         setField(defendantAggregate, "hearingIds", hearingIds);
 
-        final List<Object> collect = defendantAggregate.lookupHearingsForNewOffenceOnDefendant(randomUUID(), randomUUID(), Offence.offence().build()).collect(toList());
+        final List<Object> collect = defendantAggregate.lookupHearingsForNewOffenceOnDefendantV2(randomUUID(), randomUUID(), singletonList(Offence.offence().build())).collect(toList());
         assertThat(collect.size(), is(1));
     }
 
@@ -562,6 +570,45 @@ public class DefendantAggregateTest {
 
         assertThat(getValueOfField(defendantAggregate, "hearingIds", HashSet.class).size(), is(1));
         assertThat(getValueOfField(defendantAggregate, "hearingIds", HashSet.class).stream().findFirst().get(), is(hearingId2));
+    }
+
+    @Test
+    public void shouldReturn_emptyStream_whenEditOffence_hearingIds_notFound() {
+        Stream<Object> objectStream = defendantAggregate.lookupHearingsForEditOffenceOnOffence(randomUUID(), Collections.singletonList(uk.gov.justice.core.courts.Offence.offence().build()));
+        assertThat(objectStream.findAny(), Matchers.is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldReturn_stream_whenEditOffence_hearingIds_areFound() {
+        ReflectionUtil.setField(defendantAggregate, "hearingIds", Set.of(randomUUID()));
+        Stream<Object> objectStream = defendantAggregate.lookupHearingsForEditOffenceOnOffence(randomUUID(), Collections.singletonList(uk.gov.justice.core.courts.Offence.offence().build()));
+        TestCase.assertTrue(objectStream.findAny().isPresent());
+    }
+
+    @Test
+    public void shouldReturn_stream_whenDeleteOffence_hearingIds_areFound() {
+        ReflectionUtil.setField(defendantAggregate, "hearingIds", Set.of(randomUUID()));
+        Stream<Object> objectStream = defendantAggregate.lookupHearingsForEditOffenceOnOffence(randomUUID(), Collections.singletonList(uk.gov.justice.core.courts.Offence.offence().build()));
+        TestCase.assertTrue(objectStream.findAny().isPresent());
+    }
+
+    @Test
+    public void shouldReturn_emptyStream_whenDeleteOffence_hearingIds_notFound() {
+        Stream<Object> objectStream = defendantAggregate.lookupHearingsForDeleteOffenceOnOffence(singletonList(randomUUID()));
+        assertThat(objectStream.findAny(), Matchers.is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldReturn_stream_whenDeleteOffence_hearingIds_found() {
+        final UUID offenceId = randomUUID();
+        ReflectionUtil.setField(defendantAggregate, "hearingIds", Set.of(randomUUID()));
+        final Stream<Object> objectStream = defendantAggregate.lookupHearingsForDeleteOffenceOnOffence(singletonList(offenceId));
+        final List<Object> event = objectStream.collect(toList());
+        assertThat(event, Matchers.is(notNullValue()));
+        assertThat(event.size(), Matchers.is(1));
+        final FoundHearingsForDeleteOffenceV2 foundHearingsForDeleteOffence = (FoundHearingsForDeleteOffenceV2) event.get(0);
+        assertThat(foundHearingsForDeleteOffence, Matchers.is(notNullValue()));
+        assertThat(foundHearingsForDeleteOffence.getIds(), hasItems(offenceId));
     }
 
     public void testMapWithdrawnDismissed(final Map map, final Matcher matcher) {

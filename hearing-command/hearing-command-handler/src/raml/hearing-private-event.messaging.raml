@@ -32,6 +32,10 @@ baseUri: message://command/handler/message/hearing
                     schema: !include json/schema/hearing.events.registered-hearing-against-offence.json
                     example: !include json/hearing.events.registered-hearing-against-offence.json
 
+                application/vnd.hearing.events.registered-hearing-against-offence-v2+json:
+                    schema: !include json/schema/hearing.events.registered-hearing-against-offence-v2.json
+                    example: !include json/hearing.events.registered-hearing-against-offence-v2.json
+
                 application/vnd.hearing.events.registered-hearing-against-defendant+json:
                     schema: !include json/schema/hearing.events.registered-hearing-against-defendant.json
                     example: !include json/hearing.events.registered-hearing-against-defendant.json
@@ -105,25 +109,49 @@ baseUri: message://command/handler/message/hearing
                     schema: !include json/schema/hearing.events.found-hearings-for-new-offence.json
                     example: !include json/hearing.events.found-hearings-for-new-offence.json
 
+                application/vnd.hearing.events.found-hearings-for-new-offence-v2+json:
+                    schema: !include json/schema/hearing.events.found-hearings-for-new-offence-v2.json
+                    example: !include json/hearing.events.found-hearings-for-new-offence-v2.json
+
                 application/vnd.hearing.events.offence-added+json:
                     schema: !include json/schema/hearing.events.offence-added.json
                     example: !include json/hearing.events.offence-added.json
+
+                application/vnd.hearing.events.offence-added-v2+json:
+                    schema: !include json/schema/hearing.events.offence-added-v2.json
+                    example: !include json/hearing.events.offence-added-v2.json
 
                 application/vnd.hearing.events.found-hearings-for-edit-offence+json:
                     schema: !include json/schema/hearing.events.found-hearings-for-edit-offence.json
                     example: !include json/hearing.events.found-hearings-for-edit-offence.json
 
+                application/vnd.hearing.events.found-hearings-for-edit-offence-v2+json:
+                    schema: !include json/schema/hearing.events.found-hearings-for-edit-offence-v2.json
+                    example: !include json/hearing.events.found-hearings-for-edit-offence-v2.json
+
                 application/vnd.hearing.events.offence-updated+json:
                     schema: !include json/schema/hearing.events.offence-updated.json
                     example: !include json/hearing.events.offence-updated.json
+
+                application/vnd.hearing.events.offence-updated-v2+json:
+                    schema: !include json/schema/hearing.events.offence-updated-v2.json
+                    example: !include json/hearing.events.offence-updated-v2.json
 
                 application/vnd.hearing.events.found-hearings-for-delete-offence+json:
                     schema: !include json/schema/hearing.events.found-hearings-for-delete-offence.json
                     example: !include json/hearing.events.found-hearings-for-delete-offence.json
 
+                application/vnd.hearing.events.found-hearings-for-delete-offence-v2+json:
+                    schema: !include json/schema/hearing.events.found-hearings-for-delete-offence-v2.json
+                    example: !include json/hearing.events.found-hearings-for-delete-offence-v2.json
+
                 application/vnd.hearing.events.offence-deleted+json:
                     schema: !include json/schema/hearing.events.offence-deleted.json
                     example: !include json/hearing.events.offence-deleted.json
+
+                application/vnd.hearing.events.offence-deleted-v2+json:
+                    schema: !include json/schema/hearing.events.offence-deleted-v2.json
+                    example: !include json/hearing.events.offence-deleted-v2.json
 
 # Hearing Detail Changed
                 application/vnd.hearing.event.detail-changed+json:

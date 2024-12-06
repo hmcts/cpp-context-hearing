@@ -133,23 +133,41 @@ subscriptions_descriptor:
         - name: hearing.events.found-hearings-for-new-offence
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/found-hearings-for-new-offence.json
 
+        - name: hearing.events.found-hearings-for-new-offence-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/found-hearings-for-new-offence-v2.json
+
         - name: hearing.command.add-new-offence-to-hearings
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/command.add-new-offence-to-hearings.json
+
+        - name: hearing.command.add-new-offence-to-hearings-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/command.add-new-offence-to-hearings-v2.json
 
         - name: hearing.events.found-hearings-for-edit-offence
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/found-hearings-for-edit-offence.json
 
+        - name: hearing.events.found-hearings-for-edit-offence-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/found-hearings-for-edit-offence-v2.json
+
         - name: hearing.command.update-offence-on-hearings
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/command.update-offence-on-hearings.json
 
+        - name: hearing.command.update-offence-on-hearings-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/command.update-offence-on-hearings-v2.json
+
         - name: hearing.events.found-hearings-for-delete-offence
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/found-hearings-for-delete-offence.json
+
+        - name: hearing.events.found-hearings-for-delete-offence-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/found-hearings-for-delete-offence-v2.json
 
         - name: hearing.events.offence-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/offence-added.json
 
         - name: hearing.command.delete-offence-on-hearings
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/command.delete-offence-on-hearings.json
+
+        - name: hearing.command.delete-offence-on-hearings-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/command.delete-offence-on-hearings-v2.json
 
         # Nows
         - name: hearing.events.nows-material-status-updated

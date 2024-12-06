@@ -17,6 +17,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstOffenceCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstOffenceCommandV2;
 import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
@@ -91,8 +92,7 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
 
     /**
      * This is the new command handler which updates the existing hearing like {@link InitiateHearingCommandHandler#extendHearing(JsonEnvelope)}
-     * and does the same functionality.
-     *
+     * and does the same functionality.*
      * But this command is created to have a meaningful command name and event name(ExistingHearingUpdated).
      *
      * @param envelope
@@ -118,6 +118,15 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
         }
         final RegisterHearingAgainstOffenceCommand command = convertToObject(envelope, RegisterHearingAgainstOffenceCommand.class);
         aggregate(OffenceAggregate.class, command.getOffenceId(), envelope, a -> a.lookupOffenceForHearing(command.getHearingId(), command.getOffenceId()));
+    }
+
+    @Handles("hearing.command.register-hearing-against-offence-v2")
+    public void initiateHearingOffenceV2(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.register-hearing-against-offence-v2 event received {}", envelope.toObfuscatedDebugString());
+        }
+        final RegisterHearingAgainstOffenceCommandV2 command = convertToObject(envelope, RegisterHearingAgainstOffenceCommandV2.class);
+        aggregate(OffenceAggregate.class, command.getOffenceId(), envelope, a -> a.lookupOffenceForHearingV2(command.getHearingIds(), command.getOffenceId()));
     }
 
     @Handles("hearing.command.register-hearing-against-defendant")

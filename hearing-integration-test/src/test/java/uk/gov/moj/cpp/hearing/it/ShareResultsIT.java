@@ -203,9 +203,10 @@ public class ShareResultsIT extends AbstractIT {
     private static final UUID DISMISSED_RESULT_DEF_ID = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
     private static final UUID GUILTY_RESULT_DEF_ID = fromString("ce23a452-9015-4619-968f-1628d7a271c9");
     private static final UUID WITHDRAWN_RESULT_DEF_ID = fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
+    private static final UUID REMANDED_ON_CONDITIONAL_BAIL_ID = fromString("3a529001-2f43-45ba-a0a8-d3ced7e9e7ad");
     private static final String GUILTY = "GUILTY";
     private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
-    private static final MessageConsumer consumerForCourtDocumentUpdated = getPublicTopicInstance().createConsumer("public.events.hearing.custody-time-limit-clock-stopped");
+    private static final MessageConsumer consumerForCustodyTimeClockStopped = getPublicTopicInstance().createConsumer("public.events.hearing.custody-time-limit-clock-stopped");
 
     @BeforeEach
     public void setup() {
@@ -2007,7 +2008,46 @@ public class ShareResultsIT extends AbstractIT {
 
         assertPublicHearingResultedEventPublished(hearing);
 
-        final JsonPath jsonPath = QueueUtil.retrieveMessage(consumerForCourtDocumentUpdated);
+        final JsonPath jsonPath = QueueUtil.retrieveMessage(consumerForCustodyTimeClockStopped);
+
+        assertTrue(((List)jsonPath.get("offenceIds")).size() > 0);
+        assertNotNull(jsonPath.get("hearingId"));
+    }
+
+    @Test
+    public void shouldCreateCTLClockStoppedWhenRemandOnConditionalBail() {
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+
+        final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = getUuidMapForCivilCaseStructure();
+        final UUID masterProsecutionCaseId = caseStructure.keySet().iterator().next();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommandForCivilCases(caseStructure, masterProsecutionCaseId);
+        final Hearing hearing = hearingCommand.getHearing();
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
+
+        stubCourtRoom(hearing);
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceDataRemandedOnBailCondition(orderedDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingCommand.it(), orderedDate, LocalDate.now());
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
+
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+
+        saveDaysDraftResult(saveDraftResultCommand);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        shareDaysResultWithCourtClerk(hearing, targets, LocalDate.now());
+
+        assertPublicHearingResultedEventPublished(hearing);
+
+        final JsonPath jsonPath = QueueUtil.retrieveMessage(consumerForCustodyTimeClockStopped);
 
         assertTrue(((List)jsonPath.get("offenceIds")).size() > 0);
         assertNotNull(jsonPath.get("hearingId"));
@@ -3104,6 +3144,55 @@ public class ShareResultsIT extends AbstractIT {
                                 .setId(NOTICE_OF_FINANCIAL_PENALTY_NOW_DEFINITION_ID)
                                 .setResultDefinitions(asList(NowResultDefinitionRequirement.resultDefinitions()
                                                 .setId(RD_FINE)
+                                                .setMandatory(true)
+                                                .setWelshText("Welsh Text Primary")
+                                                .setPrimary(true),
+                                        NowResultDefinitionRequirement.resultDefinitions()
+                                                .setId(randomUUID())
+                                                .setMandatory(false)
+                                                .setPrimary(false)
+                                                .setWelshText("Welsh Text Not Primary")
+                                ))
+                                .setName(STRING.next())
+                                .setText("NowLevel/" + STRING.next())
+                                .setWelshText("NowLevel/" + STRING.next() + " Welsh")
+                                .setWelshName("Welsh Name")
+                                .setTemplateName(STRING.next())
+                                .setRank(INTEGER.next())
+                                .setJurisdiction("B")
+                                .setRemotePrintingRequired(false),
+                        NowDefinition.now()
+                                .setId(ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID)
+                                .setResultDefinitions(asList(NowResultDefinitionRequirement.resultDefinitions()
+                                                .setId(fromString("de946ddc-ad77-44b1-8480-8bbc251cdcfb")) // FIDICI
+                                                .setWelshText("Welsh Text Primary")
+                                                .setMandatory(true)
+                                                .setPrimary(true),
+                                        NowResultDefinitionRequirement.resultDefinitions()
+                                                .setId(randomUUID())
+                                                .setMandatory(false)
+                                                .setPrimary(false)
+                                                .setWelshText("Welsh Text Not Primary")
+                                ))
+                                .setName(STRING.next())
+                                .setText("NowLevel/" + STRING.next())
+                                .setTemplateName(STRING.next())
+                                .setRank(INTEGER.next())
+                                .setJurisdiction("B")
+                                .setRemotePrintingRequired(false)
+                                .setText(STRING.next())
+                                .setWelshText("welshText")
+                                .setWelshName("welshName")
+                ));
+        return setupNowsReferenceData(referenceDate, allnows);
+    }
+
+    private AllNowsReferenceDataHelper setupNowsReferenceDataRemandedOnBailCondition(final LocalDate referenceDate) {
+        AllNows allnows = AllNows.allNows()
+                .setNows(Arrays.asList(NowDefinition.now()
+                                .setId(NOTICE_OF_FINANCIAL_PENALTY_NOW_DEFINITION_ID)
+                                .setResultDefinitions(asList(NowResultDefinitionRequirement.resultDefinitions()
+                                                .setId(REMANDED_ON_CONDITIONAL_BAIL_ID)
                                                 .setMandatory(true)
                                                 .setWelshText("Welsh Text Primary")
                                                 .setPrimary(true),

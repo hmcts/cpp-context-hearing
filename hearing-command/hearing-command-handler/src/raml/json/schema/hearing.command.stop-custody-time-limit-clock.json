@@ -3,12 +3,12 @@
   "id": "http://justice.gov.uk/hearing/courts/hearing.command.stop-custody-time-limit-clock.json",
   "type": "object",
   "properties": {
-    "hearingId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    "hearing": {
+      "$ref": "http://justice.gov.uk/core/courts/hearing.json"
     }
   },
   "required": [
-    "hearingId"
+    "hearing"
   ],
   "additionalProperties": false
 }
