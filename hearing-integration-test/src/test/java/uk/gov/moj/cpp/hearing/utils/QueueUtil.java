@@ -33,7 +33,6 @@ public class QueueUtil implements AutoCloseable {
     private static final String JMS_TOPIC_PREFIX = "jms.topic.";
     private final Topic topic;
 
-    private String topicName;
     private static Session session;
     private MessageProducer messageProducer;
 
@@ -48,7 +47,6 @@ public class QueueUtil implements AutoCloseable {
             connection.start();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             topic = new ActiveMQTopic(topicName);
-            this.topicName = topicName;
         } catch (final JMSException e) {
             LOGGER.error("Fatal error initialising Artemis", e);
             throw new RuntimeException(e);
@@ -114,10 +112,6 @@ public class QueueUtil implements AutoCloseable {
         } catch (final JMSException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public String getTopicName(){
-        return topicName;
     }
 
     @Override

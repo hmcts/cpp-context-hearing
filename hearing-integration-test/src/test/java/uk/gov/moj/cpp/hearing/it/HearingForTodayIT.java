@@ -4,6 +4,8 @@ import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
@@ -22,11 +24,14 @@ import static uk.gov.justice.core.courts.Person.person;
 import static uk.gov.justice.core.courts.PersonDefendant.personDefendant;
 import static uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase;
 import static uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCaseIdentifier;
+import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand.initiateHearingCommand;
-import static uk.gov.moj.cpp.hearing.it.Queries.getHearingForTodayPollForMatch;
+import static uk.gov.moj.cpp.hearing.it.Queries.jsonPayloadMatchesBean;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsMagistrateUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
@@ -50,14 +55,20 @@ import uk.gov.justice.core.courts.SummonsTemplateType;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
+import uk.gov.justice.services.common.http.HeaderConstants;
+import uk.gov.justice.services.test.utils.core.http.RequestParams;
+import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 
 public class HearingForTodayIT extends AbstractIT {
@@ -259,6 +270,20 @@ public class HearingForTodayIT extends AbstractIT {
                         .with(this::extractApplicationLegislation, is(APPLICATION_LEGISLATION))
                 ))
         );
+    }
+
+    private static void getHearingForTodayPollForMatch(final UUID userId, final long timeout, final BeanMatcher<GetHearings> resultMatcher) {
+        final RequestParams requestParams = requestParams(getURL("hearing.get.hearings-for-today"), "application/vnd.hearing.get.hearings-for-today+json")
+                .withHeader(HeaderConstants.USER_ID, userId)
+                .build();
+
+        final Matcher<ResponseData> expectedConditions = allOf(status().is(OK), jsonPayloadMatchesBean(GetHearings.class, resultMatcher));
+        poll(requestParams)
+                .timeout(timeout, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        expectedConditions
+                );
     }
 
 
@@ -482,9 +507,10 @@ public class HearingForTodayIT extends AbstractIT {
         return hearingSummaries.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getOffences().get(0).getOffenceTitle();
     }
 
-    private int getNumberOfOffences(final  HearingSummaries hearingSummaries) {
+    private int getNumberOfOffences(final HearingSummaries hearingSummaries) {
         return hearingSummaries.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getOffences().size();
     }
+
     private String getOffenceWording(final HearingSummaries hearingSummaries) {
         return hearingSummaries.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getOffences().get(0).getWording();
     }

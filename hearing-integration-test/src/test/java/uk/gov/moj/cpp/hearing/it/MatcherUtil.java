@@ -13,7 +13,6 @@ import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
 

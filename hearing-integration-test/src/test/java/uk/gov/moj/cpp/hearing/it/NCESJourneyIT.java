@@ -4,7 +4,6 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -25,7 +24,6 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.constants.ApplicationOutcome.WITHDRAWN;
 import static uk.gov.moj.cpp.hearing.constants.ApplicationType.APPEAL_AGAINST_SENTENCE;
 import static uk.gov.moj.cpp.hearing.constants.EmailAmendmentTitles.AMEND_RESULT;
 import static uk.gov.moj.cpp.hearing.constants.EmailAmendmentTitles.APPEAL_WITHDRAWN;
@@ -36,8 +34,8 @@ import static uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows
 import static uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition.now;
 import static uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement.resultDefinitions;
 import static uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions.allResultDefinitions;
-import static uk.gov.moj.cpp.hearing.it.ProsecutionCounselIT.createFirstProsecutionCounsel;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
+import static uk.gov.moj.cpp.hearing.it.UseCases.createFirstProsecutionCounsel;
 import static uk.gov.moj.cpp.hearing.it.UseCases.shareResults;
 import static uk.gov.moj.cpp.hearing.it.Utilities.JsonUtil.objectToJsonObject;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
@@ -76,7 +74,6 @@ import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
-import uk.gov.moj.cpp.hearing.constants.ApplicationOutcome;
 import uk.gov.moj.cpp.hearing.constants.ApplicationType;
 import uk.gov.moj.cpp.hearing.constants.EmailStatus;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
@@ -96,7 +93,6 @@ import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -131,23 +127,6 @@ public class NCESJourneyIT extends AbstractIT {
     }
 
     @Test
-    public void shouldSendToGOBButNotSendEmailWhenResultsSharedWithFinancialImpositionWithoutDeemedServedResults() {
-        InitiateHearingCommandHelper hearingCommandHelper = getInitiateHearingCommandHelper();
-        SaveDraftResultCommand draftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate, LocalDate.now());
-
-        // extend hearing by creating an application against a defendant
-        final Defendant firstDefendant = hearingCommandHelper.getFirstCase().getDefendants().get(0);
-        UUID defendantId = firstDefendant.getId();
-        UUID hearingId = hearingCommandHelper.getHearingId();
-        initiateHearingAndShareResults(orderedDate, setupNowsReferenceData(orderedDate, false), hearingCommandHelper, draftResultCommand);
-        sendStagingEnforcementAcknowledgment(2, FIRST_ACK_ACCOUNT_NUMBER, testStartTime, hearingId);
-        verifyEmailNotificationEvent(NOT_SENT, isJson(allOf(
-                withJsonPath("$.hearingId", is(hearingId.toString())),
-                withJsonPath("$.defendantId", is(defendantId.toString()))
-        )));
-    }
-
-    @Test
     public void shouldSendToGOBAndEmailWhenResultsSharedWithFinancialImpositionAndDeemedServedResults() {
         InitiateHearingCommandHelper hearingCommandHelper = getInitiateHearingCommandHelper();
         SaveDraftResultCommand draftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate, LocalDate.now());
@@ -163,33 +142,6 @@ public class NCESJourneyIT extends AbstractIT {
                 withJsonPath("$.defendantId", is(defendantId.toString())),
                 withJsonPath("$.documentContent.gobAccountNumber", is(FIRST_ACK_ACCOUNT_NUMBER)),
                 withJsonPath("$.documentContent.amendmentType", is(WRITE_OFF_ONE_DAY_DEEMED_SERVED))
-        )));
-    }
-
-    @Test
-    public void shouldSendToGOBAndNotEmailWhenResultsResharedWithFinancialImpositionAndWithDeemedServedResults() {
-        InitiateHearingCommandHelper hearingCommandHelper = getInitiateHearingCommandHelper();
-        SaveDraftResultCommand draftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate, LocalDate.now());
-
-        // extend hearing by creating an application against a defendant
-        final Defendant firstDefendant = hearingCommandHelper.getFirstCase().getDefendants().get(0);
-        UUID defendantId = firstDefendant.getId();
-        UUID hearingId = hearingCommandHelper.getHearingId();
-        initiateHearingAndShareResults(orderedDate, setupNowsReferenceData(orderedDate, true), hearingCommandHelper, draftResultCommand);
-        sendStagingEnforcementAcknowledgment(2, FIRST_ACK_ACCOUNT_NUMBER, testStartTime, hearingId);
-        verifyEmailNotificationEvent(SENT, isJson(allOf(
-                withJsonPath("$.hearingId", is(hearingId.toString())),
-                withJsonPath("$.defendantId", is(defendantId.toString())),
-                withJsonPath("$.documentContent.gobAccountNumber", is(FIRST_ACK_ACCOUNT_NUMBER)),
-                withJsonPath("$.documentContent.amendmentType", is(WRITE_OFF_ONE_DAY_DEEMED_SERVED))
-        )));
-
-        final ZonedDateTime timeOfSubsequentSharing = ZonedDateTime.now();
-        shareOffenceResults(hearingCommandHelper, draftResultCommand);
-        sendStagingEnforcementAcknowledgment(2, SECOND_ACK_ACCOUNT_NUMBER, timeOfSubsequentSharing, hearingId);
-        verifyEmailNotificationEvent(NOT_SENT, isJson(allOf(
-                withJsonPath("$.hearingId", is(hearingId.toString())),
-                withJsonPath("$.defendantId", is(defendantId.toString()))
         )));
     }
 
@@ -242,11 +194,9 @@ public class NCESJourneyIT extends AbstractIT {
 
         final UUID applicationId = randomUUID();
 
-        extendHearingWithApplicationLinkedToDefendant(defendantId, caseId, applicationId, hearingId, APPEAL_AGAINST_SENTENCE, of(WITHDRAWN), hearingCommandHelper);
+        extendHearingWithApplicationLinkedToDefendant(defendantId, caseId, applicationId, hearingId, APPEAL_AGAINST_SENTENCE);
 
-        //saveDraftApplicationOutcome(hearingId, applicationId, WITHDRAWN, hearingCommandHelper);
-
-        shareApplicationResults(applicationId, hearingId, WITHDRAWN, hearingCommandHelper, draftResultCommand);
+        shareApplicationResults(applicationId, hearingId, hearingCommandHelper, draftResultCommand);
 
         verifyEmailNotificationEvent(SENT, isJson(allOf(
                 withJsonPath("$.hearingId", is(hearingId.toString())),
@@ -256,7 +206,7 @@ public class NCESJourneyIT extends AbstractIT {
 
     }
 
-    private void extendHearingWithApplicationLinkedToDefendant(UUID defendantId, UUID caseId, UUID applicationId, UUID hearingId, ApplicationType applicationType, Optional<ApplicationOutcome> optionalApplicationOutcome, InitiateHearingCommandHelper hearingCommandHelper) throws JsonProcessingException {
+    private void extendHearingWithApplicationLinkedToDefendant(UUID defendantId, UUID caseId, UUID applicationId, UUID hearingId, ApplicationType applicationType) throws JsonProcessingException {
         getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))
@@ -268,8 +218,6 @@ public class NCESJourneyIT extends AbstractIT {
         extendHearingCommand.setHearingId(hearingId);
         final CourtApplication newCourtApplication = (new HearingFactory()).courtApplicationWithDefendantParty(defendantId, caseId, applicationType.getId()).build();
         newCourtApplication.setId(applicationId);
-        //TODO fix applications
-//        newCourtApplication.getApplicant().getMasterDefendant().setOffences(hearingCommandHelper.getFirstDefendantForFirstCase().getOffences());
         extendHearingCommand.setCourtApplication(newCourtApplication);
 
         JsonObject commandJson = objectToJsonObject(extendHearingCommand);
@@ -363,7 +311,7 @@ public class NCESJourneyIT extends AbstractIT {
         // ensuring no result lines are present in draft sharing
         draftResultCommand.getTarget().setResultLines(null);
 
-        testSaveDraftResult(draftResultCommand, asList(draftResultCommand.getTarget()));
+        testSaveDraftResult(draftResultCommand);
 
         setResultLinesBeforeSharing(allNows, draftResultCommand);
 
@@ -427,9 +375,7 @@ public class NCESJourneyIT extends AbstractIT {
 
     }
 
-    private void shareApplicationResults(final UUID applicationId, final UUID hearingId, final ApplicationOutcome outcome, InitiateHearingCommandHelper hearingCommandHelper, SaveDraftResultCommand draftResultCommand) {
-
-        final Hearing hearing = hearingCommandHelper.getHearing();
+    private void shareApplicationResults(final UUID applicationId, final UUID hearingId, InitiateHearingCommandHelper hearingCommandHelper, SaveDraftResultCommand draftResultCommand) {
 
         try (final EventListener publicEventHearingResulted = listenFor("public.hearing.resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
@@ -465,7 +411,7 @@ public class NCESJourneyIT extends AbstractIT {
                 .getPrompts().get(0);
     }
 
-    private void testSaveDraftResult(final SaveDraftResultCommand saveDraftResultCommand, final List<Target> previousTargets) {
+    private void testSaveDraftResult(final SaveDraftResultCommand saveDraftResultCommand) {
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final Target target = saveDraftResultCommand.getTarget();

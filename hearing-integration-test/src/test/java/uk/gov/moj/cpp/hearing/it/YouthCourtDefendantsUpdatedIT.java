@@ -40,26 +40,22 @@ public class YouthCourtDefendantsUpdatedIT extends AbstractIT {
 
     }
 
-
-
-
-
-
     private JsonPath updateDefendantsInYouthCourt(final RequestSpecification requestSpec, final UUID hearingId, final List<UUID> defendantsInYouthCourt) {
 
-        final EventListener eventListener = listenFor("public.hearing.defendants-in-youthcourt-updated")
-                .withFilter(isJson(withJsonPath("$.hearingId", Is.is(hearingId.toString()))));
-        final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
+        try (EventListener eventListener = listenFor("public.hearing.defendants-in-youthcourt-updated")
+                .withFilter(isJson(withJsonPath("$.hearingId", Is.is(hearingId.toString()))))) {
+            final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
 
-        final JsonArrayBuilder arrayBuilder =  Json.createArrayBuilder();
-        defendantsInYouthCourt.stream().forEach(d -> arrayBuilder.add(d.toString()));
-        jsonObjectBuilder.add("youthCourtDefendantIds", arrayBuilder.build());
-        makeCommand(requestSpec, "hearing.youth-court-defendants")
-                .withArgs(hearingId)
-                .ofType("application/vnd.hearing.youth-court-defendants+json")
-                .withPayload(jsonObjectBuilder.build().toString())
-                .executeSuccessfully();
+            final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+            defendantsInYouthCourt.stream().forEach(d -> arrayBuilder.add(d.toString()));
+            jsonObjectBuilder.add("youthCourtDefendantIds", arrayBuilder.build());
+            makeCommand(requestSpec, "hearing.youth-court-defendants")
+                    .withArgs(hearingId)
+                    .ofType("application/vnd.hearing.youth-court-defendants+json")
+                    .withPayload(jsonObjectBuilder.build().toString())
+                    .executeSuccessfully();
 
-        return eventListener.waitFor();
+            return eventListener.waitFor();
+        }
     }
 }

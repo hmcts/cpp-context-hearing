@@ -13,9 +13,7 @@ import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingWithApplicationTemplate;
 
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.HearingFactory;
-
 
 import java.util.UUID;
 
@@ -26,7 +24,7 @@ public class NCESApplicationJourneyIT extends AbstractIT {
     private static final UUID APPEAL_AGAINST_CONVICTION_ID = fromString("57810183-a5c2-3195-8748-c6b97eda1ebd");
 
     @Test
-    public void shouldRaisePublicEventWhenApplicationTypeIsAppeal(){
+    public void shouldRaisePublicEventWhenApplicationTypeIsAppeal() {
 
         final HearingFactory hearingFactory = new HearingFactory();
         final UUID masterDefendantId = randomUUID();
@@ -40,7 +38,7 @@ public class NCESApplicationJourneyIT extends AbstractIT {
                         withJsonPath("$.hearingCourtCentreName", notNullValue())
                 )));
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(),
+        h(initiateHearing(getRequestSpec(),
                 standardInitiateHearingWithApplicationTemplate(singletonList(
                         hearingFactory.courtApplication(hearingFactory.courtApplicationDefendant(masterDefendantId, randomUUID()).build(), APPEAL_AGAINST_CONVICTION_ID).build()))));
 

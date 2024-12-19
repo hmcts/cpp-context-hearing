@@ -1,6 +1,19 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.jupiter.api.Test;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
+import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
+import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
+import static uk.gov.moj.cpp.hearing.it.UseCases.sendPublicApplicationChangedMessage;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
+
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
@@ -10,35 +23,25 @@ import uk.gov.moj.cpp.hearing.test.HearingFactory;
 
 import javax.json.JsonObject;
 
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import org.junit.jupiter.api.Test;
 
 public class ChangeApplicationDetailIT extends AbstractIT {
-    private final String eventName = "public.progression.events.hearing-extended";
+    private static final String PROGRESSION_EVENTS_HEARING_EXTENDED = "public.progression.events.hearing-extended";
 
     @Test
-    public void changeApplicationDetailShouldApplied_When_Progression_Announce() throws Exception {
+    public void updateApplicationDetails_WhenProgressionNotifiesUpdates() throws Exception {
 
         //Given Application already Exist
         final ExtendHearingCommand extendHearingCommand = addApplication();
         final CourtApplication existingCourtApplication = extendHearingCommand.getCourtApplication();
 
         //when progression announced application change
-        final CourtApplication applicationChangeRequest = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate())).getHearing().getCourtApplications().get(0);
+        final CourtApplication applicationChangeRequest = h(initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate())).getHearing().getCourtApplications().get(0);
         applicationChangeRequest.setId(existingCourtApplication.getId());
-        UseCases.sendPublicApplicationChangedMessage(applicationChangeRequest);
+        sendPublicApplicationChangedMessage(applicationChangeRequest);
 
         //then application should  updated
-        Queries.getHearingPollForMatch(extendHearingCommand.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(extendHearingCommand.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(extendHearingCommand.getHearingId()))
                         .withValue(h -> h.getCourtApplications().size(), 2)
@@ -53,12 +56,12 @@ public class ChangeApplicationDetailIT extends AbstractIT {
 
     private ExtendHearingCommand addApplication() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.getHearing();
         final CourtApplication initialCourtApplication = hearing.getCourtApplications().get(0);
 
-        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearing.getId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .with(Hearing::getCourtApplications, first(isBean(CourtApplication.class)
@@ -68,7 +71,6 @@ public class ChangeApplicationDetailIT extends AbstractIT {
                 )
         );
 
-
         ExtendHearingCommand extendHearingCommand = new ExtendHearingCommand();
         extendHearingCommand.setHearingId(hearing.getId());
         final CourtApplication newCourtApplication = (new HearingFactory()).courtApplication().build();
@@ -77,14 +79,14 @@ public class ChangeApplicationDetailIT extends AbstractIT {
         JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(extendHearingCommand);
 
         sendMessage(getPublicTopicInstance().createProducer(),
-                eventName,
+                PROGRESSION_EVENTS_HEARING_EXTENDED,
                 commandJson,
-                metadataOf(randomUUID(), eventName)
+                metadataOf(randomUUID(), PROGRESSION_EVENTS_HEARING_EXTENDED)
                         .withUserId(randomUUID().toString())
                         .build()
         );
 
-        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearing.getId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .withValue(h -> h.getCourtApplications().size(), 2)

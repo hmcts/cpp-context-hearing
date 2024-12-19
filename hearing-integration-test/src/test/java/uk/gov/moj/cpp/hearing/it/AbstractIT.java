@@ -3,13 +3,9 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.google.common.io.Resources.getResource;
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.stubHearingEventDefinitions;
@@ -43,9 +39,6 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.text.MessageFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,8 +54,6 @@ import com.google.common.io.Resources;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.Header;
 import io.restassured.specification.RequestSpecification;
-import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -77,7 +68,6 @@ public class AbstractIT {
     protected static final UUID USER_ID_VALUE_AS_ADMIN = fromString("46986cb7-eefa-48b3-b7e2-34431c3265e5");
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIT.class);
     private static final String ENDPOINT_PROPERTIES_FILE = "endpoint.properties";
-    protected static final String HEARING_CONTEXT = "hearing";
     /**
      * todo this is not a good pattern, only for fixing parallel runs without changing existing
      * codes too much
@@ -114,11 +104,6 @@ public class AbstractIT {
         return ADMIN_USER_ID_CONTEXT.get();
     }
 
-    protected static void setLoggedInAdminUser(final UUID userId) {
-        ADMIN_USER_ID_CONTEXT.set(userId);
-    }
-
-
     public static Header getLoggedIdUserHeader() {
         return new Header(USER_ID, getLoggedInUser().toString());
     }
@@ -144,61 +129,6 @@ public class AbstractIT {
         requestSpec = new RequestSpecBuilder().setBaseUri(baseUri).build();
     }
 
-    protected static Matcher<String> equalStr(final Object bean, final String name) {
-        return equalTo(getString(bean, name));
-    }
-
-    protected static Matcher<String> equalStr(final Object bean, final char separator, final String... names) {
-        return equalTo(StringUtils.join(Stream.of(names).map(name -> getString(bean, name).trim()).collect(toList()), separator).trim());
-    }
-
-    protected static Matcher<String> equalStr(final Object bean, final String name, final DateTimeFormatter dateTimeFormatter) {
-        return equalTo(getString(bean, name, dateTimeFormatter));
-    }
-
-    protected static Matcher<Integer> equalInt(final Object bean, final String name) {
-        return equalTo(getInteger(bean, name));
-    }
-
-    protected static Matcher<String> equalDate(final Temporal localDate) {
-        return equalTo(ISO_LOCAL_DATE.format(localDate));
-    }
-
-    protected static String getString(final Object bean, final String name, final DateTimeFormatter dateTimeFormatter) {
-        try {
-            final Temporal dateTime = (Temporal) PropertyUtils.getNestedProperty(bean, name);
-            if (dateTime instanceof LocalDate) {
-                return dateTimeFormatter.format(((LocalDate) dateTime).atStartOfDay());
-            }
-            return dateTimeFormatter.format(dateTime);
-        } catch (final Exception e) {
-            LOGGER.error("Cannot get string property: " + name + " from bean " + bean.getClass().getCanonicalName(), e.getMessage(), e);
-            return EMPTY;
-        }
-    }
-
-    protected static UUID getUUID(final Object bean, final String name) {
-        return UUID.fromString(getString(bean, name));
-    }
-
-    protected static String getString(final Object bean, final String name) {
-        try {
-            return EMPTY + PropertyUtils.getNestedProperty(bean, name);
-        } catch (final Exception e) {
-            LOGGER.error("Cannot get string property: " + name + " from bean " + bean.getClass().getCanonicalName(), e.getMessage(), e);
-            return EMPTY;
-        }
-    }
-
-    protected static Integer getInteger(final Object bean, final String name) {
-        try {
-            return Integer.parseInt(getString(bean, name));
-        } catch (final Exception e) {
-            LOGGER.error("Cannot get integer property: " + name + " from bean " + bean.getClass().getCanonicalName(), e.getMessage(), e);
-            return null;
-        }
-    }
-
     protected static String getStringFromResource(final String path) throws IOException {
         return Resources.toString(getResource(path), defaultCharset());
     }
@@ -208,12 +138,9 @@ public class AbstractIT {
     }
 
     public static Matcher<ResponseData> print() {
-        return new BaseMatcher<ResponseData>() {
+        return new BaseMatcher<>() {
             @Override
             public boolean matches(final Object o) {
-                if (o instanceof ResponseData) {
-                    final ResponseData responseData = (ResponseData) o;
-                }
                 return true;
             }
 

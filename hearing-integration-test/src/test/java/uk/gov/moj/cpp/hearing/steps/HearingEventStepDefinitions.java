@@ -55,18 +55,10 @@ import org.hamcrest.Matcher;
 
 public class HearingEventStepDefinitions {
 
-    public static final String SEQUENCE_TYPE_PAUSE_RESUME = "PAUSE_RESUME";
-    public static final String SEQUENCE_TYPE_NOT_REGISTERED = "NOT_REGISTERED";
-    public static final String RECORDED_LABEL_START_HEARING = "Start Hearing";
     public static final String RECORDED_LABEL_END_HEARING = "Hearing ended";
-    private static final String MEDIA_TYPE_CREATE_EVENT_LOG = "application/vnd.hearing.log-hearing-event+json";
     private static final String MEDIA_TYPE_CREATE_EVENT_DEFINITIONS = "application/vnd.hearing.create-hearing-event-definitions+json";
     private static final String MEDIA_TYPE_QUERY_EVENT_DEFINITIONS = "application/vnd.hearing.hearing-event-definitions+json";
-    private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
-    private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
-    private static final String FIELD_EVENT_TIME = "eventTime";
-    private static final String FIELD_LAST_MODIFIED_TIME = "lastModifiedTime";
     private static final String FIELD_EVENT_DEFINITIONS = "eventDefinitions";
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_CASE_ATTRIBUTE = "caseAttribute";
@@ -245,13 +237,8 @@ public class HearingEventStepDefinitions {
         return format("%s/%s", getBaseUri(), queryEventDefinitionsEndPoint);
     }
 
-    public static void waitForNotFoundResponse(final String url, final String mediaType, final String userId) {
-        poll(requestParams(url, mediaType).withHeader(USER_ID, userId))
-                .until(status().is(NOT_FOUND));
-    }
-
-    public static String getQueryReusableInfoUrl(final UUID hearingId){
+    public static String getQueryReusableInfoUrl(final String hearingId){
         final String queryReusableInfoEndPoint = ENDPOINT_PROPERTIES.getProperty("hearing.query.reusable-info");
-        return format("%s/%s/%s",getBaseUri(),queryReusableInfoEndPoint, hearingId.toString());
+        return format("%s/%s/%s",getBaseUri(),queryReusableInfoEndPoint, hearingId);
     }
 }

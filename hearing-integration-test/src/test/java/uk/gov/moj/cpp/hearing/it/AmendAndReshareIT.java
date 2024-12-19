@@ -11,7 +11,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.Queries.getDraftResultsForHearingDayPollForMatch;
-import static uk.gov.moj.cpp.hearing.it.Queries.waitForFewSeconds;
+import static uk.gov.moj.cpp.hearing.it.Queries.waitFor;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
@@ -22,7 +22,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveMultipleDraftResultsCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_WAIT_TIME_IN_SEC;
 
 import uk.gov.justice.core.courts.Hearing;
@@ -63,7 +62,7 @@ public class AmendAndReshareIT extends AbstractIT {
 
         final InitiateHearingCommandHelper initiateHearingCommandHelper = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
-        getDraftResultsForHearingDayPollForMatch(initiateHearingCommandHelper.getHearingId(), LocalDate.now().toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+        getDraftResultsForHearingDayPollForMatch(initiateHearingCommandHelper.getHearingId(), LocalDate.now().toString(), isBean(TargetListResponse.class)
                 .with(TargetListResponse::getTargets, is(empty())));
     }
 
@@ -72,22 +71,22 @@ public class AmendAndReshareIT extends AbstractIT {
 
         final CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplateWithMultidayHearing()));
 
-        getDraftResultsForHearingDayPollForMatch(initiateHearingCommandHelper.getHearingId(), PAST_LOCAL_DATE.next().toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+        getDraftResultsForHearingDayPollForMatch(initiateHearingCommandHelper.getHearingId(), PAST_LOCAL_DATE.next().toString(), isBean(TargetListResponse.class)
                 .with(TargetListResponse::getTargets, is(empty())));
     }
 
     @Test
     public void shouldSaveDraftResultForSingleDay() {
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
+        waitFor(DEFAULT_WAIT_TIME_IN_SEC);
         LocalDate orderDate = LocalDate.now();
 
         final InitiateHearingCommandHelper initiateHearingCommandHelper = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
 
-        final List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, orderDate);
+        final List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand);
 
-        getDraftResultsForHearingDayPollForMatch(initiateHearingCommandHelper.getHearingId(), orderDate.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+        getDraftResultsForHearingDayPollForMatch(initiateHearingCommandHelper.getHearingId(), orderDate.toString(), isBean(TargetListResponse.class)
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), targets.get(0).getHearingDay())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getTargetId(), targets.get(0).getTargetId())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDraftResult(), targets.get(0).getDraftResult())
@@ -101,7 +100,7 @@ public class AmendAndReshareIT extends AbstractIT {
     @SuppressWarnings("squid:S1607")
     @Test
     public void shouldSaveDraftResultForMultiDay() {
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
+        waitFor(DEFAULT_WAIT_TIME_IN_SEC);
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithMultidayHearing();
         final CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = h(initiateHearing(getRequestSpec(), initiateHearingCommand));
 
@@ -112,9 +111,9 @@ public class AmendAndReshareIT extends AbstractIT {
         final LocalDate orderDateDay2 = hearingDays.get(1).getSittingDay().toLocalDate();
 
         final SaveDraftResultCommand saveMultiDayDraftResultCommandDay1 = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDateDay1, orderDateDay1);
-        final List<Target> day1Target = saveDraftResults(saveMultiDayDraftResultCommandDay1, orderDateDay1);
+        final List<Target> day1Target = saveDraftResults(saveMultiDayDraftResultCommandDay1);
 
-        getDraftResultsForHearingDayPollForMatch(initiateHearingCommandHelper.getHearingId(), orderDateDay1.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+        getDraftResultsForHearingDayPollForMatch(initiateHearingCommandHelper.getHearingId(), orderDateDay1.toString(), isBean(TargetListResponse.class)
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), day1Target.get(0).getHearingDay())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getTargetId(), day1Target.get(0).getTargetId())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDraftResult(), day1Target.get(0).getDraftResult())
@@ -123,10 +122,10 @@ public class AmendAndReshareIT extends AbstractIT {
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getOffenceId(), day1Target.get(0).getOffenceId())
         );
 
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
+        waitFor(DEFAULT_WAIT_TIME_IN_SEC);
         final SaveDraftResultCommand saveMultiDayDraftResultCommandDay2 = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDateDay2, orderDateDay2);
-        final List<Target> day2Target = saveDraftResults(saveMultiDayDraftResultCommandDay2, orderDateDay2);
-        getDraftResultsForHearingDayPollForMatch(initiateHearingCommandHelper.getHearingId(), orderDateDay2.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+        final List<Target> day2Target = saveDraftResults(saveMultiDayDraftResultCommandDay2);
+        getDraftResultsForHearingDayPollForMatch(initiateHearingCommandHelper.getHearingId(), orderDateDay2.toString(), isBean(TargetListResponse.class)
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), day2Target.get(0).getHearingDay())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getTargetId(), day2Target.get(0).getTargetId())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDraftResult(), day2Target.get(0).getDraftResult())
@@ -150,12 +149,12 @@ public class AmendAndReshareIT extends AbstractIT {
 
         SaveMultipleDaysResultsCommand saveSingleDayMultipleDraftResultCommand = saveMultipleDraftResultsCommandTemplate(initiateHearingCommandHelper.it(), orderDate, orderDate);
 
-        final List<Target> targets = saveMultipleDraftResults(saveSingleDayMultipleDraftResultCommand, orderDate);
+        final List<Target> targets = saveMultipleDraftResults(saveSingleDayMultipleDraftResultCommand);
 
         final List<UUID> offenceIdList = Arrays.asList(targets.get(0).getOffenceId(), targets.get(1).getOffenceId());
         final List<UUID> targetIdList = Arrays.asList(targets.get(0).getTargetId(), targets.get(1).getTargetId());
 
-        getDraftResultsForHearingDayPollForMatch(initiateHearingCommandHelper.getHearingId(), orderDate.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+        getDraftResultsForHearingDayPollForMatch(initiateHearingCommandHelper.getHearingId(), orderDate.toString(), isBean(TargetListResponse.class)
                 .with(TargetListResponse::getTargets, hasSize(2))
                 .with(targetListResponse ->
                         targetListResponse.getTargets().stream().map(t -> t.getOffenceId()).collect(Collectors.toList()).containsAll(offenceIdList), is(true))
@@ -171,7 +170,7 @@ public class AmendAndReshareIT extends AbstractIT {
         );
     }
 
-    private List<Target> saveDraftResults(SaveDraftResultCommand saveSingleDayDraftResultCommand, LocalDate orderDate) {
+    private List<Target> saveDraftResults(SaveDraftResultCommand saveSingleDayDraftResultCommand) {
 
         final List<Target> targets = new ArrayList<>();
         targets.add(saveSingleDayDraftResultCommand.getTarget());
@@ -181,7 +180,7 @@ public class AmendAndReshareIT extends AbstractIT {
         return targets;
     }
 
-    private List<Target> saveMultipleDraftResults(SaveMultipleDaysResultsCommand saveDraftResultsCommand, LocalDate orderDate) throws IOException {
+    private List<Target> saveMultipleDraftResults(SaveMultipleDaysResultsCommand saveDraftResultsCommand) throws IOException {
 
         final List<Target> targets = saveDraftResultsCommand.getTargets();
 

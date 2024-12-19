@@ -63,7 +63,7 @@ public class DDJIT extends AbstractIT {
         final UUID case2 = randomUUID();
         final UUID case3 = randomUUID();
 
-        stubUsersAndGroupsGetLoggedInPermissionsWithCases(case1, case2, case3,getLoggedInUser());
+        stubUsersAndGroupsGetLoggedInPermissionsWithCases(case1, case2, case3, getLoggedInUser());
         stubUsersAndGroupsUserRolesForDDJ(getLoggedInUser());
 
         final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
@@ -115,7 +115,7 @@ public class DDJIT extends AbstractIT {
                         .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(hearingOne.getHearing().getProsecutionCases()))
                 )
         );
-        Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
+        Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
                                 .with(HearingSummaries::getId, is(hearing.getId()))
@@ -133,8 +133,8 @@ public class DDJIT extends AbstractIT {
                                         .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearing.getProsecutionCases()))
                                 .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
-                                       .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
-                               ))
+                                        .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
+                                ))
                         ))
         );
 
@@ -147,7 +147,7 @@ public class DDJIT extends AbstractIT {
         final UUID case2 = randomUUID();
         final UUID case3 = randomUUID();
 
-        stubUsersAndGroupsGetLoggedInPermissionsWithCases(case1, case2, case3,getLoggedInUser());
+        stubUsersAndGroupsGetLoggedInPermissionsWithCases(case1, case2, case3, getLoggedInUser());
         stubUsersAndGroupsUserRolesForDDJ(getLoggedInUser());
 
         final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
@@ -171,8 +171,8 @@ public class DDJIT extends AbstractIT {
         final Hearing hearing = hearingOne.getHearing();
         final List<ProsecutionCase> prosecutionCases = new ArrayList<>();
         final List<ProsecutionCase> prosecutionCasesIdentified = hearingOne.getHearing().getProsecutionCases();
-        for (ProsecutionCase prosecutionCase:prosecutionCasesIdentified){
-            if (prosecutionCase.getId().equals(case1)){
+        for (ProsecutionCase prosecutionCase : prosecutionCasesIdentified) {
+            if (prosecutionCase.getId().equals(case1)) {
                 prosecutionCases.add(prosecutionCase);
             }
         }
@@ -212,7 +212,7 @@ public class DDJIT extends AbstractIT {
         );
         stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCases(case1, getLoggedInUser());
 
-        Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
+        Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
                                 .with(HearingSummaries::getId, is(hearing.getId()))
@@ -237,6 +237,7 @@ public class DDJIT extends AbstractIT {
         );
 
     }
+
     @Test
     public void initiateHearingWithNoHearingCasesForDDJ() {
 
@@ -244,7 +245,7 @@ public class DDJIT extends AbstractIT {
         final UUID case2 = randomUUID();
         final UUID case3 = randomUUID();
 
-        stubUsersAndGroupsGetLoggedInPermissionsWithCases(case1, case2, case3,getLoggedInUser());
+        stubUsersAndGroupsGetLoggedInPermissionsWithCases(case1, case2, case3, getLoggedInUser());
 
 
         final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
@@ -300,7 +301,7 @@ public class DDJIT extends AbstractIT {
         stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForDDJ();
 
         Queries.getHearingsByDatePollForMatch(
-                hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
+                hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class).with(GetHearings::getHearingSummaries, is(nullValue()))
         );
     }
@@ -311,7 +312,7 @@ public class DDJIT extends AbstractIT {
         final UUID case2 = randomUUID();
         final UUID case3 = randomUUID();
 
-        stubUsersAndGroupsGetLoggedInPermissionsWithCases(case1,case2,case3,getLoggedInUser());
+        stubUsersAndGroupsGetLoggedInPermissionsWithCases(case1, case2, case3, getLoggedInUser());
         stubUsersAndGroupsUserRoles(getLoggedInUser());
 
         final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
@@ -362,7 +363,7 @@ public class DDJIT extends AbstractIT {
                         .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(hearingOne.getHearing().getProsecutionCases()))
                 )
         );
-        Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
+        Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
                                 .with(HearingSummaries::getId, is(hearing.getId()))
@@ -374,7 +375,7 @@ public class DDJIT extends AbstractIT {
                                 .with(HearingSummaries::getType, isBean(HearingType.class)
                                         .withValue(HearingType::getId, hearing.getType().getId())
                                         .withValue(HearingType::getDescription, hearing.getType().getDescription()))
-                                 .with(HearingSummaries::getHearingDays, first(isBean(HearingDay.class)
+                                .with(HearingSummaries::getHearingDays, first(isBean(HearingDay.class)
                                         .withValue(HearingDay::getSittingDay, hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC")))
                                         .withValue(HearingDay::getListedDurationMinutes, hearingDay.getListedDurationMinutes())
                                         .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
@@ -387,7 +388,8 @@ public class DDJIT extends AbstractIT {
 
 
     }
-    public Matcher<Iterable<ProsecutionCaseSummaries>> hasProsecutionSummaries(final List<ProsecutionCase> prosecutionCases) {
+
+    private Matcher<Iterable<ProsecutionCaseSummaries>> hasProsecutionSummaries(final List<ProsecutionCase> prosecutionCases) {
         return hasItems(
                 prosecutionCases.stream().map(
                         prosecutionCase -> hasProsecutionCaseSummary(prosecutionCase)
@@ -396,7 +398,7 @@ public class DDJIT extends AbstractIT {
 
     }
 
-    public BeanMatcher<ProsecutionCaseSummaries> hasProsecutionCaseSummary(final ProsecutionCase prosecutionCase) {
+    private BeanMatcher<ProsecutionCaseSummaries> hasProsecutionCaseSummary(final ProsecutionCase prosecutionCase) {
         return isBean(ProsecutionCaseSummaries.class)
                 .withValue(ProsecutionCaseSummaries::getId, prosecutionCase.getId())
                 .with(ProsecutionCaseSummaries::getProsecutionCaseIdentifier,
@@ -410,11 +412,11 @@ public class DDJIT extends AbstractIT {
                 );
     }
 
-    public Matcher<Iterable<Defendants>> hasDefendantSummaries(final ProsecutionCase prosecutionCase) {
+    private Matcher<Iterable<Defendants>> hasDefendantSummaries(final ProsecutionCase prosecutionCase) {
         return hasItems(prosecutionCase.getDefendants().stream().map(defendant ->
-                isBean(Defendants.class)
-                        .withValue(Defendants::getId, defendant.getId())
-                        .withValue(Defendants::getFirstName, defendant.getPersonDefendant().getPersonDetails().getFirstName()))
+                        isBean(Defendants.class)
+                                .withValue(Defendants::getId, defendant.getId())
+                                .withValue(Defendants::getFirstName, defendant.getPersonDefendant().getPersonDetails().getFirstName()))
                 .toArray(BeanMatcher[]::new));
     }
 }

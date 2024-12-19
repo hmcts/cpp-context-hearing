@@ -2,11 +2,14 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
 import static java.time.ZonedDateTime.parse;
+import static java.util.UUID.randomUUID;
 import static uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo.bookProvisionalHearingSlotsCommand;
 import static uk.gov.moj.cpp.hearing.it.UseCases.bookHearingSlots;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.utils.CourtSchedulerStub.stubProvisionalBookSlots;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
+
+import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -25,13 +28,13 @@ public class BookProvisionalHearingSlotsIT extends AbstractIT {
 
     @Test
     public void shouldBookProvisionalHearingSlots() throws Exception {
-        final UUID hearingId = UUID.randomUUID();
-        final UUID courtSchedulingId1 = UUID.randomUUID();
-        final UUID courtSchedulingId2 = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID courtSchedulingId1 = randomUUID();
+        final UUID courtSchedulingId2 = randomUUID();
         final ZonedDateTime hearingStartTime1 = parse("2020-08-25T10:00:00.000Z");
         final ZonedDateTime hearingStartTime2 = parse("2020-08-27T11:00:00.000Z");
 
-        final Utilities.EventListener eventListener = listenFor("public.hearing.hearing-slots-provisionally-booked", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
+        final EventListener eventListener = listenFor("public.hearing.hearing-slots-provisionally-booked", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
                 .withFilter(hasJsonPath("$.bookingId"));
 
         bookHearingSlots(getRequestSpec(), hearingId, Arrays.asList(

@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static com.google.common.collect.ImmutableList.of;
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -9,23 +8,17 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_NOT_GUILTY;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.it.Queries.getDraftResultsForHearingDayPollForMatch;
+import static uk.gov.moj.cpp.hearing.it.Queries.getCalculatedCustodyTimeLimitExpiryDate;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
-import static uk.gov.moj.cpp.hearing.it.Queries.waitForFewSeconds;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.UseCases.shareResults;
 import static uk.gov.moj.cpp.hearing.it.UseCases.shareResultsPerDay;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
-import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.allocationDecision;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.customStructureInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.standardResultLineTemplate;
@@ -41,7 +34,6 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubPublicHolidays;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_WAIT_TIME_IN_SEC;
 
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
@@ -53,7 +45,6 @@ import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -64,13 +55,10 @@ import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResultedV2;
-import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
+import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 import uk.gov.moj.cpp.hearing.test.TestUtilities;
-import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
 import java.io.IOException;
@@ -83,17 +71,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.restassured.path.json.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
-    private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
     private static final String FIELD_CUSTODY_TIME_LIMIT = "custodyTimeLimit";
 
     private final String REMAND_STATUS_RESULT_DEFINITION_ID = "d0a369c9-5a28-40ec-99cb-da7943550b18";
@@ -129,7 +113,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
     @Test
     public void shouldShareResultsWithCTLExtendedResult() {
-        final LocalDate orderDate = LocalDate.now();
+        final LocalDate orderDate = now();
         final UUID offenceId = randomUUID();
         final String ctlExtendedDate = "2021-06-04";
 
@@ -152,22 +136,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                 .map(HearingDay::getCourtCentreId)
                 .map(UUID::toString)
                 .forEach(ReferenceDataStub::stubOrganisationUnit);
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
-        SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, LocalDate.now());
+
+        SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, now());
 
         saveSingleDayDraftResultCommand = setPromptForSaveDraftResultCommandForCTLE(saveSingleDayDraftResultCommand, ctlExtendedDate);
 
-        List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, CTLE_RESULT_DEFINITON_ID);
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
-        getDraftResultsForHearingDayPollForMatch(hearing.getId(), orderDate.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
-                .withValue(targetListResponse -> targetListResponse.getTargets().isEmpty(), false)
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), targets.get(0).getHearingDay())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getTargetId(), targets.get(0).getTargetId())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDraftResult(), targets.get(0).getDraftResult())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingId(), targets.get(0).getHearingId())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDefendantId(), targets.get(0).getDefendantId())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getOffenceId(), targets.get(0).getOffenceId())
-        );
+        List<Target> targets = getTargets(saveSingleDayDraftResultCommand);
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
@@ -175,7 +149,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         assertHearingResultsAreShared(hearing);
 
-        try (final Utilities.EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+        try (final EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
                 .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
                         .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearing.getId())))))) {
@@ -183,7 +157,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
             final DelegatedPowers courtClerk = getDelegatedPowers();
 
             ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
-            shareDaysResultsCommand.setHearingDay(LocalDate.now());
+            shareDaysResultsCommand.setHearingDay(now());
             shareResultsPerDay(getRequestSpec(), hearing.getId(), with(
                     shareDaysResultsCommand,
                     command -> command.setCourtClerk(courtClerk)
@@ -219,7 +193,6 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                         .build()
         );
 
-
         final LocalDate ctlExtendedDateLD = LocalDate.parse(ctlExtendedDate);
         assertHearingHasOffenceWithExtendedCTL(hearing1, offenceId, ctlExtendedDateLD);
         assertHearingHasOffenceWithExtendedCTL(hearing2, offenceId, ctlExtendedDateLD);
@@ -227,8 +200,8 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
     @Test
     public void shouldShareResultsWithAutoCalculatedCTLExpiryDateForAdult() {
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
-        final LocalDate orderDate = LocalDate.now();
+
+        final LocalDate orderDate = now();
         final UUID offenceId = randomUUID();
 
         final InitiateHearingCommand initiateHearing = customStructureInitiateHearingTemplate(getUuidMapForSingleCaseStructure(offenceId));
@@ -250,46 +223,35 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                 .map(HearingDay::getCourtCentreId)
                 .map(UUID::toString)
                 .forEach(ReferenceDataStub::stubOrganisationUnit);
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
 
-        SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, LocalDate.now());
+
+        SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, now());
 
         saveSingleDayDraftResultCommand = setPromptForSaveDraftResultCommandForRemandStatus(saveSingleDayDraftResultCommand);
 
-        List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, REMAND_STATUS_RESULT_DEFINITION_ID);
+        List<Target> targets = getTargets(saveSingleDayDraftResultCommand);
 
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
-        getDraftResultsForHearingDayPollForMatch(hearing.getId(), orderDate.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
-                .withValue(targetListResponse -> targetListResponse.getTargets().isEmpty(), false)
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), targets.get(0).getHearingDay())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getTargetId(), targets.get(0).getTargetId())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDraftResult(), targets.get(0).getDraftResult())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingId(), targets.get(0).getHearingId())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDefendantId(), targets.get(0).getDefendantId())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getOffenceId(), targets.get(0).getOffenceId())
-        );
 
-        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC, "C");
+        final ResponseData responseData = getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, "C");
 
         final String ctlExpiryDate = new StringToJsonObjectConverter().convert(responseData.getPayload()).getString(FIELD_CUSTODY_TIME_LIMIT);
 
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
         saveSingleDayDraftResultCommand = setPromptForSaveDraftResultCommandForCTL(saveSingleDayDraftResultCommand, ctlExpiryDate);
 
-        targets = saveDraftResults(saveSingleDayDraftResultCommand, CTL_RESULT_DEFINITION_ID);
+        targets = getTargets(saveSingleDayDraftResultCommand);
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final DelegatedPowers courtClerk = getDelegatedPowers();
 
 
-        try (final Utilities.EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+        try (final EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
                 .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
                         .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearing.getId())))))) {
 
             ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
-            shareDaysResultsCommand.setHearingDay(LocalDate.now());
+            shareDaysResultsCommand.setHearingDay(now());
             shareResultsPerDay(getRequestSpec(), hearing.getId(), with(
                     shareDaysResultsCommand,
                     command -> command.setCourtClerk(courtClerk)
@@ -306,8 +268,8 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
     @Test
     public void shouldShareResultsWithAutoCalculatedCTLExpiryDateForAdultWithExtendedCTL() {
-        final LocalDate orderDate = LocalDate.now();
-        final LocalDate extendedCTLDate = LocalDate.now().plusDays(10);
+        final LocalDate orderDate = now();
+        final LocalDate extendedCTLDate = now().plusDays(10);
         final UUID offenceId = randomUUID();
 
         final InitiateHearingCommand initiateHearing = customStructureInitiateHearingTemplate(getUuidMapForSingleCaseStructure(offenceId));
@@ -334,46 +296,32 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                 .map(UUID::toString)
                 .forEach(ReferenceDataStub::stubOrganisationUnit);
 
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
-        SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, LocalDate.now());
+
+        SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, now());
 
         saveSingleDayDraftResultCommand = setPromptForSaveDraftResultCommandForRemandStatus(saveSingleDayDraftResultCommand);
 
-        List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, REMAND_STATUS_RESULT_DEFINITION_ID);
-
-        getDraftResultsForHearingDayPollForMatch(hearing.getId(), orderDate.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
-                .withValue(targetListResponse -> targetListResponse.getTargets().isEmpty(), false)
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), targets.get(0).getHearingDay())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getTargetId(), targets.get(0).getTargetId())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDraftResult(), targets.get(0).getDraftResult())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingId(), targets.get(0).getHearingId())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDefendantId(), targets.get(0).getDefendantId())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getOffenceId(), targets.get(0).getOffenceId())
-        );
-
-        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC, "C");
+        final ResponseData responseData = getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, "C");
 
         final String ctlExpiryDate = new StringToJsonObjectConverter().convert(responseData.getPayload()).getString(FIELD_CUSTODY_TIME_LIMIT);
 
         assertThat(ctlExpiryDate, is(extendedCTLDate.toString()));
 
         saveSingleDayDraftResultCommand = setPromptForSaveDraftResultCommandForCTL(saveSingleDayDraftResultCommand, ctlExpiryDate);
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
 
-        targets = saveDraftResults(saveSingleDayDraftResultCommand, CTL_RESULT_DEFINITION_ID);
+        List<Target> targets = getTargets(saveSingleDayDraftResultCommand);
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final DelegatedPowers courtClerk = getDelegatedPowers();
 
-
-        try (final Utilities.EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+        try (final EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
                 .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
                         .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearing.getId())))))) {
 
             ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
-            shareDaysResultsCommand.setHearingDay(LocalDate.now());
+            shareDaysResultsCommand.setHearingDay(now());
             shareResultsPerDay(getRequestSpec(), hearing.getId(), with(
                     shareDaysResultsCommand,
                     command -> command.setCourtClerk(courtClerk)
@@ -390,7 +338,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
     @Test
     public void shouldShareResultsWithAutoCalculatedCTLExpiryDateForYouth() {
-        final LocalDate orderDate = LocalDate.now();
+        final LocalDate orderDate = now();
         final UUID offenceId = randomUUID();
 
         final InitiateHearingCommand initiateHearing = customStructureInitiateHearingTemplate(getUuidMapForSingleCaseStructure(offenceId));
@@ -414,43 +362,32 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                 .map(HearingDay::getCourtCentreId)
                 .map(UUID::toString)
                 .forEach(ReferenceDataStub::stubOrganisationUnit);
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
-        SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, LocalDate.now());
+
+        SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, now());
 
         saveSingleDayDraftResultCommand = setPromptForSaveDraftResultCommandForRemandStatus(saveSingleDayDraftResultCommand);
 
-        List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, REMAND_STATUS_RESULT_DEFINITION_ID);
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
-        getDraftResultsForHearingDayPollForMatch(hearing.getId(), orderDate.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
-                .withValue(targetListResponse -> targetListResponse.getTargets().isEmpty(), false)
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), targets.get(0).getHearingDay())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getTargetId(), targets.get(0).getTargetId())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDraftResult(), targets.get(0).getDraftResult())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingId(), targets.get(0).getHearingId())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDefendantId(), targets.get(0).getDefendantId())
-                .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getOffenceId(), targets.get(0).getOffenceId())
-        );
+        List<Target> targets = getTargets(saveSingleDayDraftResultCommand);
 
-        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC, "C");
+        final ResponseData responseData = getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, "C");
 
         final String ctlExpiryDate = new StringToJsonObjectConverter().convert(responseData.getPayload()).getString(FIELD_CUSTODY_TIME_LIMIT);
 
         saveSingleDayDraftResultCommand = setPromptForSaveDraftResultCommandForCTL(saveSingleDayDraftResultCommand, ctlExpiryDate);
 
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
-        targets = saveDraftResults(saveSingleDayDraftResultCommand, CTL_RESULT_DEFINITION_ID);
+        targets = getTargets(saveSingleDayDraftResultCommand);
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final DelegatedPowers courtClerk = getDelegatedPowers();
 
-        try (final Utilities.EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+        try (final EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
                 .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
                         .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearing.getId())))))) {
 
             ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
-            shareDaysResultsCommand.setHearingDay(LocalDate.now());
+            shareDaysResultsCommand.setHearingDay(now());
             shareResultsPerDay(getRequestSpec(), hearing.getId(), with(
                     shareDaysResultsCommand,
                     command -> command.setCourtClerk(courtClerk)
@@ -467,20 +404,20 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
     @Test
     public void shouldStopCTLClockWhenRemandStatusOnBail() {
-        final LocalDate orderDate = LocalDate.now();
-        final UUID offenceId = UUID.randomUUID();
+        final LocalDate orderDate = now();
+        final UUID offenceId = randomUUID();
 
         final InitiateHearingCommand initiateHearing = customStructureInitiateHearingTemplate(getUuidMapForSingleCaseStructure(offenceId));
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
-                .withTimeLimit(LocalDate.now().plusDays(10))
+                .withTimeLimit(now().plusDays(10))
                 .build());
 
         final Hearing hearing = createHearing(initiateHearing);
-        final SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, LocalDate.now());
+        final SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, now());
 
         saveSingleDayDraftResultCommand.getTarget().getResultLines().get(0).setResultDefinitionId(CROWN_COURT_RESULT_DEFINITION_ID);
         setPromptForSaveDraftResultCommandForOnBailRemandStatus(saveSingleDayDraftResultCommand);
-        final List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, CROWN_COURT_RESULT_DEFINITION_ID.toString());
+        final List<Target> targets = getTargets(saveSingleDayDraftResultCommand);
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
@@ -490,7 +427,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         assertCTLClockStopped(hearing);
 
-        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC, "C");
+        final ResponseData responseData = getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, "C");
 
         final JsonObject ctlExpiryDate = new StringToJsonObjectConverter().convert(responseData.getPayload());
         assertThat(ctlExpiryDate.isEmpty(), is(true));
@@ -499,21 +436,21 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
     @Test
     public void shouldStopCTLClockWhenFinalResultIsWithDrawn() {
-        final LocalDate orderDate = LocalDate.now();
-        final UUID offenceId = UUID.randomUUID();
+        final LocalDate orderDate = now();
+        final UUID offenceId = randomUUID();
 
         final InitiateHearingCommand initiateHearing = customStructureInitiateHearingTemplate(getUuidMapForSingleCaseStructure(offenceId));
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
-                .withTimeLimit(LocalDate.now().plusDays(10))
+                .withTimeLimit(now().plusDays(10))
                 .build());
 
         final Hearing hearing = createHearing(initiateHearing);
 
-        final SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, LocalDate.now());
+        final SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, now());
         saveSingleDayDraftResultCommand.getTarget().getResultLines().get(0).setResultDefinitionId(WITHDRAWN_RESULT_ID);
         setPromptForWithDrawnResultCommandForCTL(saveSingleDayDraftResultCommand, orderDate.toString());
 
-        final List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, WITHDRAWN_RESULT_ID.toString());
+        final List<Target> targets = getTargets(saveSingleDayDraftResultCommand);
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
@@ -523,7 +460,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         assertCTLClockStopped(hearing);
 
-        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC, "C");
+        final ResponseData responseData = getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, "C");
 
         final JsonObject ctlExpiryDate = new StringToJsonObjectConverter().convert(responseData.getPayload());
         assertThat(ctlExpiryDate.isEmpty(), is(true));
@@ -533,8 +470,8 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
     @Test
     public void shouldSetDateHeldInCustodyWhenFirstHearingInCustody() {
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
-        final LocalDate orderDate = LocalDate.now();
-        final UUID offenceId = UUID.randomUUID();
+        final LocalDate orderDate = now();
+        final UUID offenceId = randomUUID();
         final LocalDate hearingDay = now();
 
         final InitiateHearingCommand initiateHearing = customStructureInitiateHearingTemplate(getUuidMapForSingleCaseStructure(offenceId));
@@ -555,14 +492,14 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                 .forEach(ReferenceDataStub::stubOrganisationUnit);
 
         stubCourtRoom(hearing);
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
+
         final SaveDraftResultCommand saveSingleDayDraftResultCommand = getSaveDraftResultCommandForRemandInCustody(orderDate, initiateHearingCommandHelper);
 
-        final List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, REMAND_STATUS_RESULT_DEFINITION_ID);
+        final List<Target> targets = getTargets(saveSingleDayDraftResultCommand);
 
         final DelegatedPowers courtClerk = getDelegatedPowers();
 
-        try (final Utilities.EventListener publicEventResulted = listenFor("public.events.hearing.hearing-resulted")
+        try (final EventListener publicEventResulted = listenFor("public.events.hearing.hearing-resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
@@ -588,15 +525,15 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
     public void shouldKeepPreviousDateHeldInCustodyWhenHearingAlreadyInCustody() {
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
-        final LocalDate orderDate = LocalDate.now();
-        final UUID offenceId = UUID.randomUUID();
+        final LocalDate orderDate = now();
+        final UUID offenceId = randomUUID();
         final LocalDate dateHeldInCustodySince = now().minusDays(10);
         final int previousDaysHeldInCustody = 3;
 
         final InitiateHearingCommand initiateHearing = customStructureInitiateHearingTemplate(getUuidMapForSingleCaseStructure(offenceId));
         initiateHearing.getHearing().getHearingDays().get(0).setSittingDay(utcClock.now());
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
-                .withTimeLimit(LocalDate.now().plusDays(10))
+                .withTimeLimit(now().plusDays(10))
                 .build());
 
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setPreviousDaysHeldInCustody(previousDaysHeldInCustody);
@@ -621,11 +558,11 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         final SaveDraftResultCommand saveSingleDayDraftResultCommand = getSaveDraftResultCommandForRemandInCustody(orderDate, initiateHearingCommandHelper);
 
-        final List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, REMAND_STATUS_RESULT_DEFINITION_ID);
+        final List<Target> targets = getTargets(saveSingleDayDraftResultCommand);
 
         final DelegatedPowers courtClerk = getDelegatedPowers();
 
-        try (final Utilities.EventListener publicEventResulted = listenFor("public.events.hearing.hearing-resulted")
+        try (final EventListener publicEventResulted = listenFor("public.events.hearing.hearing-resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
@@ -637,7 +574,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                                 .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
                                         .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))))))) {
             ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
-            shareDaysResultsCommand.setHearingDay(LocalDate.now());
+            shareDaysResultsCommand.setHearingDay(now());
             shareResultsPerDay(getRequestSpec(), hearing.getId(), with(
                     shareDaysResultsCommand,
                     command -> command.setCourtClerk(courtClerk)
@@ -652,8 +589,8 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
     public void shouldClearDateHeldInCustodySinceAndCalculateDaysSpentWhenResultIsOnBail() {
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
-        final LocalDate orderDate = LocalDate.now();
-        final UUID offenceId = UUID.randomUUID();
+        final LocalDate orderDate = now();
+        final UUID offenceId = randomUUID();
         final LocalDate dateHeldInCustodySince = now().minusDays(10);
         final int previousDaysHeldInCustody = 3;
         final int newPreviousDaysHeldInCustody = 13;
@@ -661,7 +598,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         final InitiateHearingCommand initiateHearing = customStructureInitiateHearingTemplate(getUuidMapForSingleCaseStructure(offenceId));
         initiateHearing.getHearing().getHearingDays().get(0).setSittingDay(utcClock.now());
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
-                .withTimeLimit(LocalDate.now().plusDays(182))
+                .withTimeLimit(now().plusDays(182))
                 .build());
 
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setPreviousDaysHeldInCustody(previousDaysHeldInCustody);
@@ -683,8 +620,8 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                 .map(UUID::toString)
                 .forEach(ReferenceDataStub::stubOrganisationUnit);
         stubCourtRoom(hearing);
-        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
-        final SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
+
+        final SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, now());
 
         saveSingleDayDraftResultCommand.getTarget().setResultLines(asList(
                 standardResultLineTemplate(randomUUID(), CROWN_COURT_RESULT_DEFINITION_ID, orderDate)
@@ -708,13 +645,11 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                 ).build()
         ));
 
-        final List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, "bb90e801-0066-4bdf-85e6-8d64bc683f0c");
-
+        final List<Target> targets = getTargets(saveSingleDayDraftResultCommand);
 
         final DelegatedPowers courtClerk = getDelegatedPowers();
 
-
-        try (final Utilities.EventListener publicEventResulted = listenFor("public.events.hearing.hearing-resulted")
+        try (final EventListener publicEventResulted = listenFor("public.events.hearing.hearing-resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
@@ -726,7 +661,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                                 .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
                                         .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))))))) {
             ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
-            shareDaysResultsCommand.setHearingDay(LocalDate.now());
+            shareDaysResultsCommand.setHearingDay(now());
             shareResultsPerDay(getRequestSpec(), hearing.getId(), with(
                     shareDaysResultsCommand,
                     command -> command.setCourtClerk(courtClerk)
@@ -746,7 +681,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
     private SaveDraftResultCommand setPromptForSaveDraftResultCommandForRemandStatus(final SaveDraftResultCommand saveDraftResultCommand) {
         final List<ResultLine> resultLineList = new ArrayList<>();
         final ResultLine resultLine = ResultLine.resultLine()
-                .withOrderedDate(LocalDate.now())
+                .withOrderedDate(now())
                 .withResultLineId(UUID.fromString(REMAND_STATUS_RESULT_DEFINITION_ID))
                 .withIsModified(false)
                 .withIsDeleted(false)
@@ -763,7 +698,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
     private SaveDraftResultCommand setPromptForSaveDraftResultCommandForCTL(final SaveDraftResultCommand saveDraftResultCommand, final String ctlExpiryDate) {
         final List<ResultLine> resultLineList = new ArrayList<>();
         final ResultLine resultLine = ResultLine.resultLine()
-                .withOrderedDate(LocalDate.now())
+                .withOrderedDate(now())
                 .withResultLineId(UUID.fromString(CTL_RESULT_DEFINITION_ID))
                 .withIsModified(false)
                 .withIsComplete(false)
@@ -780,7 +715,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
     private SaveDraftResultCommand setPromptForWithDrawnResultCommandForCTL(final SaveDraftResultCommand saveDraftResultCommand, final String ctlExpiryDate) {
         final List<ResultLine> resultLineList = new ArrayList<>();
         final ResultLine resultLine = ResultLine.resultLine()
-                .withOrderedDate(LocalDate.now())
+                .withOrderedDate(now())
                 .withResultLineId(WITHDRAWN_RESULT_ID)
                 .withIsModified(false)
                 .withIsComplete(false)
@@ -847,7 +782,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
     }
 
     private SaveDraftResultCommand getSaveDraftResultCommandForRemandInCustody(final LocalDate orderDate, final CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper) {
-        final SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
+        final SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, now());
 
         saveSingleDayDraftResultCommand.getTarget().setResultLines(asList(
                 standardResultLineTemplate(randomUUID(), UUID.fromString(REMAND_STATUS_RESULT_DEFINITION_ID), orderDate).withPrompts(
@@ -862,95 +797,10 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         return saveSingleDayDraftResultCommand;
     }
 
-
-    public static Offence offence(final UUID offenceId) {
-        return Offence.offence()
-                .withId(offenceId)
-                .withStartDate(PAST_LOCAL_DATE.next())
-                .withEndDate(PAST_LOCAL_DATE.next())
-                .withArrestDate(PAST_LOCAL_DATE.next())
-                .withChargeDate(PAST_LOCAL_DATE.next())
-                .withIndicatedPlea(CoreTestTemplates.indicatedPlea(offenceId, INDICATED_NOT_GUILTY).build())
-                .withNotifiedPlea(CoreTestTemplates.notifiedPlea(offenceId).build())
-                .withOffenceDefinitionId(randomUUID())
-                .withOffenceTitle(STRING.next())
-                .withOffenceTitleWelsh(STRING.next())
-                .withOffenceCode(STRING.next())
-                .withOffenceLegislation(STRING.next())
-                .withOffenceLegislationWelsh(STRING.next())
-                .withWording(STRING.next())
-                .withWordingWelsh(STRING.next())
-                .withModeOfTrial("Either Way")
-                .withOrderIndex(INTEGER.next())
-                .withProceedingsConcluded(true)
-                .withIsDiscontinued(true)
-                .withIntroducedAfterInitialProceedings(true)
-                .withLaidDate(PAST_LOCAL_DATE.next())
-                .withEndorsableFlag(true)
-                .withOffenceDateCode(CoreTestTemplates.defaultArguments().getOffenceDateCode())
-                .withConvictionDate(null)
-                .withCustodyTimeLimit(null)
-                .withAllocationDecision(allocationDecision(offenceId, "Defendant consents to summary trial").build())
-                .withReportingRestrictions(of(ReportingRestriction.reportingRestriction()
-                        .withId(randomUUID())
-                        .withJudicialResultId(randomUUID())
-                        .withLabel("YES")
-                        .withOrderedDate(now())
-                        .build())).build();
-    }
-
-
-    private List<Target> saveDraftResults(final SaveDraftResultCommand saveSingleDayDraftResultCommand, final String resultDefinitionId) {
+    private List<Target> getTargets(final SaveDraftResultCommand saveSingleDayDraftResultCommand) {
         final List<Target> targets = new ArrayList<>();
         targets.add(saveSingleDayDraftResultCommand.getTarget());
-        try {
-            saveDraftResultForHearingDay(saveSingleDayDraftResultCommand, resultDefinitionId);
-        } catch (final JsonProcessingException e) {
-            e.printStackTrace();
-        }
         return targets;
-    }
-
-    private void saveDraftResultForHearingDay(final SaveDraftResultCommand saveDraftResultCommand, final String resultDefinitionId) throws JsonProcessingException {
-        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
-
-        final Target target = saveDraftResultCommand.getTarget();
-
-        final JsonObject result = Json.createObjectBuilder().add("resultCode", resultDefinitionId).add("isDeleted", false).build();
-        final JsonArray results = Json.createArrayBuilder()
-                .add(result)
-                .build();
-
-        saveDraftResult(saveDraftResultCommand, target, results);
-    }
-
-
-    private void saveDraftResult(SaveDraftResultCommand saveDraftResultCommand, Target target, JsonArray results) {
-        saveDraftResultCommand.getTarget().setDraftResult(Json.createObjectBuilder()
-                .add("defendantId", randomUUID().toString())
-                .add("targetId", randomUUID().toString())
-                .add("results", results)
-                .build()
-                .toString());
-        final BeanMatcher<PublicHearingDraftResultSaved> beanMatcher = isBean(PublicHearingDraftResultSaved.class)
-                .with(PublicHearingDraftResultSaved::getTargetId, is(target.getTargetId()))
-                .with(PublicHearingDraftResultSaved::getHearingId, is(target.getHearingId()))
-                .with(PublicHearingDraftResultSaved::getDefendantId, is(target.getDefendantId()))
-                .with(PublicHearingDraftResultSaved::getOffenceId, is(target.getOffenceId()));
-
-        final String expectedMetaDataContextUser = getLoggedInUser().toString();
-        final String expectedMetaDataName = PUBLIC_HEARING_DRAFT_RESULT_SAVED;
-        try (final Utilities.EventListener publicEventResulted = listenFor(PUBLIC_HEARING_DRAFT_RESULT_SAVED)
-                .withFilter(beanMatcher, expectedMetaDataName, expectedMetaDataContextUser)) {
-
-            makeCommand(getRequestSpec(), "hearing.save-days-draft-result")
-                    .ofType("application/vnd.hearing.draft-result+json")
-                    .withArgs(target.getHearingId(), target.getHearingDay())
-                    .withPayload(target)
-                    .executeSuccessfully();
-
-            publicEventResulted.waitFor();
-        }
     }
 
     private List<Prompt> getRemandStatusPrompts() {
@@ -1051,7 +901,6 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         ), targets);
     }
 
-
     private void assertHearingResultsAreShared(final Hearing hearing) {
         getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -1077,7 +926,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                                                                              final String ctlExpiryDate) {
         final List<ResultLine> resultLineList = new ArrayList<>();
         final ResultLine resultLine = ResultLine.resultLine()
-                .withOrderedDate(LocalDate.now())
+                .withOrderedDate(now())
                 .withResultLineId(fromString(CTLE_RESULT_DEFINITON_ID))
                 .withIsModified(false)
                 .withIsComplete(false)
@@ -1123,7 +972,6 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         ctlePromptList.add(timeSpendInCustody);
         return ctlePromptList;
     }
-
 
     private Hearing createHearingWithOffence(final UUID offenceId) {
         return createHearing(customStructureInitiateHearingTemplate(getUuidMapForSingleCaseStructure(offenceId)));

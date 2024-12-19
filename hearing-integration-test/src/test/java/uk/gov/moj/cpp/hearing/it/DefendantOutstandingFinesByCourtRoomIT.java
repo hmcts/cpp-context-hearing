@@ -4,8 +4,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static java.util.List.of;
 import static java.util.UUID.randomUUID;
 import static org.awaitility.Awaitility.waitAtMost;
+import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
@@ -17,7 +19,7 @@ import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.OutstandingFinesQuery;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -39,12 +41,12 @@ public class DefendantOutstandingFinesByCourtRoomIT extends AbstractIT {
     }
 
     @Test
-    public void shouldPostComputeOutstandingFines() throws Exception {
+    public void shouldPostComputeOutstandingFines() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final CourtCentre courtCentre = initiateHearingCommand.getHearing().getCourtCentre();
         final HearingDay hearingDay = initiateHearingCommand.getHearing().getHearingDays().get(0);
         hearingDay.setSittingDay(ZonedDateTime.now().plusDays(1));
-        final CommandHelpers.InitiateHearingCommandHelper initiate = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingCommand));
+        final InitiateHearingCommandHelper initiate = h(initiateHearing(getRequestSpec(), initiateHearingCommand));
 
         final UUID correlationId = randomUUID();
         getRequestSpec().header(HeaderConstants.CLIENT_CORRELATION_ID, correlationId);
@@ -53,7 +55,7 @@ public class DefendantOutstandingFinesByCourtRoomIT extends AbstractIT {
                 .withPayload(
                         OutstandingFinesQuery.newBuilder()
                                 .withCourtCentreId(courtCentre.getId())
-                                .withCourtRoomIds(Arrays.asList(courtCentre.getRoomId()))
+                                .withCourtRoomIds(of(courtCentre.getRoomId()))
                                 .withHearingDate(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate())
                                 .build()
                 )
@@ -61,16 +63,16 @@ public class DefendantOutstandingFinesByCourtRoomIT extends AbstractIT {
         final Person personDetails = initiate.getFirstDefendantForFirstCase().getPersonDefendant().getPersonDetails();
 
         waitAtMost(Duration.ofSeconds(30))
-                .untilAsserted(() -> verifyStagingenforcementCourtRoomsOutstandingFines(Arrays.asList(
-                        personDetails.getFirstName(),
-                        personDetails.getLastName(),
-                        personDetails.getNationalInsuranceNumber()
+                .untilAsserted(() -> verifyStagingEnforcementCourtRoomsOutstandingFines(Arrays.asList(
+                                personDetails.getFirstName(),
+                                personDetails.getLastName(),
+                                personDetails.getNationalInsuranceNumber()
                         ))
                 );
 
     }
 
-    public static void verifyStagingenforcementCourtRoomsOutstandingFines(final List<String> expectedValues) {
+    private void verifyStagingEnforcementCourtRoomsOutstandingFines(final List<String> expectedValues) {
 
         final RequestPatternBuilder requestPatternBuilder = postRequestedFor(urlPathMatching("/stagingenforcement-service/command/api/rest/stagingenforcement/court/rooms/outstanding-fines"));
         expectedValues.forEach(
@@ -78,7 +80,6 @@ public class DefendantOutstandingFinesByCourtRoomIT extends AbstractIT {
         );
         verify(requestPatternBuilder);
     }
-
 
 
 }

@@ -24,7 +24,7 @@ import static uk.gov.justice.core.courts.PersonDefendant.personDefendant;
 import static uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase;
 import static uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCaseIdentifier;
 import static uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand.initiateHearingCommand;
-import static uk.gov.moj.cpp.hearing.it.Queries.getHearingForTomorrowPollForMatch;
+import static uk.gov.moj.cpp.hearing.it.Queries.pollForFutureHearings;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
@@ -66,7 +66,7 @@ public class FutureHearingIT extends AbstractIT {
 
         initiateHearing(getRequestSpec(), initiateHearingCommand);
 
-        getHearingForTomorrowPollForMatch(userId, prosecutionCaseId, isBean(GetHearings.class)
+        pollForFutureHearings(userId, prosecutionCaseId, isBean(GetHearings.class)
                 .with(GetHearings::getHearingSummaries, hasSize(greaterThanOrEqualTo(1)))
                 .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
                         .with(HearingSummaries::getId, is(hearingId))
@@ -91,7 +91,7 @@ public class FutureHearingIT extends AbstractIT {
     }
 
     @Test
-    public void shouldGetNullFutureHearingsByCaseIdsPasDatedRecords() {
+    public void shouldGetNullFutureHearingsByCaseIdsPastDatedRecords() {
         final UUID userId = randomUUID();
         final UUID hearingId = randomUUID();
         final UUID prosecutionCaseId = randomUUID();
@@ -102,7 +102,7 @@ public class FutureHearingIT extends AbstractIT {
 
         initiateHearing(getRequestSpec(), initiateHearingCommand);
 
-        getHearingForTomorrowPollForMatch(userId, prosecutionCaseId, isBean(GetHearings.class)
+        pollForFutureHearings(userId, prosecutionCaseId, isBean(GetHearings.class)
                 .with(GetHearings::getHearingSummaries, nullValue())
         );
     }
@@ -112,7 +112,7 @@ public class FutureHearingIT extends AbstractIT {
         final UUID userId = randomUUID();
         final UUID prosecutionCaseId = randomUUID();
 
-        getHearingForTomorrowPollForMatch(userId, prosecutionCaseId, isBean(GetHearings.class)
+        pollForFutureHearings(userId, prosecutionCaseId, isBean(GetHearings.class)
                 .with(GetHearings::getHearingSummaries, nullValue())
         );
     }

@@ -18,7 +18,6 @@ import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 public class WebDavStub {
 
     private static final String XHIBIT_GATEWAY_SEND_TO_XHIBIT_PATH_REG_EX = "/xhibit-gateway/send-to-xhibit/.*\\.xml";
-    private static final String XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_PATH_REG_EX = "/xhibit-gateway/send-to-xhibit/WebPage.*\\.xml";
     private static final String XHIBIT_GATEWAY_SEND_PUB_DISP_TO_XHIBIT_FILE_PATH_REG_EX = "/xhibit-gateway/send-to-xhibit/PublicDisplay.*\\.xml";
 
     public static void stubExhibitFileUpload() {
@@ -28,10 +27,6 @@ public class WebDavStub {
                         .withHeader("CPPID", UUID.randomUUID().toString())));
 
         waitForPutStubToBeReady("/xhibit-gateway/send-to-xhibit/waitForPutStubToBeReady.xml", APPLICATION_XML, OK);
-    }
-
-    public static String getSentXmlForWebPage() {
-        return getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_PATH_REG_EX);
     }
 
     public static String getSentXmlForPubDisplay() {

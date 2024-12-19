@@ -1,11 +1,7 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.fromString;
 import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.core.Is.is;
-import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubGetProgressionProsecutionCases;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRoomMappings;
@@ -16,7 +12,6 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.stubExhibitFileUpload;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 import javax.json.JsonObject;
@@ -37,7 +32,6 @@ public class AbstractPublishLatestCourtCentreHearingIT extends AbstractIT {
     protected static String courtRoom5Id;
     protected static UUID caseId;
     protected static UUID hearingTypeId;
-    protected static LocalDate localDate;
     protected static final String LISTING_COMMAND_PUBLISH_COURT_LIST = "hearing.command.publish-court-list";
     protected static final String MEDIA_TYPE_LISTING_COMMAND_PUBLISH_COURT_LIST = "application/vnd.hearing.publish-court-list+json";
     protected static final String E20903_PCO_TYPE = "E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type";
@@ -76,19 +70,13 @@ public class AbstractPublishLatestCourtCentreHearingIT extends AbstractIT {
 
     public static String sendPublishCourtListCommand(final JsonObject publishCourtListJsonObject, final String courtCentreId) {
 
-        try (final Utilities.EventListener eventTopic = listenFor("hearing.event.publish-court-list-export-successful", "hearing.event")
-                .withFilter(isJson(withJsonPath("$.publishStatus", is("EXPORT_SUCCESSFUL")
-                )))) {
+        makeCommand(requestSpec, LISTING_COMMAND_PUBLISH_COURT_LIST)
+                .ofType(MEDIA_TYPE_LISTING_COMMAND_PUBLISH_COURT_LIST)
+                .withPayload(publishCourtListJsonObject.toString())
+                .withCppUserId(USER_ID_VALUE_AS_ADMIN)
 
-            makeCommand(requestSpec, LISTING_COMMAND_PUBLISH_COURT_LIST)
-                    .ofType(MEDIA_TYPE_LISTING_COMMAND_PUBLISH_COURT_LIST)
-                    .withPayload(publishCourtListJsonObject.toString())
-                    .withCppUserId(USER_ID_VALUE_AS_ADMIN)
+                .executeSuccessfully();
 
-                    .executeSuccessfully();
-
-            eventTopic.waitFor();
-        }
         return courtCentreId;
     }
 }

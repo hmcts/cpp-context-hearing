@@ -34,10 +34,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class EjectCaseApplicationIT extends AbstractIT {
-    private static final String CASE_STATUS_EJECTED = "EJECTED";
-    private final String eventName = "public.progression.events.hearing-extended";
-    private final String ejectEventName = "public.progression.events.case-or-application-ejected";
-    private final String REMOVAL_REASON = "LEGAL";
+    private static final String PROGRESSION_EVENTS_HEARING_EXTENDED = "public.progression.events.hearing-extended";
+    private static final String PROGRESSION_EVENTS_CASE_OR_APPLICATION_EJECTED = "public.progression.events.case-or-application-ejected";
+    private static final String REMOVAL_REASON = "LEGAL";
 
     @Test
     @Disabled("Need to revisit this scenario to decide what needs to be done with courtapplication's status when case is rejected")
@@ -67,7 +66,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
         // Eject case will also eject linked application
         ejectCaseWithLinkedApplication(hearing.getId(), prosecutionCaseId, standAloneApplicationId);
         Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(),
-                hearing.getHearingDays().get(0).getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
+                hearing.getHearingDays().get(0).getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         .withValue(h -> h.getHearingSummaries().size(), 1)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
@@ -77,9 +76,9 @@ public class EjectCaseApplicationIT extends AbstractIT {
 
         );
         // Eject standalone application
-        ejectStandAloneApplication(hearing,hearing.getId(), standAloneApplicationId);
+        ejectStandAloneApplication(hearing.getId(), standAloneApplicationId);
         Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(),
-                hearing.getHearingDays().get(0).getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
+                hearing.getHearingDays().get(0).getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         // all applications ejected now including child and linked
                         .withValue(h -> h.getHearingSummaries().size(), 0)
@@ -88,8 +87,6 @@ public class EjectCaseApplicationIT extends AbstractIT {
 
 
     }
-
-
 
     private  void addLinkedApplication(final UUID prosecutionCaseId, final Hearing hearing) throws Exception {
 
@@ -101,9 +98,9 @@ public class EjectCaseApplicationIT extends AbstractIT {
         final JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(extendHearingCommand);
 
         sendMessage(getPublicTopicInstance().createProducer(),
-                eventName,
+                PROGRESSION_EVENTS_HEARING_EXTENDED,
                 commandJson,
-                metadataOf(randomUUID(), eventName)
+                metadataOf(randomUUID(), PROGRESSION_EVENTS_HEARING_EXTENDED)
                         .withUserId(randomUUID().toString())
                         .build()
         );
@@ -129,9 +126,9 @@ public class EjectCaseApplicationIT extends AbstractIT {
         final JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(extendHearingCommand);
 
         sendMessage(getPublicTopicInstance().createProducer(),
-                eventName,
+                PROGRESSION_EVENTS_HEARING_EXTENDED,
                 commandJson,
-                metadataOf(randomUUID(), eventName)
+                metadataOf(randomUUID(), PROGRESSION_EVENTS_HEARING_EXTENDED)
                         .withUserId(randomUUID().toString())
                         .build()
         );
@@ -147,6 +144,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
         );
 
     }
+
     private void ejectCaseWithLinkedApplication(final UUID hearingId, final UUID prosecutionCaseId, final UUID applicationId) throws Exception {
         final EjectCaseOrApplicationCommand command = EjectCaseOrApplicationCommand.EjectCaseOrApplicationCommandBuilder
                 .anEjectCaseOrApplicationCommand()
@@ -157,9 +155,9 @@ public class EjectCaseApplicationIT extends AbstractIT {
         final JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(command);
 
         sendMessage(getPublicTopicInstance().createProducer(),
-                ejectEventName,
+                PROGRESSION_EVENTS_CASE_OR_APPLICATION_EJECTED,
                 commandJson,
-                metadataOf(randomUUID(), ejectEventName)
+                metadataOf(randomUUID(), PROGRESSION_EVENTS_CASE_OR_APPLICATION_EJECTED)
                         .withUserId(randomUUID().toString())
                         .build()
         );
@@ -176,7 +174,8 @@ public class EjectCaseApplicationIT extends AbstractIT {
                 )
         );
     }
-    private void ejectStandAloneApplication(final Hearing hearing, final UUID hearingId, final UUID standAloneApplicationId) throws Exception {
+
+    private void ejectStandAloneApplication(final UUID hearingId, final UUID standAloneApplicationId) throws Exception {
         final EjectCaseOrApplicationCommand command = EjectCaseOrApplicationCommand.EjectCaseOrApplicationCommandBuilder.anEjectCaseOrApplicationCommand()
                 .withApplicationId(standAloneApplicationId)
                 .withRemovalReason(REMOVAL_REASON)
@@ -185,9 +184,9 @@ public class EjectCaseApplicationIT extends AbstractIT {
         final JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(command);
 
         sendMessage(getPublicTopicInstance().createProducer(),
-                ejectEventName,
+                PROGRESSION_EVENTS_CASE_OR_APPLICATION_EJECTED,
                 commandJson,
-                metadataOf(randomUUID(), ejectEventName)
+                metadataOf(randomUUID(), PROGRESSION_EVENTS_CASE_OR_APPLICATION_EJECTED)
                         .withUserId(randomUUID().toString())
                         .build()
         );

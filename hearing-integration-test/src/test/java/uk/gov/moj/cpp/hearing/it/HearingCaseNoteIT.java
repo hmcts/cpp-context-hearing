@@ -29,7 +29,6 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import uk.gov.justice.core.courts.NoteType;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
 
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
@@ -41,8 +40,6 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 
 public class HearingCaseNoteIT extends AbstractIT {
-
-    private FileResourceObjectMapper fileResourceObjectMapper = new FileResourceObjectMapper();
 
     @Test
     public void shouldSaveHearingCaseNote() throws Exception {

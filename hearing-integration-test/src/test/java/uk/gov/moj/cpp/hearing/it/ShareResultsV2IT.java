@@ -1,27 +1,20 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static javax.ws.rs.core.Response.Status.OK;
-import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
-import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
-import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.UseCases.shareResultsPerDay;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
-import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
@@ -37,7 +30,6 @@ import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.conver
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
 
 import uk.gov.justice.core.courts.CourtCentre;
@@ -47,21 +39,17 @@ import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Prompt;
-import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Target;
-import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResultedV2;
-import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.SecondaryCJSCode;
-import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllNowsReferenceDataHelper;
@@ -69,7 +57,6 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllResultDefinitionsReferenceD
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 import uk.gov.moj.cpp.hearing.test.TestUtilities;
-import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -79,7 +66,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import io.restassured.path.json.JsonPath;
@@ -92,7 +78,6 @@ public class ShareResultsV2IT extends AbstractIT {
     private static final UUID NOTICE_OF_FINANCIAL_PENALTY_NOW_DEFINITION_ID = fromString("66cd749a-1d51-11e8-accf-0ed5f89f718b");
     private static final UUID ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID = fromString("10115268-8efc-49fe-b8e8-feee216a03da");
     private static final UUID RD_FINE = fromString("969f150c-cd05-46b0-9dd9-30891efcc766");
-    private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
 
     @Test
     public void shouldShareResultsForHearingWithMultipleCasesWithApplication() {
@@ -115,19 +100,14 @@ public class ShareResultsV2IT extends AbstractIT {
         final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), orderedDate);
         setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
 
-
         final List<Target> targets = new ArrayList<>();
         targets.add(saveDraftResultCommand.getTarget());
-
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         shareDaysResultWithCourtClerk(hearing, targets, hearingDay);
 
         assertHearingResultsAreShared(hearing);
-
-        //getSharedResult(hearing,hearingDay);
-
     }
 
     @Test
@@ -149,10 +129,8 @@ public class ShareResultsV2IT extends AbstractIT {
         final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingCommand.it(), orderedDate, hearingDay);
         setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
 
-
         final List<Target> targets = new ArrayList<>();
         targets.add(saveDraftResultCommand.getTarget());
-
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
@@ -170,24 +148,8 @@ public class ShareResultsV2IT extends AbstractIT {
         assertHearingResultsAreShared(hearing);
     }
 
-    private void getSharedResult(final Hearing hearing, final LocalDate hearingDay) {
-
-        poll(requestParams(getURL("hearing.get-share-result-v2", hearing.getId(), hearingDay), "application/vnd.hearing.get-share-result-v2+json")
-                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
-                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
-                .until(status().is(OK),
-                        print(),
-                        payload().isJson(allOf(
-                                //withJsonPath("$.hearingDay", is(hearingDay)),
-                                withJsonPath("$.resultLines[0].sharedDate", is(notNullValue()))
-                        )));
-    }
-
-
-
-
     private void shareDaysResultWithCourtClerk(final Hearing hearing, final List<Target> targets, final LocalDate hearingDay) {
-        final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
+        final DelegatedPowers courtClerk1 = delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
                 .withUserId(randomUUID()).build();
         ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
@@ -243,7 +205,6 @@ public class ShareResultsV2IT extends AbstractIT {
                         ).build())));
     }
 
-
     private HashMap<UUID, Map<UUID, List<UUID>>> getUuidMapForMultipleCaseStructure() {
         HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
         Map<UUID, List<UUID>> value = new HashMap<>();
@@ -254,41 +215,6 @@ public class ShareResultsV2IT extends AbstractIT {
         caseStructure.put(randomUUID(), toMap(randomUUID(), TestUtilities.asList(randomUUID())));
         return caseStructure;
     }
-
-
-
-
-
-
-    private void testSaveDraftResult(final SaveDraftResultCommand saveDraftResultCommand) {
-        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
-
-        final Target target = saveDraftResultCommand.getTarget();
-        final List<ResultLine> resultLines = target.getResultLines();
-        // currently not sending result lines in draft
-        target.setResultLines(null);
-        final BeanMatcher<PublicHearingDraftResultSaved> beanMatcher = isBean(PublicHearingDraftResultSaved.class)
-                .with(PublicHearingDraftResultSaved::getTargetId, is(target.getTargetId()))
-                .with(PublicHearingDraftResultSaved::getHearingId, is(target.getHearingId()))
-                .with(PublicHearingDraftResultSaved::getDefendantId, is(target.getDefendantId()))
-                .with(PublicHearingDraftResultSaved::getOffenceId, is(target.getOffenceId()));
-
-        final String expectedMetaDataContextUser = getLoggedInUser().toString();
-        final String expectedMetaDataName = PUBLIC_HEARING_DRAFT_RESULT_SAVED;
-        try (final EventListener publicEventResulted = listenFor(PUBLIC_HEARING_DRAFT_RESULT_SAVED)
-                .withFilter(beanMatcher, expectedMetaDataName, expectedMetaDataContextUser)) {
-
-            makeCommand(getRequestSpec(), "hearing.save-draft-result")
-                    .ofType("application/vnd.hearing.save-draft-result+json")
-                    .withArgs(saveDraftResultCommand.getTarget().getHearingId())
-                    .withPayload(saveDraftResultCommand.getTarget())
-                    .executeSuccessfully();
-
-            publicEventResulted.waitFor();
-        }
-        target.setResultLines(resultLines);
-    }
-
 
     private AllNowsReferenceDataHelper setupNowsReferenceData(final LocalDate referenceDate) {
         AllNows allnows = AllNows.allNows()
@@ -394,19 +320,6 @@ public class ShareResultsV2IT extends AbstractIT {
         return allResultDefinitions;
     }
 
-
-    private uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt findPrompt(final AllResultDefinitionsReferenceDataHelper refDataHelper, final UUID resultDefId) {
-        final ResultDefinition resultDefinition =
-                refDataHelper.it().getResultDefinitions().stream()
-                        .filter(rd -> rd.getId().equals(resultDefId))
-                        .findFirst()
-                        .orElseThrow(() -> new RuntimeException("invalid test data")
-                        );
-        return resultDefinition.getPrompts().get(0);
-    }
-
-
-
     private void assertHearingWithMultipleCasesCreatedAndResultAreNotShared(final Hearing hearing) {
         final HearingDay hearingDay = hearing.getHearingDays().get(0);
         getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
@@ -429,16 +342,12 @@ public class ShareResultsV2IT extends AbstractIT {
         );
     }
 
-
-
     private void assertHearingResultsAreShared(final Hearing hearing) {
         getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .with(Hearing::getHasSharedResults, is(true))));
     }
-
-
 
     private List<SecondaryCJSCode> getSecondaryCjsCodes() {
         final List<SecondaryCJSCode> secondaryCJSCodes = new ArrayList<>();

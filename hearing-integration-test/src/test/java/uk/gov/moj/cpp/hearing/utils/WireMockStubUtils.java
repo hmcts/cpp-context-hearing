@@ -14,7 +14,6 @@ import static org.awaitility.Durations.TEN_SECONDS;
 import static java.text.MessageFormat.format;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -44,7 +43,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.json.JsonObject;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -302,17 +300,6 @@ public class WireMockStubUtils {
 
     }
 
-    public static void mockProgressionCaseDetails(final UUID caseId, final String caseUrn) {
-
-        stubFor(get(urlMatching("/usersgroups-service/query/api/rest/usersgroups/users/.*/groups"))
-                .willReturn(aResponse().withStatus(OK.getStatusCode())
-                        .withHeader(ID, randomUUID().toString())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-                        .withBody(getPayload("stub-data/usersgroups.get-all-groups-by-user.json"))));
-
-        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", randomUUID()), CONTENT_TYPE_QUERY_GROUPS);
-    }
-
     public static void setupAsMagistrateUser(final UUID userId) {
         stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId)))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
@@ -328,24 +315,6 @@ public class WireMockStubUtils {
 
         stubFor(post(urlPathEqualTo("/stagingenforcement-service/command/api/rest/stagingenforcement/court/rooms/outstanding-fines"))
                 .withHeader(CONTENT_TYPE, equalTo("application/vnd.stagingenforcement.court.rooms.outstanding-fines+json"))
-                .willReturn(aResponse().withStatus(SC_ACCEPTED)));
-
-    }
-
-    public static void stubRequestApproval() {
-        InternalEndpointMockUtils.stubPingFor("hearing-service");
-
-        stubFor(post(urlPathEqualTo("/hearing-service/command/api/rest/hearing/request-approval"))
-                .withHeader(CONTENT_TYPE, equalTo("application/vnd.hearing.request-approval+json"))
-                .willReturn(aResponse().withStatus(SC_ACCEPTED)));
-
-    }
-
-    public static void stubStagingenforcementOutstandingFines() {
-        InternalEndpointMockUtils.stubPingFor("stagingenforcement-service");
-
-        stubFor(post(urlPathEqualTo("/stagingenforcement-service/command/api/rest/stagingenforcement/outstanding-fines"))
-                .withHeader(CONTENT_TYPE, equalTo("application/vnd.stagingenforcement.request-outstanding-fine+json"))
                 .willReturn(aResponse().withStatus(SC_ACCEPTED)));
 
     }
@@ -386,13 +355,6 @@ public class WireMockStubUtils {
                 .target(url)
                 .request()
                 .put(entity("", MediaType.valueOf(contentType)));
-    }
-
-    private static JsonObject getProgressionCaseJson(final UUID caseId, final String caseUrn) {
-        return createObjectBuilder()
-                .add("caseId", caseId.toString())
-                .add("caseUrn", caseUrn)
-                .build();
     }
 
     public static void setupProsecutionCaseByHearingId(final UUID hearingId, final UUID hearingEventDefinitionId) {

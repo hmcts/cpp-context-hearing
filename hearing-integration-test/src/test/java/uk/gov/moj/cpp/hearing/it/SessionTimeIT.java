@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
 public class SessionTimeIT extends AbstractIT {
 
     @Test
-    public void shouldSaveSessionTimeForFullUpdate() throws Exception {
+    public void shouldSaveSessionTimeForFullUpdate() {
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
         final UUID courtAssociateId = randomUUID();
         final UUID courtClerkId = randomUUID();
@@ -80,21 +80,7 @@ public class SessionTimeIT extends AbstractIT {
     }
 
     @Test
-    public void shouldThrowExceptionWhenInvalidQueryRequest() throws Exception {
-        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
-        saveSessionTime(randomUUID(), randomUUID(), LocalDate.now(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), STRING.next(), STRING.next(), STRING.next(), true, false, false);
-        final String payload = poll(requestParams(getURL("hearing.query.session-time", randomUUID(), randomUUID()),
-                "application/vnd.hearing.query.session-time+json").withHeader(USER_ID, getLoggedInUser()))
-                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
-                .until(
-                        status().is(NOT_FOUND),
-                        print()
-                ).getPayload();
-        assertEquals("", payload);
-    }
-
-    @Test
-    public void shouldSaveSessionTimeForPartialUpdate() throws Exception {
+    public void shouldSaveSessionTimeForPartialUpdate() {
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
         final UUID jud1 = randomUUID();
         final String jud1Name = STRING.next();

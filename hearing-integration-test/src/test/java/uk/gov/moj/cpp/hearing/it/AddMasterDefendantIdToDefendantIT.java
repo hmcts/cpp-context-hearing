@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
-import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"squid:S2699", "squid:S1607"})
@@ -35,10 +34,8 @@ public class AddMasterDefendantIdToDefendantIT extends AbstractIT {
 
     private EventHandler eventHandler = new EventHandler();
 
-
     @Test
     public void shouldAddMasterDefendantIdToDefendantAsSystemUser() {
-
 
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         final UUID hearingId = hearingOne.getHearingId();
@@ -50,7 +47,7 @@ public class AddMasterDefendantIdToDefendantIT extends AbstractIT {
                 .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()))
                 .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(Response.Status.OK), print(), ResponsePayloadMatcher.payload().isJson(allOf(
-                        withJsonPath("$.hearing.id", Is.is(hearingId.toString()))
+                        withJsonPath("$.hearing.id", is(hearingId.toString()))
                 )));
 
         addMasterDefendantIdToDefendantAndVerifyEventHasBeenCreated(hearingId, prosecutionCaseId, defendantId, masterDefendantId);

@@ -55,7 +55,6 @@ public class RestructureResultsIT extends AbstractIT {
     @Test
     public void shouldRestructureCO() throws IOException {
 
-
         final InitiateHearingCommandHelper hearing = shareResults("restructure/CO-UI-payload.json");
 
         final EventListener publicEventResulted = listenFor("public.hearing.resulted")

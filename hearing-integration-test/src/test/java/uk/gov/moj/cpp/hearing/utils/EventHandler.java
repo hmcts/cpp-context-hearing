@@ -66,11 +66,6 @@ public class EventHandler {
         this.eventsByName = new HashMap<>();
     }
 
-    public EventHandler withMaxWaitTime(final Integer maxWaitTime) {
-        this.maxWaitTime = maxWaitTime;
-        return this;
-    }
-
     public EventHandler subscribe(final String... eventNames) {
         for (String eventName : eventNames) {
 
@@ -81,11 +76,6 @@ public class EventHandler {
 
     private String eventNameWithPrefix(final String eventName){
         return "jms.topic." + eventName;
-    }
-
-    public EventHandler unsubscribe(String eventName) {
-        this.eventsByName.remove(eventName);
-        return this;
     }
 
     public EventHandler run(final Runnable action) {
@@ -99,26 +89,8 @@ public class EventHandler {
         return this;
     }
 
-    public EventHandler run(final Callable action) {
-        Map<String, MessageConsumerClient> consumers = eventsByName.keySet().parallelStream().collect(toMap(p -> p, this::startConsumer));
-
-        Optional<UUID> correlationId = runAndCheckForCorrelationId(action);
-
-        if (correlationId.isPresent()) {
-            consumers.entrySet().parallelStream().forEach((entry) -> receiveAndClose(entry, correlationId.get()));
-        } else {
-            consumers.entrySet().parallelStream().forEach(this::receiveAndClose);
-        }
-
-        return this;
-    }
-
     public Optional<JsonEnvelope> popEvent(String eventName) {
         return ofNullable(this.eventsByName.get(eventNameWithPrefix(eventName)).poll());
-    }
-
-    public Optional<JsonEnvelope> peekEvent(final String eventName) {
-        return ofNullable(this.eventsByName.get(eventName).peek());
     }
 
     public <T> Optional<Envelope<T>> popEvent(final Class<T> eventClass) {
@@ -131,21 +103,6 @@ public class EventHandler {
 
         return ofNullable(this.eventsByName.get(eventAnnotation.value()).poll())
                 .map(jsonEnvelope -> envelopeFrom(jsonEnvelope.metadata(), JsonHelper.fromJsonObject(jsonEnvelope.payloadAsJsonObject(), eventClass)));
-    }
-
-    public <T> T popEventPayload(final Class<T> eventClass) {
-        return popEvent(eventClass)
-                .map(Envelope::payload)
-                .orElseThrow(() -> new RuntimeException(String.format("Event %s not present", eventClass.getAnnotation(Event.class).value())));
-    }
-
-    public EventHandler reset() {
-        this.eventsByName.clear();
-        return this;
-    }
-
-    public Set<String> getSubscribedEvents() {
-        return eventsByName.keySet();
     }
 
     private MessageConsumerClient startConsumer(String eventName) {

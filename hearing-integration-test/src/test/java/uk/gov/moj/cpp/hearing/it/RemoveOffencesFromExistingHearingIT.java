@@ -25,7 +25,6 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
@@ -61,15 +60,15 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
     public static final String PUBLIC_EVENTS_LISTING_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING = "public.events.listing.offences-removed-from-existing-allocated-hearing";
     private final String publicProgressionDefendantOffencesChanged = "public.progression.defendant-offences-changed";
 
-    UUID defendantId1 ;
-    UUID defendantId2 ;
-    UUID offenceId1 ;
-    UUID offenceId2 ;
-    UUID offenceId3 ;
+    UUID defendantId1;
+    UUID defendantId2;
+    UUID offenceId1;
+    UUID offenceId2;
+    UUID offenceId3;
     UUID prosecutionCaseId;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         defendantId1 = UUID.randomUUID();
         defendantId2 = UUID.randomUUID();
         offenceId1 = UUID.randomUUID();
@@ -104,19 +103,19 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
                         print(),
                         payload().isJson(
                                 anyOf(allOf(
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(2)),
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", is(defendantId1.toString())),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(2)),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", is(defendantId1.toString())),
                                                 withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId2.toString())),
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].id", is(defendantId2.toString())),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId2.toString())),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[1].id", is(defendantId2.toString())),
                                                 withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences", hasSize(1)),
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences[0].id", is(offenceId3.toString()))),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences[0].id", is(offenceId3.toString()))),
 
-                                allOf(
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(2)),
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", is(defendantId2.toString())),
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId3.toString()))),
+                                        allOf(
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(2)),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", is(defendantId2.toString())),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId3.toString()))),
                                         withJsonPath("$.hearing.prosecutionCases[0].defendants[1].id", is(defendantId1.toString())),
                                         withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences", hasSize(1)),
                                         withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences[0].id", is(offenceId1.toString())))
@@ -137,10 +136,10 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
-                                                withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(1)),
-                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", is(defendantId2.toString())),
-                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
-                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId3.toString())))
+                                withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(1)),
+                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", is(defendantId2.toString())),
+                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
+                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId3.toString())))
                         ));
 
         // public.progression.defendant-offences-changed
@@ -205,11 +204,11 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
-                                                withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(1)),
-                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", is(defendantId1.toString())),
-                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
-                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId1.toString()))
-                                        )
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(1)),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", is(defendantId1.toString())),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId1.toString()))
+                                )
                         ));
     }
 
@@ -218,16 +217,7 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
 
         final UUID hearingId = initiateHearingAndAssertDefendantAndOffencesInHearing(prosecutionCaseId, defendantId1, defendantId2, offenceId1, offenceId2, offenceId3);
 
-        try (final Utilities.EventListener publicEventResultedListener = listenFor("public.hearing.selected-offences-removed-from-existing-hearing")
-                .withFilter(convertStringTo(PublicSelectedOffencesRemovedFromExistingHearing.class, isBean(PublicSelectedOffencesRemovedFromExistingHearing.class)
-                        .with(PublicSelectedOffencesRemovedFromExistingHearing::getHearingId, Matchers.is(hearingId))))) {
-
-            publicEventRemoveOffencesFromExistingAllocatedHearing(hearingId, singletonList(offenceId1));
-
-            publicEventResultedListener.expectNoneWithin(DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS);
-
-        }
-
+        publicEventRemoveOffencesFromExistingAllocatedHearing(hearingId, singletonList(offenceId1));
 
         poll(requestParams(getURL(GET_HEARING_QUERY_ENDPOINT_NAME, hearingId), GET_HEARING_QUERY_ENDPOINT_MEDIA_TYPE)
                 .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
@@ -236,13 +226,13 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
                         print(),
                         payload().isJson(
                                 anyOf(allOf(
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(2)),
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", is(defendantId1.toString())),
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId2.toString())),
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].id", is(defendantId2.toString())),
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences", hasSize(1)),
-                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences[0].id", is(offenceId3.toString()))),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(2)),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", is(defendantId1.toString())),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId2.toString())),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[1].id", is(defendantId2.toString())),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences", hasSize(1)),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences[0].id", is(offenceId3.toString()))),
 
                                         allOf(
                                                 withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(2)),

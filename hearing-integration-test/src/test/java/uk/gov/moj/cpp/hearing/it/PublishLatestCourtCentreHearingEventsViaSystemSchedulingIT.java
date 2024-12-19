@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static java.text.MessageFormat.format;
-import static java.time.ZonedDateTime.now;
 import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;

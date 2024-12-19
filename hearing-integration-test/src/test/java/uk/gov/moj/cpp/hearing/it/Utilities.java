@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.ENDPOINT_PROPERTIES;
+import static uk.gov.moj.cpp.hearing.it.AbstractIT.getLoggedInUser;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPrivateTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
@@ -18,7 +19,6 @@ import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher;
 import uk.gov.moj.cpp.hearing.utils.QueueUtil;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.text.MessageFormat;
 import java.util.UUID;
@@ -210,10 +210,6 @@ public class Utilities {
             return objectMapper().writeValueAsString(o);
         }
 
-        public static <T> T fromJsonString(final String str, Class<T> theClass) throws IOException {
-            return objectMapper().reader().forType(theClass).readValue(str);
-        }
-
         public static JsonObject objectToJsonObject(final Object o) throws JsonProcessingException {
             return (new StringToJsonObjectConverter()).convert(toJsonString(o));
         }
@@ -282,7 +278,7 @@ public class Utilities {
                     .contentType(type)
                     .accept(type)
                     .body(ofNullable(this.payloadAsString).orElse(""))
-                    .header(new Header(USER_ID, cppUserId != null ? cppUserId.toString() : AbstractIT.getLoggedInUser().toString())).when()
+                    .header(new Header(USER_ID, cppUserId != null ? cppUserId.toString() : getLoggedInUser().toString())).when()
                     .post(url)
                     .then().extract().response();
             assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));

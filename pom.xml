@@ -4,7 +4,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>17.100.0</version>
+        <version>17.100.0.1</version>
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
@@ -31,13 +31,12 @@
         <results.version>17.0.2</results.version>
         <notification.notify.version>17.0.1</notification.notify.version>
         <stagingenforcement.version>17.0.12</stagingenforcement.version>
-        <progression.version>17.0.39</progression.version>
+        <progression.version>17.0.46</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
-<!--        <test-utils-enveloper-provider.version>5.1.2</test-utils-enveloper-provider.version>-->
         <usersgroups.version>17.0.21</usersgroups.version>
         <listing.version>17.0.8</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>

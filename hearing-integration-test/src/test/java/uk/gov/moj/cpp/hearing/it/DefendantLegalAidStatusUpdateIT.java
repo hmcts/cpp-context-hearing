@@ -23,6 +23,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 
 public class DefendantLegalAidStatusUpdateIT extends AbstractIT {
@@ -32,6 +33,7 @@ public class DefendantLegalAidStatusUpdateIT extends AbstractIT {
     //TODO ignoring this test as we are not able to reproduce it locally. will revisit this test once again to figure out why it ia failing and will fix it.
     @SuppressWarnings("squid:S1607")
     @Disabled
+    @Test
     public void updateDefendantLegalAidStatus() {
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
@@ -54,7 +56,7 @@ public class DefendantLegalAidStatusUpdateIT extends AbstractIT {
                         .build()
         );
 
-        Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, 0, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))
                         .with(Hearing::getProsecutionCases, hasItem(isBean(ProsecutionCase.class)

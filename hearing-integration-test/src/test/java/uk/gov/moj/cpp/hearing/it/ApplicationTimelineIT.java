@@ -16,6 +16,7 @@ import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.command.TrialType.builder;
+import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.UseCases.setTrialType;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
@@ -26,14 +27,14 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.moj.cpp.hearing.command.TrialType;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,10 +47,8 @@ public class ApplicationTimelineIT extends AbstractIT {
 
     @BeforeEach
     public void setUpHearingWithApplication() {
-
-
-        final CommandHelpers.InitiateHearingCommandHelper hearingOneHelper =
-                h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOneHelper =
+                h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         hearingOne = hearingOneHelper.getHearing();
 
         addTrialType = builder()
@@ -62,64 +61,36 @@ public class ApplicationTimelineIT extends AbstractIT {
         setTrialType(getRequestSpec(), hearingOne.getId(), addTrialType);
     }
 
-    private void setUpSecondHearingWithApplication() {
-        final CommandHelpers.InitiateHearingCommandHelper hearingTwoHelper =
-                h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingWithApplicationTemplate(hearingOne.getCourtApplications())));
-        hearingTwo = hearingTwoHelper.getHearing();
-        setTrialType(getRequestSpec(), hearingTwo.getId(), addTrialType);
-    }
-
     @Test
-    public void shouldDisplayApplicationTimeline() {
+    public void shouldDisplayApplicationsOnTimeline() {
 
         stubCourtRoom(hearingOne);
 
-        final String timelineQueryAPIEndPoint = format(ENDPOINT_PROPERTIES.getProperty("hearing.application.timeline"), applicationId);
-        final String timelineURL = getBaseUri() + "/" + timelineQueryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.application.timeline+json";
         final Map<String, String> hearingSummaryMap = populateHearingSummaryKeyMap(hearingOne);
 
-        poll(requestParams(timelineURL, mediaType).withHeader(USER_ID, getLoggedInUser()).build())
-                .timeout(30, TimeUnit.SECONDS)
-                .until(
-                        status().is(OK),
-                        payload().isJson(allOf(
-                                withJsonPath("$.hearingSummaries[0].hearingId", is(hearingOne.getId().toString())),
-                                withJsonPath("$.hearingSummaries[0].hearingType", is(hearingSummaryMap.get("hearingType"))),
-                                withJsonPath("$.hearingSummaries[0].courtHouse", is(hearingSummaryMap.get("courtHouse"))),
-                                withJsonPath("$.hearingSummaries[0].courtRoom", is(hearingSummaryMap.get("courtRoom"))),
-                                withJsonPath("$.hearingSummaries[0].hearingTime", is(hearingSummaryMap.get("hearingTime"))),
-                                withJsonPath("$.hearingSummaries[0].estimatedDuration", is(Integer.parseInt(hearingSummaryMap.get("listedDurationMinutes")))),
-                                withJsonPath("$.hearingSummaries[0].hearingDate", is(hearingSummaryMap.get("hearingDate"))),
-                                withJsonPath("$.hearingSummaries[0].applicants[0]", is(hearingSummaryMap.get("applicant"))),
-                                withJsonPath("$.hearingSummaries[0].youthDefendantIds", is(empty()))
-                        )));
-
-
-    }
-
-    @Test
-    public void shouldDisplayApplicationMultiHearingTimeline() throws InterruptedException {
-
+        pollForApplicationTimeline(new Matcher[]{
+                withJsonPath("$.hearingSummaries[0].hearingId", is(hearingOne.getId().toString())),
+                withJsonPath("$.hearingSummaries[0].hearingType", is(hearingSummaryMap.get("hearingType"))),
+                withJsonPath("$.hearingSummaries[0].courtHouse", is(hearingSummaryMap.get("courtHouse"))),
+                withJsonPath("$.hearingSummaries[0].courtRoom", is(hearingSummaryMap.get("courtRoom"))),
+                withJsonPath("$.hearingSummaries[0].hearingTime", is(hearingSummaryMap.get("hearingTime"))),
+                withJsonPath("$.hearingSummaries[0].estimatedDuration", is(Integer.parseInt(hearingSummaryMap.get("listedDurationMinutes")))),
+                withJsonPath("$.hearingSummaries[0].hearingDate", is(hearingSummaryMap.get("hearingDate"))),
+                withJsonPath("$.hearingSummaries[0].applicants[0]", is(hearingSummaryMap.get("applicant"))),
+                withJsonPath("$.hearingSummaries[0].youthDefendantIds", is(empty()))
+        });
 
         setUpSecondHearingWithApplication();
 
-        final String timelineQueryAPIEndPoint = format(ENDPOINT_PROPERTIES.getProperty("hearing.application.timeline"), applicationId);
-        final String timelineURL = getBaseUri() + "/" + timelineQueryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.application.timeline+json";
+        pollForApplicationTimeline(new Matcher[]{
+                anyOf(
+                        withJsonPath("$.hearingSummaries[0].hearingId", containsString(hearingOne.getId().toString())),
+                        withJsonPath("$.hearingSummaries[1].hearingId", containsString(hearingOne.getId().toString()))),
+                anyOf(
+                        withJsonPath("$.hearingSummaries[0].hearingId", containsString(hearingTwo.getId().toString())),
+                        withJsonPath("$.hearingSummaries[1].hearingId", containsString(hearingTwo.getId().toString())))
+        });
 
-        poll(requestParams(timelineURL, mediaType).withHeader(USER_ID, getLoggedInUser()).build())
-                .timeout(30, TimeUnit.SECONDS)
-                .until(
-                        status().is(OK),
-                        payload().isJson(allOf(
-                                anyOf(
-                                        withJsonPath("$.hearingSummaries[0].hearingId", containsString(hearingOne.getId().toString())),
-                                        withJsonPath("$.hearingSummaries[1].hearingId", containsString(hearingOne.getId().toString()))),
-                                anyOf(
-                                        withJsonPath("$.hearingSummaries[0].hearingId", containsString(hearingTwo.getId().toString())),
-                                        withJsonPath("$.hearingSummaries[1].hearingId", containsString(hearingTwo.getId().toString())))
-                        )));
     }
 
     private Map<String, String> populateHearingSummaryKeyMap(Hearing hearing) {
@@ -139,6 +110,25 @@ public class ApplicationTimelineIT extends AbstractIT {
         hearingSummaryMap.put("respondentId", hearing.getCourtApplications().get(0).getRespondents().get(0).getId().toString());
         hearingSummaryMap.put("subjectId", hearing.getCourtApplications().get(0).getSubject().getId().toString());
         return hearingSummaryMap;
+    }
+
+    private void pollForApplicationTimeline(final Matcher[] matchers) {
+        final String timelineQueryAPIEndPoint = format(ENDPOINT_PROPERTIES.getProperty("hearing.application.timeline"), applicationId);
+        final String timelineURL = getBaseUri() + "/" + timelineQueryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.application.timeline+json";
+
+        poll(requestParams(timelineURL, mediaType).withHeader(USER_ID, getLoggedInUser()).build())
+                .timeout(30, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(matchers)));
+    }
+
+    private void setUpSecondHearingWithApplication() {
+        final InitiateHearingCommandHelper hearingTwoHelper =
+                h(initiateHearing(getRequestSpec(), standardInitiateHearingWithApplicationTemplate(hearingOne.getCourtApplications())));
+        hearingTwo = hearingTwoHelper.getHearing();
+        setTrialType(getRequestSpec(), hearingTwo.getId(), addTrialType);
     }
 
 }

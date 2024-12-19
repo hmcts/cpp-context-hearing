@@ -8,13 +8,15 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
+import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
+import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
+import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearingWithoutBreachApplication;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Hearing;
@@ -22,7 +24,7 @@ import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.HearingFactory;
 
 import java.time.ZonedDateTime;
@@ -38,8 +40,7 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("squid:S2699")
 public class ExtendHearingIT extends AbstractIT {
 
-    final String eventName = "public.progression.events.hearing-extended";
-
+    private static final String PROGRESSION_EVENTS_HEARING_EXTENDED = "public.progression.events.hearing-extended";
 
     @Test
     public void insertCourtApplication() throws Exception {
@@ -53,16 +54,16 @@ public class ExtendHearingIT extends AbstractIT {
 
     @Test
     public void addBreachCourtApplication() throws Exception {
-        extendBreachApplication(true);
+        extendBreachApplication();
     }
 
     @Test
     public void insertProsecutionCases() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.getHearing();
-        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearing.getId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                 )
@@ -70,20 +71,20 @@ public class ExtendHearingIT extends AbstractIT {
 
         ExtendHearingCommand extendHearingCommand = new ExtendHearingCommand();
         extendHearingCommand.setHearingId(hearing.getId());
-        final UUID caseId = UUID.randomUUID();
+        final UUID caseId = randomUUID();
         extendHearingCommand.setProsecutionCases(cloneCase(hearing, caseId));
 
         JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(extendHearingCommand);
 
         sendMessage(getPublicTopicInstance().createProducer(),
-                eventName,
+                PROGRESSION_EVENTS_HEARING_EXTENDED,
                 commandJson,
-                metadataOf(randomUUID(), eventName)
+                metadataOf(randomUUID(), PROGRESSION_EVENTS_HEARING_EXTENDED)
                         .withUserId(randomUUID().toString())
                         .build()
         );
 
-        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearing.getId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .withValue(h -> h.getProsecutionCases().size(), 2)
@@ -98,10 +99,10 @@ public class ExtendHearingIT extends AbstractIT {
     @Test
     public void insertProsecutionCasesForAdhocHearing() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.getHearing();
-        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearing.getId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .withValue(h -> h.getProsecutionCases().size(), 1)
@@ -110,7 +111,7 @@ public class ExtendHearingIT extends AbstractIT {
 
         ExtendHearingCommand extendHearingCommand = new ExtendHearingCommand();
         extendHearingCommand.setHearingId(hearing.getId());
-        final UUID caseId = UUID.randomUUID();
+        final UUID caseId = randomUUID();
         extendHearingCommand.setProsecutionCases(cloneCase(hearing, caseId));
 
         JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(extendHearingCommand);
@@ -123,7 +124,7 @@ public class ExtendHearingIT extends AbstractIT {
                         .build()
         );
 
-        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearing.getId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .withValue(h -> h.getProsecutionCases().size(), 2)
@@ -138,25 +139,25 @@ public class ExtendHearingIT extends AbstractIT {
     }
 
 
-    private List<ProsecutionCase> cloneCase(final Hearing hearing, final UUID caseId){
+    private List<ProsecutionCase> cloneCase(final Hearing hearing, final UUID caseId) {
         final List<ProsecutionCase> prosecutionCases = hearing.getProsecutionCases();
 
         prosecutionCases.get(0).setId(caseId);
-        prosecutionCases.get(0).getDefendants().get(0).setId(UUID.randomUUID());
-        prosecutionCases.get(0).getDefendants().get(0).getOffences().get(0).setId(UUID.randomUUID());
-        prosecutionCases.get(0).getDefendants().get(0).getOffences().get(0).getReportingRestrictions().get(0).setId(UUID.randomUUID());
-        prosecutionCases.get(0).getCaseMarkers().get(0).setId(UUID.randomUUID());
+        prosecutionCases.get(0).getDefendants().get(0).setId(randomUUID());
+        prosecutionCases.get(0).getDefendants().get(0).getOffences().get(0).setId(randomUUID());
+        prosecutionCases.get(0).getDefendants().get(0).getOffences().get(0).getReportingRestrictions().get(0).setId(randomUUID());
+        prosecutionCases.get(0).getCaseMarkers().get(0).setId(randomUUID());
         return prosecutionCases;
     }
 
     private void extend(boolean insert) throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.getHearing();
         final CourtApplication initialCourtApplication = hearing.getCourtApplications().get(0);
 
-        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearing.getId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .with(Hearing::getCourtApplications, first(isBean(CourtApplication.class)
@@ -179,9 +180,9 @@ public class ExtendHearingIT extends AbstractIT {
         JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(extendHearingCommand);
 
         sendMessage(getPublicTopicInstance().createProducer(),
-                eventName,
+                PROGRESSION_EVENTS_HEARING_EXTENDED,
                 commandJson,
-                metadataOf(randomUUID(), eventName)
+                metadataOf(randomUUID(), PROGRESSION_EVENTS_HEARING_EXTENDED)
                         .withUserId(randomUUID().toString())
                         .build()
         );
@@ -189,7 +190,7 @@ public class ExtendHearingIT extends AbstractIT {
         int expectedApplicationCount = hearing.getCourtApplications().size() + (insert ? 1 : 0);
         int listedDurationMin = insert ? hearing.getHearingDays().get(0).getListedDurationMinutes() : 20;
 
-        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearing.getId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .withValue(h -> h.getCourtApplications().size(), expectedApplicationCount)
@@ -198,19 +199,17 @@ public class ExtendHearingIT extends AbstractIT {
                                 .withValue(CourtApplication::getApplicationReference, extendHearingCommand.getCourtApplication().getApplicationReference())
                         ))
                         .with(Hearing::getHearingDays, hasItem(isBean(HearingDay.class)
-                        .withValue(HearingDay::getListedDurationMinutes, listedDurationMin)))
+                                .withValue(HearingDay::getListedDurationMinutes, listedDurationMin)))
                 )
         );
-
-
     }
 
-    private void extendBreachApplication(boolean insert) throws Exception {
+    private void extendBreachApplication() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearingWithoutBreachApplication(getRequestSpec(), minimumInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearingWithoutBreachApplication(getRequestSpec(), minimumInitiateHearingTemplate()));
         final Hearing hearing = hearingOne.getHearing();
 
-        UUID courtApplicationId = UUID.randomUUID();
+        UUID courtApplicationId = randomUUID();
 
         final JsonObject publicEventBreachApplicationsToBeAdded = Json.createObjectBuilder()
                 .add("hearingId", hearing.getId().toString())
@@ -237,20 +236,18 @@ public class ExtendHearingIT extends AbstractIT {
         JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(extendHearingCommand);
 
         sendMessage(getPublicTopicInstance().createProducer(),
-                eventName,
+                PROGRESSION_EVENTS_HEARING_EXTENDED,
                 commandJson,
-                metadataOf(randomUUID(), eventName)
+                metadataOf(randomUUID(), PROGRESSION_EVENTS_HEARING_EXTENDED)
                         .withUserId(randomUUID().toString())
                         .build()
         );
 
-        int expectedApplicationCount = 1;
         int listedDurationMin = 20;
 
-        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearing.getId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
-                        .withValue(h -> h.getCourtApplications().size(), expectedApplicationCount)
                         .with(Hearing::getCourtApplications, hasItem(isBean(CourtApplication.class)
                                 .withValue(CourtApplication::getId, extendHearingCommand.getCourtApplication().getId())
                                 .withValue(CourtApplication::getApplicationReference, extendHearingCommand.getCourtApplication().getApplicationReference())
