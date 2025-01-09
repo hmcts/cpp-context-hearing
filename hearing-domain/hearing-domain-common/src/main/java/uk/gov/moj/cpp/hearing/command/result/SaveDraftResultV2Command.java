@@ -13,6 +13,7 @@ public final class SaveDraftResultV2Command {
 
     private UUID hearingId;
     private LocalDate hearingDay;
+    private Integer version;
     private List<Relation> relations = new ArrayList<>();
     private Map<UUID, JsonObject> resultLines = new HashMap<>();
     private List<UUID> shadowListedOffenceIds = new ArrayList<>();
@@ -25,8 +26,9 @@ public final class SaveDraftResultV2Command {
         return hearingDay;
     }
 
-    public void setHearingDay(LocalDate hearingDay) {
+    public SaveDraftResultV2Command setHearingDay(LocalDate hearingDay) {
         this.hearingDay = hearingDay;
+        return this;
     }
 
     public UUID getHearingId() {
@@ -42,16 +44,18 @@ public final class SaveDraftResultV2Command {
         return new ArrayList<>(relations);
     }
 
-    public void setRelations(List<Relation> relations) {
+    public SaveDraftResultV2Command setRelations(List<Relation> relations) {
         this.relations = new ArrayList<>(relations);
+        return this;
     }
 
     public Map<UUID, JsonObject> getResultLines() {
         return resultLines;
     }
 
-    public void setResultLines(Map<UUID, JsonObject> resultLines) {
+    public SaveDraftResultV2Command setResultLines(Map<UUID, JsonObject> resultLines) {
         this.resultLines = resultLines;
+        return this;
     }
 
     public List<UUID> getShadowListedOffenceIds() {
@@ -60,5 +64,14 @@ public final class SaveDraftResultV2Command {
 
     public void setShadowListedOffenceIds(List<UUID> shadowListedOffenceIds) {
         this.shadowListedOffenceIds = new ArrayList<>(shadowListedOffenceIds);
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public SaveDraftResultV2Command setVersion(final Integer version) {
+        this.version = version;
+        return this;
     }
 }

@@ -1,5 +1,6 @@
 {
   "hearingId": "HEARING_ID",
+  "version": 1,
   "relations": [
     {
       "resultLineId": "RESULT_LINE_ID",

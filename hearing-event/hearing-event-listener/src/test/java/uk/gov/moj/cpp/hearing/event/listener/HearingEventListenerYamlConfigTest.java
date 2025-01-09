@@ -85,6 +85,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsCancellationFa
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidationFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedSuccess;
+import uk.gov.moj.cpp.hearing.domain.event.result.ManageResultsFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ShareResultsFailed;
 import uk.gov.moj.cpp.hearing.event.listener.util.SubscriptionsDescriptorLoader;
@@ -157,6 +158,7 @@ public class HearingEventListenerYamlConfigTest {
             BookProvisionalHearingSlots.class.getAnnotation(Event.class).value(),
             SaveDraftResultFailed.class.getAnnotation(Event.class).value(),
             ShareResultsFailed.class.getAnnotation(Event.class).value(),
+            ManageResultsFailed.class.getAnnotation(Event.class).value(),
             MasterDefendantIdAdded.class.getAnnotation(Event.class).value(),
             HearingMarkedAsDuplicateForCase.class.getAnnotation(Event.class).value(),
             HearingMarkedAsDuplicateForDefendant.class.getAnnotation(Event.class).value(),

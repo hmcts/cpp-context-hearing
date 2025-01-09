@@ -6,6 +6,9 @@
     "courtClerk": {
       "$ref": "http://justice.gov.uk/core/courts/delegatedPowers.json"
     },
+    "version": {
+      "type": "integer"
+    },
     "resultLines": {
       "type": "array",
       "minItems": 1,
@@ -16,6 +19,7 @@
   },
   "required": [
     "courtClerk",
+    "version",
     "resultLines"
   ],
   "definitions": {

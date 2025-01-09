@@ -123,7 +123,6 @@ import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -149,6 +148,8 @@ public class TestTemplates {
     public static final String IMPRISONMENT_TERM = "imprisonment term";
     public static final String SIX_YEARS = "6 years";
     public static final String WELSH_VALUE = "6 blynedd";
+
+    private static final Integer RESULT_VERSION = 1;
 
     private TestTemplates() {
     }
@@ -1010,6 +1011,39 @@ public class TestTemplates {
 
         }
 
+        public static ResultLine.Builder standardResultLineTemplateNoWelsh(final UUID resultLineId, final UUID resultDefinitionId, final LocalDate orderedDate) {
+            return ResultLine.resultLine()
+                    .withResultLineId(resultLineId)
+                    .withDelegatedPowers(
+                            DelegatedPowers.delegatedPowers()
+                                    .withUserId(randomUUID())
+                                    .withLastName(BOWIE)
+                                    .withFirstName(DAVID)
+                                    .build()
+                    )
+                    .withIsComplete(true)
+                    .withIsModified(true)
+                    .withIsDeleted(false)
+                    .withLevel(Level.OFFENCE)
+                    .withOrderedDate(orderedDate)
+                    .withResultLineId(randomUUID())
+                    .withResultLabel(IMPRISONMENT)
+                    .withSharedDate(now())
+                    .withResultDefinitionId(resultDefinitionId)
+                    .withPrompts(
+                            asList(
+                                    uk.gov.justice.core.courts.Prompt.prompt()
+                                            .withFixedListCode(FIXEDLISTCODE_0)
+                                            .withId(randomUUID())
+                                            .withLabel(IMPRISONMENT_TERM)
+                                            .withValue(SIX_YEARS)
+                                            .withPromptRef(IMPRISONMENT)
+                                            .build()
+                            )
+                    );
+
+        }
+
         public static ResultLine.Builder standardResultLineTemplateWithHmiSlots(final UUID resultLineId, final LocalDate orderedDate) {
             return ResultLine.resultLine()
                     .withResultLineId(resultLineId)
@@ -1396,6 +1430,7 @@ public class TestTemplates {
 
 
     public static class ShareResultsCommandTemplates {
+
         private ShareResultsCommandTemplates() {
         }
 
@@ -1413,6 +1448,18 @@ public class TestTemplates {
         public static ShareDaysResultsCommand basicShareResultsCommandV2Template() {
 
             return ShareDaysResultsCommand.shareResultsCommand()
+                    .setVersion(RESULT_VERSION)
+                    .setCourtClerk(DelegatedPowers.delegatedPowers()
+                            .withUserId(randomUUID())
+                            .withFirstName(STRING.next())
+                            .withLastName(STRING.next())
+                            .build());
+        }
+
+        public static ShareDaysResultsCommand basicShareResultsCommandV2Template(final Integer withVersion) {
+
+            return ShareDaysResultsCommand.shareResultsCommand()
+                    .setVersion(withVersion)
                     .setCourtClerk(DelegatedPowers.delegatedPowers()
                             .withUserId(randomUUID())
                             .withFirstName(STRING.next())

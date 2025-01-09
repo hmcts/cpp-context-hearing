@@ -27,6 +27,8 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.INITIALISED;
+import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.VERSION_MISMATCH;
 import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_DRAFT_RESULT_DELETED_V2;
 import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_DRAFT_RESULT_SAVED;
 import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_EVENT_AMENDED;
@@ -58,6 +60,8 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAddedToHearing;
+import uk.gov.moj.cpp.hearing.domain.event.result.ManageResultsFailed;
+import uk.gov.moj.cpp.hearing.event.service.UsersGroupService;
 import uk.gov.moj.cpp.hearing.eventlog.HearingApplicationDetail;
 import uk.gov.moj.cpp.hearing.eventlog.HearingCaseDetail;
 import uk.gov.moj.cpp.hearing.eventlog.HearingDefendantDetail;
@@ -65,9 +69,11 @@ import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -221,6 +227,9 @@ public class HearingEventProcessorTest {
     @Spy
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
 
+    @Mock
+    private UsersGroupService usersGroupService;
+
 
     public static Stream<Arguments> provideListOfRequiredHearingField() {
         // @formatter:off
@@ -336,12 +345,44 @@ public class HearingEventProcessorTest {
     }
 
     @Test
+    public void shouldPublishSaveDraftResultVersionErrorPublicEvent() {
+        final UUID hearingId = randomUUID();
+        final UUID userId = randomUUID();
+        final Integer version = 2;
+        final UUID amendedByUserId = randomUUID();
+        final Integer currentVersion = 1;
+        final LocalDate hearingDay = LocalDate.now();
+        final ManageResultsFailed manageResultsFailed = new ManageResultsFailed(hearingId, INITIALISED, VERSION_MISMATCH.toError(String.format("Share results failed for version: %s", version)), hearingDay, currentVersion, amendedByUserId, version, userId);
+        final String userIds = String.join(",", List.of(userId.toString(), amendedByUserId.toString()));
+
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(manageResultsFailed);
+        final JsonEnvelope eventIn = envelopeFrom(metadataWithRandomUUID(DRAFT_RESULT_SAVED_PRIVATE_EVENT), jsonObject);
+        when(usersGroupService.getUserDetails(eventIn, userIds)).thenReturn(Map.of(amendedByUserId, "amended user", userId, "requested user"));
+
+        this.hearingEventProcessor.handleSaveDraftResultVersionErrorEvent(eventIn);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_MANAGE_RESULTS_FAILED));
+        final PublicManageResultsFailed publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicManageResultsFailed.class);
+        assertThat(publicEventOut.getHearingId(), is(manageResultsFailed.getHearingId()));
+        assertThat(publicEventOut.getHearingState(), is(manageResultsFailed.getHearingState()));
+        assertThat(publicEventOut.getError().getType(), is(manageResultsFailed.getResultsError().getType()));
+        assertThat(publicEventOut.getError().getCode(), is(manageResultsFailed.getResultsError().getCode()));
+        assertThat(publicEventOut.getError().getReason(), is(manageResultsFailed.getResultsError().getReason()));
+
+        assertThat(publicEventOut.getInfo().get("lastUpdatedVersion"), is(manageResultsFailed.getLastUpdatedVersion()));
+        assertThat(publicEventOut.getInfo().get("lastUpdatedByUserName"), is("amended user"));
+        assertThat(publicEventOut.getInfo().get("version"), is(manageResultsFailed.getVersion()));
+    }
+
+    @Test
     public void shouldPublishShareResultsFailedPublicEvent() {
         final String draftResult = "some random text";
 
         final JsonObjectBuilder result = createObjectBuilder()
                 .add(FIELD_AMENDED_BY_USER_ID, AMENDED_BY_USER_ID.toString())
-                .add(FIELD_HEARING_STATE, HearingState.INITIALISED.toString())
+                .add(FIELD_HEARING_STATE, INITIALISED.toString())
                 .add(FIELD_HEARING_ID, HEARING_ID.toString());
 
         final JsonEnvelope eventIn = envelopeFrom(metadataWithRandomUUID(SHARE_RESULTS_FAILED_PRIVATE_EVENT), result.build());
@@ -352,7 +393,7 @@ public class HearingEventProcessorTest {
         final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
         assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_SHARE_RESULTS_FAILED));
         final PublicHearingShareResultsFailed publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingShareResultsFailed.class);
-        assertThat(publicEventOut.getHearingState(), is(HearingState.INITIALISED));
+        assertThat(publicEventOut.getHearingState(), is(INITIALISED));
         assertThat(publicEventOut.getHearingId(), is(HEARING_ID));
         assertThat(publicEventOut.getAmendedByUserId(), is(AMENDED_BY_USER_ID));
     }
@@ -416,7 +457,6 @@ public class HearingEventProcessorTest {
         final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
         assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.COMMAND_BREACH_APPLICATIONS_TO_BE_ADDED));
     }
-
 
 
     @Test
@@ -611,25 +651,25 @@ public class HearingEventProcessorTest {
 
     private JsonEnvelope createResultsSharedEvent() {
         final JsonArray resultLines = createArrayBuilder().add(
-                createObjectBuilder()
-                        .add(FIELD_GENERIC_ID, GENERIC_ID.toString())
-                        .add(FIELD_DEFENDANT_ID, DEFENDANT_ID.toString())
-                        .add(FIELD_CASE_ID, CASE_ID.toString())
-                        .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
-                        .add(FIELD_LEVEL, LEVEL)
-                        .add(FIELD_RESULT_LABEL, RESULT_LABEL)
-                        .add(FIELD_COURT, COURT)
-                        .add(FIELD_COURT_ROOM, COURT_ROOM_NUMBER)
-                        .add(FIELD_CLERK_OF_THE_COURT_ID, CLERK_OF_THE_COURT_ID.toString())
-                        .add(FIELD_CLERK_OF_THE_COURT_FIRST_NAME, CLERK_OF_THE_COURT_FIRST_NAME)
-                        .add(FIELD_CLERK_OF_THE_COURT_LAST_NAME, CLERK_OF_THE_COURT_LAST_NAME)
-                        .add(FIELD_PROMPTS, createArrayBuilder()
-                                .add(createObjectBuilder()
-                                        .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_1)
-                                        .add(FIELD_VALUE, PROMPT_VALUE_1))
-                                .add(createObjectBuilder()
-                                        .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_2)
-                                        .add(FIELD_VALUE, PROMPT_VALUE_2))))
+                        createObjectBuilder()
+                                .add(FIELD_GENERIC_ID, GENERIC_ID.toString())
+                                .add(FIELD_DEFENDANT_ID, DEFENDANT_ID.toString())
+                                .add(FIELD_CASE_ID, CASE_ID.toString())
+                                .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
+                                .add(FIELD_LEVEL, LEVEL)
+                                .add(FIELD_RESULT_LABEL, RESULT_LABEL)
+                                .add(FIELD_COURT, COURT)
+                                .add(FIELD_COURT_ROOM, COURT_ROOM_NUMBER)
+                                .add(FIELD_CLERK_OF_THE_COURT_ID, CLERK_OF_THE_COURT_ID.toString())
+                                .add(FIELD_CLERK_OF_THE_COURT_FIRST_NAME, CLERK_OF_THE_COURT_FIRST_NAME)
+                                .add(FIELD_CLERK_OF_THE_COURT_LAST_NAME, CLERK_OF_THE_COURT_LAST_NAME)
+                                .add(FIELD_PROMPTS, createArrayBuilder()
+                                        .add(createObjectBuilder()
+                                                .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_1)
+                                                .add(FIELD_VALUE, PROMPT_VALUE_1))
+                                        .add(createObjectBuilder()
+                                                .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_2)
+                                                .add(FIELD_VALUE, PROMPT_VALUE_2))))
                 .build();
 
         final JsonObject shareResult = createObjectBuilder()

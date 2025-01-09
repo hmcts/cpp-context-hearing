@@ -45,6 +45,10 @@ public class HearingStatesEventProcessor {
     @Inject
     private Enveloper enveloper;
 
+    /**
+     * @deprecated (CCT-2007, replaced with generic "public.hearing.manage-results-failed" event)
+     */
+    @Deprecated(since = "CCT-2007", forRemoval = true)
     @Transactional
     @Handles(HEARING_EVENT_APPROVAL_REJECTED)
     public void approvalRejected(final JsonEnvelope envelope) {
@@ -82,6 +86,10 @@ public class HearingStatesEventProcessor {
                 envelope.payloadAsJsonObject()));
     }
 
+    /**
+     * @deprecated (CCT-2007, replaced with generic "public.hearing.manage-results-failed" event)
+     */
+    @Deprecated(since = "CCT-2007", forRemoval = true)
     @Handles(HEARING_EVENT_RESULT_AMENDMENTS_VALIDATION_FAILED)
     public void processResultAmendmentsValidationFailed(final JsonEnvelope envelope) {
         log(HEARING_EVENT_APPROVAL_REQUESTED, envelope);
@@ -90,6 +98,10 @@ public class HearingStatesEventProcessor {
                 envelope.payloadAsJsonObject()));
     }
 
+    /**
+     * @deprecated (CCT-2007, replaced with generic "public.hearing.manage-results-failed" event)
+     */
+    @Deprecated(since = "CCT-2007", forRemoval = true)
     @Handles(HEARING_EVENT_HEARING_UNLOCK_FAILED)
     public void processHearingUnlockFailed(final JsonEnvelope envelope) {
         log(HEARING_EVENT_HEARING_UNLOCK_FAILED, envelope);

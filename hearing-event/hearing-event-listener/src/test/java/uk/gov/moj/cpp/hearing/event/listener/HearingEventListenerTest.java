@@ -43,6 +43,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.HearingDay;
@@ -93,7 +94,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -233,7 +233,7 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
                 ));
 
         targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
@@ -281,7 +281,7 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
 
                 ));
 
@@ -334,7 +334,7 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
 
                 ));
 
@@ -388,7 +388,7 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
 
                 ));
 
@@ -440,7 +440,7 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
 
                 ));
 
@@ -492,7 +492,7 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
 
                 ));
 
@@ -544,7 +544,7 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
 
                 ));
 
@@ -596,7 +596,7 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
 
                 ));
 
@@ -653,7 +653,7 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
 
                 ));
 
@@ -701,7 +701,7 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
 
                 ));
 
@@ -740,7 +740,7 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
 
                 ));
 
@@ -779,7 +779,7 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(false)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
 
                 ));
 
@@ -809,8 +809,9 @@ public class HearingEventListenerTest {
         final UUID hearingId = randomUUID();
         final UUID amendedByUser = randomUUID();
         final LocalDate hearingDay = LocalDate.now();
+        final Integer version = 1;
         final JsonObject someJsonObject = new StringToJsonObjectConverter().convert("{}");
-        final DraftResultSavedV2 draftResultSavedV2 = new DraftResultSavedV2(hearingId, hearingDay, someJsonObject, amendedByUser);
+        final DraftResultSavedV2 draftResultSavedV2 = new DraftResultSavedV2(hearingId, hearingDay, someJsonObject, amendedByUser, version);
 
         when(draftResultRepository.findBy(hearingId.toString() + hearingDay)).thenReturn(null);
 
@@ -961,7 +962,7 @@ public class HearingEventListenerTest {
                 .setId(new HearingSnapshotKey(randomUUID(), randomUUID()))
                 .setHearingDay(today.toString());
         final Target target2 = new Target()
-        .setId(new HearingSnapshotKey(randomUUID(), randomUUID()))
+                .setId(new HearingSnapshotKey(randomUUID(), randomUUID()))
                 .setHearingDay(tomorrow.toString());
 
         final ProsecutionCase prosecutionCase = new ProsecutionCase();
@@ -1013,7 +1014,6 @@ public class HearingEventListenerTest {
         verify(this.draftResultRepository, never()).save(any());
         verifyNoMoreInteractions(offenceRepository);
     }
-
 
 
     @Test
@@ -1086,6 +1086,84 @@ public class HearingEventListenerTest {
         assertThat(draftResult.getDraftResultPayload().get("__metadata__").get("lastSharedTime").textValue(), not(isEmptyOrNullString()));
         verify(this.draftResultRepository, times(1)).save(any());
         verifyNoMoreInteractions(offenceRepository);
+    }
+
+    @Test
+    public void resultsSharedV3_shouldIndependentlySaveTheResultLinesSharedForDifferentHearingDaysForAnOffence() throws IOException {
+        final LocalDate today = now();
+        final LocalDate tomorrow = now().plusDays(1);
+
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
+        final UUID offenceId = hearing.getFirstOffenceForFirstDefendantForFirstCase().getId();
+        final UUID hearingId = hearing.getHearingId();
+        final ResultsSharedV3 resultsShared = resultsSharedV3Template(hearing, tomorrow);
+
+        final HearingSnapshotKey hearingSnapshotKey = new HearingSnapshotKey(offenceId, hearingId);
+        final Target target = new Target()
+                .setId(hearingSnapshotKey)
+                .setDraftResult("{}")
+                .setHearingDay(today.toString());
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay hearingDay1 = new uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay();
+        hearingDay1.setId(new HearingSnapshotKey(randomUUID(), hearingId));
+        hearingDay1.setDate(today);
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay hearingDay2 = new uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay();
+        hearingDay2.setId(new HearingSnapshotKey(randomUUID(), hearingId));
+        hearingDay2.setDate(tomorrow);
+
+        final Hearing dbHearing = new Hearing()
+                .setHasSharedResults(false)
+                .setHearingDays(asSet(hearingDay1, hearingDay2))
+                .setTargets(asSet(target))
+                .setProsecutionCases(asSet(getDbProsecutionCase()))
+                .setId(hearingId);
+
+        DraftResult draftResult = mock(DraftResult.class);
+        JsonObject draftResultJsonObject = Json.createObjectBuilder()
+                .add("__metadata__", Json.createObjectBuilder()
+                        .add("version", "1")
+                        .build())
+                .build();
+
+        final JsonNode draftResultPayload = toJsonNode(draftResultJsonObject);
+        when(draftResult.getDraftResultPayload()).thenReturn(draftResultPayload);
+        final Target targetOut = new Target();
+        targetOut.setId(hearingSnapshotKey);
+        targetOut.setHearingDay(tomorrow.toString());
+
+        final String draftResultPK = hearingId.toString() + resultsShared.getHearingDay().toString();
+        when(draftResultRepository.findBy(draftResultPK)).thenReturn(draftResult);
+        when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
+        when(targetJPAMapper.toJPA2(dbHearing, resultsShared.getTargets().get(0))).thenReturn(targetOut);
+
+        hearingEventListener.resultsSharedV3(envelopeFrom(metadataWithRandomUUID("hearing.results-shared-v3"),
+                objectToJsonObjectConverter.convert(resultsShared)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+        verify(this.approvalRequestedRepository).removeAllRequestApprovals(hearingId);
+
+        final Hearing saveHearingCaptorValue = saveHearingCaptor.getValue();
+
+        assertThat(saveHearingCaptorValue, isBean(Hearing.class)
+                .with(Hearing::getHasSharedResults, is(true))
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getFirstSharedDate, is(resultsShared.getSharedTime()))
+                .with(Hearing::getTargets, hasSize(2))
+        );
+
+        assertThat(saveHearingCaptorValue.getTargets().stream().anyMatch(t -> t.getHearingDay().equals(today.toString())), is(true));
+        assertThat(saveHearingCaptorValue.getTargets().stream().anyMatch(t -> t.getHearingDay().equals(tomorrow.toString())), is(true));
+        assertThat(saveHearingCaptorValue.getHearingDays().stream().anyMatch(h -> h.getDate().equals(tomorrow) && h.getHasSharedResults()), is(true));
+    }
+
+    private ProsecutionCase getDbProsecutionCase() {
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
+        final Defendant defendant = new Defendant();
+        final Set<Defendant> defendants = asSet(defendant);
+        prosecutionCase.setDefendants(defendants);
+
+        return prosecutionCase;
     }
 
     @Test
@@ -1208,7 +1286,6 @@ public class HearingEventListenerTest {
         assertThat(hearing.getWitnesses().size(), is(1));
         assertThat(hearing.getWitnesses().get(0).getName(), is("test"));
     }
-
 
 
     @Test
@@ -1355,6 +1432,39 @@ public class HearingEventListenerTest {
                 ))
                 .withVariantDirectory(singletonList(
                         standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId())
+                ))
+                .withHearingDay(hearingDay)
+                .build();
+    }
+
+    private ResultsSharedV3 resultsSharedV3Template(final CommandHelpers.InitiateHearingCommandHelper hearing, final LocalDate hearingDay) {
+        UUID completedResultLineId = randomUUID();
+        hearing.it().getHearing().setHasSharedResults(true);
+
+        return ResultsSharedV3.builder()
+                .withHearingId(hearing.getHearingId())
+                .withTargets(new ArrayList<>(singletonList(
+                        CoreTestTemplates.target2(hearing.getHearingId(), hearing.getFirstDefendantForFirstCase().getId(), hearing.getFirstOffenceIdForFirstDefendant(), completedResultLineId).build()
+                )))
+                .withSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                .withHearing(hearing.getHearing())
+                .withCourtClerk(DelegatedPowers.delegatedPowers()
+                        .withUserId(randomUUID())
+                        .withFirstName(STRING.next())
+                        .withLastName(STRING.next())
+                        .build())
+                .withCompletedResultLinesStatus(ImmutableMap.of(completedResultLineId, CompletedResultLineStatus.builder()
+                        .withCourtClerk(DelegatedPowers.delegatedPowers()
+                                .withUserId(randomUUID())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .build())
+                        .withId(completedResultLineId)
+                        .withLastSharedDateTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                        .build()
+                ))
+                .withVariantDirectory(singletonList(
+                        standardVariantTemplate(randomUUID(), hearing.getHearingId(), hearing.getFirstDefendantForFirstCase().getId())
                 ))
                 .withHearingDay(hearingDay)
                 .build();

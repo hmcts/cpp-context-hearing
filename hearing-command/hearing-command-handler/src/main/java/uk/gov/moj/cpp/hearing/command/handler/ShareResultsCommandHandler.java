@@ -72,7 +72,7 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
         if (draftResult != null && userId.isPresent() && saveDraftResultV2.getHearingId() != null) {
             aggregate(HearingAggregate.class, saveDraftResultV2.getHearingId(), envelope,
-                    aggregate -> aggregate.saveDraftResultV2(fromString(userId.get()), draftResult, saveDraftResultV2.getHearingId(), saveDraftResultV2.getHearingDay()));
+                    aggregate -> aggregate.saveDraftResultV2(fromString(userId.get()), draftResult, saveDraftResultV2.getHearingId(), saveDraftResultV2.getHearingDay(), saveDraftResultV2.getVersion()));
         }
     }
 
@@ -163,8 +163,9 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.command.share-days-results command received {}", envelope.toObfuscatedDebugString());
         }
         final ShareDaysResultsCommand command = convertToObject(envelope, ShareDaysResultsCommand.class);
+        final UUID userId = envelope.metadata().userId().map(UUID::fromString).orElse(null);
         aggregate(HearingAggregate.class, command.getHearingId(), envelope,
-                aggregate -> shareDaysResultsEnrichedWithYouthCourt(aggregate, command));
+                aggregate -> shareDaysResultsEnrichedWithYouthCourt(aggregate, command, userId));
     }
 
     @Handles("hearing.command.update-result-lines-status")
@@ -217,7 +218,7 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
     }
 
-    private Stream<Object> shareDaysResultsEnrichedWithYouthCourt(final HearingAggregate hearingAggregate, final ShareDaysResultsCommand command ) {
+    private Stream<Object> shareDaysResultsEnrichedWithYouthCourt(final HearingAggregate hearingAggregate, final ShareDaysResultsCommand command, final UUID userId) {
 
         final Hearing hearing = hearingAggregate.getHearing();
         final YouthCourt youthCourt;
@@ -228,7 +229,8 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
             youthCourt = null;
         }
 
-        return hearingAggregate.shareResultForDay(command.getHearingId(), command.getCourtClerk(), clock.now(), command.getResultLines(), command.getNewHearingState(), youthCourt, command.getHearingDay());
+        return hearingAggregate.shareResultForDay(command.getHearingId(), command.getCourtClerk(), clock.now(), command.getResultLines(),
+                command.getNewHearingState(), youthCourt, command.getHearingDay(), userId, command.getVersion());
 
     }
 

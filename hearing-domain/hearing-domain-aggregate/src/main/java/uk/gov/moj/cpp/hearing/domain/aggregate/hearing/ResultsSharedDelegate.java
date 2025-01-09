@@ -30,10 +30,12 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSavedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.HearingVacatedRequested;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.domain.ResultsError;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedSuccess;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
+import uk.gov.moj.cpp.hearing.domain.event.result.ManageResultsFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 
 import java.io.Serializable;
@@ -246,8 +248,8 @@ public class ResultsSharedDelegate implements Serializable {
         return Stream.of(new DraftResultSaved(target, hearingState, userId));
     }
 
-    public Stream<Object> saveDraftResultV2(final UUID hearingId, LocalDate hearingDay, final JsonObject draftResult, final UUID userId) {
-        return Stream.of(new DraftResultSavedV2(hearingId, hearingDay, draftResult, userId));
+    public Stream<Object> saveDraftResultV2(final UUID hearingId, LocalDate hearingDay, final JsonObject draftResult, final UUID userId, final Integer version) {
+        return Stream.of(new DraftResultSavedV2(hearingId, hearingDay, draftResult, userId, version));
     }
 
     public Stream<Object> deleteDraftResultV2(final UUID hearingId, LocalDate hearingDay, final UUID userId) {
@@ -266,6 +268,14 @@ public class ResultsSharedDelegate implements Serializable {
         return Stream.of(HearingLockedByOtherUser.builder().withHearingId(hearingId).build());
     }
 
+    public Stream<Object> manageResultsFailed(final UUID hearingId, final HearingState hearingState, final ResultsError resultsError, final LocalDate hearingDay,
+                                              final UUID userId, final Integer version, final UUID amendedByUserId, final Integer amendedResultVersion) {
+        return Stream.of(new ManageResultsFailed(hearingId, hearingState, resultsError, hearingDay, amendedResultVersion, amendedByUserId, version, userId));
+    }
+    public Stream<Object> manageResultsFailed(final UUID hearingId, final HearingState hearingState, final ResultsError resultsError, final LocalDate hearingDay,
+                                              final UUID userId, final UUID amendedByUserId, final Integer amendedResultVersion) {
+        return Stream.of(new ManageResultsFailed(hearingId, hearingState, resultsError, hearingDay, amendedResultVersion, amendedByUserId, userId));
+    }
 
     private ResultLine convert(final SharedResultsCommandResultLine resultLineIn) {
         return ResultLine.resultLine()

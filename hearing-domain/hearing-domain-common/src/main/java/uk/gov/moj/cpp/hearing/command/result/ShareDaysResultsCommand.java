@@ -18,6 +18,8 @@ public final class ShareDaysResultsCommand implements Serializable {
 
     private UUID hearingId;
 
+    private Integer version;
+
     private List<SharedResultsCommandResultLineV2> resultLines;
 
     private DelegatedPowers courtClerk;
@@ -35,12 +37,14 @@ public final class ShareDaysResultsCommand implements Serializable {
             @JsonProperty("courtClerk") final DelegatedPowers courtClerk,
             @JsonProperty("resultLines") final List<SharedResultsCommandResultLineV2> resultLines,
             @JsonProperty("newHearingState") final HearingState newHearingState,
-            @JsonProperty("hearingDay") final LocalDate hearingDay) {
+            @JsonProperty("hearingDay") final LocalDate hearingDay,
+            @JsonProperty("version") final Integer version) {
         this.hearingId = hearingId;
         this.courtClerk = courtClerk;
         this.resultLines = resultLines;
         this.newHearingState = newHearingState;
         this.hearingDay = hearingDay;
+        this.version = version;
     }
 
     public static ShareDaysResultsCommand shareResultsCommand() {
@@ -53,6 +57,15 @@ public final class ShareDaysResultsCommand implements Serializable {
 
     public ShareDaysResultsCommand setHearingId(final UUID hearingId) {
         this.hearingId = hearingId;
+        return this;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public ShareDaysResultsCommand setVersion(final Integer version) {
+        this.version = version;
         return this;
     }
 

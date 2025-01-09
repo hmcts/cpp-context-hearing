@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -20,10 +22,15 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ManageResultsFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ShareResultsFailed;
+import uk.gov.moj.cpp.hearing.event.service.UsersGroupService;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -39,6 +46,7 @@ public class HearingEventProcessor {
     public static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
     public static final String PUBLIC_HEARING_MULTIPLE_DRAFT_RESULTS_SAVED = "public.hearing.multiple-draft-results-saved";
     public static final String PUBLIC_HEARING_SAVE_DRAFT_RESULT_FAILED = "public.hearing.save-draft-result-failed";
+    public static final String PUBLIC_HEARING_MANAGE_RESULTS_FAILED = "public.hearing.manage-results-failed";
     public static final String PUBLIC_HEARING_SHARE_RESULTS_FAILED = "public.hearing.share-results-failed";
     public static final String PUBLIC_HEARING_TRIAL_VACATED = "public.hearing.trial-vacated";
     public static final String PUBLIC_LISTING_HEARING_RESCHEDULED = "public.listing.hearing-rescheduled";
@@ -58,13 +66,16 @@ public class HearingEventProcessor {
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
+    private final UsersGroupService usersGroupQueryService;
+
     @Inject
     public HearingEventProcessor(final Enveloper enveloper, final Sender sender, final JsonObjectToObjectConverter jsonObjectToObjectConverter,
-                                 final ObjectToJsonObjectConverter objectToJsonObjectConverter) {
+                                 final ObjectToJsonObjectConverter objectToJsonObjectConverter, final UsersGroupService usersGroupQueryService) {
         this.enveloper = enveloper;
         this.sender = sender;
         this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
         this.objectToJsonObjectConverter = objectToJsonObjectConverter;
+        this.usersGroupQueryService = usersGroupQueryService;
     }
 
     @Handles("hearing.event.amended")
@@ -152,6 +163,23 @@ public class HearingEventProcessor {
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_SAVE_DRAFT_RESULT_FAILED).apply(publicEventPayload));
     }
 
+    @Handles("hearing.manage-results-failed")
+    public void handleSaveDraftResultVersionErrorEvent(final JsonEnvelope event) {
+        final ManageResultsFailed errorEvent = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ManageResultsFailed.class);
+
+        final Map<String, Object> info = getAdditionalInfoMap(event, errorEvent);
+        final PublicManageResultsFailed publicEventSaveDraftResultVersionError = new PublicManageResultsFailed(errorEvent.getHearingId(), errorEvent.getHearingState(), errorEvent.getResultsError(), info);
+        final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicEventSaveDraftResultVersionError);
+
+        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_MANAGE_RESULTS_FAILED).apply(publicEventPayload));
+    }
+
+    private void addToMetadata(final Map<String, Object> metadata, final String key, final Object value) {
+        if (nonNull(value)) {
+            metadata.put(key, value);
+        }
+    }
+
     @Handles("hearing.share-results-failed")
     public void handleShareResultsFailedEvent(final JsonEnvelope event) {
         if (LOGGER.isDebugEnabled()) {
@@ -168,7 +196,6 @@ public class HearingEventProcessor {
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicEventShareResultsFailed);
         final MetadataBuilder metadata = metadataFrom(event.metadata()).withName(PUBLIC_HEARING_SHARE_RESULTS_FAILED);
         sender.send(envelopeFrom(metadata, publicEventPayload));
-
     }
 
     @Handles("hearing.multiple-draft-results-saved")
@@ -308,5 +335,19 @@ public class HearingEventProcessor {
                 envelope.payloadAsJsonObject()));
     }
 
+    private Map<String, Object> getAdditionalInfoMap(final JsonEnvelope event, final ManageResultsFailed errorEvent) {
+        final Map<String, Object> info = new HashMap<>();
+        addToMetadata(info, "hearingDay", errorEvent.getHearingDay());
+        ofNullable(errorEvent.getLastUpdatedVersion()).ifPresent(version -> addToMetadata(info, "lastUpdatedVersion", version));
+        ofNullable(errorEvent.getVersion()).ifPresent(version -> addToMetadata(info, "version", version));
+
+        if (nonNull(errorEvent.getUserId()) && nonNull(errorEvent.getLastUpdatedByUserId())) {
+            final String userIds = String.join(",", List.of(errorEvent.getUserId().toString(), errorEvent.getLastUpdatedByUserId().toString()));
+            final Map<UUID, String> userIdNameMap = usersGroupQueryService.getUserDetails(event, userIds);
+            addToMetadata(info, "lastUpdatedByUserName", userIdNameMap.get(errorEvent.getLastUpdatedByUserId()));
+            addToMetadata(info, "userName", userIdNameMap.get(errorEvent.getUserId()));
+        }
+        return info;
+    }
 
 }

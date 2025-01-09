@@ -25,17 +25,21 @@ public class DraftResultSavedV2 implements Serializable {
 
     private LocalDate hearingDay;
 
+    private Integer amendedResultVersion;
+
     @JsonCreator
     public DraftResultSavedV2(
             @JsonProperty("hearingId") final UUID hearingId,
             @JsonProperty("hearingDay") final LocalDate hearingDay,
             @JsonProperty("draftResult") final JsonObject draftResult,
-            @JsonProperty("amendedByUserId") final UUID amendedByUserId
+            @JsonProperty("amendedByUserId") final UUID amendedByUserId,
+            @JsonProperty("amendedResultVersion") final Integer amendedResultVersion
     ) {
         this.hearingId = hearingId;
         this.draftResult = draftResult;
         this.amendedByUserId = amendedByUserId;
         this.hearingDay = hearingDay;
+        this.amendedResultVersion = amendedResultVersion;
     }
 
     public void setAmendedByUserId(final UUID amendedByUserId) {
@@ -68,5 +72,13 @@ public class DraftResultSavedV2 implements Serializable {
 
     public void setDraftResult(final JsonObject draftResult) {
         this.draftResult = draftResult;
+    }
+
+    public Integer getAmendedResultVersion() {
+        return amendedResultVersion;
+    }
+
+    public void setAmendedResultVersion(final Integer amendedResultVersion) {
+        this.amendedResultVersion = amendedResultVersion;
     }
 }

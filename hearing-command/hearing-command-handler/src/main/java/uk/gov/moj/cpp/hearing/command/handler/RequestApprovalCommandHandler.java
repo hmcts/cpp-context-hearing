@@ -8,6 +8,7 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,16 +20,21 @@ public class RequestApprovalCommandHandler extends AbstractCommandHandler {
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(RequestApprovalCommandHandler.class.getName());
+    private static final String HEARING_ID = "hearingId";
+    private static final String HEARING_DAY = "hearingDay";
 
     @Handles("hearing.command.request-approval")
     public void requestApproval(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.command.request-approval event received {}", envelope.toObfuscatedDebugString());
         }
-        final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString("hearingId"));
+        final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString(HEARING_ID));
+        final LocalDate hearingDay = LocalDate.parse(envelope.payloadAsJsonObject().getString(HEARING_DAY));
+        final Integer version = envelope.payloadAsJsonObject().getInt("version");
         final Optional<String> userId = envelope.metadata().userId();
         if (userId.isPresent()) {
-            aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate -> hearingAggregate.approvalRequest(hearingId, UUID.fromString(userId.get())));
+            aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate ->
+                    hearingAggregate.approvalRequest(hearingId, UUID.fromString(userId.get()), hearingDay, version));
         }
     }
 
@@ -38,10 +44,11 @@ public class RequestApprovalCommandHandler extends AbstractCommandHandler {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.command.change-cancel-amendments {}", envelope.toObfuscatedDebugString());
         }
-        final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString("hearingId"));
+        final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString(HEARING_ID));
         final UUID userId = UUID.fromString(envelope.metadata().userId().get());
-        final boolean resetHearing = envelope.payloadAsJsonObject().getBoolean("resetHearing",false);
-        aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate -> hearingAggregate.cancelAmendmentsSincePreviousShare(hearingId, userId,resetHearing));
+        final LocalDate hearingDay = envelope.payloadAsJsonObject().containsKey(HEARING_DAY) ? LocalDate.parse(envelope.payloadAsJsonObject().getString(HEARING_DAY)) : null;
+        final boolean resetHearing = envelope.payloadAsJsonObject().getBoolean("resetHearing", false);
+        aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate -> hearingAggregate.cancelAmendmentsSincePreviousShare(hearingId, userId, resetHearing, hearingDay));
     }
 
 }

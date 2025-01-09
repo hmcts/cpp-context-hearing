@@ -1,23 +1,27 @@
 package uk.gov.moj.cpp.hearing.command.result;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public class ValidateResultAmendmentsCommand {
 
     private UUID id;
     private UUID userId;
-    private ZonedDateTime validateAmendmentsTime;
+    private String validateAction;
+
+    private LocalDate hearingDay;
 
     public ValidateResultAmendmentsCommand() {
     }
 
     private ValidateResultAmendmentsCommand(final UUID id,
                                             final UUID userId,
-                                            final ZonedDateTime validateAmendmentsTime) {
+                                            final String validateAction,
+                                            final LocalDate hearingDay) {
         this.id = id;
         this.userId = userId;
-        this.validateAmendmentsTime = validateAmendmentsTime;
+        this.validateAction = validateAction;
+        this.hearingDay = hearingDay;
     }
 
     public static Builder newBuilder() {
@@ -28,7 +32,7 @@ public class ValidateResultAmendmentsCommand {
         final Builder builder = new Builder();
         builder.id = copy.getId();
         builder.userId = copy.getUserId();
-        builder.validateAmendmentsTime = copy.getValidateAmendmentsTime();
+        builder.hearingDay = copy.getHearingDay();
         return builder;
     }
 
@@ -40,14 +44,19 @@ public class ValidateResultAmendmentsCommand {
         return userId;
     }
 
-    public ZonedDateTime getValidateAmendmentsTime() {
-        return validateAmendmentsTime;
+    public LocalDate getHearingDay() {
+        return hearingDay;
+    }
+
+    public String getValidateAction() {
+        return validateAction;
     }
 
     public static final class Builder {
         private UUID id;
         private UUID userId;
-        private ZonedDateTime validateAmendmentsTime;
+        private String validateAction;
+        private LocalDate hearingDay;
 
         private Builder() {
         }
@@ -62,13 +71,18 @@ public class ValidateResultAmendmentsCommand {
             return this;
         }
 
-        public Builder withValidateAmendmentsTime(final ZonedDateTime validateAmendmentsTime) {
-            this.validateAmendmentsTime = validateAmendmentsTime;
+        public Builder withValidateAction(final String validateAction) {
+            this.validateAction = validateAction;
+            return this;
+        }
+
+        public Builder withHearingDay(final LocalDate hearingDay) {
+            this.hearingDay = hearingDay;
             return this;
         }
 
         public ValidateResultAmendmentsCommand build() {
-            return new ValidateResultAmendmentsCommand(id, userId, validateAmendmentsTime);
+            return new ValidateResultAmendmentsCommand(id, userId, validateAction, hearingDay);
         }
     }
 }

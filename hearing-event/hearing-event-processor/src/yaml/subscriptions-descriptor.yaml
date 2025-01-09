@@ -115,6 +115,9 @@ subscriptions_descriptor:
         - name: hearing.save-draft-result-failed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/save-draft-result-failed.json
 
+        - name: hearing.manage-results-failed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/manage-results-failed.json
+
         # Update Verdict
         - name: hearing.hearing-offence-verdict-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-offence-verdict-updated.json

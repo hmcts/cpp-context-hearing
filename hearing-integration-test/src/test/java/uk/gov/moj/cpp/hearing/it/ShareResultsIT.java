@@ -79,6 +79,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandT
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.standardAmendedResultLineTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.standardInitiateHearingTemplateWithDefendantJudicialResults;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.standardResultLineTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.standardResultLineTemplateNoWelsh;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.basicShareResultsCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.basicShareResultsCommandV2Template;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateDefendantAttendanceCommandTemplates.updateDefendantAttendanceTemplate;
@@ -103,6 +104,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubReferenceDataRe
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsForNames;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AllocationDecision;
@@ -139,6 +141,7 @@ import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -148,6 +151,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResultedV2;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
+import uk.gov.moj.cpp.hearing.event.PublicManageResultsFailed;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
@@ -190,7 +194,9 @@ import java.util.stream.IntStream;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.jms.MessageConsumer;
+import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import io.restassured.path.json.JsonPath;
 import org.apache.commons.lang3.tuple.Pair;
@@ -214,6 +220,7 @@ public class ShareResultsIT extends AbstractIT {
     private static final UUID REMANDED_ON_CONDITIONAL_BAIL_ID = fromString("3a529001-2f43-45ba-a0a8-d3ced7e9e7ad");
     private static final String GUILTY = "GUILTY";
     private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
+    private static final String PUBLIC_HEARING_MANAGE_RESULTS_FAILED = "public.hearing.manage-results-failed";
     private static final MessageConsumer consumerForCustodyTimeClockStopped = getPublicTopicInstance().createConsumer("public.events.hearing.custody-time-limit-clock-stopped");
 
     @BeforeEach
@@ -1559,6 +1566,133 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
+    public void shouldSavingDraftResultWhenVersionInSequence() throws IOException {
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final UUID hearingId = randomUUID();
+        final UUID resultLineId = randomUUID();
+        final String hearingDay = "2021-03-01";
+        final int initVersion = 1;
+
+        saveDraftResultsV2(resultLineId, hearingId, hearingDay, initVersion, PUBLIC_HEARING_DRAFT_RESULT_SAVED);
+        saveDraftResultsV2(resultLineId, hearingId, hearingDay, initVersion + 1, PUBLIC_HEARING_DRAFT_RESULT_SAVED);
+
+
+        poll(requestParams(getURL("hearing.get-draft-result-v2", hearingId, hearingDay), "application/vnd.hearing.get-draft-result-v2+json")
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingId.toString())),
+                                withJsonPath("$.version", is(2)),
+                                withJsonPath("$.hearingDay", is(hearingDay))
+                        )));
+
+    }
+
+    @Test
+    public void shouldReturnSavingDraftResultVersionErrorWhenVersionNotInSequence() throws IOException {
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+        stubUsersAndGroupsForNames(getLoggedInUser());
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommand(getUuidMapForMultipleCaseStructure());
+
+        final UUID hearingId = hearingCommand.getHearingId();
+        final String hearingDay = hearingCommand.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate().toString();
+        final UUID resultLineId = randomUUID();
+        final int initVersion = 1;
+
+        saveDraftResultsV2(resultLineId, hearingId, hearingDay, initVersion, PUBLIC_HEARING_DRAFT_RESULT_SAVED);
+        saveDraftResultsV2(resultLineId, hearingId, hearingDay, initVersion + 2, PUBLIC_HEARING_MANAGE_RESULTS_FAILED);
+
+
+        poll(requestParams(getURL("hearing.get-draft-result-v2", hearingId, hearingDay), "application/vnd.hearing.get-draft-result-v2+json")
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingId.toString())),
+                                withJsonPath("$.version", is(1)),
+                                withJsonPath("$.hearingDay", is(hearingDay))
+                        )));
+
+    }
+
+    private void saveDraftResultsV2(final UUID resultLineId, final UUID hearingId, final String hearingDay, final Integer version, final String publicEvent) throws IOException {
+        final String eventPayloadString = getStringFromResource("hearing.save-draft-result-v2.json")
+                .replaceAll("RESULT_LINE_ID", resultLineId.toString())
+                .replaceAll("HEARING_ID", hearingId.toString())
+                .replaceAll("CASE_ID", randomUUID().toString())
+                .replaceAll("OFFENCE_ID", randomUUID().toString());
+
+        final JsonObject saveDraftResultJson = new StringToJsonObjectConverter().convert(eventPayloadString);
+        JsonObjectBuilder builder = Json.createObjectBuilder();
+        saveDraftResultJson.forEach(builder::add);
+        builder.add("version", version);
+        final JsonObject draftResultWithVersionJson = builder.build();
+
+        try (final EventListener publicEventResulted = listenFor(publicEvent)
+                .withFilter(convertStringTo(PublicHearingDraftResultSaved.class, isBean(PublicHearingDraftResultSaved.class)
+                        .with(PublicHearingDraftResultSaved::getHearingId, is(hearingId))))) {
+            makeCommand(getRequestSpec(), "hearing.save-draft-result-v2")
+                    .ofType("application/vnd.hearing.save-draft-result-v2+json")
+                    .withArgs(hearingId, hearingDay)
+                    .withPayload(draftResultWithVersionJson.toString())
+                    .executeSuccessfully();
+
+            publicEventResulted.waitFor();
+        }
+    }
+
+    @Test
+    public void shouldSavingDraftResultAndShareWhenVersionNotInSequence() throws IOException {
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+        stubUsersAndGroupsForNames(getLoggedInUser());
+
+        final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = getUuidMapForCivilCaseStructure();
+        final UUID masterProsecutionCaseId = caseStructure.keySet().iterator().next();
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommandForCivilCases(caseStructure, masterProsecutionCaseId);
+        final Hearing hearing = hearingCommand.getHearing();
+
+
+        final UUID hearingId = hearing.getId();
+        final UUID resultLineId = randomUUID();
+        final String hearingDay = "2021-03-01";
+        final int initVersion = 1;
+
+        saveDraftResultsV2(resultLineId, hearingId, hearingDay, initVersion, PUBLIC_HEARING_DRAFT_RESULT_SAVED);
+
+        poll(requestParams(getURL("hearing.get-draft-result-v2", hearingId, hearingDay), "application/vnd.hearing.get-draft-result-v2+json")
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingId.toString())),
+                                withJsonPath("$.version", is(1)),
+                                withJsonPath("$.hearingDay", is(hearingDay))
+                        )));
+
+        try (final Utilities.EventListener publicEventListener = listenFor("public.hearing.manage-results-failed")
+                .withFilter(convertStringTo(PublicManageResultsFailed.class, isBean(PublicManageResultsFailed.class)
+                        .with(PublicManageResultsFailed::getHearingId, is(hearing.getId()))))) {
+
+            ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template(3);
+            shareDaysResultsCommand.setHearingId(hearingId);
+            shareDaysResultsCommand.setHearingDay(LocalDate.parse(hearingDay));
+            shareResultsPerDay(getRequestSpec(), hearingId, shareDaysResultsCommand, getTargets(hearingId, resultLineId, hearingDay));
+
+            final JsonPath publicHearingVersionError = publicEventListener.waitFor();
+            assertThat(publicHearingVersionError.getString("hearingId"), is(hearing.getId().toString()));
+            assertThat(publicHearingVersionError.getString("info.hearingDay"), is(hearingDay));
+            assertThat(publicHearingVersionError.getString("info.version"), is("3"));
+            assertThat(publicHearingVersionError.getString("info.lastUpdatedVersion"), is("1"));
+        }
+
+    }
+
+    @Test
     public void shouldShareHearingWithCivilCases() {
 
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
@@ -1670,6 +1804,21 @@ public class ShareResultsIT extends AbstractIT {
 
         assertTrue(((List) jsonPath.get("offenceIds")).size() > 0);
         assertNotNull(jsonPath.get("hearingId"));
+    }
+
+    private static List<Target> getTargets(final UUID hearingId, final UUID resultLineId, final String hearingDay) {
+        final List<Target> targets = new ArrayList<>();
+        targets.add(Target.target()
+                .withHearingId(hearingId)
+                .withDefendantId(randomUUID())
+                .withDraftResult("{}")
+                .withOffenceId(randomUUID())
+                .withTargetId(UUID.randomUUID())
+                .withResultLines(Collections.singletonList(standardResultLineTemplateNoWelsh(resultLineId, randomUUID(), LocalDate.now()).build()))
+                .withShadowListed(TRUE)
+                .withHearingDay(LocalDate.parse(hearingDay))
+                .build());
+        return targets;
     }
 
     private void assertPublicHearingResultedEventPublished(final Hearing hearing) {
