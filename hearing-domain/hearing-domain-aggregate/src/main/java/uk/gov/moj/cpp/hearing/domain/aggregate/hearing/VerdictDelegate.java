@@ -40,7 +40,11 @@ public class VerdictDelegate implements Serializable {
         final Verdict verdict = verdictUpsert.getVerdict();
         if (nonNull(verdict)) {
             ofNullable(verdict.getOffenceId()).ifPresent(offId -> {
-                this.momento.getVerdicts().put(offId, verdict);
+                if (nonNull(verdict.getIsDeleted()) && verdict.getIsDeleted()) {
+                    this.momento.getVerdicts().put(offId, null);
+                } else {
+                    this.momento.getVerdicts().put(offId, verdict);
+                }
                 ofNullable(this.momento.getHearing().getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
                         .flatMap(ca -> ofNullable(ca.getCourtApplicationCases()).map(Collection::stream).orElseGet(Stream::empty))
                         .flatMap(c -> ofNullable(c.getOffences()).map(Collection::stream).orElseGet(Stream::empty))
@@ -56,17 +60,34 @@ public class VerdictDelegate implements Serializable {
                         .forEach(this::setVerdictOnTheOffence);
             });
             ofNullable(verdict.getApplicationId()).ifPresent(appId -> {
-                this.momento.getVerdicts().put(appId, verdict);
+                if (nonNull(verdict.getIsDeleted()) && verdict.getIsDeleted()) {
+                    this.momento.getVerdicts().put(appId, null);
+                } else {
+                    this.momento.getVerdicts().put(appId, verdict);
+                }
                 ofNullable(this.momento.getHearing().getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
                         .filter(app -> app.getId().equals(verdict.getApplicationId()))
-                        .forEach(app -> app.setVerdict(verdict));
+                        .forEach(this::setVerdictOnTheApplication);
             });
         }
     }
 
-
     private void setVerdictOnTheOffence(final Offence offence) {
-        offence.setVerdict(this.momento.getVerdicts().get(offence.getId()));
+        Verdict verdict = this.momento.getVerdicts().get(offence.getId());
+        if (nonNull(verdict) && nonNull(verdict.getIsDeleted()) && verdict.getIsDeleted()) {
+            offence.setVerdict(null);
+        } else {
+            offence.setVerdict(this.momento.getVerdicts().get(offence.getId()));
+        }
+    }
+
+    private void setVerdictOnTheApplication(final CourtApplication courtApplication) {
+        Verdict verdict = this.momento.getVerdicts().get(courtApplication.getId());
+        if (nonNull(verdict) && nonNull(verdict.getIsDeleted()) && verdict.getIsDeleted()) {
+            courtApplication.setVerdict(null);
+        } else {
+            courtApplication.setVerdict(this.momento.getVerdicts().get(courtApplication.getId()));
+        }
     }
 
     public Stream<Object> updateVerdict(final UUID hearingId, final Verdict verdict, final Set<String> guiltyPleaTypes) {
@@ -85,9 +106,15 @@ public class VerdictDelegate implements Serializable {
         return events.stream();
     }
 
+
     public void handleInheritedVerdict(final InheritedVerdictAdded inheritedVerdict) {
-        this.momento.getVerdicts().put(inheritedVerdict.getVerdict().getOffenceId(),
-                 inheritedVerdict.getVerdict());
+        if (nonNull(inheritedVerdict.getVerdict().getIsDeleted()) && inheritedVerdict.getVerdict().getIsDeleted()) {
+            this.momento.getVerdicts().put(inheritedVerdict.getVerdict().getOffenceId(),
+                    null);
+        } else {
+            this.momento.getVerdicts().put(inheritedVerdict.getVerdict().getOffenceId(),
+                    inheritedVerdict.getVerdict());
+        }
     }
 
     public Stream<Object> inheritVerdict(final UUID hearingId, final Verdict verdict, final Set<String> guiltyPleaTypes) {

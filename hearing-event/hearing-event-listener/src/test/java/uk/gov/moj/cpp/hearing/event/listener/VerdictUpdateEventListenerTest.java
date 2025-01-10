@@ -208,6 +208,75 @@ public class VerdictUpdateEventListenerTest {
     }
 
     @Test
+    public void shouldUpdateCourtApplicationWithClearedVerdict(){
+        final UUID hearingId = randomUUID();
+        final UUID applicationId = randomUUID();
+        final boolean unanimous = BOOLEAN.next();
+        final int numberOfSplitJurors = unanimous ? 0 : integer(1, 3).next();
+
+        uk.gov.justice.core.courts.Verdict applicationVerdict = uk.gov.justice.core.courts.Verdict.verdict()
+                .withVerdictDate(PAST_LOCAL_DATE.next())
+                .withApplicationId(applicationId)
+                .withOriginatingHearingId(randomUUID())
+                .withJurors(
+                        uk.gov.justice.core.courts.Jurors.jurors()
+                                .withNumberOfJurors(integer(9, 12).next())
+                                .withNumberOfSplitJurors(numberOfSplitJurors)
+                                .withUnanimous(unanimous)
+                                .build())
+                .withVerdictType(
+                        uk.gov.justice.core.courts.VerdictType.verdictType()
+                                .withCategoryType(STRING.next())
+                                .withCategory(STRING.next())
+                                .withDescription(STRING.next())
+                                .withSequence(INTEGER.next())
+                                .build())
+                .withLesserOrAlternativeOffence(uk.gov.justice.core.courts.LesserOrAlternativeOffence.lesserOrAlternativeOffence()
+                        .withOffenceLegislationWelsh(STRING.next())
+                        .withOffenceLegislation(STRING.next())
+                        .withOffenceTitleWelsh(STRING.next())
+                        .withOffenceTitle(STRING.next())
+                        .withOffenceCode(STRING.next())
+                        .withOffenceDefinitionId(randomUUID())
+                        .build())
+                .withIsDeleted(true)
+                .build();
+
+        final VerdictUpsert verdictUpsert = VerdictUpsert.verdictUpsert()
+                .setHearingId(hearingId)
+                .setVerdict(applicationVerdict);
+
+        final Hearing hearingEntity = new Hearing();
+        hearingEntity.setId(hearingId);
+        final CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withId(applicationId).build();
+
+        final String str = objectToJsonObjectConverter.convert(courtApplication).toString();
+
+        final uk.gov.justice.core.courts.Hearing hearing = uk.gov.justice.core.courts.Hearing.hearing()
+                .withCourtApplications(Collections.singletonList(CourtApplication.courtApplication().withId(applicationId).build()))
+                .build();
+
+        when(this.hearingRepository.findBy(hearingId)).thenReturn(hearingEntity);
+        when(this.hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearing);
+        when(hearingJPAMapper.addOrUpdateCourtApplication(any(),any() )).thenReturn("["+str+"]");
+
+        verdictUpdateEventListener.verdictUpdate(envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-verdict-updated"),
+                objectToJsonObjectConverter.convert(verdictUpsert)));
+
+        final ArgumentCaptor<CourtApplication> courtApplicationArgumentCaptor = ArgumentCaptor.forClass(CourtApplication.class);
+        verify(hearingJPAMapper).addOrUpdateCourtApplication(any(), courtApplicationArgumentCaptor.capture());
+        final CourtApplication updatedCourtApplication = courtApplicationArgumentCaptor.getValue();
+        assertThat(updatedCourtApplication, is(courtApplication));
+
+        final ArgumentCaptor<Hearing> hearingArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+        verify(hearingRepository).save(hearingArgumentCaptor.capture());
+        final Hearing savedHearing = hearingArgumentCaptor.getValue();
+        assertThat(savedHearing.getCourtApplicationsJson(), is("[{\"id\":\"" + applicationId.toString() + "\"}]"));
+
+    }
+
+    @Test
     public void verdictUpdate_shouldUpdateTheVerdictToOffenceInCourtApplication() {
 
         final UUID applicationId = randomUUID();

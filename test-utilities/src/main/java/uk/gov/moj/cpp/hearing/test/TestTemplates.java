@@ -4,6 +4,7 @@ import static java.time.LocalDate.now;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
@@ -844,6 +845,10 @@ public class TestTemplates {
             return updateVerdictTemplate(hearingId, offenceId, verdictCategoryType, randomUUID(), STRING.next(), null);
         }
 
+        public static HearingUpdateVerdictCommand updateVerdictTemplate(final UUID hearingId, final UUID offenceId) {
+            return clearVerdictTemplate(hearingId, offenceId, null);
+        }
+
         public static HearingUpdateVerdictCommand updateVerdictTemplate(final UUID hearingId, final UUID offenceId, final VerdictCategoryType verdictCategoryType, final UUID applicationId) {
             return updateVerdictTemplate(hearingId, offenceId, verdictCategoryType, randomUUID(), STRING.next(), applicationId);
         }
@@ -863,7 +868,7 @@ public class TestTemplates {
                             .withVerdictType(VerdictType.verdictType()
                                     .withId(verdictTypeId)
                                     .withCategory(STRING.next())
-                                    .withCategoryType(verdictCategoryType.name())
+                                    .withCategoryType(nonNull(verdictCategoryType) ? verdictCategoryType.name() : null)
                                     .withDescription(STRING.next())
                                     .withSequence(INTEGER.next())
                                     .withVerdictCode(verdictCode)
@@ -891,6 +896,21 @@ public class TestTemplates {
                             .build()
                     ));
         }
+    }
+
+    public static HearingUpdateVerdictCommand clearVerdictTemplate(final UUID hearingId, final UUID offenceId, final UUID applicationId) {
+
+        return HearingUpdateVerdictCommand.hearingUpdateVerdictCommand()
+                .withHearingId(hearingId)
+                .withVerdicts(singletonList(Verdict.verdict()
+                        .withOffenceId(offenceId)
+                        .withApplicationId(applicationId)
+                        .withVerdictDate(PAST_LOCAL_DATE.next())
+                        .withVerdictType(VerdictType.verdictType().withId(randomUUID()).withCategory("Not Guilty").withCategoryType(TestTemplates.VerdictCategoryType.NOT_GUILTY.name()).build())
+                        .withOriginatingHearingId(hearingId)
+                        .withIsDeleted(true)
+                        .build()
+                ));
     }
 
     public static class SaveDraftResultsCommandTemplates {

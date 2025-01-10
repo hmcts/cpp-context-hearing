@@ -1,0 +1,682 @@
+{
+  "hearingId": "128e0400-d905-470c-99e0-6ff70d0da706",
+  "sharedTime": "2024-11-05T17:07:11.367Z",
+  "courtClerk": {
+    "firstName": "Emma",
+    "lastName": "Cleaner",
+    "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+  },
+  "hearing": {
+    "courtCentre": {
+      "address": {
+        "address1": "176A Lavender Hill",
+        "address2": "London",
+        "address3": "",
+        "address4": "",
+        "address5": "",
+        "postcode": "SW11 1JU"
+      },
+      "code": "B01LY00",
+      "courtHearingLocation": "B01LY01",
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "lja": {
+        "ljaCode": "2577",
+        "ljaName": "South West London Magistrates' Court"
+      },
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01"
+    },
+    "defendantAttendance": [
+      {
+        "attendanceDays": [
+          {
+            "attendanceType": "BY_VIDEO",
+            "day": "2024-11-06"
+          }
+        ],
+        "defendantId": "f7ff4f44-0fa6-4e85-ae07-d1631b502504"
+      }
+    ],
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "courtCentreId": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+        "courtRoomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+        "hasSharedResults": true,
+        "isCancelled": false,
+        "listedDurationMinutes": 20,
+        "listingSequence": 0,
+        "sittingDay": "2024-11-06T22:30:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "128e0400-d905-470c-99e0-6ff70d0da706",
+    "isGroupProceedings": false,
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [
+      {
+        "caseStatus": "ACTIVE",
+        "cpsOrganisation": "A30AB00",
+        "defendants": [
+          {
+            "courtProceedingsInitiated": "2024-11-05T16:58:09.491Z",
+            "id": "f7ff4f44-0fa6-4e85-ae07-d1631b502504",
+            "isYouth": false,
+            "masterDefendantId": "b54c7f85-312e-4624-ae3b-59240350ef98",
+            "offences": [
+              {
+                "arrestDate": "2021-01-01",
+                "chargeDate": "2020-12-28",
+                "count": 0,
+                "endorsableFlag": false,
+                "id": "5ddcb65b-0282-46b6-817c-017711309013",
+                "listingNumber": 1,
+                "modeOfTrial": "Either Way",
+                "offenceCode": "TH68010",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "17a1e9a2-835e-443f-bc8a-593b8b120a3a",
+                "offenceLegislation": "Contrary to section 1(1) and 7 of the Theft    Act 1968.",
+                "offenceLegislationWelsh": "Yn groes i adran 1(1) a 7 Deddf Dwyn 1968.",
+                "offenceTitle": "Theft from a shop",
+                "offenceTitleWelsh": "Dwyn o siop - siop-ladrad",
+                "orderIndex": 1,
+                "startDate": "2019-11-28",
+                "verdict": {
+                  "jurors": {
+                    "numberOfJurors": 12,
+                    "numberOfSplitJurors": 0,
+                    "unanimous": true
+                  },
+                  "lesserOrAlternativeOffence": {
+                    "offenceCode": "TH68010",
+                    "offenceDefinitionId": "17a1e9a2-835e-443f-bc8a-593b8b120a3a",
+                    "offenceLegislation": "Contrary to section 1(1) and 7 of the Theft    Act 1968.",
+                    "offenceTitle": "Theft from a shop"
+                  },
+                  "offenceId": "5ddcb65b-0282-46b6-817c-017711309013",
+                  "originatingHearingId": "128e0400-d905-470c-99e0-6ff70d0da706",
+                  "verdictDate": "2024-11-06",
+                  "verdictType": {
+                    "id": "5ddcb65b-0282-46b6-817c-017711309017",
+                    "category": "",
+                    "categoryType": ""
+                  },
+                  "isDeleted": true
+                },
+                "wording": "Obstruct person executing search warrant for TV receiver"
+              }
+            ],
+            "personDefendant": {
+              "arrestSummonsNumber": "D28GC01127977568",
+              "bailStatus": {
+                "code": "C",
+                "description": "Custody or remanded into custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              },
+              "driverNumber": "VANFL002222OW9PH",
+              "personDetails": {
+                "address": {
+                  "address1": "9999A9999AAAA",
+                  "address2": "Woodlane",
+                  "address3": "addressline 3",
+                  "address4": "Bristol",
+                  "address5": "Avon",
+                  "postcode": "BS5 0AA"
+                },
+                "contact": {
+                  "home": "0207977568",
+                  "mobile": "07777977568",
+                  "primaryEmail": "REDDY.TEST017977568@gmail.com"
+                },
+                "dateOfBirth": "1981-11-11",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+                  "observedEthnicityCode": "1",
+                  "observedEthnicityDescription": "White - North European",
+                  "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                  "selfDefinedEthnicityCode": "W1",
+                  "selfDefinedEthnicityDescription": "British",
+                  "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                },
+                "firstName": "JOHN",
+                "gender": "MALE",
+                "hearingLanguageNeeds": "ENGLISH",
+                "lastName": "SMITH",
+                "title": "Mr"
+              },
+              "policeBailStatus": {
+                "code": "C",
+                "description": "Custody or remanded into custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              }
+            },
+            "prosecutionAuthorityReference": "D28GC01127977568",
+            "prosecutionCaseId": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894"
+          }
+        ],
+        "id": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894",
+        "initiationCode": "C",
+        "originatingOrganisation": "G94DV00",
+        "prosecutionCaseIdentifier": {
+          "address": {
+            "address1": "Finance Operations",
+            "address2": "C3 East",
+            "address3": "DVLA",
+            "address4": "Longview Road",
+            "address5": "Swansea",
+            "postcode": "SA6 7JL"
+          },
+          "contact": {
+            "primaryEmail": "sjp@dvla.gov.uk"
+          },
+          "majorCreditorCode": "DVL2",
+          "prosecutionAuthorityCode": "DVLA",
+          "prosecutionAuthorityId": "6ae4b163-658b-3ae2-a66d-43401cac2f96",
+          "prosecutionAuthorityName": "Driver and Vehicle Licensing Agency",
+          "prosecutionAuthorityOUCode": "G94DV00",
+          "caseURN": "28DI7977568"
+        }
+      }
+    ],
+    "type": {
+      "description": "First hearing",
+      "id": "4a0e892d-c0c5-3c51-95b8-704d8c781776"
+    }
+  },
+  "variantDirectory": [],
+  "completedResultLinesStatus": {
+    "52192783-ead6-40c6-a849-3c8801da07c2": {
+      "id": "52192783-ead6-40c6-a849-3c8801da07c2",
+      "lastSharedDateTime": "2024-11-05T17:01:34.319Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "03a2ea97-5516-463c-8135-7bb798c016e1": {
+      "id": "03a2ea97-5516-463c-8135-7bb798c016e1",
+      "lastSharedDateTime": "2024-11-05T17:01:34.319Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "84faed34-8f4d-4daf-adc6-0dccac86628d": {
+      "id": "84faed34-8f4d-4daf-adc6-0dccac86628d",
+      "lastSharedDateTime": "2024-11-05T17:01:34.319Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "27cbbf6e-39ef-4417-8add-69e065820265": {
+      "id": "27cbbf6e-39ef-4417-8add-69e065820265",
+      "lastSharedDateTime": "2024-11-05T17:01:34.319Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "c3dbd1d5-32b2-4c54-98ef-864d22ba5d2f": {
+      "id": "c3dbd1d5-32b2-4c54-98ef-864d22ba5d2f",
+      "lastSharedDateTime": "2024-11-05T17:01:34.319Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    }
+  },
+  "targets": [
+    {
+      "caseId": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894",
+      "defendantId": "f7ff4f44-0fa6-4e85-ae07-d1631b502504",
+      "draftResult": "{}",
+      "hearingDay": "2024-11-06",
+      "hearingId": "128e0400-d905-470c-99e0-6ff70d0da706",
+      "masterDefendantId": "b54c7f85-312e-4624-ae3b-59240350ef98",
+      "offenceId": "5ddcb65b-0282-46b6-817c-017711309013",
+      "resultLines": [
+        {
+          "amendmentDate": "2024-11-05T17:06:14.422Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[]}",
+          "caseId": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894",
+          "category": "I",
+          "childResultLineIds": [
+            "84faed34-8f4d-4daf-adc6-0dccac86628d",
+            "03a2ea97-5516-463c-8135-7bb798c016e1"
+          ],
+          "defendantId": "f7ff4f44-0fa6-4e85-ae07-d1631b502504",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "b54c7f85-312e-4624-ae3b-59240350ef98",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "5ddcb65b-0282-46b6-817c-017711309013",
+          "orderedDate": "2024-11-06",
+          "prompts": [
+            {
+              "id": "61f951c3-f18d-4a44-ae4a-0cad4efb4133",
+              "label": "Defendant to attend the next hearing",
+              "promptRef": "defendantToAttendTheNextHearing",
+              "value": "true"
+            }
+          ],
+          "resultDefinitionId": "d278650c-e429-11e8-9f32-f2801f1b9fd1",
+          "resultLabel": "Adjournment",
+          "resultLineId": "27cbbf6e-39ef-4417-8add-69e065820265",
+          "shadowListed": false,
+          "sharedDate": "2024-11-05",
+          "shortCode": "a"
+        },
+        {
+          "amendmentDate": "2024-11-05T17:06:14.422Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[]}",
+          "caseId": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894",
+          "category": "A",
+          "childResultLineIds": [
+            "52192783-ead6-40c6-a849-3c8801da07c2"
+          ],
+          "defendantId": "f7ff4f44-0fa6-4e85-ae07-d1631b502504",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "b54c7f85-312e-4624-ae3b-59240350ef98",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "5ddcb65b-0282-46b6-817c-017711309013",
+          "orderedDate": "2024-11-06",
+          "parentResultLineIds": [
+            "27cbbf6e-39ef-4417-8add-69e065820265"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "resultLabel": "Next hearing",
+          "resultLineId": "84faed34-8f4d-4daf-adc6-0dccac86628d",
+          "shadowListed": false,
+          "sharedDate": "2024-11-05",
+          "shortCode": "nexh"
+        },
+        {
+          "amendmentDate": "2024-11-05T17:06:14.422Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[]}",
+          "caseId": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894",
+          "category": "A",
+          "childResultLineIds": [
+            "c3dbd1d5-32b2-4c54-98ef-864d22ba5d2f"
+          ],
+          "defendantId": "f7ff4f44-0fa6-4e85-ae07-d1631b502504",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "b54c7f85-312e-4624-ae3b-59240350ef98",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "5ddcb65b-0282-46b6-817c-017711309013",
+          "orderedDate": "2024-11-06",
+          "parentResultLineIds": [
+            "27cbbf6e-39ef-4417-8add-69e065820265"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "7fc17a01-2f5a-4433-aae9-28e0c959f73b",
+          "resultLabel": "Adjournment reasons",
+          "resultLineId": "03a2ea97-5516-463c-8135-7bb798c016e1",
+          "shadowListed": false,
+          "sharedDate": "2024-11-05",
+          "shortCode": "adjr"
+        },
+        {
+          "amendmentDate": "2024-11-05T17:06:14.422Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[]}",
+          "caseId": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "f7ff4f44-0fa6-4e85-ae07-d1631b502504",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "b54c7f85-312e-4624-ae3b-59240350ef98",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "5ddcb65b-0282-46b6-817c-017711309013",
+          "orderedDate": "2024-11-06",
+          "parentResultLineIds": [
+            "03a2ea97-5516-463c-8135-7bb798c016e1"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "69ff04d5-84e8-4a61-8478-82c2999c1969",
+          "resultLabel": "To attend or a warrant to issue",
+          "resultLineId": "c3dbd1d5-32b2-4c54-98ef-864d22ba5d2f",
+          "shadowListed": false,
+          "sharedDate": "2024-11-05",
+          "shortCode": "awi"
+        },
+        {
+          "amendmentDate": "2024-11-05T17:06:14.422Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[]}",
+          "caseId": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "f7ff4f44-0fa6-4e85-ae07-d1631b502504",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "b54c7f85-312e-4624-ae3b-59240350ef98",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "5ddcb65b-0282-46b6-817c-017711309013",
+          "orderedDate": "2024-11-06",
+          "parentResultLineIds": [
+            "84faed34-8f4d-4daf-adc6-0dccac86628d"
+          ],
+          "prompts": [
+            {
+              "id": "aea2ee79-47b4-4023-9a95-1b327e6e03d5",
+              "label": "Fixed Date",
+              "promptRef": "fixedDate",
+              "value": "2024-11-06"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "10:00"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "Croydon Crown Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "The Law Courts"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "Altyre Road"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 3",
+              "promptRef": "hCHOUSEAddress3",
+              "value": "Croydon"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "CR9 5AB"
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "promptRef": "HTYPE",
+              "value": "Plea & Trial Preparation"
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "promptRef": "HEST",
+              "value": "30 MINUTES"
+            }
+          ],
+          "resultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c8",
+          "resultLabel": "Next hearing in Crown Court",
+          "resultLineId": "52192783-ead6-40c6-a849-3c8801da07c2",
+          "shadowListed": false,
+          "sharedDate": "2024-11-05",
+          "shortCode": "nhccs"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "5ddcb65b-0282-46b6-817c-017711309013"
+    }
+  ],
+  "savedTargets": [
+    {
+      "caseId": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894",
+      "defendantId": "f7ff4f44-0fa6-4e85-ae07-d1631b502504",
+      "draftResult": "{}",
+      "hearingDay": "2024-11-06",
+      "hearingId": "128e0400-d905-470c-99e0-6ff70d0da706",
+      "masterDefendantId": "b54c7f85-312e-4624-ae3b-59240350ef98",
+      "offenceId": "5ddcb65b-0282-46b6-817c-017711309013",
+      "resultLines": [
+        {
+          "caseId": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894",
+          "category": "I",
+          "childResultLineIds": [
+            "84faed34-8f4d-4daf-adc6-0dccac86628d",
+            "03a2ea97-5516-463c-8135-7bb798c016e1"
+          ],
+          "defendantId": "f7ff4f44-0fa6-4e85-ae07-d1631b502504",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "b54c7f85-312e-4624-ae3b-59240350ef98",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "5ddcb65b-0282-46b6-817c-017711309013",
+          "orderedDate": "2024-11-06",
+          "prompts": [
+            {
+              "id": "61f951c3-f18d-4a44-ae4a-0cad4efb4133",
+              "label": "Defendant to attend the next hearing",
+              "promptRef": "defendantToAttendTheNextHearing",
+              "value": "true"
+            }
+          ],
+          "resultDefinitionId": "d278650c-e429-11e8-9f32-f2801f1b9fd1",
+          "resultLabel": "Adjournment",
+          "resultLineId": "27cbbf6e-39ef-4417-8add-69e065820265",
+          "shadowListed": false,
+          "sharedDate": "2024-11-05",
+          "shortCode": "a"
+        },
+        {
+          "caseId": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894",
+          "category": "A",
+          "childResultLineIds": [
+            "52192783-ead6-40c6-a849-3c8801da07c2"
+          ],
+          "defendantId": "f7ff4f44-0fa6-4e85-ae07-d1631b502504",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "b54c7f85-312e-4624-ae3b-59240350ef98",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "5ddcb65b-0282-46b6-817c-017711309013",
+          "orderedDate": "2024-11-06",
+          "parentResultLineIds": [
+            "27cbbf6e-39ef-4417-8add-69e065820265"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "resultLabel": "Next hearing",
+          "resultLineId": "84faed34-8f4d-4daf-adc6-0dccac86628d",
+          "shadowListed": false,
+          "sharedDate": "2024-11-05",
+          "shortCode": "nexh"
+        },
+        {
+          "caseId": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894",
+          "category": "A",
+          "childResultLineIds": [
+            "c3dbd1d5-32b2-4c54-98ef-864d22ba5d2f"
+          ],
+          "defendantId": "f7ff4f44-0fa6-4e85-ae07-d1631b502504",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "b54c7f85-312e-4624-ae3b-59240350ef98",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "5ddcb65b-0282-46b6-817c-017711309013",
+          "orderedDate": "2024-11-06",
+          "parentResultLineIds": [
+            "27cbbf6e-39ef-4417-8add-69e065820265"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "7fc17a01-2f5a-4433-aae9-28e0c959f73b",
+          "resultLabel": "Adjournment reasons",
+          "resultLineId": "03a2ea97-5516-463c-8135-7bb798c016e1",
+          "shadowListed": false,
+          "sharedDate": "2024-11-05",
+          "shortCode": "adjr"
+        },
+        {
+          "caseId": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "f7ff4f44-0fa6-4e85-ae07-d1631b502504",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "b54c7f85-312e-4624-ae3b-59240350ef98",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "5ddcb65b-0282-46b6-817c-017711309013",
+          "orderedDate": "2024-11-06",
+          "parentResultLineIds": [
+            "03a2ea97-5516-463c-8135-7bb798c016e1"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "69ff04d5-84e8-4a61-8478-82c2999c1969",
+          "resultLabel": "To attend or a warrant to issue",
+          "resultLineId": "c3dbd1d5-32b2-4c54-98ef-864d22ba5d2f",
+          "shadowListed": false,
+          "sharedDate": "2024-11-05",
+          "shortCode": "awi"
+        },
+        {
+          "caseId": "e5b7fe7f-48dd-47b2-a4cc-72bc88b4b894",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "f7ff4f44-0fa6-4e85-ae07-d1631b502504",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "b54c7f85-312e-4624-ae3b-59240350ef98",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "5ddcb65b-0282-46b6-817c-017711309013",
+          "orderedDate": "2024-11-06",
+          "parentResultLineIds": [
+            "84faed34-8f4d-4daf-adc6-0dccac86628d"
+          ],
+          "prompts": [
+            {
+              "id": "aea2ee79-47b4-4023-9a95-1b327e6e03d5",
+              "label": "Fixed Date",
+              "promptRef": "fixedDate",
+              "value": "2024-11-06"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "10:00"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "Croydon Crown Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "The Law Courts"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "Altyre Road"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 3",
+              "promptRef": "hCHOUSEAddress3",
+              "value": "Croydon"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "CR9 5AB"
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "promptRef": "HTYPE",
+              "value": "Plea & Trial Preparation"
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "promptRef": "HEST",
+              "value": "30 MINUTES"
+            }
+          ],
+          "resultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c8",
+          "resultLabel": "Next hearing in Crown Court",
+          "resultLineId": "52192783-ead6-40c6-a849-3c8801da07c2",
+          "shadowListed": false,
+          "sharedDate": "2024-11-05",
+          "shortCode": "nhccs"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "5ddcb65b-0282-46b6-817c-017711309013"
+    }
+  ],
+  "defendantDetailsChanged": [],
+  "isReshare": true,
+  "newAmendmentResults": [
+    {
+      "id": "27cbbf6e-39ef-4417-8add-69e065820265",
+      "amendmentDateTime": "2024-11-05T17:06:14.422Z"
+    },
+    {
+      "id": "84faed34-8f4d-4daf-adc6-0dccac86628d",
+      "amendmentDateTime": "2024-11-05T17:06:14.422Z"
+    },
+    {
+      "id": "03a2ea97-5516-463c-8135-7bb798c016e1",
+      "amendmentDateTime": "2024-11-05T17:06:14.422Z"
+    },
+    {
+      "id": "c3dbd1d5-32b2-4c54-98ef-864d22ba5d2f",
+      "amendmentDateTime": "2024-11-05T17:06:14.422Z"
+    },
+    {
+      "id": "52192783-ead6-40c6-a849-3c8801da07c2",
+      "amendmentDateTime": "2024-11-05T17:06:14.422Z"
+    }
+  ],
+  "hearingDay": "2024-11-06"
+}

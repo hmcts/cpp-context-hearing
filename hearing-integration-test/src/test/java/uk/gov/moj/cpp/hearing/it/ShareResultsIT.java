@@ -84,6 +84,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTempl
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.basicShareResultsCommandV2Template;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateDefendantAttendanceCommandTemplates.updateDefendantAttendanceTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdatePleaCommandTemplates.updatePleaTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VerdictCategoryType;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
@@ -140,6 +141,7 @@ import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
+import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.http.HeaderConstants;
@@ -660,6 +662,70 @@ public class ShareResultsIT extends AbstractIT {
             completeSetupAndShareResults(allNows, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
             assertPublicHearingResultedHasVerdictTypeInformation(publicEventResulted, expectedTrialType, hearing);
         }
+    }
+
+    @Test
+    public void shouldShareResultsWithClearVerdictTypeInformation() {
+
+        LocalDate orderDate = PAST_LOCAL_DATE.next();
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
+
+        final InitiateHearingCommandHelper initiateHearingCommandHelper = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdictCommandHelper = updateDefendantAndChangeVerdict(initiateHearingCommandHelper);
+
+        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
+
+        final uk.gov.justice.core.courts.Hearing hearing = initiateHearingCommandHelper.getHearing();
+
+        stubCourtRoom(hearing);
+
+        final CommandHelpers.UpdatePleaCommandHelper updatePleaCommand = updatePleaWithChangingConvictionDate(initiateHearingCommandHelper);
+
+        final CrackedIneffectiveTrial expectedTrialType = getExpectedTrialType(initiateHearingCommandHelper, updatePleaCommand , updatePleaCommand.getFirstPleaDate());
+
+        try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
+                .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
+                        .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
+                                .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
+                                .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                        .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                                .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                        .with(Offence::getJudicialResults, first(isBean(JudicialResult.class)
+                                                                .with(JudicialResult::getCanBeSubjectOfBreach, is(true))
+                                                                .with(JudicialResult::getLevel, is("O"))))))))))
+                                .with(Hearing::getDefendantAttendance, first(isBean(DefendantAttendance.class)
+                                        .with(DefendantAttendance::getAttendanceDays, first(isBean(AttendanceDay.class)
+                                                .with(AttendanceDay::getAttendanceType, is(AttendanceType.IN_PERSON))))))
+                                .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                                        .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))))))) {
+
+            completeSetupAndShareResults(allNows, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
+            assertPublicHearingResultedHasVerdictTypeInformation(publicEventResulted, expectedTrialType, hearing);
+
+        }
+
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), initiateHearingCommandHelper.getHearingId(),
+                updateVerdictTemplate(
+                        initiateHearingCommandHelper.getHearingId(),
+                        initiateHearingCommandHelper.getFirstOffenceForFirstDefendantForFirstCase().getId()
+                )));
+
+        Queries.getHearingPollForMatch(initiateHearingCommandHelper.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(updateVerdict.getFirstVerdict().getOffenceId()))
+                                                .with(Offence::getVerdict, is(nullValue()))
+                                        ))
+                                ))
+                        ))
+                )
+        );
     }
 
     @Test

@@ -570,6 +570,7 @@ public class CoreTestTemplates {
                             .withOffenceId(offenceId)
                             .withVerdictDate(LocalDate.now())
                             .withVerdictType(VerdictType.verdictType()
+                                    .withId(randomUUID())
                                     .withCategory("Not Guilty")
                                     .withCategoryType(TestTemplates.VerdictCategoryType.NOT_GUILTY.name())
                                     .build())

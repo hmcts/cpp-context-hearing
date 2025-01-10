@@ -223,10 +223,12 @@ public class InitiateHearingEventListener {
 
             final boolean shouldSetVerdict = isNull(offence.getVerdict()) || isVerdictInherited(event, offence);
 
-            if (shouldSetVerdict) {
-                offence.setVerdict(verdictJPAMapper.toJPA(event.getVerdict()));
-                offenceRepository.save(offence);
+            if (shouldSetVerdict && !isVerdictDeleted(event)) {
+                    offence.setVerdict(verdictJPAMapper.toJPA(event.getVerdict()));
+            } else {
+                offence.setVerdict(null);
             }
+            offenceRepository.save(offence);
         }
     }
 
@@ -303,6 +305,10 @@ public class InitiateHearingEventListener {
 
     private boolean isVerdictInherited(InheritedVerdictAdded event, Offence offence) {
         return !event.getHearingId().equals(offence.getVerdict().getOriginatingHearingId());
+    }
+
+    private boolean isVerdictDeleted(InheritedVerdictAdded event) {
+        return nonNull(event.getVerdict().getIsDeleted()) && event.getVerdict().getIsDeleted();
     }
 
     private void save(final UUID offenceId, final UUID hearingId, final Consumer<Offence> consumer) {

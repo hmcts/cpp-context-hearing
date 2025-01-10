@@ -6,8 +6,10 @@ import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_COURT_APPLICATION_WITH_INDICATED_PLEA_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_HEARING_DAY_WITHOUT_COURT_CENTRE_ID;
@@ -120,6 +122,27 @@ public class OffenceHelperTest {
         assertThat(verdictType.getId().toString(), is("c51ce410-c124-310e-8db5-e4b97fc2af39"));
         assertThat(verdictType.getVerdictCode(), is("VC13"));
         assertThat(verdictType.getSequence(), is(13));
+    }
+
+    @Test
+    public void shareResultsWithClearVerdictType() throws IOException {
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile("hearing.results-clear-with-verdict-type.json", ResultsShared.class);
+        offenceHelper.enrichOffence(context, resultsShared.getHearing());
+        final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
+        assertThat(defendant.isPresent(), is(true));
+        assertThat(defendant.get().getOffences().get(0).getVerdict(), nullValue());
+    }
+
+
+    @Test
+    public void shareResultsWithVerdictClearType() throws IOException {
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile("hearing.results-clear-with-verdict-type-1.json", ResultsShared.class);
+        offenceHelper.enrichOffence(context, resultsShared.getHearing());
+        final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
+        assertThat(defendant.isPresent(), is(true));
+        assertThat(defendant.get().getOffences().get(0).getVerdict(), nullValue());
     }
 
     @Test

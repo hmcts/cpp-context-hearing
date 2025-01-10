@@ -557,6 +557,18 @@ public class PleaIT extends AbstractIT {
 
                 )
         );
+
+        getUpdatePleaCommandHelper(hearingOne, null, false, null, null, hearingOne.getHearing().getCourtApplications().get(0).getId(), true);
+
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getCourtApplications, first(isBean(CourtApplication.class)
+                                .with(CourtApplication::getPlea, is(CoreMatchers.nullValue()))
+                        ))
+
+                )
+        );
     }
 
     @Test

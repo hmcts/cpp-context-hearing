@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import static java.util.Collections.emptyList;
-import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -378,15 +377,31 @@ public class HearingJPAMapper {
     }
 
     private CourtOrderOffence getCourtOrderOffenceWithVerdict(final Verdict verdict, final CourtOrderOffence o) {
-        return !o.getOffence().getId().equals(verdict.getOffenceId()) ? o : CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
-                .withOffence(Offence.offence().withValuesFrom(o.getOffence())
-                        .withVerdict(verdict)
-                        .build())
-                .build();
+        return !o.getOffence().getId().equals(verdict.getOffenceId()) ? o :
+                getCourtOrderOffenceWithUpdatedVerdict(verdict, o);
+    }
+
+    private CourtOrderOffence getCourtOrderOffenceWithUpdatedVerdict(final Verdict verdict, final CourtOrderOffence o) {
+        return (verdict.getIsDeleted() != null && verdict.getIsDeleted()) ?
+                CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
+                        .withOffence(Offence.offence().withValuesFrom(o.getOffence())
+                                .withVerdict(null).build()).build() :
+                CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
+                        .withOffence(Offence.offence().withValuesFrom(o.getOffence())
+                                .withVerdict(verdict)
+                                .build())
+                        .build();
     }
 
     private Offence getCourtApplicationOffenceWithVerdict(final Verdict verdict, final Offence offence) {
         return !offence.getId().equals(verdict.getOffenceId()) ? offence :
+                getCourtApplicationOffenceWithUpdatedVerdict(verdict, offence);
+    }
+
+    private Offence getCourtApplicationOffenceWithUpdatedVerdict(final Verdict verdict, final Offence offence) {
+        return (verdict.getIsDeleted() != null && verdict.getIsDeleted()) ?
+                Offence.offence().withValuesFrom(offence)
+                        .withVerdict(null).build() :
                 Offence.offence().withValuesFrom(offence)
                         .withVerdict(verdict)
                         .build();

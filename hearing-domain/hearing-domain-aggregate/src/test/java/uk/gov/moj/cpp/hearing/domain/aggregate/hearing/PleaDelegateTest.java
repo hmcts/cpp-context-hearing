@@ -18,8 +18,11 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.ALL_PLEAS;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.GUILTY_PLEA_LIST;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.guiltyPleaTypes;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingWithApplicationTemplate;
 
 import java.lang.reflect.Field;
+
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;
@@ -28,10 +31,12 @@ import org.junit.runner.RunWith;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
+import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
@@ -43,8 +48,10 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTestData;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -336,6 +343,24 @@ public class PleaDelegateTest {
     }
 
     @Test
+    public void shouldClearPleaIntoHearingAggregateMomentoForApplication() {
+        final Hearing hearing = getHearingWithPlea(OFFENCE_ID, APPLICATION_ID, HEARING_ID);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaUpsert pleaUpsert = PleaUpsert.pleaUpsert()
+                .setHearingId(HEARING_ID)
+                .setPleaModel(PleaModel.pleaModel()
+                        .withProsecutionCaseId(CASE_ID)
+                        .withDefendantId(DEFENDANT_ID)
+                        .withApplicationId(APPLICATION_ID).build());
+        pleaDelegate.handlePleaUpsert(pleaUpsert);
+
+        assertThat(hearingAggregateMomento.getPleas().size(), is(0));
+        final Plea plea = hearingAggregateMomento.getPleas().get(APPLICATION_ID);
+        assertThat(plea, nullValue());
+    }
+
+    @Test
     public void shouldSetIndicatedPleaIntoHearingAggregateMomento() {
 
         final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
@@ -619,7 +644,6 @@ public class PleaDelegateTest {
         }
     }
 
-
     @Test
     public void shouldRaiseIndicatedPleaUpdated() {
 
@@ -697,6 +721,17 @@ public class PleaDelegateTest {
                 ).build();
     }
 
+    private PleaModel getApplicationPlea(final String pleaValue, final LocalDate pleaDate) {
+        return PleaModel.pleaModel()
+                .withDefendantId(DEFENDANT_ID)
+                .withApplicationId(APPLICATION_ID)
+                .withPlea(Plea.plea()
+                        .withPleaDate(pleaDate)
+                        .withPleaValue(pleaValue)
+                        .build()
+                ).build();
+    }
+
     private Hearing getHearing(final UUID offenceId, final UUID defendantId, final UUID prosecutionCaseId, final UUID hearingId) {
         final Defendant defendant = defendant()
                 .withId(defendantId)
@@ -737,6 +772,34 @@ public class PleaDelegateTest {
                 .withId(hearingId)
                 .withCourtApplications(singletonList(CourtApplication.courtApplication()
                         .withId(courtApplicationId)
+                        .withCourtApplicationCases(Collections.singletonList(CourtApplicationCase.courtApplicationCase()
+                                .withProsecutionCaseId(randomUUID())
+                                .withIsSJP(false)
+                                .withCaseStatus("ACTIVE")
+                                .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                                        .withCaseURN("caseURN")
+                                        .withProsecutionAuthorityId(randomUUID())
+                                        .withProsecutionAuthorityCode("ABC")
+                                        .build())
+                                .withOffences(Collections.singletonList(uk.gov.justice.core.courts.Offence.offence()
+                                        .withOffenceDefinitionId(randomUUID())
+                                        .withOffenceCode("ABC")
+                                        .withOffenceTitle("ABC")
+                                        .withWording("ABC")
+                                        .withStartDate(LocalDate.now())
+                                        .withId(offenceId).build()))
+                                .build()))
+                        .build()))
+                .build();
+    }
+
+    private Hearing getHearingWithPlea(final UUID offenceId, final UUID courtApplicationId,final UUID hearingId) {
+
+        return hearing()
+                .withId(hearingId)
+                .withCourtApplications(singletonList(CourtApplication.courtApplication()
+                        .withId(courtApplicationId)
+                        .withPlea(Plea.plea().withPleaValue("GUILTY").withApplicationId(courtApplicationId).build())
                         .withCourtApplicationCases(Collections.singletonList(CourtApplicationCase.courtApplicationCase()
                                 .withProsecutionCaseId(randomUUID())
                                 .withIsSJP(false)

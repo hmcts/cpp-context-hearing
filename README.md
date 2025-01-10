@@ -10,4 +10,3 @@
 
 3. The test results will be save in a .jtl file in ./target/jmeter/results/ and can be viewed in any of the results
    listeners within Jmeter gui.
-

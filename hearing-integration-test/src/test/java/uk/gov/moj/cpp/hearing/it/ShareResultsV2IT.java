@@ -1,11 +1,16 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
@@ -13,6 +18,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
+import static uk.gov.moj.cpp.hearing.it.UseCases.createFirstProsecutionCounsel;
 import static uk.gov.moj.cpp.hearing.it.UseCases.shareResultsPerDay;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
@@ -20,29 +26,42 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplateWithApplication;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.basicShareResultsCommandV2Template;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateDefendantAttendanceCommandTemplates.updateDefendantAttendanceTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VERDICT_TYPE_GUILTY_CODE;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VERDICT_TYPE_GUILTY_ID;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
 
+import uk.gov.justice.core.courts.AttendanceDay;
+import uk.gov.justice.core.courts.AttendanceType;
 import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Prompt;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResultedV2;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
@@ -56,6 +75,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllNowsReferenceDataHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllResultDefinitionsReferenceDataHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
 import uk.gov.moj.cpp.hearing.test.TestUtilities;
 
 import java.time.LocalDate;
@@ -111,6 +131,90 @@ public class ShareResultsV2IT extends AbstractIT {
     }
 
     @Test
+    public void shouldShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict() {
+
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+        final UUID ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID = fromString("10115268-8efc-49fe-b8e8-feee216a03da");
+
+        final LocalDate hearingDay = LocalDate.now();
+
+        final InitiateHearingCommandHelper hearingCommand = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        final Hearing hearing = hearingCommand.getHearing();
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
+
+        stubCourtRoom(hearing);
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), orderedDate);
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
+
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt1 = getMandatoryNowResultDefPrompt(orderedDate, ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID, allNows);
+        final SaveDraftResultCommand saveDraftResultCommand1 = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), orderedDate);
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt1, saveDraftResultCommand1);
+
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+
+        final List<Target> targets1 = new ArrayList<>();
+        targets1.add(saveDraftResultCommand1.getTarget());
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdictCommandHelper = updateDefendantAndChangeVerdict(hearingCommand);
+
+        shareDaysResultWithCourtClerk(hearing, targets, hearingDay);
+
+        assertHearingResultsAreShared(hearing);
+
+        Queries.getHearingPollForMatch(hearingCommand.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingCommand.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(updateVerdictCommandHelper.getFirstVerdict().getOffenceId()))
+                                                .with(Offence::getVerdict, is(notNullValue()))
+                                        ))
+                                ))
+                        ))
+                )
+        );
+
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingCommand.getHearingId(),
+                updateVerdictTemplate(
+                        hearingCommand.getHearingId(),
+                        hearingCommand.getFirstOffenceForFirstDefendantForFirstCase().getId()
+                )));
+
+
+        shareDaysResultWithCourtClerk(hearing, targets1, hearingDay);
+
+        assertHearingResultsAreShared(hearing);
+
+        Queries.getHearingPollForMatch(hearingCommand.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingCommand.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(updateVerdict.getFirstVerdict().getOffenceId()))
+                                                .with(Offence::getVerdict, is(nullValue()))
+                                        ))
+                                ))
+                        ))
+                )
+        );
+
+
+    }
+
+    @Test
     public void doesNotIncludeParentGuardianPromptInPublicHearingPayloadIfFalseWhenShareResult() {
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
@@ -146,6 +250,75 @@ public class ShareResultsV2IT extends AbstractIT {
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].judicialResultPrompts[0].promptReference"), is("bailConditionReason"));
         }
         assertHearingResultsAreShared(hearing);
+    }
+
+    private CommandHelpers.UpdateVerdictCommandHelper updateDefendantAndChangeVerdict(InitiateHearingCommandHelper initiateHearingCommandHelper) {
+        updateDefendantAttendance(initiateHearingCommandHelper);
+
+        stubCourtCentre(initiateHearingCommandHelper.getHearing());
+
+        createFirstProsecutionCounsel(initiateHearingCommandHelper);
+
+        return changeVerdict(initiateHearingCommandHelper, fromString(VERDICT_TYPE_GUILTY_ID), VERDICT_TYPE_GUILTY_CODE);
+    }
+
+    private void updateDefendantAttendance(final InitiateHearingCommandHelper hearingOne) {
+        final UUID hearingId = hearingOne.getHearingId();
+        final UUID defendantId = hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId();
+        final LocalDate dateOfAttendance = hearingOne.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate();
+
+        try (final Utilities.EventListener publicDefendantAttendanceUpdated = listenFor("public.hearing.defendant-attendance-updated", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
+                .withFilter(convertStringTo(DefendantAttendanceUpdated.class, isBean(DefendantAttendanceUpdated.class)
+                        .with(DefendantAttendanceUpdated::getHearingId, is(hearingId))
+                        .with(DefendantAttendanceUpdated::getDefendantId, is(defendantId))
+                        .with(DefendantAttendanceUpdated::getAttendanceDay, isBean(AttendanceDay.class)
+                                .with(AttendanceDay::getDay, is(dateOfAttendance))
+                                .with(AttendanceDay::getAttendanceType, is(AttendanceType.IN_PERSON)))))) {
+
+
+            h(UseCases.updateDefendantAttendance(getRequestSpec(), updateDefendantAttendanceTemplate(hearingId, defendantId, dateOfAttendance, AttendanceType.IN_PERSON)));
+
+            publicDefendantAttendanceUpdated.waitFor();
+        }
+    }
+
+    private void stubCourtCentre(final Hearing hearing) {
+        stubCourtCentre(hearing, null);
+    }
+
+    private CommandHelpers.UpdateVerdictCommandHelper changeVerdict(final InitiateHearingCommandHelper hearingOne, final UUID verdictTypeId, final String verdictCode) {
+        try (final Utilities.EventListener verdictUpdatedPublicEventListener = listenFor("public.hearing.verdict-updated")
+                .withFilter(isJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))
+                        ))
+                );
+             final Utilities.EventListener offenceVerdictUpdatedPublicEventListener = listenFor("public.hearing.hearing-offence-verdict-updated")
+                     .withFilter(isJson(allOf(
+                                     withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
+                                     withJsonPath("$.verdict.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString()))
+                             ))
+                     )
+        ) {
+
+            final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
+                    TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate(
+                            hearingOne.getHearingId(),
+                            hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
+                            TestTemplates.VerdictCategoryType.GUILTY,
+                            verdictTypeId,
+                            verdictCode)
+            ));
+
+            verdictUpdatedPublicEventListener.waitFor();
+            offenceVerdictUpdatedPublicEventListener.waitFor();
+            return updateVerdict;
+        }
+    }
+
+    private void stubCourtCentre(final Hearing hearing, final String ljaCode) {
+        final CourtCentre courtCentre = hearing.getCourtCentre();
+        hearing.getProsecutionCases().forEach(prosecutionCase -> stubLjaDetails(courtCentre, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId(), ljaCode));
+        stubGetReferenceDataCourtRooms(courtCentre, hearing.getHearingLanguage(), ouId3, ouId4);
     }
 
     private void shareDaysResultWithCourtClerk(final Hearing hearing, final List<Target> targets, final LocalDate hearingDay) {

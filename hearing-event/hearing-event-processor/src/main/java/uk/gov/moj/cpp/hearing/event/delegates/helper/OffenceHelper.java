@@ -144,17 +144,22 @@ public class OffenceHelper {
      */
     private void populateFullVerdictTypeData(final Offence offence, final List<VerdictType> verdictTypes) {
         final Verdict originalVerdict = offence.getVerdict();
-        final Optional<VerdictType> fullVerdictType = verdictTypes.stream()
-                .filter(verdictType -> verdictType.getId().equals(originalVerdict.getVerdictType().getId()))
-                .findFirst();
-        fullVerdictType.ifPresent(verdictType -> offence.setVerdict(Verdict.verdict()
-                .withVerdictType(verdictType)
-                .withJurors(originalVerdict.getJurors())
-                .withOffenceId(originalVerdict.getOffenceId())
-                .withVerdictDate(originalVerdict.getVerdictDate())
-                .withLesserOrAlternativeOffence(originalVerdict.getLesserOrAlternativeOffence())
-                .withOriginatingHearingId(originalVerdict.getOriginatingHearingId())
-                .build()));
+        if(nonNull(originalVerdict.getIsDeleted()) && originalVerdict.getIsDeleted()) {
+            offence.setVerdict(null);
+        } else {
+            final Optional<VerdictType> fullVerdictType = verdictTypes.stream()
+                    .filter(verdictType -> verdictType.getId().equals(originalVerdict.getVerdictType().getId()))
+                    .findFirst();
+            fullVerdictType.ifPresent(verdictType ->
+                    offence.setVerdict(Verdict.verdict()
+                            .withVerdictType(verdictType)
+                            .withJurors(originalVerdict.getJurors())
+                            .withOffenceId(originalVerdict.getOffenceId())
+                            .withVerdictDate(originalVerdict.getVerdictDate())
+                            .withLesserOrAlternativeOffence(originalVerdict.getLesserOrAlternativeOffence())
+                            .withOriginatingHearingId(originalVerdict.getOriginatingHearingId())
+                            .build()));
+        }
     }
 
     /**

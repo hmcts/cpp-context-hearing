@@ -347,6 +347,46 @@ public class UpdateVerdictCommandHandlerTest {
         });
     }
 
+    @Test
+    public void updateVerdict_Clear() throws EventStreamException {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+
+        final UUID caseId = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getId();
+
+        final UUID offenceId = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
+
+        final HearingUpdateVerdictCommand hearingUpdateVerdictCommand =
+                TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate(
+                        hearingId, offenceId, null);
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        setupMockedEventStream(hearingUpdateVerdictCommand.getHearingId(), this.hearingEventStream, hearingAggregate);
+
+        final JsonEnvelope addVerdictCommand = envelopeFrom(
+                metadataWithRandomUUID("hearing.command.update-verdict"),
+                objectToJsonObjectConverter.convert(hearingUpdateVerdictCommand));
+
+        this.hearingCommandHandler.updateVerdict(addVerdictCommand);
+
+        final List<?> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
+
+        final Verdict verdict = hearingUpdateVerdictCommand.getVerdicts().get(0);
+
+        assertThat(asPojo((JsonEnvelope) events.get(0), VerdictUpsert.class), isBean(VerdictUpsert.class)
+                .with(VerdictUpsert::getHearingId, is(hearingUpdateVerdictCommand.getHearingId()))
+                .with(VerdictUpsert::getVerdict, isBean(Verdict.class)
+                        .with(Verdict::getOffenceId, is(verdict.getOffenceId()))
+                        .with(Verdict::getOriginatingHearingId, is(hearingUpdateVerdictCommand.getHearingId()))
+                        .with(Verdict::getVerdictDate, is(verdict.getVerdictDate()))
+                        ));
+    }
+
     @SuppressWarnings("unchecked")
     private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate, Consumer<T> consumer) {
         consumer.accept(aggregate);

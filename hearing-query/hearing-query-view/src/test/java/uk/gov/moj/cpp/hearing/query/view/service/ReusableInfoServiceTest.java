@@ -12,6 +12,7 @@ import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIX
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.INT;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.TXT;
 
+
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.Defendant;

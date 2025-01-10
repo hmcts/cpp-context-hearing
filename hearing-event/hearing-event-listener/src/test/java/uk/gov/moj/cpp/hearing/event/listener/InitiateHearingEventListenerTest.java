@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.event.listener;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -22,7 +23,11 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Jurors;
+import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.Verdict;
+import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -35,10 +40,13 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.mapping.CourtCentreJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.VerdictJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DelegatedPowers;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
@@ -69,6 +77,7 @@ import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,6 +105,9 @@ public class InitiateHearingEventListenerTest {
 
     @Mock
     private PleaJPAMapper pleaJPAMapper;
+
+    @Mock
+    private VerdictJPAMapper verdictJPAMapper;
 
     @Mock
     private ProsecutionCaseRepository prosecutionCaseRepository;
@@ -292,6 +304,101 @@ public class InitiateHearingEventListenerTest {
         assertThat(prosecutionCase.getDefendants().get(0).getOffences().size(), is(1));
         assertThat(prosecutionCase.getDefendants().get(0).getOffences().get(0).getId(), is(offenceId));
 
+    }
+
+    @Test
+    public void testHearingInheritedClearVerdictData() {
+
+        final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
+                .withUserId(randomUUID())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .build();
+        final uk.gov.justice.core.courts.Verdict verdictPojo = uk.gov.justice.core.courts.Verdict.verdict()
+                .withOffenceId(randomUUID())
+                .withOriginatingHearingId(randomUUID())
+                .withVerdictDate(PAST_LOCAL_DATE.next())
+                .build();
+
+        final InheritedVerdictAdded event = new InheritedVerdictAdded()
+                .setHearingId(randomUUID())
+                .setVerdict(verdictPojo);
+
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(event.getVerdict().getOffenceId(), event.getHearingId());
+
+        final Offence offence = new Offence();
+        offence.setId(snapshotKey);
+        final LocalDate convictionDate = LocalDate.now();
+        offence.setConvictionDate(convictionDate);
+        when(offenceRepository.findBy(snapshotKey)).thenReturn(offence);
+
+        final DelegatedPowers delegatedPowers = new DelegatedPowers();
+        delegatedPowers.setDelegatedPowersUserId(delegatedPowersPojo.getUserId());
+        delegatedPowers.setDelegatedPowersLastName(delegatedPowersPojo.getLastName());
+        delegatedPowers.setDelegatedPowersFirstName(delegatedPowersPojo.getFirstName());
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Verdict verdict = new uk.gov.moj.cpp.hearing.persist.entity.ha.Verdict();
+        verdict.setOriginatingHearingId(verdictPojo.getOriginatingHearingId());
+        verdict.setVerdictDate(verdictPojo.getVerdictDate());
+
+        initiateHearingEventListener.hearingInitiatedVerdictData(envelopeFrom(metadataWithRandomUUID("hearing.events.inherited-verdict-added"),
+                objectToJsonObjectConverter.convert(event)));
+
+        verify(this.offenceRepository).save(offence);
+
+        assertThat(offence, isBean(Offence.class)
+                .with(Offence::getId, is(snapshotKey))
+                .with(Offence::getVerdict, is(nullValue()))
+        );
+    }
+
+    @Test
+    public void testHearingInheritedVerdictData() {
+
+        final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
+                .withUserId(randomUUID())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .build();
+        final uk.gov.justice.core.courts.Verdict verdictPojo = Verdict.verdict()
+                .withOffenceId(randomUUID())
+                .withOriginatingHearingId(randomUUID())
+                .withVerdictDate(PAST_LOCAL_DATE.next())
+                .withVerdictType(VerdictType.verdictType().withId(randomUUID()).withCategory("category").withCategoryType("categoryType").build())
+                .build();
+
+        final InheritedVerdictAdded event = new InheritedVerdictAdded()
+                .setHearingId(randomUUID())
+                .setVerdict(verdictPojo);
+
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(event.getVerdict().getOffenceId(), event.getHearingId());
+
+        final Offence offence = new Offence();
+        offence.setId(snapshotKey);
+        final LocalDate convictionDate = LocalDate.now();
+        offence.setConvictionDate(convictionDate);
+        when(offenceRepository.findBy(snapshotKey)).thenReturn(offence);
+
+        final DelegatedPowers delegatedPowers = new DelegatedPowers();
+        delegatedPowers.setDelegatedPowersUserId(delegatedPowersPojo.getUserId());
+        delegatedPowers.setDelegatedPowersLastName(delegatedPowersPojo.getLastName());
+        delegatedPowers.setDelegatedPowersFirstName(delegatedPowersPojo.getFirstName());
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Verdict verdict = new uk.gov.moj.cpp.hearing.persist.entity.ha.Verdict();
+        verdict.setOriginatingHearingId(verdictPojo.getOriginatingHearingId());
+        verdict.setVerdictDate(verdictPojo.getVerdictDate());
+
+        when(verdictJPAMapper.toJPA(Mockito.any())).thenReturn(verdict);
+
+        initiateHearingEventListener.hearingInitiatedVerdictData(envelopeFrom(metadataWithRandomUUID("hearing.events.inherited-verdict-added"),
+                objectToJsonObjectConverter.convert(event)));
+
+        verify(this.offenceRepository).save(offence);
+
+        assertThat(offence, isBean(Offence.class)
+                .with(Offence::getId, is(snapshotKey))
+                .with(Offence::getVerdict, is(notNullValue()))
+        );
     }
 
     @Test

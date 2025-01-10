@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -65,7 +66,7 @@ public class PleaUpdateEventListener {
         LOGGER.debug("hearing.hearing-offence-plea-updated event received for hearingId {} with offenceID {}", event.getHearingId(), event.getPleaModel().getOffenceId());
 
         if(event.getPleaModel().getApplicationId() != null){
-            courtApplicationPleaUpdated(event.getHearingId(), event.getPleaModel().getPlea());
+            courtApplicationPleaUpdated(event.getHearingId(), event.getPleaModel());
         }else {
             final UUID offenceId = event.getPleaModel().getOffenceId();
             final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(offenceId, event.getHearingId()));
@@ -127,22 +128,26 @@ public class PleaUpdateEventListener {
         hearingRepository.save(hearingEntity);
     }
 
-    private void courtApplicationPleaUpdated(final UUID hearingId, Plea plea) {
+    private void courtApplicationPleaUpdated(final UUID hearingId, PleaModel pleaModel) {
         final Hearing hearingEntity = hearingRepository.findBy(hearingId);
         final uk.gov.justice.core.courts.Hearing hearing = hearingJPAMapper.fromJPA(hearingEntity);
 
         final Optional<CourtApplication> courtApplication = hearing.getCourtApplications().stream()
-                .filter( ca -> ca.getId().equals(plea.getApplicationId()))
+                .filter( ca -> ca.getId().equals(pleaModel.getApplicationId()))
                 .findFirst();
 
         if(courtApplication.isPresent()) {
-            courtApplication.get().setPlea(plea);
+            if(nonNull(pleaModel.getPlea())) {
+                courtApplication.get().setPlea(pleaModel.getPlea());
+            } else {
+                courtApplication.get().setPlea(null);
+            }
             final String updatedCourtApplications = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), courtApplication.get());
             hearingEntity.setCourtApplicationsJson(updatedCourtApplications);
             hearingRepository.save(hearingEntity);
         }else{
             if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("hearing.hearing-court-application-plea-updated event application not found {}", plea.getApplicationId());
+                LOGGER.debug("hearing.hearing-court-application-plea-updated event application not found {}", pleaModel.getPlea().getApplicationId());
             }
         }
     }

@@ -66,10 +66,12 @@ public class VerdictUpdateEventListener {
                     .orElse(null);
 
             if(nonNull(offence)){
-                final Verdict verdict = verdictJPAMapper.toJPA(verdictPojo);
-
-                offence.setVerdict(verdict);
-
+                if(nonNull(verdictUpdated.getVerdict().getIsDeleted()) && verdictUpdated.getVerdict().getIsDeleted()) {
+                    offence.setVerdict(null);
+                } else{
+                    final Verdict verdict = verdictJPAMapper.toJPA(verdictPojo);
+                    offence.setVerdict(verdict);
+                }
                 hearingRepository.save(hearing);
             }else{
                 final Hearing hearingEntity = hearingRepository.findBy(verdictUpdated.getHearingId());
@@ -93,7 +95,11 @@ public class VerdictUpdateEventListener {
                 .findFirst();
 
         if(courtApplication.isPresent()) {
-            courtApplication.get().setVerdict(verdict);
+            if(nonNull(verdict.getIsDeleted()) && verdict.getIsDeleted()) {
+                courtApplication.get().setVerdict(null);
+            } else {
+                courtApplication.get().setVerdict(verdict);
+            }
 
             final String updatedCourtApplications = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), courtApplication.get());
             hearingEntity.setCourtApplicationsJson(updatedCourtApplications);

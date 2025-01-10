@@ -39,6 +39,7 @@ import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.ReferralReason;
 import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.Verdict;
+import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantReferralReason;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
@@ -400,7 +401,8 @@ public class HearingJPAMapperTest {
         final Verdict verdict =  Verdict.verdict()
                 .withApplicationId(courtAppId)
                 .withOffenceId(offenceId)
-                .withVerdictDate(verdictDate).build();
+                .withVerdictDate(verdictDate)
+                .withVerdictType(VerdictType.verdictType().withId(randomUUID()).withCategoryType("test").withCategory("testCategory").build()).build();
 
         final String strResult = hearingJPAMapper.updateVerdictOnOffencesInCourtApplication("",  verdict );
 
@@ -420,6 +422,64 @@ public class HearingJPAMapperTest {
         assertThat(applicationList.get(1).getCourtApplicationCases().get(0).getIsSJP(), is(courtApplications.get(1).getCourtApplicationCases().get(0).getIsSJP()));
         assertThat(applicationList.get(1).getCourtApplicationCases().get(0).getOffences().get(0).getId(), is(courtApplications.get(1).getCourtApplicationCases().get(0).getOffences().get(0).getId()));
         assertThat(applicationList.get(1).getCourtApplicationCases().get(0).getOffences().get(0).getVerdict(), nullValue());
+    }
+
+    @Test
+    public void ShouldUpdateClearVerdictForOffenceUnderCourtApplicationCase(){
+        final UUID courtAppId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final LocalDate verdictDate = LocalDate.now();
+        List<CourtApplication> courtApplications = new ArrayList<>();
+        courtApplications.add(CourtApplication.courtApplication()
+                .withId(courtAppId)
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withIsSJP(false)
+                        .withCaseStatus("ACTIVE")
+                        .withOffences(Arrays.asList(uk.gov.justice.core.courts.Offence.offence()
+                                .withId(offenceId).build(), uk.gov.justice.core.courts.Offence.offence()
+                                .withId(randomUUID()).build()))
+                        .build()))
+                .build());
+        courtApplications.add(CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withIsSJP(false)
+                        .withCaseStatus("ACTIVE")
+                        .withOffences(singletonList(uk.gov.justice.core.courts.Offence.offence()
+                                .withId(offenceId1).build()))
+                        .build()))
+                .build());
+
+        when(courtApplicationsSerializer.courtApplications(any(String.class))).thenReturn(courtApplications);
+        when(courtApplicationsSerializer.json(any())).thenReturn("EFG");
+        final Verdict verdict =  Verdict.verdict()
+                .withApplicationId(courtAppId)
+                .withOffenceId(offenceId)
+                .withVerdictDate(verdictDate)
+                .withVerdictType(VerdictType.verdictType().withId(randomUUID()).withCategory("category").withCategoryType("category type").build())
+                .withIsDeleted(true)
+                .build();
+
+        final String strResult = hearingJPAMapper.updateVerdictOnOffencesInCourtApplication("",  verdict );
+
+        verify(courtApplicationsSerializer, times(1)).json(courtApplicationCaptor.capture());
+        List<CourtApplication> applicationList = courtApplicationCaptor.getValue();
+
+        assertThat(strResult, is("EFG"));
+        assertThat(applicationList.get(0).getId(), is(courtApplications.get(0).getId()));
+        assertThat(applicationList.get(0).getCourtApplicationCases().get(0).getIsSJP(), is(courtApplications.get(0).getCourtApplicationCases().get(0).getIsSJP()));
+        assertThat(applicationList.get(0).getCourtApplicationCases().get(0).getOffences().get(0).getId(), is(courtApplications.get(0).getCourtApplicationCases().get(0).getOffences().get(0).getId()));
+        assertThat(applicationList.get(0).getCourtApplicationCases().get(0).getOffences().get(0).getVerdict(), nullValue());
+
+        assertThat(applicationList.get(0).getCourtApplicationCases().get(0).getOffences().get(1).getId(), is(courtApplications.get(0).getCourtApplicationCases().get(0).getOffences().get(1).getId()));
+        assertThat(applicationList.get(0).getCourtApplicationCases().get(0).getOffences().get(1).getVerdict(), nullValue());
+
+        assertThat(applicationList.get(1).getId(), is(courtApplications.get(1).getId()));
+        assertThat(applicationList.get(1).getCourtApplicationCases().get(0).getIsSJP(), is(courtApplications.get(1).getCourtApplicationCases().get(0).getIsSJP()));
+        assertThat(applicationList.get(1).getCourtApplicationCases().get(0).getOffences().get(0).getId(), is(courtApplications.get(1).getCourtApplicationCases().get(0).getOffences().get(0).getId()));
+        assertThat(applicationList.get(1).getCourtApplicationCases().get(0).getOffences().get(0).getVerdict(), nullValue());
+
     }
 
     @Test
@@ -456,7 +516,8 @@ public class HearingJPAMapperTest {
         final Verdict verdict =  Verdict.verdict()
                 .withApplicationId(courtAppId)
                 .withOffenceId(offenceId)
-                .withVerdictDate(verdictDate).build();
+                .withVerdictDate(verdictDate)
+                .withVerdictType(VerdictType.verdictType().withId(randomUUID()).withCategoryType("test").withCategory("testCategory").build()).build();
 
         final String strResult = hearingJPAMapper.updateVerdictOnOffencesInCourtApplication("",  verdict );
 

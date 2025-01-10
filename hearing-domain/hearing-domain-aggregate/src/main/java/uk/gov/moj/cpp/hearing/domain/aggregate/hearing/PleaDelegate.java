@@ -44,6 +44,8 @@ public class PleaDelegate implements Serializable {
 
     public void handlePleaUpsert(final PleaUpsert pleaUpsert) {
         final UUID offenceId = pleaUpsert.getPleaModel().getOffenceId();
+        final UUID applicationId = pleaUpsert.getPleaModel().getApplicationId();
+
         if (nonNull(pleaUpsert.getPleaModel().getPlea())) {
             this.momento.getPleas().put(offenceId, pleaUpsert.getPleaModel().getPlea());
         }else{
@@ -53,6 +55,12 @@ public class PleaDelegate implements Serializable {
             this.momento.getIndicatedPlea().put(offenceId, pleaUpsert.getPleaModel().getIndicatedPlea());
         }else{
             this.momento.getIndicatedPlea().remove(offenceId);
+        }
+
+        if (nonNull(applicationId) && nonNull(pleaUpsert.getPleaModel().getPlea())) {
+            this.momento.getPleas().put(applicationId, pleaUpsert.getPleaModel().getPlea());
+        }else{
+            this.momento.getPleas().remove(applicationId);
         }
 
         if (nonNull(pleaUpsert.getPleaModel().getAllocationDecision())) {
@@ -80,7 +88,14 @@ public class PleaDelegate implements Serializable {
                 .map(CourtOrderOffence::getOffence)
                 .filter(o -> o.getId().equals(offenceId))
                 .forEach(this::setOffence);
+
+        ofNullable(this.momento.getHearing().getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
+                .filter(app -> app.getId().equals(applicationId))
+                .forEach(this::setApplicationPlea);
+
     }
+
+
 
     public Stream<Object> inheritPlea(final UUID hearingId, final Plea plea) {
         return Stream.of(InheritedPlea.inheritedPlea()
@@ -224,5 +239,9 @@ public class PleaDelegate implements Serializable {
         offence.setPlea(this.momento.getPleas().get(offence.getId()));
         offence.setIndicatedPlea(this.momento.getIndicatedPlea().get(offence.getId()));
         offence.setAllocationDecision(this.momento.getAllocationDecision().get(offence.getId()));
+    }
+
+    private void setApplicationPlea(final CourtApplication courtApplication) {
+        courtApplication.setPlea(this.momento.getPleas().get(courtApplication.getId()));
     }
 }
