@@ -201,6 +201,23 @@ public class PleaIT extends AbstractIT {
                                                 .with(Offence::getConvictionDate, is(nullValue()))
                                         )))))))
         );
+
+        getUpdatePleaCommandHelper(hearingOne, null, false, null, offenceId, true);
+
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getCourtApplications, first(isBean(CourtApplication.class)
+                                .with(CourtApplication::getCourtApplicationCases, first(isBean(CourtApplicationCase.class)
+                                        .with(CourtApplicationCase::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(offenceId))
+                                                .with(Offence::getPlea, is(nullValue()))
+                                                .with(Offence::getIndicatedPlea, is(nullValue()))
+                                                .with(Offence::getConvictionDate, is(nullValue()))
+                                        )))))))
+        );
+
+
     }
 
     @Test

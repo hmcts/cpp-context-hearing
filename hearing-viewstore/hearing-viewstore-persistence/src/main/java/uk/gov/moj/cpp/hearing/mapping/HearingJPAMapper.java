@@ -24,6 +24,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -303,12 +304,11 @@ public class HearingJPAMapper {
 
     public String updatePleaOnOffencesInCourtApplication(final String courtApplicationsJson, final PleaModel pleaModel) {
         final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
-        final CourtApplication courtApplication = pleaModel.getPlea() != null ? getCourtApplication(courtApplications, pleaModel.getPlea().getOffenceId()) :
-                getCourtApplication(courtApplications, pleaModel.getIndicatedPlea().getOffenceId());
+        final CourtApplication courtApplication =getCourtApplication(courtApplications, pleaModel.getOffenceId());
         final int index = courtApplications.indexOf(courtApplication);
 
         final CourtApplication updatedCourtApplication = CourtApplication.courtApplication().withValuesFrom(courtApplication)
-                                .withCourtApplicationCases(courtApplication.getCourtApplicationCases() == null ? null : courtApplication.getCourtApplicationCases().stream()
+                                .withCourtApplicationCases(ofNullable(courtApplication.getCourtApplicationCases()).stream().flatMap(Collection::stream)
                                         .map(applicationCase -> CourtApplicationCase.courtApplicationCase().withValuesFrom(applicationCase)
                                                 .withOffences(ofNullable(applicationCase.getOffences()).orElse(emptyList()).stream()
                                                         .map(courtApplicationOffence -> getCourtApplicationOffenceWithPlea(pleaModel, courtApplicationOffence))
@@ -326,31 +326,29 @@ public class HearingJPAMapper {
     }
 
     private CourtOrderOffence getCourtOrderOffenceWithPlea(final PleaModel pleaModel, final CourtOrderOffence o) {
-        if(pleaModel.getPlea()!=null){
-            return !o.getOffence().getId().equals(pleaModel.getPlea().getOffenceId()) ? o : CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
+        if(o.getOffence().getId().equals(pleaModel.getOffenceId())){
+            return  CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
                     .withOffence(Offence.offence().withValuesFrom(o.getOffence())
                             .withPlea(pleaModel.getPlea())
+                            .withIndicatedPlea(pleaModel.getIndicatedPlea())
+                            .withAllocationDecision(pleaModel.getAllocationDecision())
                             .build())
                     .build();
+        } else{
+            return o;
         }
-        return !o.getOffence().getId().equals(pleaModel.getIndicatedPlea().getOffenceId()) ? o : CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
-                .withOffence(Offence.offence().withValuesFrom(o.getOffence())
-                        .withIndicatedPlea(pleaModel.getIndicatedPlea())
-                        .build())
-                .build();
     }
 
     private Offence getCourtApplicationOffenceWithPlea(final PleaModel pleaModel, final Offence offence) {
-        if (pleaModel.getPlea() != null) {
-            return !offence.getId().equals(pleaModel.getPlea().getOffenceId()) ? offence :
-                    Offence.offence().withValuesFrom(offence)
-                            .withPlea(pleaModel.getPlea())
-                            .build();
+        if(offence.getId().equals(pleaModel.getOffenceId())){
+            return Offence.offence().withValuesFrom(offence)
+                    .withPlea(pleaModel.getPlea())
+                    .withIndicatedPlea(pleaModel.getIndicatedPlea())
+                    .withAllocationDecision(pleaModel.getAllocationDecision())
+                    .build();
+        } else{
+            return offence;
         }
-        return !offence.getId().equals(pleaModel.getIndicatedPlea().getOffenceId()) ? offence :
-                Offence.offence().withValuesFrom(offence)
-                        .withIndicatedPlea(pleaModel.getIndicatedPlea())
-                        .build();
     }
 
     public String updateVerdictOnOffencesInCourtApplication(final String courtApplicationsJson, final Verdict verdict) {
