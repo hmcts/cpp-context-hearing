@@ -8,6 +8,9 @@
     },
     "overwriteWithResults": {
       "type": "boolean"
+    },
+    "reason": {
+      "type": "string"
     }
   },
   "required": [

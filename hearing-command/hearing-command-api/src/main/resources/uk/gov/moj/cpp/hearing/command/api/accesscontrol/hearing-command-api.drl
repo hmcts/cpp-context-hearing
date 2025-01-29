@@ -524,6 +524,15 @@ rule "Command - API - Action - hearing.mark-as-duplicate-v2"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.mark-as-duplicate-with-reason"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.mark-as-duplicate-with-reason");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "System Users", "Court Administrators"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Command - API - Action - hearing.mark-as-duplicate"
   when
     $outcome: Outcome();

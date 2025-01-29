@@ -552,7 +552,7 @@ public class HearingDelegateTest {
         final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
         hearingDelegate.handleHearingInitiated(new HearingInitiated(hearing.getHearing()));
 
-        final List<Object> eventStream = hearingDelegate.markAsDuplicate(hearingId).collect(toList());
+        final List<Object> eventStream = hearingDelegate.markAsDuplicate(hearingId, "Some reason").collect(toList());
 
         assertThat(eventStream.size(), is(1));
 

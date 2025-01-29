@@ -63,7 +63,7 @@ public class HearingCommandApiTest {
             "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel", "addInterpreterIntermediary",
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
             "computeOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant", "cancelAmendments",
-            "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing","markAsDuplicateHearingV2", "saveMultipleDraftResult", "updateResultLineSharedDates", "reusableInfo", "hearing.youth-court-defendants",
+            "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing","markAsDuplicateHearingV2", "markAsDuplicateHearingWithReason", "saveMultipleDraftResult", "updateResultLineSharedDates", "reusableInfo", "hearing.youth-court-defendants",
             "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "addWitnessToHearing","saveDraftResultsForHearingDay", "removeOffences", "saveDraftResultV2", "deleteDraftResultV2", "amendHearing", "unlockHearing", "replicateHearingResults");
 
     private static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
@@ -556,6 +556,14 @@ public class HearingCommandApiTest {
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.mark-as-duplicate");
     }
 
+    @Test
+    public void shouldPassThroughMarkAsDuplicateWithReasonToCommandHandlerWithAllAccess() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.mark-as-duplicate-with-reason");
+
+        hearingCommandApi.markAsDuplicateHearingWithReason(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.mark-as-duplicate");
+    }
     @Test
     public void shouldPassThroughUpdateRelatedHearingToCommandHandler() {
         final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-related-hearing");

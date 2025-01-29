@@ -25,13 +25,17 @@ public class HearingMarkedAsDuplicate implements Serializable {
 
     private UUID courtCentreId;
 
+    private String reason;
+
     @JsonCreator
-    public HearingMarkedAsDuplicate(@JsonProperty("prosecutionCaseIds") final List<UUID> prosecutionCaseIds, @JsonProperty("defendantIds") final List<UUID> defendantIds, @JsonProperty("offenceIds") final List<UUID> offenceIds, @JsonProperty("hearingId") final UUID hearingId, @JsonProperty("courtCentreId") final UUID courtCentreId) {
+    public HearingMarkedAsDuplicate(@JsonProperty("prosecutionCaseIds") final List<UUID> prosecutionCaseIds, @JsonProperty("defendantIds") final List<UUID> defendantIds, @JsonProperty("offenceIds") final List<UUID> offenceIds, @JsonProperty("hearingId") final UUID hearingId, @JsonProperty("courtCentreId") final UUID courtCentreId,
+                                    @JsonProperty("reason") final String reason) {
         this.prosecutionCaseIds = prosecutionCaseIds;
         this.defendantIds = defendantIds;
         this.offenceIds = offenceIds;
         this.hearingId = hearingId;
         this.courtCentreId = courtCentreId;
+        this.reason = reason;
     }
 
     public List<UUID> getProsecutionCaseIds() {
@@ -72,5 +76,13 @@ public class HearingMarkedAsDuplicate implements Serializable {
 
     public void setCourtCentreId(final UUID courtCentreId) {
         this.courtCentreId = courtCentreId;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(final String reason) {
+        this.reason = reason;
     }
 }

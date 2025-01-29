@@ -24,6 +24,7 @@ import javax.inject.Inject;
 @ServiceComponent(COMMAND_API)
 public class HearingCommandApi {
     private static final String DEFENDANT_DETAILS_CHANGED_SHORT_CODE = "DDCH";
+    public static final String HEARING_COMMAND_MARK_AS_DUPLICATE = "hearing.command.mark-as-duplicate";
 
     private final Sender sender;
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -271,7 +272,7 @@ public class HearingCommandApi {
 
     @Handles("hearing.mark-as-duplicate")
     public void markAsDuplicateHearing(final JsonEnvelope envelope) {
-        sendEnvelopeWithName(envelope, "hearing.command.mark-as-duplicate");
+        sendEnvelopeWithName(envelope, HEARING_COMMAND_MARK_AS_DUPLICATE);
     }
 
     /**
@@ -280,7 +281,17 @@ public class HearingCommandApi {
      */
     @Handles("hearing.mark-as-duplicate-v2")
     public void markAsDuplicateHearingV2(final JsonEnvelope envelope) {
-        sendEnvelopeWithName(envelope, "hearing.command.mark-as-duplicate");
+        sendEnvelopeWithName(envelope, HEARING_COMMAND_MARK_AS_DUPLICATE);
+    }
+
+    /**
+     * For the hearing UI similar to 'hearing.mark-as-duplicate-v2'
+     *  but requires a 'reason' in the payload
+     * @param envelope - envelope
+     */
+    @Handles("hearing.mark-as-duplicate-with-reason")
+    public void markAsDuplicateHearingWithReason(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, HEARING_COMMAND_MARK_AS_DUPLICATE);
     }
 
     @Handles("hearing.request-approval")
