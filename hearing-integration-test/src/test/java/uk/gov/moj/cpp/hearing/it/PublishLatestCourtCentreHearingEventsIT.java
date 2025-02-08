@@ -74,17 +74,20 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
         final String filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         final String filePayloadForPubDisplay = getSentXmlForPubDisplay();
 
-        final String expectedDefendantXMLValueForWeb = "<defendants>\n" +
-                "                            <defendant/>\n" +
-                "                        </defendants>";
+        final String expectedDefendantXMLValueForWeb = """
+                <defendants>
+                                            <defendant/>
+                                        </defendants>""";
 
-        final String expectedDefendantXMLValueForPublic = "<defendants>\n" +
-                "                                    <defendant/>\n" +
-                "                                </defendants>";
+        final String expectedDefendantXMLValueForPublic = """
+                <defendants>
+                                                    <defendant/>
+                                                </defendants>""";
 
-        final String expectedPublicNoticeXMLValueForPublic = "<publicnotices>\n" +
-                "                                    <publicnotice>Yes</publicnotice>\n" +
-                "                                </publicnotices>";
+        final String expectedPublicNoticeXMLValueForPublic = """
+                <publicnotices>
+                                                    <publicnotice>Yes</publicnotice>
+                                                </publicnotices>""";
 
         assertThat(filePayload, containsString(E20903_PCO_TYPE));
         assertThat(filePayload, containsString(expectedDefendantXMLValueForWeb));

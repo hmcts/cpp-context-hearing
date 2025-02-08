@@ -133,7 +133,7 @@ public class Utilities {
 
             } while (timeout > (System.currentTimeMillis() - startTime));
 
-            fail("Expected '" + eventType + "' Retries " + numberOfRetries + "  message to emit on the public.event topic: " + description.toString());
+            fail("Expected '" + eventType + "' Retries " + numberOfRetries + "  message to emit on the public.event topic: " + description);
             return null;
         }
 

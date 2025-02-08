@@ -35,7 +35,6 @@ import java.io.StringReader;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
@@ -161,8 +160,7 @@ public class Queries {
         return new BaseMatcher<>() {
             @Override
             public boolean matches(final Object o) {
-                if (o instanceof ResponseData) {
-                    final ResponseData responseData = (ResponseData) o;
+                if (o instanceof final ResponseData responseData) {
                     if (responseData.getPayload() != null) {
                         JsonObject jsonObject = createReader(new StringReader(responseData.getPayload())).readObject();
                         return jsonObjectMatcher.matches(jsonObject);

@@ -6,9 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.Response.Status.OK;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.waitForPutStubToBeReady;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,8 +23,6 @@ public class WebDavStub {
                 .willReturn(aResponse()
                         .withStatus(OK.getStatusCode())
                         .withHeader("CPPID", UUID.randomUUID().toString())));
-
-        waitForPutStubToBeReady("/xhibit-gateway/send-to-xhibit/waitForPutStubToBeReady.xml", APPLICATION_XML, OK);
     }
 
     public static String getSentXmlForPubDisplay() {

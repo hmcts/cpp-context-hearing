@@ -8,22 +8,15 @@ import static java.text.MessageFormat.format;
 import static java.util.UUID.randomUUID;
 import static org.apache.http.HttpStatus.SC_OK;
 import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.waitForStubToBeReady;
-
-import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
 
 import java.util.UUID;
 
 public class ProgressionStub {
 
-    private static final String PROGRESSION_SERVICE_NAME = "progression-service";
-
     private static final String PROGRESSION_PROSECUTION_CASE_QUERY_URL = "/progression-service/query/api/rest/progression/prosecutioncases/{0}";
     private static final String PROGRESSION_PROSECUTION_CASE_MEDIA_TYPE = "application/vnd.progression.query.prosecutioncase+json";
 
     public static void stubGetProgressionProsecutionCases(final UUID caseId) {
-        InternalEndpointMockUtils.stubPingFor(PROGRESSION_SERVICE_NAME);
-
         final String stringUrl = format(PROGRESSION_PROSECUTION_CASE_QUERY_URL, caseId);
         final String payload = getPayload("stub-data/progression.query.prosecutioncase.json");
         stubFor(get(urlPathEqualTo(stringUrl))
@@ -32,7 +25,5 @@ public class ProgressionStub {
                         .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", PROGRESSION_PROSECUTION_CASE_MEDIA_TYPE)
                         .withBody(payload)));
-
-        waitForStubToBeReady(stringUrl, PROGRESSION_PROSECUTION_CASE_MEDIA_TYPE);
     }
 }

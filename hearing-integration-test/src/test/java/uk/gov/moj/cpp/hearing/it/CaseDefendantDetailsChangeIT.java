@@ -28,7 +28,6 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.CaseDefendantDetailsHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
@@ -55,8 +54,6 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
                 with(caseDefendantDetailsChangedCommandTemplate(), template -> {
                             template.getDefendants().get(0).setId(hearingOne.getFirstDefendantForFirstCase().getId());
                             template.getDefendants().get(0).setProsecutionCaseId(hearingOne.getFirstDefendantForFirstCase().getProsecutionCaseId());
-                            ((Consumer<CaseDefendantDetails>) c -> {
-                            }).accept(template);
                         }
                 )));
 

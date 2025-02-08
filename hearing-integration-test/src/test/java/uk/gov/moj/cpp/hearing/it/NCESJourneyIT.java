@@ -122,8 +122,7 @@ public class NCESJourneyIT extends AbstractIT {
     private InitiateHearingCommandHelper getInitiateHearingCommandHelper() {
         testStartTime = ZonedDateTime.now();
         orderedDate = PAST_LOCAL_DATE.next();
-        InitiateHearingCommandHelper hearingCommandHelper = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate(), false, false, true, false, false, false));
-        return hearingCommandHelper;
+        return h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate(), false, false, true, false, false, false));
     }
 
     @Test
@@ -323,7 +322,7 @@ public class NCESJourneyIT extends AbstractIT {
                 .filter(rd -> !rd.getMandatory())
                 .map(NowResultDefinitionRequirement::getId).findFirst().orElseThrow(() -> new RuntimeException("invalid test data"));
         final UUID secondNowPrimaryResultDefinitionId = allNows.it().getNows().get(1).getResultDefinitions().stream()
-                .filter(rd -> rd.getMandatory())
+                .filter(NowResultDefinitionRequirement::getMandatory)
                 .map(NowResultDefinitionRequirement::getId).findFirst().orElseThrow(() -> new RuntimeException("invalid test data"));
 
         //need to get out prompt label here or put in to create draft label

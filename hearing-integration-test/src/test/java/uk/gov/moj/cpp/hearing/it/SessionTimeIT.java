@@ -2,13 +2,11 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static io.restassured.RestAssured.given;
 import static java.util.UUID.randomUUID;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertEquals;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
@@ -53,7 +51,7 @@ public class SessionTimeIT extends AbstractIT {
         final UUID courtRoomId = randomUUID();
         final LocalDate courtSessionDate = LocalDate.of(2020, 12, 12);
         saveSessionTime(courtHouseId, courtRoomId, courtSessionDate, courtAssociateId, courtClerkId, legalAdviserId, jud1, jud2, jud3, jud1Name, jud2Name, jud3Name, chair1, chair2, chair3);
-        final String payload = poll(requestParams(getURL("hearing.query.session-time", courtHouseId, courtRoomId)+"?courtSessionDate="+ courtSessionDate.toString(),
+        final String payload = poll(requestParams(getURL("hearing.query.session-time", courtHouseId, courtRoomId)+"?courtSessionDate="+ courtSessionDate,
                 "application/vnd.hearing.query.session-time+json").withHeader(USER_ID, getLoggedInUser()))
                 .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(
@@ -106,7 +104,7 @@ public class SessionTimeIT extends AbstractIT {
         recordSessionTime1.add("amCourtSession", courtSession);
         updateSessionTimeCommand(recordSessionTime1.build());
 
-        final String payloadAfter1 = poll(requestParams(getURL("hearing.query.session-time", courtHouseId, courtRoomId)+"?courtSessionDate="+ courtSessionDate.toString(),
+        final String payloadAfter1 = poll(requestParams(getURL("hearing.query.session-time", courtHouseId, courtRoomId)+"?courtSessionDate="+ courtSessionDate,
                 "application/vnd.hearing.query.session-time+json").withHeader(USER_ID, getLoggedInUser()))
                 .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(
@@ -145,7 +143,7 @@ public class SessionTimeIT extends AbstractIT {
 
         updateSessionTimeCommand(recordSessionTime2.build());
 
-        final String payloadAfter2 = poll(requestParams(getURL("hearing.query.session-time", courtHouseId, courtRoomId)+"?courtSessionDate="+ courtSessionDate.toString(),
+        final String payloadAfter2 = poll(requestParams(getURL("hearing.query.session-time", courtHouseId, courtRoomId)+"?courtSessionDate="+ courtSessionDate,
                 "application/vnd.hearing.query.session-time+json").withHeader(USER_ID, getLoggedInUser()))
                 .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(

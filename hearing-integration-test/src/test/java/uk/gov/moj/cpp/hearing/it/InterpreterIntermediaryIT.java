@@ -59,7 +59,7 @@ public class InterpreterIntermediaryIT extends AbstractIT {
     }
 
     @Test
-    public void addInterpreterIntermediary_shouldAdd() throws Exception {
+    public void addInterpreterIntermediary_shouldAdd() {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         Attendant attendant = new Attendant(AttendantType.WITNESS, null, STRING.next());
@@ -85,7 +85,7 @@ public class InterpreterIntermediaryIT extends AbstractIT {
     }
 
     @Test
-    public void removeInterpreterIntermediary_shouldRemove() throws Exception {
+    public void removeInterpreterIntermediary_shouldRemove() {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         Attendant attendant = new Attendant(AttendantType.WITNESS, null, STRING.next());
@@ -122,7 +122,7 @@ public class InterpreterIntermediaryIT extends AbstractIT {
     }
 
     @Test
-    public void updateInterpreterIntermediary_shouldUpdate() throws Exception {
+    public void updateInterpreterIntermediary_shouldUpdate() {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         Attendant attendant = new Attendant(AttendantType.WITNESS, null, STRING.next());

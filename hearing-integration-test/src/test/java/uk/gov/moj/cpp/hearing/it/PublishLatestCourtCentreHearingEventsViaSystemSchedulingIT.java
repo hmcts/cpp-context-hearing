@@ -65,7 +65,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     }
 
     @Test
-    public void shouldProduceWebPageOnlyWithLatestEventOfTheDayForTheCourtRoom() throws NoSuchAlgorithmException {
+    public void shouldProduceWebPageOnlyWithLatestEventOfTheDayForTheCourtRoom() {
         createHearingEvent(hearing, randomUUID().toString(), START_HEARING, eventTime.plusHours(1).plusMinutes(rand()).plusSeconds(rand()));
         logEvent(getRequestSpec(), asDefault(), hearing.it(), getHearingEventDefinition(END_HEARING).getId(),
                 false, randomUUID(), eventTime.plusHours(2).plusMinutes(rand()).plusSeconds(rand()), null);
@@ -89,7 +89,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     }
 
     @Test
-    public void shouldRequestToPublishHearingList() throws NoSuchAlgorithmException {
+    public void shouldRequestToPublishHearingList() {
         createHearingEvent(hearing, randomUUID().toString(), START_HEARING, eventTime.plusMinutes(rand()).plusSeconds(rand()));
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, eventTime.toLocalDate());

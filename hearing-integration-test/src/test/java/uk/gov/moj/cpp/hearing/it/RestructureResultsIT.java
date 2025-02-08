@@ -27,6 +27,7 @@ import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
 
@@ -147,14 +148,14 @@ public class RestructureResultsIT extends AbstractIT {
                 .getResultLines()
                 .stream()
                 .filter(rl -> null == rl.getParentResultLineIds())
-                .map(rl -> rl.getDefendantId())
+                .map(SharedResultsCommandResultLine::getDefendantId)
                 .findFirst();
 
         final Optional<UUID> offenceId = shareResultsCommand
                 .getResultLines()
                 .stream()
                 .filter(rl -> null == rl.getParentResultLineIds())
-                .map(rl -> rl.getOffenceId())
+                .map(SharedResultsCommandResultLine::getOffenceId)
                 .findFirst();
 
         final InitiateHearingCommand initiateHearingCommandTemplate = standardInitiateHearingTemplate();

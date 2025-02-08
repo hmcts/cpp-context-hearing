@@ -177,8 +177,7 @@ public class DDJIT extends AbstractIT {
             }
         }
 
-        final Hearing hearingTwo = hearing;
-        hearingTwo.setProsecutionCases(prosecutionCases);
+        hearing.setProsecutionCases(prosecutionCases);
 
         final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
 
@@ -207,7 +206,7 @@ public class DDJIT extends AbstractIT {
                                 .withValue(CourtApplication::getId, courtApplication.getId())
                                 .withValue(CourtApplication::getApplicationReference, courtApplication.getApplicationReference())
                         ))
-                        .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(hearingTwo.getProsecutionCases()))
+                        .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(hearing.getProsecutionCases()))
                 )
         );
         stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCases(case1, getLoggedInUser());
@@ -228,7 +227,7 @@ public class DDJIT extends AbstractIT {
                                         .withValue(HearingDay::getSittingDay, hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC")))
                                         .withValue(HearingDay::getListedDurationMinutes, hearingDay.getListedDurationMinutes())
                                         .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
-                                .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearingTwo.getProsecutionCases()))
+                                .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearing.getProsecutionCases()))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasSize(1))
                                 .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
                                         .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
@@ -392,7 +391,7 @@ public class DDJIT extends AbstractIT {
     private Matcher<Iterable<ProsecutionCaseSummaries>> hasProsecutionSummaries(final List<ProsecutionCase> prosecutionCases) {
         return hasItems(
                 prosecutionCases.stream().map(
-                        prosecutionCase -> hasProsecutionCaseSummary(prosecutionCase)
+                        this::hasProsecutionCaseSummary
                 ).toArray(BeanMatcher[]::new)
         );
 

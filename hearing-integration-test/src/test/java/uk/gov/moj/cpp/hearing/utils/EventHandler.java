@@ -1,13 +1,9 @@
 package uk.gov.moj.cpp.hearing.utils;
 
-import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
-import static uk.gov.justice.services.messaging.Envelope.envelopeFrom;
 
-import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
-import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.messaging.MessageConsumerClient;
 
@@ -15,9 +11,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
 
 import com.google.common.base.Strings;
 
@@ -93,51 +86,10 @@ public class EventHandler {
         return ofNullable(this.eventsByName.get(eventNameWithPrefix(eventName)).poll());
     }
 
-    public <T> Optional<Envelope<T>> popEvent(final Class<T> eventClass) {
-
-        final Event eventAnnotation = eventClass.getAnnotation(Event.class);
-
-        if (isNull(eventAnnotation)) {
-            throw new IllegalArgumentException(String.format("Class %s is not annotated with @Event", eventClass));
-        }
-
-        return ofNullable(this.eventsByName.get(eventAnnotation.value()).poll())
-                .map(jsonEnvelope -> envelopeFrom(jsonEnvelope.metadata(), JsonHelper.fromJsonObject(jsonEnvelope.payloadAsJsonObject(), eventClass)));
-    }
-
     private MessageConsumerClient startConsumer(String eventName) {
         MessageConsumerClient messageConsumer = new MessageConsumerClient();
         messageConsumer.startConsumer(eventName, determineTopic(eventName));
         return messageConsumer;
-    }
-
-    private Optional<UUID> runAndCheckForCorrelationId(final Callable action) {
-        try {
-            return Optional.of((UUID) action.call());
-        } catch (Exception e) {
-            return Optional.empty();
-        }
-    }
-
-    private void receiveAndClose(Map.Entry<String, MessageConsumerClient> entry, UUID correlationId) {
-        try (MessageConsumerClient consumer = entry.getValue()) {
-
-            while (true) {
-                Optional<String> optionalMessage = consumer.retrieveMessage(maxWaitTime);
-                if (!optionalMessage.isPresent()) {
-                    break;
-                }
-
-                JsonEnvelope jsonEnvelope = new DefaultJsonObjectEnvelopeConverter().asEnvelope(optionalMessage.get());
-                Optional<String> eventCorrelationId = jsonEnvelope.metadata().clientCorrelationId();
-                boolean matched = eventCorrelationId.isPresent() && correlationId.equals(UUID.fromString(eventCorrelationId.get()));
-
-                if (matched) {
-                    eventsByName.get(entry.getKey()).add(jsonEnvelope);
-                    break;
-                }
-            }
-        }
     }
 
     private void receiveAndClose(Map.Entry<String, MessageConsumerClient> entry) {

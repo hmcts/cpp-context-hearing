@@ -1301,7 +1301,7 @@ public class InitiateHearingIT extends AbstractIT {
     public Matcher<Iterable<ProsecutionCaseSummaries>> hasProsecutionSummaries(final List<ProsecutionCase> prosecutionCases) {
         return hasItems(
                 prosecutionCases.stream().map(
-                        prosecutionCase -> hasProsecutionCaseSummary(prosecutionCase)
+                        this::hasProsecutionCaseSummary
                 ).toArray(BeanMatcher[]::new)
         );
 
@@ -1322,7 +1322,7 @@ public class InitiateHearingIT extends AbstractIT {
     private Matcher<Iterable<CourtApplicationSummaries>> hasCourtApplicationSummaries(final List<CourtApplication> courtApplications) {
         return hasItems(
                 courtApplications.stream().map(
-                        courtApplication -> hasCourtApplicationSummary(courtApplication)
+                        this::hasCourtApplicationSummary
                 ).toArray(BeanMatcher[]::new)
         );
 
