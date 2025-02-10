@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
 public class HearingCaseNoteIT extends AbstractIT {
 
     @Test
-    public void shouldSaveHearingCaseNote() throws Exception {
+    public void shouldSaveHearingCaseNote() {
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 

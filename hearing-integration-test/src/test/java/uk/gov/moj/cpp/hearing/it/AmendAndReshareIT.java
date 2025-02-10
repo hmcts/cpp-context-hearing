@@ -157,9 +157,9 @@ public class AmendAndReshareIT extends AbstractIT {
         getDraftResultsForHearingDayPollForMatch(initiateHearingCommandHelper.getHearingId(), orderDate.toString(), isBean(TargetListResponse.class)
                 .with(TargetListResponse::getTargets, hasSize(2))
                 .with(targetListResponse ->
-                        targetListResponse.getTargets().stream().map(t -> t.getOffenceId()).collect(Collectors.toList()).containsAll(offenceIdList), is(true))
+                        targetListResponse.getTargets().stream().map(Target::getOffenceId).collect(Collectors.toList()).containsAll(offenceIdList), is(true))
                 .with(targetListResponse ->
-                        targetListResponse.getTargets().stream().map(t -> t.getTargetId()).collect(Collectors.toList()).containsAll(targetIdList), is(true))
+                        targetListResponse.getTargets().stream().map(Target::getTargetId).collect(Collectors.toList()).containsAll(targetIdList), is(true))
                 .with(targetListResponse ->
                         targetListResponse.getTargets().stream().filter(t -> t.getDraftResult().equals(targets.get(0).getDraftResult())).collect(Collectors.toList()), hasSize(2))
                 .with(targetListResponse ->
@@ -201,9 +201,8 @@ public class AmendAndReshareIT extends AbstractIT {
                 .with(PublicHearingDraftResultSaved::getOffenceId, is(target.getOffenceId()));
 
         final String expectedMetaDataContextUser = getLoggedInUser().toString();
-        final String expectedMetaDataName = PUBLIC_HEARING_DRAFT_RESULT_SAVED;
         try (final Utilities.EventListener publicEventResulted = listenFor(PUBLIC_HEARING_DRAFT_RESULT_SAVED)
-                .withFilter(beanMatcher, expectedMetaDataName, expectedMetaDataContextUser)) {
+                .withFilter(beanMatcher, PUBLIC_HEARING_DRAFT_RESULT_SAVED, expectedMetaDataContextUser)) {
 
             makeCommand(getRequestSpec(), "hearing.save-days-draft-result")
                     .ofType("application/vnd.hearing.draft-result+json")

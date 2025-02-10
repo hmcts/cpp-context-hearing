@@ -106,14 +106,13 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
 
     @Test
     public void shouldNotCancelADayOfSingleDayHearing() {
-        final UUID trialTypeId = INEFFECTIVE_TRIAL_TYPE_ID;
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final InitiateHearingCommandHelper initiateHearingCommandHelper = h(initiateHearing(getRequestSpec(), initiateHearingCommand));
         updateDefendantAndChangeVerdict(initiateHearingCommandHelper);
         final Hearing hearing = initiateHearingCommandHelper.getHearing();
         final List<HearingDay> hearingDays = hearing.getHearingDays();
         final HearingDay crackedHearingDay = hearingDays.get(0);
-        final TrialType trialType = TrialType.builder().withTrialTypeId(trialTypeId).build();
+        final TrialType trialType = TrialType.builder().withTrialTypeId(INEFFECTIVE_TRIAL_TYPE_ID).build();
 
         SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
         setTrialType(getRequestSpec(), hearing.getId(), trialType, false);

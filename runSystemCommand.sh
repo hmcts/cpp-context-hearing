@@ -17,7 +17,7 @@
 #
 ##################################################################################################
 
-FRAMEWORK_VERSION=17.100.4
+FRAMEWORK_VERSION=17.101.6
 CONTEXT_NAME="hearing"
 USER_NAME="admin"
 PASSWORD="admin"

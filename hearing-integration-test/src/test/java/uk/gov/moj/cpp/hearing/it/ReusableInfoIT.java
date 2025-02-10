@@ -35,7 +35,7 @@ public class ReusableInfoIT extends AbstractIT{
     final UUID offenceId1 = randomUUID();
 
     @Test
-    public void shouldUpdateReusableInfoForCache() throws Exception {
+    public void shouldUpdateReusableInfoForCache() {
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
@@ -59,8 +59,8 @@ public class ReusableInfoIT extends AbstractIT{
                 .withFilter(isJson(allOf(
                         withJsonPath("$.hearingId", is(hearingId.toString())),
                         withJsonPath("$.promptList", hasSize(4)),
-                        withJsonPath(format("$.promptList[?(@.masterDefendantId == '%s')]", defendantId.toString()), hasSize(2)),
-                        withJsonPath(format("$.promptList[?(@.masterDefendantId == '%s')]", defendantId1.toString()), hasSize(2)),
+                        withJsonPath(format("$.promptList[?(@.masterDefendantId == '%s')]", defendantId), hasSize(2)),
+                        withJsonPath(format("$.promptList[?(@.masterDefendantId == '%s')]", defendantId1), hasSize(2)),
                         withJsonPath("$.resultsList", hasSize(2)))))) {
 
             makeCommand(requestSpec, "hearing.reusable-info")
@@ -74,7 +74,7 @@ public class ReusableInfoIT extends AbstractIT{
     }
 
     @Test
-    public void shouldSaveReusableInfoForCache() throws Exception {
+    public void shouldSaveReusableInfoForCache() {
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
@@ -99,8 +99,8 @@ public class ReusableInfoIT extends AbstractIT{
                .withFilter(isJson(allOf(
                        withJsonPath("$.hearingId", is(hearingId.toString())),
                        withJsonPath("$.promptList", hasSize(4)),
-                       withJsonPath(format("$.promptList[?(@.masterDefendantId == '%s')]", defendantId.toString()), hasSize(2)),
-                       withJsonPath(format("$.promptList[?(@.masterDefendantId == '%s')]", defendantId1.toString()), hasSize(2)),
+                       withJsonPath(format("$.promptList[?(@.masterDefendantId == '%s')]", defendantId), hasSize(2)),
+                       withJsonPath(format("$.promptList[?(@.masterDefendantId == '%s')]", defendantId1), hasSize(2)),
                        withJsonPath("$.resultsList", hasSize(2)))))) {
 
            makeCommand(requestSpec, "hearing.reusable-info")
@@ -115,7 +115,7 @@ public class ReusableInfoIT extends AbstractIT{
 
 
     @Test
-    public void shouldSaveReusableInfoForCacheWithObjects() throws Exception {
+    public void shouldSaveReusableInfoForCacheWithObjects() {
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
@@ -143,8 +143,8 @@ public class ReusableInfoIT extends AbstractIT{
                 .withFilter(isJson(allOf(
                         withJsonPath("$.hearingId", is(hearingId.toString())),
                         withJsonPath("$.promptList", hasSize(4)),
-                        withJsonPath(format("$.promptList[?(@.masterDefendantId == '%s')]", defendantId.toString()), hasSize(2)),
-                        withJsonPath(format("$.promptList[?(@.masterDefendantId == '%s')]", defendantId1.toString()), hasSize(2)))))) {
+                        withJsonPath(format("$.promptList[?(@.masterDefendantId == '%s')]", defendantId), hasSize(2)),
+                        withJsonPath(format("$.promptList[?(@.masterDefendantId == '%s')]", defendantId1), hasSize(2)))))) {
 
             makeCommand(requestSpec, "hearing.reusable-info")
                     .ofType("application/vnd.hearing.reusable-info+json")

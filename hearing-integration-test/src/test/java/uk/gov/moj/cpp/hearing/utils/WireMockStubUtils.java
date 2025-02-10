@@ -9,33 +9,21 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static org.awaitility.Awaitility.waitAtMost;
-import static org.awaitility.Durations.TEN_SECONDS;
 import static java.text.MessageFormat.format;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_OK;
-import static uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils.stubPingFor;
 import static uk.gov.justice.services.common.http.HeaderConstants.ID;
-import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
-import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.justice.services.test.utils.core.rest.ResteasyClientBuilderFactory.clientBuilder;
 import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
-import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.external.domain.referencedata.PIEventMapping;
 import uk.gov.moj.cpp.external.domain.referencedata.PIEventMappingsList;
 
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,12 +32,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,19 +48,10 @@ public class WireMockStubUtils {
     public static final String MATERIAL_UPLOAD_COMMAND =
             "/material-service/command/api/rest/material/material";
     private static final String HOST = System.getProperty("INTEGRATION_HOST_KEY", "localhost");
-    private static final String CONTENT_TYPE_QUERY_GROUPS = "application/vnd.usersgroups.groups+json";
-    private static final String CONTENT_TYPE_QUERY_PROSECTIONCASE = "application/vnd.hearing.prosecution-case-by-hearingid+json";
-
-    private static final String BASE_URI = "http://" + HOST + ":8080";
 
     private final static String QUERY_GET_LOGGED_IN_USER_PERMISSIONS = "/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions";
-    private final static String CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS = "application/vnd.usersgroups.get-logged-in-user-permissions+json";
 
     private static final String QUERY_ROLES_FOR_USER = "/usersgroups-service/query/api/rest/usersgroups/users/{0}/roles";
-    private static final String USERSGROUPS_SERVICE_QUERY_API_REST_USERSGROUPS_USERS = "/usersgroups-service/query/api/rest/usersgroups/users?userIds={0}";
-
-    private static final String CONTENT_TYPE_QUERY_ROLES_FOR_USER = "application/vnd.usersgroups.roles+json";
-    private static final String CONTENT_TYPE_QUERY_LOGGEDIN_USER_ORGANISATION = "application/vnd.usersgroups.get-organisation-details+json";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WireMockStubUtils.class);
 
@@ -94,8 +69,6 @@ public class WireMockStubUtils {
                         .withHeader(ID, randomUUID().toString())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(response)));
-
-        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/8ac63b71-c154-4469-af51-db3528c4d0d3/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
 
@@ -107,8 +80,6 @@ public class WireMockStubUtils {
                         .withHeader(HeaderConstants.ID, randomUUID().toString())
                         .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(response)));
-        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
-
     }
 
     public static void stubUsersAndGroupsGetLoggedInPermissionsWithCases(final UUID case1, final UUID case2, final UUID case3, final UUID userId) {
@@ -123,8 +94,6 @@ public class WireMockStubUtils {
                         .withHeader(HeaderConstants.ID, randomUUID().toString())
                         .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(response)));
-        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
-
     }
 
     public static void stubUsersAndGroupsGetLoggedInPermissionsWithCasesForRecorder(final UUID case1, final UUID case2, final UUID case3, final UUID userId) {
@@ -139,8 +108,6 @@ public class WireMockStubUtils {
                         .withHeader(HeaderConstants.ID, randomUUID().toString())
                         .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(response)));
-        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
-
     }
 
     public static void stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCases(final UUID case1, final UUID userId) {
@@ -153,8 +120,6 @@ public class WireMockStubUtils {
                         .withHeader(HeaderConstants.ID, randomUUID().toString())
                         .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(response)));
-        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
-
     }
 
     public static void stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCasesForRecorder(final UUID case1, final UUID userId) {
@@ -167,8 +132,6 @@ public class WireMockStubUtils {
                         .withHeader(HeaderConstants.ID, randomUUID().toString())
                         .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(response)));
-        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
-
     }
 
     public static void stubUsersAndGroupsUserRoles(final UUID userId) {
@@ -181,8 +144,6 @@ public class WireMockStubUtils {
                 .withBody(response);
         stubFor(get(urlPathEqualTo(url))
                 .willReturn(responseDefBuilder));
-
-        waitForStubToBeReady(url, CONTENT_TYPE_QUERY_ROLES_FOR_USER);
     }
 
     public static void stubUsersAndGroupsUserRolesForDDJ(final UUID userId) {
@@ -195,8 +156,6 @@ public class WireMockStubUtils {
                 .withBody(response);
         stubFor(get(urlPathEqualTo(url))
                 .willReturn(responseDefBuilder));
-
-        waitForStubToBeReady(url, CONTENT_TYPE_QUERY_ROLES_FOR_USER);
     }
 
 
@@ -210,8 +169,6 @@ public class WireMockStubUtils {
                 .withBody(response);
         stubFor(get(urlPathEqualTo(url))
                 .willReturn(responseDefBuilder));
-
-        waitForStubToBeReady(url, CONTENT_TYPE_QUERY_ROLES_FOR_USER);
     }
 
 
@@ -223,8 +180,6 @@ public class WireMockStubUtils {
                         .withHeader(HeaderConstants.ID, randomUUID().toString())
                         .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(response)));
-        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
-
     }
 
     public static void stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForRecorder() {
@@ -235,8 +190,6 @@ public class WireMockStubUtils {
                         .withHeader(HeaderConstants.ID, randomUUID().toString())
                         .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(response)));
-        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
-
     }
 
     public static void setupAsAuthorisedUser(final UUID userId) {
@@ -246,8 +199,6 @@ public class WireMockStubUtils {
                         .withHeader(ID, randomUUID().toString())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(getPayload("stub-data/usersgroups.get-groups-by-user.json"))));
-
-        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
     public static void setupAsSystemUser(final UUID userId) {
@@ -257,8 +208,6 @@ public class WireMockStubUtils {
                         .withHeader(ID, randomUUID().toString())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(getPayload("stub-data/usersgroups.get-systemuser-groups-by-user.json"))));
-
-        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
     public static void setupAsWildcardUserBelongingToAllGroups() {
@@ -268,36 +217,23 @@ public class WireMockStubUtils {
                         .withHeader(ID, randomUUID().toString())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(getPayload("stub-data/usersgroups.get-all-groups-by-user.json"))));
-
-        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", randomUUID()), CONTENT_TYPE_QUERY_GROUPS);
     }
 
     public static void setupAsAuthorizedAndSystemUser(final UUID userId) {
-        stubPingFor("usersgroups-service");
-
         stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId)))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
                         .withHeader(ID, randomUUID().toString())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(getPayload("stub-data/usersgroups.get-system-and-authorized-user-groups-by-user.json"))));
-
-        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
     public static void stubStagingEnforcementOutstandingFines() {
-
-        stubPingFor("stagingenforcement-query-api");
-
         final String urlPath = "/stagingenforcement-service/query/api/rest/stagingenforcement/defendant/outstanding-fines";
         stubFor(get(urlPathEqualTo(urlPath))
                 .willReturn(aResponse().withStatus(SC_OK)
                         .withHeader(HeaderConstants.ID, randomUUID().toString())
                         .withHeader(HttpHeaders.CONTENT_TYPE, "application/vnd.stagingenforcement.defendant.outstanding-fines+json")
                         .withBody(getPayload("stub-data/stagingenforcement.defendant.outstanding-fines.json"))));
-        waitForStubToBeReady(
-                String.format("/stagingenforcement-service/query/api/rest/stagingenforcement/defendant/outstanding-fines"),
-                "application/vnd.stagingenforcement.defendant.outstanding-fines+json");
-
     }
 
     public static void setupAsMagistrateUser(final UUID userId) {
@@ -306,13 +242,9 @@ public class WireMockStubUtils {
                         .withHeader(ID, randomUUID().toString())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(getPayload("stub-data/usersgroups.get-magistrateuser-groups-by-user.json"))));
-
-        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
     public static void stubStagingenforcementCourtRoomsOutstandingFines() {
-        InternalEndpointMockUtils.stubPingFor("stagingenforcement-service");
-
         stubFor(post(urlPathEqualTo("/stagingenforcement-service/command/api/rest/stagingenforcement/court/rooms/outstanding-fines"))
                 .withHeader(CONTENT_TYPE, equalTo("application/vnd.stagingenforcement.court.rooms.outstanding-fines+json"))
                 .willReturn(aResponse().withStatus(SC_ACCEPTED)));
@@ -320,7 +252,6 @@ public class WireMockStubUtils {
     }
 
     public static final void mockMaterialUpload() {
-
         stubFor(post(urlMatching(MATERIAL_UPLOAD_COMMAND))
                 .willReturn(aResponse().withStatus(SC_ACCEPTED)
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
@@ -335,44 +266,6 @@ public class WireMockStubUtils {
                         .withBody("")));
     }
 
-    static void waitForStubToBeReady(final String resource, final String mediaType) {
-        waitForStubToBeReady(resource, mediaType, Status.OK);
-    }
-
-    static void waitForStubToBeReady(final String resource, final String mediaType, final Status expectedStatus) {
-        poll(requestParams(format("{0}/{1}", getBaseUri(), resource), mediaType).build())
-                .until(status().is(expectedStatus));
-    }
-
-    public static void waitForPutStubToBeReady(final String resource, final String contentType, final Response.Status expectedStatus) {
-        waitAtMost(TEN_SECONDS)
-                .until(() -> put(BASE_URI + resource, contentType)
-                        .getStatus() == expectedStatus.getStatusCode());
-    }
-
-    private static Response put(final String url, final String contentType) {
-        return clientBuilder().build()
-                .target(url)
-                .request()
-                .put(entity("", MediaType.valueOf(contentType)));
-    }
-
-    public static void setupProsecutionCaseByHearingId(final UUID hearingId, final UUID hearingEventDefinitionId) {
-
-        Set<UUID> refHearingEventId = stubPIEventMapperCache(); // TBD
-
-        if (refHearingEventId.contains(hearingEventDefinitionId)) { //TBD
-            stubPingFor("hearing-query-api");
-
-            stubFor(get(urlPathEqualTo(format("/query/api/rest/hearing/hearings/{0}/{1}/prosecution-case", hearingId, hearingEventDefinitionId)))
-                    .willReturn(aResponse().withStatus(SC_OK)
-                            .withHeader("Accept", "application/vnd.hearing.prosecution-case-by-hearingid+json")
-                            .withBody(getPayload("stub-data/hearing.get-prosecutioncase-result.json"))));
-
-            waitForStubToBeReady(format("/query/api/rest/hearing/hearings/{0}/{1}/prosecution-case", hearingId, hearingEventDefinitionId), CONTENT_TYPE_QUERY_PROSECTIONCASE);
-        }
-    }
-
     public static void setupNoProsecutionCaseByHearingId(final UUID hearingId, final UUID hearingEventDefinitionId) {
 
         Set<UUID> refHearingEventId = stubPIEventMapperCache(); // TBD
@@ -382,8 +275,6 @@ public class WireMockStubUtils {
             stubFor(get(urlPathEqualTo(format("/query/api/rest/hearing/hearings/{0}/{1}/prosecution-case", hearingId, hearingEventDefinitionId)))
                     .willReturn(aResponse().withStatus(SC_OK)
                             .withHeader("Accept", "application/vnd.hearing.prosecution-case-by-hearingid+json")));
-            waitForStubToBeReady(format("/query/api/rest/hearing/hearings/{0}/{1}/prosecution-case", hearingId, hearingEventDefinitionId), CONTENT_TYPE_QUERY_PROSECTIONCASE);
-
         }
     }
 
@@ -412,9 +303,8 @@ public class WireMockStubUtils {
     public static void stubUsersAndGroupsForNames(final UUID userId) {
         final String response = getPayload("stub-data/usersgroups.users.json");
 
-
         var query = "/usersgroups-service/query/api/rest/usersgroups/users";
-        var mediaType= "application/vnd.usersgroups.search-users+json";
+        var mediaType = "application/vnd.usersgroups.search-users+json";
         stubFor(get(urlPathEqualTo(query))
                 .withQueryParam("userIds", containing(userId.toString()))
                 .withHeader("Accept", equalTo(mediaType))
@@ -422,9 +312,6 @@ public class WireMockStubUtils {
                         .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", mediaType)
                         .withBody(response)));
-        final String url = format(USERSGROUPS_SERVICE_QUERY_API_REST_USERSGROUPS_USERS,  URLEncoder.encode(StringUtils.lowerCase(userId.toString()), Charset.defaultCharset()));
-        waitForStubToBeReady(url, mediaType);
-
     }
 
     public static void stubUserAndOrganisation(final UUID userId, final String response) {
@@ -436,31 +323,22 @@ public class WireMockStubUtils {
                 .withBody(response);
         stubFor(get(urlPathEqualTo(url))
                 .willReturn(responseDefBuilder));
-
-        waitForStubToBeReady(url, "application/vnd.usersgroups.logged-in-user-details+json");
     }
 
     public static void stubGetUserOrganisation(final String organisationId, final String responsePayLoad) {
-
-        stubPingFor("usersgroups-service");
-
         stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/organisations/{0}", organisationId)))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
                         .withHeader(ID, randomUUID().toString())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(responsePayLoad)));
 
-        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/organisations/{0}", organisationId), CONTENT_TYPE_QUERY_LOGGEDIN_USER_ORGANISATION);
-
     }
 
     public static void stubAaagDetails(final String applicationId, final String responsePayLoad) {
-        stubPingFor("progression-service");
-                stubFor(get(urlPathEqualTo(format("/progression-service/query/api/rest/progression/applications/{0}", applicationId)))
+        stubFor(get(urlPathEqualTo(format("/progression-service/query/api/rest/progression/applications/{0}", applicationId)))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
                         .withHeader(ID, randomUUID().toString())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(responsePayLoad)));
-        waitForStubToBeReady(format("/progression-service/query/api/rest/progression/applications/{0}", applicationId), "application/vnd.progression.query.application.aaag+json");
     }
 }

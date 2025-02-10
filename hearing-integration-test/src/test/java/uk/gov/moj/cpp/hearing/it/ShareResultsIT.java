@@ -84,7 +84,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTempl
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.basicShareResultsCommandV2Template;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateDefendantAttendanceCommandTemplates.updateDefendantAttendanceTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdatePleaCommandTemplates.updatePleaTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VerdictCategoryType;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
@@ -141,7 +140,6 @@ import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
-import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.http.HeaderConstants;
@@ -267,13 +265,13 @@ public class ShareResultsIT extends AbstractIT {
         stubOrganisationUnit(hearing.getHearingDays()
                 .stream()
                 .map(HearingDay::getCourtCentreId)
-                .map(uuid -> uuid.toString())
+                .map(UUID::toString)
                 .collect(Collectors.joining()));
 
         hearing.getHearingDays()
                 .stream()
                 .map(HearingDay::getCourtCentreId)
-                .map(uuid -> uuid.toString())
+                .map(UUID::toString)
                 .forEach(ReferenceDataStub::stubOrganisationUnit);
 
         shareResultWithCourtClerk(hearing, targets);
@@ -1290,12 +1288,12 @@ public class ShareResultsIT extends AbstractIT {
         stubOrganisationUnit(hearingOne.getHearing().getHearingDays()
                 .stream()
                 .map(HearingDay::getCourtCentreId)
-                .map(uuid -> uuid.toString())
+                .map(UUID::toString)
                 .collect(Collectors.joining()));
         hearingOne.getHearing().getHearingDays()
                 .stream()
                 .map(HearingDay::getCourtCentreId)
-                .map(uuid -> uuid.toString())
+                .map(UUID::toString)
                 .forEach(ReferenceDataStub::stubOrganisationUnit);
 
         createFirstProsecutionCounsel(hearingOne);
@@ -2768,9 +2766,8 @@ public class ShareResultsIT extends AbstractIT {
 
 
         final String expectedMetaDataContextUser = getLoggedInUser().toString();
-        final String expectedMetaDataName = PUBLIC_HEARING_DRAFT_RESULT_SAVED;
         try (final EventListener publicEventResulted = listenFor(PUBLIC_HEARING_DRAFT_RESULT_SAVED)
-                .withFilter(beanMatcher, expectedMetaDataName, expectedMetaDataContextUser)) {
+                .withFilter(beanMatcher, PUBLIC_HEARING_DRAFT_RESULT_SAVED, expectedMetaDataContextUser)) {
 
             makeCommand(getRequestSpec(), "hearing.save-days-draft-result")
                     .ofType("application/vnd.hearing.draft-result+json")
@@ -2971,13 +2968,13 @@ public class ShareResultsIT extends AbstractIT {
         stubOrganisationUnit(hearingCommandHelper.getHearing().getHearingDays()
                 .stream()
                 .map(HearingDay::getCourtCentreId)
-                .map(uuid -> uuid.toString())
+                .map(UUID::toString)
                 .collect(Collectors.joining()));
 
         hearingCommandHelper.getHearing().getHearingDays()
                 .stream()
                 .map(HearingDay::getCourtCentreId)
-                .map(uuid -> uuid.toString())
+                .map(UUID::toString)
                 .forEach(ReferenceDataStub::stubOrganisationUnit);
 
         final List<SaveDraftResultCommand> saveDraftResultCommandList = saveDraftResultCommandForMultipleOffences(hearingCommandHelper.it(), orderDate, DISMISSED_RESULT_DEF_ID);

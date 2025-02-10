@@ -15,11 +15,8 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
-import static uk.gov.moj.cpp.hearing.it.UseCases.addProsecutionCounsel;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
-import static uk.gov.moj.cpp.hearing.it.UseCases.createFirstProsecutionCounsel;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
-import static uk.gov.moj.cpp.hearing.it.UseCases.removeProsecutionCounsel;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.RECORDED_LABEL_END_HEARING;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.findEventDefinitionWithActionLabel;
@@ -279,27 +276,6 @@ public class ProsecutionCounselIT extends AbstractIT {
                                 withJsonPath("$.hearing.prosecutionCounsels.[0].attendanceDays.[0]", is(secondProsecutionCounsel.getAttendanceDays().get(0).toString())),
                                 withJsonPath("$.hearing.prosecutionCounsels.[0].prosecutionCases.[0]", is(secondProsecutionCounsel.getProsecutionCases().get(0).toString())))));
 
-    }
-
-    private void createSecondProsecutionCounsel(final InitiateHearingCommandHelper hearingOne) {
-        final AddProsecutionCounsel secondProsecutionCounselCommand = UseCases.addProsecutionCounsel(getRequestSpec(), hearingOne.getHearingId(),
-                addProsecutionCounselCommandTemplate(hearingOne.getHearingId())
-        );
-        ProsecutionCounsel secondProsecutionCounsel = secondProsecutionCounselCommand.getProsecutionCounsel();
-        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
-                .until(status().is(OK),
-                        print(),
-                        payload().isJson(allOf(
-                                withJsonPath("$.hearing.prosecutionCounsels", hasSize(1)),
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].status", is(secondProsecutionCounsel.getStatus())),
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].firstName", is(secondProsecutionCounsel.getFirstName())),
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].lastName", is(secondProsecutionCounsel.getLastName())),
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].title", is(secondProsecutionCounsel.getTitle())),
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].middleName", is(secondProsecutionCounsel.getMiddleName())),
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].attendanceDays.[0]", is(secondProsecutionCounsel.getAttendanceDays().get(0).toString())),
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].prosecutionCases.[0]", is(secondProsecutionCounsel.getProsecutionCases().get(0).toString()))
-                        )));
     }
 
     @Test
