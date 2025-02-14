@@ -21,7 +21,12 @@ import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtOrder;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.LegalEntityDefendant;
+import uk.gov.justice.core.courts.MasterDefendant;
+import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.PersonDefendant;
+import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ReportingRestriction;
@@ -115,6 +120,204 @@ public class GetHearingsTransformerTest {
                                                 .withValue(ReportingRestrictions::getJudicialResultId, reportingRestriction.getJudicialResultId())
                                                 .withValue(ReportingRestrictions::getLabel, reportingRestriction.getLabel())
                                                 .withValue(ReportingRestrictions::getOrderedDate, reportingRestriction.getOrderedDate())))))))
+                ))
+        );
+
+
+    }
+
+    @Test
+    public void shouldTransformHearingWhenPersonDetailsInMasterDefendant() {
+        final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
+        final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
+        courtApplication.setParentApplicationId(UUID.randomUUID());
+        final CourtApplicationParty applicant = courtApplication.getApplicant();
+        final CourtApplicationParty courtApplicationRespondent = courtApplication.getRespondents().get(0);
+        final Person respondentPerson = courtApplicationRespondent.getPersonDetails();
+        final Hearing hearingPersonDetailsInMasterDefendant = Hearing.hearing().withValuesFrom(hearing)
+                .withCourtApplications(asList(CourtApplication.courtApplication()
+                        .withValuesFrom(courtApplication)
+                        .withApplicant(CourtApplicationParty.courtApplicationParty()
+                                .withValuesFrom(applicant)
+                                .withPersonDetails(null)
+                                .withOrganisation(null)
+                                .withProsecutingAuthority(null)
+                                .withMasterDefendant(MasterDefendant.masterDefendant()
+                                        .withLegalEntityDefendant(LegalEntityDefendant.legalEntityDefendant()
+                                                .withOrganisation(applicant.getOrganisation())
+                                                .build())
+                                        .withPersonDefendant(PersonDefendant.personDefendant()
+                                                .withPersonDetails(applicant.getPersonDetails())
+                                                .build())
+                                        .build())
+                                .build())
+                        .withRespondents(asList(CourtApplicationParty.courtApplicationParty()
+                                .withValuesFrom(hearing.getCourtApplications().get(0).getRespondents().get(0))
+                                .withPersonDetails(null)
+                                .withOrganisation(null)
+                                .withMasterDefendant(MasterDefendant.masterDefendant()
+                                        .withMasterDefendantId(randomUUID())
+                                        .withLegalEntityDefendant(LegalEntityDefendant.legalEntityDefendant()
+                                                .withOrganisation(courtApplicationRespondent.getOrganisation())
+                                                .build())
+                                        .withPersonDefendant(PersonDefendant.personDefendant()
+                                                .withPersonDetails(respondentPerson)
+                                                .build())
+                                        .build())
+                                .build()))
+                        .build()))
+                .build();
+
+
+        final HearingSummaries hearingSummary = target.summary(hearingPersonDetailsInMasterDefendant).build();
+
+        assertThat(hearingSummary, isBean(HearingSummaries.class)
+                .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
+                        .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
+                        .with(CourtApplicationSummaries::getApplicant, isBean(Applicant.class)
+                                .withValue(Applicant::getFirstName, applicant.getPersonDetails().getFirstName())
+                                .withValue(Applicant::getMiddleName, applicant.getPersonDetails().getMiddleName())
+                                .withValue(Applicant::getLastName, applicant.getPersonDetails().getLastName())
+                                .withValue(Applicant::getId, applicant.getId())
+                                .withValue(Applicant::getOrganisationName, applicant.getOrganisation().getName())
+                                .withValue(Applicant::getSynonym, applicant.getSynonym())
+                        )
+                        .with(CourtApplicationSummaries::getRespondents, first(isBean(Respondents.class)
+                                .withValue(Respondents::getFirstName, respondentPerson.getFirstName())
+                                .withValue(Respondents::getMiddleName, respondentPerson.getMiddleName())
+                                .withValue(Respondents::getLastName, respondentPerson.getLastName())
+                                .withValue(Respondents::getOrganisationName, courtApplicationRespondent.getOrganisation().getName())
+                                .withValue(Respondents::getFirstName, respondentPerson.getFirstName())
+                                .withValue(Respondents::getMiddleName, respondentPerson.getMiddleName())
+                                .withValue(Respondents::getLastName, respondentPerson.getLastName())
+                                .withValue(Respondents::getOrganisationName, courtApplicationRespondent.getOrganisation().getName())
+                        ))
+                ))
+
+        );
+    }
+
+    @Test
+    public void shouldTransformHearingWhenOrganisationInProsecutionAuthorityName() {
+        final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
+        final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
+        courtApplication.setParentApplicationId(UUID.randomUUID());
+
+        final CourtApplicationParty courtApplicationRespondent = courtApplication.getRespondents().get(0);
+        final Person respondentPerson = courtApplicationRespondent.getPersonDetails();
+        final CourtApplicationParty applicant = courtApplication.getApplicant();
+
+        final CourtApplicationParty respondentParty = hearing.getCourtApplications().get(0).getRespondents().get(0);
+        final Hearing hearingOrganisationInProsecutionAuthority = Hearing.hearing().withValuesFrom(hearing)
+                .withCourtApplications(asList(CourtApplication.courtApplication()
+                        .withValuesFrom(courtApplication)
+                        .withApplicant(CourtApplicationParty.courtApplicationParty()
+                                .withValuesFrom(applicant)
+                                .withOrganisation(null)
+                                .withMasterDefendant(null)
+                                .withProsecutingAuthority(ProsecutingAuthority.prosecutingAuthority()
+                                        .withName(applicant.getOrganisation().getName())
+                                        .withProsecutionAuthorityId(applicant.getProsecutingAuthority().getProsecutionAuthorityId())
+                                        .build())
+                                .build())
+                        .withRespondents(asList(CourtApplicationParty.courtApplicationParty()
+                                .withValuesFrom(respondentParty)
+                                .withOrganisation(null)
+                                .withMasterDefendant(null)
+                                .withProsecutingAuthority(ProsecutingAuthority.prosecutingAuthority()
+                                        .withName(respondentParty.getOrganisation().getName())
+                                        .build())
+                                .build()))
+                        .build()))
+                .build();
+
+        final HearingSummaries hearingSummary = target.summary(hearingOrganisationInProsecutionAuthority).build();
+
+        assertThat(hearingSummary, isBean(HearingSummaries.class)
+                .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
+                        .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
+                        .with(CourtApplicationSummaries::getApplicant, isBean(Applicant.class)
+                                .withValue(Applicant::getFirstName, applicant.getPersonDetails().getFirstName())
+                                .withValue(Applicant::getMiddleName, applicant.getPersonDetails().getMiddleName())
+                                .withValue(Applicant::getLastName, applicant.getPersonDetails().getLastName())
+                                .withValue(Applicant::getId, applicant.getId())
+                                .withValue(Applicant::getOrganisationName, applicant.getOrganisation().getName())
+                                .withValue(Applicant::getSynonym, applicant.getSynonym())
+                        )
+                        .with(CourtApplicationSummaries::getRespondents, first(isBean(Respondents.class)
+                                .withValue(Respondents::getFirstName, respondentPerson.getFirstName())
+                                .withValue(Respondents::getMiddleName, respondentPerson.getMiddleName())
+                                .withValue(Respondents::getLastName, respondentPerson.getLastName())
+                                .withValue(Respondents::getOrganisationName, courtApplicationRespondent.getOrganisation().getName())
+                                .withValue(Respondents::getFirstName, respondentPerson.getFirstName())
+                                .withValue(Respondents::getMiddleName, respondentPerson.getMiddleName())
+                                .withValue(Respondents::getLastName, respondentPerson.getLastName())
+                                .withValue(Respondents::getOrganisationName, respondentParty.getOrganisation().getName())
+                                .withValue(Respondents::getOrganisationCode, respondentParty.getOrganisation().getId())
+                        ))
+                ))
+
+        );
+
+
+    }
+
+    @Test
+    public void shouldTransformHearingWhenOrganisationInRepresentationOrganisation() {
+        final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
+        final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
+        courtApplication.setParentApplicationId(UUID.randomUUID());
+        final CourtApplicationParty courtApplicationParty = courtApplication.getRespondents().get(0);
+        final Person personDetails = courtApplicationParty.getPersonDetails();
+        final CourtApplicationParty courtApplicationRespondent = courtApplication.getRespondents().get(0);
+        final Person respondentPerson = courtApplicationRespondent.getPersonDetails();
+        final Organisation respondentOrganisation = courtApplicationRespondent.getOrganisation();
+        final CourtApplicationParty applicant = courtApplication.getApplicant();
+        final Organisation applicantOrganisation = applicant.getOrganisation();
+
+        final Hearing hearingOrganisationInProsecutionAuthority = Hearing.hearing().withValuesFrom(hearing)
+                .withCourtApplications(asList(CourtApplication.courtApplication()
+                        .withValuesFrom(courtApplication)
+                        .withApplicant(CourtApplicationParty.courtApplicationParty()
+                                .withValuesFrom(applicant)
+                                .withOrganisation(null)
+                                .withMasterDefendant(null)
+                                .withProsecutingAuthority(null)
+                                .withRepresentationOrganisation(applicantOrganisation)
+                                .build())
+                        .withRespondents(asList(CourtApplicationParty.courtApplicationParty()
+                                .withValuesFrom(hearing.getCourtApplications().get(0).getRespondents().get(0))
+                                .withOrganisation(null)
+                                .withMasterDefendant(null)
+                                .withProsecutingAuthority(null)
+                                .withRepresentationOrganisation(respondentOrganisation)
+                                .build()))
+                        .build()))
+                .build();
+
+        final HearingSummaries hearingSummary = target.summary(hearingOrganisationInProsecutionAuthority).build();
+
+        assertThat(hearingSummary, isBean(HearingSummaries.class)
+                .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
+                        .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
+                        .with(CourtApplicationSummaries::getApplicant, isBean(Applicant.class)
+                                .withValue(Applicant::getFirstName, applicant.getPersonDetails().getFirstName())
+                                .withValue(Applicant::getMiddleName, applicant.getPersonDetails().getMiddleName())
+                                .withValue(Applicant::getLastName, applicant.getPersonDetails().getLastName())
+                                .withValue(Applicant::getId, applicant.getId())
+                                .withValue(Applicant::getOrganisationName, applicantOrganisation.getName())
+                                .withValue(Applicant::getSynonym, applicant.getSynonym())
+                        )
+                        .with(CourtApplicationSummaries::getRespondents, first(isBean(Respondents.class)
+                                .withValue(Respondents::getFirstName, personDetails.getFirstName())
+                                .withValue(Respondents::getMiddleName, personDetails.getMiddleName())
+                                .withValue(Respondents::getLastName, personDetails.getLastName())
+                                .withValue(Respondents::getOrganisationName, courtApplicationParty.getOrganisation().getName())
+                                .withValue(Respondents::getFirstName, respondentPerson.getFirstName())
+                                .withValue(Respondents::getMiddleName, respondentPerson.getMiddleName())
+                                .withValue(Respondents::getLastName, respondentPerson.getLastName())
+                                .withValue(Respondents::getOrganisationName, respondentOrganisation.getName())
+                        ))
                 ))
         );
 
