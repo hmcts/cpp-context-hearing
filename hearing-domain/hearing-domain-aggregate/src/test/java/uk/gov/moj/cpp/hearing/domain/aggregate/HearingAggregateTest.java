@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static com.google.common.collect.ImmutableSet.of;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
@@ -82,6 +83,7 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
 import uk.gov.moj.cpp.hearing.command.updateEvent.UpdateHearingEventsCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
+import uk.gov.moj.cpp.hearing.domain.ResultsError;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
@@ -3214,6 +3216,59 @@ public class HearingAggregateTest {
     }
 
     @Test
+    public void shouldRaiseResultsSharedV3EventWhenSharedResultLinesHaveOffencesNotSharedPreviouslyForAHearingDay() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        final LocalDate hearingDay = hearing.getHearingDays().get(0).getSittingDay().toLocalDate();
+        final UUID offence1Id = randomUUID();
+        final Offence offence1 = Offence.offence().withId(offence1Id).build();
+        final UUID offence2Id = randomUUID();
+        final Offence offence2 = Offence.offence().withId(offence2Id).build();
+        ofNullable(hearing.getProsecutionCases().stream()).orElseGet(Stream::empty)
+                .forEach(prosecutionCase -> {
+                    prosecutionCase.getDefendants().forEach(defendant -> {
+                        defendant.getOffences().add(offence1);
+                        defendant.getOffences().add(offence2);
+                    });
+                });
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
+                .withFirstName("Andrew").withLastName("Eldritch")
+                .withUserId(randomUUID()).build();
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), LocalDate.now());
+        final Target targetDraft = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
+        resultLineIn.setIsComplete(true);
+        final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine = getSharedResultsCommandResultLine(resultLineIn, targetDraft);
+
+        final ResultsSharedSuccess resultsSharedSuccess = (ResultsSharedSuccess) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(),
+                newArrayList(sharedResultsCommandResultLine), INITIALISED, null, hearingDay, USER_ID, 1).toList().get(0);
+        assertEquals(hearing.getId(), resultsSharedSuccess.getHearingId());
+
+        final Target targetDraft2 = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn2 = targetDraft2.getResultLines().get(0);
+        resultLineIn.setIsComplete(true);
+        targetDraft2.setOffenceId(offence2Id);
+        targetDraft2.setResultLines(null);
+
+        final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine2 = getSharedResultsCommandResultLine(resultLineIn2, targetDraft2);
+
+        final ResultsSharedSuccess resultsSharedSuccess2 = (ResultsSharedSuccess) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine2), SHARED, null, hearingDay, USER_ID, 2)
+                .toList().get(0);
+        assertEquals(hearing.getId(), resultsSharedSuccess2.getHearingId());
+
+        final ManageResultsFailed manageResultsFailed = (ManageResultsFailed) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine2), SHARED, null, hearingDay, USER_ID, 3)
+                .toList().get(0);
+        assertEquals(hearing.getId(), manageResultsFailed.getHearingId());
+        assertEquals(SHARED, manageResultsFailed.getHearingState());
+        assertEquals(ResultsError.ErrorType.STATE, manageResultsFailed.getResultsError().getType());
+        assertEquals("207", manageResultsFailed.getResultsError().getCode());
+    }
+
+    @Test
     public void shouldRaiseHearingIgnoredForAddOffenceIfNoHearingExist() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = UUID.randomUUID();
@@ -3811,5 +3866,40 @@ public class HearingAggregateTest {
                 .withId(defenceCounselId)
                 .withDefendants((defendantIds))
                 .build();
+    }
+
+    private static SharedResultsCommandResultLineV2 getSharedResultsCommandResultLine(final ResultLine resultLineIn, final Target targetDraft) {
+        return new SharedResultsCommandResultLineV2(
+                "sc1",
+                resultLineIn.getDelegatedPowers(),
+                resultLineIn.getOrderedDate(),
+                resultLineIn.getSharedDate(),
+                resultLineIn.getResultLineId(),
+                targetDraft.getOffenceId(),
+                targetDraft.getDefendantId(),
+                randomUUID(),
+                resultLineIn.getResultDefinitionId(),
+                resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
+                        p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(Collectors.toList()),
+                resultLineIn.getResultLabel(),
+                resultLineIn.getLevel().name(),
+                resultLineIn.getIsModified(),
+                resultLineIn.getIsComplete(),
+                targetDraft.getApplicationId(),
+                randomUUID(),
+                resultLineIn.getAmendmentReasonId(),
+                resultLineIn.getAmendmentReason(),
+                ZonedDateTime.now(),
+                resultLineIn.getFourEyesApproval(),
+                resultLineIn.getApprovedDate(),
+                resultLineIn.getIsDeleted(),
+                null,
+                null,
+                targetDraft.getShadowListed(),
+                targetDraft.getDraftResult(),
+                "log",
+                "A",
+                true
+        );
     }
 }

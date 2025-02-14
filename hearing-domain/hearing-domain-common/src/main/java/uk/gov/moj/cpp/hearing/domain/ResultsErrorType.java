@@ -50,6 +50,12 @@ public enum ResultsErrorType {
         public ResultsError toError(final String description) {
             return new ResultsError(this.getErrorType(), this.getErrorCode(), description);
         }
+    },
+    SHARE_NOT_PERMITTED_ALL_TARGETS_SHARED(ResultsError.ErrorType.STATE, "207") {
+        @Override
+        public ResultsError toError(final String description) {
+            return new ResultsError(this.getErrorType(), this.getErrorCode(), description);
+        }
     };
 
     private final ResultsError.ErrorType errorType;
