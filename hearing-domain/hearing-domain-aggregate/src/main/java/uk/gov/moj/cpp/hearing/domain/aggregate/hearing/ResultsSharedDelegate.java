@@ -524,9 +524,7 @@ public class ResultsSharedDelegate implements Serializable {
         }
         streamBuilder.add(resultsSharedV2Builder.build());
 
-        if (!this.momento.getNextHearingStartDates().isEmpty()) {
-            streamBuilder.add(new EarliestNextHearingDateCleared(hearingId));
-        }
+
 
         final Stream<Object> streams = Stream.concat(enrichHearingV2(resultLines), streamBuilder.build());
         new HearingDaySharedResults().setHasSharedResults(momento.getHearing(), hearingDay);
@@ -593,9 +591,7 @@ public class ResultsSharedDelegate implements Serializable {
 
         isHearingVacatedRequired(hearing, resultsSharedV3, streamBuilder);
 
-        if (!this.momento.getNextHearingStartDates().isEmpty()) {
-            streamBuilder.add(new EarliestNextHearingDateCleared(hearingId));
-        }
+
 
         final Stream<Object> streams = Stream.concat(Stream.empty(), streamBuilder.build());
         new HearingDaySharedResults().setHasSharedResults(momento.getHearing(), hearingDay);

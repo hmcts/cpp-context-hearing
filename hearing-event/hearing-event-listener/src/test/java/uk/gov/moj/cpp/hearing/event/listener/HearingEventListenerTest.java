@@ -14,6 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
@@ -1686,7 +1687,8 @@ public class HearingEventListenerTest {
         final UUID hearingId = randomUUID();
         final UUID userId = randomUUID();
         final Hearing hearingEntity = new Hearing()
-                .setId(hearingId);
+                .setId(hearingId)
+                .setEarliestNextHearingDate(ZonedDateTime.now());
 
         final HearingAmended hearingAmended = new HearingAmended(hearingId, userId, SHARED_AMEND_LOCKED_USER_ERROR);
 
@@ -1702,6 +1704,7 @@ public class HearingEventListenerTest {
                 .with(Hearing::getId, is(hearingId))
                 .with(Hearing::getHearingState, is(hearingAmended.getNewHearingState()))
                 .with(Hearing::getAmendedByUserId, is(hearingAmended.getUserId()))
+                .with(Hearing::getEarliestNextHearingDate, is(notNullValue()))
         );
     }
 
