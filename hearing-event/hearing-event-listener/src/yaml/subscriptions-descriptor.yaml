@@ -291,10 +291,6 @@ subscriptions_descriptor:
         - name: hearing.events.hearing-deleted
           schema_uri: http://justice.gov.uk/hearing/courts/hearing-deleted.json
 
-        # Hearing Deleted BDF
-        - name: hearing.events.hearing-deleted-bdf
-          schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.hearing-deleted-bdf.json
-
         # Existing Hearing Updated
         - name: hearing.events.existing-hearing-updated
           schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.existing-hearing-updated.json

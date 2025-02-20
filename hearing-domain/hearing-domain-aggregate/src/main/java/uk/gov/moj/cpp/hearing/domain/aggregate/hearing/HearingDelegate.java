@@ -32,7 +32,6 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
-import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedBdf;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
@@ -444,10 +443,6 @@ public class HearingDelegate implements Serializable {
         final List<UUID> courtApplicationIds = isNotEmpty(momento.getHearing().getCourtApplications()) ? getCourtApplicationIds(momento.getHearing()) : null;
 
         return Stream.of(new HearingDeleted(prosecutionCaseIds, defendantIds, offenceIds, courtApplicationIds, hearingId));
-    }
-
-    public Stream<Object> deleteHearingBdf(final UUID hearingId) {
-        return Stream.of(new HearingDeletedBdf(hearingId));
     }
 
     public Stream<Object> unAllocateHearing(final UUID hearingId, final List<UUID> offencesToBeRemoved) {

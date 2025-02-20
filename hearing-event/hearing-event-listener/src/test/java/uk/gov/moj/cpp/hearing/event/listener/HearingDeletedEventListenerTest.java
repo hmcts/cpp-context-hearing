@@ -56,32 +56,4 @@ public class HearingDeletedEventListenerTest {
 
         verify(hearingRepository, never()).remove(hearing);
     }
-
-    @Test
-    public void shouldDeleteHearingBdfWhenExistsInViewStore() {
-        final UUID hearingId = randomUUID();
-        final Hearing hearing = new Hearing();
-
-        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
-
-        hearingDeletedEventListener.hearingDeletedBdf(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
-                .add("hearingId", hearingId.toString())
-                .build()));
-
-        verify(hearingRepository).remove(hearing);
-    }
-
-    @Test
-    public void shouldNotDeleteHearingBdfWhenHearingNotExistsInViewStore() {
-        final UUID hearingId = randomUUID();
-        final Hearing hearing = new Hearing();
-
-        when(hearingRepository.findBy(hearingId)).thenReturn(null);
-
-        hearingDeletedEventListener.hearingDeletedBdf(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
-                .add("hearingId", hearingId.toString())
-                .build()));
-
-        verify(hearingRepository, never()).remove(hearing);
-    }
 }

@@ -20,7 +20,6 @@ public class HearingDeletedEventListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingDeletedEventListener.class);
 
     private static final String HEARING_EVENT_HEARING_DELETED = "hearing.events.hearing-deleted";
-    private static final String HEARING_EVENT_HEARING_DELETED_BDF = "hearing.events.hearing-deleted-bdf";
 
     @Inject
     private HearingRepository hearingRepository;
@@ -33,19 +32,6 @@ public class HearingDeletedEventListener {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Received event '{}' hearingId: {}", HEARING_EVENT_HEARING_DELETED, hearingId);
         }
-
-        final Hearing hearing = hearingRepository.findBy(hearingId);
-
-        if (hearing != null) {
-            hearingRepository.remove(hearing);
-        }
-    }
-
-    @Handles(HEARING_EVENT_HEARING_DELETED_BDF)
-    public void hearingDeletedBdf(final JsonEnvelope event) {
-        final UUID hearingId = UUID.fromString(event.payloadAsJsonObject().getString("hearingId"));
-
-        LOGGER.info("Received event '{}' hearingId: {}", HEARING_EVENT_HEARING_DELETED_BDF, hearingId);
 
         final Hearing hearing = hearingRepository.findBy(hearingId);
 

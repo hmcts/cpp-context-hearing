@@ -36,8 +36,6 @@ public class DeleteHearingCommandHandler extends AbstractCommandHandler {
     private static final String HEARING_COMMAND_DELETE_HEARING_FOR_COURT_APPLICATIONS = "hearing.command.delete-hearing-for-court-applications";
     private static final String HEARING_ID = "hearingId";
 
-    private static final String HEARING_COMMAND_DELETE_HEARING_BDF = "hearing.command.delete-hearing-bdf";
-
     @Handles(HEARING_COMMAND_DELETE_HEARING)
     public void handleDeleteHearing(final JsonEnvelope envelope) throws EventStreamException {
 
@@ -47,17 +45,6 @@ public class DeleteHearingCommandHandler extends AbstractCommandHandler {
 
         final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString(HEARING_ID));
         aggregate(HearingAggregate.class, hearingId, envelope, a -> a.deleteHearing(hearingId));
-    }
-
-    @Handles(HEARING_COMMAND_DELETE_HEARING_BDF)
-    public void handleDeleteHearingBdf(final JsonEnvelope envelope) throws EventStreamException {
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("'hearing.command.delete-hearing-bdf' received with payload {}", envelope.toObfuscatedDebugString());
-        }
-
-        final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString(HEARING_ID));
-        aggregate(HearingAggregate.class, hearingId, envelope, a -> a.deleteHearingBdf(hearingId));
     }
 
     @Handles(HEARING_COMMAND_DELETE_HEARING_FOR_PROSECUTION_CASES)

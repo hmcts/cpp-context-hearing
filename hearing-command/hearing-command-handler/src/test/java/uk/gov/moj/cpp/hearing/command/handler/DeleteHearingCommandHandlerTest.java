@@ -37,7 +37,6 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
-import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedBdf;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForCourtApplication;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForOffence;
@@ -72,8 +71,7 @@ public class DeleteHearingCommandHandlerTest {
             HearingDeletedForCourtApplication.class,
             HearingDeletedForDefendant.class,
             HearingDeletedForOffence.class,
-            HearingChangeIgnored.class,
-            HearingDeletedBdf.class);
+            HearingChangeIgnored.class);
 
     @Mock
     private EventSource eventSource;
@@ -274,26 +272,6 @@ public class DeleteHearingCommandHandlerTest {
         assertThat(eventss.size(), is (1));
     }
 
-    @Test
-    public void shouldCreateHearingDeletedBdfEvent() throws EventStreamException {
-        final UUID hearingId = randomUUID();
-
-        final JsonEnvelope envelope = createHearingDeletedBdfCommandEnvelopeForHearing(hearingId);
-        when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingEventStream);
-        final HearingAggregate hearingAggregate = new HearingAggregate();
-        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
-
-        handler.handleDeleteHearingBdf(envelope);
-
-        assertThat(verifyAppendAndGetArgumentFrom(hearingEventStream), streamContaining(
-                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.events.hearing-deleted-bdf"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.hearingId", is(hearingId.toString()))
-                        ))
-                )));
-    }
-
-
     private JsonEnvelope createHearingDeletedCommandEnvelopeForHearing(final UUID hearingId) {
         final JsonObjectBuilder payloadBuilder = createObjectBuilder()
                 .add("hearingId", hearingId.toString());
@@ -341,12 +319,4 @@ public class DeleteHearingCommandHandlerTest {
                 .build());
         return hearingAggregate;
     }
-
-    private JsonEnvelope createHearingDeletedBdfCommandEnvelopeForHearing(final UUID hearingId) {
-        final JsonObjectBuilder payloadBuilder = createObjectBuilder()
-                .add("hearingId", hearingId.toString());
-
-        return envelopeFrom(metadataWithRandomUUID("hearing.command.hearing-deleted-bdf"), payloadBuilder.build());
-    }
-
 }

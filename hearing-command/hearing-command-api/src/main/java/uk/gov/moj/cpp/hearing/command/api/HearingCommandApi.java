@@ -333,10 +333,6 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.add-witness");
     }
 
-    @Handles("hearing.delete-hearing-bdf")
-    public void deleteHearingBdf(final JsonEnvelope envelope) {
-        sendEnvelopeWithName(envelope, "hearing.command.delete-hearing-bdf");
-    }
     //hearing.add-witness
 
     /**
