@@ -405,7 +405,7 @@ public class HearingEventListener {
                 legacyTargets.forEach(legacyTarget -> hearing.getTargets().remove(legacyTarget));
                 hearing.setHasSharedResults(true);
                 hearing.getHearingDays().stream().filter(hd -> hearingDay.equals(hd.getDate())).forEach(hd -> hd.setHasSharedResults(true));
-                LOGGER.info("ResultsShared with targets: {} for hearing: {}", listOfTargets.size(), hearing.getId());
+                LOGGER.error("ResultsShared with targets: {} for hearing: {}", listOfTargets.size(), hearing.getId());
                 listOfTargets.forEach(targetIn -> updateDraftResultV2(hearing, targetIn));
                 hearing.setHearingState(HearingState.SHARED);
                 if(null == hearing.getFirstSharedDate()) {
@@ -665,15 +665,20 @@ public class HearingEventListener {
      * @param targetIn - the target to add match it won't be updated.
      */
     private void updateDraftResultV2(Hearing hearing, Target2 targetIn) {
-        LOGGER.info("targetIn:: targetId:{}, offenceId:{}, hearingDay:{}", targetIn.getTargetId(), targetIn.getOffenceId(), targetIn.getHearingDay());
+        LOGGER.error("targetIn:: targetId:{}, offenceId:{}, hearingDay:{}", targetIn.getTargetId(), targetIn.getOffenceId(), targetIn.getHearingDay());
         final uk.gov.moj.cpp.hearing.persist.entity.ha.Target targetReq = targetJPAMapper.toJPA2(hearing, targetIn);
 
+        if (nonNull(targetReq)) {
+            LOGGER.error("targetReq:: targetId:{}, offenceId:{}, hearingDay:{}", targetReq.getTargetId(), targetReq.getOffenceId(), targetReq.getHearingDay());
+        }
         hearing.getTargets().stream().filter(t -> t.getId().getId().equals(targetIn.getTargetId())).findFirst().ifPresent(t -> t.getResultLines().removeIf(not(ResultLine::getDeleted)));
 
 
         if (hearing.getTargets().isEmpty() ||
                 (hearing.getTargets().stream().noneMatch(t -> t.getId().equals(targetReq.getId()) && t.getHearingDay().equals(targetReq.getHearingDay())))) {
-
+            if (nonNull(targetReq)) {
+                LOGGER.error("Adding as new targetReq:: targetId:{}, offenceId:{}, hearingDay:{}", targetReq.getTargetId(), targetReq.getOffenceId(), targetReq.getHearingDay());
+            }
             hearing.getTargets().add(targetReq);
             return;
         }
@@ -682,6 +687,7 @@ public class HearingEventListener {
                 .filter(t -> t.equals(targetReq))
                 .findFirst()
                 .ifPresent(t -> {
+                    LOGGER.error("Updating targetReq:: targetId:{}, offenceId:{}, hearingDay:{}", targetReq.getTargetId(), targetReq.getOffenceId(), targetReq.getHearingDay());
                     t.setCaseId(targetReq.getCaseId());
                     t.setDefendantId(targetReq.getDefendantId());
                     t.setHearingDay(targetReq.getHearingDay());
