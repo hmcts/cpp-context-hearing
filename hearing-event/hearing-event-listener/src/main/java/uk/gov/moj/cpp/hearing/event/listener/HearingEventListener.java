@@ -559,6 +559,7 @@ public class HearingEventListener {
         final Hearing hearing = hearingRepository.findBy(hearingAmendedEvent.getHearingId());
         hearing.setHearingState(hearingAmendedEvent.getNewHearingState());
         hearing.setAmendedByUserId(hearingAmendedEvent.getUserId());
+        hearing.setEarliestNextHearingDate(null);
         hearingRepository.save(hearing);
     }
 

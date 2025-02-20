@@ -108,7 +108,6 @@ public class ResultsSharedDelegateTest {
                 .withLastName(STRING.next())
                 .withUserId(randomUUID())
                 .build();
-        hearingAggregateMomento.getNextHearingStartDates().put(randomUUID(), ZonedDateTime.now() );
         final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resultLines, emptyList(), LocalDate.now());
 
         final List<Object> eventCollection = eventStreams.collect(toList());
@@ -162,7 +161,6 @@ public class ResultsSharedDelegateTest {
                 .build();
         final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
         final DelegatedPowers courtClerk = getDelegatedPowers();
-        hearingAggregateMomento.getNextHearingStartDates().put(randomUUID(), ZonedDateTime.now() );
         final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resultLines, emptyList(), LocalDate.now());
 
         final List<Object> eventCollection = eventStreams.collect(toList());
@@ -218,7 +216,6 @@ public class ResultsSharedDelegateTest {
                 .withLastName(STRING.next())
                 .withUserId(randomUUID())
                 .build();
-        hearingAggregateMomento.getNextHearingStartDates().put(randomUUID(), ZonedDateTime.now() );
         final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resultLines, emptyList(), LocalDate.now());
 
         final List<Object> eventCollection = eventStreams.collect(toList());
@@ -305,7 +302,6 @@ public class ResultsSharedDelegateTest {
                 .withLastName(STRING.next())
                 .withUserId(randomUUID())
                 .build();
-        hearingAggregateMomento.getNextHearingStartDates().put(randomUUID(), ZonedDateTime.now() );
         final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resultLines, emptyList(), LocalDate.now());
 
         final List<Object> eventCollection = eventStreams.collect(toList());
@@ -934,7 +930,6 @@ public class ResultsSharedDelegateTest {
         hearingAggregateMomento.getHearing().setHearingDays(hearingDays);
 
         final ZonedDateTime sharedTime = ZonedDateTime.now();
-        hearingAggregateMomento.getNextHearingStartDates().put(randomUUID(), ZonedDateTime.now() );
 
         final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, getDelegatedPowers(), sharedTime, getSharedResultsCommandResultLineV2s(sharedTime), emptyList(), hearingDay);
 
@@ -960,7 +955,6 @@ public class ResultsSharedDelegateTest {
 
         final ZonedDateTime sharedTime = ZonedDateTime.now();
 
-        hearingAggregateMomento.getNextHearingStartDates().put(randomUUID(), ZonedDateTime.now() );
         final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, getDelegatedPowers(), sharedTime, getSharedResultsCommandResultLineV2s(sharedTime), emptyList(), hearingDay);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
