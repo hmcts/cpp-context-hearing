@@ -1135,6 +1135,10 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingDelegate.deleteHearing(hearingId));
     }
 
+    public Stream<Object> deleteHearingBdf(final UUID hearingId) {
+        return apply(this.hearingDelegate.deleteHearingBdf(hearingId));
+    }
+
     public Stream<Object> unAllocateHearing(final UUID hearingId, final List<UUID> removedOffenceIds) {
         if (this.momento.getHearing() == null) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing not found", hearingId));

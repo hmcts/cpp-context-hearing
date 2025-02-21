@@ -595,3 +595,12 @@ rule "Command - API - Action - hearing.unlock-hearing"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.delete-hearing-bdf"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.delete-hearing-bdf");
+    eval(userAndGroupProvider.isSystemUser($action));
+  then
+    $outcome.setSuccess(true);
+end

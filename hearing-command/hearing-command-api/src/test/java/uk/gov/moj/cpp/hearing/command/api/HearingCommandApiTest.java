@@ -64,7 +64,7 @@ public class HearingCommandApiTest {
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
             "computeOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant", "cancelAmendments",
             "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing","markAsDuplicateHearingV2", "saveMultipleDraftResult", "updateResultLineSharedDates", "reusableInfo", "hearing.youth-court-defendants",
-            "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "addWitnessToHearing","saveDraftResultsForHearingDay", "removeOffences", "saveDraftResultV2", "deleteDraftResultV2", "amendHearing", "unlockHearing", "replicateHearingResults");
+            "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "addWitnessToHearing","saveDraftResultsForHearingDay", "removeOffences", "saveDraftResultV2", "deleteDraftResultV2", "amendHearing", "unlockHearing", "replicateHearingResults", "deleteHearingBdf");
 
     private static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
     private static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
@@ -581,6 +581,15 @@ public class HearingCommandApiTest {
         hearingCommandApi.unlockHearing(jsonRequestEnvelope);
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.unlock-hearing");
+    }
+
+    @Test
+    public void shouldDeleteHearingCommandHandlerBdf() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.delete-hearing-bdf");
+
+        hearingCommandApi.deleteHearingBdf(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.delete-hearing-bdf");
     }
 
     private JsonEnvelope buildDummyJsonRequestEnvelopeWithName(final String name) {
