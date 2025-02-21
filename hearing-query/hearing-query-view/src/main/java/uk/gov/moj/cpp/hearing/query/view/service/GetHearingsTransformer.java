@@ -14,8 +14,11 @@ import uk.gov.justice.core.courts.CourtApplicationType;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ReportingRestriction;
@@ -226,19 +229,13 @@ public class GetHearingsTransformer {
         final Applicant.Builder result = Applicant.applicant();
         result.withId(courtApplicationParty.getId());
         result.withSynonym(courtApplicationParty.getSynonym());
-        if (courtApplicationParty.getPersonDetails() != null) {
-            result.withFirstName(courtApplicationParty.getPersonDetails().getFirstName());
-            result.withLastName(courtApplicationParty.getPersonDetails().getLastName());
-            result.withMiddleName(courtApplicationParty.getPersonDetails().getMiddleName());
-        }
 
-        if (courtApplicationParty.getOrganisation() != null) {
-            result.withOrganisationName(courtApplicationParty.getOrganisation().getName());
-        } else if (courtApplicationParty.getProsecutingAuthority() != null) {
-            result.withOrganisationName(courtApplicationParty.getProsecutingAuthority().getName());
-        }
-
-
+        final CourtApplicationPartySummary partySummary = CourtApplicationPartySummary.from(courtApplicationParty);
+        result.withFirstName(partySummary.firstName);
+        result.withMiddleName(partySummary.middleName);
+        result.withLastName(partySummary.lastName);
+        result.withOrganisationName(partySummary.organisationName);
+        result.withOrganisationCode(partySummary.organisationCode);
         return result;
     }
 
@@ -277,14 +274,12 @@ public class GetHearingsTransformer {
     private Respondents.Builder respondentSummary(final CourtApplicationParty courtApplicationParty) {
         final Respondents.Builder result = Respondents.respondents();
         result.withId(courtApplicationParty.getId());
-        if (courtApplicationParty.getPersonDetails() != null) {
-            result.withFirstName(courtApplicationParty.getPersonDetails().getFirstName());
-            result.withLastName(courtApplicationParty.getPersonDetails().getLastName());
-            result.withMiddleName(courtApplicationParty.getPersonDetails().getMiddleName());
-        }
-        if (courtApplicationParty.getOrganisation() != null) {
-            result.withOrganisationName(courtApplicationParty.getOrganisation().getName());
-        }
+        final CourtApplicationPartySummary partySummary = CourtApplicationPartySummary.from(courtApplicationParty);
+        result.withFirstName(partySummary.firstName);
+        result.withMiddleName(partySummary.middleName);
+        result.withLastName(partySummary.lastName);
+        result.withOrganisationName(partySummary.organisationName);
+        result.withOrganisationCode(partySummary.organisationCode);
         return result;
     }
 
@@ -333,5 +328,52 @@ public class GetHearingsTransformer {
                     .collect(toList()));
         }
         return result;
+    }
+
+    /**
+     * Represents a summary of a court application party, providing information such as first name, middle name, last name, organisation name, and organisation code.
+     * This class is used for creating a summary from a CourtApplicationParty object by extracting relevant information based on the type of party.
+     */
+    private static final class CourtApplicationPartySummary {
+        private String firstName;
+        private String middleName;
+        private String lastName;
+        private String organisationName;
+        private String organisationCode;
+
+        private static CourtApplicationPartySummary from(final CourtApplicationParty courtApplicationParty) {
+            final CourtApplicationPartySummary courtApplicationPartySummary = new CourtApplicationPartySummary();
+
+            if (courtApplicationParty.getPersonDetails() != null) {
+                courtApplicationPartySummary.firstName = courtApplicationParty.getPersonDetails().getFirstName();
+                courtApplicationPartySummary.middleName = courtApplicationParty.getPersonDetails().getMiddleName();
+                courtApplicationPartySummary.lastName = courtApplicationParty.getPersonDetails().getLastName();
+            } else if (courtApplicationParty.getMasterDefendant() != null && courtApplicationParty.getMasterDefendant().getPersonDefendant() != null) {
+                final Person person = courtApplicationParty.getMasterDefendant().getPersonDefendant().getPersonDetails();
+                courtApplicationPartySummary.firstName = person.getFirstName();
+                courtApplicationPartySummary.middleName = person.getMiddleName();
+                courtApplicationPartySummary.lastName = person.getLastName();
+            }
+
+            if (courtApplicationParty.getOrganisation() != null && courtApplicationParty.getOrganisation().getName() != null) {
+                courtApplicationPartySummary.organisationName = courtApplicationParty.getOrganisation().getName();
+            } else if (courtApplicationParty.getMasterDefendant() != null && courtApplicationParty.getMasterDefendant().getLegalEntityDefendant() != null) {
+                final LegalEntityDefendant legalEntityDefendant = courtApplicationParty.getMasterDefendant().getLegalEntityDefendant();
+                if (legalEntityDefendant.getOrganisation() != null && legalEntityDefendant.getOrganisation().getName() != null) {
+                    courtApplicationPartySummary.organisationName = legalEntityDefendant.getOrganisation().getName();
+                }
+            } else if (courtApplicationParty.getProsecutingAuthority() != null) {
+                final ProsecutingAuthority prosecutingAuthority = courtApplicationParty.getProsecutingAuthority();
+                if (prosecutingAuthority.getName() != null) {
+                    courtApplicationPartySummary.organisationName = prosecutingAuthority.getName();
+                }
+                if (prosecutingAuthority.getProsecutionAuthorityCode() != null) {
+                    courtApplicationPartySummary.organisationCode = prosecutingAuthority.getProsecutionAuthorityCode();
+                }
+            } else if (courtApplicationParty.getRepresentationOrganisation() != null && courtApplicationParty.getRepresentationOrganisation().getName() != null) {
+                courtApplicationPartySummary.organisationName = courtApplicationParty.getRepresentationOrganisation().getName();
+            }
+            return courtApplicationPartySummary;
+        }
     }
 }
