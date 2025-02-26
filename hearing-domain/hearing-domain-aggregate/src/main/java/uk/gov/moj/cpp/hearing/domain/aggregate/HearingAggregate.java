@@ -19,6 +19,7 @@ import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.CANCEL_AMENDMENTS_N
 import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.HEARING_LOCKED;
 import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.SAVE_RESULTS_NOT_PERMITTED;
 import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.SHARE_NOT_PERMITTED;
+import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.SHARE_NOT_PERMITTED_ALL_TARGETS_SHARED;
 import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.UNLOCK_HEARING_NOT_PERMITTED;
 import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.VALIDATE_HEARING_NOT_PERMITTED;
 import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.VERSION_MISMATCH;
@@ -188,6 +189,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -255,6 +257,8 @@ public class HearingAggregate implements Aggregate {
     private final Map<LocalDate, Integer> amendedResultHearingDayVersionMap = new HashMap<>();
 
     private Boolean isMultiDayHearing;
+    private Map<LocalDate, Set<UUID>> hearingDaySharedOffencesMap = new HashMap<>();
+    private Map<LocalDate, Set<UUID>> hearingDaySharedApplicationsMap = new HashMap<>();
 
     private static final String HEARING_STATE_STR = "Hearing is in %s state";
     @Override
@@ -294,6 +298,8 @@ public class HearingAggregate implements Aggregate {
                             this.hearingState = SHARED;
                             resultsSharedDelegate.handleResultsSharedV3(e);
                             defendantDelegate.clearDefendantDetailsChanged();
+                            updateSharedOffencesByHearingDay(e.getHearingDay(), e.getTargets());
+                            updateSharedApplicationsByHearingDay(e.getHearingDay(), e.getTargets());
                         }
                 ),
                 when(ResultLinesStatusUpdated.class).apply(resultsSharedDelegate::handleResultLinesStatusUpdated),
@@ -403,6 +409,34 @@ public class HearingAggregate implements Aggregate {
     @SuppressWarnings("squid:S1172")
     private void handleBreachApplicationsAdded(final HearingBreachApplicationsAdded hearingBreachApplicationsAdded) {
         this.momento.setBreachApplicationsToBeAdded(null);
+    }
+
+    private void updateSharedOffencesByHearingDay(final LocalDate hearingDay, final List<Target2> targets) {
+        if (nonNull(targets) && !targets.isEmpty()){
+            final Set<UUID> sharedOffences = targets.stream()
+                    .map(Target2::getOffenceId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            if (hearingDaySharedOffencesMap.containsKey(hearingDay)){
+                hearingDaySharedOffencesMap.get(hearingDay).addAll(sharedOffences);
+            } else {
+                hearingDaySharedOffencesMap.put(hearingDay, sharedOffences);
+            }
+        }
+    }
+
+    private void updateSharedApplicationsByHearingDay(final LocalDate hearingDay, final List<Target2> targets) {
+        if (nonNull(targets) && !targets.isEmpty()){
+            final Set<UUID> sharedApplications = targets.stream()
+                    .map(Target2::getApplicationId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            if (hearingDaySharedApplicationsMap.containsKey(hearingDay)){
+                hearingDaySharedApplicationsMap.get(hearingDay).addAll(sharedApplications);
+            } else {
+                hearingDaySharedApplicationsMap.put(hearingDay, sharedApplications);
+            }
+        }
     }
 
     private void handleBreachApplicationsToBeAddedReceived(final HearingBreachApplicationsToBeAddedReceived hearingBreachApplicationsToBeAddedReceived) {
@@ -620,6 +654,14 @@ public class HearingAggregate implements Aggregate {
                     hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
         }
 
+        //Share results permitted for a hearingDay until all the target for that day are not 'SHARED'.
+        //Share results not permitted when all targets (offenceId/applicationId) are shared.
+        if (SHARED == this.hearingState && hasAllTargetsShared(hearingDay, resultLines)) {
+            return apply(resultsSharedDelegate.manageResultsFailed(hearingId, this.hearingState,
+                    SHARE_NOT_PERMITTED_ALL_TARGETS_SHARED.toError(String.format("Share results not permitted! all the targets already shared for the hearingDay %s", hearingDay)),
+                    hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
+        }
+
         if (isResultVersionMismatch(hearingDay, version)) {
             return apply(resultsSharedDelegate.manageResultsFailed(hearingId, this.hearingState, VERSION_MISMATCH.toError(String.format("Share results failed for version: %s, lastUpdatedVersion: %s", version, this.amendedResultHearingDayVersionMap.get(hearingDay))),
                     hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
@@ -631,6 +673,22 @@ public class HearingAggregate implements Aggregate {
     private boolean isResultVersionMismatch(final LocalDate hearingDay, final Integer version) {
         return nonNull(version) && nonNull(this.amendedResultHearingDayVersionMap.get(hearingDay))
                 && !this.amendedResultHearingDayVersionMap.get(hearingDay).equals(version);
+    }
+
+    private boolean hasAllTargetsShared(final LocalDate hearingDay, final List<SharedResultsCommandResultLineV2> resultLines) {
+        final boolean isApplicationResultType = resultLines.stream().allMatch(rl -> nonNull(rl.getApplicationId()));
+        if (isApplicationResultType){
+            final Set<UUID> sharedApplicationIdSet = hearingDaySharedApplicationsMap.get(hearingDay);
+            return nonNull(sharedApplicationIdSet) && resultLines.stream()
+                    .allMatch(rl -> sharedApplicationIdSet.contains(rl.getApplicationId()));
+        }
+        final boolean isCaseResultType = resultLines.stream().allMatch(rl -> nonNull(rl.getOffenceId()));
+        if (isCaseResultType) {
+            final Set<UUID> sharedOffenceIdSet = hearingDaySharedOffencesMap.get(hearingDay);
+            return nonNull(sharedOffenceIdSet) && resultLines.stream()
+                    .allMatch(rl -> sharedOffenceIdSet.contains(rl.getOffenceId()));
+        }
+        return false;
     }
 
     public Stream<Object> saveAllDraftResults(final List<Target> targets, final UUID userId) {
@@ -1131,6 +1189,10 @@ public class HearingAggregate implements Aggregate {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'deleteHearing' event as hearing already shared", hearingId));
         }
         return apply(this.hearingDelegate.deleteHearing(hearingId));
+    }
+
+    public Stream<Object> deleteHearingBdf(final UUID hearingId) {
+        return apply(this.hearingDelegate.deleteHearingBdf(hearingId));
     }
 
     public Stream<Object> unAllocateHearing(final UUID hearingId, final List<UUID> removedOffenceIds) {

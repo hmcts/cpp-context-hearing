@@ -1,7 +1,5 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-import static java.util.Objects.nonNull;
-
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -182,14 +180,12 @@ public class Target {
             return false;
         }
         final Target target = (Target) o;
-        return Objects.equals(id, target.id) && Objects.equals(hearingDay, target.hearingDay);
+        return Objects.equals(id, target.id);
     }
 
     @Override
     public int hashCode() {
-        return nonNull(hearingDay)
-                ? Objects.hash(id.hashCode(), hearingDay.hashCode())
-                : Objects.hash(id.hashCode());
+        return Objects.hash(id.hashCode());
     }
 
     public UUID getTargetId() {
