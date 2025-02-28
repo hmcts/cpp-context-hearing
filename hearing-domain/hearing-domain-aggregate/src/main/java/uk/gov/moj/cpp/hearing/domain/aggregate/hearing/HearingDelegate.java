@@ -402,12 +402,12 @@ public class HearingDelegate implements Serializable {
         return Stream.of(new MasterDefendantIdAdded(hearingId, prosecutionCaseId, defendantId, masterDefendantId));
     }
 
-    public Stream<Object> markAsDuplicate(final UUID hearingId) {
+    public Stream<Object> markAsDuplicate(final UUID hearingId, final String reason) {
         final List<UUID> prosecutionCaseIds = momento.getHearing().getProsecutionCases().stream().map(ProsecutionCase::getId).collect(Collectors.toList());
         final List<UUID> defendantIds = momento.getHearing().getProsecutionCases().stream().flatMap(c -> c.getDefendants().stream().map(Defendant::getId)).collect(Collectors.toList());
         final List<UUID> offenceIds = momento.getHearing().getProsecutionCases().stream().flatMap(c -> c.getDefendants().stream().flatMap(d -> d.getOffences().stream().map(Offence::getId))).collect(Collectors.toList());
         final UUID courtCentreId = momento.getHearing().getCourtCentre().getId();
-        return Stream.of(new HearingMarkedAsDuplicate(prosecutionCaseIds, defendantIds, offenceIds, hearingId, courtCentreId));
+        return Stream.of(new HearingMarkedAsDuplicate(prosecutionCaseIds, defendantIds, offenceIds, hearingId, courtCentreId, reason));
     }
 
     public void handleHearingMarkedAsDuplicate() {

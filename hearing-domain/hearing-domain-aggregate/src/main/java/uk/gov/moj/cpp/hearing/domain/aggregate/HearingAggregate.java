@@ -481,9 +481,6 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingDelegate.extend(hearingId, hearingDays, courtCentre, jurisdictionType, courtApplication, prosecutionCases, shadowListedOffences));
     }
 
-    public Stream<Object> markAsDuplicate(final UUID hearingId) {
-        return apply(this.hearingDelegate.markAsDuplicate(hearingId));
-    }
 
     public Stream<Object> updateExistingHearing(final UUID hearingId, final List<ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {
         if (this.momento.getHearing() == null) {
@@ -499,13 +496,14 @@ public class HearingAggregate implements Aggregate {
      * @param hearingId            - the id of the hearing to be marked as duplicate.
      * @param overwriteWithResults - if TRUE then mark as duplicate, even if the hearing has
      *                             results.
+     * @param reason               - the reason for marking as duplicate or removing.
      * @return mark as duplicate event, or no events.
      */
-    public Stream<Object> markAsDuplicate(final UUID hearingId, final boolean overwriteWithResults) {
+    public Stream<Object> markAsDuplicate(final UUID hearingId, final boolean overwriteWithResults, final String reason) {
         if (resultsSharedDelegate.hasResultsShared() && !overwriteWithResults) {
             return Stream.empty();
         } else {
-            return apply(this.hearingDelegate.markAsDuplicate(hearingId));
+            return apply(this.hearingDelegate.markAsDuplicate(hearingId, reason));
         }
     }
 

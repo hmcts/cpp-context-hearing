@@ -41,9 +41,7 @@
     "hearingState",
     "resultsError",
     "hearingDay",
-    "userId",
-    "lastUpdatedByUserId",
-    "lastUpdatedVersion"
+    "userId"
   ],
   "additionalProperties": false,
   "definitions": {

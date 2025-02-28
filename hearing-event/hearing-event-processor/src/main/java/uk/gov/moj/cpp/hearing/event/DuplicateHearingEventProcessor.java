@@ -35,6 +35,7 @@ public class DuplicateHearingEventProcessor {
     private static final String OFFENCE_IDS_FIELD = "offenceIds";
     private static final String HEARING_ID_FIELD = "hearingId";
     private static final String COURT_CENTRE_ID_FIELD = "courtCentreId";
+    private static final String REASON_FIELD = "reason";
 
     @Inject
     private Sender sender;
@@ -80,6 +81,6 @@ public class DuplicateHearingEventProcessor {
     }
 
     private JsonObject getPublicEventPayload(final JsonObject payload) {
-        return JsonObjects.createObjectBuilderWithFilter(payload, s -> !s.equals(COURT_CENTRE_ID_FIELD)).build();
+        return JsonObjects.createObjectBuilderWithFilter(payload, s -> !COURT_CENTRE_ID_FIELD.equals(s) && !REASON_FIELD.equals(s)).build();
     }
 }

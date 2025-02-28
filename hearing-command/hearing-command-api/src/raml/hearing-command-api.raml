@@ -180,6 +180,9 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
             requestType: application/vnd.hearing.duplicate.v2+json
             name: hearing.mark-as-duplicate-v2
         (mapping):
+            requestType: application/vnd.hearing.mark-as-duplicate-with-reason+json
+            name: hearing.mark-as-duplicate-with-reason        
+        (mapping):
             requestType: application/vnd.hearing.change-hearing-detail+json
             name: hearing.change-hearing-detail
         (mapping):
@@ -322,6 +325,9 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
             example: !include json/hearing.mark-as-duplicate.json
             schema: !include json/schema/hearing.mark-as-duplicate.json
         application/vnd.hearing.duplicate.v2+json: !!null
+        application/vnd.hearing.mark-as-duplicate-with-reason+json:
+          example: !include json/hearing.mark-as-duplicate-with-reason.json
+          schema: !include json/schema/hearing.mark-as-duplicate-with-reason.json
         application/vnd.hearing.change-cancel-amendments+json:
             schema: !include json/schema/hearing.change-cancel-amendments.json
             example: !include json/hearing.change-cancel-amendments.json
