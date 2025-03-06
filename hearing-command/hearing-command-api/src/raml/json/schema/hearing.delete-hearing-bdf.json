@@ -1,10 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.mark-as-duplicate.json",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.delete-hearing-bdf.json",
   "type": "object",
   "properties": {
-    "overwriteWithResults": {
-      "type": "boolean"
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
     }
   },
   "additionalProperties": false
