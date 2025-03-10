@@ -315,6 +315,10 @@ subscriptions_descriptor:
         - name: hearing.event.reusable-info-saved
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.reusable-info-saved.json
 
+        # user allocated to judiciary.
+        - name: hearing.event.user-added-to-judiciary
+          schema_uri: http://justice.gov.uk/hearing/json/schema/hearing.event.user-added-to-judiciary.json
+
         # Defendants in youth court.
         - name: hearing.event.defendants-in-youthcourt-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hhearing.event.defendants-in-youthcourt-updated.json

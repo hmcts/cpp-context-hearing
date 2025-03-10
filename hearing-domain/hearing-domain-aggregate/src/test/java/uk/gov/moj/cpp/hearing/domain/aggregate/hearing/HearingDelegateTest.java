@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -31,6 +32,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingUserAddedToJudiciary;
 import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
@@ -42,6 +44,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -516,6 +519,24 @@ public class HearingDelegateTest {
 
 
     }
+    @Test
+    public void shouldUserAddedToJudiciary(){
+
+        final UUID judiciaryId = randomUUID();
+        final String emailId = "abc@cde.com";
+        final UUID cpUserId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID id = randomUUID();
+
+        final Stream<Object> objectStream = hearingDelegate.userAddedToJudiciary(
+                judiciaryId,
+                emailId,
+                cpUserId,
+                hearingId,
+                id);
+        assertThat(((HearingUserAddedToJudiciary)objectStream.collect(toList()).get(0)).getHearingId(), is(hearingId));
+    }
+
     @Test
     public void shouldNotRaiseEventIfHearingIsAlreadyMarkedAsDuplicate(){
 

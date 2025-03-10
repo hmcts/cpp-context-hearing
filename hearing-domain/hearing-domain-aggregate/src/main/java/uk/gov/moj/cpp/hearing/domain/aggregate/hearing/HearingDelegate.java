@@ -24,6 +24,7 @@ import uk.gov.justice.core.courts.ListHearingRequest;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target2;
+
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
@@ -40,6 +41,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiateIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingUserAddedToJudiciary;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVacatedTrialDetailUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
@@ -715,4 +717,14 @@ public class HearingDelegate implements Serializable {
                 .collect(toList());
     }
 
+    public Stream<Object> userAddedToJudiciary(final UUID judiciaryId, final String emailId, final UUID cpUserId, final UUID hearingId, final UUID id) {
+        final Stream.Builder<Object> streamBuilder = Stream.builder();
+        streamBuilder.add(new HearingUserAddedToJudiciary(
+                judiciaryId,
+                emailId,
+                cpUserId,
+                hearingId,
+                id));
+        return streamBuilder.build();
+    }
 }

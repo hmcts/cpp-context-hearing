@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "http://justice.gov.uk/hearing/json/schema/hearing.event.user-added-to-judiciary.json",
+  "type": "object",
+  "properties": {
+    "judiciaryId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "cpUserId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "emailId": {
+      "type": "string"
+    },
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "id": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "judiciaryId",
+    "cpUserId",
+    "emailId",
+    "hearingId",
+    "id"
+  ],
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
+}

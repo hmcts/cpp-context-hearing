@@ -247,7 +247,8 @@ public class HearingEventListenerYamlConfigTest {
                 CaseRemovedFromGroupCasesEventListener.class,
                 MasterCaseUpdatedForHearing.class,
                 CustodyTimeLimitEventListener.class,
-                IndicatedPleaUpdated.class));
+                IndicatedPleaUpdated.class,
+                HearingJudiciaryListener.class));
 
         yamlEventNames = new SubscriptionsDescriptorLoader(PATH_TO_YAML).eventNames();
     }

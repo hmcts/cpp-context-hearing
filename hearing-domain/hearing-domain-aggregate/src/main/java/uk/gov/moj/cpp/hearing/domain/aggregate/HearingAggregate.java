@@ -1155,6 +1155,14 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingDay));
     }
 
+    public Stream<Object> userAddedToJudiciary(final UUID judiciaryId, final String emailId, final UUID cpUserId, final UUID hearingId, final UUID id) {
+        return apply(this.hearingDelegate.userAddedToJudiciary(
+                judiciaryId,
+                emailId,
+                cpUserId,
+                hearingId,
+                id));
+    }
     public Stream<Object> saveReusableInfo(final UUID hearingId, final List<ReusableInfo> reusableInfoCaches, final List<ReusableInfoResults> reusableResultInfoCaches) {
         return apply(Stream.of(reusableInfoSaved()
                 .withHearingId(hearingId)

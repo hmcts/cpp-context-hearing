@@ -283,6 +283,11 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.add-defendants.json
             schema:  !include json/schema/hearing.add-defendants.json
 
+# Add Defendant
+        application/vnd.hearing.command.user-attached-to-judiciary+json:
+            example: !include json/hearing.command.user-attached-to-judiciary.json
+            schema:  !include json/schema/hearing.command.user-attached-to-judiciary.json
+
 # Update Application Detail
         application/vnd.hearing.update-court-application+json:
             schema: !include json/schema/hearing.update-court-application.json

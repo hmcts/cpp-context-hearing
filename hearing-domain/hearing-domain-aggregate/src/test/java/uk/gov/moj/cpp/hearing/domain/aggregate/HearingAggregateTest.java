@@ -104,6 +104,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingLocked;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLockedByOtherUser;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnlocked;
+import uk.gov.moj.cpp.hearing.domain.event.HearingUserAddedToJudiciary;
 import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
@@ -3632,6 +3633,24 @@ public class HearingAggregateTest {
         ReflectionUtil.setField(hearingAggregate, "hearingState", SHARED);
         final Stream<Object> objectStream = hearingAggregate.cancelHearingDays(hearingId, Collections.emptyList());
         assertThat(objectStream.collect(toList()).size(), is(1));
+    }
+
+    @Test
+    void shouldUserAddedToJudiciary(){
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID judiciaryId = randomUUID();
+        final String emailId = "abc@cde.com";
+        final UUID cpUserId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID id = randomUUID();
+
+        final Stream<Object> objectStream = hearingAggregate.userAddedToJudiciary(
+                judiciaryId,
+                emailId,
+                cpUserId,
+                hearingId,
+                id);
+        assertThat(((HearingUserAddedToJudiciary)objectStream.collect(toList()).get(0)).getHearingId(), is(hearingId));
     }
 
     @Test

@@ -484,4 +484,8 @@ subscriptions_descriptor:
         - name : public.progression.related-hearing-updated-for-adhoc-hearing
           schema_uri: http://justice.gov.uk/listing/courts/public.progression.related-hearing-updated-for-adhoc-hearing.json
 
+        - name : public.referencedata.event.user-associated-with-judiciary
+          schema_uri: http://justice.gov.uk/listing/courts/public.referencedata.event.user-associated-with-judiciary.json
+
+
       event_source_name: public.event.source

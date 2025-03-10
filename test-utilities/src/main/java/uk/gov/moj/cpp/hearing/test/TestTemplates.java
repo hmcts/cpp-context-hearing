@@ -423,6 +423,25 @@ public class TestTemplates {
                             .setJurisdictionType(CROWN)).build());
         }
 
+        public static InitiateHearingCommand standardInitiateHearingTemplateWithoutJudiciaryUserId() {
+            final Hearing hearing = CoreTestTemplates.hearing(defaultArguments()
+                    .setDefendantType(PERSON)
+                    .setHearingLanguage(ENGLISH)
+                    .setJurisdictionType(CROWN)).build();
+            hearing.setJudiciary(hearing.getJudiciary().stream().map(judicialRole -> {
+                 judicialRole.setUserId(null);
+                 return judicialRole;
+            }).toList());
+            hearing.setHearingDays(hearing.getHearingDays().stream().map(hearingDay -> new HearingDay.Builder()
+                        .withValuesFrom(hearingDay)
+                        .withSittingDay(ZonedDateTime.now().plusDays(1))
+                        .build()
+            ).toList());
+
+            return initiateHearingCommand()
+                    .setHearing(hearing);
+        }
+
         public static InitiateHearingCommand standardInitiateHearingTemplateWithOffenceIndicatedPlea() {
             return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearingWithOffenceIndicatedPlea(defaultArguments()
