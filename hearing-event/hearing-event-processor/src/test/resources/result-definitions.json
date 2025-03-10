@@ -42696,6 +42696,7 @@
       "shortCode": "FO",
       "level": "O",
       "rank": 22300,
+      "canExtendActiveOrder": true,
       "wordGroups": [
         {
           "wordGroup": [
@@ -42727,7 +42728,9 @@
           "jurisdiction": "B",
           "hidden": false,
           "nameEmail": false,
-          "associatedWithReferenceData": false
+          "associatedWithReferenceData": false,
+          "activeOrderExtended": true,
+          "activeOrderNotExtended": false
         }
       ],
       "welshLabel": "Dirwy",

@@ -72,6 +72,9 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
         final List<TreeNode<ResultLine2>> restructuredTree = target.restructure(envelope, resultsShared, treeNodes);
 
         assertThat(restructuredTree.size(), is(3));
+        assertThat(restructuredTree.get(0).getJudicialResult().getCanExtendActiveOrder(), is(true));
+        assertThat(restructuredTree.get(0).getJudicialResult().getJudicialResultPrompts().get(0).getActiveOrderExtended(), is(true));
+        assertThat(restructuredTree.get(0).getJudicialResult().getJudicialResultPrompts().get(0).getActiveOrderNotExtended(), is(false));
 
         final List<TreeNode<ResultLine2>> topLevelResultLineRestructuredParents = filterV3ResultsBy(restructuredTree, r -> r.getParents().isEmpty() && r.getChildren().size() > 0);
 

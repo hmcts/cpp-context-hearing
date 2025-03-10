@@ -209,7 +209,8 @@ public class ResultTreeBuilderV3 {
                 .withDvlaCode(resultDefinition.getDvlaCode())
                 .withLevel(resultDefinition.getLevel())
                 .withPoliceSubjectLineTitle(resultDefinition.getPoliceSubjectLineTitle())
-                .withPreserveActiveOrder(getBooleanValue(resultDefinition.getPreserveActiveOrder(), false));
+                .withPreserveActiveOrder(getBooleanValue(resultDefinition.getPreserveActiveOrder(), false))
+                .withCanExtendActiveOrder(getBooleanValue(resultDefinition.getCanExtendActiveOrder(), false));;
         if(resultTextConfHelper.isOldResultDefinition(resultLine.getOrderedDate())) {
             judicialResult.withResultText(ResultTextHelperV3.getResultText(resultDefinition, resultLine));
         }
