@@ -54,8 +54,12 @@ public class VerdictUpdateEventListener {
         if(verdictUpdated.getVerdict().getApplicationId() != null){
             aplicationVerdictUpdate(verdictUpdated.getHearingId(), verdictUpdated.getVerdict());
         }else {
-            final Hearing hearing = hearingRepository.findBy(verdictUpdated.getHearingId());
+            final Optional<Hearing> hearingEnt = hearingRepository.findOptionalBy(verdictUpdated.getHearingId());
+            if(hearingEnt.isEmpty()){
+                return;
+            }
 
+            final Hearing hearing = hearingEnt.get();
             final uk.gov.justice.core.courts.Verdict verdictPojo = verdictUpdated.getVerdict();
 
             final Offence offence = ofNullable(hearing.getProsecutionCases()).orElse(emptySet()).stream()
@@ -86,8 +90,11 @@ public class VerdictUpdateEventListener {
     }
 
     private void aplicationVerdictUpdate(final UUID hearingId, final uk.gov.justice.core.courts.Verdict verdict) {
-        final Hearing hearingEntity = hearingRepository.findBy(hearingId);
-
+        final Optional<Hearing> hearingEnt = hearingRepository.findOptionalBy(hearingId);
+        if(hearingEnt.isEmpty()){
+            return;
+        }
+        final Hearing hearingEntity = hearingEnt.get();
         final uk.gov.justice.core.courts.Hearing hearing = hearingJPAMapper.fromJPA(hearingEntity);
 
         final Optional<CourtApplication> courtApplication = hearing.getCourtApplications().stream()

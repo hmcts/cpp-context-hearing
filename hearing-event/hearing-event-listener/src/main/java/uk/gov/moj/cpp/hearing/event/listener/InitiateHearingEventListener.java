@@ -119,8 +119,12 @@ public class InitiateHearingEventListener {
 
         final HearingExtended hearingExtended = jsonObjectToObjectConverter.convert(payload, HearingExtended.class);
 
-        final Hearing hearingEntity = hearingRepository.findBy(hearingExtended.getHearingId());
+        final Optional<Hearing> hearingEntityOpt = hearingRepository.findOptionalBy(hearingExtended.getHearingId());
+        if(hearingEntityOpt.isEmpty()){
+            return;
+        }
 
+        final Hearing hearingEntity = hearingEntityOpt.get();
         LOGGER.debug("hearing.hearingExtended event received for hearingId {}", hearingEntity.getId());
 
         if (nonNull(hearingExtended.getCourtApplication())) {
@@ -151,8 +155,12 @@ public class InitiateHearingEventListener {
 
         final ApplicationDetailChanged applicationDetailChanged = jsonObjectToObjectConverter.convert(payload, ApplicationDetailChanged.class);
 
-        final Hearing hearingEntity = hearingRepository.findBy(applicationDetailChanged.getHearingId());
+        final Optional<Hearing> hearing = hearingRepository.findOptionalBy(applicationDetailChanged.getHearingId());
+        if(hearing.isEmpty()){
+            return;
+        }
 
+        final Hearing hearingEntity = hearing.get();
         LOGGER.debug("hearing.events.application-detail-changed event received for hearingId {}", hearingEntity.getId());
 
         final String courtApplicationsJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), applicationDetailChanged.getCourtApplication());
@@ -320,7 +328,7 @@ public class InitiateHearingEventListener {
             consumer.accept(o);
             offenceRepository.saveAndFlush(o);
             return o;
-        }).orElseThrow(() -> new RuntimeException("Offence id is not found on hearing id: " + hearingId));
+        });
     }
 
     private uk.gov.justice.core.courts.ProsecutionCase createProsecutionCase(final uk.gov.justice.core.courts.ProsecutionCase prosecutionCaseRequest,
@@ -408,7 +416,11 @@ public class InitiateHearingEventListener {
         if(courtApplicationID == null) {
             save(offenceId, hearingId, o -> o.setConvictionDate(convictionDate));
         }else{
-            final Hearing hearingEntity = hearingRepository.findBy(hearingId);
+            final Optional<Hearing> hearingEnt = hearingRepository.findOptionalBy(hearingId);
+            if(hearingEnt.isEmpty()){
+                return;
+            }
+            final Hearing hearingEntity = hearingEnt.get();
             final String updatedCourtApplicationJson;
             if(offenceId != null) {
                 updatedCourtApplicationJson = hearingJPAMapper.updateConvictedDateOnOffencesInCourtApplication(hearingEntity.getCourtApplicationsJson(), courtApplicationID, offenceId, convictionDate);
