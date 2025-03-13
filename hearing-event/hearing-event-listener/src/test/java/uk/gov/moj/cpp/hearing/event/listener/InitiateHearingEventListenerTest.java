@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -281,7 +282,7 @@ public class InitiateHearingEventListenerTest {
         final Hearing hearing = new Hearing();
         hearing.setProsecutionCases(prosecutionCasesEntities);
 
-        when(hearingRepository.findBy(existingHearingUpdated.getHearingId())).thenReturn(hearing);
+        when(hearingRepository.findOptionalBy(existingHearingUpdated.getHearingId())).thenReturn(Optional.of(hearing));
         when(prosecutionCaseJPAMapper.toJPA(any(hearing.getClass()), any(ProsecutionCase.class))).thenReturn(prosecutionCaseEntity);
         when(prosecutionCaseJPAMapper.fromJPA(anySet())).thenReturn(prosecutionCasesInEntity);
         when(prosecutionCaseRepository.save(any())).thenReturn(prosecutionCaseEntity);

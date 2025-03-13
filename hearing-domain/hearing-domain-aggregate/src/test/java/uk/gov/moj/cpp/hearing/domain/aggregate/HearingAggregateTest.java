@@ -2660,7 +2660,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseEventHearingUnallocated() {
+    public void shouldNotRaiseEventHearingUnallocatedWhenHearingWasDeleted() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
@@ -2673,6 +2673,24 @@ public class HearingAggregateTest {
         final UUID caseId = hearing.getProsecutionCases().get(0).getId();
         hearingAggregate.apply(new HearingDeleted(asList(caseId), asList(defendantId), asList(offenceId), emptyList(), hearingId));
 
+        final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearingId, Arrays.asList(offenceId)).collect(toList());
+
+        assertThat(eventStream.size(), is(1));
+        final HearingChangeIgnored  hearingChangeIgnored = (HearingChangeIgnored ) eventStream.get(0);
+        assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
+        assertThat(hearingChangeIgnored.getReason(), is("Ignoring 'unAllocateHearing' event as hearing not found"));
+    }
+
+    @Test
+    public void shouldRaiseEventHearingUnallocated() {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final UUID hearingId = hearing.getId();
+        final UUID offenceId = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
         final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearingId, Arrays.asList(offenceId)).collect(toList());
 
         assertThat(eventStream.size(), is(1));

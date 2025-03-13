@@ -239,12 +239,16 @@ public class InitiateHearingEventListener {
 
         final ExistingHearingUpdated existingHearingUpdated = jsonObjectToObjectConverter.convert(payload, ExistingHearingUpdated.class);
 
-        final Hearing hearingEntity = hearingRepository.findBy(existingHearingUpdated.getHearingId());
+        final Optional<Hearing> hearingEntity = hearingRepository.findOptionalBy(existingHearingUpdated.getHearingId());
+
+        if(hearingEntity.isEmpty()){
+            return;
+        }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.events.existing-hearing-updated event received {}", hearingEntity.getId());
+            LOGGER.debug("hearing.events.existing-hearing-updated event received {}", hearingEntity.get().getId());
         }
-        updateHearing(hearingEntity, existingHearingUpdated.getProsecutionCases(), existingHearingUpdated.getShadowListedOffences());
+        updateHearing(hearingEntity.get(), existingHearingUpdated.getProsecutionCases(), existingHearingUpdated.getShadowListedOffences());
     }
 
     private void updateHearing(final Hearing hearingEntity, final List<uk.gov.justice.core.courts.ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {

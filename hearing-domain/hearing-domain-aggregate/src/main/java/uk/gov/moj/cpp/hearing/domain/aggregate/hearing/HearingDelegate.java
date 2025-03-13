@@ -66,7 +66,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S3655", "squid:S1871", "PMD:BeanMembersShouldSerialize"})
 public class HearingDelegate implements Serializable {
 
-    private static final long serialVersionUID = 6948738797633524094L;
+    private static final long serialVersionUID = 6948738797633524095L;
 
     private final HearingAggregateMomento momento;
 
@@ -414,6 +414,8 @@ public class HearingDelegate implements Serializable {
 
     public void handleHearingMarkedAsDuplicate() {
         this.momento.setDuplicate(true);
+        this.momento.setDeleted(true);
+        this.momento.setHearing(null);
     }
 
 
@@ -561,32 +563,14 @@ public class HearingDelegate implements Serializable {
 
     public void handleHearingDeleted() {
         this.momento.setDeleted(true);
+        this.momento.setDuplicate(true);
+        this.momento.setHearing(null);
     }
 
     public void handleHearingUnallocated(final HearingUnallocated hearingUnallocated) {
         this.momento.setDeleted(true);
-
-        final List<UUID> offencesToBeRemoved = hearingUnallocated.getProsecutionCaseIds();
-        final List<UUID> defendantsToBeRemoved = hearingUnallocated.getProsecutionCaseIds();
-        final List<UUID> prosecutionCasesToBeRemoved = hearingUnallocated.getProsecutionCaseIds();
-
-        // Remove offences from all defendants
-        momento.getHearing().getProsecutionCases().forEach(
-                prosecutionCase -> prosecutionCase.getDefendants().forEach(
-                        defendant -> defendant.getOffences()
-                                .removeIf(offence -> offencesToBeRemoved.contains(offence.getId()))
-                )
-        );
-
-        // Remove defendants with no offences from all prosecution cases
-        momento.getHearing().getProsecutionCases().forEach(
-                prosecutionCase -> prosecutionCase.getDefendants()
-                        .removeIf(defendant -> defendantsToBeRemoved.contains(defendant.getId()))
-        );
-
-        // Remove prosecution cases with no defendants
-        momento.getHearing().getProsecutionCases()
-                .removeIf(prosecutionCase -> prosecutionCasesToBeRemoved.contains(prosecutionCase.getId()));
+        this.momento.setDuplicate(true);
+        this.momento.setHearing(null);
     }
 
     public Stream<Object> changeNextHearingStartDate(final UUID hearingId, final UUID seedingHearingId, final ZonedDateTime nextHearingStartDate) {
