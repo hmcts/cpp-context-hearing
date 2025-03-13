@@ -4,18 +4,13 @@
     "id": "fab947a3-c50c-4dbb-accf-b2758b1d2d6d",
     "status": "QC",
     "title": "Mr",
-    "firstName": "Eric",
-    "lastName": "Ormsby",
+    "firstName": "James",
+    "lastName": "Jonny",
     "defendants": [
-      "DEFENDANT_ID1",
-      "DEFENDANT_ID2"
+      "DEFENDANT_ID1"
     ],
     "attendanceDays": [
-      "2018-07-17",
-      "2018-07-18",
-      "2018-07-19",
-      "2018-07-21",
-      "2018-07-22"
+      "2025-02-17"
     ]
   }
 }

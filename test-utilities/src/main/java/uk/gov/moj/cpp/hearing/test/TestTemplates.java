@@ -8,6 +8,7 @@ import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.HearingLanguage.WELSH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
@@ -28,13 +29,13 @@ import static uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand.ini
 import static uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand.updatePleaCommand;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.ORGANISATION;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.NUMBER_OF_GROUP_CASES;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.associatedPerson;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.hearingDay;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.legalEntityDefendant;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.organisation;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.personDefendant;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.NUMBER_OF_GROUP_CASES;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 
 import uk.gov.justice.core.courts.ApplicantCounsel;
@@ -127,7 +128,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1729,10 +1730,11 @@ public class TestTemplates {
         private AddDefenceCounselCommandTemplates() {
         }
 
-        public static AddDefenceCounsel addDefenceCounselCommandTemplate(final UUID hearingId) {
+        public static AddDefenceCounsel addDefenceCounselCommandTemplate(final CommandHelpers.InitiateHearingCommandHelper hearingOne) {
+            final List<UUID> defendantIds = getDefendantIdsOnHearing(hearingOne.getHearing());
             final DefenceCounsel defenceCounsel = new DefenceCounsel(
                     Arrays.asList(now()),
-                    Arrays.asList(randomUUID()),
+                    defendantIds,
                     STRING.next(),
                     randomUUID(),
                     STRING.next(),
@@ -1741,7 +1743,7 @@ public class TestTemplates {
                     STRING.next(),
                     randomUUID()
             );
-            return new AddDefenceCounsel(defenceCounsel, hearingId);
+            return new AddDefenceCounsel(defenceCounsel, hearingOne.getHearingId());
         }
 
         public static AddDefenceCounsel addDefenceCounselCommandTemplateWithoutMiddleName(final UUID hearingId) {
@@ -1762,7 +1764,16 @@ public class TestTemplates {
         public static AddDefenceCounsel addDefenceCounselCommandTemplate(final UUID hearingId, final DefenceCounsel defenceCounsel) {
             return new AddDefenceCounsel(defenceCounsel, hearingId);
         }
+
+        private static List<UUID> getDefendantIdsOnHearing(final Hearing hearing) {
+            return hearing.getProsecutionCases().stream()
+                    .map(ProsecutionCase::getDefendants)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList()).stream().map(uk.gov.justice.core.courts.Defendant::getId).collect(toList());
+        }
     }
+
+
 
     public static class UpdateDefenceCounselCommandTemplates {
         private UpdateDefenceCounselCommandTemplates() {
