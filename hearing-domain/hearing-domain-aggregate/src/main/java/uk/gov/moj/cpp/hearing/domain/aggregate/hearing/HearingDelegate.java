@@ -349,7 +349,10 @@ public class HearingDelegate implements Serializable {
         if (this.momento.getHearing() == null) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.update-court-application' event as hearing not found", hearingId));
         }
-        return Stream.of(new ApplicationDetailChanged(hearingId, courtApplication));
+        if (this.momento.getHearing().getHasSharedResults() == null || !this.momento.getHearing().getHasSharedResults()) {
+            return Stream.of(new ApplicationDetailChanged(hearingId, courtApplication));
+        }
+        return Stream.empty();
     }
 
     /**
