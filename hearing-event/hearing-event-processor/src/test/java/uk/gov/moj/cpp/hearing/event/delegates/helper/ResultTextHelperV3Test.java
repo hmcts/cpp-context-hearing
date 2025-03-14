@@ -27,7 +27,7 @@ public class ResultTextHelperV3Test {
 
 
     public static final String TEXT_FOR_PROMPTS = "Vehicle {makeOfVehicle} {vehicleRegistration} for which clamping order made on {clampingOrderMadeOn} not to be sold. {vehicleToBeReleasedOnPaymentOfTheChargesDue} {vehicleToBeReleasedForthwithWithoutPaymentOfAnyChargesDue}.";
-    public static final String TEXT_FOR_CONDITIONAL = "Clamping order made for vehicle {makeOfVehicle} {vehicleRegistration} [and vehicle {makeOfSecondVehicle} {vehicleRegistrationOfSecondVehicle}] to take effect on. [Reasons: {reasons}.]";
+    public static final String TEXT_FOR_CONDITIONAL = "Clamping order made for vehicle {makeOfVehicle} {vehicleRegistration} [and vehicle {makeOfSecondVehicle} {vehicleRegistrationOfSecondVehicle}] to take effect on. [Reasons: {reasons}.{Concurrent}]";
     public static final String TEXT_FOR_PROMPTS_WITH_ALL_EMPTY = "Vehicle {makeOfVehicle} for which clamping order made on not to be sold. {vehicleToBeReleasedOnPaymentOfTheChargesDue}.";
     public static final String TEXT_FOR_CONDITIONAL_WITH_ALL_EMPTY = "Clamping order made for vehicle {makeOfVehicle} [and vehicle {makeOfSecondVehicle} {vehicleRegistrationOfSecondVehicle}] to take effect on. [Reasons: {reasons}.]";
     public static final String TEXT_FOR_RESULT_LABEL = "Vehicle {makeOfVehicle} %ResultLabel%.";
@@ -116,7 +116,7 @@ public class ResultTextHelperV3Test {
 
     @Test
     public void shouldSetResultTextForPromptDirectiveWithBooleanValues(){
-        final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", "No", null, null, null);
+        final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", "No", null, null, null, "false");
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -126,7 +126,7 @@ public class ResultTextHelperV3Test {
 
     @Test
     public void shouldSetResultTextForPromptDirectiveWithEmptySomeValues(){
-        final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", null, null, null, null);
+        final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", null, null, null, null, "false");
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -135,7 +135,7 @@ public class ResultTextHelperV3Test {
 
     @Test
     public void shouldSetResultTextForPromptDirectiveWithEmptyValues(){
-        final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null, null, null, null);
+        final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null, null, null, null, "false");
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -194,7 +194,7 @@ public class ResultTextHelperV3Test {
 
 
         treeNodeList.get(0).addChildren(getTreeNodesForNameAddress("Organisation Name", null, null, null, "~Name"));
-        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", "No", null, null,  null));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", "No", null, null,  null, "false"));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -209,7 +209,7 @@ public class ResultTextHelperV3Test {
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesWithOnlyResultTextTemplate("result Text with %NEXH% and %NEXB%");
 
         treeNodeList.get(0).addChildren(getTreeNodesForNameAddress(null, null, null, null, "~Name"));
-        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, "No", null, null,  null));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, "No", null, null,  null, "false"));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -222,7 +222,7 @@ public class ResultTextHelperV3Test {
 
     @Test
     public void shouldSetResultTextForConditionalPromptsWithValues(){
-        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty"));
+        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty", "false"));
 
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
@@ -232,7 +232,7 @@ public class ResultTextHelperV3Test {
 
     @Test
     public void shouldSetResultTextForConditionalPromptsWithoutValues(){
-        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", null, null, "guilty"));
+        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", null, null, "guilty", "false"));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -243,7 +243,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextForConditionalChildWithValues(){
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesWithOnlyResultTextTemplate("result Text [with %NEXH%] get");
 
-        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty"));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty", "false"));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -255,7 +255,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextForConditionalChildWithNoResultText(){
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesWithOnlyResultTextTemplate("result Text [with %NEXH%] get");
 
-        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(null, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty"));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(null, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty", "false"));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -267,7 +267,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextForConditionalWithOutChild(){
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesWithOnlyResultTextTemplate("result Text [with %NEXHH%] get");
 
-        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(null, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty"));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(null, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty", "false"));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -279,7 +279,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextForConditionalChildExistsWithoutValues(){
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesWithOnlyResultTextTemplate("result Text [with %NEXH%] get");
 
-        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_CONDITIONAL_WITH_ALL_EMPTY, null, null, null, null, null));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_CONDITIONAL_WITH_ALL_EMPTY, null, null, null, null, null, "false"));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -293,7 +293,7 @@ public class ResultTextHelperV3Test {
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesWithOnlyResultTextTemplate("result Text with %AllChildText%");
 
         treeNodeList.get(0).addChildren(getTreeNodesForNameAddress("Organisation Name", null, null, null, "~Name"));
-        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", "No", null, null,  null));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", "No", null, null,  null, "false"));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -308,7 +308,7 @@ public class ResultTextHelperV3Test {
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesWithOnlyResultTextTemplate("result Text with %AllChildText%");
 
         treeNodeList.get(0).addChildren(getTreeNodesForNameAddress("Organisation Name", null, null, null, "~Name"));
-        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null, null, null,  null));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null, null, null,  null, "false"));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -323,7 +323,7 @@ public class ResultTextHelperV3Test {
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesWithOnlyResultTextTemplate("result Text with %AllChildText%");
 
         treeNodeList.get(0).addChildren(getTreeNodesForNameAddress(null, null, null, null, "~Name"));
-        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null, null, null,  null));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null, null, null,  null, "false"));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -338,7 +338,7 @@ public class ResultTextHelperV3Test {
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesWithOnlyResultTextTemplate("result Text with %AllChildText%");
 
         treeNodeList.get(0).addChildren(getTreeNodesForNameAddress("Organisation Name", null, null, null, "~Name"));
-        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", "No", null, null,  null));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", "No", null, null,  null, "false"));
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirectiveWithAlwaysPublished(TEXT_FOR_PROMPTS, "make Of Vehicle", "No"));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
@@ -355,7 +355,7 @@ public class ResultTextHelperV3Test {
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesWithOnlyResultTextTemplate("result Text with %AllChildText%");
 
         treeNodeList.get(0).addChildren(getTreeNodesForNameAddress(null, null, null, null, "~Name"));
-        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null, null, null,  null));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null, null, null,  null, "false"));
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirectiveWithAlwaysPublished(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
@@ -369,7 +369,7 @@ public class ResultTextHelperV3Test {
 
     @Test
     public void shouldSetResultTextWithResultLabel(){
-        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_RESULT_LABEL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty"));
+        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_RESULT_LABEL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty", "false"));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -378,7 +378,7 @@ public class ResultTextHelperV3Test {
 
     @Test
     public void shouldSetResultTextWithAllNoneNullPrompts(){
-        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_ALL_PROMPTS, "value1", "No", null, null, "guilty"));
+        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_ALL_PROMPTS, "value1", "No", null, null, "guilty", "false"));
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
@@ -387,7 +387,7 @@ public class ResultTextHelperV3Test {
 
     @Test
     public void shouldSetResultTextForNoResultText(){
-        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty"));
+        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty", "false"));
         treeNodeList.get(0).addChildren(getTreeNodesWithoutResultTextTemplate());
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
@@ -396,13 +396,24 @@ public class ResultTextHelperV3Test {
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXH - Result Label\nClamping order made for vehicle make Of Vehicle vehicle Registration Value and vehicle make Of Second Vehicle vehicle Registration Of Second Vehicle to take effect on. Reasons: guilty."));
     }
 
+    @Test
+    public void shouldSetResultTextForYesBoxIsTrue(){
+        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty", "true"));
+        treeNodeList.get(0).addChildren(getTreeNodesWithoutResultTextTemplate());
+
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
+
+        assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), CoreMatchers.is ("SCode - Label"));
+        assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXH - Result Label\nClamping order made for vehicle make Of Vehicle vehicle Registration Value and vehicle make Of Second Vehicle vehicle Registration Of Second Vehicle to take effect on. Reasons: guilty.Concurrent"));
+    }
+
     private List<TreeNode<ResultLine2>> getTreeNodesForPromptDirective(final String templateText, final String makeOfVehicle, final String vehicleToBeReleasedOnPaymentOfTheChargesDue,
-                                                                      final String makeOfSecondVehicle, final String vehicleRegistrationOfSecondVehicle, final String reasons) {
-        return singletonList(getTreeNode(templateText, makeOfVehicle, vehicleToBeReleasedOnPaymentOfTheChargesDue, makeOfSecondVehicle, vehicleRegistrationOfSecondVehicle, reasons));
+                                                                      final String makeOfSecondVehicle, final String vehicleRegistrationOfSecondVehicle, final String reasons, final String concurrent) {
+        return singletonList(getTreeNode(templateText, makeOfVehicle, vehicleToBeReleasedOnPaymentOfTheChargesDue, makeOfSecondVehicle, vehicleRegistrationOfSecondVehicle, reasons, concurrent));
     }
 
     private TreeNode<ResultLine2> getTreeNode(final String templateText, final String makeOfVehicle, final String vehicleToBeReleasedOnPaymentOfTheChargesDue,
-                                             final String makeOfSecondVehicle, final String vehicleRegistrationOfSecondVehicle, final String reasons) {
+                                             final String makeOfSecondVehicle, final String vehicleRegistrationOfSecondVehicle, final String reasons, final String concurrent) {
 
         final TreeNode<ResultLine2> treeNode = new TreeNode<>(randomUUID(), null);
         treeNode.setJudicialResult(JudicialResult.judicialResult()
@@ -452,7 +463,13 @@ public class ResultTextHelperV3Test {
                         .withPromptReference("reasons")
                         .withType("TXT")
                         .withValue(reasons)
-                        .build())
+                        .build(),
+                        judicialResultPrompt()
+                                .withLabel("Concurrent")
+                                .withPromptReference("Concurrent")
+                                .withType("YESBOX")
+                                .withValue(concurrent)
+                                .build())
                 )
                 .build());
 
