@@ -28,6 +28,7 @@ public class ResultTextParseRule <T>{
     public static final String PROMPT_DIRECTIVE = "{";
     public static final String CONDITIONAL_DIRECTIVE = "]";
     public static final String VARIABLE_RESULT_DIRECTIVE = "%";
+    private static final String YESBOX = "YESBOX";
 
 
     private final String lastChar;
@@ -150,7 +151,7 @@ public class ResultTextParseRule <T>{
                 .filter(p -> !TRUE.equals(getDefPrompt(p, node.getResultDefinition().getData().getPrompts()).isHidden()))
                 .sorted(comparing(JudicialResultPrompt::getPromptSequence, nullsLast(naturalOrder())))
                 .filter(p -> Objects.nonNull(p.getValue()))
-                .map(p -> (BOOLEAN.equals(p.getType()) ? "" : p.getLabel() + ": ") + getPromptValue(p))
+                .map(p -> ((BOOLEAN.equals(p.getType()) || YESBOX.equals(p.getType())) ? "" : p.getLabel() + ": ") + getPromptValue(p))
                 .filter(v -> !"".equals(v))
                 .collect(Collectors.joining(", "));
     }
@@ -216,9 +217,9 @@ public class ResultTextParseRule <T>{
     }
 
     private static String getPromptValue(final JudicialResultPrompt prompt) {
-        if(prompt.getValue() == null || (BOOLEAN.equals(prompt.getType()) && !(parseBoolean(prompt.getValue()) || "Yes".equals(prompt.getValue())))){
+        if(prompt.getValue() == null || ((BOOLEAN.equals(prompt.getType()) || YESBOX.equals(prompt.getType())) && !(parseBoolean(prompt.getValue()) || "Yes".equals(prompt.getValue())))){
             return "";
-        }else if(BOOLEAN.equals(prompt.getType())){
+        }else if(BOOLEAN.equals(prompt.getType()) || YESBOX.equals(prompt.getType())){
             return prompt.getLabel();
         }else{
             return prompt.getValue();
