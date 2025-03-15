@@ -9,6 +9,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,7 +69,7 @@ public class CourtListRestrictionEventListenerTest {
         final List<UUID> offenceIds = singletonList(offenceId);
 
         final CourtListRestricted courtListRestricted = new CourtListRestricted(caseIds, null, null, null, null, defendantIds, hearingId, offenceIds, true);
-        when(hearingRepository.findBy(any())).thenReturn(hearingEntity(hearingId, caseId, defendantId, offenceId));
+        when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.of(hearingEntity(hearingId, caseId, defendantId, offenceId)));
         final Metadata metadata = metadataBuilder()
                 .withId(UUID.randomUUID())
                 .withName("hearing.event.court-list-restricted")
@@ -122,7 +123,7 @@ public class CourtListRestrictionEventListenerTest {
         final List<UUID> respondentIds = singletonList(respondentId);
 
         final CourtListRestricted courtListRestricted = new CourtListRestricted(null, applicantIds, applicationIds, respondentIds, null, null, hearingId, null, true);
-        when(hearingRepository.findBy(any())).thenReturn(hearingEntity(hearingId, asList(UUID.randomUUID()), emptyList(), null));
+        when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.of(hearingEntity(hearingId, asList(UUID.randomUUID()), emptyList(), null)));
         final Metadata metadata = metadataBuilder()
                 .withId(UUID.randomUUID())
                 .withName("hearing.event.court-list-restricted")
@@ -154,7 +155,7 @@ public class CourtListRestrictionEventListenerTest {
         final List<UUID> applicationIds = singletonList(applicationId);
 
         final CourtListRestricted courtListRestricted = new CourtListRestricted(null, null, applicationIds, null, null, null, hearingId, null, true);
-        when(hearingRepository.findBy(any())).thenReturn(hearingEntity(hearingId));
+        when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.of(hearingEntity(hearingId)));
         final Metadata metadata = metadataBuilder()
                 .withId(UUID.randomUUID())
                 .withName("hearing.event.court-list-restricted")
@@ -183,7 +184,7 @@ public class CourtListRestrictionEventListenerTest {
         final List<UUID> applicationIds = singletonList(applicationId);
 
         final CourtListRestricted courtListRestricted = new CourtListRestricted(null, singletonList(applicantId2), applicationIds, null, null, null, hearingId, null, false);
-        when(hearingRepository.findBy(any())).thenReturn(hearingEntity(hearingId, singletonList(applicationId), asList(applicantId1, applicantId2), emptyList()));
+        when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.of(hearingEntity(hearingId, singletonList(applicationId), asList(applicantId1, applicantId2), emptyList())));
         final Metadata metadata = metadataBuilder()
                 .withId(UUID.randomUUID())
                 .withName("hearing.event.court-list-restricted")
@@ -202,6 +203,26 @@ public class CourtListRestrictionEventListenerTest {
         assertThat(applicationCourtListRestriction.getCourtApplicationApplicantIds().size(), is(1));
         assertThat(applicationCourtListRestriction.getCourtApplicationApplicantIds().get(0), is(applicantId1));
         assertThat(applicationCourtListRestriction.getCourtApplicationRespondentIds().size(), is(0));
+    }
+
+    @Test
+    public void shouldDoNothingIfThereIsNoHearing() throws IOException {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID applicationId = UUID.randomUUID();
+        final UUID applicantId2 = UUID.randomUUID();
+
+        final List<UUID> applicationIds = singletonList(applicationId);
+
+        final CourtListRestricted courtListRestricted = new CourtListRestricted(null, singletonList(applicantId2), applicationIds, null, null, null, hearingId, null, false);
+        when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.empty());
+        final Metadata metadata = metadataBuilder()
+                .withId(UUID.randomUUID())
+                .withName("hearing.event.court-list-restricted")
+                .build();
+
+        final Envelope<CourtListRestricted> event = envelopeFrom(metadata, courtListRestricted);
+        courtListRestrictionEventListener.processCourtListRestrictions(event);
+        verify(hearingRepository, never()).save(hearingArgumentCaptor.capture());
     }
 
     private Hearing hearingEntity(final UUID hearingId, final UUID caseId, final UUID defendantId, final UUID offenceId){

@@ -9,31 +9,13 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtCentre;
-import uk.gov.justice.core.courts.Defendant;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.JurisdictionType;
-import uk.gov.justice.core.courts.Offence;
-import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.Verdict;
-import uk.gov.justice.core.courts.VerdictType;
-import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
-import uk.gov.moj.cpp.hearing.domain.event.HearingBreachApplicationsAdded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
-import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicate;
-import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingUserAddedToJudiciary;
-import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
+import uk.gov.justice.core.courts.*;
+import uk.gov.moj.cpp.hearing.domain.event.*;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
@@ -44,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -583,6 +566,54 @@ public class HearingDelegateTest {
         assertThat(hearingMarkedAsDuplicate.getDefendantIds().size(), is(1));
         assertThat(hearingMarkedAsDuplicate.getProsecutionCaseIds().size(), is(1));
         assertThat(hearingMarkedAsDuplicate.getOffenceIds().size(), is(1));
+    }
+    @Test
+    void updateCourtApplication_shouldReturnApplicationDetailChangedEvent() {
+        UUID hearingId = UUID.randomUUID();
+        final uk.gov.justice.core.courts.CourtApplication courtApplication = uk.gov.justice.core.courts.CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .build();
+        momento.setHearing(Hearing.hearing().withId(hearingId).build());
+
+        final Stream<Object> result = hearingDelegate.updateCourtApplication(hearingId, courtApplication);
+
+        List<Object> events = result.collect(Collectors.toList());
+        assertEquals(1, events.size());
+        assertTrue(events.get(0) instanceof ApplicationDetailChanged);
+        ApplicationDetailChanged event = (ApplicationDetailChanged) events.get(0);
+        assertEquals(hearingId, event.getHearingId());
+        assertEquals(courtApplication, event.getCourtApplication());
+    }
+
+    @Test
+    void updateCourtApplication_shouldReturnHearingIgnoredMessageWhenHearingNotFound() {
+        UUID hearingId = UUID.randomUUID();
+        momento.setHearing(null);
+        Stream<Object> result = hearingDelegate.updateCourtApplication(hearingId, uk.gov.justice.core.courts.CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .build());
+
+        List<Object> events = result.collect(Collectors.toList());
+        assertEquals(1, events.size());
+        assertTrue(events.get(0) instanceof HearingChangeIgnored);
+        HearingChangeIgnored event = (HearingChangeIgnored) events.get(0);
+        assertEquals(hearingId, event.getHearingId());
+        assertEquals("Rejecting 'hearing.update-court-application' event as hearing not found", event.getReason());
+    }
+
+    @Test
+    void updateCourtApplication_shouldReturnEmptyStreamWhenHearingHasSharedResults() {
+        UUID hearingId = UUID.randomUUID();
+        CourtApplication courtApplication = uk.gov.justice.core.courts.CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .build();
+
+        momento.setHearing(Hearing.hearing().withId(hearingId).build());
+        momento.getHearing().setHasSharedResults(true);
+        Stream<Object> result = hearingDelegate.updateCourtApplication(hearingId, courtApplication);
+
+        List<Object> events = result.collect(Collectors.toList());
+        assertTrue(events.isEmpty());
     }
 
     private List<ProsecutionCase> caseList(ProsecutionCase... cases) {

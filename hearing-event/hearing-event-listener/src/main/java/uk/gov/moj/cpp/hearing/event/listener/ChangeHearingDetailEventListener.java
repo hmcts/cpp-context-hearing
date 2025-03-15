@@ -14,6 +14,8 @@ import uk.gov.moj.cpp.hearing.mapping.JudicialRoleJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
@@ -38,7 +40,11 @@ public class ChangeHearingDetailEventListener {
 
         final HearingDetailChanged hearingDetailChanged = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingDetailChanged.class);
 
-        final Hearing hearing = hearingRepository.findBy(hearingDetailChanged.getId());
+        final Optional<Hearing> hearingEntity = hearingRepository.findOptionalBy(hearingDetailChanged.getId());
+        if(hearingEntity.isEmpty()){
+            return;
+        }
+        final Hearing hearing = hearingEntity.get();
 
         hearing.setHearingType(with(hearing.getHearingType(), type -> {
             type.setId(hearingDetailChanged.getType().getId());

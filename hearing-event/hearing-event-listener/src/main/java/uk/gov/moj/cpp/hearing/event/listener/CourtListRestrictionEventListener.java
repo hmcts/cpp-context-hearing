@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,8 +43,11 @@ public class CourtListRestrictionEventListener {
     public void processCourtListRestrictions(final Envelope<CourtListRestricted> event) throws IOException {
         final CourtListRestricted courtListRestricted = event.payload();
         LOGGER.info("CourtListRestricted for hearing id {} ", courtListRestricted.getHearingId());
-        final Hearing hearing = hearingRepository.findBy(courtListRestricted.getHearingId());
-
+        final Optional<Hearing> hearingEntity = hearingRepository.findOptionalBy(courtListRestricted.getHearingId());
+        if(hearingEntity.isEmpty()){
+            return;
+        }
+        final Hearing hearing = hearingEntity.get();
         if (hasApplicationRestriction(courtListRestricted)) {
             applyCourtApplicationRestrictions(courtListRestricted, hearing);
         }

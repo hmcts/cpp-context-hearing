@@ -127,8 +127,11 @@ public class UpdateOffencesForDefendantEventListener {
     public void updateOffence(final JsonEnvelope envelope) {
 
         final OffenceUpdated offenceUpdated = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceUpdated.class);
-        final Hearing hearing = hearingRepository.findBy(offenceUpdated.getHearingId());
-        final Offence offence = offenceJPAMapper.toJPA(hearing, offenceUpdated.getDefendantId(), offenceUpdated.getOffence());
+        final Optional<Hearing> hearing = hearingRepository.findOptionalBy(offenceUpdated.getHearingId());
+        if(hearing.isEmpty()){
+            return;
+        }
+        final Offence offence = offenceJPAMapper.toJPA(hearing.get(), offenceUpdated.getDefendantId(), offenceUpdated.getOffence());
 
         final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(offenceUpdated.getDefendantId(), offenceUpdated.getHearingId()));
 
@@ -146,7 +149,11 @@ public class UpdateOffencesForDefendantEventListener {
     public void updateOffenceV2(final JsonEnvelope envelope) {
 
         final OffenceUpdatedV2 offenceUpdated = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceUpdatedV2.class);
-        final Hearing hearing = hearingRepository.findBy(offenceUpdated.getHearingId());
+        final Optional<Hearing> hearingEntity = hearingRepository.findOptionalBy(offenceUpdated.getHearingId());
+        if(hearingEntity.isEmpty()){
+            return;
+        }
+        final Hearing hearing = hearingEntity.get();
         final Set<Offence> offences = offenceJPAMapper.toJPA(hearing, offenceUpdated.getDefendantId(), offenceUpdated.getOffences());
 
         final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(offenceUpdated.getDefendantId(), offenceUpdated.getHearingId()));
@@ -168,11 +175,14 @@ public class UpdateOffencesForDefendantEventListener {
 
         final OffenceDeleted offenceDeleted = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceDeleted.class);
 
-        final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(offenceDeleted.getId(), offenceDeleted.getHearingId()));
+        final Optional<Offence> offence = offenceRepository.findOptionalBy(new HearingSnapshotKey(offenceDeleted.getId(), offenceDeleted.getHearingId()));
+        if(offence.isEmpty()){
+            return;
+        }
 
-        offence.getDefendant().getOffences().removeIf(o -> o.getId().getId().equals(offenceDeleted.getId()));
+        offence.get().getDefendant().getOffences().removeIf(o -> o.getId().getId().equals(offenceDeleted.getId()));
 
-        defendantRepository.save(offence.getDefendant());
+        defendantRepository.save(offence.get().getDefendant());
     }
 
     @Transactional
@@ -182,11 +192,14 @@ public class UpdateOffencesForDefendantEventListener {
         final OffenceDeletedV2 offenceDeleted = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceDeletedV2.class);
 
         offenceDeleted.getIds().forEach(offenceId -> {
-            final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(offenceId, offenceDeleted.getHearingId()));
+            final Optional<Offence> offence = offenceRepository.findOptionalBy(new HearingSnapshotKey(offenceId, offenceDeleted.getHearingId()));
+            if(offence.isEmpty()){
+                return;
+            }
 
-            offence.getDefendant().getOffences().removeIf(o -> o.getId().getId().equals(offenceId));
+            offence.get().getDefendant().getOffences().removeIf(o -> o.getId().getId().equals(offenceId));
 
-            defendantRepository.save(offence.getDefendant());
+            defendantRepository.save(offence.get().getDefendant());
         });
     }
 
@@ -201,7 +214,12 @@ public class UpdateOffencesForDefendantEventListener {
         final List<UUID> defendantIds = offencesRemovedFromExistingHearing.getDefendantIds();
         final List<UUID> offenceIds = offencesRemovedFromExistingHearing.getOffenceIds();
         final Set<UUID> removedDefendantIdsFromHearing = new HashSet<>();
-        final Hearing hearing = updateOffencesForDefendantService.removeOffencesFromExistingHearing(hearingRepository.findBy(hearingId), prosecutionCaseIds, defendantIds, offenceIds, removedDefendantIdsFromHearing);
+
+        Optional<Hearing> existingHearing = hearingRepository.findOptionalBy(hearingId);
+        if(existingHearing.isEmpty()){
+            return;
+        }
+        final Hearing hearing = updateOffencesForDefendantService.removeOffencesFromExistingHearing(existingHearing.get(), prosecutionCaseIds, defendantIds, offenceIds, removedDefendantIdsFromHearing);
 
         hearingRepository.save(hearing);
 

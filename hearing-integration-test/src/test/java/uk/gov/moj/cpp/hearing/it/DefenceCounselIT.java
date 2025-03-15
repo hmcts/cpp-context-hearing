@@ -156,7 +156,7 @@ class DefenceCounselIT extends AbstractIT {
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))))) {
 
             addDefenceCounsel(getRequestSpec(), hearingOne.getHearingId(),
-                    addDefenceCounselCommandTemplate(hearingOne.getHearingId())
+                    addDefenceCounselCommandTemplate(hearingOne)
             );
 
             jsonPath = publicDefenceCounselAdded.waitFor();
@@ -188,7 +188,7 @@ class DefenceCounselIT extends AbstractIT {
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))))) {
 
             addDefenceCounsel(getRequestSpec(), hearingOne.getHearingId(),
-                    addDefenceCounselCommandTemplate(hearingOne.getHearingId())
+                    addDefenceCounselCommandTemplate(hearingOne)
             );
 
             jsonPath = publicDefenceCounselAdded.waitFor();
@@ -206,7 +206,7 @@ class DefenceCounselIT extends AbstractIT {
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))))) {
 
             firstDefenceCounselCommand = addDefenceCounsel(getRequestSpec(), hearingOne.getHearingId(),
-                    addDefenceCounselCommandTemplate(hearingOne.getHearingId())
+                    addDefenceCounselCommandTemplate(hearingOne)
             );
 
             publicDefenceCounselAdded.waitFor();
@@ -227,7 +227,7 @@ class DefenceCounselIT extends AbstractIT {
 
     private DefenceCounsel createSecondDefenceCounsel(final InitiateHearingCommandHelper hearingOne, final DefenceCounsel firstDefenceCounsel) {
         final AddDefenceCounsel secondDefenceCounselCommand = addDefenceCounsel(getRequestSpec(), hearingOne.getHearingId(),
-                addDefenceCounselCommandTemplate(hearingOne.getHearingId())
+                addDefenceCounselCommandTemplate(hearingOne)
         );
         DefenceCounsel secondDefenceCounsel = secondDefenceCounselCommand.getDefenceCounsel();
         pollForHearing(hearingOne.getHearingId().toString(),

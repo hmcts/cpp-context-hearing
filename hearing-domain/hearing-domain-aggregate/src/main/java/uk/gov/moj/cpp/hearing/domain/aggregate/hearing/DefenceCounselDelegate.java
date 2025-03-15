@@ -1,15 +1,22 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.stream.Collectors.toSet;
+
 import uk.gov.justice.core.courts.DefenceCounsel;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpdated;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DefenceCounselDelegate implements Serializable {
@@ -36,7 +43,10 @@ public class DefenceCounselDelegate implements Serializable {
 
     public Stream<Object> addDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId, boolean isHearingEnded) {
         final Hearing hearing = this.momento.getHearing();
-
+        // Check for defendant(s) exists on the hearing
+        if(isNoDfendantsOnTheHearing(defenceCounsel, hearing)) {
+            return Stream.empty();
+        }
         if (this.momento.getDefenceCounsels().containsKey(defenceCounsel.getId())) {
             return Stream.of(new DefenceCounselChangeIgnored(
                     String.format("Provided DefenceCounsel already exists, payload [%s]", defenceCounsel.toString()),
@@ -48,6 +58,15 @@ public class DefenceCounselDelegate implements Serializable {
         }
 
         return Stream.of(new DefenceCounselAdded(defenceCounsel, hearingId));
+    }
+
+    private boolean isNoDfendantsOnTheHearing(final DefenceCounsel defenceCounsel, final Hearing hearing) {
+        final Set<UUID> defendantIds = hearing.getProsecutionCases().stream()
+                .map(ProsecutionCase::getDefendants)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()).stream().map(Defendant::getId).collect(toSet());
+
+        return defenceCounsel.getDefendants().stream().filter(aDefId -> defendantIds.contains(aDefId)).findFirst().isPresent() ? false:true;
     }
 
     public Stream<Object> removeDefenceCounsel(final UUID id, final UUID hearingId) {

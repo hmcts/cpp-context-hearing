@@ -4,6 +4,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -32,6 +33,7 @@ import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -121,7 +123,7 @@ public class ChangeHearingDetailEventListenerTest {
         hearing.setHearingType(type);
         hearing.setHasSharedResults(false);
 
-        when(this.hearingRepository.findBy(HEARING_ID)).thenReturn(hearing);
+        when(this.hearingRepository.findOptionalBy(HEARING_ID)).thenReturn(Optional.of(hearing));
         when(this.hearingDayJPAMapper.toJPA(any(), any())).thenReturn(hearingDays);
         when(this.judicialRoleJPAMapper.toJPA(any(), any())).thenReturn(judicialRoles);
 
@@ -180,6 +182,46 @@ public class ChangeHearingDetailEventListenerTest {
         // Should not change the shared results
         assertThat(hearing.getHasSharedResults(), equalTo(toBePersisted.getHasSharedResults()));
     }
+
+    @Test
+    public void shouldNotChangeMandatoryHearingDetailsIfThereIsNoHearing() {
+
+        // Should change Court Centre, Hearing Days, Judicial Roles, Hearing Type, Hearing Language, Jurisdiction Type and Reporting Restrictions
+        final HearingType type = createHearingType();
+        final CourtCentre courtCentre = createCourtCentre();
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(HEARING_ID);
+        hearing.setCourtCentre(courtCentre);
+        hearing.setHearingType(type);
+        hearing.setHasSharedResults(false);
+
+        when(this.hearingRepository.findOptionalBy(HEARING_ID)).thenReturn(Optional.empty());
+
+        HearingDetailChanged hearingDetailChanged = HearingDetailChanged.hearingDetailChanged()
+                .setId(HEARING_ID)
+                .setType(uk.gov.justice.core.courts.HearingType.hearingType()
+                        .withId(randomUUID())
+                        .withDescription(STRING.next())
+                        .build())
+                .setCourtCentre(uk.gov.justice.core.courts.CourtCentre.courtCentre()
+                        .withId(randomUUID())
+                        .withName(STRING.next())
+                        .withRoomId(randomUUID())
+                        .withRoomName(STRING.next())
+                        .withWelshName(STRING.next())
+                        .withWelshRoomName(STRING.next())
+                        .build())
+                .setHearingLanguage(HearingLanguage.ENGLISH)
+                .setJurisdictionType(JurisdictionType.CROWN)
+                .setReportingRestrictionReason(STRING.next());
+
+        changeHearingDetailEventListener.hearingDetailChanged(envelopeFrom(metadataWithRandomUUID("hearing.event.detail-changed"),
+                objectToJsonObjectConverter.convert(hearingDetailChanged)));
+
+        verify(this.hearingRepository, never()).save(ahearingArgumentCaptor.capture());
+
+     }
 
     private HearingType createHearingType() {
         final HearingType type = new HearingType();

@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -99,6 +100,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -1614,7 +1616,7 @@ public class HearingEventListenerTest {
 
         final HearingAmended hearingAmended = new HearingAmended(hearingId, userId, SHARED_AMEND_LOCKED_USER_ERROR);
 
-        when(hearingRepository.findBy(hearingId)).thenReturn(hearingEntity);
+        when(hearingRepository.findOptionalBy(hearingId)).thenReturn(Optional.of(hearingEntity));
 
         hearingEventListener.amendHearing(envelopeFrom(metadataWithRandomUUID("hearing.event.amended"),
                 objectToJsonObjectConverter.convert(hearingAmended)
@@ -1628,6 +1630,25 @@ public class HearingEventListenerTest {
                 .with(Hearing::getAmendedByUserId, is(hearingAmended.getUserId()))
                 .with(Hearing::getEarliestNextHearingDate, is(notNullValue()))
         );
+    }
+
+    public void shouldDoNothingIfThereIsNoHearingForAmend() {
+
+        final UUID hearingId = randomUUID();
+        final UUID userId = randomUUID();
+        final Hearing hearingEntity = new Hearing()
+                .setId(hearingId);
+
+        final HearingAmended hearingAmended = new HearingAmended(hearingId, userId, SHARED_AMEND_LOCKED_USER_ERROR);
+
+        when(hearingRepository.findOptionalBy(hearingId)).thenReturn(Optional.empty());
+
+        hearingEventListener.amendHearing(envelopeFrom(metadataWithRandomUUID("hearing.event.amended"),
+                objectToJsonObjectConverter.convert(hearingAmended)
+        ));
+
+        verify(this.hearingRepository, never()).save(saveHearingCaptor.capture());
+
     }
 
     @Test
@@ -1661,7 +1682,7 @@ public class HearingEventListenerTest {
 
         final EarliestNextHearingDateChanged earliestNextHearingDateChanged = new EarliestNextHearingDateChanged(hearingId, seedingHearingId, earliestNextHearingDate);
 
-        when(hearingRepository.findBy(seedingHearingId)).thenReturn(hearingEntity);
+        when(hearingRepository.findOptionalBy(seedingHearingId)).thenReturn(Optional.of(hearingEntity));
 
         hearingEventListener.changeEarliestNextHearingDate(envelopeFrom(metadataWithRandomUUID("hearing.events.earliest-next-hearing-date-changed"),
                 objectToJsonObjectConverter.convert(earliestNextHearingDateChanged)
@@ -1673,6 +1694,28 @@ public class HearingEventListenerTest {
                 .with(Hearing::getId, is(hearingId))
                 .with(Hearing::getEarliestNextHearingDate, is(earliestNextHearingDate))
         );
+    }
+
+    @Test
+    public void shouldDoNothingIfThereIsNoHearing() {
+
+        final UUID hearingId = randomUUID();
+        final UUID seedingHearingId = randomUUID();
+        final ZonedDateTime earliestNextHearingDate = new UtcClock().now().withZoneSameInstant(ZoneId.of("UTC"));
+
+        final Hearing hearingEntity = new Hearing()
+                .setId(hearingId);
+
+        final EarliestNextHearingDateChanged earliestNextHearingDateChanged = new EarliestNextHearingDateChanged(hearingId, seedingHearingId, earliestNextHearingDate);
+
+        when(hearingRepository.findOptionalBy(seedingHearingId)).thenReturn(Optional.empty());
+
+        hearingEventListener.changeEarliestNextHearingDate(envelopeFrom(metadataWithRandomUUID("hearing.events.earliest-next-hearing-date-changed"),
+                objectToJsonObjectConverter.convert(earliestNextHearingDateChanged)
+        ));
+
+        verify(this.hearingRepository, never()).save(saveHearingCaptor.capture());
+
     }
 
     @Test
