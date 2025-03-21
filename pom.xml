@@ -86,7 +86,6 @@
         <module>hearing-domain</module>
         <module>hearing-event</module>
         <module>hearing-integration-test</module>
-        <module>hearing-performance-test</module>
         <module>hearing-service</module>
         <module>test-utilities</module>
         <module>hearing-json</module>

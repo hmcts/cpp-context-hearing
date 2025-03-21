@@ -34,7 +34,6 @@
         <extension module="org.wildfly.iiop-openjdk"/>
     </extensions>
 
-
     <management>
         <security-realms>
             <security-realm name="ManagementRealm">
