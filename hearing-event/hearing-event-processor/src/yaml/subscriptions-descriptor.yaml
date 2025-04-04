@@ -488,4 +488,7 @@ subscriptions_descriptor:
           schema_uri: http://justice.gov.uk/listing/courts/public.referencedata.event.user-associated-with-judiciary.json
 
 
+        - name: public.progression.events.court-application-deleted
+          schema_uri: http://justice.gov.uk/progression/courts/public.progression.events.court-application-deleted.json
+
       event_source_name: public.event.source

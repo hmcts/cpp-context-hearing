@@ -2,12 +2,17 @@ package uk.gov.moj.cpp.hearing.event.listener;
 
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 
+import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationHearingDeleted;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
@@ -83,5 +88,23 @@ public class HearingDeletedEventListenerTest {
                 .build()));
 
         verify(hearingRepository, never()).remove(hearing);
+    }
+
+    @Test
+    public void shouldProcessCourtApplicationDeleted() {
+        Envelope<CourtApplicationHearingDeleted> envelope = (Envelope<CourtApplicationHearingDeleted>) mock(Envelope.class);
+
+        final UUID hearingId = randomUUID();
+        final CourtApplicationHearingDeleted courtApplicationHearingDeleted = CourtApplicationHearingDeleted.courtApplicationHearingDeleted()
+                .withHearingId(hearingId)
+                .build();
+        given(envelope.payload()).willReturn(courtApplicationHearingDeleted);
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+
+        when(hearingRepository.findBy(any())).thenReturn(hearing);
+        hearingDeletedEventListener.processCourtApplicationDeleted(envelope);
+
+        verify(hearingRepository).remove(hearing);
     }
 }
