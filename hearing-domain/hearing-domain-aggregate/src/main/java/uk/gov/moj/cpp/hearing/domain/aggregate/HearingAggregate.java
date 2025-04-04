@@ -101,6 +101,7 @@ import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationHearingDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
@@ -391,6 +392,7 @@ public class HearingAggregate implements Aggregate {
                     this.hearingState = APPROVAL_REQUESTED;
                 }),
                 when(HearingDeleted.class).apply(deleted -> hearingDelegate.handleHearingDeleted()),
+                when(CourtApplicationHearingDeleted.class).apply(deleted -> hearingDelegate.handleHearingDeleted()),
                 when(HearingUnallocated.class).apply(hearingDelegate::handleHearingUnallocated),
                 when(NextHearingStartDateRecorded.class).apply(hearingDelegate::handleNextHearingStartDateRecorded),
                 when(EarliestNextHearingDateCleared.class).apply(cleared -> hearingDelegate.handleEarliestNextHearingDateCleared()),
@@ -564,6 +566,17 @@ public class HearingAggregate implements Aggregate {
     public Stream<Object> correctHearingEvent(final UUID latestHearingEventId, final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final HearingEvent hearingEvent, final UUID userId) {
         return apply(this.hearingEventDelegate.correctHearingEvent(latestHearingEventId, hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, userId));
     }
+
+    public Stream<Object> deleteCourtApplicationHearing(final UUID hearingId) {
+        if(momento.isDeleted() || this.momento.getHearing() == null || momento.isDuplicate()){
+            return Stream.empty();
+        }
+        return apply(Stream.of(CourtApplicationHearingDeleted.courtApplicationHearingDeleted()
+                .withHearingId(hearingId)
+                .build()
+        ));
+    }
+
 
     public Stream<Object> updateHearingDetails(final UUID id,
                                                final HearingType type,

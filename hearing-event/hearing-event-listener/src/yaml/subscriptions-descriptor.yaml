@@ -356,4 +356,7 @@ subscriptions_descriptor:
         - name: hearing.event.witness-added-to-hearing
           schema_uri: http://justice.gov.uk/core/courts/hearing.event.witness-added-to-hearing.json
 
+        - name: hearing.event.court-application-hearing-deleted
+          schema_uri: http://justice.gov.uk/hearing/event/hearing.event.court-application-hearing-deleted.json
+
       event_source_name: hearing
