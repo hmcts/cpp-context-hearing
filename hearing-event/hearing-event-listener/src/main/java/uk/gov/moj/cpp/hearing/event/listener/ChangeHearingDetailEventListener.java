@@ -69,7 +69,7 @@ public class ChangeHearingDetailEventListener {
         hearing.getJudicialRoles().clear();
         hearing.getJudicialRoles().addAll(judicialRoleJPAMapper.toJPA(hearing, hearingDetailChanged.getJudiciary()));
 
-        hearingRepository.save(hearing);
+        hearingRepository.saveAndFlush(hearing);
     }
 
     @Transactional
