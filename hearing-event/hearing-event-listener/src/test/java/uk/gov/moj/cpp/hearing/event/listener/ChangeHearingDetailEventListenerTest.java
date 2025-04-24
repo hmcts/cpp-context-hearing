@@ -51,7 +51,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ChangeHearingDetailEventListenerTest {
 
     private static final UUID HEARING_ID = randomUUID();
-    private static final UUID VACATED_REASON_ID = randomUUID();
 
     @Mock
     private HearingRepository hearingRepository;
@@ -148,7 +147,7 @@ public class ChangeHearingDetailEventListenerTest {
         changeHearingDetailEventListener.hearingDetailChanged(envelopeFrom(metadataWithRandomUUID("hearing.event.detail-changed"),
                 objectToJsonObjectConverter.convert(hearingDetailChanged)));
 
-        verify(this.hearingRepository).save(ahearingArgumentCaptor.capture());
+        verify(this.hearingRepository).saveAndFlush(ahearingArgumentCaptor.capture());
 
         final Hearing toBePersisted = ahearingArgumentCaptor.getValue();
 
