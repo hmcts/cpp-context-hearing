@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-viewstore</artifactId>
-        <version>17.0.75</version>
+        <version>17.0.76-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-viewstore-persistence</artifactId>
     <build>
