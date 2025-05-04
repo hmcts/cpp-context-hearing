@@ -249,7 +249,7 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
         final Response response = given().spec(getRequestSpec())
                 .and().contentType(REMOVE_OFFENCES_FROM_EXISTING_HEARING_COMMAND_MEDIA_TYPE)
                 .and().header(USER_ID, getLoggedInUser())
-                .and().body(new RemoveOffencesFromExistingHearing(hearingId, uuids))
+                .and().body(new RemoveOffencesFromExistingHearing(hearingId, uuids, null))
                 .when().post(REMOVE_OFFENCES_FROM_EXISTING_HEARING_COMMAND_ENDPOINT)
                 .then().extract().response();
 
@@ -257,7 +257,7 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
     }
 
     private void publicEventRemoveOffencesFromExistingHearing(final UUID hearingId, final List<UUID> uuids) throws JsonProcessingException {
-        JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(new RemoveOffencesFromExistingHearing(hearingId, uuids));
+        JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(new RemoveOffencesFromExistingHearing(hearingId, uuids, null));
         sendMessage(getPublicTopicInstance().createProducer(),
                 PUBLIC_PROGRESSION_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING,
                 commandJson,
@@ -268,7 +268,7 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
     }
 
     private void publicEventRemoveOffencesFromExistingAllocatedHearing(final UUID hearingId, final List<UUID> uuids) throws JsonProcessingException {
-        JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(new RemoveOffencesFromExistingHearing(hearingId, uuids));
+        JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(new RemoveOffencesFromExistingHearing(hearingId, uuids, true));
         sendMessage(getPublicTopicInstance().createProducer(),
                 PUBLIC_EVENTS_LISTING_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING,
                 commandJson,

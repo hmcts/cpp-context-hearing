@@ -445,7 +445,7 @@ public class UpdateOffencesForDefendantCommandHandlerTest {
                     });
                 });
 
-        final RemoveOffencesFromExistingHearing removeOffencesFromExistingHearing = new RemoveOffencesFromExistingHearing(hearingId,asList(offence2Id));
+        final RemoveOffencesFromExistingHearing removeOffencesFromExistingHearing = new RemoveOffencesFromExistingHearing(hearingId,asList(offence2Id), null);
 
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.remove-offences-from-existing-hearing"),
                 objectToJsonObjectConverter.convert(removeOffencesFromExistingHearing));
@@ -482,7 +482,7 @@ public class UpdateOffencesForDefendantCommandHandlerTest {
                     });
                 });
 
-        final RemoveOffencesFromExistingHearing removeOffencesFromExistingHearing = new RemoveOffencesFromExistingHearing(hearingId,asList(offence2Id));
+        final RemoveOffencesFromExistingHearing removeOffencesFromExistingHearing = new RemoveOffencesFromExistingHearing(hearingId,asList(offence2Id), null);
 
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.remove-offences-from-existing-allocated-hearing"),
                 objectToJsonObjectConverter.convert(removeOffencesFromExistingHearing));
@@ -511,7 +511,7 @@ public class UpdateOffencesForDefendantCommandHandlerTest {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final List<UUID> offenceIds = Arrays.asList(randomUUID(), randomUUID());
 
-        final RemoveOffencesFromExistingHearing removeOffencesFromExistingHearing = new RemoveOffencesFromExistingHearing(hearingId, offenceIds);
+        final RemoveOffencesFromExistingHearing removeOffencesFromExistingHearing = new RemoveOffencesFromExistingHearing(hearingId, offenceIds, null);
 
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.remove-offences-from-existing-hearing"),
                 objectToJsonObjectConverter.convert(removeOffencesFromExistingHearing));

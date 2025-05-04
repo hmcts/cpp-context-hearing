@@ -16,11 +16,15 @@ public class RemoveOffencesFromExistingHearing implements Serializable {
 
     private final List<UUID> offenceIds;
 
+    private final Boolean isNextHearingDeleting;
+
     @JsonCreator
     public RemoveOffencesFromExistingHearing(@JsonProperty("hearingId") final UUID hearingId,
-                                             @JsonProperty("offenceIds") final List<UUID> offenceIds) {
+                                             @JsonProperty("offenceIds") final List<UUID> offenceIds,
+                                             @JsonProperty("isNextHearingDeleting") final Boolean isNextHearingDeleting) {
         this.hearingId = hearingId;
         this.offenceIds = new ArrayList<>(offenceIds);
+        this.isNextHearingDeleting = isNextHearingDeleting;
     }
 
     public UUID getHearingId() {
@@ -29,6 +33,10 @@ public class RemoveOffencesFromExistingHearing implements Serializable {
 
     public List<UUID> getOffenceIds() {
         return offenceIds;
+    }
+
+    public Boolean getIsNextHearingDeleting() {
+        return isNextHearingDeleting;
     }
 
     @Override
