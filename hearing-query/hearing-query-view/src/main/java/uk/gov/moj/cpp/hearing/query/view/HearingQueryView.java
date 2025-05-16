@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
@@ -35,6 +36,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffec
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
+import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.DraftResultResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -43,6 +45,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCas
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
+import uk.gov.moj.cpp.hearing.query.view.service.ProgressionService;
 import uk.gov.moj.cpp.hearing.query.view.service.ReusableInfoService;
 import uk.gov.moj.cpp.hearing.query.view.service.ctl.CTLExpiryDateCalculatorService;
 import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatusResult;
@@ -50,6 +53,8 @@ import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,6 +65,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.persistence.NoResultException;
@@ -90,11 +96,15 @@ public class HearingQueryView {
     private static final String FIELD_OFFENCE_ID = "offenceId";
     private static final String FIELD_CUSTODY_TIME_LIMIT = "custodyTimeLimit";
     private static final String FIELD_CASE_IDS = "caseIds";
+    private static final String FIELD_COURT_APPLICATIONS = "courtApplications";
+    private static final String FIELD_APPLICATION_ID = "applicationId";
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingQueryView.class);
 
     @Inject
     private HearingService hearingService;
 
+    @Inject
+    private ProgressionService progressionService;
 
     @Inject
     private DefendantRepository defendantRepository;
@@ -272,13 +282,34 @@ public class HearingQueryView {
                 .withMetadataFrom(envelope);
     }
 
-
     public Envelope<Timeline> getTimelineByApplicationId(final JsonEnvelope envelope, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms) {
         final Optional<UUID> applicationId = getUUID(envelope.payloadAsJsonObject(), FIELD_ID);
 
-        final Timeline timeline = hearingService.getTimeLineByApplicationId(applicationId.get(), crackedIneffectiveVacatedTrialTypes, allCourtRooms);
+        final List<TimelineHearingSummary> allTimelineHearingSummaries = new ArrayList<>();
+        allTimelineHearingSummaries.addAll(hearingService.getTimelineHearingSummariesByApplicationId(applicationId.get(),
+                crackedIneffectiveVacatedTrialTypes, allCourtRooms));
 
-        return envelop(timeline)
+        final JsonObject courtApplicationPayload = progressionService.retrieveApplicationsByParentId(envelope, applicationId.get());
+
+        if (nonNull(courtApplicationPayload) && courtApplicationPayload.containsKey(FIELD_COURT_APPLICATIONS)){
+            final JsonArray courtApplicationsJson = courtApplicationPayload.getJsonArray(FIELD_COURT_APPLICATIONS);
+
+            courtApplicationsJson.stream().forEach(courtApplicationJson -> {
+                final JsonObject jsonObject = (JsonObject) courtApplicationJson;
+                final UUID childApplicationId = UUID.fromString(jsonObject.getString(FIELD_APPLICATION_ID));
+                final List<TimelineHearingSummary> childApplicationTimelineHearingSummaries = hearingService.getTimelineHearingSummariesByApplicationId(childApplicationId,
+                        crackedIneffectiveVacatedTrialTypes, allCourtRooms);
+                allTimelineHearingSummaries.addAll(childApplicationTimelineHearingSummaries);
+            });
+        }
+
+        // remove the duplicates
+        final Set<UUID> hearingIds = new HashSet<>();
+        return envelop(new Timeline(
+                allTimelineHearingSummaries
+                        .stream()
+                        .filter(e -> hearingIds.add(e.getHearingId()))
+                        .collect(Collectors.toList())))
                 .withName("hearing.timeline")
                 .withMetadataFrom(envelope);
     }

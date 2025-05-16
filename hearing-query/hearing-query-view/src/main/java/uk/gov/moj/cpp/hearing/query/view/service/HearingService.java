@@ -769,14 +769,17 @@ public class HearingService {
 
     @Transactional
     public Timeline getTimeLineByApplicationId(final UUID applicationId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms) {
+        final List<TimelineHearingSummary> hearingSummaries = getTimelineHearingSummariesByApplicationId(applicationId, crackedIneffectiveVacatedTrialTypes, allCourtRooms);
+        return new Timeline(hearingSummaries);
+    }
 
+    public List<TimelineHearingSummary> getTimelineHearingSummariesByApplicationId(final UUID applicationId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms) {
         final List<TimelineHearingSummary> hearingSummaries = hearingRepository.findAllHearingsByApplicationId(applicationId)
                 .stream()
                 .map(hearing -> populateTimeLineHearingSummariesWithApplicants(hearing, crackedIneffectiveVacatedTrialTypes, allCourtRooms, applicationId))
                 .flatMap(Collection::stream)
                 .collect(toList());
-
-        return new Timeline(hearingSummaries);
+        return hearingSummaries;
     }
 
     private List<TimelineHearingSummary> populateTimeLineHearingSummaries(final Hearing hearing, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms, final UUID caseId) {

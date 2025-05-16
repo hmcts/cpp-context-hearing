@@ -28,6 +28,7 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE_ID;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubApplicationsByParentId;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
@@ -47,6 +48,7 @@ import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("java:S2699")
 public class ApplicationTimelineIT extends AbstractIT {
 
     private Hearing hearingOne;
@@ -72,7 +74,7 @@ public class ApplicationTimelineIT extends AbstractIT {
 
     @Test
     public void shouldDeleteApplicationHearing(){
-        System.out.println(applicationId);
+        stubApplicationsByParentId(applicationId);
         sendMessage(getPublicTopicInstance().createProducer(),
                 "public.progression.events.court-application-deleted",
                 Json.createObjectBuilder().add("hearingId",hearingOne.getId().toString()).add("applicationId",applicationId.toString() ).build(),
@@ -101,6 +103,7 @@ public class ApplicationTimelineIT extends AbstractIT {
     public void shouldDisplayApplicationsOnTimeline() {
 
         stubCourtRoom(hearingOne);
+        stubApplicationsByParentId(applicationId);
 
         final Map<String, String> hearingSummaryMap = populateHearingSummaryKeyMap(hearingOne);
 
