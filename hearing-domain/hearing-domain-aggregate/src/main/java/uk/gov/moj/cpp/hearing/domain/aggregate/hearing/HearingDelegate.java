@@ -24,7 +24,6 @@ import uk.gov.justice.core.courts.ListHearingRequest;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target2;
-
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
@@ -52,12 +51,14 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -236,7 +237,7 @@ public class HearingDelegate implements Serializable {
                                  final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases,
                                  final List<UUID> shadowListedOffences) {
         final Stream.Builder<Object> streamBuilder = Stream.builder();
-        if (this.momento.getHearing() == null) {
+        if (isNull(momento.getHearing())) {
             return streamBuilder.add(generateHearingIgnoredMessage("Skipping 'hearing.events.hearing-extended' event as hearing has not been created yet", hearingId)).build();
         }
         if (courtApplication != null && this.momento.getBreachApplicationsToBeAdded() != null && !this.momento.getBreachApplicationsToBeAdded().isEmpty()) {
@@ -272,7 +273,7 @@ public class HearingDelegate implements Serializable {
                                                final List<JudicialRole> judiciary
     ) {
 
-        if (this.momento.getHearing() == null) {
+        if (shouldSkipMomento()) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.change-hearing-detail' event as hearing not found", id));
         }
 
@@ -307,7 +308,7 @@ public class HearingDelegate implements Serializable {
     }
 
     public Stream<Object> addDefendant(final UUID hearingId, final Defendant defendant, final List<ListHearingRequest> hearingRequest) {
-        if (this.momento.getHearing() == null) {
+        if (shouldSkipMomento()) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.add-defendant' event as hearing not found", hearingId));
         } else if (checkIfHearingDateAlreadyPassed()) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.add-defendant' event as hearing date has already passed", hearingId));
@@ -384,7 +385,7 @@ public class HearingDelegate implements Serializable {
     }
 
     public Stream<Object> cancelHearingDays(final UUID hearingId, final List<HearingDay> hearingDays) {
-        if (isNull(this.momento.getHearing())) {
+        if (shouldSkipMomento()) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.command.cancel-hearing-days' event as hearing not found", hearingId));
         }
         return Stream.of(new HearingDaysCancelled(hearingId, hearingDays));
@@ -417,8 +418,6 @@ public class HearingDelegate implements Serializable {
 
     public void handleHearingMarkedAsDuplicate() {
         this.momento.setDuplicate(true);
-        this.momento.setDeleted(true);
-        this.momento.setHearing(null);
     }
 
 
@@ -442,7 +441,7 @@ public class HearingDelegate implements Serializable {
     }
 
     public Stream<Object> deleteHearing(final UUID hearingId) {
-        if (isNull(momento.getHearing())) {
+        if (shouldSkipMomento()) {
             return Stream.empty();
         }
         final List<UUID> prosecutionCaseIds = isNotEmpty(momento.getHearing().getProsecutionCases()) ? getProsecutionCaseIds(momento.getHearing()) : null;
@@ -566,19 +565,56 @@ public class HearingDelegate implements Serializable {
 
     public void handleHearingDeleted() {
         this.momento.setDeleted(true);
-        this.momento.setDuplicate(true);
-        this.momento.setHearing(null);
     }
 
     public void handleHearingUnallocated(final HearingUnallocated hearingUnallocated) {
+        final Hearing hearing = momento.getHearing();
+
+        if (shouldSkipMomento()) {
+            return;
+        }
         this.momento.setDeleted(true);
-        this.momento.setDuplicate(true);
-        this.momento.setHearing(null);
+        final Set offencesToBeRemoved = new HashSet<UUID>(
+                Optional.ofNullable(hearingUnallocated.getOffenceIds())
+                        .orElse(Collections.emptyList())
+        );
+
+        final Set defendantsToBeRemoved = new HashSet<UUID>(
+                Optional.ofNullable(hearingUnallocated.getDefendantIds())
+                        .orElse(Collections.emptyList())
+        );
+
+        final Set prosecutionCasesToBeRemoved = new HashSet<UUID>(
+                Optional.ofNullable(hearingUnallocated.getProsecutionCaseIds())
+                        .orElse(Collections.emptyList())
+        );
+        // Remove offences from all defendants
+        hearing.getProsecutionCases().forEach(
+                prosecutionCase -> prosecutionCase.getDefendants().forEach(
+                        defendant -> defendant.getOffences()
+                                .removeIf(offence -> offencesToBeRemoved.contains(offence.getId()))
+                )
+        );
+
+        // Remove defendants with no offences from all prosecution cases
+        hearing.getProsecutionCases().forEach(
+                prosecutionCase -> prosecutionCase.getDefendants()
+                        .removeIf(defendant -> defendantsToBeRemoved.contains(defendant.getId()))
+        );
+
+        // Remove prosecution cases
+        hearing.getProsecutionCases()
+                .removeIf(prosecutionCase -> prosecutionCasesToBeRemoved.contains(prosecutionCase.getId()));
+
+        final List prosecutionCases = Optional.ofNullable(hearing.getProsecutionCases())
+                .orElseGet(ArrayList::new);
+
+        hearing.setProsecutionCases(prosecutionCases);
     }
 
     public Stream<Object> changeNextHearingStartDate(final UUID hearingId, final UUID seedingHearingId, final ZonedDateTime nextHearingStartDate) {
 
-        if (this.momento.isDuplicate() || this.momento.isDeleted()) {
+        if (shouldSkipMomento()) {
             return Stream.empty();
         }
 
@@ -604,6 +640,10 @@ public class HearingDelegate implements Serializable {
         }
 
         return streamBuilder.build();
+    }
+
+    private boolean shouldSkipMomento() {
+        return isNull(momento.getHearing()) || this.momento.isDuplicate() || this.momento.isDeleted();
     }
 
     /**

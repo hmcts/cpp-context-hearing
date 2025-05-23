@@ -518,8 +518,8 @@ public class HearingAggregate implements Aggregate {
 
 
     public Stream<Object> updateExistingHearing(final UUID hearingId, final List<ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {
-        if (this.momento.getHearing() == null) {
-            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing not found", hearingId));
+        if (isNull(momento.getHearing()) || this.momento.isDeleted() || this.momento.isDuplicate()) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing / deleted / marked as duplicate' event as hearing not found", hearingId));
         }
         return apply(Stream.of(new ExistingHearingUpdated(hearingId, prosecutionCases, shadowListedOffences)));
     }
@@ -1208,7 +1208,7 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> unAllocateHearing(final UUID hearingId, final List<UUID> removedOffenceIds) {
-        if (this.momento.getHearing() == null) {
+        if (isNull(momento.getHearing()) || this.momento.isDeleted() || this.momento.isDuplicate()) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing not found", hearingId));
         } else if(this.hearingState == SHARED) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing already shared", hearingId));

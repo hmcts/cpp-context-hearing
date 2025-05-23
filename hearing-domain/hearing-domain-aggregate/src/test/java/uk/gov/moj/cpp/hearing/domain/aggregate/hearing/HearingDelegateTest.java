@@ -370,7 +370,7 @@ public class HearingDelegateTest {
         final UUID hearingId = UUID.randomUUID();
         final UUID seedingHearingId = UUID.randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(2);
-
+        momento.setHearing(Hearing.hearing().withId(hearingId).build());
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingStartDate).collect(toList());
 
         assertThat(eventStream.size(), is(2));
@@ -393,6 +393,7 @@ public class HearingDelegateTest {
         final UUID hearingId = UUID.randomUUID();
         final UUID seedingHearingId = UUID.randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(2);
+        momento.setHearing(Hearing.hearing().withId(hearingId).build());
 
         momento.getNextHearingStartDates().put(hearingId, ZonedDateTime.now().plusDays(3));
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingStartDate).collect(toList());
@@ -417,7 +418,7 @@ public class HearingDelegateTest {
         final UUID hearingId = UUID.randomUUID();
         final UUID seedingHearingId = UUID.randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
-
+        momento.setHearing(Hearing.hearing().withId(hearingId).build());
         momento.getNextHearingStartDates().put(hearingId, ZonedDateTime.now().plusDays(3));
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingStartDate).collect(toList());
 
@@ -442,6 +443,7 @@ public class HearingDelegateTest {
         final UUID seedingHearingId = UUID.randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(2);
 
+        momento.setHearing(Hearing.hearing().withId(hearingId1).build());
         momento.getNextHearingStartDates().put(hearingId1, ZonedDateTime.now().plusDays(3));
         momento.getNextHearingStartDates().put(hearingId2, ZonedDateTime.now().plusDays(4));
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId1, seedingHearingId, nextHearingStartDate).collect(toList());
@@ -467,7 +469,7 @@ public class HearingDelegateTest {
         final UUID hearingId2 = UUID.randomUUID();
         final UUID seedingHearingId = UUID.randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
-
+        momento.setHearing(Hearing.hearing().withId(hearingId1).build());
         momento.getNextHearingStartDates().put(hearingId1, ZonedDateTime.now().plusDays(2));
         momento.getNextHearingStartDates().put(hearingId2, ZonedDateTime.now().plusDays(4));
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId1, seedingHearingId, nextHearingStartDate).collect(toList());
@@ -488,6 +490,8 @@ public class HearingDelegateTest {
         final UUID hearingId2 = UUID.randomUUID();
         final UUID seedingHearingId = UUID.randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
+
+        momento.setHearing(Hearing.hearing().withId(hearingId1).build());
 
         momento.getNextHearingStartDates().put(hearingId2, ZonedDateTime.now().plusDays(3));
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId1, seedingHearingId, nextHearingStartDate).collect(toList());
@@ -614,6 +618,73 @@ public class HearingDelegateTest {
 
         List<Object> events = result.collect(Collectors.toList());
         assertTrue(events.isEmpty());
+    }
+
+    @Test
+    public void shouldHandleHearingUnallocated() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID prosecutionCaseId1 = UUID.randomUUID();
+        final UUID prosecutionCaseId2 = UUID.randomUUID();
+        final UUID prosecutionCaseId3 = UUID.randomUUID();
+        final UUID defendantId1 = UUID.randomUUID();
+        final UUID defendantId2 = UUID.randomUUID();
+        final UUID defendantId3 = UUID.randomUUID();
+        final UUID offence1 = UUID.randomUUID();
+        final UUID offence2 = UUID.randomUUID();
+        final UUID offence3 = UUID.randomUUID();
+        final UUID offence4 = UUID.randomUUID();
+
+        final ProsecutionCase prosecutionCase1 = createProsecutionCase(prosecutionCaseId1, defendantId1, offence1, offence2);
+        final ProsecutionCase prosecutionCase2 = createProsecutionCase(prosecutionCaseId2, defendantId2, offence3, offence4);
+        final ProsecutionCase prosecutionCase3 = createProsecutionCase(prosecutionCaseId3, defendantId3, offence3, offence4);
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(new ArrayList<>(asList(prosecutionCase1, prosecutionCase2, prosecutionCase3)))
+                .build());
+
+        HearingUnallocated hearingUnallocated = new HearingUnallocated(asList(prosecutionCaseId1, prosecutionCaseId2,prosecutionCaseId3), asList(defendantId1, defendantId2, defendantId3), asList(offence1,offence2,offence3,offence4), hearingId);
+
+        hearingDelegate.handleHearingUnallocated(hearingUnallocated);
+
+        assertThat(momento.getHearing().getProsecutionCases().isEmpty(), is(true));
+        assertThat(momento.isDeleted(), is(true));
+    }
+
+    @Test
+    public void shouldHandleHearingDetailChangedPostHearingUnallocated() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID prosecutionCaseId1 = UUID.randomUUID();
+        final UUID prosecutionCaseId2 = UUID.randomUUID();
+        final UUID prosecutionCaseId3 = UUID.randomUUID();
+        final UUID defendantId1 = UUID.randomUUID();
+        final UUID defendantId2 = UUID.randomUUID();
+        final UUID defendantId3 = UUID.randomUUID();
+        final UUID offence1 = UUID.randomUUID();
+        final UUID offence2 = UUID.randomUUID();
+        final UUID offence3 = UUID.randomUUID();
+        final UUID offence4 = UUID.randomUUID();
+
+        final ProsecutionCase prosecutionCase1 = createProsecutionCase(prosecutionCaseId1, defendantId1, offence1, offence2);
+        final ProsecutionCase prosecutionCase2 = createProsecutionCase(prosecutionCaseId2, defendantId2, offence3, offence4);
+        final ProsecutionCase prosecutionCase3 = createProsecutionCase(prosecutionCaseId3, defendantId3, offence3, offence4);
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(new ArrayList<>(asList(prosecutionCase1, prosecutionCase2, prosecutionCase3)))
+                .build());
+
+        HearingUnallocated hearingUnallocated = new HearingUnallocated(asList(prosecutionCaseId1, prosecutionCaseId2,prosecutionCaseId3), asList(defendantId1, defendantId2, defendantId3), asList(offence1,offence2,offence3,offence4), hearingId);
+
+        hearingDelegate.handleHearingUnallocated(hearingUnallocated);
+
+        Stream<Object> streams = hearingDelegate.updateHearingDetails(hearingId, null, null, null, null,null, null, null);
+        List<Object> events = streams.collect(Collectors.toList());
+        assertEquals(1, events.size());
+        assertTrue(events.get(0) instanceof HearingChangeIgnored);
+        HearingChangeIgnored event = (HearingChangeIgnored) events.get(0);
+        assertEquals(hearingId, event.getHearingId());
+        assertEquals("Rejecting 'hearing.change-hearing-detail' event as hearing not found", event.getReason());
     }
 
     private List<ProsecutionCase> caseList(ProsecutionCase... cases) {

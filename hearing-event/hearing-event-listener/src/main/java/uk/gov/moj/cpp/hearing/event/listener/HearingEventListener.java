@@ -487,9 +487,11 @@ public class HearingEventListener {
         final RegisteredHearingAgainstApplication registeredHearingAgainstApplication = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), RegisteredHearingAgainstApplication.class);
 
-        final HearingApplication hearingApplication = new HearingApplication();
-        hearingApplication.setId(new HearingApplicationKey(registeredHearingAgainstApplication.getApplicationId(), registeredHearingAgainstApplication.getHearingId()));
-        hearingApplicationRepository.save(hearingApplication);
+        if(nonNull(hearingRepository.findBy(registeredHearingAgainstApplication.getHearingId()))) {
+            final HearingApplication hearingApplication = new HearingApplication();
+            hearingApplication.setId(new HearingApplicationKey(registeredHearingAgainstApplication.getApplicationId(), registeredHearingAgainstApplication.getHearingId()));
+            hearingApplicationRepository.save(hearingApplication);
+        }
     }
 
     @Handles("hearing.hearing-days-cancelled")

@@ -1172,7 +1172,9 @@ public class HearingEventListenerTest {
         final UUID hearingId = randomUUID();
         final UUID applicationId = randomUUID();
         final RegisteredHearingAgainstApplication registeredHearingAgainstApplication = new RegisteredHearingAgainstApplication(applicationId, hearingId);
+        final Hearing dbHearing = new Hearing();
 
+        when(hearingRepository.findBy(any())).thenReturn(dbHearing);
         hearingEventListener.registerHearingAgainstApplication(envelopeFrom(metadataWithRandomUUID("hearing.events.registered-hearing-against-application"),
                 objectToJsonObjectConverter.convert(registeredHearingAgainstApplication)
         ));
@@ -1181,6 +1183,22 @@ public class HearingEventListenerTest {
 
         assertThat(saveHearingApplicationCaptor.getValue().getId().getApplicationId(), is(applicationId));
         assertThat(saveHearingApplicationCaptor.getValue().getId().getHearingId(), is(hearingId));
+    }
+
+    @Test
+    public void shouldRegisterHearingAgainstApplicationWhenHearingNotThere() {
+        final UUID hearingId = randomUUID();
+        final UUID applicationId = randomUUID();
+        final RegisteredHearingAgainstApplication registeredHearingAgainstApplication = new RegisteredHearingAgainstApplication(applicationId, hearingId);
+
+        when(hearingRepository.findBy(any())).thenReturn(null);
+
+        hearingEventListener.registerHearingAgainstApplication(envelopeFrom(metadataWithRandomUUID("hearing.events.registered-hearing-against-application"),
+                objectToJsonObjectConverter.convert(registeredHearingAgainstApplication)
+        ));
+
+        verify(this.hearingApplicationRepository, never()).save(saveHearingApplicationCaptor.capture());
+
     }
 
     @Test

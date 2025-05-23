@@ -29,22 +29,27 @@ import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.VerdictJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplicationKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -92,6 +97,9 @@ public class InitiateHearingEventListener {
     @Inject
     private HearingDayJPAMapper hearingDayJPAMapper;
 
+    @Inject
+    private HearingApplicationRepository hearingApplicationRepository;
+
     @Transactional
     @Handles("hearing.events.initiated")
     public void newHearingInitiated(final JsonEnvelope event) {
@@ -108,7 +116,14 @@ public class InitiateHearingEventListener {
         getOffencesForHearing(hearingEntity)
                 .forEach(x -> updateOffenceForShadowListedStatus(initiated.getHearing().getShadowListedOffences(), x));
 
+        ofNullable(initiated.getHearing().getCourtApplications()).stream().flatMap(Collection::stream).map(CourtApplication::getId).collect(Collectors.toSet()).forEach(courtApplicationId -> {
+            final HearingApplication hearingApplication = new HearingApplication();
+            hearingApplication.setId(new HearingApplicationKey(courtApplicationId, hearingEntity.getId()));
+            hearingApplicationRepository.save(hearingApplication);
+        });
+
         hearingRepository.save(hearingEntity);
+
     }
 
     @Transactional

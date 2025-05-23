@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -186,7 +187,7 @@ public class OffenceDelegate implements Serializable {
 
     public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId,
                                      final Offence offence) {
-        if (this.momento.isPublished()) {
+        if (shouldSkipMomento()) {
             return empty();
         }
 
@@ -210,7 +211,7 @@ public class OffenceDelegate implements Serializable {
 
     public Stream<Object> addOffenceV2(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId,
                                      final List<Offence> offences) {
-        if (this.momento.isPublished()) {
+        if (shouldSkipMomento()) {
             return empty();
         }
 
@@ -237,7 +238,7 @@ public class OffenceDelegate implements Serializable {
     }
 
     public Stream<Object> updateOffence(final UUID hearingId, final UUID defendantId, final Offence offence) {
-        if (this.momento.isPublished()) {
+        if (shouldSkipMomento()) {
             return empty();
         }
         return Stream.of(OffenceUpdated.offenceUpdated()
@@ -251,7 +252,7 @@ public class OffenceDelegate implements Serializable {
     }
 
     public Stream<Object> updateOffenceV2(final UUID hearingId, final UUID defendantId, final List<Offence> offences) {
-        if (this.momento.isPublished()) {
+        if (shouldSkipMomento()) {
             return empty();
         }
         final Set<UUID> offencesInTHeHearing =  this.momento.getHearing().getProsecutionCases().stream()
@@ -280,7 +281,7 @@ public class OffenceDelegate implements Serializable {
     }
 
     public Stream<Object> deleteOffence(final UUID offenceId, final UUID hearingId) {
-        if (this.momento.isPublished()) {
+        if (shouldSkipMomento()) {
             return empty();
         }
         return Stream.of(OffenceDeleted.builder()
@@ -290,7 +291,7 @@ public class OffenceDelegate implements Serializable {
     }
 
     public Stream<Object> deleteOffenceV2(final List<UUID> offenceId, final UUID hearingId) {
-        if (this.momento.isPublished()) {
+        if (shouldSkipMomento()) {
             return empty();
         }
         return Stream.of(OffenceDeletedV2.builder()
@@ -301,7 +302,7 @@ public class OffenceDelegate implements Serializable {
 
     public Stream<Object> removeOffencesFromAllocatedHearing(final UUID hearingId, final List<UUID> offenceIds, final String source) {
 
-        if (this.momento.isPublished()) {
+        if (shouldSkipMomento()) {
             return empty();
         }
 
@@ -388,4 +389,7 @@ public class OffenceDelegate implements Serializable {
         }
     }
 
+    private boolean shouldSkipMomento() {
+        return this.momento.isPublished() || isNull(momento.getHearing()) || this.momento.isDeleted() || this.momento.isDuplicate();
+    }
 }

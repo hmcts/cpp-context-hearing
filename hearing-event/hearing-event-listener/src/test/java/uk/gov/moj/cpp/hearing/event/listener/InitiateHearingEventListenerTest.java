@@ -52,6 +52,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Plea;
+import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
@@ -78,7 +79,6 @@ import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -119,6 +119,9 @@ public class InitiateHearingEventListenerTest {
     @Mock
     private OffenceRepository offenceRepository;
 
+    @Mock
+    private HearingApplicationRepository hearingApplicationRepository;
+
     @InjectMocks
     private InitiateHearingEventListener initiateHearingEventListener;
 
@@ -136,7 +139,25 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldInsertHearingWhenInitiated() {
+    public void shouldInsertHearingWhenInitiatedWithoutApplication() {
+
+        final InitiateHearingCommand command = minimumInitiateHearingTemplate();
+
+        final uk.gov.justice.core.courts.Hearing hearing = command.getHearing();
+        hearing.setCourtApplications(null);
+
+        when(hearingJPAMapper.toJPA(any(uk.gov.justice.core.courts.Hearing.class))).thenReturn(new Hearing());
+
+        initiateHearingEventListener.newHearingInitiated(getInitiateHearingJsonEnvelope(hearing));
+
+        final ArgumentCaptor<Hearing> hearingExArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+
+        verify(hearingRepository, times(1)).save(hearingExArgumentCaptor.capture());
+        verify(hearingApplicationRepository, never()).save(any());
+    }
+
+    @Test
+    public void shouldInsertHearingWhenInitiatedWithApplication() {
 
         final InitiateHearingCommand command = minimumInitiateHearingTemplate();
 
@@ -149,6 +170,7 @@ public class InitiateHearingEventListenerTest {
         final ArgumentCaptor<Hearing> hearingExArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
 
         verify(hearingRepository, times(1)).save(hearingExArgumentCaptor.capture());
+        verify(hearingApplicationRepository).save(any());
     }
 
     @Test
