@@ -75,7 +75,7 @@ public class TimelineHearingSummaryHelper {
 
         final List<uk.gov.moj.cpp.hearing.query.view.response.Defendant> defendants = getDefendants(hearing, caseId);
 
-        if (!defendants.isEmpty()) {
+        if (isNotEmpty(defendants)) {
             timelineHearingSummaryBuilder.withDefendants(defendants);
         }
 
@@ -136,6 +136,13 @@ public class TimelineHearingSummaryHelper {
         if (!applicantNames.isEmpty()) {
             timelineHearingSummaryBuilder.withApplicants(applicantNames);
         }
+
+        final List<String> subjectNames = getSubjectNames(hearing.getCourtApplicationsJson(), applicationId);
+        if (!subjectNames.isEmpty()) {
+            timelineHearingSummaryBuilder.withSubjects(subjectNames);
+
+         }
+
         return timelineHearingSummaryBuilder.build();
     }
 
@@ -162,7 +169,7 @@ public class TimelineHearingSummaryHelper {
         return nonNull(hearing.getIsGroupProceedings()) && TRUE.equals(hearing.getIsGroupProceedings()) && hearing.getNumberOfGroupCases() > 1;
     }
 
-    private Optional<String> getApplicantName(final CourtApplicationParty applicant) {
+    private Optional<String> getPartyName(final CourtApplicationParty applicant) {
         Optional<String> displayName = Optional.empty();
         if (Objects.nonNull(applicant.getPersonDetails())) {
             displayName = ofNullable(Stream.of(applicant.getPersonDetails().getFirstName(),
@@ -192,7 +199,7 @@ public class TimelineHearingSummaryHelper {
     }
 
     private uk.gov.moj.cpp.hearing.query.view.response.Person buildApplicant(final CourtApplicationParty applicant) {
-        final Optional<String> displayName = getApplicantName(applicant);
+        final Optional<String> displayName = getPartyName(applicant);
         return new uk.gov.moj.cpp.hearing.query.view.response.Person(applicant.getId(), displayName.orElse(EMPTY), getMasterDefendantId(applicant.getMasterDefendant()));
 
     }
@@ -234,8 +241,19 @@ public class TimelineHearingSummaryHelper {
             .stream()
             .filter(courtApplication -> courtApplication.getId().equals(applicationId))
             .map(courtApplication ->
-                getApplicantName(courtApplication.getApplicant()).orElse(EMPTY))
+                getPartyName(courtApplication.getApplicant()).orElse(EMPTY))
             .collect(Collectors.toList());
+    }
+
+    private List<String> getSubjectNames(final String courtApplicationJson, UUID applicationId) {
+        final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationJson);
+
+        return courtApplications
+                .stream()
+                .filter(courtApplication -> courtApplication.getId().equals(applicationId))
+                .filter(courtApplication -> nonNull(courtApplication.getSubject()))
+                .map(courtApplication -> getPartyName(courtApplication.getSubject()).orElse(EMPTY))
+                .collect(Collectors.toList());
     }
 
     private List<Person> getSubject(final UUID applicationId, final List<CourtApplication> courtApplications) {
