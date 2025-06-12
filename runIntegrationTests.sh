@@ -13,7 +13,6 @@ DOCKER_CONTAINER_REGISTRY_HOST_NAME=crmdvrepo01
 LIQUIBASE_COMMAND=update
 #LIQUIBASE_COMMAND=dropAll
 
-
 #fail script on error
 set -e
 
