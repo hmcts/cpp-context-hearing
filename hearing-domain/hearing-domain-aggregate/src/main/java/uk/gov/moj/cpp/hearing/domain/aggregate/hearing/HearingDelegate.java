@@ -479,8 +479,6 @@ public class HearingDelegate implements Serializable {
 
     public void handleHearingMarkedAsDuplicate() {
         this.momento.setDuplicate(true);
-        this.momento.setDeleted(true);
-        this.momento.setHearing(null);
     }
 
 
@@ -628,8 +626,6 @@ public class HearingDelegate implements Serializable {
 
     public void handleHearingDeleted() {
         this.momento.setDeleted(true);
-        this.momento.setDuplicate(true);
-        this.momento.setHearing(null);
     }
 
     public void handleHearingUnallocated(final HearingUnallocated hearingUnallocated) {
