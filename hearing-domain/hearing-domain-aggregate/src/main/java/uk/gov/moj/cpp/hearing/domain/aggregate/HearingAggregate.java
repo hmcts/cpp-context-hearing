@@ -677,7 +677,7 @@ public class HearingAggregate implements Aggregate {
         //Share results not permitted when all targets (offenceId/applicationId) are shared.
         if (SHARED == this.hearingState && hasAllTargetsShared(hearingDay, resultLines)) {
             return apply(resultsSharedDelegate.manageResultsFailed(hearingId, this.hearingState,
-                    SHARE_NOT_PERMITTED_ALL_TARGETS_SHARED.toError(String.format("Share results not permitted! all the targets already shared for the hearingDay %s", hearingDay)),
+                    SHARE_NOT_PERMITTED_ALL_TARGETS_SHARED.toError(String.format(SHARE_RESULTS_NOT_PERMITTED_ALL_THE_TARGETS_ALREADY_SHARED_FOR_THE_HEARING_DAY_S, hearingDay)),
                     hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
         }
 
