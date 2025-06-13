@@ -49,6 +49,8 @@ import java.util.UUID;
 public class HearingFactory {
 
     private static final String APPLICATION_REFERENCE = "12AA3456716";
+    public static final String PROD_AUTH_CODE = "prodAuthCode";
+    public static final String PROSECUTION_AUTHORITY_REFERENCE = "prosecutionAuthorityReference";
 
     public ProsecutionCase.Builder prosecutionCase() {
         return ProsecutionCase.prosecutionCase();
@@ -158,6 +160,28 @@ public class HearingFactory {
                 .withOffenceActiveOrder(OffenceActiveOrder.NOT_APPLICABLE);
     }
 
+    public CourtApplicationType.Builder courtApplicationTypeForAppeal(final String appCode) {
+        return CourtApplicationType.courtApplicationType()
+                .withId(randomUUID())
+                .withType("applicationType")
+                .withCode(appCode)
+                .withLegislation("appLegislation")
+                .withCategoryCode("appCategory")
+                .withLinkType(LinkType.LINKED)
+                .withJurisdiction(Jurisdiction.EITHER)
+                .withSummonsTemplateType(SummonsTemplateType.BREACH)
+                .withBreachType(BreachType.NOT_APPLICABLE)
+                .withAppealFlag(false)
+                .withApplicantAppellantFlag(false)
+                .withPleaApplicableFlag(false)
+                .withCommrOfOathFlag(false)
+                .withCourtOfAppealFlag(false)
+                .withCourtExtractAvlFlag(false)
+                .withProsecutorThirdPartyFlag(false)
+                .withSpiOutApplicableFlag(false)
+                .withOffenceActiveOrder(OffenceActiveOrder.NOT_APPLICABLE);
+    }
+
     public CourtApplicationType.Builder courtApplicationType() {
         return courtApplicationType(randomUUID());
     }
@@ -182,15 +206,43 @@ public class HearingFactory {
                 .withCourtApplicationCases(asList(courtApplicationCase()
                         .withProsecutionCaseId(randomUUID())
                         .withProsecutionCaseIdentifier(prosecutionCaseIdentifier()
-                                .withProsecutionAuthorityCode("prodAuthCode")
+                                .withProsecutionAuthorityCode(PROD_AUTH_CODE)
                                 .withProsecutionAuthorityId(randomUUID())
-                                .withProsecutionAuthorityReference("prosecutionAuthorityReference").build())
+                                .withProsecutionAuthorityReference(PROSECUTION_AUTHORITY_REFERENCE).build())
                         .withIsSJP(false)
                         .withCaseStatus("INACTIVE")
                         .withOffences(asList(getOffence())).build()))
                 .withApplicant(party)
                 .withApplicationReceivedDate(now())
                 .withType(courtApplicationType(courtApplicationTypeId).build())
+                .withRespondents(asList(courtApplicationParty2().build(),
+                        courtApplicationParty3().build()
+                ))
+                .withSubject(party)
+                .withThirdParties(asList(courtApplicationParty2().build(),
+                        courtApplicationParty3().build()))
+                .withApplicationReference(APPLICATION_REFERENCE)
+                .withApplicationStatus(ApplicationStatus.DRAFT);
+
+    }
+
+    public CourtApplication.Builder courtApplicationForAppeal(final CourtApplicationParty party, final String courtApplicationTypeCode) {
+
+        return CourtApplication.courtApplication()
+                .withCourtOrder(getCourtOrder())
+                .withId(randomUUID())
+                .withCourtApplicationCases(asList(courtApplicationCase()
+                        .withProsecutionCaseId(randomUUID())
+                        .withProsecutionCaseIdentifier(prosecutionCaseIdentifier()
+                                .withProsecutionAuthorityCode(PROD_AUTH_CODE)
+                                .withProsecutionAuthorityId(randomUUID())
+                                .withProsecutionAuthorityReference(PROSECUTION_AUTHORITY_REFERENCE).build())
+                        .withIsSJP(false)
+                        .withCaseStatus("INACTIVE")
+                        .withOffences(asList(getOffence())).build()))
+                .withApplicant(party)
+                .withApplicationReceivedDate(now())
+                .withType(courtApplicationTypeForAppeal(courtApplicationTypeCode).build())
                 .withRespondents(asList(courtApplicationParty2().build(),
                         courtApplicationParty3().build()
                 ))
@@ -231,9 +283,9 @@ public class HearingFactory {
 
     private CourtOrderOffence getCourtOrderOffence() {
         return courtOrderOffence().withProsecutionCaseId(randomUUID()).withProsecutionCaseIdentifier(prosecutionCaseIdentifier()
-                .withProsecutionAuthorityCode("prodAuthCode")
+                .withProsecutionAuthorityCode(PROD_AUTH_CODE)
                 .withProsecutionAuthorityId(randomUUID())
-                .withProsecutionAuthorityReference("prosecutionAuthorityReference").build()).withOffence(getOffence()).build();
+                .withProsecutionAuthorityReference(PROSECUTION_AUTHORITY_REFERENCE).build()).withOffence(getOffence()).build();
     }
 
     @SuppressWarnings({"squid:UnusedPrivateMethod"})

@@ -8,6 +8,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -15,6 +16,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationLaareferenceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
@@ -154,7 +156,7 @@ public class InitiateHearingEventListener {
                 existingHearingDays.addAll(hearingDayJPAMapper.toJPA(hearingEntity, hearingExtended.getHearingDays()));
                 hearingEntity.setHearingDays(existingHearingDays);
             }
-            if(nonNull(hearingExtended.getCourtCentre())) {
+            if (nonNull(hearingExtended.getCourtCentre())) {
                 hearingEntity.setJurisdictionType(hearingExtended.getJurisdictionType());
             }
             hearingRepository.save(hearingEntity);
@@ -184,6 +186,65 @@ public class InitiateHearingEventListener {
 
         hearingRepository.save(hearingEntity);
     }
+
+    @Transactional
+    @Handles("hearing.events.application-laareference-updated")
+    public void hearingApplicationLaaReferenceUpdated(final JsonEnvelope event) {
+
+        final JsonObject payload = event.payloadAsJsonObject();
+
+        final ApplicationLaareferenceUpdated applicationLaareferenceUpdated = jsonObjectToObjectConverter.convert(payload, ApplicationLaareferenceUpdated.class);
+
+        final Hearing hearingEntity = hearingRepository.findBy(applicationLaareferenceUpdated.getHearingId());
+
+        LOGGER.debug("hearing.events.application-detail-changed event received for hearingId {}", hearingEntity.getId());
+
+        String courtApplicationJson = hearingEntity.getCourtApplicationsJson();
+
+        final Optional<CourtApplication> persistedApplication = hearingJPAMapper.getCourtApplication(courtApplicationJson, applicationLaareferenceUpdated.getApplicationId());
+
+        if (persistedApplication.isPresent()) {
+
+            CourtApplication courtApplication = persistedApplication.get();
+
+            if (nonNull(courtApplication.getSubject()) && courtApplication.getSubject().getId().equals(applicationLaareferenceUpdated.getSubjectId()) && isNotEmpty(courtApplication.getCourtApplicationCases())) {
+                List<CourtApplicationCase> updatedCases = getUpdatedCases(courtApplication, applicationLaareferenceUpdated);
+
+                CourtApplication updatedCourtApplication = CourtApplication.courtApplication().withValuesFrom(courtApplication).withCourtApplicationCases(updatedCases).build();
+
+                final String courtApplicationsJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), updatedCourtApplication);
+
+                hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
+
+                hearingRepository.save(hearingEntity);
+            }
+        }
+    }
+
+    private static List<CourtApplicationCase> getUpdatedCases(CourtApplication persistedApplication, ApplicationLaareferenceUpdated applicationLaareferenceUpdated) {
+        return persistedApplication.getCourtApplicationCases().stream()
+                .map(applicationCase -> {
+                    // Update offences within the current case
+                    List<uk.gov.justice.core.courts.Offence> updatedOffences = applicationCase.getOffences().stream()
+                            .map(offence -> {
+                                // Match offence ID and update if necessary
+                                if (offence.getId().equals(applicationLaareferenceUpdated.getOffenceId())) {
+                                    return uk.gov.justice.core.courts.Offence.offence()
+                                            .withValuesFrom(offence)
+                                            .withLaaApplnReference(applicationLaareferenceUpdated.getLaaReference())
+                                            .build();
+                                }
+                                return offence; // Return unchanged offence
+                            })
+                            .toList();
+                    return CourtApplicationCase.courtApplicationCase()
+                            .withValuesFrom(applicationCase)
+                            .withOffences(updatedOffences)
+                            .build();
+                })
+                .toList();
+    }
+
 
     @Transactional
     @Handles("hearing.conviction-date-added")
@@ -428,28 +489,28 @@ public class InitiateHearingEventListener {
     }
 
     private void updateConvictionDate(final UUID hearingId, final UUID offenceId, final UUID courtApplicationID, final LocalDate convictionDate) {
-        if(courtApplicationID == null) {
+        if (courtApplicationID == null) {
             save(offenceId, hearingId, o -> o.setConvictionDate(convictionDate));
-        }else{
+        } else{
             final Optional<Hearing> hearingEnt = hearingRepository.findOptionalBy(hearingId);
             if(hearingEnt.isEmpty()){
                 return;
             }
             final Hearing hearingEntity = hearingEnt.get();
             final String updatedCourtApplicationJson;
-            if(offenceId != null) {
+            if (offenceId != null) {
                 updatedCourtApplicationJson = hearingJPAMapper.updateConvictedDateOnOffencesInCourtApplication(hearingEntity.getCourtApplicationsJson(), courtApplicationID, offenceId, convictionDate);
-            }else{
+            } else {
                 final uk.gov.justice.core.courts.Hearing hearing = hearingJPAMapper.fromJPA(hearingEntity);
                 final Optional<CourtApplication> courtApplication = hearing.getCourtApplications().stream()
-                        .filter( ca -> ca.getId().equals(courtApplicationID))
+                        .filter(ca -> ca.getId().equals(courtApplicationID))
                         .findFirst();
-                if(courtApplication.isPresent()) {
+                if (courtApplication.isPresent()) {
                     courtApplication.get().setConvictionDate(convictionDate);
                     updatedCourtApplicationJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), courtApplication.get());
-                }else{
-                    updatedCourtApplicationJson =   hearingEntity.getCourtApplicationsJson();
-                    if(LOGGER.isDebugEnabled()) {
+                } else {
+                    updatedCourtApplicationJson = hearingEntity.getCourtApplicationsJson();
+                    if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("hearing.hearing-court-application-plea-updated / removed event application not found {}", courtApplicationID);
                     }
                 }
