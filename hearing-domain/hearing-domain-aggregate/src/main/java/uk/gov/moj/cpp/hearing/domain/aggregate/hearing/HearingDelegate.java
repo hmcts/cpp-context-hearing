@@ -8,9 +8,12 @@ import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.justice.core.courts.CourtApplicationParty.courtApplicationParty;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.HearingResultsCleanerUtil.removeResultsFromHearing;
 
+import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Defendant;
@@ -20,11 +23,15 @@ import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.LaaReference;
 import uk.gov.justice.core.courts.ListHearingRequest;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target2;
+
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationLaareferenceUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationOrganisationDetailsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingBreachApplicationsAdded;
@@ -128,7 +135,7 @@ public class HearingDelegate implements Serializable {
             this.momento.getVerdicts().put(offenceId, offence.getVerdict());
         }
 
-        if(nonNull(offence.getIndicatedPlea())) {
+        if (nonNull(offence.getIndicatedPlea())) {
             this.momento.getIndicatedPlea().put(offenceId, offence.getIndicatedPlea());
         }
     }
@@ -291,7 +298,7 @@ public class HearingDelegate implements Serializable {
     }
 
     public HearingChangeIgnored generateHearingIgnoredMessage(final String reason,
-                                                               final UUID hearingId) {
+                                                              final UUID hearingId) {
         return new HearingChangeIgnored(hearingId, reason);
     }
 
@@ -345,6 +352,14 @@ public class HearingDelegate implements Serializable {
                 .noneMatch(localDate -> (localDate.isAfter(LocalDate.now()) || localDate.isEqual(LocalDate.now())));
     }
 
+    public Stream<Object> updateLaaReferenceForApplication(final UUID hearingId, final UUID applicationId, final UUID subjectId, final UUID offenceId, final LaaReference laaReference) {
+        return Stream.of(new ApplicationLaareferenceUpdated(hearingId, applicationId, subjectId, offenceId, laaReference));
+    }
+
+    public Stream<Object> updateDefenceOrganisationForApplication(final UUID hearingId, final UUID applicationId, final UUID subjectId, final AssociatedDefenceOrganisation defenceOrganisation) {
+        return Stream.of(new ApplicationOrganisationDetailsUpdatedForHearing(applicationId, subjectId, defenceOrganisation, hearingId));
+    }
+
     public Stream<Object> updateCourtApplication(final UUID hearingId,
                                                  final CourtApplication courtApplication) {
         if (this.momento.getHearing() == null) {
@@ -382,6 +397,52 @@ public class HearingDelegate implements Serializable {
             previousStoredApplication.ifPresent(courtApplication -> momento.getHearing().getCourtApplications().remove(courtApplication));
             momento.getHearing().getCourtApplications().add(applicationDetailChanged.getCourtApplication());
         }
+    }
+
+    public void handleApplicationLaaReferenceUpdated(
+            final ApplicationLaareferenceUpdated applicationLaareferenceUpdated) {
+        if (momento.getHearing() != null) {
+            final Optional<CourtApplication> previousStoredApplication = momento.getHearing().getCourtApplications().stream()
+                    .filter(courtApplication -> courtApplication.getId().equals(applicationLaareferenceUpdated.getApplicationId()))
+                    .findFirst();
+
+            if (previousStoredApplication.isPresent()) {
+
+                CourtApplication courtApplication = previousStoredApplication.get();
+
+                if (nonNull(courtApplication.getSubject()) && courtApplication.getSubject().getId().equals(applicationLaareferenceUpdated.getSubjectId()) && isNotEmpty(courtApplication.getCourtApplicationCases())) {
+                    List<CourtApplicationCase> updatedCases = getUpdatedCases(courtApplication, applicationLaareferenceUpdated);
+
+                    CourtApplication updatedCourtApplication = CourtApplication.courtApplication().withValuesFrom(courtApplication).withCourtApplicationCases(updatedCases).build();
+                    momento.getHearing().getCourtApplications().remove(previousStoredApplication.get());
+                    momento.getHearing().getCourtApplications().add(updatedCourtApplication);
+                }
+            }
+        }
+    }
+
+    private static List<CourtApplicationCase> getUpdatedCases(CourtApplication persistedApplication, ApplicationLaareferenceUpdated applicationLaareferenceUpdated) {
+        return persistedApplication.getCourtApplicationCases().stream()
+                .map(applicationCase -> {
+                    // Update offences within the current case
+                    List<uk.gov.justice.core.courts.Offence> updatedOffences = applicationCase.getOffences().stream()
+                            .map(offence -> {
+                                // Match offence ID and update if necessary
+                                if (offence.getId().equals(applicationLaareferenceUpdated.getOffenceId())) {
+                                    return uk.gov.justice.core.courts.Offence.offence()
+                                            .withValuesFrom(offence)
+                                            .withLaaApplnReference(applicationLaareferenceUpdated.getLaaReference())
+                                            .build();
+                                }
+                                return offence; // Return unchanged offence
+                            })
+                            .toList();
+                    return CourtApplicationCase.courtApplicationCase()
+                            .withValuesFrom(applicationCase)
+                            .withOffences(updatedOffences)
+                            .build();
+                })
+                .toList();
     }
 
     public Stream<Object> cancelHearingDays(final UUID hearingId, final List<HearingDay> hearingDays) {
@@ -574,17 +635,17 @@ public class HearingDelegate implements Serializable {
             return;
         }
         this.momento.setDeleted(true);
-        final Set offencesToBeRemoved = new HashSet<UUID>(
+        final Set<UUID> offencesToBeRemoved = new HashSet<>(
                 Optional.ofNullable(hearingUnallocated.getOffenceIds())
                         .orElse(Collections.emptyList())
         );
 
-        final Set defendantsToBeRemoved = new HashSet<UUID>(
+        final Set<UUID> defendantsToBeRemoved = new HashSet<>(
                 Optional.ofNullable(hearingUnallocated.getDefendantIds())
                         .orElse(Collections.emptyList())
         );
 
-        final Set prosecutionCasesToBeRemoved = new HashSet<UUID>(
+        final Set<UUID> prosecutionCasesToBeRemoved = new HashSet<>(
                 Optional.ofNullable(hearingUnallocated.getProsecutionCaseIds())
                         .orElse(Collections.emptyList())
         );
@@ -606,7 +667,7 @@ public class HearingDelegate implements Serializable {
         hearing.getProsecutionCases()
                 .removeIf(prosecutionCase -> prosecutionCasesToBeRemoved.contains(prosecutionCase.getId()));
 
-        final List prosecutionCases = Optional.ofNullable(hearing.getProsecutionCases())
+        final List<ProsecutionCase> prosecutionCases = Optional.ofNullable(hearing.getProsecutionCases())
                 .orElseGet(ArrayList::new);
 
         hearing.setProsecutionCases(prosecutionCases);
@@ -744,6 +805,28 @@ public class HearingDelegate implements Serializable {
                 .collect(toList());
     }
 
+    public void handleApplicationDefenceOrganisationDetailsUpdated(ApplicationOrganisationDetailsUpdatedForHearing applicationOrganisationDetailsUpdatedForHearing) {
+        if (momento.getHearing() != null) {
+            final Optional<CourtApplication> previousStoredApplication = momento.getHearing().getCourtApplications().stream()
+                    .filter(courtApplication -> courtApplication.getId().equals(applicationOrganisationDetailsUpdatedForHearing.getApplicationId()))
+                    .findFirst();
+
+            if (previousStoredApplication.isPresent()) {
+                final CourtApplication courtApplication = previousStoredApplication.get();
+                if (nonNull(courtApplication.getSubject()) && courtApplication.getSubject().getId().equals(applicationOrganisationDetailsUpdatedForHearing.getSubjectId())) {
+
+                    final CourtApplication updatedCourtApplication = CourtApplication.courtApplication().withValuesFrom(courtApplication)
+                            .withSubject(courtApplicationParty()
+                                    .withValuesFrom(courtApplication.getSubject())
+                                    .withAssociatedDefenceOrganisation(applicationOrganisationDetailsUpdatedForHearing.getAssociatedDefenceOrganisation())
+                                    .build())
+                            .build();
+                    momento.getHearing().getCourtApplications().remove(previousStoredApplication.get());
+                    momento.getHearing().getCourtApplications().add(updatedCourtApplication);
+                }
+            }
+        }
+    }
     public Stream<Object> userAddedToJudiciary(final UUID judiciaryId, final String emailId, final UUID cpUserId, final UUID hearingId, final UUID id) {
         final Stream.Builder<Object> streamBuilder = Stream.builder();
         streamBuilder.add(new HearingUserAddedToJudiciary(

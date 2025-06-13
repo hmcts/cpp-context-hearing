@@ -142,7 +142,7 @@ public class InitiateHearingEventProcessor {
 
         final List<CourtApplication> courtApplications = initiateHearingCommand.getHearing().getCourtApplications();
         ofNullable(courtApplications).map(Collection::stream).orElseGet(Stream::empty)
-                .filter(courtApplication -> APPLICATION_TYPE_LIST.containsKey(courtApplication.getType().getCode().toString()))
+                .filter(courtApplication -> APPLICATION_TYPE_LIST.containsKey(courtApplication.getType().getCode()))
                 .filter(courtApplication -> courtApplication.getSubject().getMasterDefendant() != null)
                 .forEach(
                         courtApplication -> {
@@ -158,7 +158,7 @@ public class InitiateHearingEventProcessor {
                         });
     }
 
-    private Boolean isApplicationFinalisedOrListed(final JsonEnvelope event, final UUID applicationId) {
+    private boolean isApplicationFinalisedOrListed(final JsonEnvelope event, final UUID applicationId) {
         final Optional<JsonObject> courtApplication = progressionService.getApplicationDetails(event, applicationId);
         Boolean shouldRaiseNCESEmailNotification = false;
         if(courtApplication.isPresent()) {

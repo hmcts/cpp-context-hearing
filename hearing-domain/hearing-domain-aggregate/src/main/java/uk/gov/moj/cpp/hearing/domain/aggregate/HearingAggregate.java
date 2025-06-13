@@ -27,6 +27,7 @@ import static uk.gov.moj.cpp.hearing.domain.event.ReusableInfoSaved.reusableInfo
 import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.VERSION_OFF_SEQUENCE;
 
 import uk.gov.justice.core.courts.ApplicantCounsel;
+import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.CourtApplication;
@@ -42,6 +43,7 @@ import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.LaaReference;
 import uk.gov.justice.core.courts.ListHearingRequest;
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.Offence;
@@ -92,6 +94,8 @@ import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationLaareferenceUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationOrganisationDetailsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
@@ -212,6 +216,7 @@ public class HearingAggregate implements Aggregate {
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
     private static final List<HearingState> HEARING_STATES_SHARE_NOT_ALLOWED = asList(SHARED_AMEND_LOCKED_ADMIN_ERROR, SHARED_AMEND_LOCKED_USER_ERROR, APPROVAL_REQUESTED);
+    public static final String SHARE_RESULTS_NOT_PERMITTED_ALL_THE_TARGETS_ALREADY_SHARED_FOR_THE_HEARING_DAY_S = "Share results not permitted! all the targets already shared for the hearingDay %s";
     private final HearingAggregateMomento momento = new HearingAggregateMomento();
 
     private final HearingDelegate hearingDelegate = new HearingDelegate(momento);
@@ -337,6 +342,8 @@ public class HearingAggregate implements Aggregate {
                 when(ApplicantCounselUpdated.class).apply(applicantCounselDelegate::handleApplicantCounselUpdated),
                 when(DefendantAdded.class).apply(hearingDelegate::handleDefendantAdded),
                 when(ApplicationDetailChanged.class).apply(hearingDelegate::handleApplicationDetailChanged),
+                when(ApplicationLaareferenceUpdated.class).apply(hearingDelegate::handleApplicationLaaReferenceUpdated),
+                when(ApplicationOrganisationDetailsUpdatedForHearing.class).apply(hearingDelegate::handleApplicationDefenceOrganisationDetailsUpdated),
                 when(InterpreterIntermediaryAdded.class).apply(interpreterIntermediaryDelegate::handleInterpreterIntermediaryAdded),
                 when(InterpreterIntermediaryRemoved.class).apply(interpreterIntermediaryDelegate::handleInterpreterIntermediaryRemoved),
                 when(InterpreterIntermediaryUpdated.class).apply(interpreterIntermediaryDelegate::handleInterpreterIntermediaryUpdated),
@@ -670,7 +677,7 @@ public class HearingAggregate implements Aggregate {
         //Share results not permitted when all targets (offenceId/applicationId) are shared.
         if (SHARED == this.hearingState && hasAllTargetsShared(hearingDay, resultLines)) {
             return apply(resultsSharedDelegate.manageResultsFailed(hearingId, this.hearingState,
-                    SHARE_NOT_PERMITTED_ALL_TARGETS_SHARED.toError(String.format("Share results not permitted! all the targets already shared for the hearingDay %s", hearingDay)),
+                    SHARE_NOT_PERMITTED_ALL_TARGETS_SHARED.toError(String.format(SHARE_RESULTS_NOT_PERMITTED_ALL_THE_TARGETS_ALREADY_SHARED_FOR_THE_HEARING_DAY_S, hearingDay)),
                     hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
         }
 
@@ -1007,6 +1014,26 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> updateCourtApplication(final UUID hearingId, final uk.gov.justice.core.courts.CourtApplication courtApplication) {
         return hearingDelegate.updateCourtApplication(hearingId, courtApplication);
+    }
+
+    public Stream<Object> updateLaareferenceForApplication(final UUID hearingId, final UUID applicationId, final UUID subjectId, final UUID offenceId, final LaaReference laaReference) {
+        if(momento.isDeleted()){
+            return Stream.empty();
+        }
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'updateLaareferenceForApplication' event as hearing not found", hearingId));
+        }
+        return hearingDelegate.updateLaaReferenceForApplication(hearingId, applicationId, subjectId, offenceId, laaReference);
+    }
+
+    public Stream<Object> updateDefenceOrganisationForApplication(final UUID hearingId, final UUID applicationId, final UUID subjectId, final AssociatedDefenceOrganisation defenceOrganisation) {
+        if(momento.isDeleted()){
+            return Stream.empty();
+        }
+        if (isNull(this.momento.getHearing())) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'updateDefenceOrganisationForApplication' event as hearing not found", hearingId));
+        }
+        return hearingDelegate.updateDefenceOrganisationForApplication(hearingId, applicationId, subjectId, defenceOrganisation);
     }
 
     public Stream<Object> addInterpreterIntermediary(final UUID hearingId, final InterpreterIntermediary interpreterIntermediary) {

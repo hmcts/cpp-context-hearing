@@ -247,6 +247,7 @@ public class HearingEventListenerYamlConfigTest {
                 CaseRemovedFromGroupCasesEventListener.class,
                 MasterCaseUpdatedForHearing.class,
                 CustodyTimeLimitEventListener.class,
+                ApplicationOrganisationDetailsUpdatedEventListener.class,
                 IndicatedPleaUpdated.class,
                 HearingJudiciaryListener.class));
 

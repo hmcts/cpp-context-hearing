@@ -207,6 +207,11 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.update-case-defendant-details.json
             example: !include json/hearing.update-case-defendant-details.json
 
+# Application Organisation Details Update
+        application/vnd.hearing.update-defence-organisation-for-application+json:
+            schema: !include json/schema/hearing.update-defence-organisation-for-application.json
+            example: !include json/hearing.update-defence-organisation-for-application.json
+
 # Case Defendant Offences Update
         application/vnd.hearing.command.update-offences-for-defendant+json:
             schema: !include json/schema/hearing.command.update-offences-for-defendant.json
@@ -292,6 +297,11 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.update-court-application+json:
             schema: !include json/schema/hearing.update-court-application.json
             example: !include json/hearing.update-court-application.json
+
+# Update Application Detail
+        application/vnd.hearing.update-laareference-for-application+json:
+            schema: !include json/schema/hearing.update-laareference-for-application.json
+            example: !include json/hearing.update-laareference-for-application.json
 
 # Eject case or application
         application/vnd.hearing.command.eject-case-or-application+json:

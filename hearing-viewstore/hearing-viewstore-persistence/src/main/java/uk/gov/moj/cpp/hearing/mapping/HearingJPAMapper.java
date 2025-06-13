@@ -225,6 +225,15 @@ public class HearingJPAMapper {
     private List<UUID> getDefendantsSelectedForYouthDefendant(final Hearing hearing){
        return  hearingYouthCourtDefendantsRepository.findAllByHearingId(hearing.getId()).stream().map(h -> h.getId().getDefendantId()).collect(toList());
     }
+
+    public Optional<CourtApplication> getCourtApplication(final String courtApplicationsJson, final UUID applicationId){
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        return courtApplications.stream().filter(
+                ca -> ca.getId().equals(applicationId)
+        ).findFirst();
+    }
+
+
     public String addOrUpdateCourtApplication(final String courtApplicationsJson, final CourtApplication courtApplicationUpdate) {
         List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
         if (courtApplications == null) {
