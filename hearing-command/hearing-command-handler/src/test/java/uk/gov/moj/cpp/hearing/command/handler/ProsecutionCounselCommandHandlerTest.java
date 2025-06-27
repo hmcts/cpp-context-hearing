@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import static com.google.common.io.Resources.getResource;
+import static java.nio.charset.Charset.defaultCharset;
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -10,10 +13,16 @@ import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.metadataFor;
 
-import uk.gov.justice.core.courts.ProsecutionCounsel;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
+import uk.gov.justice.core.courts.*;
+import uk.gov.justice.hearing.courts.AddDefenceCounsel;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
 import uk.gov.justice.hearing.courts.RemoveProsecutionCounsel;
 import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
@@ -23,9 +32,7 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.*;
 import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
 
 import java.io.IOException;
@@ -60,19 +67,57 @@ public class ProsecutionCounselCommandHandlerTest {
 
     private FileResourceObjectMapper fileResourceObjectMapper = new FileResourceObjectMapper();
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapperProducer().objectMapper();
+
+    private String getStringFromResource(final String path) throws IOException {
+        return Resources.toString(getResource(path), defaultCharset());
+    }
+
 
     @Test
     public void addProsecutionCounsel() throws EventStreamException, IOException {
+        UUID hearingId = UUID.randomUUID();
+        UUID caseId = UUID.randomUUID();
+        UUID defendantId1 = UUID.randomUUID();
+        UUID defendantId2 = UUID.randomUUID();
+        final UUID prosecutionCounselId = UUID.randomUUID();
 
-        final AddProsecutionCounsel addProsecutionCounsel = fileResourceObjectMapper.convertFromFile("add-prosecution-counsel.json", AddProsecutionCounsel.class);
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase().withId(caseId)
+                        .withDefendants(asList(Defendant.defendant().withId(defendantId1)
+                                        .withOffences(asList(Offence.offence().withId(UUID.randomUUID())
+                                                .build()))
+                                        .build(),
+                                Defendant.defendant().withId(defendantId2)
+                                        .withOffences(asList(Offence.offence().withId(UUID.randomUUID())
+                                                .build()))
+                                        .build()))
+                        .build()))
+                .build();
 
-        final UUID streamId = UUID.fromString("029034d9-0f54-43c5-ba36-e5deadd62474");
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(hearing));
+        }};
+
+
+
+        final String prosecutionCounselString = getStringFromResource("add-prosecution-counsel.json")
+                .replace("HEARING_ID", hearingId.toString())
+                .replace("CASE_ID", caseId.toString())
+                .replace("PROSECUTION_COUNSEL_ID", prosecutionCounselId.toString());
+
+        final AddProsecutionCounsel addProsecutionCounsel = new JsonObjectToObjectConverter(OBJECT_MAPPER).convert(new StringToJsonObjectConverter().convert(prosecutionCounselString), AddProsecutionCounsel.class);
+
+
+
+        final UUID streamId = hearingId;
         final Metadata metadata = metadataFor("hearing.add-prosecution-counsel", UUID.randomUUID());
         final Envelope<AddProsecutionCounsel> envelope = envelopeFrom(metadata, addProsecutionCounsel);
 
         when(eventSource.getStreamById(streamId)).thenReturn(hearingEventStream);
         when(aggregateService.get(eq(hearingEventStream), any()))
-                .thenReturn(new uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate());
+                .thenReturn(hearingAggregate);
 
         prosecutionCounselCommandHandler.addProsecutionCounsel(envelope);
 
@@ -84,15 +129,54 @@ public class ProsecutionCounselCommandHandlerTest {
     @Test
     public void removeProsecutionCounsel() throws EventStreamException, IOException {
 
-        final RemoveProsecutionCounsel removeProsecutionCounsel = fileResourceObjectMapper.convertFromFile("remove-prosecution-counsel.json", RemoveProsecutionCounsel.class);
+        UUID hearingId = UUID.randomUUID();
+        UUID caseId = UUID.randomUUID();
+        UUID defendantId1 = UUID.randomUUID();
+        UUID defendantId2 = UUID.randomUUID();
+        final UUID prosecutionCounselId = UUID.randomUUID();
 
-        final UUID streamId = UUID.fromString("fab947a3-c50c-4dbb-accf-b2758b1d2d6d");
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase().withId(caseId)
+                        .withDefendants(asList(Defendant.defendant().withId(defendantId1)
+                                        .withOffences(asList(Offence.offence().withId(UUID.randomUUID())
+                                                .build()))
+                                        .build(),
+                                Defendant.defendant().withId(defendantId2)
+                                        .withOffences(asList(Offence.offence().withId(UUID.randomUUID())
+                                                .build()))
+                                        .build()))
+                        .build()))
+                .build();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(hearing));
+        }};
+
+        final String prosecutionCounselString = getStringFromResource("add-prosecution-counsel.json")
+                .replace("HEARING_ID", hearingId.toString())
+                .replace("CASE_ID", caseId.toString())
+                .replace("PROSECUTION_COUNSEL_ID", prosecutionCounselId.toString());
+
+        final AddProsecutionCounsel addProsecutionCounsel = new JsonObjectToObjectConverter(OBJECT_MAPPER).convert(new StringToJsonObjectConverter().convert(prosecutionCounselString), AddProsecutionCounsel.class);
+
+        hearingAggregate.apply(new ProsecutionCounselAdded(addProsecutionCounsel.getProsecutionCounsel(), hearingId));
+
+
+        final String removeProsecutionCounselString = getStringFromResource("remove-prosecution-counsel.json")
+                .replace("HEARING_ID", hearingId.toString())
+                .replace("PROSECUTION_COUNSEL_ID", prosecutionCounselId.toString());
+
+        final RemoveProsecutionCounsel removeProsecutionCounsel = new JsonObjectToObjectConverter(OBJECT_MAPPER).convert(new StringToJsonObjectConverter().convert(removeProsecutionCounselString), RemoveProsecutionCounsel.class);
+
+
+        final UUID streamId = hearingId;
         final Metadata metadata = metadataFor("hearing.remove-prosecution-counsel", UUID.randomUUID());
         final Envelope<RemoveProsecutionCounsel> envelope = envelopeFrom(metadata, removeProsecutionCounsel);
 
         when(eventSource.getStreamById(streamId)).thenReturn(hearingEventStream);
         when(aggregateService.get(eq(hearingEventStream), any()))
-                .thenReturn(new uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate());
+                .thenReturn(hearingAggregate);
 
         prosecutionCounselCommandHandler.removeProsecutionCounsel(envelope);
 
