@@ -92,6 +92,7 @@ public class AddDefenceCounselCommandHandlerTest {
         UUID caseId = UUID.randomUUID();
         UUID defendantId1 = UUID.randomUUID();
         UUID defendantId2 = UUID.randomUUID();
+        UUID defenceCounselId = UUID.randomUUID();
 
         final Hearing hearing = Hearing.hearing()
                 .withId(hearingId)
@@ -114,7 +115,8 @@ public class AddDefenceCounselCommandHandlerTest {
         final String defenceCounselString = getStringFromResource("add-defence-counsel.json")
                 .replace("HEARING_ID", hearingId.toString())
                 .replace("DEFENDANT_ID1", defendantId1.toString())
-                .replace("DEFENDANT_ID2", defendantId2.toString());
+                .replace("DEFENDANT_ID2", defendantId2.toString())
+                .replace("DEFENCE_COUNSEL_ID", defenceCounselId.toString());
 
         final AddDefenceCounsel addDefenceCounsel = new JsonObjectToObjectConverter(OBJECT_MAPPER).convert(new StringToJsonObjectConverter().convert(defenceCounselString), AddDefenceCounsel.class);
 
@@ -134,15 +136,55 @@ public class AddDefenceCounselCommandHandlerTest {
     @Test
     public void removeDefenceCounsel() throws EventStreamException, IOException {
 
-        final RemoveDefenceCounsel removeDefenceCounsel = fileResourceObjectMapper.convertFromFile("remove-defence-counsel.json", RemoveDefenceCounsel.class);
+        UUID hearingId = UUID.randomUUID();
+        UUID caseId = UUID.randomUUID();
+        UUID defendantId1 = UUID.randomUUID();
+        UUID defendantId2 = UUID.randomUUID();
+        UUID defenceCounselId = UUID.randomUUID();
 
-        final UUID streamId = UUID.fromString("fab947a3-c50c-4dbb-accf-b2758b1d2d6d");
-        final Metadata metadata = metadataFor("hearing.remove-defence-counsel", UUID.randomUUID());
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase().withId(caseId)
+                        .withDefendants(asList(Defendant.defendant().withId(defendantId1)
+                                        .withOffences(asList(Offence.offence().withId(UUID.randomUUID())
+                                                .build()))
+                                        .build(),
+                                Defendant.defendant().withId(defendantId2)
+                                        .withOffences(asList(Offence.offence().withId(UUID.randomUUID())
+                                                .build()))
+                                        .build()))
+                        .build()))
+                .build();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+
+        final String defenceCounselString = getStringFromResource("add-defence-counsel.json")
+                .replace("HEARING_ID", hearingId.toString())
+                .replace("DEFENDANT_ID1", defendantId1.toString())
+                .replace("DEFENDANT_ID2", defendantId2.toString())
+                .replace("DEFENCE_COUNSEL_ID", defenceCounselId.toString());
+
+        final AddDefenceCounsel addDefenceCounsel = new JsonObjectToObjectConverter(OBJECT_MAPPER).convert(new StringToJsonObjectConverter().convert(defenceCounselString), AddDefenceCounsel.class);
+
+        hearingAggregate.apply(new DefenceCounselAdded(addDefenceCounsel.getDefenceCounsel(), hearingId));
+
+
+        final String removeDefenceCounselString = getStringFromResource("remove-defence-counsel.json")
+                .replace("HEARING_ID", hearingId.toString())
+                .replace("DEFENCE_COUNSEL_ID", defenceCounselId.toString());
+
+
+
+        final RemoveDefenceCounsel removeDefenceCounsel = new JsonObjectToObjectConverter(OBJECT_MAPPER).convert(new StringToJsonObjectConverter().convert(removeDefenceCounselString), RemoveDefenceCounsel.class);
+
+        final UUID streamId = hearingId;
+        final Metadata metadata = metadataFor("hearing.remove-defence-counsel", UUID.fromString("fab947a3-c50c-4dbb-accf-b2758b1d2d6d"));
         final Envelope<RemoveDefenceCounsel> envelope = envelopeFrom(metadata, removeDefenceCounsel);
 
         when(eventSource.getStreamById(streamId)).thenReturn(hearingEventStream);
         when(aggregateService.get(eq(hearingEventStream), any()))
-                .thenReturn(new uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate());
+                .thenReturn(hearingAggregate);
 
         defenceCounselCommandHandler.removeDefenceCounsel(envelope);
 

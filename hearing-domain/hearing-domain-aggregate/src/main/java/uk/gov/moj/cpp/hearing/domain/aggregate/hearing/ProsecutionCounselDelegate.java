@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
@@ -49,11 +50,21 @@ public class ProsecutionCounselDelegate implements Serializable {
         return Stream.of(new ProsecutionCounselAdded(prosecutionCounsel, hearingId));
     }
 
-    public Stream<Object> removeProsecutionCounsel(final UUID id, final UUID hearingId) {
+    public Stream<Object> removeProsecutionCounsel(final UUID id, final UUID hearingId, final boolean isHearingEnded) {
+
+        final ProsecutionCounsel prosecutionCounsel = this.momento.getProsecutionCounsels().get(id);
+        if (prosecutionCounsel == null ||isHearingEnded) {
+            return Stream.empty();
+        }
+
+
         return Stream.of(new ProsecutionCounselRemoved(id, hearingId));
     }
 
-    public Stream<Object> updateProsecutionCounsel(final ProsecutionCounsel prosecutionCounsel, final UUID hearingId) {
+    public Stream<Object> updateProsecutionCounsel(final ProsecutionCounsel prosecutionCounsel, final UUID hearingId, final boolean isHearingEnded) {
+        if (isHearingEnded) {
+            return  Stream.empty();
+        }
 
         final Map<UUID, ProsecutionCounsel> prosecutionCounsels = this.momento.getProsecutionCounsels();
         final String caseRef = this.momento.getHearing() != null ? this.momento.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN():null;

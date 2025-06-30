@@ -41,7 +41,7 @@ public class DefenceCounselDelegate implements Serializable {
         this.momento.getDefenceCounsels().put(defenceCounsel.getId(), defenceCounsel);
     }
 
-    public Stream<Object> addDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId, boolean isHearingEnded) {
+    public Stream<Object>  addDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId, boolean isHearingEnded) {
         final Hearing hearing = this.momento.getHearing();
         // Check for defendant(s) exists on the hearing
         if(isNoDfendantsOnTheHearing(defenceCounsel, hearing)) {
@@ -69,13 +69,21 @@ public class DefenceCounselDelegate implements Serializable {
         return defenceCounsel.getDefendants().stream().filter(aDefId -> defendantIds.contains(aDefId)).findFirst().isPresent() ? false:true;
     }
 
-    public Stream<Object> removeDefenceCounsel(final UUID id, final UUID hearingId) {
+    public Stream<Object> removeDefenceCounsel(final UUID id, final UUID hearingId, final boolean isHearingEnded) {
+        final DefenceCounsel defenceCounsel = this.momento.getDefenceCounsels().get(id);
+        if (defenceCounsel == null || isHearingEnded ) {
+            return Stream.empty();
+        }
+
         return Stream.of(new DefenceCounselRemoved(id, hearingId));
     }
 
-    public Stream<Object> updateDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId) {
+    public Stream<Object> updateDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId, final boolean isHearingEnded) {
 
         final Map<UUID, DefenceCounsel> defenceCounsels = this.momento.getDefenceCounsels();
+        if (defenceCounsel == null || isHearingEnded ) {
+            return Stream.empty();
+        }
         final String caseRef = this.momento.getHearing() != null ? this.momento.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN():null;
 
         if (!(defenceCounsels.containsKey(defenceCounsel.getId()))) {

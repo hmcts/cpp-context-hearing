@@ -1,7 +1,7 @@
 {
   "hearingId": "HEARING_ID",
   "defenceCounsel": {
-    "id": "fab947a3-c50c-4dbb-accf-b2758b1d2d6d",
+    "id": "DEFENCE_COUNSEL_ID",
     "status": "QC",
     "title": "Mr",
     "firstName": "Eric",

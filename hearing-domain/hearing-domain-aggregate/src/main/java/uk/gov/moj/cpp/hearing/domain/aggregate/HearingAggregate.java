@@ -456,11 +456,11 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> removeProsecutionCounsel(final UUID id, final UUID hearingId) {
-        return apply(prosecutionCounselDelegate.removeProsecutionCounsel(id, hearingId));
+        return apply(prosecutionCounselDelegate.removeProsecutionCounsel(id, hearingId, hasHearingEnded()));
     }
 
     public Stream<Object> updateProsecutionCounsel(final ProsecutionCounsel prosecutionCounsel, final UUID hearingId) {
-        return apply(prosecutionCounselDelegate.updateProsecutionCounsel(prosecutionCounsel, hearingId));
+        return apply(prosecutionCounselDelegate.updateProsecutionCounsel(prosecutionCounsel, hearingId, hasHearingEnded()));
     }
 
     public Stream<Object> updateProsecutionCounsel(final UUID hearingId, final ProsecutionCounsel prosecutionCounsel,
@@ -469,7 +469,7 @@ public class HearingAggregate implements Aggregate {
                 .withValuesFrom(prosecutionCounsel)
                 .withProsecutionCases(getUpdatedProsecutionCases(prosecutionCounsel.getProsecutionCases(), removedCase, newGroupMaster))
                 .build();
-        return apply(prosecutionCounselDelegate.updateProsecutionCounsel(updated, hearingId));
+        return apply(prosecutionCounselDelegate.updateProsecutionCounsel(updated, hearingId, hasHearingEnded()));
     }
 
     private List<UUID> getUpdatedProsecutionCases(final List<UUID> prosecutionCases, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
@@ -491,12 +491,12 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> removeDefenceCounsel(final UUID id, final UUID hearingId) {
-        return apply(defenceCounselDelegate.removeDefenceCounsel(id, hearingId));
+        return apply(defenceCounselDelegate.removeDefenceCounsel(id, hearingId, hasHearingEnded()));
     }
 
 
     public Stream<Object> updateDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId) {
-        return apply(defenceCounselDelegate.updateDefenceCounsel(defenceCounsel, hearingId));
+        return apply(defenceCounselDelegate.updateDefenceCounsel(defenceCounsel, hearingId, hasHearingEnded()));
     }
 
 
