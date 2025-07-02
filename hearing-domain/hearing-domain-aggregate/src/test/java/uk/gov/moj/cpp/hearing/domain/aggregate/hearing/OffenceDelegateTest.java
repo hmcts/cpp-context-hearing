@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -9,11 +10,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
+import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.Verdict;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
 import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitExtended;
@@ -25,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +38,7 @@ import org.junit.jupiter.api.Test;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAddedV2;
 
-public class OffenceDelegateTest {
+class OffenceDelegateTest {
 
     private HearingAggregateMomento hearingAggregateMomento;
     private OffenceDelegate offenceDelegate;
@@ -288,7 +294,7 @@ public class OffenceDelegateTest {
                 .build();
 
 
-        List events = hearingAggregate.addOffenceV2(hearingId,defendantId,prosecutionCaseId, Collections.singletonList(offence)).toList();
+        List events = hearingAggregate.addOffenceV2(hearingId,defendantId,prosecutionCaseId, singletonList(offence)).toList();
 
         assertThat(events.isEmpty(), is(true));
 
@@ -359,11 +365,59 @@ public class OffenceDelegateTest {
                 .withHearingId(hearingId)
                 .withDefendantId(defendantId)
                 .withProsecutionCaseId(prosecutionCaseId)
-                .withOffence(Collections.singletonList(offence)));
+                .withOffence(singletonList(offence)));
 
         final List<Offence> offences = hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences();
         assertThat(offences.size(), is(2));
 
+    }
+
+
+    @Test
+    void shouldAddOffencePleasToMomento() {
+        final UUID hearingId = randomUUID();
+        final UUID caseId1 = randomUUID();
+        final UUID caseId2 = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        hearingAggregate.apply(new HearingInitiated(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(new ArrayList<>(singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(caseId1)
+                        .withDefendants(new ArrayList<>(singletonList(Defendant.defendant()
+                                .withId(defendantId)
+                                .withOffences(new ArrayList<>(singletonList(Offence.offence()
+                                        .withId(offenceId)
+                                        .build())))
+                                .build())))
+                        .build())))
+                .build()));
+
+        final List<ProsecutionCase> prosecutionCases = singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(caseId2)
+                        .withDefendants(singletonList(
+                                Defendant.defendant()
+                                        .withId(defendantId)
+                                        .withOffences(singletonList(Offence.offence()
+                                                .withId(offenceId)
+                                                .withPlea(Plea.plea().withOffenceId(offenceId).build())
+                                                .withIndicatedPlea(IndicatedPlea.indicatedPlea().withOffenceId(offenceId).build())
+                                                .withAllocationDecision(AllocationDecision.allocationDecision().withOffenceId(offenceId).build())
+                                                .withVerdict(Verdict.verdict().withOffenceId(offenceId).build())
+                                                .build()))
+                                        .build()))
+                        .build());
+        hearingAggregate.apply(new ExistingHearingUpdated(hearingId, prosecutionCases, Collections.emptyList()));
+
+        assertThat(hearingAggregateMomento.getPleas().size(), is(1));
+        assertThat(hearingAggregateMomento.getIndicatedPlea().size(), is(1));
+        assertThat(hearingAggregateMomento.getVerdicts().size(), is(1));
+        assertThat(hearingAggregateMomento.getAllocationDecision().size(), is(1));
+        assertThat(hearingAggregateMomento.getPleas().get(offenceId).getOffenceId(), is(offenceId));
+        assertThat(hearingAggregateMomento.getIndicatedPlea().get(offenceId).getOffenceId(), is(offenceId));
+        assertThat(hearingAggregateMomento.getVerdicts().get(offenceId).getOffenceId(), is(offenceId));
+        assertThat(hearingAggregateMomento.getAllocationDecision().get(offenceId).getOffenceId(), is(offenceId));
     }
 
     public void shouldUpdateOffenceIfOffenceExistAlreadyForDefendantV2() {
@@ -389,7 +443,7 @@ public class OffenceDelegateTest {
                 .build();
 
 
-        List events = hearingAggregate.updateOffenceV2(hearingId,defendantId, Collections.singletonList(offence)).toList();
+        List events = hearingAggregate.updateOffenceV2(hearingId,defendantId, singletonList(offence)).toList();
 
         assertThat(events.isEmpty(), is(false));
         assertThat(hearingAggregate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getCount(), is(3));
