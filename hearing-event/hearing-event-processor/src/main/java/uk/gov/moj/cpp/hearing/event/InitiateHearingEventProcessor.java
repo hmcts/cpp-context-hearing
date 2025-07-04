@@ -4,12 +4,14 @@ import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -56,7 +58,7 @@ public class InitiateHearingEventProcessor {
 
     public static final String APPEAL = "APPEAL";
     public static final String STAT_DEC = "STAT_DEC";
-    private static final Map<String, String> APPLICATION_TYPE_LIST = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> ENFORCEMENT_NOTIFICATION_APPLICATION_TYPES = ImmutableMap.<String, String>builder()
             .put("MC80527", STAT_DEC)
             .put("MC80528", STAT_DEC)
             .put("MC80524", "REOPEN")
@@ -95,7 +97,7 @@ public class InitiateHearingEventProcessor {
 
         final List<ProsecutionCase> prosecutionCases = initiateHearingCommand.getHearing().getProsecutionCases();
 
-        if (prosecutionCases!=null) {
+        if (prosecutionCases != null) {
             prosecutionCases.forEach(prosecutionCase -> {
 
                 prosecutionCase.getDefendants().forEach(defendant -> {
@@ -110,8 +112,8 @@ public class InitiateHearingEventProcessor {
                         cases.add(prosecutionCase.getId());
 
                         this.sender.send(Enveloper.envelop(RegisterHearingAgainstOffenceCommand.registerHearingAgainstOffenceDefendantCommand()
-                                .setHearingId(initiateHearingCommand.getHearing().getId())
-                                .setOffenceId(offence.getId())).withName("hearing.command.register-hearing-against-offence")
+                                        .setHearingId(initiateHearingCommand.getHearing().getId())
+                                        .setOffenceId(offence.getId())).withName("hearing.command.register-hearing-against-offence")
                                 .withMetadataFrom(event));
                     }
                 });
@@ -142,59 +144,20 @@ public class InitiateHearingEventProcessor {
 
         final List<CourtApplication> courtApplications = initiateHearingCommand.getHearing().getCourtApplications();
         ofNullable(courtApplications).map(Collection::stream).orElseGet(Stream::empty)
-                .filter(courtApplication -> APPLICATION_TYPE_LIST.containsKey(courtApplication.getType().getCode()))
+                .filter(courtApplication -> ENFORCEMENT_NOTIFICATION_APPLICATION_TYPES.containsKey(courtApplication.getType().getCode()))
                 .filter(courtApplication -> courtApplication.getSubject().getMasterDefendant() != null)
+                .filter(courtApplication -> !isApplicationFinalisedOrListed(event, courtApplication.getId()))
                 .forEach(
                         courtApplication -> {
-                                if (!isApplicationFinalisedOrListed(event, courtApplication.getId())) {
-                                        this.sender.send(Enveloper.envelop(createObjectBuilder()
-                                                .add("applicationType", APPLICATION_TYPE_LIST.get(courtApplication.getType().getCode()))
-                                                .add("masterDefendantId", courtApplication.getSubject().getMasterDefendant().getMasterDefendantId().toString())
-                                                .add("listingDate", dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))
-                                                .add("caseUrns", createCaseUrns(courtApplication).build())
-                                                .add("hearingCourtCentreName", initiateHearingCommand.getHearing().getCourtCentre().getName())
-                                                .build()).withName("public.hearing.nces-email-notification-for-application").withMetadataFrom(event));
-                                }
+                            this.sender.send(Enveloper.envelop(createObjectBuilder()
+                                    .add("applicationType", ENFORCEMENT_NOTIFICATION_APPLICATION_TYPES.get(courtApplication.getType().getCode()))
+                                    .add("masterDefendantId", courtApplication.getSubject().getMasterDefendant().getMasterDefendantId().toString())
+                                    .add("listingDate", dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))
+                                    .add("caseUrns", createCaseUrns(courtApplication).build())
+                                    .add("hearingCourtCentreName", initiateHearingCommand.getHearing().getCourtCentre().getName())
+                                    .add("caseOffenceIdList", createCaseOffenceIds(courtApplication.getCourtApplicationCases()))
+                                    .build()).withName("public.hearing.nces-email-notification-for-application").withMetadataFrom(event));
                         });
-    }
-
-    private boolean isApplicationFinalisedOrListed(final JsonEnvelope event, final UUID applicationId) {
-        final Optional<JsonObject> courtApplication = progressionService.getApplicationDetails(event, applicationId);
-        Boolean shouldRaiseNCESEmailNotification = false;
-        if(courtApplication.isPresent()) {
-            CourtApplication courtApplicationObj = jsonObjectToObjectConverter.convert(courtApplication.get().getJsonObject("courtApplication"), CourtApplication.class);
-            if(nonNull(courtApplicationObj.getApplicationStatus())) {
-                if (ApplicationStatus.FINALISED.toString().equals(courtApplicationObj.getApplicationStatus().toString())) {
-                    shouldRaiseNCESEmailNotification = Boolean.TRUE;
-                } else {
-                    shouldRaiseNCESEmailNotification = hasNextHearing(courtApplicationObj);
-                }
-            }
-        }
-        return  shouldRaiseNCESEmailNotification;
-    }
-
-    private Boolean hasNextHearing(final CourtApplication courtApplicationObj) {
-        Boolean applicationStatus;
-        List<JudicialResult> judicialResults = courtApplicationObj.getJudicialResults();
-        if (judicialResults != null) {
-            boolean hasNextHearing = judicialResults.stream().anyMatch(result -> result.getNextHearing() != null);
-            if (hasNextHearing) {
-                applicationStatus = Boolean.TRUE;
-            } else {
-                applicationStatus = Boolean.FALSE;
-            }
-        } else {
-            applicationStatus = Boolean.FALSE;
-        }
-        return applicationStatus;
-    }
-
-
-    private JsonArrayBuilder createCaseUrns(final CourtApplication courtApplication) {
-        final JsonArrayBuilder builder = createArrayBuilder();
-        courtApplication.getCourtApplicationCases().stream().map(cac -> ofNullable(cac.getProsecutionCaseIdentifier().getCaseURN()).orElse(cac.getProsecutionCaseIdentifier().getProsecutionAuthorityReference())).forEach(builder::add);
-        return builder;
     }
 
     @Handles("hearing.events.hearing-initiate-ignored")
@@ -204,4 +167,39 @@ public class InitiateHearingEventProcessor {
         }
         this.sender.send(Enveloper.envelop(event.payloadAsJsonObject()).withName("public.hearing.initiate-ignored").withMetadataFrom(event));
     }
+
+    private Boolean isApplicationFinalisedOrListed(final JsonEnvelope event, final UUID applicationId) {
+        final Optional<JsonObject> courtApplication = progressionService.getApplicationDetails(event, applicationId);
+        if (courtApplication.isPresent()) {
+            final CourtApplication courtApplicationObj = jsonObjectToObjectConverter.convert(courtApplication.get().getJsonObject("courtApplication"), CourtApplication.class);
+            return courtApplicationObj.getApplicationStatus() == ApplicationStatus.FINALISED || hasNextHearing(courtApplicationObj.getJudicialResults());
+        }
+        return false;
+    }
+
+    private Boolean hasNextHearing(final List<JudicialResult> judicialResults) {
+        return nonNull(judicialResults) && judicialResults.stream().anyMatch(result -> nonNull(result.getNextHearing()));
+    }
+
+
+    private JsonArrayBuilder createCaseUrns(final CourtApplication courtApplication) {
+        final JsonArrayBuilder builder = createArrayBuilder();
+        courtApplication.getCourtApplicationCases().stream()
+                .map(cac -> ofNullable(cac.getProsecutionCaseIdentifier().getCaseURN()).orElse(cac.getProsecutionCaseIdentifier().getProsecutionAuthorityReference()))
+                .forEach(builder::add);
+        return builder;
+    }
+
+    private JsonArrayBuilder createCaseOffenceIds(final List<CourtApplicationCase> courtApplicationCases) {
+        final JsonArrayBuilder builder = createArrayBuilder();
+        if (isNotEmpty(courtApplicationCases)) {
+            courtApplicationCases.stream()
+                    .filter(cac -> isNotEmpty(cac.getOffences()))
+                    .flatMap(cac -> cac.getOffences().stream())
+                    .map(offence -> offence.getId().toString())
+                    .forEach(builder::add);
+        }
+        return builder;
+    }
+
 }
