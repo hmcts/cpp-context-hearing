@@ -37,7 +37,6 @@ import java.util.stream.Stream;
 import org.apache.commons.collections.CollectionUtils;
 
 public class OffenceDelegate implements Serializable {
-
     private static final long serialVersionUID = 5L;
 
     private final HearingAggregateMomento momento;
@@ -126,6 +125,11 @@ public class OffenceDelegate implements Serializable {
         } else {
             momento.getHearing().getProsecutionCases().add(prosecutionCase);
         }
+
+        if(nonNull(prosecutionCase.getDefendants())) {
+            prosecutionCase.getDefendants().forEach(defendant ->
+                    defendant.getOffences().forEach(this::addPleasToMomentoHearing));
+        }
     }
 
     private void addDefendantToMomentoHearing(final ProsecutionCase prosecutionCaseInAggregate, final Defendant defendant) {
@@ -145,6 +149,26 @@ public class OffenceDelegate implements Serializable {
                 .findFirst();
         if (!offenceInAggregate.isPresent()) {
             defendantInAggregate.getOffences().add(offence);
+        }
+    }
+
+    private void addPleasToMomentoHearing(final Offence offence) {
+        final UUID offenceId = offence.getId();
+
+        if(nonNull(offence.getPlea())) {
+            this.momento.getPleas().putIfAbsent(offenceId, offence.getPlea());
+        }
+
+        if(nonNull(offence.getIndicatedPlea())) {
+            this.momento.getIndicatedPlea().putIfAbsent(offenceId, offence.getIndicatedPlea());
+        }
+
+        if(nonNull(offence.getVerdict())) {
+            this.momento.getVerdicts().putIfAbsent(offenceId, offence.getVerdict());
+        }
+
+        if(nonNull(offence.getAllocationDecision())) {
+            this.momento.getAllocationDecision().putIfAbsent(offenceId, offence.getAllocationDecision());
         }
     }
 
