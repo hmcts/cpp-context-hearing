@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static java.lang.String.valueOf;
 import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
@@ -27,6 +28,7 @@ import static uk.gov.moj.cpp.hearing.domain.event.ReusableInfoSaved.reusableInfo
 import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.VERSION_OFF_SEQUENCE;
 
 import uk.gov.justice.core.courts.ApplicantCounsel;
+import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.CourtApplication;
@@ -42,6 +44,7 @@ import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.LaaReference;
 import uk.gov.justice.core.courts.ListHearingRequest;
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.Offence;
@@ -92,6 +95,8 @@ import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationLaareferenceUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationOrganisationDetailsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
@@ -101,6 +106,7 @@ import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationHearingDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
@@ -205,12 +211,13 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize", "squid:CommentedOutCodeLine","squid:CallToDeprecatedMethod"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = -6059812881894748586L;
+    private static final long serialVersionUID = -6059812881894748587L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingAggregate.class);
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
     private static final List<HearingState> HEARING_STATES_SHARE_NOT_ALLOWED = asList(SHARED_AMEND_LOCKED_ADMIN_ERROR, SHARED_AMEND_LOCKED_USER_ERROR, APPROVAL_REQUESTED);
+    public static final String SHARE_RESULTS_NOT_PERMITTED_ALL_THE_TARGETS_ALREADY_SHARED_FOR_THE_HEARING_DAY_S = "Share results not permitted! all the targets already shared for the hearingDay %s";
     private final HearingAggregateMomento momento = new HearingAggregateMomento();
 
     private final HearingDelegate hearingDelegate = new HearingDelegate(momento);
@@ -259,7 +266,6 @@ public class HearingAggregate implements Aggregate {
     private Boolean isMultiDayHearing;
     private Map<LocalDate, Set<UUID>> hearingDaySharedOffencesMap = new HashMap<>();
     private Map<LocalDate, Set<UUID>> hearingDaySharedApplicationsMap = new HashMap<>();
-
     private static final String HEARING_STATE_STR = "Hearing is in %s state";
     @Override
     public Object apply(final Object event) {
@@ -337,6 +343,8 @@ public class HearingAggregate implements Aggregate {
                 when(ApplicantCounselUpdated.class).apply(applicantCounselDelegate::handleApplicantCounselUpdated),
                 when(DefendantAdded.class).apply(hearingDelegate::handleDefendantAdded),
                 when(ApplicationDetailChanged.class).apply(hearingDelegate::handleApplicationDetailChanged),
+                when(ApplicationLaareferenceUpdated.class).apply(hearingDelegate::handleApplicationLaaReferenceUpdated),
+                when(ApplicationOrganisationDetailsUpdatedForHearing.class).apply(hearingDelegate::handleApplicationDefenceOrganisationDetailsUpdated),
                 when(InterpreterIntermediaryAdded.class).apply(interpreterIntermediaryDelegate::handleInterpreterIntermediaryAdded),
                 when(InterpreterIntermediaryRemoved.class).apply(interpreterIntermediaryDelegate::handleInterpreterIntermediaryRemoved),
                 when(InterpreterIntermediaryUpdated.class).apply(interpreterIntermediaryDelegate::handleInterpreterIntermediaryUpdated),
@@ -392,6 +400,7 @@ public class HearingAggregate implements Aggregate {
                     this.hearingState = APPROVAL_REQUESTED;
                 }),
                 when(HearingDeleted.class).apply(deleted -> hearingDelegate.handleHearingDeleted()),
+                when(CourtApplicationHearingDeleted.class).apply(deleted -> hearingDelegate.handleHearingDeleted()),
                 when(HearingUnallocated.class).apply(hearingDelegate::handleHearingUnallocated),
                 when(NextHearingStartDateRecorded.class).apply(hearingDelegate::handleNextHearingStartDateRecorded),
                 when(EarliestNextHearingDateCleared.class).apply(cleared -> hearingDelegate.handleEarliestNextHearingDateCleared()),
@@ -448,11 +457,11 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> removeProsecutionCounsel(final UUID id, final UUID hearingId) {
-        return apply(prosecutionCounselDelegate.removeProsecutionCounsel(id, hearingId));
+        return apply(prosecutionCounselDelegate.removeProsecutionCounsel(id, hearingId, hasHearingEnded()));
     }
 
     public Stream<Object> updateProsecutionCounsel(final ProsecutionCounsel prosecutionCounsel, final UUID hearingId) {
-        return apply(prosecutionCounselDelegate.updateProsecutionCounsel(prosecutionCounsel, hearingId));
+        return apply(prosecutionCounselDelegate.updateProsecutionCounsel(prosecutionCounsel, hearingId, hasHearingEnded()));
     }
 
     public Stream<Object> updateProsecutionCounsel(final UUID hearingId, final ProsecutionCounsel prosecutionCounsel,
@@ -461,7 +470,7 @@ public class HearingAggregate implements Aggregate {
                 .withValuesFrom(prosecutionCounsel)
                 .withProsecutionCases(getUpdatedProsecutionCases(prosecutionCounsel.getProsecutionCases(), removedCase, newGroupMaster))
                 .build();
-        return apply(prosecutionCounselDelegate.updateProsecutionCounsel(updated, hearingId));
+        return apply(prosecutionCounselDelegate.updateProsecutionCounsel(updated, hearingId, hasHearingEnded()));
     }
 
     private List<UUID> getUpdatedProsecutionCases(final List<UUID> prosecutionCases, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
@@ -483,12 +492,12 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> removeDefenceCounsel(final UUID id, final UUID hearingId) {
-        return apply(defenceCounselDelegate.removeDefenceCounsel(id, hearingId));
+        return apply(defenceCounselDelegate.removeDefenceCounsel(id, hearingId, hasHearingEnded()));
     }
 
 
     public Stream<Object> updateDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId) {
-        return apply(defenceCounselDelegate.updateDefenceCounsel(defenceCounsel, hearingId));
+        return apply(defenceCounselDelegate.updateDefenceCounsel(defenceCounsel, hearingId, hasHearingEnded()));
     }
 
 
@@ -512,13 +521,20 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> extend(final UUID hearingId, final List<HearingDay> hearingDays, final CourtCentre courtCentre, final JurisdictionType jurisdictionType,
                                  final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {
+        if (momento.isDeletedOrDuplicated()){
+            return warnEventIgnored(hearingId, "extend");
+        }
+
         return apply(this.hearingDelegate.extend(hearingId, hearingDays, courtCentre, jurisdictionType, courtApplication, prosecutionCases, shadowListedOffences));
     }
 
 
     public Stream<Object> updateExistingHearing(final UUID hearingId, final List<ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {
-        if (this.momento.getHearing() == null) {
-            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing not found", hearingId));
+        if(this.momento.isDeletedOrDuplicated()){
+            return warnEventIgnored(hearingId, "updateExistingHearing");
+        }
+        if (isNull(momento.getHearing()) ) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing / deleted / marked as duplicate' event as hearing not found", hearingId));
         }
         return apply(Stream.of(new ExistingHearingUpdated(hearingId, prosecutionCases, shadowListedOffences)));
     }
@@ -546,6 +562,10 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> inheritPlea(final UUID hearingId, final Plea plea) {
+        if (this.momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "inheritPlea");
+        }
+
         return apply(this.pleaDelegate.inheritPlea(hearingId, plea));
     }
 
@@ -554,7 +574,11 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final HearingEvent hearingEvent, final List<UUID> hearingTypeIds, final UUID userId) {
-            return apply(Stream.concat(this.hearingEventDelegate.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, userId),
+        if (this.momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "logHearingEvent");
+        }
+
+        return apply(Stream.concat(this.hearingEventDelegate.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, userId),
                 CustodyTimeLimitUtil.stopCTLExpiryForTrialHearingUser(this.momento, hearingEvent, hearingTypeIds)));
     }
 
@@ -565,6 +589,17 @@ public class HearingAggregate implements Aggregate {
     public Stream<Object> correctHearingEvent(final UUID latestHearingEventId, final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final HearingEvent hearingEvent, final UUID userId) {
         return apply(this.hearingEventDelegate.correctHearingEvent(latestHearingEventId, hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, userId));
     }
+
+    public Stream<Object> deleteCourtApplicationHearing(final UUID hearingId) {
+        if(momento.isDeletedOrDuplicated() || this.momento.getHearing() == null){
+            return warnEventIgnored(hearingId, "deleteCourtApplicationHearing");
+        }
+        return apply(Stream.of(CourtApplicationHearingDeleted.courtApplicationHearingDeleted()
+                .withHearingId(hearingId)
+                .build()
+        ));
+    }
+
 
     public Stream<Object> updateHearingDetails(final UUID id,
                                                final HearingType type,
@@ -658,7 +693,15 @@ public class HearingAggregate implements Aggregate {
         //Share results not permitted when all targets (offenceId/applicationId) are shared.
         if (SHARED == this.hearingState && hasAllTargetsShared(hearingDay, resultLines)) {
             return apply(resultsSharedDelegate.manageResultsFailed(hearingId, this.hearingState,
-                    SHARE_NOT_PERMITTED_ALL_TARGETS_SHARED.toError(String.format("Share results not permitted! all the targets already shared for the hearingDay %s", hearingDay)),
+                    SHARE_NOT_PERMITTED_ALL_TARGETS_SHARED.toError(String.format(SHARE_RESULTS_NOT_PERMITTED_ALL_THE_TARGETS_ALREADY_SHARED_FOR_THE_HEARING_DAY_S, hearingDay)),
+                    hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
+        }
+
+        //Share results permitted for a hearingDay until all the target for that day are not 'SHARED'.
+        //Share results not permitted when all targets (offenceId/applicationId) are shared.
+        if (SHARED == this.hearingState && hasAllTargetsShared(hearingDay, resultLines)) {
+            return apply(resultsSharedDelegate.manageResultsFailed(hearingId, this.hearingState,
+                    SHARE_NOT_PERMITTED_ALL_TARGETS_SHARED.toError(String.format(SHARE_RESULTS_NOT_PERMITTED_ALL_THE_TARGETS_ALREADY_SHARED_FOR_THE_HEARING_DAY_S, hearingDay)),
                     hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
         }
 
@@ -903,12 +946,16 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateDefendantDetails(final UUID hearingId, final Defendant defendant) {
+        if (momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "updateDefendantDetails");
+        }
+
         return apply(this.defendantDelegate.updateDefendantDetails(hearingId, defendant));
     }
 
     public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId, final Offence offence) {
-        if(momento.isDeleted()){
-            return Stream.empty();
+        if (momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "addOffence");
         }
         if (this.momento.getHearing() == null) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'addOffence' event as hearing not found", hearingId));
@@ -918,8 +965,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> addOffenceV2(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId, final List<Offence> offences) {
-        if(momento.isDeleted()){
-            return Stream.empty();
+        if (momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "addOffenceV2");
         }
         if (this.momento.getHearing() == null) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'addOffence' event as hearing not found", hearingId));
@@ -929,10 +976,18 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateOffence(final UUID hearingId, final UUID defendantId, final Offence offence) {
+        if (momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "updateOffence");
+        }
+
         return apply(this.offenceDelegate.updateOffence(hearingId, defendantId, offence));
     }
 
     public Stream<Object> updateOffenceV2(final UUID hearingId, final UUID defendantId, final List<Offence> offences) {
+        if (momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "updateOffenceV2");
+        }
+
         return apply(this.offenceDelegate.updateOffenceV2(hearingId, defendantId, offences));
     }
 
@@ -997,6 +1052,26 @@ public class HearingAggregate implements Aggregate {
         return hearingDelegate.updateCourtApplication(hearingId, courtApplication);
     }
 
+    public Stream<Object> updateLaareferenceForApplication(final UUID hearingId, final UUID applicationId, final UUID subjectId, final UUID offenceId, final LaaReference laaReference) {
+        if(momento.isDeletedOrDuplicated()){
+            return warnEventIgnored(hearingId, "updateLaareferenceForApplication");
+        }
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'updateLaareferenceForApplication' event as hearing not found", hearingId));
+        }
+        return hearingDelegate.updateLaaReferenceForApplication(hearingId, applicationId, subjectId, offenceId, laaReference);
+    }
+
+    public Stream<Object> updateDefenceOrganisationForApplication(final UUID hearingId, final UUID applicationId, final UUID subjectId, final AssociatedDefenceOrganisation defenceOrganisation) {
+        if(momento.isDeletedOrDuplicated()){
+            return warnEventIgnored(hearingId, "updateDefenceOrganisationForApplication");
+        }
+        if (isNull(this.momento.getHearing())) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'updateDefenceOrganisationForApplication' event as hearing not found", hearingId));
+        }
+        return hearingDelegate.updateDefenceOrganisationForApplication(hearingId, applicationId, subjectId, defenceOrganisation);
+    }
+
     public Stream<Object> addInterpreterIntermediary(final UUID hearingId, final InterpreterIntermediary interpreterIntermediary) {
         return interpreterIntermediaryDelegate.addInterpreterIntermediary(hearingId, interpreterIntermediary);
     }
@@ -1049,6 +1124,10 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateDefendantLegalAidStatusForHearing(final UUID hearingId, final UUID defendantId, final String legalAidStatus) {
+        if (this.momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "updateDefendantLegalAidStatusForHearing");
+        }
+
         return apply(Stream.of(DefendantLegalAidStatusUpdatedForHearing.defendantLegalaidStatusUpdatedForHearing()
                 .withHearingId(hearingId)
                 .withDefendantId(defendantId)
@@ -1058,8 +1137,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> addOrUpdateCaseDefendantsForHearing(final UUID hearingId, final ProsecutionCase prosecutionCase) {
-        if (SHARED.equals(this.hearingState) || this.momento.isDeleted()) {
-            return Stream.empty();
+        if (SHARED.equals(this.hearingState) || this.momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "addOrUpdateCaseDefendantsForHearing");
         }
         final Stream.Builder<Object> streamBuilder = Stream.builder();
         streamBuilder.add(CaseDefendantsUpdatedForHearing.caseDefendantsUpdatedForHearing()
@@ -1071,8 +1150,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateApplicationDefendantsForHearing(final UUID hearingId, final CourtApplication courtApplication) {
-        if (SHARED.equals(this.hearingState) || this.momento.isDeleted()) {
-            return Stream.empty();
+        if (SHARED.equals(this.hearingState) || this.momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "updateApplicationDefendantsForHearing");
         }
         return apply(Stream.of(ApplicationDefendantsUpdatedForHearing.applicationDefendantsUpdatedForHearing()
                 .withHearingId(hearingId)
@@ -1180,8 +1259,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> deleteHearing(final UUID hearingId) {
-        if(momento.isDeleted()){
-            return Stream.empty();
+        if (momento.isDeletedOrDuplicated()){
+            return warnEventIgnored(hearingId, "deleteHearing");
         }
         if (this.momento.getHearing() == null) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'deleteHearing' event as hearing not found", hearingId));
@@ -1196,8 +1275,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> unAllocateHearing(final UUID hearingId, final List<UUID> removedOffenceIds) {
-        if (this.momento.getHearing() == null) {
-            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing not found", hearingId));
+        if (isNull(momento.getHearing()) || this.momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "unAllocateHearing");
         } else if(this.hearingState == SHARED) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing already shared", hearingId));
         }
@@ -1206,6 +1285,9 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> changeNextHearingStartDate(final UUID hearingId, final UUID seedingHearingId, final ZonedDateTime nextHearingDay) {
+        if (momento.isDeletedOrDuplicated()){
+            return warnEventIgnored(hearingId, "changeNextHearingStartDate");
+        }
         if (this.momento.getHearing() == null) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'changeNextHearingStartDate' event as hearing not found", hearingId));
         }
@@ -1213,6 +1295,14 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingDay));
     }
 
+    public Stream<Object> userAddedToJudiciary(final UUID judiciaryId, final String emailId, final UUID cpUserId, final UUID hearingId, final UUID id) {
+        return apply(this.hearingDelegate.userAddedToJudiciary(
+                judiciaryId,
+                emailId,
+                cpUserId,
+                hearingId,
+                id));
+    }
     public Stream<Object> saveReusableInfo(final UUID hearingId, final List<ReusableInfo> reusableInfoCaches, final List<ReusableInfoResults> reusableResultInfoCaches) {
         return apply(Stream.of(reusableInfoSaved()
                 .withHearingId(hearingId)
@@ -1235,8 +1325,11 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> stopCustodyTimeLimitClock(final List<UUID> resultIdList, final Hearing hearing) {
 
-        if (!SHARED.equals(this.hearingState) || this.momento.isDeleted()) {
-            return Stream.empty();
+        if (!SHARED.equals(this.hearingState) || this.momento.isDeletedOrDuplicated()) {
+            if (hearing == null) {
+                return Stream.empty();
+            }
+            return warnEventIgnored(hearing.getId(), "stopCustodyTimeLimitClock");
         }
         return  CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, this.momento.getSharedResultsCommandResultLineV2s(), resultIdList, hearing);
 
@@ -1390,5 +1483,10 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> addWitnessToHearing(final UUID hearingId, final String witness) {
         return apply(Stream.of(new WitnessAddedToHearing(witness, hearingId)));
+    }
+
+    private Stream<Object> warnEventIgnored(final UUID hearingId, final String methodName) {
+        LOGGER.warn("Ignoring '{}' event as hearing with ID '{}' is already deleted or marked as duplicate or not found", methodName, hearingId);
+        return Stream.empty();
     }
 }

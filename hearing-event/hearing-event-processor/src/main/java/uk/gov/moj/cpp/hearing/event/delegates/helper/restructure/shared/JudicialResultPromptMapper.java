@@ -40,6 +40,8 @@ public class JudicialResultPromptMapper {
                 .withDurationSequence(promptDefinition.getDurationSequence())
                 .withIsDurationStartDate(promptDefinition.getIsDurationStartDate())
                 .withIsDurationEndDate(promptDefinition.getIsDurationEndDate())
+                .withActiveOrderExtended(promptDefinition.getActiveOrderExtended())
+                .withActiveOrderNotExtended(promptDefinition.getActiveOrderNotExtended())
                 .build();
     }
 

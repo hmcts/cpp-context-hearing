@@ -103,6 +103,8 @@ public class ResultDefinition {
 
     private String dependantResultDefinitionGroup;
 
+    private Boolean canExtendActiveOrder;
+
     public static ResultDefinition resultDefinition() {
         return new ResultDefinition();
     }
@@ -497,6 +499,10 @@ public class ResultDefinition {
         this.preserveActiveOrder = preserveActiveOrder;
         return this;
     }
+
+    public Boolean getCanExtendActiveOrder() {return canExtendActiveOrder;}
+
+    public void setCanExtendActiveOrder(final Boolean canExtendActiveOrder) {this.canExtendActiveOrder = canExtendActiveOrder;}
 
     public String getPoliceSubjectLineTitle() {
         return policeSubjectLineTitle;

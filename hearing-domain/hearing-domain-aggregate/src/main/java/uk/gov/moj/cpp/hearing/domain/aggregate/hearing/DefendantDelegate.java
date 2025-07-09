@@ -83,8 +83,7 @@ public class DefendantDelegate implements Serializable {
     }
 
     public Stream<Object> updateDefendantDetails(final UUID hearingId, final uk.gov.moj.cpp.hearing.command.defendant.Defendant newDefendant) {
-
-        if (!this.momento.isPublished() && nonNull(momento.getHearing())) {
+        if (!this.momento.isPublished() && nonNull(momento.getHearing()) && !this.momento.isDeleted() && !this.momento.isDuplicate()) {
 
             final Optional<Defendant> previouslyStoredDefendant = momento.getHearing().getProsecutionCases().stream()
                     .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())

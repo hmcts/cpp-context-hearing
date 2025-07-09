@@ -1,11 +1,12 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static uk.gov.justice.core.courts.CourtCentre.courtCentre;
 import static uk.gov.justice.core.courts.HearingDay.hearingDay;
 import static uk.gov.justice.core.courts.HearingType.hearingType;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.command.hearing.details.HearingDetailsUpdateCommand.hearingDetailsUpdateCommand;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
@@ -14,8 +15,12 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.updateHearing;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithoutJudiciaryUserId;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 import uk.gov.justice.core.courts.CourtCentre;
@@ -25,9 +30,11 @@ import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
@@ -61,6 +68,35 @@ public class ChangeHearingDetailIT extends AbstractIT {
                                 .with(JudicialRole::getUserId, is(newUserId))
                                 .with(JudicialRole::getUserId, not(hearingOne.getHearing().getJudiciary().get(0).getUserId()))
                                 .with(JudicialRole::getJudicialId, not(hearingOne.getHearing().getJudiciary().get(0).getJudicialId()))
+                        ))
+                ));
+    }
+    @Test
+    public void shouldUpdateHearingJudiaciaryWithoutAssociatedUser() throws Exception {
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplateWithoutJudiciaryUserId()));
+
+
+        UUID cpUserId = UUID.randomUUID();
+        final String eventPayloadString = getStringFromResource("public.referencedata.event.user-associated-with-judiciary.json")
+                .replaceAll("JUDICIARY_ID", hearingOne.getHearing().getJudiciary().stream().findFirst().get().getJudicialId().toString())
+                .replaceAll("CP_USER_ID", cpUserId.toString())
+                .replaceAll("EMAIL_ID", "abc@dummy123.com");
+
+        sendMessage(getPublicTopicInstance().createProducer(),
+                "public.referencedata.event.user-associated-with-judiciary",
+                new StringToJsonObjectConverter().convert(eventPayloadString),
+                metadataOf(randomUUID(), "public.referencedata.event.user-associated-with-judiciary")
+                        .withUserId(randomUUID().toString())
+                        .build()
+        );
+
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                        )
+                        .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
+                                .with(JudicialRole::getUserId, is(cpUserId))
                         ))
                 ));
     }

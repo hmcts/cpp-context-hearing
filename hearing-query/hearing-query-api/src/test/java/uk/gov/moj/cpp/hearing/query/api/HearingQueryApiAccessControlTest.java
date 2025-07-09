@@ -84,7 +84,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetDraftResult() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators","Operational Delivery Admin");
     }
 
     @Test
@@ -94,7 +94,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetDraftResult() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators","Operational Delivery Admin");
     }
 
     @Test

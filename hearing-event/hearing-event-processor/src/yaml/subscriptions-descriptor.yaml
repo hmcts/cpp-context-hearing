@@ -132,6 +132,9 @@ subscriptions_descriptor:
         - name: hearing.update-case-defendant-details
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/update-case-defendant-details.json
 
+        - name: hearing.update-defence-organisation-for-application
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/update-application-organisation-details.json
+
         # Case Defendant Offences Change
         - name: hearing.events.found-hearings-for-new-offence
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/found-hearings-for-new-offence.json
@@ -389,6 +392,10 @@ subscriptions_descriptor:
         - name: public.progression.case-defendant-changed
           schema_uri: http://cpp.moj.gov.uk/progression/json/schema/event/public-case-defendant-changed.json
 
+        # Application Organisation Details Change
+        - name: public.progression.application-organisation-changed
+          schema_uri: http://cpp.moj.gov.uk/progression/json/schema/event/public.application-organisation-changed.json
+
         # Application Defendant Details Change
         - name: public.progression.court-application-updated
           schema_uri: http://cpp.moj.gov.uk/progression/json/schema/event/public-court-application-updated.json
@@ -424,6 +431,10 @@ subscriptions_descriptor:
         # Progression Legal Aid Status Updated
         - name: public.progression.defendant-legalaid-status-updated
           schema_uri: http://justice.gov.uk/progression/courts/defendant-legalaid-status-updated.json
+
+        # Progression Application Offences Updated
+        - name: public.progression.application-offences-updated
+          schema_uri: http://justice.gov.uk/progression/courts/public.progression.application-offences-updated.json
 
         # Progression Hearing Resulted Case Updated
         - name: public.progression.hearing-resulted-case-updated
@@ -467,12 +478,6 @@ subscriptions_descriptor:
         - name: public.progression.offences-removed-from-existing-allocated-hearing
           schema_uri: http://justice.gov.uk/progression/courts/public.progression.offences-removed-from-existing-allocated-hearing.json
 
-        - name: public.staginghmi.hearing-updated-from-hmi
-          schema_uri: http://justice.gov.uk/staginghmi/courts/public.staginghmi.hearing-updated-from-hmi.json
-
-        - name: public.staginghmi.hearing-deleted-from-hmi
-          schema_uri: http://justice.gov.uk/staginghmi/courts/public.staginghmi.hearing-deleted-from-hmi.json
-
         - name: public.progression.breach-applications-to-be-added-to-hearing
           schema_uri: http://justice.gov.uk/progression/courts/public.progression.breach-applications-to-be-added-to-hearing.json
 
@@ -483,5 +488,12 @@ subscriptions_descriptor:
 
         - name : public.progression.related-hearing-updated-for-adhoc-hearing
           schema_uri: http://justice.gov.uk/listing/courts/public.progression.related-hearing-updated-for-adhoc-hearing.json
+
+        - name : public.referencedata.event.user-associated-with-judiciary
+          schema_uri: http://justice.gov.uk/listing/courts/public.referencedata.event.user-associated-with-judiciary.json
+
+
+        - name: public.progression.events.court-application-deleted
+          schema_uri: http://justice.gov.uk/progression/courts/public.progression.events.court-application-deleted.json
 
       event_source_name: public.event.source

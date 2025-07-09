@@ -131,7 +131,7 @@ public class HearingAggregateMomento implements Serializable {
         return companyRepresentatives;
     }
 
-    public boolean isDuplicate() {
+    protected boolean isDuplicate() {
         return this.duplicate;
     }
 
@@ -167,7 +167,7 @@ public class HearingAggregateMomento implements Serializable {
         this.lastSharedTime = lastSharedTime;
     }
 
-    public boolean isDeleted() {
+    protected boolean isDeleted() {
         return deleted;
     }
 
@@ -213,5 +213,9 @@ public class HearingAggregateMomento implements Serializable {
 
     public Map<UUID, UUID> getGroupAndMaster() {
         return this.groupAndMaster;
+    }
+
+    public boolean isDeletedOrDuplicated()  {
+        return this.isDeleted() || this.isDuplicate();
     }
 }

@@ -1,8 +1,10 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.text.MessageFormat.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
+import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.anyOf;
@@ -15,29 +17,38 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.moj.cpp.hearing.command.TrialType.builder;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.UseCases.setTrialType;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingWithApplicationTemplate;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE_ID;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubApplicationsByParentId;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+import uk.gov.moj.cpp.hearing.utils.RestUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import javax.json.Json;
+
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("java:S2699")
 public class ApplicationTimelineIT extends AbstractIT {
 
     private Hearing hearingOne;
@@ -62,9 +73,37 @@ public class ApplicationTimelineIT extends AbstractIT {
     }
 
     @Test
+    public void shouldDeleteApplicationHearing(){
+        stubApplicationsByParentId(applicationId);
+        sendMessage(getPublicTopicInstance().createProducer(),
+                "public.progression.events.court-application-deleted",
+                Json.createObjectBuilder().add("hearingId",hearingOne.getId().toString()).add("applicationId",applicationId.toString() ).build(),
+                metadataOf(randomUUID(),"public.progression.events.court-application-deleted")
+                        .withUserId(randomUUID().toString())
+                        .build()
+        );
+
+        RestUtils.poll(requestParams(getURL("hearing.get.hearing", hearingOne.getId()),
+                        "application/vnd.hearing.get.hearing+json").withHeader(USER_ID, getLoggedInAdminUser()))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withoutJsonPath("$.hearing.id")
+                        ))
+                );
+
+        pollForApplicationTimeline(new Matcher[]{
+                anyOf(
+                        withoutJsonPath("$.hearingSummaries[0].hearingId"))
+        });
+    }
+
+    @Test
     public void shouldDisplayApplicationsOnTimeline() {
 
         stubCourtRoom(hearingOne);
+        stubApplicationsByParentId(applicationId);
 
         final Map<String, String> hearingSummaryMap = populateHearingSummaryKeyMap(hearingOne);
 

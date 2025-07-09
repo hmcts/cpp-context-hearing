@@ -87,7 +87,9 @@ public class HearingCommandHandlerRamlConfigTest {
                 UnlockHearingCommandHandler.class,
                 HearingApplicationsUpdatesCommandHandler.class,
                 RemoveCaseFromGroupCasesCommandHandler.class,
-                UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandler.class
+                UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandler.class,
+                JudiciaryUpdatedUserAddedCommandHandler.class,
+                DeleteCourtApplicationHandler.class
         );
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames));

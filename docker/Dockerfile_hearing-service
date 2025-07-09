@@ -5,7 +5,8 @@ ARG version
 ARG repo_loc=https://libraries-internal.mdv.cpp.nonlive/artifactory/repocentral
 ARG framework_version=17.101.6
 ARG eventstore_version=17.101.5
-ARG activiti_version=17.10.4
+ARG activiti_version=17.21.1
+
 
 ARG wildfly_home=/opt/jboss/wildfly
 ARG wildfly_user=jboss

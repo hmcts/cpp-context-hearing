@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.event.listener;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -15,10 +16,13 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.DefendantAttendanceRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +39,9 @@ public class DefendantAttendanceEventListenerTest {
 
     @Mock
     private DefendantAttendanceRepository defendantAttendanceRepository;
+
+    @Mock
+    private HearingRepository hearingRepository;
 
     @InjectMocks
     private DefendantAttendanceEventListener defendantAttendanceEventListener;
@@ -73,6 +80,7 @@ public class DefendantAttendanceEventListenerTest {
         defendantAttendance.setAttendanceType(AttendanceType.NOT_PRESENT);
 
         when(defendantAttendanceRepository.findByHearingIdDefendantIdAndDate(hearingId, defendantId, attendanceDay)).thenReturn(null);
+        when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.of(new Hearing()));
 
         defendantAttendanceEventListener.updateDefendantAttendance(envelopeFrom(metadataWithRandomUUID("hearing.defendant-attendance-updated"),
                 objectToJsonObjectConverter.convert(defendantAttendanceUpdated)));
@@ -89,6 +97,44 @@ public class DefendantAttendanceEventListenerTest {
         assertThat(defendantAttendance.getAttendanceType(), is(AttendanceType.NOT_PRESENT));
     }
 
+    @Test
+    public void shouldNotUpdateDefendantAttendanceToNotPresentIfThereIsNoHearing() throws Exception {
+
+        final UUID hearingId = UUID.randomUUID();
+        final UUID defendantId = UUID.randomUUID();
+        final LocalDate attendanceDay = LocalDate.of(2018, 12, 12);
+
+        final DefendantAttendanceUpdated defendantAttendanceUpdated = DefendantAttendanceUpdated.defendantAttendanceUpdated()
+                .setHearingId(hearingId)
+                .setDefendantId(defendantId)
+                .setAttendanceDay(AttendanceDay.attendanceDay()
+                        .withDay(attendanceDay)
+                        .withAttendanceType(AttendanceType.NOT_PRESENT)
+                        .build());
+
+        final DefendantAttendance defendantAttendance = new DefendantAttendance();
+        defendantAttendance.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingId));
+        defendantAttendance.setDefendantId(defendantId);
+        defendantAttendance.setDay(attendanceDay);
+        defendantAttendance.setAttendanceType(AttendanceType.NOT_PRESENT);
+
+        when(defendantAttendanceRepository.findByHearingIdDefendantIdAndDate(hearingId, defendantId, attendanceDay)).thenReturn(null);
+        when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.empty());
+
+        defendantAttendanceEventListener.updateDefendantAttendance(envelopeFrom(metadataWithRandomUUID("hearing.defendant-attendance-updated"),
+                objectToJsonObjectConverter.convert(defendantAttendanceUpdated)));
+
+        final ArgumentCaptor<UUID> hearingIdArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
+        final ArgumentCaptor<UUID> defendantIdArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
+        final ArgumentCaptor<LocalDate> attendanceDateArgumentCaptor = ArgumentCaptor.forClass(LocalDate.class);
+
+        verify(this.defendantAttendanceRepository).findByHearingIdDefendantIdAndDate(hearingIdArgumentCaptor.capture(), defendantIdArgumentCaptor.capture(), attendanceDateArgumentCaptor.capture());
+
+        assertThat(hearingIdArgumentCaptor.getValue(), is(hearingId));
+        assertThat(defendantIdArgumentCaptor.getValue(), is(defendantId));
+        assertThat(attendanceDateArgumentCaptor.getValue(), is(attendanceDay));
+        assertThat(defendantAttendance.getAttendanceType(), is(AttendanceType.NOT_PRESENT));
+    }
 
     @Test
     public void shouldUpdateDefendantAttendanceFromNotPresentToInPerson() throws Exception {

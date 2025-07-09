@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.event.listener;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -20,6 +21,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.CaseMarker;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
 
 import java.util.Arrays;
@@ -60,6 +62,9 @@ public class CaseMarkerEventListenerTest {
     @Mock
     ProsecutionCaseRepository prosecutionCaseRepository;
 
+    @Mock
+    HearingRepository hearingRepository;
+
     @BeforeEach
     public void setUp() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
@@ -92,6 +97,7 @@ public class CaseMarkerEventListenerTest {
         Set<CaseMarker> caseMarkers = new HashSet<>();
         caseMarkers.add(caseMarker);
 
+        when(this.hearingRepository.findBy(any())).thenReturn(hearing);
         when(this.prosecutionCaseRepository.findBy(any())).thenReturn(prosecutionCase);
         this.caseMarkerEventListener.caseMarkersUpdated(envelopeFrom(metadataWithRandomUUID("hearing.events.case-markers-updated"),
                 objectToJsonObjectConverter.convert(caseMarkersUpdated)));
@@ -100,5 +106,27 @@ public class CaseMarkerEventListenerTest {
 
         final ProsecutionCase savedProsecutionCase = argumentCaptor.getValue();
         assertThat(savedProsecutionCase, Matchers.is(prosecutionCase));
+    }
+
+    @Test
+    public void notCaseMarkersUpdatedIfThereIsNoHearing() {
+
+        final UUID hearingId = randomUUID();
+        final List<Marker> markers = Arrays.asList(Marker.marker()
+                .withId(randomUUID())
+                .withMarkerTypeid(randomUUID())
+                .withMarkerTypeCode(STRING.next())
+                .withMarkerTypeDescription(STRING.next())
+                .build());
+
+        CaseMarkersUpdated caseMarkersUpdated = new CaseMarkersUpdated(randomUUID(), hearingId, markers);
+        when(this.hearingRepository.findBy(any())).thenReturn(null);
+
+        this.caseMarkerEventListener.caseMarkersUpdated(envelopeFrom(metadataWithRandomUUID("hearing.events.case-markers-updated"),
+                objectToJsonObjectConverter.convert(caseMarkersUpdated)));
+
+        verify(this.prosecutionCaseRepository, never()).save(argumentCaptor.capture());
+
+
     }
 }

@@ -122,14 +122,22 @@ public class PleaUpdateEventListener {
     }
 
     private void updateOffenceUnderCourtApplication(final PleaUpsert event) {
-        final Hearing hearingEntity = hearingRepository.findBy(event.getHearingId());
+        final Optional<Hearing> hearing = hearingRepository.findOptionalBy(event.getHearingId());
+        if(hearing.isEmpty()){
+            return;
+        }
+        final Hearing hearingEntity = hearing.get();
         final String updatedCourtApplicationJson = hearingJPAMapper.updatePleaOnOffencesInCourtApplication(hearingEntity.getCourtApplicationsJson(), event.getPleaModel());
         hearingEntity.setCourtApplicationsJson(updatedCourtApplicationJson);
         hearingRepository.save(hearingEntity);
     }
 
     private void courtApplicationPleaUpdated(final UUID hearingId, PleaModel pleaModel) {
-        final Hearing hearingEntity = hearingRepository.findBy(hearingId);
+        final Optional<Hearing> hearingEnt = hearingRepository.findOptionalBy(hearingId);
+        if(hearingEnt.isEmpty()){
+            return;
+        }
+        final Hearing hearingEntity = hearingEnt.get();
         final uk.gov.justice.core.courts.Hearing hearing = hearingJPAMapper.fromJPA(hearingEntity);
 
         final Optional<CourtApplication> courtApplication = hearing.getCourtApplications().stream()

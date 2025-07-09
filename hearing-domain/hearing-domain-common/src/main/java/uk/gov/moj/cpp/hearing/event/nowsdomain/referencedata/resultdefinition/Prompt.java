@@ -56,6 +56,10 @@ public class Prompt {
 
     private Boolean isDurationEndDate;
 
+    private Boolean activeOrderExtended;
+
+    private Boolean activeOrderNotExtended;
+
     public static Prompt prompt() {
         return new Prompt();
     }
@@ -257,5 +261,21 @@ public class Prompt {
     public Prompt setIsDurationEndDate(final Boolean isDurationEndDate) {
         this.isDurationEndDate = isDurationEndDate;
         return this;
+    }
+
+    public Boolean getActiveOrderExtended() {
+        return activeOrderExtended;
+    }
+
+    public void setActiveOrderExtended(final Boolean activeOrderExtended) {
+        this.activeOrderExtended = activeOrderExtended;
+    }
+
+    public Boolean getActiveOrderNotExtended() {
+        return activeOrderNotExtended;
+    }
+
+    public void setActiveOrderNotExtended(final Boolean activeOrderNotExtended) {
+        this.activeOrderNotExtended = activeOrderNotExtended;
     }
 }

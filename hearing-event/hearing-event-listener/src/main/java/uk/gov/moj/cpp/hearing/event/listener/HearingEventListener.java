@@ -487,9 +487,11 @@ public class HearingEventListener {
         final RegisteredHearingAgainstApplication registeredHearingAgainstApplication = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), RegisteredHearingAgainstApplication.class);
 
-        final HearingApplication hearingApplication = new HearingApplication();
-        hearingApplication.setId(new HearingApplicationKey(registeredHearingAgainstApplication.getApplicationId(), registeredHearingAgainstApplication.getHearingId()));
-        hearingApplicationRepository.save(hearingApplication);
+        if(nonNull(hearingRepository.findBy(registeredHearingAgainstApplication.getHearingId()))) {
+            final HearingApplication hearingApplication = new HearingApplication();
+            hearingApplication.setId(new HearingApplicationKey(registeredHearingAgainstApplication.getApplicationId(), registeredHearingAgainstApplication.getHearingId()));
+            hearingApplicationRepository.save(hearingApplication);
+        }
     }
 
     @Handles("hearing.hearing-days-cancelled")
@@ -526,9 +528,12 @@ public class HearingEventListener {
 
         final EarliestNextHearingDateChanged earliestNextHearingDateChanged = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), EarliestNextHearingDateChanged.class);
 
-        final Hearing hearing = hearingRepository.findBy(earliestNextHearingDateChanged.getSeedingHearingId());
-        hearing.setEarliestNextHearingDate(earliestNextHearingDateChanged.getEarliestNextHearingDate());
-        hearingRepository.save(hearing);
+        final Optional<Hearing> hearing = hearingRepository.findOptionalBy(earliestNextHearingDateChanged.getSeedingHearingId());
+        if(hearing.isEmpty()){
+            return;
+        }
+        hearing.get().setEarliestNextHearingDate(earliestNextHearingDateChanged.getEarliestNextHearingDate());
+        hearingRepository.save(hearing.get());
 
     }
 
@@ -556,7 +561,11 @@ public class HearingEventListener {
 
         final HearingAmended hearingAmendedEvent = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingAmended.class);
 
-        final Hearing hearing = hearingRepository.findBy(hearingAmendedEvent.getHearingId());
+        final Optional<Hearing> hearingEntity = hearingRepository.findOptionalBy(hearingAmendedEvent.getHearingId());
+        if(hearingEntity.isEmpty()){
+            return;
+        }
+        final Hearing hearing = hearingEntity.get();
         hearing.setHearingState(hearingAmendedEvent.getNewHearingState());
         hearing.setAmendedByUserId(hearingAmendedEvent.getUserId());
         hearingRepository.save(hearing);

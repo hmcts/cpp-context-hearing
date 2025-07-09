@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -8,30 +9,13 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtCentre;
-import uk.gov.justice.core.courts.Defendant;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.JurisdictionType;
-import uk.gov.justice.core.courts.Offence;
-import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.Verdict;
-import uk.gov.justice.core.courts.VerdictType;
-import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
-import uk.gov.moj.cpp.hearing.domain.event.HearingBreachApplicationsAdded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
-import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicate;
-import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
-import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
+import uk.gov.justice.core.courts.*;
+import uk.gov.moj.cpp.hearing.domain.event.*;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
@@ -42,6 +26,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -384,7 +370,7 @@ public class HearingDelegateTest {
         final UUID hearingId = UUID.randomUUID();
         final UUID seedingHearingId = UUID.randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(2);
-
+        momento.setHearing(Hearing.hearing().withId(hearingId).build());
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingStartDate).collect(toList());
 
         assertThat(eventStream.size(), is(2));
@@ -407,6 +393,7 @@ public class HearingDelegateTest {
         final UUID hearingId = UUID.randomUUID();
         final UUID seedingHearingId = UUID.randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(2);
+        momento.setHearing(Hearing.hearing().withId(hearingId).build());
 
         momento.getNextHearingStartDates().put(hearingId, ZonedDateTime.now().plusDays(3));
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingStartDate).collect(toList());
@@ -431,7 +418,7 @@ public class HearingDelegateTest {
         final UUID hearingId = UUID.randomUUID();
         final UUID seedingHearingId = UUID.randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
-
+        momento.setHearing(Hearing.hearing().withId(hearingId).build());
         momento.getNextHearingStartDates().put(hearingId, ZonedDateTime.now().plusDays(3));
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingStartDate).collect(toList());
 
@@ -456,6 +443,7 @@ public class HearingDelegateTest {
         final UUID seedingHearingId = UUID.randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(2);
 
+        momento.setHearing(Hearing.hearing().withId(hearingId1).build());
         momento.getNextHearingStartDates().put(hearingId1, ZonedDateTime.now().plusDays(3));
         momento.getNextHearingStartDates().put(hearingId2, ZonedDateTime.now().plusDays(4));
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId1, seedingHearingId, nextHearingStartDate).collect(toList());
@@ -481,7 +469,7 @@ public class HearingDelegateTest {
         final UUID hearingId2 = UUID.randomUUID();
         final UUID seedingHearingId = UUID.randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
-
+        momento.setHearing(Hearing.hearing().withId(hearingId1).build());
         momento.getNextHearingStartDates().put(hearingId1, ZonedDateTime.now().plusDays(2));
         momento.getNextHearingStartDates().put(hearingId2, ZonedDateTime.now().plusDays(4));
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId1, seedingHearingId, nextHearingStartDate).collect(toList());
@@ -503,6 +491,8 @@ public class HearingDelegateTest {
         final UUID seedingHearingId = UUID.randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
 
+        momento.setHearing(Hearing.hearing().withId(hearingId1).build());
+
         momento.getNextHearingStartDates().put(hearingId2, ZonedDateTime.now().plusDays(3));
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId1, seedingHearingId, nextHearingStartDate).collect(toList());
 
@@ -516,6 +506,24 @@ public class HearingDelegateTest {
 
 
     }
+    @Test
+    public void shouldUserAddedToJudiciary(){
+
+        final UUID judiciaryId = randomUUID();
+        final String emailId = "abc@cde.com";
+        final UUID cpUserId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID id = randomUUID();
+
+        final Stream<Object> objectStream = hearingDelegate.userAddedToJudiciary(
+                judiciaryId,
+                emailId,
+                cpUserId,
+                hearingId,
+                id);
+        assertThat(((HearingUserAddedToJudiciary)objectStream.collect(toList()).get(0)).getHearingId(), is(hearingId));
+    }
+
     @Test
     public void shouldNotRaiseEventIfHearingIsAlreadyMarkedAsDuplicate(){
 
@@ -562,6 +570,121 @@ public class HearingDelegateTest {
         assertThat(hearingMarkedAsDuplicate.getDefendantIds().size(), is(1));
         assertThat(hearingMarkedAsDuplicate.getProsecutionCaseIds().size(), is(1));
         assertThat(hearingMarkedAsDuplicate.getOffenceIds().size(), is(1));
+    }
+    @Test
+    void updateCourtApplication_shouldReturnApplicationDetailChangedEvent() {
+        UUID hearingId = UUID.randomUUID();
+        final uk.gov.justice.core.courts.CourtApplication courtApplication = uk.gov.justice.core.courts.CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .build();
+        momento.setHearing(Hearing.hearing().withId(hearingId).build());
+
+        final Stream<Object> result = hearingDelegate.updateCourtApplication(hearingId, courtApplication);
+
+        List<Object> events = result.collect(Collectors.toList());
+        assertEquals(1, events.size());
+        assertTrue(events.get(0) instanceof ApplicationDetailChanged);
+        ApplicationDetailChanged event = (ApplicationDetailChanged) events.get(0);
+        assertEquals(hearingId, event.getHearingId());
+        assertEquals(courtApplication, event.getCourtApplication());
+    }
+
+    @Test
+    void updateCourtApplication_shouldReturnHearingIgnoredMessageWhenHearingNotFound() {
+        UUID hearingId = UUID.randomUUID();
+        momento.setHearing(null);
+        Stream<Object> result = hearingDelegate.updateCourtApplication(hearingId, uk.gov.justice.core.courts.CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .build());
+
+        List<Object> events = result.collect(Collectors.toList());
+        assertEquals(1, events.size());
+        assertTrue(events.get(0) instanceof HearingChangeIgnored);
+        HearingChangeIgnored event = (HearingChangeIgnored) events.get(0);
+        assertEquals(hearingId, event.getHearingId());
+        assertEquals("Rejecting 'hearing.update-court-application' event as hearing not found", event.getReason());
+    }
+
+    @Test
+    void updateCourtApplication_shouldReturnEmptyStreamWhenHearingHasSharedResults() {
+        UUID hearingId = UUID.randomUUID();
+        CourtApplication courtApplication = uk.gov.justice.core.courts.CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .build();
+
+        momento.setHearing(Hearing.hearing().withId(hearingId).build());
+        momento.getHearing().setHasSharedResults(true);
+        Stream<Object> result = hearingDelegate.updateCourtApplication(hearingId, courtApplication);
+
+        List<Object> events = result.collect(Collectors.toList());
+        assertTrue(events.isEmpty());
+    }
+
+    @Test
+    public void shouldHandleHearingUnallocated() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID prosecutionCaseId1 = UUID.randomUUID();
+        final UUID prosecutionCaseId2 = UUID.randomUUID();
+        final UUID prosecutionCaseId3 = UUID.randomUUID();
+        final UUID defendantId1 = UUID.randomUUID();
+        final UUID defendantId2 = UUID.randomUUID();
+        final UUID defendantId3 = UUID.randomUUID();
+        final UUID offence1 = UUID.randomUUID();
+        final UUID offence2 = UUID.randomUUID();
+        final UUID offence3 = UUID.randomUUID();
+        final UUID offence4 = UUID.randomUUID();
+
+        final ProsecutionCase prosecutionCase1 = createProsecutionCase(prosecutionCaseId1, defendantId1, offence1, offence2);
+        final ProsecutionCase prosecutionCase2 = createProsecutionCase(prosecutionCaseId2, defendantId2, offence3, offence4);
+        final ProsecutionCase prosecutionCase3 = createProsecutionCase(prosecutionCaseId3, defendantId3, offence3, offence4);
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(new ArrayList<>(asList(prosecutionCase1, prosecutionCase2, prosecutionCase3)))
+                .build());
+
+        HearingUnallocated hearingUnallocated = new HearingUnallocated(asList(prosecutionCaseId1, prosecutionCaseId2,prosecutionCaseId3), asList(defendantId1, defendantId2, defendantId3), asList(offence1,offence2,offence3,offence4), hearingId);
+
+        hearingDelegate.handleHearingUnallocated(hearingUnallocated);
+
+        assertThat(momento.getHearing().getProsecutionCases().isEmpty(), is(true));
+        assertThat(momento.isDeleted(), is(true));
+    }
+
+    @Test
+    public void shouldHandleHearingDetailChangedPostHearingUnallocated() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID prosecutionCaseId1 = UUID.randomUUID();
+        final UUID prosecutionCaseId2 = UUID.randomUUID();
+        final UUID prosecutionCaseId3 = UUID.randomUUID();
+        final UUID defendantId1 = UUID.randomUUID();
+        final UUID defendantId2 = UUID.randomUUID();
+        final UUID defendantId3 = UUID.randomUUID();
+        final UUID offence1 = UUID.randomUUID();
+        final UUID offence2 = UUID.randomUUID();
+        final UUID offence3 = UUID.randomUUID();
+        final UUID offence4 = UUID.randomUUID();
+
+        final ProsecutionCase prosecutionCase1 = createProsecutionCase(prosecutionCaseId1, defendantId1, offence1, offence2);
+        final ProsecutionCase prosecutionCase2 = createProsecutionCase(prosecutionCaseId2, defendantId2, offence3, offence4);
+        final ProsecutionCase prosecutionCase3 = createProsecutionCase(prosecutionCaseId3, defendantId3, offence3, offence4);
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(new ArrayList<>(asList(prosecutionCase1, prosecutionCase2, prosecutionCase3)))
+                .build());
+
+        HearingUnallocated hearingUnallocated = new HearingUnallocated(asList(prosecutionCaseId1, prosecutionCaseId2,prosecutionCaseId3), asList(defendantId1, defendantId2, defendantId3), asList(offence1,offence2,offence3,offence4), hearingId);
+
+        hearingDelegate.handleHearingUnallocated(hearingUnallocated);
+
+        Stream<Object> streams = hearingDelegate.updateHearingDetails(hearingId, null, null, null, null,null, null, null);
+        List<Object> events = streams.collect(Collectors.toList());
+        assertEquals(1, events.size());
+        assertTrue(events.get(0) instanceof HearingChangeIgnored);
+        HearingChangeIgnored event = (HearingChangeIgnored) events.get(0);
+        assertEquals(hearingId, event.getHearingId());
+        assertEquals("Rejecting 'hearing.change-hearing-detail' event as hearing not found", event.getReason());
     }
 
     private List<ProsecutionCase> caseList(ProsecutionCase... cases) {

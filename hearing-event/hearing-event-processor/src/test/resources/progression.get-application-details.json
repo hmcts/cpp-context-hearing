@@ -1,0 +1,314 @@
+{
+  "courtApplication": {
+    "applicant": {
+      "id": "135111dc-a18c-4984-aade-5f735018d302",
+      "masterDefendant": {
+        "associatedPersons": [
+          {
+            "person": {
+              "address": {
+                "address1": "Address line 1",
+                "address2": "Address line 2",
+                "address3": "Address line 3",
+                "address4": "Address line 4",
+                "address5": "Address line ",
+                "postcode": "RT4 4DF"
+              },
+              "firstName": "ParentGuardianFN",
+              "gender": "NOT_SPECIFIED",
+              "lastName": "ParentGuardianLN"
+            },
+            "role": "PARENT"
+          }
+        ],
+        "defendantCase": [
+          {
+            "caseId": "7b437ee2-7e46-4229-ab62-afea333e1393",
+            "caseReference": "GD48587265",
+            "defendantId": "3ab1c67c-f265-4415-8519-c04d1e20346c"
+          }
+        ],
+        "isYouth": true,
+        "masterDefendantId": "3ab1c67c-f265-4415-8519-c04d1e20346c",
+        "personDefendant": {
+          "arrestSummonsNumber": "0800PP0100000000001H",
+          "bailStatus": {
+            "code": "A",
+            "description": "Not applicable",
+            "id": "86009c70-759d-3308-8de4-194886ff9a77"
+          },
+          "driverNumber": "CRIME709136TC9GZ",
+          "personDetails": {
+            "address": {
+              "address1": "9999A9999AAAA",
+              "address2": "Hansen Turnpike",
+              "address3": "Morrischester",
+              "address4": "Avon",
+              "postcode": "DA61 7ND"
+            },
+            "contact": {
+              "home": "7643802508"
+            },
+            "dateOfBirth": "2020-11-11",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "selfDefinedEthnicityCode": "W1",
+              "selfDefinedEthnicityDescription": "British",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Meredith",
+            "gender": "FEMALE",
+            "hearingLanguageNeeds": "ENGLISH",
+            "lastName": "Haag",
+            "nationalityDescription": "Unknown",
+            "nationalityId": "22ef7a73-df50-4349-8c72-ca3b9ace6363",
+            "title": "Mr"
+          },
+          "policeBailStatus": {
+            "code": "C",
+            "description": "Custody",
+            "id": "12e69486-4d01-3403-a50a-7419ca040635"
+          }
+        }
+      },
+      "notificationRequired": true,
+      "summonsRequired": false
+    },
+    "applicationReceivedDate": "2025-05-01",
+    "applicationReference": "GD48587265",
+    "applicationStatus": "LISTED",
+    "commissionerOfOath": false,
+    "courtApplicationCases": [
+      {
+        "caseStatus": "INACTIVE",
+        "isSJP": false,
+        "offences": [
+          {
+            "arrestDate": "2019-12-01",
+            "chargeDate": "2019-12-02",
+            "convictingCourt": {
+              "code": "B01LY00",
+              "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+              "lja": {
+                "ljaCode": "2577",
+                "ljaName": "South West London Magistrates' Court"
+              },
+              "name": "Lavender Hill Magistrates' Court",
+              "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8"
+            },
+            "convictionDate": "2025-05-02",
+            "count": 0,
+            "endorsableFlag": false,
+            "id": "b01f7edc-874c-49f2-8a19-ac3b26a05e3e",
+            "indicatedPlea": {
+              "indicatedPleaDate": "2025-05-02",
+              "indicatedPleaValue": "INDICATED_GUILTY",
+              "offenceId": "b01f7edc-874c-49f2-8a19-ac3b26a05e3e",
+              "originatingHearingId": "d46e3c72-71ea-483b-9343-eeb856aace03",
+              "source": "IN_COURT"
+            },
+            "isDisposed": true,
+            "listingNumber": 1,
+            "maxPenalty": "EW:6M &/or Ultd Fine",
+            "modeOfTrial": "Either Way",
+            "offenceCode": "PT00018",
+            "offenceDateCode": 1,
+            "offenceDefinitionId": "2f23c989-8a77-3bc6-adae-2d205bc1956d",
+            "offenceLegislation": "Contrary to sections 15(3) and 22 of the Terrorism Act 2000.",
+            "offenceTitle": "Provide money / property for use in acts of terrorism",
+            "orderIndex": 2,
+            "proceedingsConcluded": true,
+            "reportingRestrictions": [
+              {
+                "id": "cacdea08-062e-435f-bb66-0613a7b352d0",
+                "label": "Section 49 of the Children and Young Persons Act 1933 applies",
+                "orderedDate": "2025-05-02"
+              }
+            ],
+            "startDate": "2019-11-28",
+            "wording": "Aggravated vehicle taking - ( driver did not take ) and vehicle damage of £5000 or over."
+          },
+          {
+            "arrestDate": "2019-12-01",
+            "chargeDate": "2019-12-02",
+            "convictingCourt": {
+              "code": "B01LY00",
+              "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+              "lja": {
+                "ljaCode": "2577",
+                "ljaName": "South West London Magistrates' Court"
+              },
+              "name": "Lavender Hill Magistrates' Court",
+              "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8"
+            },
+            "convictionDate": "2025-05-02",
+            "count": 0,
+            "endorsableFlag": false,
+            "id": "1ef086c6-3d44-4575-8cb3-30a4a4e6aed1",
+            "indicatedPlea": {
+              "indicatedPleaDate": "2025-05-02",
+              "indicatedPleaValue": "INDICATED_GUILTY",
+              "offenceId": "1ef086c6-3d44-4575-8cb3-30a4a4e6aed1",
+              "originatingHearingId": "d46e3c72-71ea-483b-9343-eeb856aace03",
+              "source": "IN_COURT"
+            },
+            "isDisposed": true,
+            "listingNumber": 1,
+            "maxPenalty": "EW:6M &/or Ultd Fine",
+            "modeOfTrial": "Either Way",
+            "offenceCode": "SX03209",
+            "offenceDateCode": 1,
+            "offenceDefinitionId": "12ac7151-d196-3b0e-9492-88e76e2d208a",
+            "offenceLegislation": "Contrary to section 41 of the Sexual Offences Act 2003.",
+            "offenceTitle": "Care worker cause mentally disordered person to watch a sexual act - SOA 2003",
+            "orderIndex": 1,
+            "proceedingsConcluded": true,
+            "reportingRestrictions": [
+              {
+                "id": "3eba45e6-cb6a-497c-bea6-e68a028bda33",
+                "label": "Complainant's anonymity protected by virtue of Section 1 of the Sexual Offences Amendment Act 1992",
+                "orderedDate": "2025-05-02"
+              },
+              {
+                "id": "25c83914-3d59-4df4-81f3-62bb559b1205",
+                "label": "Section 49 of the Children and Young Persons Act 1933 applies",
+                "orderedDate": "2025-05-02"
+              }
+            ],
+            "startDate": "2019-11-28",
+            "wording": "Theft of pedal cycle."
+          }
+        ],
+        "prosecutionCaseId": "7b437ee2-7e46-4229-ab62-afea333e1393",
+        "prosecutionCaseIdentifier": {
+          "address": {
+            "address1": "Criminal Justice Department",
+            "address2": "Derbyshire Constabulary",
+            "address3": "Butterley Hall",
+            "address4": "Ripley",
+            "address5": "Derby",
+            "postcode": "DE5 3RS"
+          },
+          "contact": {
+            "primaryEmail": "criminaldataderbyshire@derbyshire.police.uk"
+          },
+          "majorCreditorCode": "PO30",
+          "prosecutionAuthorityCode": "DERPF",
+          "prosecutionAuthorityId": "bdc190e7-c939-37ca-be4b-9f615d6ef40e",
+          "prosecutionAuthorityName": "Derbyshire Police",
+          "prosecutionAuthorityOUCode": "0300000",
+          "caseURN": "GD48587265"
+        }
+      }
+    ],
+    "id": "020074c0-21cf-4339-ab11-0604e7d527e4",
+    "subject": {
+      "id": "135111dc-a18c-4984-aade-5f735018d302",
+      "masterDefendant": {
+        "associatedPersons": [
+          {
+            "person": {
+              "address": {
+                "address1": "Address line 1",
+                "address2": "Address line 2",
+                "address3": "Address line 3",
+                "address4": "Address line 4",
+                "address5": "Address line ",
+                "postcode": "RT4 4DF"
+              },
+              "firstName": "ParentGuardianFN",
+              "gender": "NOT_SPECIFIED",
+              "lastName": "ParentGuardianLN"
+            },
+            "role": "PARENT"
+          }
+        ],
+        "defendantCase": [
+          {
+            "caseId": "7b437ee2-7e46-4229-ab62-afea333e1393",
+            "caseReference": "GD48587265",
+            "defendantId": "3ab1c67c-f265-4415-8519-c04d1e20346c"
+          }
+        ],
+        "isYouth": true,
+        "masterDefendantId": "3ab1c67c-f265-4415-8519-c04d1e20346c",
+        "personDefendant": {
+          "arrestSummonsNumber": "0800PP0100000000001H",
+          "bailStatus": {
+            "code": "A",
+            "description": "Not applicable",
+            "id": "86009c70-759d-3308-8de4-194886ff9a77"
+          },
+          "driverNumber": "CRIME709136TC9GZ",
+          "personDetails": {
+            "address": {
+              "address1": "9999A9999AAAA",
+              "address2": "Hansen Turnpike",
+              "address3": "Morrischester",
+              "address4": "Avon",
+              "postcode": "DA61 7ND"
+            },
+            "contact": {
+              "home": "7643802508"
+            },
+            "dateOfBirth": "2020-11-11",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "selfDefinedEthnicityCode": "W1",
+              "selfDefinedEthnicityDescription": "British",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Meredith",
+            "gender": "FEMALE",
+            "hearingLanguageNeeds": "ENGLISH",
+            "lastName": "Haag",
+            "nationalityDescription": "Unknown",
+            "nationalityId": "22ef7a73-df50-4349-8c72-ca3b9ace6363",
+            "title": "Mr"
+          },
+          "policeBailStatus": {
+            "code": "C",
+            "description": "Custody",
+            "id": "12e69486-4d01-3403-a50a-7419ca040635"
+          }
+        }
+      },
+      "notificationRequired": true,
+      "summonsRequired": false
+    },
+    "type": {
+      "appealFlag": true,
+      "applicantAppellantFlag": true,
+      "applicationWording": "Appeal against conviction by a Magistrates' Court on {1} at {2} to the Crown Court",
+      "boxworkNotifTemplate": "NOT_APPLICABLE",
+      "breachType": "NOT_APPLICABLE",
+      "categoryCode": "CR",
+      "changeDate": "2022-10-09T14:12:09",
+      "code": "MC80802",
+      "commrOfOathFlag": false,
+      "contestedFeeApplicable": false,
+      "courtExtractAvlFlag": true,
+      "courtOfAppealFlag": false,
+      "exParte": false,
+      "hearingCode": "APL",
+      "id": "3fca31f0-7b30-47e8-8f3f-90601ad26b50",
+      "initialFeeApplicable": false,
+      "jurisdiction": "CROWN",
+      "lastModified": "2025-02-24T18:19:04.990Z",
+      "legislation": "In accordance with section 108 of the Magistrates' Courts Act 1980.",
+      "legislationWelsh": "adran 108 Deddf Llysoedd Ynadon 1980",
+      "linkType": "SJP",
+      "listingNotifTemplate": "POSTAL_NOTIFICATION",
+      "offenceActiveOrder": "OFFENCE",
+      "pleaApplicableFlag": false,
+      "prosecutorThirdPartyFlag": false,
+      "pssId": 587579,
+      "sowRef": "APPS",
+      "spiOutApplicableFlag": true,
+      "summonsTemplateType": "NOT_APPLICABLE",
+      "type": "Appeal against conviction by a Magistrates' Court to the Crown Court",
+      "typeWelsh": "Apelio i Lys y Goron yn erbyn euogfarn gan Lys Ynadon",
+      "validFrom": "1980-01-01"
+    }
+  }
+}

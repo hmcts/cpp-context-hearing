@@ -19,7 +19,11 @@ import javax.json.JsonObject;
 @ApplicationScoped
 public class ProgressionService {
 
-    private static final String PROGRESSION_QUERY_APPLICATIONS = "progression.query.application.aaag";
+    private static final String PROGRESSION_QUERY_APPLICATION_AAAG = "progression.query.application.aaag";
+    private static final String PROGRESSION_QUERY_APPLICATION_ONLY = "progression.query.application-only";
+    private static final String PROGRESSION_QUERY_APPLICATION_SUMMARY = "progression.query.application.summary";
+
+    private static final String FIELD_APPLICATION_ID = "applicationId";
 
     @Inject
     @ServiceComponent(QUERY_API)
@@ -27,10 +31,10 @@ public class ProgressionService {
 
     public Optional<JsonObject> getApplication(final JsonEnvelope envelope, final String applicationId) {
         final JsonObject requestParameter = createObjectBuilder()
-                .add("applicationId", applicationId)
+                .add(FIELD_APPLICATION_ID, applicationId)
                 .build();
         final Envelope<JsonObject> requestEnvelop = envelop(requestParameter)
-                .withName(PROGRESSION_QUERY_APPLICATIONS)
+                .withName(PROGRESSION_QUERY_APPLICATION_AAAG)
                 .withMetadataFrom(envelope);
         final Envelope<JsonObject> jsonObjectEnvelope = requester.request(requestEnvelop, JsonObject.class);
         return Optional.of(jsonObjectEnvelope.payload());
@@ -42,5 +46,43 @@ public class ProgressionService {
             return applicationPayload.get();
         }
         throw new IllegalStateException("Application not found for applicationId:" + applicationId);
+    }
+
+    public Optional<JsonObject> getApplicationOnly(final JsonEnvelope envelope, final String applicationId) {
+        final JsonObject requestParameter = createObjectBuilder()
+                .add(FIELD_APPLICATION_ID, applicationId)
+                .build();
+        final Envelope<JsonObject> requestEnvelop = envelop(requestParameter)
+                .withName(PROGRESSION_QUERY_APPLICATION_ONLY)
+                .withMetadataFrom(envelope);
+        final Envelope<JsonObject> jsonObjectEnvelope = requester.request(requestEnvelop, JsonObject.class);
+        return Optional.of(jsonObjectEnvelope.payload());
+    }
+
+    public JsonObject retrieveApplicationOnly(final JsonEnvelope event, final UUID applicationId) {
+        final Optional<JsonObject> applicationPayload = getApplicationOnly(event, applicationId.toString());
+        if (applicationPayload.isPresent()) {
+            return applicationPayload.get();
+        }
+        throw new IllegalStateException("Application not found for applicationId:" + applicationId);
+    }
+
+    public Optional<JsonObject> retrieveApplicationsByParentId(final JsonEnvelope envelope, final String applicationId) {
+        final JsonObject requestParameter = createObjectBuilder()
+                .add(FIELD_APPLICATION_ID, applicationId.toString())
+                .build();
+        final Envelope<JsonObject> requestEnvelop = envelop(requestParameter)
+                .withName(PROGRESSION_QUERY_APPLICATION_SUMMARY)
+                .withMetadataFrom(envelope);
+        final Envelope<JsonObject> jsonObjectEnvelope = requester.requestAsAdmin(requestEnvelop, JsonObject.class);
+        return Optional.of(jsonObjectEnvelope.payload());
+    }
+
+    public JsonObject retrieveApplicationsByParentId(final JsonEnvelope event, final UUID applicationId) {
+        final Optional<JsonObject> applicationPayload = retrieveApplicationsByParentId(event, applicationId.toString());
+        if (applicationPayload.isPresent()) {
+            return applicationPayload.get();
+        }
+        throw new IllegalStateException("Application not found for parent applicationId:" + applicationId);
     }
 }

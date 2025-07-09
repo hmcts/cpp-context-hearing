@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/hearing/courts/hearing.command.delete-hearing.json",
+  "id": "http://justice.gov.uk/hearing/courts/hearing.command.delete-hearing-bdf.json",
   "type": "object",
   "properties": {
     "hearingId": {

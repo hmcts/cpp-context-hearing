@@ -16,6 +16,9 @@ subscriptions_descriptor:
         - name: hearing.events.application-detail-changed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/application-detail-changed.json
 
+        - name: hearing.events.application-laareference-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/application-laareference-updated.json
+
         - name: hearing.events.inherited-plea
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/inherited-plea.json
 
@@ -84,6 +87,10 @@ subscriptions_descriptor:
         # Case Defendant Details Updated
         - name: hearing.defendant-details-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defendant-details-updated.json
+
+        # Application Organisation Details Updated
+        - name: hearing.application-organisation-details-updated-for-hearing
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/application-organisation-details-updated-for-hearing.json
 
         # Case Defendant Offences Change
         - name: hearing.events.offence-added
@@ -315,6 +322,10 @@ subscriptions_descriptor:
         - name: hearing.event.reusable-info-saved
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.reusable-info-saved.json
 
+        # user allocated to judiciary.
+        - name: hearing.event.user-added-to-judiciary
+          schema_uri: http://justice.gov.uk/hearing/json/schema/hearing.event.user-added-to-judiciary.json
+
         # Defendants in youth court.
         - name: hearing.event.defendants-in-youthcourt-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hhearing.event.defendants-in-youthcourt-updated.json
@@ -351,5 +362,8 @@ subscriptions_descriptor:
 
         - name: hearing.event.witness-added-to-hearing
           schema_uri: http://justice.gov.uk/core/courts/hearing.event.witness-added-to-hearing.json
+
+        - name: hearing.event.court-application-hearing-deleted
+          schema_uri: http://justice.gov.uk/hearing/event/hearing.event.court-application-hearing-deleted.json
 
       event_source_name: hearing

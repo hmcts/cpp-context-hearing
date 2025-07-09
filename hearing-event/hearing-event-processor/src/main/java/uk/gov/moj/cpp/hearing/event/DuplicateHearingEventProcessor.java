@@ -81,6 +81,6 @@ public class DuplicateHearingEventProcessor {
     }
 
     private JsonObject getPublicEventPayload(final JsonObject payload) {
-        return JsonObjects.createObjectBuilderWithFilter(payload, s -> !s.equals(COURT_CENTRE_ID_FIELD) && !s.equals(REASON_FIELD)).build();
+        return JsonObjects.createObjectBuilderWithFilter(payload, s -> !COURT_CENTRE_ID_FIELD.equals(s) && !REASON_FIELD.equals(s)).build();
     }
 }

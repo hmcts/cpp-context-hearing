@@ -1,7 +1,10 @@
 package uk.gov.moj.cpp.hearing.utils;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 
+import org.hamcrest.Matcher;
+import uk.gov.justice.services.integrationtest.utils.jms.JmsMessageConsumerClient;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
@@ -59,6 +62,24 @@ public class QueueUtil implements AutoCloseable {
 
     public static QueueUtil getPrivateTopicInstance(final String topicName) {
         return new QueueUtil(JMS_TOPIC_PREFIX + topicName);
+    }
+
+    public static JsonPath retrieveMessageAsJsonPath(final JmsMessageConsumerClient consumer, final Matcher matchers) {
+        return retrieveMessageAsJsonPath(consumer, matchers, RETRIEVE_TIMEOUT);
+    }
+
+    public static JsonPath retrieveMessageAsJsonPath(final JmsMessageConsumerClient consumer, final Matcher matchers, final long retrieveTimeOut) {
+        final long startTime = System.currentTimeMillis();
+        JsonPath message;
+        do {
+            message = consumer.retrieveMessageAsJsonPath(retrieveTimeOut).orElse(null);
+            if (ofNullable(message).isPresent()) {
+                if (matchers.matches(message.prettify())) {
+                    return message;
+                }
+            }
+        } while (RETRIEVE_TIMEOUT > (System.currentTimeMillis() - startTime));
+        return null;
     }
 
     public static JsonPath retrieveMessage(final MessageConsumer consumer) {

@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 
 public class NCESApplicationJourneyIT extends AbstractIT {
-    private static final UUID APPEAL_AGAINST_CONVICTION_ID = fromString("57810183-a5c2-3195-8748-c6b97eda1ebd");
+    private static final String APPEAL_AGAINST_CONVICTION_ID = "MC80802";
 
     @Test
     public void shouldRaisePublicEventWhenApplicationTypeIsAppeal() {
@@ -40,7 +40,7 @@ public class NCESApplicationJourneyIT extends AbstractIT {
 
         h(initiateHearing(getRequestSpec(),
                 standardInitiateHearingWithApplicationTemplate(singletonList(
-                        hearingFactory.courtApplication(hearingFactory.courtApplicationDefendant(masterDefendantId, randomUUID()).build(), APPEAL_AGAINST_CONVICTION_ID).build()))));
+                        hearingFactory.courtApplicationForAppeal(hearingFactory.courtApplicationDefendant(masterDefendantId, randomUUID()).build(), APPEAL_AGAINST_CONVICTION_ID).build()))));
 
         publicEventTopic.waitFor();
     }

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Objects.isNull;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -40,6 +41,9 @@ public class AddDefendantEventListener {
         final UUID hearingId = caseDefendantAdded.getHearingId();
 
         final Hearing hearingEntity = hearingRepository.findBy(hearingId);
+        if(isNull(hearingEntity)){
+            return;
+        }
 
         hearingEntity.getProsecutionCases().forEach(prosecutionCase -> prosecutionCase.getDefendants().add(defendantJPAMapper.toJPA(hearingEntity, prosecutionCase, defendantIn)));
 

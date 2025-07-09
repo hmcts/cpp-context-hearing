@@ -10,6 +10,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.DefendantAttendanceRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.util.UUID;
 
@@ -30,6 +31,9 @@ public class DefendantAttendanceEventListener {
     private DefendantAttendanceRepository defendantAttendanceRepository;
 
     @Inject
+    private HearingRepository hearingRepository;
+
+    @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     @Transactional
@@ -43,6 +47,9 @@ public class DefendantAttendanceEventListener {
         LOGGER.debug("hearing.defendant-attendance-updated event received for hearingId {}", defendantAttendanceUpdated.getHearingId());
 
         if (null == defendantAttendance) {
+            if(hearingRepository.findOptionalBy(defendantAttendanceUpdated.getHearingId()).isEmpty()){
+                return;
+            }
             defendantAttendance = new DefendantAttendance();
             defendantAttendance.setId(new HearingSnapshotKey(UUID.randomUUID(), defendantAttendanceUpdated.getHearingId()));
             defendantAttendance.setDefendantId(defendantAttendanceUpdated.getDefendantId());

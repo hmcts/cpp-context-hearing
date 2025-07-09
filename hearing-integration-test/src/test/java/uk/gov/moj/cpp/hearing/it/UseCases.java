@@ -34,7 +34,6 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupNoProsecutionCaseByHearingId;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
@@ -46,7 +45,6 @@ import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
-import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
@@ -77,6 +75,7 @@ import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
 import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
 import uk.gov.justice.hearing.courts.referencedata.EnforcementAreaBacs;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
+import uk.gov.justice.progression.events.ApplicationOrganisationDetails;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -97,12 +96,7 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
-import uk.gov.moj.cpp.hearing.eventlog.CourtCentre;
-import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
-import uk.gov.moj.cpp.hearing.eventlog.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventLogged;
 import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
@@ -724,6 +718,24 @@ public class UseCases {
         return caseDefendantDetails;
     }
 
+    public static ApplicationOrganisationDetails updateApplicaionWithOrganisation(final ApplicationOrganisationDetails applicationOrganisationDetails) throws Exception {
+
+        final String eventName = "public.progression.application-organisation-changed";
+
+        final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
+
+        final String payloadAsString = mapper.writeValueAsString(applicationOrganisationDetails);
+
+        final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
+
+        sendMessage(
+                getPublicTopicInstance().createProducer(),
+                eventName,
+                jsonObject,
+                metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
+
+        return applicationOrganisationDetails;
+    }
 
     public static UpdateOffencesForDefendantCommand updateOffences(final UpdateOffencesForDefendantCommand updateOffencesForDefendantCommand) throws Exception {
 
@@ -955,6 +967,39 @@ public class UseCases {
                 eventName,
                 createObjectBuilder()
                         .add("courtApplication", createObjectBuilder(jsonObject).build())
+                        .build(),
+                metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
+
+    }
+
+    public static void sendPublicApplicationOffencesUpdatedMessage(final JsonObject laaReference, final String applicationId, final  String subjectId, final String offenceId) throws Exception {
+
+        final String eventName = "public.progression.application-offences-updated";
+
+        sendMessage(
+                getPublicTopicInstance().createProducer(),
+                eventName,
+                createObjectBuilder()
+                        .add("applicationId", applicationId)
+                        .add("offenceId", offenceId)
+                        .add("subjectId", subjectId)
+                        .add("laaReference", laaReference)
+                        .build(),
+                metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
+
+    }
+
+    public static void sendPublicApplicationOrganisationUpdatedMessage(final JsonObject associatedOrganisation, final String applicationId, final  String subjectId) throws Exception {
+
+        final String eventName = "public.progression.application-organisation-changed";
+
+        sendMessage(
+                getPublicTopicInstance().createProducer(),
+                eventName,
+                createObjectBuilder()
+                        .add("applicationId", applicationId)
+                        .add("subjectId", subjectId)
+                        .add("associatedDefenceOrganisation", associatedOrganisation)
                         .build(),
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
 

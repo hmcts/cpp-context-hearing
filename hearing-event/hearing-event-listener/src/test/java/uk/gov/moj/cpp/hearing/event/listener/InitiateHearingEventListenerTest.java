@@ -7,6 +7,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -22,9 +23,10 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
+import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.Defendant;
-import uk.gov.justice.core.courts.Jurors;
-import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
+import uk.gov.justice.core.courts.LaaReference;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
@@ -35,13 +37,13 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationLaareferenceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
-import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.mapping.CourtCentreJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
@@ -52,6 +54,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Plea;
+import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
@@ -63,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -77,7 +81,6 @@ import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -118,6 +121,9 @@ public class InitiateHearingEventListenerTest {
     @Mock
     private OffenceRepository offenceRepository;
 
+    @Mock
+    private HearingApplicationRepository hearingApplicationRepository;
+
     @InjectMocks
     private InitiateHearingEventListener initiateHearingEventListener;
 
@@ -135,7 +141,25 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldInsertHearingWhenInitiated() {
+    public void shouldInsertHearingWhenInitiatedWithoutApplication() {
+
+        final InitiateHearingCommand command = minimumInitiateHearingTemplate();
+
+        final uk.gov.justice.core.courts.Hearing hearing = command.getHearing();
+        hearing.setCourtApplications(null);
+
+        when(hearingJPAMapper.toJPA(any(uk.gov.justice.core.courts.Hearing.class))).thenReturn(new Hearing());
+
+        initiateHearingEventListener.newHearingInitiated(getInitiateHearingJsonEnvelope(hearing));
+
+        final ArgumentCaptor<Hearing> hearingExArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+
+        verify(hearingRepository, times(1)).save(hearingExArgumentCaptor.capture());
+        verify(hearingApplicationRepository, never()).save(any());
+    }
+
+    @Test
+    public void shouldInsertHearingWhenInitiatedWithApplication() {
 
         final InitiateHearingCommand command = minimumInitiateHearingTemplate();
 
@@ -148,6 +172,7 @@ public class InitiateHearingEventListenerTest {
         final ArgumentCaptor<Hearing> hearingExArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
 
         verify(hearingRepository, times(1)).save(hearingExArgumentCaptor.capture());
+        verify(hearingApplicationRepository).save(any());
     }
 
     @Test
@@ -163,7 +188,7 @@ public class InitiateHearingEventListenerTest {
         final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> prosecutionCaseSet = new HashSet<>();
         uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCaseEntitiy = new uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase();
         prosecutionCaseSet.add(prosecutionCaseEntitiy);
-        when(hearingRepository.findBy(hearingExtended.getHearingId())).thenReturn(hearing);
+        when(hearingRepository.findOptionalBy(hearingExtended.getHearingId())).thenReturn(Optional.of(hearing));
         when(hearingJPAMapper.addOrUpdateCourtApplication(hearing.getCourtApplicationsJson(), hearingExtended.getCourtApplication())).thenReturn(expectedUpdatedCourtApplicationJson);
         when(prosecutionCaseJPAMapper.toJPA(any(hearing.getClass()), any(ProsecutionCase.class))).thenReturn(prosecutionCaseEntitiy);
         when(prosecutionCaseRepository.save(any())).thenReturn(prosecutionCaseEntitiy);
@@ -218,7 +243,7 @@ public class InitiateHearingEventListenerTest {
         final Hearing hearing = new Hearing();
         hearing.setProsecutionCases(prosecutionCasesEntities);
 
-        when(hearingRepository.findBy(hearingExtended.getHearingId())).thenReturn(hearing);
+        when(hearingRepository.findOptionalBy(hearingExtended.getHearingId())).thenReturn(Optional.of(hearing));
         when(prosecutionCaseJPAMapper.toJPA(any(hearing.getClass()), any(ProsecutionCase.class))).thenReturn(prosecutionCaseEntity);
         when(prosecutionCaseJPAMapper.fromJPA(anySet())).thenReturn(prosecutionCasesInEntity);
         when(prosecutionCaseRepository.save(any())).thenReturn(prosecutionCaseEntity);
@@ -281,7 +306,7 @@ public class InitiateHearingEventListenerTest {
         final Hearing hearing = new Hearing();
         hearing.setProsecutionCases(prosecutionCasesEntities);
 
-        when(hearingRepository.findBy(existingHearingUpdated.getHearingId())).thenReturn(hearing);
+        when(hearingRepository.findOptionalBy(existingHearingUpdated.getHearingId())).thenReturn(Optional.of(hearing));
         when(prosecutionCaseJPAMapper.toJPA(any(hearing.getClass()), any(ProsecutionCase.class))).thenReturn(prosecutionCaseEntity);
         when(prosecutionCaseJPAMapper.fromJPA(anySet())).thenReturn(prosecutionCasesInEntity);
         when(prosecutionCaseRepository.save(any())).thenReturn(prosecutionCaseEntity);
@@ -441,7 +466,7 @@ public class InitiateHearingEventListenerTest {
         final Hearing hearing = new Hearing();
         hearing.setProsecutionCases(prosecutionCasesEntities);
 
-        when(hearingRepository.findBy(hearingExtended.getHearingId())).thenReturn(hearing);
+        when(hearingRepository.findOptionalBy(hearingExtended.getHearingId())).thenReturn(Optional.of(hearing));
         when(prosecutionCaseJPAMapper.toJPA(any(hearing.getClass()), any(ProsecutionCase.class))).thenReturn(prosecutionCaseEntity);
         when(prosecutionCaseJPAMapper.fromJPA(anySet())).thenReturn(prosecutionCasesInEntity);
         when(prosecutionCaseRepository.save(any())).thenReturn(prosecutionCaseEntity);
@@ -507,7 +532,7 @@ public class InitiateHearingEventListenerTest {
         final Hearing hearing = new Hearing();
         hearing.setProsecutionCases(prosecutionCasesEntities);
 
-        when(hearingRepository.findBy(hearingExtended.getHearingId())).thenReturn(hearing);
+        when(hearingRepository.findOptionalBy(hearingExtended.getHearingId())).thenReturn(Optional.of(hearing));
         when(prosecutionCaseJPAMapper.toJPA(any(hearing.getClass()), any(ProsecutionCase.class))).thenReturn(prosecutionCaseEntity);
         when(prosecutionCaseJPAMapper.fromJPA(anySet())).thenReturn(prosecutionCasesInEntity);
         when(prosecutionCaseRepository.save(any())).thenReturn(prosecutionCaseEntity);
@@ -571,7 +596,7 @@ public class InitiateHearingEventListenerTest {
         final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> prosecutionCaseSet = new HashSet<>();
         uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCaseEntitiy = new uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase();
         prosecutionCaseSet.add(prosecutionCaseEntitiy);
-        when(hearingRepository.findBy(hearingExtended.getHearingId())).thenReturn(hearing);
+        when(hearingRepository.findOptionalBy(hearingExtended.getHearingId())).thenReturn(Optional.of(hearing));
         when(hearingJPAMapper.addOrUpdateCourtApplication(hearing.getCourtApplicationsJson(), hearingExtended.getCourtApplication())).thenReturn(expectedUpdatedCourtApplicationJson);
         initiateHearingEventListener.hearingExtended(envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(hearingExtended)));
         final ArgumentCaptor<Hearing> hearingExArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
@@ -584,6 +609,20 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
+    public void shouldEDoNothing_whenThereIsNoHearing() {
+
+        final HearingExtended hearingExtended = new HearingExtended(UUID.randomUUID(), null, null, null,CourtApplication.courtApplication().withId(UUID.randomUUID()).build(), null, null);
+
+        when(hearingRepository.findOptionalBy(hearingExtended.getHearingId())).thenReturn(Optional.empty());
+        initiateHearingEventListener.hearingExtended(envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(hearingExtended)));
+        final ArgumentCaptor<Hearing> hearingExArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+
+        verify(hearingRepository, never()).save(hearingExArgumentCaptor.capture());
+        verify(prosecutionCaseRepository,never()).save(any());
+
+    }
+
+    @Test
     public void shouldUpdateApplicationDetails() {
 
         final ApplicationDetailChanged applicationDetailChanged = new ApplicationDetailChanged(UUID.randomUUID(), CourtApplication.courtApplication().withId(UUID.randomUUID()).build());
@@ -591,7 +630,7 @@ public class InitiateHearingEventListenerTest {
         Hearing hearing = new Hearing();
         hearing.setCourtApplicationsJson("zyz");
         final String expectedUpdatedCourtApplicationJson = "abcdef";
-        when(hearingRepository.findBy(applicationDetailChanged.getHearingId())).thenReturn(hearing);
+        when(hearingRepository.findOptionalBy(applicationDetailChanged.getHearingId())).thenReturn(Optional.of(hearing));
         when(hearingJPAMapper.addOrUpdateCourtApplication(hearing.getCourtApplicationsJson(), applicationDetailChanged.getCourtApplication())).thenReturn(expectedUpdatedCourtApplicationJson);
 
         initiateHearingEventListener.hearingApplicationDetailChanged(envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(applicationDetailChanged)));
@@ -600,6 +639,63 @@ public class InitiateHearingEventListenerTest {
         verify(hearingRepository, times(1)).save(hearingExArgumentCaptor.capture());
         final String updatedCourtApplicationsJson = hearingExArgumentCaptor.getValue().getCourtApplicationsJson();
         assertThat(updatedCourtApplicationsJson, is(expectedUpdatedCourtApplicationJson));
+    }
+
+    @Test
+    public void shouldUpdateApplicationLaaReferenceDetails() {
+        final UUID applicationId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final UUID subjectId = randomUUID();
+        final LaaReference laaReference = LaaReference.laaReference().withStatusDescription("desc").withApplicationReference("ref")
+                .withStatusCode("G2").withStatusDate(LocalDate.now()).build();
+        final ApplicationLaareferenceUpdated applicationDetailChanged = new ApplicationLaareferenceUpdated(UUID.randomUUID(), applicationId, subjectId, offenceId, laaReference);
+
+        Hearing hearing = new Hearing();
+        hearing.setCourtApplicationsJson("zyz");
+        final String expectedUpdatedCourtApplicationJson = "abcdef";
+        CourtApplication persistedApplication = CourtApplication.courtApplication()
+                .withSubject(CourtApplicationParty.courtApplicationParty().withId(subjectId).build())
+                .withCourtApplicationCases(buildCourtApplicationCases(offenceId, laaReference))
+                .build();
+        when(hearingRepository.findBy(applicationDetailChanged.getHearingId())).thenReturn(hearing);
+        when(hearingJPAMapper.getCourtApplication(any(), eq(applicationDetailChanged.getApplicationId()))).thenReturn(Optional.of(persistedApplication));
+        when(hearingJPAMapper.addOrUpdateCourtApplication(hearing.getCourtApplicationsJson(), persistedApplication)).thenReturn(expectedUpdatedCourtApplicationJson);
+
+        initiateHearingEventListener.hearingApplicationLaaReferenceUpdated(envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(applicationDetailChanged)));
+        final ArgumentCaptor<Hearing> hearingExArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+
+        verify(hearingRepository, times(1)).save(hearingExArgumentCaptor.capture());
+        final String updatedCourtApplicationsJson = hearingExArgumentCaptor.getValue().getCourtApplicationsJson();
+        assertThat(updatedCourtApplicationsJson, is(expectedUpdatedCourtApplicationJson));
+    }
+
+    private List<CourtApplicationCase> buildCourtApplicationCases(UUID offenceId, LaaReference laaReference){
+        uk.gov.justice.core.courts.Offence offence1 = uk.gov.justice.core.courts.Offence.offence().withId(offenceId).withLaaApplnReference(laaReference).build();
+        uk.gov.justice.core.courts.Offence offence2 = uk.gov.justice.core.courts.Offence.offence().withId(UUID.randomUUID()).withLaaApplnReference(LaaReference.laaReference().withStatusCode("404").build()).build();
+        uk.gov.justice.core.courts.Offence offence3 = uk.gov.justice.core.courts.Offence.offence().withId(UUID.randomUUID()).withLaaApplnReference(LaaReference.laaReference().withStatusCode("404").build()).build();
+        uk.gov.justice.core.courts.Offence offence4 = uk.gov.justice.core.courts.Offence.offence().withId(UUID.randomUUID()).withLaaApplnReference(LaaReference.laaReference().withStatusCode("404").build()).build();
+
+        CourtApplicationCase courtApplicationCase1 =CourtApplicationCase.courtApplicationCase().withOffences(List.of(offence1, offence2)).build();
+        CourtApplicationCase courtApplicationCase2 =CourtApplicationCase.courtApplicationCase().withOffences(List.of(offence3)).build();
+        CourtApplicationCase courtApplicationCase3 =CourtApplicationCase.courtApplicationCase().withOffences(List.of(offence4)).build();
+        return List.of(courtApplicationCase1, courtApplicationCase2, courtApplicationCase3);
+    }
+
+    @Test
+    public void shouldNotUpdateApplicationDetailsIfThereIsNoHearing() {
+
+        final ApplicationDetailChanged applicationDetailChanged = new ApplicationDetailChanged(UUID.randomUUID(), CourtApplication.courtApplication().withId(UUID.randomUUID()).build());
+
+        Hearing hearing = new Hearing();
+        hearing.setCourtApplicationsJson("zyz");
+        final String expectedUpdatedCourtApplicationJson = "abcdef";
+        when(hearingRepository.findOptionalBy(applicationDetailChanged.getHearingId())).thenReturn(Optional.empty());
+
+        initiateHearingEventListener.hearingApplicationDetailChanged(envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(applicationDetailChanged)));
+        final ArgumentCaptor<Hearing> hearingExArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+
+        verify(hearingRepository, never()).save(hearingExArgumentCaptor.capture());
+
     }
 
     @Test
@@ -626,6 +722,27 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
+    public void convictionDateNotUpdated_shouldUpdateTheConvictionDateIfThereIsNoHearing() {
+
+        final UUID caseId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(offenceId, hearingId);
+        final ConvictionDateAdded convictionDateAdded = new ConvictionDateAdded(caseId, hearingId, offenceId, PAST_LOCAL_DATE.next(), null);
+
+        final Offence offence = new Offence();
+        offence.setId(snapshotKey);
+
+        when(this.offenceRepository.findBy(snapshotKey)).thenReturn(null);
+
+        initiateHearingEventListener.convictionDateUpdated(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
+                objectToJsonObjectConverter.convert(convictionDateAdded)));
+
+        verify(this.offenceRepository, never()).saveAndFlush(offence);
+
+    }
+
+    @Test
     public void convictionDateUpdated_shouldUpdateTheConvictionDateToOffenceUnderCourtApplication() {
 
         final UUID applicationId = randomUUID();
@@ -640,7 +757,7 @@ public class InitiateHearingEventListenerTest {
         hearing.setCourtApplicationsJson("abc");
 
 
-        when(this.hearingRepository.findBy(convictionDateAdded.getHearingId())).thenReturn(hearing);
+        when(this.hearingRepository.findOptionalBy(convictionDateAdded.getHearingId())).thenReturn(Optional.of(hearing));
         when(hearingJPAMapper.updateConvictedDateOnOffencesInCourtApplication(hearing.getCourtApplicationsJson(), convictionDateAdded.getCourtApplicationId(), convictionDateAdded.getOffenceId(), convictionDateAdded.getConvictionDate())).thenReturn("def");
 
         initiateHearingEventListener.convictionDateUpdated(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
@@ -668,7 +785,7 @@ public class InitiateHearingEventListenerTest {
                 .withCourtApplications(Collections.singletonList(CourtApplication.courtApplication().withId(applicationId).build()))
                 .build();
 
-        when(this.hearingRepository.findBy(convictionDateAdded.getHearingId())).thenReturn(hearingEntity);
+        when(this.hearingRepository.findOptionalBy(convictionDateAdded.getHearingId())).thenReturn(Optional.of(hearingEntity));
         when(hearingJPAMapper.fromJPA(any())).thenReturn(hearing);
         when(hearingJPAMapper.addOrUpdateCourtApplication(any(),any() )).thenReturn("def");
 
@@ -700,7 +817,7 @@ public class InitiateHearingEventListenerTest {
                 .withCourtApplications(Collections.singletonList(CourtApplication.courtApplication().withId(applicationId).withConvictionDate(LocalDate.now()).build()))
                 .build();
 
-        when(this.hearingRepository.findBy(convictionDateRemoved.getHearingId())).thenReturn(hearingEntity);
+        when(this.hearingRepository.findOptionalBy(convictionDateRemoved.getHearingId())).thenReturn(Optional.of(hearingEntity));
         when(hearingJPAMapper.fromJPA(any())).thenReturn(hearing);
         when(hearingJPAMapper.addOrUpdateCourtApplication(any(),any() )).thenReturn("def");
 
@@ -730,7 +847,7 @@ public class InitiateHearingEventListenerTest {
         hearing.setCourtApplicationsJson("abc");
 
 
-        when(this.hearingRepository.findBy(convictionDateRemoved.getHearingId())).thenReturn(hearing);
+        when(this.hearingRepository.findOptionalBy(convictionDateRemoved.getHearingId())).thenReturn(Optional.of(hearing));
         when(hearingJPAMapper.updateConvictedDateOnOffencesInCourtApplication(any(), any(), any(), any())).thenReturn("def");
 
         initiateHearingEventListener.convictionDateRemoved(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
@@ -738,6 +855,30 @@ public class InitiateHearingEventListenerTest {
 
         verify(this.hearingRepository).save(hearing);
         assertThat(hearing.getCourtApplicationsJson(), is("def"));
+
+    }
+
+    @Test
+    public void convictionDateNotRemoves_shouldSetNullConvictionDateToOffenceInCourtApplicationIfThereIsNoHearing() {
+
+        final UUID applicationId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final ConvictionDateRemoved convictionDateRemoved = ConvictionDateRemoved.convictionDateRemoved()
+                .setCourtApplicationId(applicationId)
+                .setOffenceId(randomUUID())
+                .setHearingId(hearingId);
+
+        final Hearing hearing = new Hearing();
+        hearing.setCourtApplicationsJson("abc");
+
+
+        when(this.hearingRepository.findOptionalBy(convictionDateRemoved.getHearingId())).thenReturn(Optional.empty());
+
+        initiateHearingEventListener.convictionDateRemoved(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
+                objectToJsonObjectConverter.convert(convictionDateRemoved)));
+
+        verify(this.hearingRepository, never()).save(hearing);
+
 
     }
 

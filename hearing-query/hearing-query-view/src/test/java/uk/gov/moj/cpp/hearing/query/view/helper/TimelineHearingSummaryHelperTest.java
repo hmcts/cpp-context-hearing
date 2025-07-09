@@ -251,6 +251,9 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getApplicants().size(), is(1));
         assertThat(timeLineHearingSummary.getApplicants().get(0), is(format("%s %s", person.getFirstName(), person.getLastName())));
         assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
+        assertThat(timeLineHearingSummary.getSubjects().size(), is(1));
+        assertThat(timeLineHearingSummary.getSubjects().get(0), is(format("%s %s", person.getFirstName(), person.getLastName())));
+
     }
 
     @Test
@@ -262,6 +265,9 @@ public class TimelineHearingSummaryHelperTest {
 
         assertThat(timeLineHearingSummary.getApplicants().size(), is(1));
         assertThat(timeLineHearingSummary.getApplicants().get(0), is(organisation.getName()));
+        assertThat(timeLineHearingSummary.getSubjects().size(), is(1));
+        assertThat(timeLineHearingSummary.getSubjects().get(0), is(organisation.getName()));
+
         assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
     }
 
@@ -274,6 +280,9 @@ public class TimelineHearingSummaryHelperTest {
 
         assertThat(timeLineHearingSummary.getApplicants().size(), is(1));
         assertThat(timeLineHearingSummary.getApplicants().get(0), is(organisation.getName()));
+        assertThat(timeLineHearingSummary.getSubjects().size(), is(1));
+        assertThat(timeLineHearingSummary.getSubjects().get(0), is(organisation.getName()));
+
         assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
     }
 
@@ -300,6 +309,7 @@ public class TimelineHearingSummaryHelperTest {
                         .withMasterDefendant(MasterDefendant.masterDefendant().withMasterDefendantId(respondentMasterDefendantId).build())
                         .build()))
                 .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withPersonDetails(person().withFirstName(person.getFirstName()).withLastName(person.getLastName()).build())
                         .withMasterDefendant(MasterDefendant.masterDefendant().withMasterDefendantId(subjectMasterDefendantId).build())
                         .build())
                 .build();
@@ -310,6 +320,9 @@ public class TimelineHearingSummaryHelperTest {
                 .withId(applicationId)
                 .withApplicant(CourtApplicationParty.courtApplicationParty()
                         .withOrganisation(organisation().withName(organisation.getName()).build())
+                        .build())
+                .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withOrganisation(organisation().withName(organisation.getName()).build())
                         .build()).build();
     }
 
@@ -317,6 +330,10 @@ public class TimelineHearingSummaryHelperTest {
         return CourtApplication.courtApplication()
                 .withId(applicationId)
                 .withApplicant(CourtApplicationParty.courtApplicationParty()
+                        .withMasterDefendant(MasterDefendant.masterDefendant().withLegalEntityDefendant(legalEntityDefendant()
+                                .withOrganisation(organisation().withName(organisation.getName()).build()).build()).build())
+                        .build())
+                .withSubject(CourtApplicationParty.courtApplicationParty()
                         .withMasterDefendant(MasterDefendant.masterDefendant().withLegalEntityDefendant(legalEntityDefendant()
                                 .withOrganisation(organisation().withName(organisation.getName()).build()).build()).build())
                         .build()).build();

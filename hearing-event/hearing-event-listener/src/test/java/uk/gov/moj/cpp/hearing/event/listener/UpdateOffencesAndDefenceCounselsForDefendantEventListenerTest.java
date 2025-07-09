@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.json.JsonArrayBuilder;
@@ -117,7 +118,7 @@ public class UpdateOffencesAndDefenceCounselsForDefendantEventListenerTest {
 
         final Hearing hearingDBEntity = getHearing(hearingId, prosecutionId, Arrays.asList(defendant1, defendant2), Arrays.asList(hearingDefenceCounsel1, hearingDefenceCounsel2));
 
-        when(hearingRepository.findBy(hearingId)).thenReturn(hearingDBEntity);
+        when(hearingRepository.findOptionalBy(hearingId)).thenReturn(Optional.of(hearingDBEntity));
         when(hearingDefenceCounselJPAMapper.fromJPA(hearingDefenceCounsel1)).thenReturn(defenceCounsel1);
         when(hearingDefenceCounselJPAMapper.fromJPA(hearingDefenceCounsel2)).thenReturn(defenceCounsel2);
 
@@ -187,7 +188,7 @@ public class UpdateOffencesAndDefenceCounselsForDefendantEventListenerTest {
 
         final Hearing hearingDBEntity = getHearing(hearingId, prosecutionId, Arrays.asList(defendant1, defendant2, defendant3), Arrays.asList(hearingDefenceCounsel1, hearingDefenceCounsel2));
 
-        when(hearingRepository.findBy(hearingId)).thenReturn(hearingDBEntity);
+        when(hearingRepository.findOptionalBy(hearingId)).thenReturn(Optional.of(hearingDBEntity));
         when(hearingDefenceCounselJPAMapper.fromJPA(hearingDefenceCounsel1)).thenReturn(defenceCounsel1);
         when(hearingDefenceCounselJPAMapper.fromJPA(hearingDefenceCounsel2)).thenReturn(defenceCounsel2);
         when(hearingDefenceCounselJPAMapper.toJPA(hearingDBEntity, defenceCounsel2Updated)).thenReturn(hearingDefenceCounsel2Updated);

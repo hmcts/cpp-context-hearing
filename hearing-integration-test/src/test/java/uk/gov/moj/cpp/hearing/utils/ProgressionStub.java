@@ -9,6 +9,7 @@ import static java.util.UUID.randomUUID;
 import static org.apache.http.HttpStatus.SC_OK;
 import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
 
+import java.text.MessageFormat;
 import java.util.UUID;
 
 public class ProgressionStub {
@@ -25,5 +26,17 @@ public class ProgressionStub {
                         .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", PROGRESSION_PROSECUTION_CASE_MEDIA_TYPE)
                         .withBody(payload)));
+    }
+
+    public static void stubApplicationsByParentId(final UUID id) {
+        final String stringUrl = MessageFormat.format("/progression-service/query/api/rest/progression/applications/{0}", id);
+        final String payload = getPayload("stub-data/progression.query.application.summary.json");
+        stubFor(get(urlPathEqualTo(stringUrl))
+                .willReturn(aResponse()
+                        .withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", "application/vnd.progression.query.application.summary+json")
+                        .withBody(payload)));
+
     }
 }

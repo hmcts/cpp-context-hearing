@@ -1,17 +1,23 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
+import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -21,7 +27,9 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstOffenceCommand;
+import uk.gov.moj.cpp.hearing.event.service.ProgressionService;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingInitiated;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.util.HearingDetailUtil;
 
 import java.time.format.DateTimeFormatter;
@@ -29,10 +37,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
@@ -46,17 +58,19 @@ public class InitiateHearingEventProcessor {
 
     public static final String APPEAL = "APPEAL";
     public static final String STAT_DEC = "STAT_DEC";
-    private static final Map<String, String> APPLICATION_TYPE_LIST = ImmutableMap.<String, String>builder()
-            .put("f3a6e917-7cc8-3c66-83dd-d958abd6a6e4", STAT_DEC)
-            .put("7375727f-30fc-3f55-99f3-36adc4f0e70e", STAT_DEC)
-            .put("44c238d9-3bc2-3cf3-a2eb-a7d1437b8383", "REOPEN")
-            .put("57810183-a5c2-3195-8748-c6b97eda1ebd", APPEAL)
-            .put("beb08419-0a9a-3119-b3ec-038d56c8a718", APPEAL)
-            .put("36f3b0c3-9f75-31aa-a226-cfee69216160", APPEAL)
+    private static final Map<String, String> ENFORCEMENT_NOTIFICATION_APPLICATION_TYPES = ImmutableMap.<String, String>builder()
+            .put("MC80527", STAT_DEC)
+            .put("MC80528", STAT_DEC)
+            .put("MC80524", "REOPEN")
+            .put("MC80802", APPEAL)
+            .put("MC80803", APPEAL)
+            .put("MC80801", APPEAL)
             .build();
 
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final Logger LOGGER = LoggerFactory.getLogger(InitiateHearingEventProcessor.class);
+    public static final String COURT_APPLICATIONS = "courtApplications";
+    public static final String NEXT_HEARING = "Next Hearing";
     @Inject
     private Enveloper enveloper;
     @Inject
@@ -65,6 +79,10 @@ public class InitiateHearingEventProcessor {
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
     @Inject
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+    @Inject
+    private StringToJsonObjectConverter stringToJsonObjectConverter;
+    @Inject
+    private ProgressionService progressionService;
 
 
     @Handles("hearing.events.initiated")
@@ -79,7 +97,7 @@ public class InitiateHearingEventProcessor {
 
         final List<ProsecutionCase> prosecutionCases = initiateHearingCommand.getHearing().getProsecutionCases();
 
-        if (prosecutionCases!=null) {
+        if (prosecutionCases != null) {
             prosecutionCases.forEach(prosecutionCase -> {
 
                 prosecutionCase.getDefendants().forEach(defendant -> {
@@ -94,8 +112,8 @@ public class InitiateHearingEventProcessor {
                         cases.add(prosecutionCase.getId());
 
                         this.sender.send(Enveloper.envelop(RegisterHearingAgainstOffenceCommand.registerHearingAgainstOffenceDefendantCommand()
-                                .setHearingId(initiateHearingCommand.getHearing().getId())
-                                .setOffenceId(offence.getId())).withName("hearing.command.register-hearing-against-offence")
+                                        .setHearingId(initiateHearingCommand.getHearing().getId())
+                                        .setOffenceId(offence.getId())).withName("hearing.command.register-hearing-against-offence")
                                 .withMetadataFrom(event));
                     }
                 });
@@ -126,23 +144,20 @@ public class InitiateHearingEventProcessor {
 
         final List<CourtApplication> courtApplications = initiateHearingCommand.getHearing().getCourtApplications();
         ofNullable(courtApplications).map(Collection::stream).orElseGet(Stream::empty)
-                .filter(courtApplication -> APPLICATION_TYPE_LIST.containsKey(courtApplication.getType().getId().toString()))
+                .filter(courtApplication -> ENFORCEMENT_NOTIFICATION_APPLICATION_TYPES.containsKey(courtApplication.getType().getCode()))
                 .filter(courtApplication -> courtApplication.getSubject().getMasterDefendant() != null)
-                .forEach(courtApplication ->
+                .filter(courtApplication -> !isApplicationFinalisedOrListed(event, courtApplication.getId()))
+                .forEach(
+                        courtApplication -> {
                             this.sender.send(Enveloper.envelop(createObjectBuilder()
-                                    .add("applicationType",APPLICATION_TYPE_LIST.get(courtApplication.getType().getId().toString()))
+                                    .add("applicationType", ENFORCEMENT_NOTIFICATION_APPLICATION_TYPES.get(courtApplication.getType().getCode()))
                                     .add("masterDefendantId", courtApplication.getSubject().getMasterDefendant().getMasterDefendantId().toString())
                                     .add("listingDate", dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))
                                     .add("caseUrns", createCaseUrns(courtApplication).build())
                                     .add("hearingCourtCentreName", initiateHearingCommand.getHearing().getCourtCentre().getName())
-                                    .build()).withName("public.hearing.nces-email-notification-for-application").withMetadataFrom(event))
-                );
-    }
-
-    private JsonArrayBuilder createCaseUrns(final CourtApplication courtApplication) {
-        final JsonArrayBuilder builder = createArrayBuilder();
-        courtApplication.getCourtApplicationCases().stream().map(cac -> ofNullable(cac.getProsecutionCaseIdentifier().getCaseURN()).orElse(cac.getProsecutionCaseIdentifier().getProsecutionAuthorityReference())).forEach(builder::add);
-        return builder;
+                                    .add("caseOffenceIdList", createCaseOffenceIds(courtApplication.getCourtApplicationCases()))
+                                    .build()).withName("public.hearing.nces-email-notification-for-application").withMetadataFrom(event));
+                        });
     }
 
     @Handles("hearing.events.hearing-initiate-ignored")
@@ -152,4 +167,39 @@ public class InitiateHearingEventProcessor {
         }
         this.sender.send(Enveloper.envelop(event.payloadAsJsonObject()).withName("public.hearing.initiate-ignored").withMetadataFrom(event));
     }
+
+    private Boolean isApplicationFinalisedOrListed(final JsonEnvelope event, final UUID applicationId) {
+        final Optional<JsonObject> courtApplication = progressionService.getApplicationDetails(event, applicationId);
+        if (courtApplication.isPresent()) {
+            final CourtApplication courtApplicationObj = jsonObjectToObjectConverter.convert(courtApplication.get().getJsonObject("courtApplication"), CourtApplication.class);
+            return courtApplicationObj.getApplicationStatus() == ApplicationStatus.FINALISED || hasNextHearing(courtApplicationObj.getJudicialResults());
+        }
+        return false;
+    }
+
+    private Boolean hasNextHearing(final List<JudicialResult> judicialResults) {
+        return nonNull(judicialResults) && judicialResults.stream().anyMatch(result -> nonNull(result.getNextHearing()));
+    }
+
+
+    private JsonArrayBuilder createCaseUrns(final CourtApplication courtApplication) {
+        final JsonArrayBuilder builder = createArrayBuilder();
+        courtApplication.getCourtApplicationCases().stream()
+                .map(cac -> ofNullable(cac.getProsecutionCaseIdentifier().getCaseURN()).orElse(cac.getProsecutionCaseIdentifier().getProsecutionAuthorityReference()))
+                .forEach(builder::add);
+        return builder;
+    }
+
+    private JsonArrayBuilder createCaseOffenceIds(final List<CourtApplicationCase> courtApplicationCases) {
+        final JsonArrayBuilder builder = createArrayBuilder();
+        if (isNotEmpty(courtApplicationCases)) {
+            courtApplicationCases.stream()
+                    .filter(cac -> isNotEmpty(cac.getOffences()))
+                    .flatMap(cac -> cac.getOffences().stream())
+                    .map(offence -> offence.getId().toString())
+                    .forEach(builder::add);
+        }
+        return builder;
+    }
+
 }

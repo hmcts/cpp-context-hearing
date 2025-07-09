@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,6 +72,21 @@ public class AddDefendantEventListenerTest {
         final ArgumentCaptor<Hearing> hearingExArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
 
         verify(hearingRepository, times(1)).save(hearingExArgumentCaptor.capture());
+    }
+
+    @Test
+    public void shouldNotInsertNewDefendantWhenThereIsNoHearing() {
+        //given
+        final UUID arbitraryHearingId = UUID.randomUUID();
+        when(hearingRepository.findBy(arbitraryHearingId)).thenReturn(null);
+
+        //when
+        addCaseDefendantEventListener.caseDefendantAdded(getDefendantAddedJsonEnvelope(arbitraryHearingId));
+
+        //then
+        final ArgumentCaptor<Hearing> hearingExArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+
+        verify(hearingRepository, never()).save(hearingExArgumentCaptor.capture());
     }
 
 

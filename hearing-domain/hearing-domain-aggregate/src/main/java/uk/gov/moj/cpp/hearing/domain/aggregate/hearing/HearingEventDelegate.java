@@ -145,11 +145,11 @@ public class HearingEventDelegate implements Serializable {
                 ));
     }
 
-    private String getReference() {
+    public String getReference() {
         return ofNullable(this.momento.getHearing().getProsecutionCases())
                 .map(c -> c.get(0).getProsecutionCaseIdentifier())
                 .map(this::getProsecutionReference)
-                .orElse(getReferenceFromCourtApplications());
+                .orElseGet(this::getReferenceFromCourtApplications);
     }
 
     private HearingEventIgnored raiseHearingEventIgnored(final String reason, final UUID hearingId) {
@@ -216,9 +216,10 @@ public class HearingEventDelegate implements Serializable {
     }
 
     private String getReferenceFromCourtApplications() {
-        return ofNullable(this.momento.getHearing().getCourtApplications())
-                .map(courtApplications -> courtApplications.get(0))
-                .map(CourtApplication::getApplicationReference).orElse(null);
+        Optional<List<CourtApplication>> courtApplications = ofNullable(this.momento.getHearing().getCourtApplications())
+                .stream()
+                .findFirst();
+        return (courtApplications.isPresent() && !courtApplications.get().isEmpty() && courtApplications.get().get(0).getApplicationReference() != null) ? courtApplications.get().get(0).getApplicationReference() : null;
     }
 
     private String getProsecutionReference(final ProsecutionCaseIdentifier prosecutionCaseIdentifier) {

@@ -24,6 +24,9 @@ import java.util.stream.Stream;
 
 public class JudicialResultPromptHelperV3 {
 
+    private static final String BOOLEAN = "BOOLEAN";
+    private static final String YESBOX = "YESBOX";
+
     private JudicialResultPromptHelperV3() {
     }
 
@@ -58,7 +61,7 @@ public class JudicialResultPromptHelperV3 {
     }
 
     private static String getPromptValue(final String originalValue, final String promptType) {
-        if ("BOOLEAN".equalsIgnoreCase(promptType)) {
+        if (BOOLEAN.equalsIgnoreCase(promptType) || YESBOX.equalsIgnoreCase(promptType)) {
             return convertBooleanPromptValue(originalValue);
         }
         return originalValue;

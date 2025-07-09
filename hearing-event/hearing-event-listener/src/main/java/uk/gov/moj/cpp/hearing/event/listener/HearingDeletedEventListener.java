@@ -4,10 +4,13 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationHearingDeleted;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
+import java.util.Objects;
 import java.util.UUID;
 import javax.inject.Inject;
 
@@ -51,6 +54,16 @@ public class HearingDeletedEventListener {
 
         if (hearing != null) {
             hearingRepository.remove(hearing);
+        }
+    }
+
+    @Handles("hearing.event.court-application-hearing-deleted")
+    public void processCourtApplicationDeleted(final Envelope<CourtApplicationHearingDeleted> event) {
+        final UUID hearingId = event.payload().getHearingId();
+        final Hearing hearingToBeDeleted = hearingRepository.findBy(hearingId);
+
+        if (Objects.nonNull(hearingToBeDeleted)) {
+            hearingRepository.remove(hearingToBeDeleted);
         }
     }
 }
