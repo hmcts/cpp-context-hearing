@@ -3377,6 +3377,7 @@ public class HearingAggregateTest {
     }
 
 
+
     @Test
     public void shouldNotRemoveProsecutionCounselWhenHearingEnded() {
         // Arrange
