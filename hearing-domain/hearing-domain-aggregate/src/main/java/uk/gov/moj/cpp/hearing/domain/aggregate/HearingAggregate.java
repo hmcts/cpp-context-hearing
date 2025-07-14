@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static java.lang.String.valueOf;
 import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
@@ -520,12 +521,19 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> extend(final UUID hearingId, final List<HearingDay> hearingDays, final CourtCentre courtCentre, final JurisdictionType jurisdictionType,
                                  final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {
+        if (momento.isDeletedOrDuplicated()){
+            return warnEventIgnored(hearingId, "extend");
+        }
+
         return apply(this.hearingDelegate.extend(hearingId, hearingDays, courtCentre, jurisdictionType, courtApplication, prosecutionCases, shadowListedOffences));
     }
 
 
     public Stream<Object> updateExistingHearing(final UUID hearingId, final List<ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {
-        if (isNull(momento.getHearing()) || this.momento.isDeleted() || this.momento.isDuplicate()) {
+        if(this.momento.isDeletedOrDuplicated()){
+            return warnEventIgnored(hearingId, "updateExistingHearing");
+        }
+        if (isNull(momento.getHearing()) ) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing / deleted / marked as duplicate' event as hearing not found", hearingId));
         }
         return apply(Stream.of(new ExistingHearingUpdated(hearingId, prosecutionCases, shadowListedOffences)));
@@ -554,6 +562,10 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> inheritPlea(final UUID hearingId, final Plea plea) {
+        if (this.momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "inheritPlea");
+        }
+
         return apply(this.pleaDelegate.inheritPlea(hearingId, plea));
     }
 
@@ -562,7 +574,11 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final HearingEvent hearingEvent, final List<UUID> hearingTypeIds, final UUID userId) {
-            return apply(Stream.concat(this.hearingEventDelegate.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, userId),
+        if (this.momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "logHearingEvent");
+        }
+
+        return apply(Stream.concat(this.hearingEventDelegate.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, userId),
                 CustodyTimeLimitUtil.stopCTLExpiryForTrialHearingUser(this.momento, hearingEvent, hearingTypeIds)));
     }
 
@@ -575,8 +591,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> deleteCourtApplicationHearing(final UUID hearingId) {
-        if(momento.isDeleted() || this.momento.getHearing() == null || momento.isDuplicate()){
-            return Stream.empty();
+        if(momento.isDeletedOrDuplicated() || this.momento.getHearing() == null){
+            return warnEventIgnored(hearingId, "deleteCourtApplicationHearing");
         }
         return apply(Stream.of(CourtApplicationHearingDeleted.courtApplicationHearingDeleted()
                 .withHearingId(hearingId)
@@ -922,12 +938,16 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateDefendantDetails(final UUID hearingId, final Defendant defendant) {
+        if (momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "updateDefendantDetails");
+        }
+
         return apply(this.defendantDelegate.updateDefendantDetails(hearingId, defendant));
     }
 
     public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId, final Offence offence) {
-        if(momento.isDeleted()){
-            return Stream.empty();
+        if (momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "addOffence");
         }
         if (this.momento.getHearing() == null) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'addOffence' event as hearing not found", hearingId));
@@ -937,8 +957,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> addOffenceV2(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId, final List<Offence> offences) {
-        if(momento.isDeleted()){
-            return Stream.empty();
+        if (momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "addOffenceV2");
         }
         if (this.momento.getHearing() == null) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'addOffence' event as hearing not found", hearingId));
@@ -948,10 +968,18 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateOffence(final UUID hearingId, final UUID defendantId, final Offence offence) {
+        if (momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "updateOffence");
+        }
+
         return apply(this.offenceDelegate.updateOffence(hearingId, defendantId, offence));
     }
 
     public Stream<Object> updateOffenceV2(final UUID hearingId, final UUID defendantId, final List<Offence> offences) {
+        if (momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "updateOffenceV2");
+        }
+
         return apply(this.offenceDelegate.updateOffenceV2(hearingId, defendantId, offences));
     }
 
@@ -1017,8 +1045,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateLaareferenceForApplication(final UUID hearingId, final UUID applicationId, final UUID subjectId, final UUID offenceId, final LaaReference laaReference) {
-        if(momento.isDeleted()){
-            return Stream.empty();
+        if(momento.isDeletedOrDuplicated()){
+            return warnEventIgnored(hearingId, "updateLaareferenceForApplication");
         }
         if (this.momento.getHearing() == null) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'updateLaareferenceForApplication' event as hearing not found", hearingId));
@@ -1027,8 +1055,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateDefenceOrganisationForApplication(final UUID hearingId, final UUID applicationId, final UUID subjectId, final AssociatedDefenceOrganisation defenceOrganisation) {
-        if(momento.isDeleted()){
-            return Stream.empty();
+        if(momento.isDeletedOrDuplicated()){
+            return warnEventIgnored(hearingId, "updateDefenceOrganisationForApplication");
         }
         if (isNull(this.momento.getHearing())) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'updateDefenceOrganisationForApplication' event as hearing not found", hearingId));
@@ -1088,6 +1116,10 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateDefendantLegalAidStatusForHearing(final UUID hearingId, final UUID defendantId, final String legalAidStatus) {
+        if (this.momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "updateDefendantLegalAidStatusForHearing");
+        }
+
         return apply(Stream.of(DefendantLegalAidStatusUpdatedForHearing.defendantLegalaidStatusUpdatedForHearing()
                 .withHearingId(hearingId)
                 .withDefendantId(defendantId)
@@ -1097,8 +1129,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> addOrUpdateCaseDefendantsForHearing(final UUID hearingId, final ProsecutionCase prosecutionCase) {
-        if (SHARED.equals(this.hearingState) || this.momento.isDeleted()) {
-            return Stream.empty();
+        if (SHARED.equals(this.hearingState) || this.momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "addOrUpdateCaseDefendantsForHearing");
         }
         final Stream.Builder<Object> streamBuilder = Stream.builder();
         streamBuilder.add(CaseDefendantsUpdatedForHearing.caseDefendantsUpdatedForHearing()
@@ -1110,8 +1142,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateApplicationDefendantsForHearing(final UUID hearingId, final CourtApplication courtApplication) {
-        if (SHARED.equals(this.hearingState) || this.momento.isDeleted()) {
-            return Stream.empty();
+        if (SHARED.equals(this.hearingState) || this.momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "updateApplicationDefendantsForHearing");
         }
         return apply(Stream.of(ApplicationDefendantsUpdatedForHearing.applicationDefendantsUpdatedForHearing()
                 .withHearingId(hearingId)
@@ -1219,8 +1251,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> deleteHearing(final UUID hearingId) {
-        if(momento.isDeleted()){
-            return Stream.empty();
+        if (momento.isDeletedOrDuplicated()){
+            return warnEventIgnored(hearingId, "deleteHearing");
         }
         if (this.momento.getHearing() == null) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'deleteHearing' event as hearing not found", hearingId));
@@ -1235,8 +1267,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> unAllocateHearing(final UUID hearingId, final List<UUID> removedOffenceIds) {
-        if (isNull(momento.getHearing()) || this.momento.isDeleted() || this.momento.isDuplicate()) {
-            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing not found", hearingId));
+        if (isNull(momento.getHearing()) || this.momento.isDeletedOrDuplicated()) {
+            return warnEventIgnored(hearingId, "unAllocateHearing");
         } else if(this.hearingState == SHARED) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing already shared", hearingId));
         }
@@ -1245,6 +1277,9 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> changeNextHearingStartDate(final UUID hearingId, final UUID seedingHearingId, final ZonedDateTime nextHearingDay) {
+        if (momento.isDeletedOrDuplicated()){
+            return warnEventIgnored(hearingId, "changeNextHearingStartDate");
+        }
         if (this.momento.getHearing() == null) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'changeNextHearingStartDate' event as hearing not found", hearingId));
         }
@@ -1282,8 +1317,11 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> stopCustodyTimeLimitClock(final List<UUID> resultIdList, final Hearing hearing) {
 
-        if (!SHARED.equals(this.hearingState) || this.momento.isDeleted()) {
-            return Stream.empty();
+        if (!SHARED.equals(this.hearingState) || this.momento.isDeletedOrDuplicated()) {
+            if (hearing == null) {
+                return Stream.empty();
+            }
+            return warnEventIgnored(hearing.getId(), "stopCustodyTimeLimitClock");
         }
         return  CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, this.momento.getSharedResultsCommandResultLineV2s(), resultIdList, hearing);
 
@@ -1437,5 +1475,10 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> addWitnessToHearing(final UUID hearingId, final String witness) {
         return apply(Stream.of(new WitnessAddedToHearing(witness, hearingId)));
+    }
+
+    private Stream<Object> warnEventIgnored(final UUID hearingId, final String methodName) {
+        LOGGER.warn("Ignoring '{}' event as hearing with ID '{}' is already deleted or marked as duplicate or not found", methodName, hearingId);
+        return Stream.empty();
     }
 }

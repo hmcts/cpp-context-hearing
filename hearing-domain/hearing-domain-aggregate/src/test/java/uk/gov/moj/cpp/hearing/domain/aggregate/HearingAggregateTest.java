@@ -15,6 +15,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -86,6 +87,7 @@ import uk.gov.moj.cpp.hearing.command.updateEvent.UpdateHearingEventsCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.ResultsError;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingDelegate;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
@@ -155,10 +157,8 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 
 public class HearingAggregateTest {
 
@@ -171,11 +171,7 @@ public class HearingAggregateTest {
     public static final UUID USER_ID = randomUUID();
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
 
-
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
-
-    @After
+    @AfterEach
     public void teardown() {
         try {
             // ensure aggregate is serializable
@@ -186,7 +182,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldInitiateHearing() {
+    void shouldInitiateHearing() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithAllLevelJudicialResults();
 
         final HearingInitiated result = (HearingInitiated) new HearingAggregate().initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
@@ -195,7 +191,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotUpdateHearingEventsNoHearing() {
+    void shouldNotUpdateHearingEventsNoHearing() {
 
         final UUID hearingId = randomUUID();
 
@@ -217,7 +213,7 @@ public class HearingAggregateTest {
 
 
     @Test
-    public void shouldRaiseSaveDraftResultsFailedEventWhenTargetIsInvalid() {
+    void shouldRaiseSaveDraftResultsFailedEventWhenTargetIsInvalid() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithAllLevelJudicialResults();
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
@@ -242,7 +238,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldSaveMultipleDraftResultsForHearingDay() {
+    void shouldSaveMultipleDraftResultsForHearingDay() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithAllLevelJudicialResults();
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
@@ -259,7 +255,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldInitiateHearingWithAllResultsCleanedUp() {
+    void shouldInitiateHearingWithAllResultsCleanedUp() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithAllLevelJudicialResults();
 
         final HearingInitiated result = (HearingInitiated) new HearingAggregate().initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
@@ -281,7 +277,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldInitiateHearingOffencePlea() {
+    void shouldInitiateHearingOffencePlea() {
 
         final UpdateHearingWithInheritedPleaCommand command = new UpdateHearingWithInheritedPleaCommand(
                 randomUUID(),
@@ -309,7 +305,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldUpdateOffenceWithIndicatedPleaRetained() {
+    void shouldUpdateOffenceWithIndicatedPleaRetained() {
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithOffenceIndicatedPlea();
@@ -344,7 +340,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldUpdateOffenceWithIndicatedPleaRetainedV2() {
+    void shouldUpdateOffenceWithIndicatedPleaRetainedV2() {
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithOffenceIndicatedPlea();
@@ -378,7 +374,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void  shouldUpdateExistingPleaIfInheritHearingOffencePleaReceived() {
+    void  shouldUpdateExistingPleaIfInheritHearingOffencePleaReceived() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithOffencePlea();
 
@@ -457,7 +453,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void  shouldUpdateExistingVerdictIfInheritHearingOffenceVerdictReceived() {
+    void  shouldUpdateExistingVerdictIfInheritHearingOffenceVerdictReceived() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithOffenceVerdict();
 
@@ -536,7 +532,7 @@ public class HearingAggregateTest {
 
 
     @Test
-    public void  shouldClearExistingVerdictIfInheritHearingOffenceVerdictReceived() {
+    void  shouldClearExistingVerdictIfInheritHearingOffenceVerdictReceived() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithOffenceVerdict();
 
@@ -614,7 +610,7 @@ public class HearingAggregateTest {
 
 
     @Test
-    public void  shouldClearExistingVerdictIfUpdateHearingOffenceVerdictReceived() {
+    void  shouldClearExistingVerdictIfUpdateHearingOffenceVerdictReceived() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithOffenceVerdict();
 
@@ -683,7 +679,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldIgnoreLogHearingEventGivenNoPreviousHearing() {
+    void shouldIgnoreLogHearingEventGivenNoPreviousHearing() {
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
                 .withHearingEventId(randomUUID())
@@ -714,7 +710,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldIgnoreLogHearingEventGivenAPreviousEventId() {
+    void shouldIgnoreLogHearingEventGivenAPreviousEventId() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -753,7 +749,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldIgnoreLogHearingEventGivenHearingIsBoxHearing() {
+    void shouldIgnoreLogHearingEventGivenHearingIsBoxHearing() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithIsBoxHearing(true);
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
@@ -788,7 +784,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldAmendHearing() {
+    void shouldAmendHearing() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAmendCommand hearingAmendCommand = new HearingAmendCommand(randomUUID(),SHARED_AMEND_LOCKED_ADMIN_ERROR);
@@ -801,7 +797,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldLoglogHearingEvent() {
+    void shouldLoglogHearingEvent() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -830,7 +826,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldLogHearingEvent() {
+    void shouldLogHearingEvent() {
 
         final UUID previousHearingEventId = randomUUID();
 
@@ -906,7 +902,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseStopCustodyTimeLimitEventAfterResultIsShared () {
+    void shouldRaiseStopCustodyTimeLimitEventAfterResultIsShared () {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -1024,7 +1020,7 @@ public class HearingAggregateTest {
 
 
     @Test
-    public void shouldNotRaiseStopCustodyTimeLimitEventWhenResultISNotShared () {
+    void shouldNotRaiseStopCustodyTimeLimitEventWhenResultISNotShared () {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -1084,14 +1080,13 @@ public class HearingAggregateTest {
         final Stream<Object> stream = hearingAggregate.stopCustodyTimeLimitClock(referenceResultIds, hearing);
 
         final List<Object> events = stream.collect(Collectors.toList());
-        assertThat(events.size(), Matchers.is(0));
-
-
+        checkHearingEventIgnored(events);
     }
 
 
+
     @Test
-    public void shouldNotRaiseCTLClockStoppedEventForNewtonHearing() {
+    void shouldNotRaiseCTLClockStoppedEventForNewtonHearing() {
 
         final UUID previousHearingEventId = randomUUID();
 
@@ -1122,7 +1117,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldIgnoreCorrectHearingEventGivenInvalidPreviousEventId() {
+    void shouldIgnoreCorrectHearingEventGivenInvalidPreviousEventId() {
 
         final UUID previousHearingEventId = randomUUID();
 
@@ -1166,7 +1161,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldIgnorelogHearingEventGivenEventHasBeenDeleted() {
+    void shouldIgnorelogHearingEventGivenEventHasBeenDeleted() {
 
         final UUID previousHearingEventId = randomUUID();
 
@@ -1244,7 +1239,7 @@ public class HearingAggregateTest {
 
 
     @Test
-    public void shouldHearingEventNotIgnoredGivenEventHasPreivouslyBeenDeleted() {
+    void shouldHearingEventNotIgnoredGivenEventHasPreivouslyBeenDeleted() {
 
         final UUID previousHearingEventId = randomUUID();
 
@@ -1317,7 +1312,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldUpdateDefendantDetailsNotIgnoreWhenResultShared() {
+    void shouldUpdateDefendantDetailsNotIgnoreWhenResultShared() {
 
         final int expected = 0;
 
@@ -1339,7 +1334,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldUpdateDefendantDetailsWhenResultNotShared() {
+    void shouldUpdateDefendantDetailsWhenResultNotShared() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -1367,7 +1362,7 @@ public class HearingAggregateTest {
 
 
     @Test
-    public void shouldUpdateHearingEvents() {
+    void shouldUpdateHearingEvents() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -1392,7 +1387,7 @@ public class HearingAggregateTest {
 
 
     @Test
-    public void shouldNotLogPauseHearingEventIfNoActiveHearingsReturned() {
+    void shouldNotLogPauseHearingEventIfNoActiveHearingsReturned() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -1422,7 +1417,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotRaiseEventWhenHearingResultHasAlreadyShared() {
+    void shouldNotRaiseEventWhenHearingResultHasAlreadyShared() {
 
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
@@ -1451,15 +1446,12 @@ public class HearingAggregateTest {
                 .build()
         );
 
-        final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing)
-                hearingAggregate.addOrUpdateCaseDefendantsForHearing(initiateHearingCommand.getHearing().getId(), ProsecutionCase.prosecutionCase().build())
-                        .findFirst()
-                        .orElse(null);
-        assertThat(caseDefendantsUpdatedForHearing, nullValue());
+        final Stream<Object> stream = hearingAggregate.addOrUpdateCaseDefendantsForHearing(initiateHearingCommand.getHearing().getId(), ProsecutionCase.prosecutionCase().build());
+        checkHearingEventIgnored(stream.toList());
     }
 
     @Test
-    public void shouldNotRaiseEventWhenHearingIsUnAllocated() {
+    void shouldNotRaiseEventWhenHearingIsUnAllocated() {
 
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
@@ -1473,17 +1465,14 @@ public class HearingAggregateTest {
 
         hearingAggregate.apply(new HearingUnallocated(asList(randomUUID()), asList(randomUUID()), asList(randomUUID()), hearing.getId()));
 
-        final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing)
-                hearingAggregate.addOrUpdateCaseDefendantsForHearing(initiateHearingCommand.getHearing().getId(), ProsecutionCase.prosecutionCase().build())
-                        .findFirst()
-                        .orElse(null);
-        assertThat(caseDefendantsUpdatedForHearing, nullValue());
+        final Stream<Object> stream = hearingAggregate.addOrUpdateCaseDefendantsForHearing(initiateHearingCommand.getHearing().getId(), ProsecutionCase.prosecutionCase().build());
+        checkHearingEventIgnored(stream.toList());
     }
 
 
 
     @Test
-    public void shouldRaiseEventWhenHearingResultHasNotAlreadyShared() {
+    void shouldRaiseEventWhenHearingResultHasNotAlreadyShared() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -1500,7 +1489,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseEventWhenNewDefendantAddedToHearing() {
+    void shouldRaiseEventWhenNewDefendantAddedToHearing() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -1557,7 +1546,7 @@ public class HearingAggregateTest {
 
 
     @Test
-    public void shouldAddDefenceCounselBeforeHearingEnded() {
+    void shouldAddDefenceCounselBeforeHearingEnded() {
         final LogEventCommand logEventCommand = LogEventCommand.builder()
                 .withHearingEventId(randomUUID())
                 .withHearingId(randomUUID())
@@ -1584,7 +1573,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotAllowedToAddDefenceCounsel_afterHearingEnded_forSPICases() {
+    void shouldNotAllowedToAddDefenceCounsel_afterHearingEnded_forSPICases() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
@@ -1621,7 +1610,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotAllowedToAddDefenceCounsel_afterHearingEnded_forSJPCases() {
+    void shouldNotAllowedToAddDefenceCounsel_afterHearingEnded_forSJPCases() {
         final InitiateHearingCommand initiateHearingCommand = initiateHearingTemplateForMagistrates();
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
@@ -1658,7 +1647,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldAddProsecutionCounselBeforeHearingEnded() {
+    void shouldAddProsecutionCounselBeforeHearingEnded() {
         final LogEventCommand logEventCommand = LogEventCommand.builder()
                 .withHearingEventId(randomUUID())
                 .withHearingId(randomUUID())
@@ -1695,7 +1684,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotAllowedToAddProsecutionCounsel_afterHearingEnded_forSPICases() {
+    void shouldNotAllowedToAddProsecutionCounsel_afterHearingEnded_forSPICases() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
@@ -1740,7 +1729,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotAllowedToAddProsecutionCounsel_afterHearingEnded_forSJPCases() {
+    void shouldNotAllowedToAddProsecutionCounsel_afterHearingEnded_forSJPCases() {
         final InitiateHearingCommand initiateHearingCommand = initiateHearingTemplateForMagistrates();
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
@@ -1785,7 +1774,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldBookProvisionalHearingSlots() {
+    void shouldBookProvisionalHearingSlots() {
         final UUID courtScheduleId1 = randomUUID();
         final UUID courtScheduleId2 = randomUUID();
         final List<ProvisionalHearingSlotInfo> provisionalHearingSlotInfos = asList(
@@ -1811,7 +1800,7 @@ public class HearingAggregateTest {
 
 
     @Test
-    public void shouldRaiseMultipleDraftResultsSavedWhenAllTargetsAreValidDefendantOffence() {
+    void shouldRaiseMultipleDraftResultsSavedWhenAllTargetsAreValidDefendantOffence() {
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
@@ -1841,7 +1830,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseMultipleDraftResultsSavedWhenAllTargetsAreValidApplication() {
+    void shouldRaiseMultipleDraftResultsSavedWhenAllTargetsAreValidApplication() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
@@ -1869,7 +1858,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseMultipleDraftResultsSavedWhenAllTargetsAreValidApplicationOffence() {
+    void shouldRaiseMultipleDraftResultsSavedWhenAllTargetsAreValidApplicationOffence() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final UUID targetId = randomUUID();
@@ -1898,7 +1887,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotRaiseMultipleDraftResultsSavedWhenAnyTargetIsNotValid() {
+    void shouldNotRaiseMultipleDraftResultsSavedWhenAnyTargetIsNotValid() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -1928,7 +1917,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotRaiseMultipleDraftResultsSavedWhenNotMatchedWithAnExistingTargetDefendantOffence() {
+    void shouldNotRaiseMultipleDraftResultsSavedWhenNotMatchedWithAnExistingTargetDefendantOffence() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final HearingAggregate hearingAggregate = new HearingAggregate();
@@ -1960,7 +1949,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotRaiseMultipleDraftResultsSavedWhenNotMatchedWithAnExistingTargetApplication() {
+    void shouldNotRaiseMultipleDraftResultsSavedWhenNotMatchedWithAnExistingTargetApplication() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final UUID targetId = randomUUID();
@@ -1988,7 +1977,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotRaiseMultipleDraftResultsSavedWhenNotMatchedWithAnExistingTargetApplicationOffence() {
+    void shouldNotRaiseMultipleDraftResultsSavedWhenNotMatchedWithAnExistingTargetApplicationOffence() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final UUID targetId = randomUUID();
@@ -2019,7 +2008,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotRaiseMultipleDraftResultsSavedWhenNewTargetIsNotValid() {
+    void shouldNotRaiseMultipleDraftResultsSavedWhenNewTargetIsNotValid() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final UUID targetId = randomUUID();
@@ -2043,7 +2032,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotRaiseMultipleDraftResultsSavedWhenAllTargetsAreNotValid() {
+    void shouldNotRaiseMultipleDraftResultsSavedWhenAllTargetsAreNotValid() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -2074,7 +2063,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseSaveDraftResultFailedWhenAnyTargetIsInvalid() {
+    void shouldRaiseSaveDraftResultFailedWhenAnyTargetIsInvalid() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final UUID targetId = randomUUID();
@@ -2100,7 +2089,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseSaveDraftResultFailedWhenDefenceOffenceIsAlreadyUsedInAnotherTarget() {
+    void shouldRaiseSaveDraftResultFailedWhenDefenceOffenceIsAlreadyUsedInAnotherTarget() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final HearingAggregate hearingAggregate = new HearingAggregate();
@@ -2131,7 +2120,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseSaveDraftResultFailedWhenApplicationOffenceIsAlreadyUsedInAnotherTarget() {
+    void shouldRaiseSaveDraftResultFailedWhenApplicationOffenceIsAlreadyUsedInAnotherTarget() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final HearingAggregate hearingAggregate = new HearingAggregate();
@@ -2163,7 +2152,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseSaveDraftResultFailedWhenApplicationIsAlreadyUsedInAnotherTarget() {
+    void shouldRaiseSaveDraftResultFailedWhenApplicationIsAlreadyUsedInAnotherTarget() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final UUID targetId = randomUUID();
@@ -2193,7 +2182,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotDeleteDraftResultWhenHearingIsNotLocked() {
+    void shouldNotDeleteDraftResultWhenHearingIsNotLocked() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
@@ -2209,7 +2198,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldDeleteDraftResultWhenHearingIsLocked() {
+    void shouldDeleteDraftResultWhenHearingIsLocked() {
         final UUID userId = randomUUID();
         final UUID hearingId = randomUUID();
         final LocalDate hearingDay = LocalDate.now();
@@ -2221,7 +2210,7 @@ public class HearingAggregateTest {
 
     }
     @Test
-    public void shouldCorrectHearingDaysWithoutCourtCentreIfNotAlreadySet() {
+    void shouldCorrectHearingDaysWithoutCourtCentreIfNotAlreadySet() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         initiateHearingCommand
@@ -2252,7 +2241,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseEventOnRequestApprovalRejectedCommand() {
+    void shouldRaiseEventOnRequestApprovalRejectedCommand() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
 
@@ -2278,7 +2267,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseEventOnRequestApprovalCommand() {
+    void shouldRaiseEventOnRequestApprovalCommand() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
 
@@ -2307,7 +2296,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseSaveDraftResultErrorWhenAllTargetsAreNotValid() {
+    void shouldRaiseSaveDraftResultErrorWhenAllTargetsAreNotValid() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final LocalDate hearingDay = initiateHearingCommand.getHearing().getHearingDays().stream()
                 .findFirst()
@@ -2357,7 +2346,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseEventOnValidateResultAmendmentsCommand() {
+    void shouldRaiseEventOnValidateResultAmendmentsCommand() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -2374,7 +2363,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseEventResultAmendmentsValidatedWithValidateActionApprove() {
+    void shouldRaiseEventResultAmendmentsValidatedWithValidateActionApprove() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -2393,7 +2382,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseEventResultAmendmentsRejectedV2WithValidateActionNotApprove() {
+    void shouldRaiseEventResultAmendmentsRejectedV2WithValidateActionNotApprove() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -2412,7 +2401,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseEventHearingDeleted() {
+    void shouldRaiseEventHearingDeleted() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
@@ -2433,7 +2422,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotRaiseEventHearingUnallocatedWhenAlreadyShared() {
+    void shouldNotRaiseEventHearingUnallocatedWhenAlreadyShared() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -2538,7 +2527,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotRaiseEventHearingDeletedWhenAlreadyShared() {
+    void shouldNotRaiseEventHearingDeletedWhenAlreadyShared() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -2643,7 +2632,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseHearingIgnoreEventforHearingDeletedIfNoHearingExist() {
+    void shouldRaiseHearingIgnoreEventforHearingDeletedIfNoHearingExist() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
 
@@ -2655,7 +2644,7 @@ public class HearingAggregateTest {
 
 
     @Test
-    public void shouldRaiseHearingIgnoreEventForNextHearingDateChangedIfNoHearingExist() {
+    void shouldRaiseHearingIgnoreEventForNextHearingDateChangedIfNoHearingExist() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
 
@@ -2668,7 +2657,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotRaiseEventHearingUnallocatedWhenHearingWasDeleted() {
+    void shouldNotRaiseEventHearingUnallocatedWhenHearingWasDeleted() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
@@ -2683,14 +2672,11 @@ public class HearingAggregateTest {
 
         final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearingId, Arrays.asList(offenceId)).collect(toList());
 
-        assertThat(eventStream.size(), is(1));
-        final HearingChangeIgnored  hearingChangeIgnored = (HearingChangeIgnored ) eventStream.get(0);
-        assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
-        assertThat(hearingChangeIgnored.getReason(), is("Ignoring 'unAllocateHearing' event as hearing not found"));
+       checkHearingEventIgnored(eventStream);
     }
 
     @Test
-    public void shouldRaiseEventHearingUnallocated() {
+    void shouldRaiseEventHearingUnallocated() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
@@ -2710,17 +2696,15 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseHearingIgnoredForHearingUnallocatedIfNoHearingExist() {
+    void shouldRaiseHearingIgnoredForHearingUnallocatedIfNoHearingExist() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearingId, Arrays.asList(randomUUID())).collect(toList());
-        assertThat(eventStream.size(), is(1));
-        final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) eventStream.get(0);
-        assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
+        checkHearingEventIgnored(eventStream);
     }
 
     @Test
-    public void shouldRestrictCourtList() {
+    void shouldRestrictCourtList() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
 
@@ -2748,7 +2732,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseHearingIgnoredForRestrictCourtListIfNoHearingExist() {
+    void shouldRaiseHearingIgnoredForRestrictCourtListIfNoHearingExist() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final List<UUID> caseIds = Arrays.asList(randomUUID(),  randomUUID());
@@ -2764,7 +2748,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseHearingIgnoredForRemoveOffencesFromExistingHearingIfNoHearingExist() {
+    void shouldRaiseHearingIgnoredForRemoveOffencesFromExistingHearingIfNoHearingExist() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
 
@@ -2778,7 +2762,7 @@ public class HearingAggregateTest {
 
 
     @Test
-    public void shouldRaiseHearingIgnoredForUpdateHearingVacateTrialDetailsIfNoHearingExist() {
+    void shouldRaiseHearingIgnoredForUpdateHearingVacateTrialDetailsIfNoHearingExist() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
 
@@ -2791,7 +2775,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseHearingIgnoredForUpdateExistingHearingIfNoHearingExist() {
+    void shouldRaiseHearingIgnoredForUpdateExistingHearingIfNoHearingExist() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final List<UUID> shadowListedOffences = Arrays.asList(randomUUID(),  randomUUID());
@@ -2804,7 +2788,7 @@ public class HearingAggregateTest {
 
     }
     @Test
-    public void shouldRaiseOffencesRemovedFromExistingHearingWhenNotAllOffencesPassedForHearing() {
+    void shouldRaiseOffencesRemovedFromExistingHearingWhenNotAllOffencesPassedForHearing() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -2835,7 +2819,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseHearingDeletedWhenAllOffencesPassedForHearing() {
+    void shouldRaiseHearingDeletedWhenAllOffencesPassedForHearing() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -2872,7 +2856,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldCheckOffencesOfHearingWhenOneofItisDeletedInOffencesRemovedFromHearing() {
+    void shouldCheckOffencesOfHearingWhenOneofItisDeletedInOffencesRemovedFromHearing() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
         final UUID offence2Id = randomUUID();
@@ -2933,7 +2917,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturShareResultsFailedWhenNewHearingStateIsInitialisedAndResultsAlreadyShared() {
+    void shouldReturShareResultsFailedWhenNewHearingStateIsInitialisedAndResultsAlreadyShared() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
         final UUID offence2Id = randomUUID();
@@ -2989,7 +2973,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldShareResultsForDay() {
+    void shouldShareResultsForDay() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
         final UUID offence2Id = randomUUID();
@@ -3054,7 +3038,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotRaiseVerdictInheritedEventWhenHearingResultIsShared() {
+    void shouldNotRaiseVerdictInheritedEventWhenHearingResultIsShared() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
         final UUID offence2Id = randomUUID();
@@ -3135,7 +3119,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseVerdictInheritedEventWhenHearingResultIsNotShared() {
+    void shouldRaiseVerdictInheritedEventWhenHearingResultIsNotShared() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
         final UUID offence2Id = randomUUID();
@@ -3178,7 +3162,7 @@ public class HearingAggregateTest {
 
 
     @Test
-    public void shouldReturShareResultsFailedForDayWhenNewHearingStateIsInitialisedAndResultsAlreadyShared() {
+    void shouldReturShareResultsFailedForDayWhenNewHearingStateIsInitialisedAndResultsAlreadyShared() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
         final UUID offence2Id = randomUUID();
@@ -3241,8 +3225,9 @@ public class HearingAggregateTest {
         assertEquals(hearing.getId(), resultsShared.getHearingId());
 
     }
+
     @Test
-    public void shouldRaiseResultsSharedV3EventWhenSharedResultLinesHaveOffencesNotSharedPreviouslyForAHearingDay() {
+    void shouldRaiseResultsSharedV3EventWhenSharedResultLinesHaveOffencesNotSharedPreviouslyForAHearingDay() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
         final LocalDate hearingDay = hearing.getHearingDays().get(0).getSittingDay().toLocalDate();
@@ -3295,7 +3280,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseHearingIgnoredForAddOffenceIfNoHearingExist() {
+    void shouldRaiseHearingIgnoredForAddOffenceIfNoHearingExist() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
 
@@ -3308,7 +3293,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldIgnoreHearingEventForAddOffenceIfNoHearingExist() {
+    void shouldIgnoreHearingEventForAddOffenceIfNoHearingExist() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
@@ -3319,12 +3304,11 @@ public class HearingAggregateTest {
 
         final Stream<Object> stream = hearingAggregate.addOffence(hearingId, randomUUID(), randomUUID(), Offence.offence().build());
         final List<Object> objectList = stream.collect(Collectors.toList());
-        assertThat(objectList, hasSize(0));
-
+        checkHearingEventIgnored(objectList);
     }
 
     @Test
-    public void shouldRaiseHearingIgnoredForAddOffenceIfNoHearingExistV2() {
+    void shouldRaiseHearingIgnoredForAddOffenceIfNoHearingExistV2() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
 
@@ -3337,7 +3321,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldIgnoreHearingEventForAddOffenceIfNoHearingExistV2() {
+    void shouldIgnoreHearingEventForAddOffenceIfNoHearingExistV2() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
@@ -3348,12 +3332,12 @@ public class HearingAggregateTest {
 
         final Stream<Object> stream = hearingAggregate.addOffenceV2(hearingId, randomUUID(), randomUUID(), singletonList(Offence.offence().build()));
         final List<Object> objectList = stream.collect(Collectors.toList());
-        assertThat(objectList, hasSize(0));
+        checkHearingEventIgnored(objectList);
 
     }
 
     @Test
-    public void updateHearingWithIndicatedPlea() {
+    void updateHearingWithIndicatedPlea() {
 
         final UUID hearingId = randomUUID();
         final IndicatedPlea indicatedPlea = IndicatedPlea.indicatedPlea()
@@ -3367,7 +3351,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRemoveProsecutionCounselSuccessfully(){
+    void shouldRemoveProsecutionCounselSuccessfully(){
         UUID hearingId = randomUUID();
         UUID prosecutionCounselId = randomUUID();
         final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
@@ -3391,6 +3375,7 @@ public class HearingAggregateTest {
         final List<Object> objectList = objectStream.collect(Collectors.toList());
         assertThat(objectList.size(), is(1));
     }
+
 
 
     @Test
@@ -3429,7 +3414,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldUpdateProsecutionCounsel(){
+    void shouldUpdateProsecutionCounsel(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
@@ -3448,7 +3433,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRemoveDefenceCounselSuccessfully(){
+    void shouldRemoveDefenceCounselSuccessfully(){
         // Arrange
         UUID hearingId = randomUUID();
         UUID defenceCounselId = randomUUID();
@@ -3579,7 +3564,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldUpdateDefenceCounsel(){
+    void shouldUpdateDefenceCounsel(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(), new ArrayList<>(),
@@ -3590,7 +3575,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldExtend(){
+    void shouldExtend(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final Stream<Object> objectStream = hearingAggregate.extend(hearingId, Collections.emptyList(), null, null, null, Collections.emptyList(), Collections.emptyList());
@@ -3599,7 +3584,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRejectUpdateHearingDetailsWhenHearingNotFound(){
+    void shouldRejectUpdateHearingDetailsWhenHearingNotFound(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
 
@@ -3611,7 +3596,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturnResultAmendmentsCancelledV2WhenResetHearingIsTrue(){
+    void shouldReturnResultAmendmentsCancelledV2WhenResetHearingIsTrue(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final UUID userId = randomUUID();
@@ -3639,7 +3624,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturnResultAmendmentsCancelledV2WhenItIsSameUserWhoIsAmendingSharedHearing(){
+    void shouldReturnResultAmendmentsCancelledV2WhenItIsSameUserWhoIsAmendingSharedHearing(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final UUID userId = randomUUID();
@@ -3669,7 +3654,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldUnlockHearing(){
+    void shouldUnlockHearing(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final UUID userId = randomUUID();
@@ -3706,7 +3691,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturnHearingLockedByOtherUserWhenSavingDraftResults() {
+    void shouldReturnHearingLockedByOtherUserWhenSavingDraftResults() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -3736,7 +3721,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturnHearingLockedWhenSavingDraftResults() {
+    void shouldReturnHearingLockedWhenSavingDraftResults() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -3766,7 +3751,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturnHearingLockedWhenSavingDraftResultsV2WithHearingStateApprovalRequested() {
+    void shouldReturnHearingLockedWhenSavingDraftResultsV2WithHearingStateApprovalRequested() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -3782,7 +3767,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturnHearingLockedByOtherUserWhenSavingDraftResultsV2WithIsSharedHearingBeingAmended() {
+    void shouldReturnHearingLockedByOtherUserWhenSavingDraftResultsV2WithIsSharedHearingBeingAmended() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -3799,7 +3784,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturnDraftResultSavedV2WhenSavingDraftResultsV2() {
+    void shouldReturnDraftResultSavedV2WhenSavingDraftResultsV2() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -3814,7 +3799,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturnHearingLockedWhenSaveDraftResultForHearingDay() {
+    void shouldReturnHearingLockedWhenSaveDraftResultForHearingDay() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -3837,7 +3822,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturnHearingLockedByOtherUserWhenSaveDraftResultForHearingDay() {
+    void shouldReturnHearingLockedByOtherUserWhenSaveDraftResultForHearingDay() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -3861,7 +3846,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldSetTrialType(){
+    void shouldSetTrialType(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final Stream<Object> objectStream = hearingAggregate.setTrialType(new HearingEffectiveTrial(hearingId, false));
@@ -3871,16 +3856,16 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturnEmptyStreamWhenHearingStateIsShared(){
+    void shouldReturnEmptyStreamWhenHearingStateIsShared(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         ReflectionUtil.setField(hearingAggregate, "hearingState", SHARED);
         final Stream<Object> objectStream = hearingAggregate.updateApplicationDefendantsForHearing(hearingId, null);
-        assertThat(objectStream.collect(toList()).size(), is(0));
+        checkHearingEventIgnored(objectStream.toList());
     }
 
     @Test
-    public void shouldCancelHearingDays(){
+    void shouldCancelHearingDays(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         ReflectionUtil.setField(hearingAggregate, "hearingState", SHARED);
@@ -3907,7 +3892,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturnEventReusableInfoSaved(){
+    void shouldReturnEventReusableInfoSaved(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final Stream<Object> objectStream = hearingAggregate.saveReusableInfo(hearingId, Collections.emptyList(), Collections.emptyList());
@@ -3915,7 +3900,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturnEventDefendantsInYouthCourtUpdated(){
+    void shouldReturnEventDefendantsInYouthCourtUpdated(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         HearingAggregateMomento hearingAggregateMomento = mock(HearingAggregateMomento.class);
@@ -3926,7 +3911,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldReturnEventWitnessAddedToHearing(){
+    void shouldReturnEventWitnessAddedToHearing(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         HearingAggregateMomento hearingAggregateMomento = mock(HearingAggregateMomento.class);
@@ -3939,7 +3924,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void ShouldRemoveDefenceCounselsOnOffencesRemovedFromExistingHearing() {
+    void ShouldRemoveDefenceCounselsOnOffencesRemovedFromExistingHearing() {
         UUID prosecutionCaseId = randomUUID();
         UUID defendantId1 = randomUUID();
         UUID defendantId2 = randomUUID();
@@ -3989,7 +3974,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void ShouldRemoveDefendantFromDefenceCounselsOnOffencesRemovedFromExistingHearing() {
+    void ShouldRemoveDefendantFromDefenceCounselsOnOffencesRemovedFromExistingHearing() {
         UUID prosecutionCaseId = randomUUID();
         UUID defendantId1 = randomUUID();
         UUID defendantId2 = randomUUID();
@@ -4043,7 +4028,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void ShouldOffencesRemovedFromExistingHearingWithNoDefenceCounsels() {
+    void ShouldOffencesRemovedFromExistingHearingWithNoDefenceCounsels() {
         UUID prosecutionCaseId = randomUUID();
         UUID defendantId1 = randomUUID();
         UUID defendantId2 = randomUUID();
@@ -4079,7 +4064,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotRaiseEventAddDefenceCounsel_WhenDefendantIsNotOnHearing() {
+    void shouldNotRaiseEventAddDefenceCounsel_WhenDefendantIsNotOnHearing() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
@@ -4164,5 +4149,15 @@ public class HearingAggregateTest {
     {
         var dateString = datetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
         return ZonedDateTime.ofInstant(ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME).toInstant(), ZoneId.of("UTC"));
+    }
+
+    private static void setAsDeletedAndDuplicate(final HearingAggregate hearingAggregate) {
+        final HearingAggregateMomento momento = ReflectionUtil.getValueOfField(hearingAggregate, "momento", HearingAggregateMomento.class);
+        momento.setDuplicate(true);
+        momento.setDeleted(true);
+    }
+
+    private static void checkHearingEventIgnored(final List<Object> events) {
+        assertThat(events, is(empty()));
     }
 }
