@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.event;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Collections.singletonList;
-import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
@@ -18,6 +17,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.CourtOrder.courtOrder;
 import static uk.gov.justice.core.courts.CourtOrderOffence.courtOrderOffence;
 import static uk.gov.justice.core.courts.Offence.offence;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
