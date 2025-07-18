@@ -162,6 +162,15 @@ rule "Command - API - Action - hearing.amend"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.amend-for-support"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.amend-for-support");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Second Line Support"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Command - API - Action - hearing.share-days-results"
   when
     $outcome: Outcome();

@@ -6,6 +6,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
@@ -193,6 +194,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -203,6 +205,7 @@ import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 
 import org.slf4j.Logger;
@@ -211,13 +214,16 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize", "squid:CommentedOutCodeLine","squid:CallToDeprecatedMethod"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = -6059812881894748587L;
+    private static final long serialVersionUID = -6059812881894748590L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingAggregate.class);
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
     private static final List<HearingState> HEARING_STATES_SHARE_NOT_ALLOWED = asList(SHARED_AMEND_LOCKED_ADMIN_ERROR, SHARED_AMEND_LOCKED_USER_ERROR, APPROVAL_REQUESTED);
     public static final String SHARE_RESULTS_NOT_PERMITTED_ALL_THE_TARGETS_ALREADY_SHARED_FOR_THE_HEARING_DAY_S = "Share results not permitted! all the targets already shared for the hearingDay %s";
+    private static final String APPLICATION_ID = "applicationId";
+    private static final String OFFENCE_ID = "offenceId";
+    private static final String RESULT_LINES = "resultLines";
     private final HearingAggregateMomento momento = new HearingAggregateMomento();
 
     private final HearingDelegate hearingDelegate = new HearingDelegate(momento);
@@ -266,6 +272,7 @@ public class HearingAggregate implements Aggregate {
     private Boolean isMultiDayHearing;
     private Map<LocalDate, Set<UUID>> hearingDaySharedOffencesMap = new HashMap<>();
     private Map<LocalDate, Set<UUID>> hearingDaySharedApplicationsMap = new HashMap<>();
+    private Set<UUID> offencesSavedAsDraft = new HashSet<>();
     private static final String HEARING_STATE_STR = "Hearing is in %s state";
     @Override
     public Object apply(final Object event) {
@@ -304,6 +311,7 @@ public class HearingAggregate implements Aggregate {
                             this.hearingState = SHARED;
                             resultsSharedDelegate.handleResultsSharedV3(e);
                             defendantDelegate.clearDefendantDetailsChanged();
+                            amendedResultHearingDayVersionMap.put(e.getHearingDay(), e.getVersion());
                             updateSharedOffencesByHearingDay(e.getHearingDay(), e.getTargets());
                             updateSharedApplicationsByHearingDay(e.getHearingDay(), e.getTargets());
                         }
@@ -331,7 +339,7 @@ public class HearingAggregate implements Aggregate {
                 when(DraftResultSavedV2.class).apply(draftResultSaved -> {
                             this.amendingSharedHearingUserId = draftResultSaved.getAmendedByUserId();
                             this.amendedResultHearingDayVersionMap.put(draftResultSaved.getHearingDay(), draftResultSaved.getAmendedResultVersion());
-
+                            this.offencesSavedAsDraft.addAll(getOffenceIdList(draftResultSaved.getDraftResult()));
                     }
                 ),
                 when(DefendantAttendanceUpdated.class).apply(defendantDelegate::handleDefendantAttendanceUpdated),
@@ -415,6 +423,19 @@ public class HearingAggregate implements Aggregate {
         );
 
     }
+
+    private Set<UUID> getOffenceIdList(final JsonObject draftResultJson) {
+        if (nonNull(draftResultJson) && draftResultJson.containsKey(RESULT_LINES)
+                && draftResultJson.get(RESULT_LINES) instanceof JsonArray) {
+            return draftResultJson.getJsonArray(RESULT_LINES).stream()
+                    .map(jsonValue -> (JsonObject) jsonValue)
+                    .map(resultLineJson -> fromString(resultLineJson.getString(OFFENCE_ID)))
+                    .collect(Collectors.toSet());
+        }
+
+        return Set.of();
+    }
+
     @SuppressWarnings("squid:S1172")
     private void handleBreachApplicationsAdded(final HearingBreachApplicationsAdded hearingBreachApplicationsAdded) {
         this.momento.setBreachApplicationsToBeAdded(null);
@@ -702,7 +723,7 @@ public class HearingAggregate implements Aggregate {
                     hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
         }
 
-        return apply(resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, this.defendantDelegate.getDefendantDetailsChanged(), youthCourt, hearingDay));
+        return apply(resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, this.defendantDelegate.getDefendantDetailsChanged(), youthCourt, hearingDay, version));
     }
 
     private boolean isResultVersionMismatch(final LocalDate hearingDay, final Integer version) {
@@ -722,6 +743,26 @@ public class HearingAggregate implements Aggregate {
             final Set<UUID> sharedOffenceIdSet = hearingDaySharedOffencesMap.get(hearingDay);
             return nonNull(sharedOffenceIdSet) && resultLines.stream()
                     .allMatch(rl -> sharedOffenceIdSet.contains(rl.getOffenceId()));
+        }
+        return false;
+    }
+
+    private boolean hasAllTargetsShared(final LocalDate hearingDay, final Map<UUID, JsonObject> resultLines) {
+
+        final Set<UUID> saveDraftResultsRequestOffenceSet = resultLines.values().stream().map(rl -> fromString(rl.getString(OFFENCE_ID))).collect(Collectors.toSet());
+        final boolean isApplicationResultType = resultLines.values().stream().allMatch(rl -> rl.containsKey(APPLICATION_ID));
+        if (isApplicationResultType) {
+            final Set<UUID> sharedApplicationIdSet = hearingDaySharedApplicationsMap.get(hearingDay);
+            return nonNull(sharedApplicationIdSet)
+                    && resultLines.values().stream().allMatch(rl -> sharedApplicationIdSet.contains(fromString(rl.getString(APPLICATION_ID))))
+                    && saveDraftResultsRequestOffenceSet.equals(offencesSavedAsDraft);
+        }
+        final boolean isCaseResultType = resultLines.values().stream().allMatch(rl -> rl.containsKey(OFFENCE_ID));
+        if (isCaseResultType) {
+            final Set<UUID> sharedOffenceIdSet = hearingDaySharedOffencesMap.get(hearingDay);
+            return nonNull(sharedOffenceIdSet)
+                    && resultLines.values().stream().allMatch(rl -> sharedOffenceIdSet.contains(fromString(rl.getString(OFFENCE_ID))))
+                    && saveDraftResultsRequestOffenceSet.equals(offencesSavedAsDraft);
         }
         return false;
     }
@@ -841,7 +882,8 @@ public class HearingAggregate implements Aggregate {
         return apply(resultsSharedDelegate.rejectSaveDraftResult(targetForEvent));
     }
 
-    public Stream<Object> saveDraftResultV2(final UUID userId, final JsonObject draftResult, final UUID hearingId, final LocalDate hearingDay, final Integer version) {
+    public Stream<Object> saveDraftResultV2(final UUID userId, final JsonObject draftResult, final UUID hearingId, final LocalDate hearingDay,
+                                            final Integer version, final Map<UUID, JsonObject> resultLines, final Boolean isResetResults) {
         if (isNotAValidVersion(hearingDay, version)) {
             return apply(resultsSharedDelegate.manageResultsFailed(hearingId, this.hearingState, VERSION_OFF_SEQUENCE.toError(String.format("Save draft results failed for version: %s, lastUpdatedVersion: %s", version, this.amendedResultHearingDayVersionMap.get(hearingDay))),
                     hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
@@ -850,6 +892,13 @@ public class HearingAggregate implements Aggregate {
         if ((VALIDATED.equals(this.hearingState) && isSameUserWhoIsAmendingSharedHearing(userId))
                 || APPROVAL_REQUESTED.equals(this.hearingState)) {
             return apply(resultsSharedDelegate.manageResultsFailed(hearingId, this.hearingState, SAVE_RESULTS_NOT_PERMITTED.toError(String.format("Save results not permitted! Hearing is in %s state", this.hearingState)),
+                    hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
+        }
+
+        final boolean isNotResetDraftResultsRequest = isNull(isResetResults) || Boolean.FALSE.equals(isResetResults);
+        if (isNotResetDraftResultsRequest && SHARED.equals(this.hearingState) && hasAllTargetsShared(hearingDay, resultLines)) {
+            return apply(resultsSharedDelegate.manageResultsFailed(hearingId, this.hearingState,
+                    SAVE_RESULTS_NOT_PERMITTED.toError(String.format("Save draft results not permitted! all the targets shared for the hearingDay %s and Hearing is in %s state", hearingDay, this.hearingState)),
                     hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
         }
 
@@ -876,13 +925,40 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> amendHearing(final UUID hearingId, final UUID userId, final HearingState newHearingState) {
 
+        if (isHearingBeingAmended() && nonNull(amendingSharedHearingUserId) && !amendingSharedHearingUserId.equals(userId)) {
+            //when hearingState already amend_locked, then user trying to acquire the lock must be same user who already has the lock
+            //raise error event will ensure lock is intact
+            return apply(resultsSharedDelegate.manageResultsFailed(hearingId, this.hearingState,
+                    HEARING_LOCKED.toError(String.format("Amend results not permitted! Hearing locked by different user %s", this.amendingSharedHearingUserId)),
+                    userId, this.amendingSharedHearingUserId));
+        }
+
+        if (VALIDATED.equals(this.hearingState) || APPROVAL_REQUESTED.equals(this.hearingState)) {
+            return apply(resultsSharedDelegate.manageResultsFailed(hearingId, this.hearingState,
+                    HEARING_LOCKED.toError(String.format("Amend results not permitted! Hearing is in %s state", this.hearingState)),
+                    userId, this.amendingSharedHearingUserId));
+        }
+
         if (SHARED_AMEND_LOCKED_ADMIN_ERROR.equals(newHearingState) || SHARED_AMEND_LOCKED_USER_ERROR.equals(newHearingState)) {
             return apply(resultsSharedDelegate.amendHearing(hearingId, userId, newHearingState));
-
         }
-        return null;
+
+        return Stream.empty();
     }
 
+    public Stream<Object> amendHearingSupport(final UUID hearingId, final UUID userId, final HearingState newHearingState) {
+
+        if (SHARED_AMEND_LOCKED_ADMIN_ERROR.equals(newHearingState) || SHARED_AMEND_LOCKED_USER_ERROR.equals(newHearingState)) {
+            return apply(resultsSharedDelegate.amendHearing(hearingId, userId, newHearingState));
+        }
+
+        return Stream.empty();
+    }
+
+    private boolean isHearingBeingAmended() {
+        return SHARED_AMEND_LOCKED_ADMIN_ERROR == hearingState
+                || SHARED_AMEND_LOCKED_USER_ERROR == hearingState;
+    }
 
     @SuppressWarnings("squid:S3358")
     private HearingState getHearingState(final List<String> hearingStates) {

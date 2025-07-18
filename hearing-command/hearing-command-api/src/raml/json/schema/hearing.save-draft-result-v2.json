@@ -38,6 +38,9 @@
     "version": {
       "type": "integer"
     },
+    "isResetResults": {
+      "type": "boolean"
+    },
     "__metadata__": {
       "type": "object"
     }

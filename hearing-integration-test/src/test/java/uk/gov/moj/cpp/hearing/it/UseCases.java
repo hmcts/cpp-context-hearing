@@ -9,7 +9,6 @@ import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.hearing.courts.referencedata.EnforcementAreaBacs.enforcementAreaBacs;
 import static uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit.organisationalUnit;
@@ -123,6 +122,7 @@ import javax.json.JsonObjectBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.specification.RequestSpecification;
+import org.apache.http.HttpStatus;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.json.JSONObject;
@@ -457,6 +457,26 @@ public class UseCases {
                 .withArgs(hearingId)
                 .withPayload(json.toString())
                 .executeSuccessfully();
+
+        return true;
+    }
+
+    public static boolean amendHearingSupport(final RequestSpecification requestSpec, final UUID hearingId,
+                                              final HearingState newHearingState, int httpStatusCode) {
+        JSONObject json = new JSONObject();
+        json.put("hearingId", hearingId);
+        json.put("newHearingState", newHearingState.toString());
+
+        final Utilities.CommandBuilder commandBuilder = makeCommand(requestSpec, "hearing.amend-for-support")
+                .ofType("application/vnd.hearing.amend-for-support+json")
+                .withArgs(hearingId)
+                .withPayload(json.toString());
+
+        if (httpStatusCode == HttpStatus.SC_FORBIDDEN) {
+            commandBuilder.executeForbidden();
+        } else {
+            commandBuilder.executeSuccessfully();
+        }
 
         return true;
     }
@@ -972,7 +992,7 @@ public class UseCases {
 
     }
 
-    public static void sendPublicApplicationOffencesUpdatedMessage(final JsonObject laaReference, final String applicationId, final  String subjectId, final String offenceId) throws Exception {
+    public static void sendPublicApplicationOffencesUpdatedMessage(final JsonObject laaReference, final String applicationId, final String subjectId, final String offenceId) throws Exception {
 
         final String eventName = "public.progression.application-offences-updated";
 
@@ -989,7 +1009,7 @@ public class UseCases {
 
     }
 
-    public static void sendPublicApplicationOrganisationUpdatedMessage(final JsonObject associatedOrganisation, final String applicationId, final  String subjectId) throws Exception {
+    public static void sendPublicApplicationOrganisationUpdatedMessage(final JsonObject associatedOrganisation, final String applicationId, final String subjectId) throws Exception {
 
         final String eventName = "public.progression.application-organisation-changed";
 

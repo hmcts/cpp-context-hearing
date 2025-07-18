@@ -26,6 +26,7 @@ import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_ADM
 import static uk.gov.moj.cpp.hearing.it.MatcherUtil.getPastDate;
 import static uk.gov.moj.cpp.hearing.it.Queries.pollForHearingEvents;
 import static uk.gov.moj.cpp.hearing.it.UseCases.amendHearing;
+import static uk.gov.moj.cpp.hearing.it.UseCases.amendHearingSupport;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
 import static uk.gov.moj.cpp.hearing.it.UseCases.getReference;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
@@ -35,6 +36,7 @@ import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.findEventDefinitionWithActionLabel;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsAGivenGroup;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.FileUtil.getPayload;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
@@ -336,11 +338,45 @@ public class HearingEventsIT extends AbstractIT {
                         status().is(OK),
                         print(),
                         payload().isJson(allOf(
-                                withJsonPath("$.hearingState", is(SHARED_AMEND_LOCKED_ADMIN_ERROR.toString())
-
-                                )))
+                                withJsonPath("$.hearingState", is(SHARED_AMEND_LOCKED_ADMIN_ERROR.toString()))))
                 );
+    }
 
+    @Test
+    public void givenHearing_whenAmendByUserNotInSecondLineSupportUsersGroup_isForbidden() {
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
+        assertThat(hearingEventDefinition.isAlterable(), is(false));
+
+        amendHearingSupport(getRequestSpec(), hearingOne.getHearingId(), SHARED_AMEND_LOCKED_ADMIN_ERROR, HttpStatus.SC_FORBIDDEN);
+    }
+
+    @Test
+    public void givenHearing_whenAmendByUserInSecondLineSupportUsersGroup_isSuccessful() {
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
+        assertThat(hearingEventDefinition.isAlterable(), is(false));
+
+        UUID userIdSecondLineSupport = randomUUID();
+        givenAUserHasLoggedInAsAGivenGroup(userIdSecondLineSupport, "Second Line Support");
+
+        amendHearingSupport(getRequestSpec(), hearingOne.getHearingId(), SHARED_AMEND_LOCKED_ADMIN_ERROR, HttpStatus.SC_OK);
+
+        UUID userId = randomUUID();
+        setupAsAuthorisedUser(userId);
+        poll(requestParams(getURL("hearing.get-hearing", hearingOne.getHearingId(), EVENT_TIME.toLocalDate()),
+                "application/vnd.hearing.get.hearing+json").withHeader(USER_ID, userId))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingState", is(SHARED_AMEND_LOCKED_ADMIN_ERROR.toString()))))
+                );
     }
 
     @Test

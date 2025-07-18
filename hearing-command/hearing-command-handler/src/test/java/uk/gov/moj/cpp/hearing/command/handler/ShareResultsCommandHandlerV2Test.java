@@ -388,6 +388,7 @@ public class ShareResultsCommandHandlerV2Test {
             apply(Stream.of(initialDraftResultSavedV2));
             apply(Stream.of(resultsSharedV3));
             apply(Stream.of(hearingAmended));
+            apply(Stream.of(new DraftResultSavedV2(hearingId, hearingDay, someJsonObject, userId, 1)));
         }};
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
 

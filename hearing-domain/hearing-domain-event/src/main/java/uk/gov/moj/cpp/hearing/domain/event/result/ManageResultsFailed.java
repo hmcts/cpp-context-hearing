@@ -21,9 +21,9 @@ public class ManageResultsFailed implements Serializable {
     private final UUID hearingId;
     private final HearingState hearingState;
     private final ResultsError resultsError;
-    private final LocalDate hearingDay;
+    private LocalDate hearingDay;
     private final UUID lastUpdatedByUserId;
-    private final Integer lastUpdatedVersion;
+    private Integer lastUpdatedVersion;
     private final UUID userId;
     private Integer version;
 
@@ -47,6 +47,15 @@ public class ManageResultsFailed implements Serializable {
         this.resultsError = resultsError;
         this.hearingDay = hearingDay;
         this.lastUpdatedVersion = amendedResultVersion;
+        this.lastUpdatedByUserId = amendedByUserId;
+        this.userId = userId;
+    }
+
+    public ManageResultsFailed(final UUID hearingId, final HearingState hearingState, final ResultsError resultsError,
+                               final UUID amendedByUserId, final UUID userId) {
+        this.hearingId = hearingId;
+        this.hearingState = hearingState;
+        this.resultsError = resultsError;
         this.lastUpdatedByUserId = amendedByUserId;
         this.userId = userId;
     }

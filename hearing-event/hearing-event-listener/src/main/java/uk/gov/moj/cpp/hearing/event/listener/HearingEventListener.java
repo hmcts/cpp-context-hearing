@@ -389,6 +389,9 @@ public class HearingEventListener {
         if (nonNull(draftResult) && nonNull(draftResult.getDraftResultPayload())) {
             final JsonNode metadataNode = draftResult.getDraftResultPayload().get("__metadata__");
             ((ObjectNode) metadataNode).put("lastSharedTime", ZonedDateTimes.toString(resultsShared.getSharedTime()));
+            if (nonNull(resultsShared.getVersion())){
+                ((ObjectNode) draftResult.getDraftResultPayload()).put("version", resultsShared.getVersion());
+            }
             draftResultRepository.save(draftResult);
         }
     }

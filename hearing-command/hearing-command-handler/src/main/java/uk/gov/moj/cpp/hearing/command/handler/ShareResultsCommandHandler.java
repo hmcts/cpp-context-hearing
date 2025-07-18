@@ -72,7 +72,8 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
         if (draftResult != null && userId.isPresent() && saveDraftResultV2.getHearingId() != null) {
             aggregate(HearingAggregate.class, saveDraftResultV2.getHearingId(), envelope,
-                    aggregate -> aggregate.saveDraftResultV2(fromString(userId.get()), draftResult, saveDraftResultV2.getHearingId(), saveDraftResultV2.getHearingDay(), saveDraftResultV2.getVersion()));
+                    aggregate -> aggregate.saveDraftResultV2(fromString(userId.get()), draftResult, saveDraftResultV2.getHearingId(),
+                            saveDraftResultV2.getHearingDay(), saveDraftResultV2.getVersion(), saveDraftResultV2.getResultLines(), saveDraftResultV2.getIsResetResults()));
         }
     }
 

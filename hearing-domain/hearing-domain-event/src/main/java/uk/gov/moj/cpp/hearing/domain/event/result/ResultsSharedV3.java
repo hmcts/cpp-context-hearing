@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Event("hearing.events.results-shared-v3")
 public class ResultsSharedV3 implements Serializable {
 
-    private static final long serialVersionUID = -7078961436932712740L;
+    private static final long serialVersionUID = -7078961436932712741L;
 
     private UUID hearingId;
 
@@ -51,6 +51,7 @@ public class ResultsSharedV3 implements Serializable {
     private List<NewAmendmentResult> newAmendmentResults;
 
     private LocalDate hearingDay;
+    private Integer version;
 
     public ResultsSharedV3() {
     }
@@ -67,7 +68,8 @@ public class ResultsSharedV3 implements Serializable {
                             @JsonProperty("defendantDetailsChanged") final List<UUID> defendantDetailsChanged,
                             @JsonProperty("isReshare") final Boolean isReshare,
                             @JsonProperty("newAmendmentResults") final List<NewAmendmentResult> newAmendmentResults,
-                            @JsonProperty("hearingDay") final LocalDate hearingDay) {
+                            @JsonProperty("hearingDay") final LocalDate hearingDay,
+                            @JsonProperty("version") final Integer version) {
         this.hearingId = hearingId;
         this.sharedTime = sharedTime;
         this.courtClerk = courtClerk;
@@ -80,6 +82,7 @@ public class ResultsSharedV3 implements Serializable {
         this.isReshare = isReshare;
         this.newAmendmentResults = newAmendmentResults;
         this.hearingDay = hearingDay;
+        this.version = version;
     }
 
     public static Builder builder() {
@@ -146,6 +149,10 @@ public class ResultsSharedV3 implements Serializable {
         return hearingDay;
     }
 
+    public Integer getVersion() {
+        return version;
+    }
+
     @SuppressWarnings("PMD:BeanMembersShouldSerialize")
     public static final class Builder {
 
@@ -172,6 +179,8 @@ public class ResultsSharedV3 implements Serializable {
         private List<NewAmendmentResult> newAmendmentResults;
 
         private LocalDate hearingDay;
+
+        private Integer version;
 
         public Builder withHearingId(final UUID hearingId) {
             this.hearingId = hearingId;
@@ -235,6 +244,11 @@ public class ResultsSharedV3 implements Serializable {
             return this;
         }
 
+        public Builder withVersion(final Integer version) {
+            this.version = version;
+            return this;
+        }
+
         public ResultsSharedV3 build() {
             return new ResultsSharedV3(
                     hearingId,
@@ -248,7 +262,7 @@ public class ResultsSharedV3 implements Serializable {
                     defendantDetailsChanged,
                     isReshare,
                     newAmendmentResults,
-                    hearingDay);
+                    hearingDay, version);
         }
     }
 }

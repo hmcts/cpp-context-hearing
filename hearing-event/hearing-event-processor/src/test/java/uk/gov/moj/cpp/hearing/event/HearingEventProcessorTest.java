@@ -9,6 +9,7 @@ import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -28,6 +29,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.INITIALISED;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
 import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.VERSION_MISMATCH;
 import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_DRAFT_RESULT_DELETED_V2;
 import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_DRAFT_RESULT_SAVED;
@@ -374,6 +376,45 @@ public class HearingEventProcessorTest {
         assertThat(publicEventOut.getInfo().get("lastUpdatedVersion"), is(manageResultsFailed.getLastUpdatedVersion()));
         assertThat(publicEventOut.getInfo().get("lastUpdatedByUserName"), is("amended user"));
         assertThat(publicEventOut.getInfo().get("version"), is(manageResultsFailed.getVersion()));
+        assertThat(publicEventOut.getInfo().get("hearingDay"), is(hearingDay.toString()));
+        assertThat(publicEventOut.getInfo().get("lastUpdatedVersion"), is(1));
+        assertThat(publicEventOut.getInfo().get("version"), is(2));
+    }
+
+    @Test
+    public void shouldPublishAmendHearingErrorPublicEvent() {
+        final UUID hearingId = randomUUID();
+        final UUID userId = randomUUID();
+        final Integer version = 2;
+        final UUID amendedByUserId = randomUUID();
+        final Integer currentVersion = 1;
+        final LocalDate hearingDay = LocalDate.now();
+        final ManageResultsFailed manageResultsFailed = new ManageResultsFailed(hearingId, SHARED_AMEND_LOCKED_ADMIN_ERROR,
+                VERSION_MISMATCH.toError(String.format("Amend results not permitted! Hearing locked by different user %s", amendedByUserId)), amendedByUserId, userId);
+        final String userIds = String.join(",", List.of(userId.toString(), amendedByUserId.toString()));
+
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(manageResultsFailed);
+        final JsonEnvelope eventIn = envelopeFrom(metadataWithRandomUUID(DRAFT_RESULT_SAVED_PRIVATE_EVENT), jsonObject);
+        when(usersGroupService.getUserDetails(eventIn, userIds)).thenReturn(Map.of(amendedByUserId, "amended user", userId, "requested user"));
+
+        this.hearingEventProcessor.handleSaveDraftResultVersionErrorEvent(eventIn);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_MANAGE_RESULTS_FAILED));
+        final PublicManageResultsFailed publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicManageResultsFailed.class);
+        assertThat(publicEventOut.getHearingId(), is(manageResultsFailed.getHearingId()));
+        assertThat(publicEventOut.getHearingState(), is(manageResultsFailed.getHearingState()));
+        assertThat(publicEventOut.getError().getType(), is(manageResultsFailed.getResultsError().getType()));
+        assertThat(publicEventOut.getError().getCode(), is(manageResultsFailed.getResultsError().getCode()));
+        assertThat(publicEventOut.getError().getReason(), is(manageResultsFailed.getResultsError().getReason()));
+
+        assertThat(publicEventOut.getInfo().get("lastUpdatedVersion"), is(manageResultsFailed.getLastUpdatedVersion()));
+        assertThat(publicEventOut.getInfo().get("lastUpdatedByUserName"), is("amended user"));
+        assertThat(publicEventOut.getInfo().get("version"), is(manageResultsFailed.getVersion()));
+        assertThat(publicEventOut.getInfo().get("hearingDay"), is(nullValue()));
+        assertThat(publicEventOut.getInfo().get("lastUpdatedVersion"), is(nullValue()));
+        assertThat(publicEventOut.getInfo().get("version"), is(nullValue()));
     }
 
     @Test

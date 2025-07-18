@@ -14,6 +14,7 @@ public final class SaveDraftResultV2Command {
     private UUID hearingId;
     private LocalDate hearingDay;
     private Integer version;
+    private Boolean isResetResults;
     private List<Relation> relations = new ArrayList<>();
     private Map<UUID, JsonObject> resultLines = new HashMap<>();
     private List<UUID> shadowListedOffenceIds = new ArrayList<>();
@@ -73,5 +74,13 @@ public final class SaveDraftResultV2Command {
     public SaveDraftResultV2Command setVersion(final Integer version) {
         this.version = version;
         return this;
+    }
+
+    public Boolean getIsResetResults() {
+        return isResetResults;
+    }
+
+    public void setIsResetResults(final Boolean isResetResults) {
+        this.isResetResults = isResetResults;
     }
 }

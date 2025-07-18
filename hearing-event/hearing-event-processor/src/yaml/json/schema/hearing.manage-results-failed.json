@@ -40,7 +40,6 @@
     "hearingId",
     "hearingState",
     "resultsError",
-    "hearingDay",
     "userId"
   ],
   "additionalProperties": false,

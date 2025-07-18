@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -45,7 +44,6 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.HearingDay;
@@ -1018,7 +1016,6 @@ public class HearingEventListenerTest {
         verifyNoMoreInteractions(offenceRepository);
     }
 
-
     @Test
     public void resultsSharedV3_shouldPersist_with_hasSharedResults_true() throws IOException {
         final LocalDate today = now();
@@ -1049,8 +1046,7 @@ public class HearingEventListenerTest {
                 .setHearingDays(asSet(hearingDay))
                 .setTargets(asSet(target, target2))
                 .setProsecutionCases(asSet(prosecutionCase))
-                .setId(resultsShared.getHearingId()
-                );
+                .setId(resultsShared.getHearingId());
 
         DraftResult draftResult = mock(DraftResult.class);
         JsonObject draftResultJsonObject = Json.createObjectBuilder()
@@ -1087,6 +1083,7 @@ public class HearingEventListenerTest {
         );
 
         assertThat(draftResult.getDraftResultPayload().get("__metadata__").get("lastSharedTime").textValue(), not(isEmptyOrNullString()));
+        assertThat(draftResult.getDraftResultPayload().get("version").intValue(), is(2));
         verify(this.draftResultRepository, times(1)).save(any());
         verifyNoMoreInteractions(offenceRepository);
     }
@@ -1158,6 +1155,7 @@ public class HearingEventListenerTest {
         );
 
         assertThat(draftResult.getDraftResultPayload().get("__metadata__").get("lastSharedTime").textValue(), not(isEmptyOrNullString()));
+        assertThat(draftResult.getDraftResultPayload().get("version").intValue(), is(2));
         verify(this.draftResultRepository, times(1)).save(any());
         verifyNoMoreInteractions(offenceRepository);
     }
@@ -1377,6 +1375,7 @@ public class HearingEventListenerTest {
                         standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId())
                 ))
                 .withHearingDay(hearingDay)
+                .withVersion(2)
                 .build();
     }
 

@@ -272,6 +272,10 @@ public class ResultsSharedDelegate implements Serializable {
                                               final UUID userId, final Integer version, final UUID amendedByUserId, final Integer amendedResultVersion) {
         return Stream.of(new ManageResultsFailed(hearingId, hearingState, resultsError, hearingDay, amendedResultVersion, amendedByUserId, version, userId));
     }
+    public Stream<Object> manageResultsFailed(final UUID hearingId, final HearingState hearingState, final ResultsError resultsError,
+                                              final UUID userId, final UUID amendedByUserId) {
+        return Stream.of(new ManageResultsFailed(hearingId, hearingState, resultsError, amendedByUserId, userId));
+    }
     public Stream<Object> manageResultsFailed(final UUID hearingId, final HearingState hearingState, final ResultsError resultsError, final LocalDate hearingDay,
                                               final UUID userId, final UUID amendedByUserId, final Integer amendedResultVersion) {
         return Stream.of(new ManageResultsFailed(hearingId, hearingState, resultsError, hearingDay, amendedResultVersion, amendedByUserId, userId));
@@ -538,7 +542,9 @@ public class ResultsSharedDelegate implements Serializable {
      * Target is to reduce the response time
      * This feature has been developed by the NFT team in the scope of the performance improvement
      */
-    public Stream<Object> shareResultForDay(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLineV2> resultLines, final List<UUID> defendantDetailsChanged, final YouthCourt youthCourt, final LocalDate hearingDay) {
+    public Stream<Object> shareResultForDay(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime,
+                                            final List<SharedResultsCommandResultLineV2> resultLines, final List<UUID> defendantDetailsChanged,
+                                            final YouthCourt youthCourt, final LocalDate hearingDay, final Integer version) {
 
         addParenetResultLineIds(resultLines);
         final Boolean previouslyShared = Boolean.TRUE.equals(momento.getIsHearingDayPreviouslyShared().get(hearingDay));
@@ -576,7 +582,8 @@ public class ResultsSharedDelegate implements Serializable {
                 .withTargets(new ArrayList<>(finalTargets.values()))
                 .withSavedTargets(getSavedTargetsForHearingDay3(momento.getMultiDaySavedTargets(), hearingDay))
                 .withCompletedResultLinesStatus(getCompletedResultLineStatusForHearingDay(this.momento.getMultiDayCompletedResultLinesStatus(), hearingDay))
-                .withNewAmendmentResults(newAmendmentResults);
+                .withNewAmendmentResults(newAmendmentResults)
+                .withVersion(version + 1);
 
         final ResultsSharedSuccess resultsSharedSuccess = ResultsSharedSuccess.builder()
                         .withHearingId(hearingId).build();

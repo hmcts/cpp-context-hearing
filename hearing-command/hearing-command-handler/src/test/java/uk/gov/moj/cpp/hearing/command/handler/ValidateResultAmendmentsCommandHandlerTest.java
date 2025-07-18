@@ -123,6 +123,7 @@ public class ValidateResultAmendmentsCommandHandlerTest {
                     .withSharedTime(ZonedDateTime.now())
                     .withHearing(hearing.getHearing())
                     .withNewAmendmentResults(new ArrayList<>())
+                    .withVersion(2)
                     .withTargets(new ArrayList<>()).build());
         }};
 
@@ -146,7 +147,7 @@ public class ValidateResultAmendmentsCommandHandlerTest {
         assertThat(uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo(events.get(0), ManageResultsFailed.class), isBean(ManageResultsFailed.class)
                 .with(ManageResultsFailed::getHearingId, Matchers.is(hearingId))
                 .with(ManageResultsFailed::getHearingDay, Matchers.is(hearingDay))
-                .with(ManageResultsFailed::getLastUpdatedVersion, Matchers.is(1))
+                .with(ManageResultsFailed::getLastUpdatedVersion, Matchers.is(2))
                 .with(ManageResultsFailed::getLastUpdatedByUserId, Matchers.is(userId1))
                 .with(ManageResultsFailed::getResultsError, isBean(ResultsError.class)
                         .with(ResultsError::getType, Matchers.is(ResultsError.ErrorType.STATE))
@@ -183,6 +184,7 @@ public class ValidateResultAmendmentsCommandHandlerTest {
                     .withNewAmendmentResults(new ArrayList<>())
                     .withTargets(new ArrayList<>()).build());
             apply(hearingAmended);
+            apply(new DraftResultSavedV2(hearingId, hearingDay, someJsonObject, userId1, 1));
             apply(approvalRequested);
             apply(resultAmendmentsValidated);
         }};

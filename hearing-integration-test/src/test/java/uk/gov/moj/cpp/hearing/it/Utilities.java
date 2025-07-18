@@ -270,6 +270,14 @@ public class Utilities {
         }
 
         public void executeSuccessfully() {
+            execute(HttpStatus.SC_ACCEPTED);
+        }
+
+        public void executeForbidden() {
+            execute(HttpStatus.SC_FORBIDDEN);
+        }
+
+        public void execute(final int httpStatusCode) {
 
             String url = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty(endpoint), arguments);
             LOGGER.info("Command url: {}", url);
@@ -281,7 +289,7 @@ public class Utilities {
                     .header(new Header(USER_ID, cppUserId != null ? cppUserId.toString() : getLoggedInUser().toString())).when()
                     .post(url)
                     .then().extract().response();
-            assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+            assertThat(writeResponse.getStatusCode(), equalTo(httpStatusCode));
         }
     }
 

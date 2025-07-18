@@ -58,6 +58,14 @@ public class HearingDetailChangeCommandHandler extends AbstractCommandHandler {
 
     }
 
+    @Handles("hearing.command.amend-for-support")
+    public void amendHearingForSupport(final JsonEnvelope envelope) throws EventStreamException {
+        final Optional<String> userId = envelope.metadata().userId();
+        final HearingAmendCommand hearingAmendCommand = convertToObject(envelope, HearingAmendCommand.class);
+        aggregate(HearingAggregate.class, hearingAmendCommand.getHearingId(), envelope,
+                    aggregate -> aggregate.amendHearingSupport(hearingAmendCommand.getHearingId(), fromString(userId.get()), hearingAmendCommand.getNewHearingState()));
+    }
+
     @Handles("hearing.command.add-witness")
     public void addWitnessToHearing(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {

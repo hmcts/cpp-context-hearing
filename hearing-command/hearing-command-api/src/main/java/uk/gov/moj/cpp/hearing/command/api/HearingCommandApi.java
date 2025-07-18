@@ -160,6 +160,11 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.amend");
     }
 
+    @Handles("hearing.amend-for-support")
+    public void amendHearingSupport(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.amend-for-support");
+    }
+
     @Handles("hearing.update-defendant-attendance-on-hearing-day")
     public void updateDefendantAttendance(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.update-defendant-attendance-on-hearing-day");
