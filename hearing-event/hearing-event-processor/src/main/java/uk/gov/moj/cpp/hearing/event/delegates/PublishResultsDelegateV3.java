@@ -360,7 +360,7 @@ public class PublishResultsDelegateV3 {
                     final List<JudicialResult> judicialResults = getDefendantJudicialResults(results, defendant.getId());
                     if (isNotEmpty(judicialResults)) { //so that judicialResults doesn't have empty tag
                         setPromptsAsNullIfEmpty(judicialResults);
-                        return buildDefendantJudicialResults(defendant.getMasterDefendantId(), judicialResults);
+                        return buildDefendantJudicialResults(defendant.getMasterDefendantId(), judicialResults, defendant.getId());
                     }
                     return null;
                 })
@@ -385,10 +385,11 @@ public class PublishResultsDelegateV3 {
         }
     }
 
-    private List<DefendantJudicialResult> buildDefendantJudicialResults(UUID masterDefendantId, List<JudicialResult> judicialResults) {
+    private List<DefendantJudicialResult> buildDefendantJudicialResults(UUID masterDefendantId, List<JudicialResult> judicialResults, UUID defendantId) {
         return judicialResults.stream().map(judicialResult -> DefendantJudicialResult.defendantJudicialResult()
                 .withJudicialResult(judicialResult)
                 .withMasterDefendantId(masterDefendantId)
+                .withDefendantId(defendantId)
                 .build()).collect(toList());
     }
 
