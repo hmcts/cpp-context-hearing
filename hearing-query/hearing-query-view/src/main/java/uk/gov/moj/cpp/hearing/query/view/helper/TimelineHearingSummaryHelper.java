@@ -57,7 +57,7 @@ public class TimelineHearingSummaryHelper {
         timelineHearingSummaryBuilder.withHearingType(null == hearing.getHearingType() ? null : hearing.getHearingType().getDescription());
         timelineHearingSummaryBuilder.withCourtHouse(getCourtCentreName(hearingDay, hearing, allCourtRooms));
         timelineHearingSummaryBuilder.withCourtRoom(getCourtRoomName(hearingDay, hearing, allCourtRooms));
-        timelineHearingSummaryBuilder.withHearingTime(hearingDay.getDateTime());
+        timelineHearingSummaryBuilder.withHearingTime(hearingDay.getSittingDay());
         timelineHearingSummaryBuilder.withStartTime(hearingDay.getSittingDay());
         timelineHearingSummaryBuilder.withEstimatedDuration(hearingDay.getListedDurationMinutes());
         if (nonNull(hearingYouthCourtDefendants)) {
