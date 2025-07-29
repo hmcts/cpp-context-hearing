@@ -1,13 +1,15 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import static java.lang.String.valueOf;
 import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
@@ -55,6 +57,7 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.RespondentCounsel;
+import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.core.courts.Verdict;
@@ -90,6 +93,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ResultsSharedDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.VariantDirectoryDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.VerdictDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.util.CustodyTimeLimitUtil;
+import uk.gov.moj.cpp.hearing.domain.aggregate.util.HearingTargetsShared;
 import uk.gov.moj.cpp.hearing.domain.event.AddCaseDefendantsForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselRemoved;
@@ -214,14 +218,13 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize", "squid:CommentedOutCodeLine","squid:CallToDeprecatedMethod"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = -6059812881894748590L;
+    private static final long serialVersionUID = -6059812881894748592L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingAggregate.class);
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
     private static final List<HearingState> HEARING_STATES_SHARE_NOT_ALLOWED = asList(SHARED_AMEND_LOCKED_ADMIN_ERROR, SHARED_AMEND_LOCKED_USER_ERROR, APPROVAL_REQUESTED);
     public static final String SHARE_RESULTS_NOT_PERMITTED_ALL_THE_TARGETS_ALREADY_SHARED_FOR_THE_HEARING_DAY_S = "Share results not permitted! all the targets already shared for the hearingDay %s";
-    private static final String APPLICATION_ID = "applicationId";
     private static final String OFFENCE_ID = "offenceId";
     private static final String RESULT_LINES = "resultLines";
     private final HearingAggregateMomento momento = new HearingAggregateMomento();
@@ -429,6 +432,7 @@ public class HearingAggregate implements Aggregate {
                 && draftResultJson.get(RESULT_LINES) instanceof JsonArray) {
             return draftResultJson.getJsonArray(RESULT_LINES).stream()
                     .map(jsonValue -> (JsonObject) jsonValue)
+                    .filter(resultLineJson -> resultLineJson.containsKey(OFFENCE_ID))
                     .map(resultLineJson -> fromString(resultLineJson.getString(OFFENCE_ID)))
                     .collect(Collectors.toSet());
         }
@@ -442,29 +446,39 @@ public class HearingAggregate implements Aggregate {
     }
 
     private void updateSharedOffencesByHearingDay(final LocalDate hearingDay, final List<Target2> targets) {
-        if (nonNull(targets) && !targets.isEmpty()){
+        if (nonNull(targets) && !targets.isEmpty()) {
             final Set<UUID> sharedOffences = targets.stream()
-                    .map(Target2::getOffenceId)
+                    .filter(target -> nonNull(target.getOffenceId()))
+                    .filter(target -> isNotEmpty(target.getResultLines()))
+                    .flatMap(target -> target.getResultLines().stream())
+                    .map(ResultLine2::getOffenceId)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
-            if (hearingDaySharedOffencesMap.containsKey(hearingDay)){
-                hearingDaySharedOffencesMap.get(hearingDay).addAll(sharedOffences);
-            } else {
-                hearingDaySharedOffencesMap.put(hearingDay, sharedOffences);
+            if (!sharedOffences.isEmpty()) {
+                if (hearingDaySharedOffencesMap.containsKey(hearingDay)) {
+                    hearingDaySharedOffencesMap.get(hearingDay).addAll(sharedOffences);
+                } else {
+                    hearingDaySharedOffencesMap.put(hearingDay, sharedOffences);
+                }
             }
         }
     }
 
     private void updateSharedApplicationsByHearingDay(final LocalDate hearingDay, final List<Target2> targets) {
-        if (nonNull(targets) && !targets.isEmpty()){
+        if (nonNull(targets) && !targets.isEmpty()) {
             final Set<UUID> sharedApplications = targets.stream()
-                    .map(Target2::getApplicationId)
-                    .filter(Objects::nonNull)
+                    .filter(target -> nonNull(target.getApplicationId()))
+                    .filter(target -> isNotEmpty(target.getResultLines()))
+                    .flatMap(target -> target.getResultLines().stream())
+                    .filter(rl -> isNull(rl.getOffenceId()) && nonNull(rl.getApplicationId()))
+                    .map(ResultLine2::getApplicationId)
                     .collect(Collectors.toSet());
-            if (hearingDaySharedApplicationsMap.containsKey(hearingDay)){
-                hearingDaySharedApplicationsMap.get(hearingDay).addAll(sharedApplications);
-            } else {
-                hearingDaySharedApplicationsMap.put(hearingDay, sharedApplications);
+            if(!sharedApplications.isEmpty()) {
+                if (hearingDaySharedApplicationsMap.containsKey(hearingDay)) {
+                    hearingDaySharedApplicationsMap.get(hearingDay).addAll(sharedApplications);
+                } else {
+                    hearingDaySharedApplicationsMap.put(hearingDay, sharedApplications);
+                }
             }
         }
     }
@@ -732,39 +746,13 @@ public class HearingAggregate implements Aggregate {
     }
 
     private boolean hasAllTargetsShared(final LocalDate hearingDay, final List<SharedResultsCommandResultLineV2> resultLines) {
-        final boolean isApplicationResultType = resultLines.stream().allMatch(rl -> nonNull(rl.getApplicationId()));
-        if (isApplicationResultType){
-            final Set<UUID> sharedApplicationIdSet = hearingDaySharedApplicationsMap.get(hearingDay);
-            return nonNull(sharedApplicationIdSet) && resultLines.stream()
-                    .allMatch(rl -> sharedApplicationIdSet.contains(rl.getApplicationId()));
-        }
-        final boolean isCaseResultType = resultLines.stream().allMatch(rl -> nonNull(rl.getOffenceId()));
-        if (isCaseResultType) {
-            final Set<UUID> sharedOffenceIdSet = hearingDaySharedOffencesMap.get(hearingDay);
-            return nonNull(sharedOffenceIdSet) && resultLines.stream()
-                    .allMatch(rl -> sharedOffenceIdSet.contains(rl.getOffenceId()));
-        }
-        return false;
+        return HearingTargetsShared.hasAllTargetsShared(hearingDay, resultLines, unmodifiableMap(hearingDaySharedOffencesMap),
+                unmodifiableMap(hearingDaySharedApplicationsMap));
     }
 
     private boolean hasAllTargetsShared(final LocalDate hearingDay, final Map<UUID, JsonObject> resultLines) {
-
-        final Set<UUID> saveDraftResultsRequestOffenceSet = resultLines.values().stream().map(rl -> fromString(rl.getString(OFFENCE_ID))).collect(Collectors.toSet());
-        final boolean isApplicationResultType = resultLines.values().stream().allMatch(rl -> rl.containsKey(APPLICATION_ID));
-        if (isApplicationResultType) {
-            final Set<UUID> sharedApplicationIdSet = hearingDaySharedApplicationsMap.get(hearingDay);
-            return nonNull(sharedApplicationIdSet)
-                    && resultLines.values().stream().allMatch(rl -> sharedApplicationIdSet.contains(fromString(rl.getString(APPLICATION_ID))))
-                    && saveDraftResultsRequestOffenceSet.equals(offencesSavedAsDraft);
-        }
-        final boolean isCaseResultType = resultLines.values().stream().allMatch(rl -> rl.containsKey(OFFENCE_ID));
-        if (isCaseResultType) {
-            final Set<UUID> sharedOffenceIdSet = hearingDaySharedOffencesMap.get(hearingDay);
-            return nonNull(sharedOffenceIdSet)
-                    && resultLines.values().stream().allMatch(rl -> sharedOffenceIdSet.contains(fromString(rl.getString(OFFENCE_ID))))
-                    && saveDraftResultsRequestOffenceSet.equals(offencesSavedAsDraft);
-        }
-        return false;
+        return HearingTargetsShared.hasAllTargetsShared(hearingDay, resultLines, unmodifiableSet(offencesSavedAsDraft),
+                unmodifiableMap(hearingDaySharedOffencesMap), unmodifiableMap(hearingDaySharedApplicationsMap));
     }
 
     public Stream<Object> saveAllDraftResults(final List<Target> targets, final UUID userId) {
@@ -1551,6 +1539,14 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> addWitnessToHearing(final UUID hearingId, final String witness) {
         return apply(Stream.of(new WitnessAddedToHearing(witness, hearingId)));
+    }
+
+    public Map<LocalDate, Set<UUID>> getHearingDaySharedApplicationsMap() {
+        return hearingDaySharedApplicationsMap;
+    }
+
+    public Map<LocalDate, Set<UUID>> getHearingDaySharedOffencesMap() {
+        return hearingDaySharedOffencesMap;
     }
 
     private Stream<Object> warnEventIgnored(final UUID hearingId, final String methodName) {
