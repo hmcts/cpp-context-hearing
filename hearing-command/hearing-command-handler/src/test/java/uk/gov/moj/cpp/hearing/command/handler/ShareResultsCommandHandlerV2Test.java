@@ -627,6 +627,8 @@ public class ShareResultsCommandHandlerV2Test {
                         targetDraft.getDraftResult(),
                         "",
                         "I",
+                        false,
+                        randomUUID(),
                         false
                 )
         );

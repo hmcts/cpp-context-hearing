@@ -1756,6 +1756,8 @@ public class HearingServiceTest {
                 .withIsDeleted(false)
                 .withShortCode(shortCode)
                 .withCategory("I")
+                .withAutoPopulateBooleanResult(randomUUID())
+                .withDisabled(true)
                 .withNonStandaloneAncillaryResult(false)
                 .build();
         when(hearingRepository.findTargetsByFilters(hearingId, hearingDate.toString()))

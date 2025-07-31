@@ -111,6 +111,12 @@
     },
     "nonStandaloneAncillaryResult": {
       "type": "boolean"
+    },
+    "autoPopulateBooleanResult": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "disabled": {
+      "type": "boolean"
     }
   },
   "required": [

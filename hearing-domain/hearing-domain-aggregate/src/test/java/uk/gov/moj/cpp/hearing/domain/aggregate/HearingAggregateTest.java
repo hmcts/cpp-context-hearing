@@ -976,6 +976,7 @@ public class HearingAggregateTest {
                         .withLevel(Level.OFFENCE)
                         .withOffenceId(offenceId1)
                         .withNonStandaloneAncillaryResult(false)
+                        .withAutoPopulateBooleanResult(randomUUID())
                         .withCategory("I")
                         .build()))
                 .withHearingDay(hearingDay)
@@ -994,6 +995,7 @@ public class HearingAggregateTest {
                         .withOffenceId(offenceId2)
                         .withNonStandaloneAncillaryResult(false)
                         .withCategory("I")
+                        .withAutoPopulateBooleanResult(randomUUID())
                         .build()))
                 .build();
 
@@ -3154,7 +3156,9 @@ public class HearingAggregateTest {
                 targetDraft.getDraftResult(),
                 "log",
                 I,
-                nonStandaloneAncillaryResult
+                nonStandaloneAncillaryResult,
+                null,
+                false
         );
     }
 
