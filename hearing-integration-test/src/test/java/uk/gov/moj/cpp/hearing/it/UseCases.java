@@ -542,6 +542,8 @@ public class UseCases {
                         target.getDraftResult(),
                         "AMENDMENTS_LOG",
                         "I",
+                        false,
+                        randomUUID(),
                         false));
     }
 
@@ -578,7 +580,9 @@ public class UseCases {
                         target.getDraftResult(),
                         "AMENDMENTS_LOG",
                         "A",
-                        true));
+                        true,
+                        randomUUID(),
+                        false));
 
     }
 

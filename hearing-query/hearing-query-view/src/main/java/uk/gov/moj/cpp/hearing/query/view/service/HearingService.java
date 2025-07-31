@@ -724,9 +724,9 @@ public class HearingService {
                 .withAmendmentsLog(resultLine.getAmendmentsLog())
                 .withIsDeleted(resultLine.getIsDeleted())
                 .withNonStandaloneAncillaryResult(nonNull(resultLine.getNonStandaloneAncillaryResult()) && resultLine.getNonStandaloneAncillaryResult())
-                .withCategory(resultLine.getCategory());
-
-
+                .withCategory(resultLine.getCategory())
+                .withAutoPopulateBooleanResult(resultLine.getAutoPopulateBooleanResult())
+                .withDisabled(resultLine.getDisabled());
         extractedResultLines.add(builder.build());
     }
 

@@ -384,6 +384,8 @@ public class ResultsSharedDelegate implements Serializable {
                 .withamendmentsLog(resultLine2.getAmendmentsLog())
                 .withCategory(resultLine2.getCategory())
                 .withNonStandaloneAncillaryResult(nonNull(resultLine2.getNonStandaloneAncillaryResult()) && resultLine2.getNonStandaloneAncillaryResult())
+                .withAutoPopulateBooleanResult(resultLine2.getAutoPopulateBooleanResult())
+                .withDisabled(resultLine2.getDisabled())
                 .build();
     }
 
@@ -428,6 +430,8 @@ public class ResultsSharedDelegate implements Serializable {
                 .withParentResultLineIds(resultLineIn.getParentResultLineIds())
                 .withAmendmentsLog(resultLineIn.getAmendmentsLog())
                 .withCategory(resultLineIn.getCategory())
+                .withAutoPopulateBooleanResult(resultLineIn.getAutoPopulateBooleanResult())
+                .withDisabled(resultLineIn.isDisabled())
                 .withNonStandaloneAncillaryResult(nonNull(resultLineIn.getNonStandaloneAncillaryResult()) && resultLineIn.getNonStandaloneAncillaryResult())
                 .build();
     }

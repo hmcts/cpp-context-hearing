@@ -12,7 +12,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@SuppressWarnings({"squid:S2384", "squid:S1067"})
+@SuppressWarnings({"squid:S2384", "squid:S1067", "java:S106"})
 public class SharedResultsCommandResultLineV2 implements Serializable {
 
     private static final long serialVersionUID = 2942565459149667125L;
@@ -47,6 +47,8 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
     private String amendmentsLog;
     private String category;
     private boolean nonStandaloneAncillaryResult;
+    private Boolean disabled;
+    private UUID autoPopulateBooleanResult;
 
     @SuppressWarnings({"squid:S2384", "squid:S1067"})
     @JsonCreator
@@ -79,7 +81,9 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
             @JsonProperty("draftResult") final String draftResult,
             @JsonProperty("amendmentsLog") final String amendmentsLog,
             @JsonProperty("category") final String category,
-            @JsonProperty("nonStandaloneAncillaryResult") final boolean nonStandaloneAncillaryResult
+            @JsonProperty("nonStandaloneAncillaryResult") final boolean nonStandaloneAncillaryResult,
+            @JsonProperty("autoPopulateBooleanResult") final UUID autoPopulateBooleanResult,
+            @JsonProperty("disabled") final Boolean disabled
     ) {
         this.shortCode = shortCode;
         this.delegatedPowers = delegatedPowers;
@@ -110,6 +114,8 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
         this.amendmentsLog = amendmentsLog;
         this.category = category;
         this.nonStandaloneAncillaryResult = nonStandaloneAncillaryResult;
+        this.disabled = disabled;
+        this.autoPopulateBooleanResult = autoPopulateBooleanResult;
     }
 
     public String getShortCode() {
@@ -347,6 +353,19 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
         this.nonStandaloneAncillaryResult = nonStandaloneAncillaryResult;
     }
 
+    public UUID getAutoPopulateBooleanResult() {
+        return autoPopulateBooleanResult;
+    }
+
+    public void setAutoPopulateBooleanResult(final UUID autoPopulateBooleanResult) {
+        this.autoPopulateBooleanResult = autoPopulateBooleanResult;
+    }
+
+    public Boolean isDisabled() {
+        return disabled;
+    }
+
+
     public static Builder sharedResultsCommandResultLine(){
         return new Builder();
     }
@@ -381,6 +400,8 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
         private String amendmentsLog;
         private String category;
         private boolean nonStandaloneAncillaryResult;
+        private Boolean disabled;
+        private UUID autoPopulateBooleanResult;
 
         public Builder withShortCode(final String shortCode) {
             this.shortCode = shortCode;
@@ -525,6 +546,16 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
             return this;
         }
 
+        public Builder withDisabled(final Boolean disabled) {
+            this.disabled = disabled;
+            return this;
+        }
+
+        public Builder withAutoPopulateBooleanResult(final UUID autoPopulateBooleanResult) {
+            this.autoPopulateBooleanResult = autoPopulateBooleanResult;
+            return this;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -562,12 +593,15 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
                     Objects.equals(draftResult, builder.draftResult) &&
                     Objects.equals(amendmentsLog, builder.amendmentsLog) &&
                     Objects.equals(category, builder.category)&&
-                    Objects.equals(nonStandaloneAncillaryResult, builder.nonStandaloneAncillaryResult);
+                    Objects.equals(nonStandaloneAncillaryResult, builder.nonStandaloneAncillaryResult) &&
+                    Objects.equals(disabled, builder.disabled) &&
+                    Objects.equals(autoPopulateBooleanResult, builder.autoPopulateBooleanResult);
+
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(shortCode, delegatedPowers, orderedDate, sharedDate, resultLineId, offenceId, defendantId, masterDefendantId, resultDefinitionId, prompts, resultLabel, level, isModified, isComplete, applicationId, caseId, amendmentDate, amendmentReasonId, amendmentReason, fourEyesApproval, approvedDate, isDeleted, childResultLineIds, parentResultLineIds, shadowListed, draftResult, amendmentsLog, category, nonStandaloneAncillaryResult);
+            return Objects.hash(shortCode, delegatedPowers, orderedDate, sharedDate, resultLineId, offenceId, defendantId, masterDefendantId, resultDefinitionId, prompts, resultLabel, level, isModified, isComplete, applicationId, caseId, amendmentDate, amendmentReasonId, amendmentReason, fourEyesApproval, approvedDate, isDeleted, childResultLineIds, parentResultLineIds, shadowListed, draftResult, amendmentsLog, category, nonStandaloneAncillaryResult, disabled, autoPopulateBooleanResult);
         }
 
         public SharedResultsCommandResultLineV2 build() {
@@ -601,11 +635,13 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
                     draftResult,
                     amendmentsLog,
                     category,
-                    nonStandaloneAncillaryResult
+                    nonStandaloneAncillaryResult,
+                    autoPopulateBooleanResult,
+                    disabled
             );
         }
     }
 
-   
+
 
 }

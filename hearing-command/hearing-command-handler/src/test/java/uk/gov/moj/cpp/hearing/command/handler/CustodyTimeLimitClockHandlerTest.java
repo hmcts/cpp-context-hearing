@@ -183,6 +183,8 @@ public class CustodyTimeLimitClockHandlerTest {
                         .withOffenceId(offenceId1)
                         .withNonStandaloneAncillaryResult(false)
                         .withCategory("I")
+                        .withAutoPopulateBooleanResult(randomUUID())
+                        .withDisabled(true)
                         .build()))
                 .withHearingDay(hearingDay)
                 .build();
@@ -200,6 +202,7 @@ public class CustodyTimeLimitClockHandlerTest {
                         .withOffenceId(offenceId2)
                         .withNonStandaloneAncillaryResult(false)
                         .withCategory("I")
+                        .withAutoPopulateBooleanResult(randomUUID())
                         .build()))
                 .build();
 

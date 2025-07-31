@@ -8,6 +8,7 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -420,6 +421,59 @@ public class ResultsSharedDelegateTest {
         assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV3.getIsReshare(), is(false));
         assertNotNull(resultsSharedSuccess);
+
+    }
+
+    @Test
+    void shouldAConvertAutoPopulateBooleanResultAndDisabled() {
+
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+        final YouthCourt youthCourt = YouthCourt.youthCourt()
+                .withYouthCourtId(randomUUID())
+                .build();
+
+        final UUID resultLine1Id = randomUUID();
+        final UUID resultLine2Id = randomUUID();
+
+        final UUID autoPopulateBooleanResult = randomUUID();
+        final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel(OFFENCE)
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .withAutoPopulateBooleanResult(autoPopulateBooleanResult)
+                .withDisabled(true)
+                .build();
+
+        final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel(OFFENCE)
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine2Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .build();
+
+        final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withUserId(randomUUID())
+                .build();
+
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(2));
+
+        final ResultsSharedSuccess resultsSharedSuccess = (ResultsSharedSuccess) eventCollection.get(0);
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
+        assertThat(resultsSharedV3.getTargets().get(0).getResultLines().stream().filter(r -> r.getResultLineId().equals(resultLine1Id)).findFirst().get().getAutoPopulateBooleanResult(), is(autoPopulateBooleanResult));
+        assertThat(resultsSharedV3.getTargets().get(0).getResultLines().stream().filter(r -> r.getResultLineId().equals(resultLine1Id)).findFirst().get().getDisabled(), is(true));
+        assertThat(resultsSharedV3.getTargets().get(0).getResultLines().stream().filter(r -> r.getResultLineId().equals(resultLine2Id)).findFirst().get().getAutoPopulateBooleanResult(), nullValue());
+        assertThat(resultsSharedV3.getTargets().get(0).getResultLines().stream().filter(r -> r.getResultLineId().equals(resultLine2Id)).findFirst().get().getDisabled(), nullValue());
 
     }
 
