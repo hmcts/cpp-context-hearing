@@ -37,6 +37,7 @@ import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.utils.RestUtils;
 
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -139,7 +140,7 @@ public class ApplicationTimelineIT extends AbstractIT {
         final Organisation organisation = hearing.getCourtApplications().get(0).getApplicant().getOrganisation();
 
         hearingSummaryMap.put("hearingDate", hearingDay.getSittingDay().toLocalDate().format(ofPattern("dd MMM yyyy")));
-        hearingSummaryMap.put("hearingTime", hearingDay.getSittingDay().toLocalTime().format(ofPattern("HH:mm")));
+        hearingSummaryMap.put("hearingTime", hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("Europe/London")).format(ofPattern("HH:mm")));
         hearingSummaryMap.put("hearingType", hearing.getType().getDescription());
         hearingSummaryMap.put("courtHouse", hearing.getCourtCentre().getName());
         hearingSummaryMap.put("courtRoom", hearing.getCourtCentre().getRoomName());

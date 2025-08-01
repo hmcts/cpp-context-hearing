@@ -441,11 +441,10 @@ public class VerdictDelegateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(hearing.getHearing()));
 
-        assertThrows(RuntimeException.class, () -> hearingAggregate.updateVerdict(
+        hearingAggregate.updateVerdict(
                 hearing.getHearingId(),
                 verdict.getFirstVerdict(),
-                guiltyPleaTypes()
-        ));
+                guiltyPleaTypes());
         }
 
     @Test

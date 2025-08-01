@@ -68,6 +68,7 @@ import javax.json.JsonObjectBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.time.ZonedDateTime;
 
 @SuppressWarnings({"CdiInjectionPointsInspection", "WeakerAccess", "squid:S1172", "squid:CommentedOutCodeLine", "squid:S1481", "squid:S1854"})
 public class HearingEventQueryView {
@@ -283,8 +284,8 @@ public class HearingEventQueryView {
     private JsonObject createResponsePayloadWithHearingEvents(final Map<UUID, HearingEventReport> hearingEventReportMap, final LocalDate hearingDate, final JsonEnvelope query){
         hearingEventReportMap.forEach((key, record)->{
             final List<HearingEvent> hearingEvents = hearingService.getHearingEvents(key, hearingDate);
-            hearingEvents.forEach(hearingEvent -> hearingEvent.setEventTime(DayLightSavingHelper.handleDST(timeZoneHelper.isDayLightSavingOn(),hearingEvent.getEventTime())));
-            final Map<LocalDate, List<EventLog>> eventLogMap= populateEventLogsDatewise(hearingEvents);
+            final List<HearingEvent> hearingEventsWithAdjustedTimes = createHearingEventsWithAdjustedTimes(hearingEvents);
+            final Map<LocalDate, List<EventLog>> eventLogMap= populateEventLogsDatewise(hearingEventsWithAdjustedTimes);
             final List<LoggedHearingEvent> loggedHearingEvents = populateLoggedHearingEvents(eventLogMap, query);
             record.setLoggedHearingEvents(loggedHearingEvents);
         });
@@ -315,6 +316,50 @@ public class HearingEventQueryView {
             }
             return responseBuilder.build();
         }
+    }
+
+    /**
+     * Creates a list of HearingEvent objects with adjusted event times for DST without modifying the original entities.
+     * This prevents unintended database writes when the original entities are managed by JPA.
+     * 
+     * @param originalHearingEvents The original HearingEvent entities from the database
+     * @return A new list of HearingEvent objects with adjusted event times
+     */
+    public List<HearingEvent> createHearingEventsWithAdjustedTimes(final List<HearingEvent> originalHearingEvents) {
+        return originalHearingEvents.stream()
+                .map(this::createHearingEventWithAdjustedTime)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Creates a copy of a HearingEvent with an adjusted event time for DST handling.
+     * The original entity is not modified, preventing unintended database writes.
+     * 
+     * @param originalEvent The original HearingEvent entity
+     * @return A new HearingEvent object with adjusted event time
+     */
+    public HearingEvent createHearingEventWithAdjustedTime(final HearingEvent originalEvent) {
+        final HearingEvent adjustedEvent = new HearingEvent();
+        
+        // Copy all properties from the original event
+        adjustedEvent.setId(originalEvent.getId());
+        adjustedEvent.setHearingId(originalEvent.getHearingId());
+        adjustedEvent.setHearingEventDefinitionId(originalEvent.getHearingEventDefinitionId());
+        adjustedEvent.setRecordedLabel(originalEvent.getRecordedLabel());
+        adjustedEvent.setNote(originalEvent.getNote());
+        adjustedEvent.setDefenceCounselId(originalEvent.getDefenceCounselId());
+        adjustedEvent.setAlterable(originalEvent.isAlterable());
+        adjustedEvent.setUserId(originalEvent.getUserId());
+        adjustedEvent.setLastModifiedTime(originalEvent.getLastModifiedTime());
+        
+        // Apply DST adjustment to the event time without modifying the original
+        final ZonedDateTime adjustedEventTime = DayLightSavingHelper.handleDST(
+            timeZoneHelper.isDayLightSavingOn(), 
+            originalEvent.getEventTime()
+        );
+        adjustedEvent.setEventTime(adjustedEventTime);
+        
+        return adjustedEvent;
     }
 
     private void populateHearingEventReportWithHearingDetails(final HearingEventReport hearingEventReport, final Hearing hearing, final LocalDate hearingDate,  final JsonEnvelope query, final boolean hearingFlag, final boolean caseFlag, final boolean applicationFlag){

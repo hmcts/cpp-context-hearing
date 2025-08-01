@@ -119,7 +119,7 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
 
         shareResults(allNowsReferenceDataHelper, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
 
-        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), crackedHearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
+        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), crackedHearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
                                 .with(HearingSummaries::getId, is(hearing.getId()))
@@ -158,7 +158,7 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
             }
         }
 
-        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), dayActionPerformed.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
+        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), dayActionPerformed.getSittingDay().withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
                                 .with(HearingSummaries::getId, is(hearing.getId()))
@@ -167,7 +167,7 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
                                 ))))
         );
 
-        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), cancelledHearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
+        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), cancelledHearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         .withValue(GetHearings::getHearingSummaries, null)
         );

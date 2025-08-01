@@ -18,10 +18,9 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
 import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -619,13 +618,13 @@ public class HearingEventQueryViewTest {
                 hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
                 hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEventInUTC.getRecordedLabel())),
                 hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEventInUTC.getNote())),
-                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEventInUTC.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEventInUTC.getEventTime().plusHours(1).format(eventTimeFormatter))),
                 hasJsonPath(format("$.%s[0].%s", "hearings", "defendantAttendees", hasSize(1))),
                 hasJsonPath(format("$.%s[0].%s", "hearings", "prosecutionAttendees", hasSize(1))),
                 hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
                 hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
         ));
-        assertEquals(hearingEventInUTC.getEventTime().truncatedTo(ChronoUnit.SECONDS), hearingEventInBST.getEventTime().plusHours(1).truncatedTo(ChronoUnit.SECONDS));
+        assertEquals(hearingEventInUTC.getEventTime().truncatedTo(ChronoUnit.SECONDS), hearingEventInBST.getEventTime().truncatedTo(ChronoUnit.SECONDS));
     }
 
     @Test
@@ -1860,6 +1859,77 @@ public class HearingEventQueryViewTest {
         hearingDay.setDateTime(zonedDateTime);
 
         return hearingDay;
+    }
+
+    @Test
+    public void shouldCreateHearingEventWithAdjustedTimeWithoutModifyingOriginal() {
+        // Given
+        final UUID hearingId = randomUUID();
+        final ZonedDateTime originalEventTime = ZonedDateTime.now();
+        final HearingEvent originalEvent = new HearingEvent();
+        originalEvent.setId(randomUUID());
+        originalEvent.setHearingId(hearingId);
+        originalEvent.setEventTime(originalEventTime);
+        originalEvent.setRecordedLabel("Test Event");
+        originalEvent.setNote("Test Note");
+        originalEvent.setAlterable(true);
+        originalEvent.setUserId(randomUUID());
+        
+        // When
+        when(timeZone.isDayLightSavingOn()).thenReturn(true);
+        final HearingEvent adjustedEvent = target.createHearingEventWithAdjustedTime(originalEvent);
+        
+        // Then
+        // Verify the original event is not modified
+        assertThat(originalEvent.getEventTime(), is(originalEventTime));
+        
+        // Verify the adjusted event has all properties copied
+        assertThat(adjustedEvent.getId(), is(originalEvent.getId()));
+        assertThat(adjustedEvent.getHearingId(), is(originalEvent.getHearingId()));
+        assertThat(adjustedEvent.getRecordedLabel(), is(originalEvent.getRecordedLabel()));
+        assertThat(adjustedEvent.getNote(), is(originalEvent.getNote()));
+        assertThat(adjustedEvent.isAlterable(), is(originalEvent.isAlterable()));
+        assertThat(adjustedEvent.getUserId(), is(originalEvent.getUserId()));
+        
+        // Verify the adjusted event has a different event time (DST adjusted)
+        assertThat(adjustedEvent.getEventTime(), is(not(originalEventTime)));
+        
+        // Verify they are different objects
+        assertThat(adjustedEvent, is(not(sameInstance(originalEvent))));
+    }
+
+    @Test
+    public void shouldCreateHearingEventsWithAdjustedTimesForMultipleEvents() {
+        // Given
+        final List<HearingEvent> originalEvents = Arrays.asList(
+            createTestHearingEvent(ZonedDateTime.now()),
+            createTestHearingEvent(ZonedDateTime.now().plusHours(1)),
+            createTestHearingEvent(ZonedDateTime.now().plusHours(2))
+        );
+        
+        // When
+        when(timeZone.isDayLightSavingOn()).thenReturn(true);
+        final List<HearingEvent> adjustedEvents = target.createHearingEventsWithAdjustedTimes(originalEvents);
+        
+        // Then
+        assertThat(adjustedEvents, hasSize(3));
+        
+        // Verify each original event is not modified
+        for (int i = 0; i < originalEvents.size(); i++) {
+            assertThat(adjustedEvents.get(i), is(not(sameInstance(originalEvents.get(i)))));
+            assertThat(adjustedEvents.get(i).getId(), is(originalEvents.get(i).getId()));
+            assertThat(adjustedEvents.get(i).getEventTime(), is(not(originalEvents.get(i).getEventTime())));
+        }
+    }
+    
+    private HearingEvent createTestHearingEvent(final ZonedDateTime eventTime) {
+        final HearingEvent event = new HearingEvent();
+        event.setId(randomUUID());
+        event.setHearingId(randomUUID());
+        event.setEventTime(eventTime);
+        event.setRecordedLabel("Test Event");
+        event.setAlterable(true);
+        return event;
     }
 
 }

@@ -155,7 +155,7 @@ public class CaseTimelineIT extends AbstractIT {
         final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
         final UUID prosecutionCaseId = prosecutionCase.getId();
 
-        final String hearingTime = hearingDay.getSittingDay().toLocalTime().format(ofPattern("HH:mm").withZone(ZoneId.of("UTC")));
+        final String hearingTime = hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("Europe/London")).format(ofPattern("HH:mm"));
         final String hearingType = hearing.getType().getDescription();
         final String courtHouse = hearing.getCourtCentre().getName();
         final String courtRoom = hearing.getCourtCentre().getRoomName();

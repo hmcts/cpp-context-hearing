@@ -44,6 +44,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -99,9 +100,10 @@ public class TimelineHearingSummaryHelperTest {
         courtRoomName = STRING.next();
         hearing = new Hearing();
         hearingDay = new HearingDay();
-        final ZonedDateTime zonedDateTime = now().minusYears(1);
+        final ZonedDateTime zonedDateTime = now().minusYears(1).withZoneSameInstant(ZoneId.of("Europe/London"));
         hearingDay.setDate(zonedDateTime.toLocalDate());
         hearingDay.setDateTime(zonedDateTime);
+        hearingDay.setSittingDay(zonedDateTime);
         hearingDay.setListedDurationMinutes(new Random().nextInt());
         hearingDay.setCourtCentreId(courtCentreId);
         hearingDay.setCourtRoomId(courtRoomId);
@@ -214,7 +216,7 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
         assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
-        assertThat(timeLineHearingSummary.getHearingTime(), is(hearingDay.getDateTime().format(TIME_FORMATTER)));
+        assertThat(timeLineHearingSummary.getHearingTime(), is(hearingDay.getSittingDay().format(TIME_FORMATTER)));
         assertThat(timeLineHearingSummary.getStartTime(), is(hearingDay.getSittingDay()));
         assertThat(timeLineHearingSummary.getHearingType(), is(hearing.getHearingType().getDescription()));
         assertThat(timeLineHearingSummary.getCourtHouse(), is(courtCentreName));

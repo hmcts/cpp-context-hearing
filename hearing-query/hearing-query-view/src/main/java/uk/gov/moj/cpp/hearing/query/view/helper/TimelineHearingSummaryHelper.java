@@ -33,6 +33,8 @@ import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,6 +48,7 @@ public class TimelineHearingSummaryHelper {
 
     private static final String HEARING_OUTCOME_EFFECTIVE = "Effective";
     private static final String HEARING_OUTCOME_VACATED = "Vacated";
+    private static final ZoneId BST = ZoneId.of("Europe/London");
 
     @Inject
     private CourtApplicationsSerializer courtApplicationsSerializer;
@@ -57,7 +60,7 @@ public class TimelineHearingSummaryHelper {
         timelineHearingSummaryBuilder.withHearingType(null == hearing.getHearingType() ? null : hearing.getHearingType().getDescription());
         timelineHearingSummaryBuilder.withCourtHouse(getCourtCentreName(hearingDay, hearing, allCourtRooms));
         timelineHearingSummaryBuilder.withCourtRoom(getCourtRoomName(hearingDay, hearing, allCourtRooms));
-        timelineHearingSummaryBuilder.withHearingTime(hearingDay.getDateTime());
+        timelineHearingSummaryBuilder.withHearingTime(getHearingTime(hearingDay));
         timelineHearingSummaryBuilder.withStartTime(hearingDay.getSittingDay());
         timelineHearingSummaryBuilder.withEstimatedDuration(hearingDay.getListedDurationMinutes());
         if (nonNull(hearingYouthCourtDefendants)) {
@@ -85,6 +88,10 @@ public class TimelineHearingSummaryHelper {
         }
 
         return timelineHearingSummaryBuilder;
+    }
+
+    private static ZonedDateTime getHearingTime(final HearingDay hearingDay) {
+        return ofNullable(hearingDay.getSittingDay()).map(sd -> sd.withZoneSameInstant(BST)).orElse(hearingDay.getDateTime());
     }
 
     private void setHearingOutcome(final Hearing hearing, final CrackedIneffectiveTrial crackedIneffectiveTrial, final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder) {

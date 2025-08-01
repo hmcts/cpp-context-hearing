@@ -151,33 +151,33 @@ public class VerdictDelegate implements Serializable {
                     .findFirst()
                     .map(CourtApplication::getId)
                     .orElse(null);
-            if (prosecutionCaseId == null && courtApplicationId == null) {
-                throw new RuntimeException("Offence id is not present");
-            }
+
         } else {
             prosecutionCaseId = null;
             courtApplicationId = verdict.getApplicationId();
         }
+        if (prosecutionCaseId != null || courtApplicationId != null) {
 
-        final Plea existingOffencePlea = momento.getPleas().get(ofNullable(offenceId).orElse(courtApplicationId));
-        final boolean convictionDateAlreadySetForOffence = momento.getConvictionDates().containsKey(ofNullable(offenceId).orElse(courtApplicationId));
-        final boolean guiltyPleaForOffenceAlreadySet = nonNull(existingOffencePlea) && guiltyPleaTypes.contains(existingOffencePlea.getPleaValue());
+            final Plea existingOffencePlea = momento.getPleas().get(ofNullable(offenceId).orElse(courtApplicationId));
+            final boolean convictionDateAlreadySetForOffence = momento.getConvictionDates().containsKey(ofNullable(offenceId).orElse(courtApplicationId));
+            final boolean guiltyPleaForOffenceAlreadySet = nonNull(existingOffencePlea) && guiltyPleaTypes.contains(existingOffencePlea.getPleaValue());
 
-        if (isGuiltyVerdict(verdict.getVerdictType())) {
-            if (!convictionDateAlreadySetForOffence) {
-                events.add(convictionDateAdded()
+            if (isGuiltyVerdict(verdict.getVerdictType())) {
+                if (!convictionDateAlreadySetForOffence) {
+                    events.add(convictionDateAdded()
+                            .setCaseId(prosecutionCaseId)
+                            .setHearingId(hearingId)
+                            .setOffenceId(offenceId)
+                            .setConvictionDate(verdict.getVerdictDate())
+                            .setCourtApplicationId(courtApplicationId));
+                }
+            } else if (!guiltyPleaForOffenceAlreadySet && convictionDateAlreadySetForOffence) {
+                events.add(convictionDateRemoved()
                         .setCaseId(prosecutionCaseId)
                         .setHearingId(hearingId)
                         .setOffenceId(offenceId)
-                        .setConvictionDate(verdict.getVerdictDate())
                         .setCourtApplicationId(courtApplicationId));
             }
-        } else if (!guiltyPleaForOffenceAlreadySet && convictionDateAlreadySetForOffence) {
-            events.add(convictionDateRemoved()
-                    .setCaseId(prosecutionCaseId)
-                    .setHearingId(hearingId)
-                    .setOffenceId(offenceId)
-                    .setCourtApplicationId(courtApplicationId));
         }
     }
 }
