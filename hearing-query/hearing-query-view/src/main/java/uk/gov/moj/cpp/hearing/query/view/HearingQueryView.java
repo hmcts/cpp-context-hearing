@@ -142,7 +142,7 @@ public class HearingQueryView {
         final String startTime = payload.containsKey(FIELD_START_TIME) ? payload.getString(FIELD_START_TIME) : "00:00";
         final String endTime = payload.containsKey(FIELD_END_TIME) ? payload.getString(FIELD_END_TIME) : "23:59";
 
-        final GetHearings hearingListResponse = hearingService.getHearings(date, startTime, endTime, courtCentreId, roomId, accessibleCasesAndApplicationIds, isDDJorRecorder);
+        final GetHearings hearingListResponse = hearingService.getHearings(date, startTime, endTime, courtCentreId, roomId, accessibleCasesAndApplicationIds, isDDJorRecorder, envelope.metadata());
         return envelop(hearingListResponse)
                 .withName("hearing.get.hearings")
                 .withMetadataFrom(envelope);

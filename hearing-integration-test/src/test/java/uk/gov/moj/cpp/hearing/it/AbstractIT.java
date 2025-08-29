@@ -14,6 +14,8 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnitById;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUserGroupLoggedInUserHasPermissionForAction;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUserGroupLoggedInUserHasPermissionForObject;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithoutCases;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
@@ -187,6 +189,8 @@ public class AbstractIT {
         stubUsersAndGroupsGetLoggedInPermissionsWithoutCases();
         setupAsAuthorisedUser(getLoggedInUser());
         setupAsSystemUser(getLoggedInAdminUser());
+        stubUserGroupLoggedInUserHasPermissionForObject(true);
+        stubUserGroupLoggedInUserHasPermissionForAction();
     }
 
     protected void stubLjaDetails(final CourtCentre courtCentre, final UUID prosecutionAuthorityId) {

@@ -25,6 +25,7 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
+import uk.gov.moj.cpp.hearing.command.api.service.HearingQueryService;
 import uk.gov.moj.cpp.hearing.command.api.service.ReferenceDataService;
 
 import java.io.File;
@@ -96,6 +97,8 @@ public class HearingCommandApiTest {
 
     @Mock
     private ReferenceDataService referenceDataService;
+    @Mock
+    private HearingQueryService hearingQueryService;
 
     @Captor
     private ArgumentCaptor<Envelope<JsonObject>> senderArgumentCaptor1;

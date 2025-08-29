@@ -11,6 +11,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.api.service.HearingQueryService;
 import uk.gov.moj.cpp.hearing.command.api.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -30,13 +31,15 @@ public class HearingCommandApi {
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
     private final ReferenceDataService referenceDataService;
+    private final HearingQueryService hearingQueryService;
 
     @Inject
-    public HearingCommandApi(final Sender sender, final JsonObjectToObjectConverter jsonObjectToObjectConverter, final ObjectToJsonObjectConverter objectToJsonObjectConverter, final ReferenceDataService referenceDataService) {
+    public HearingCommandApi(final Sender sender, final JsonObjectToObjectConverter jsonObjectToObjectConverter, final ObjectToJsonObjectConverter objectToJsonObjectConverter, final ReferenceDataService referenceDataService, final HearingQueryService hearingQueryService) {
         this.sender = sender;
         this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
         this.objectToJsonObjectConverter = objectToJsonObjectConverter;
         this.referenceDataService = referenceDataService;
+        this.hearingQueryService = hearingQueryService;
     }
 
     @Handles("hearing.initiate")
@@ -152,6 +155,8 @@ public class HearingCommandApi {
 
     @Handles("hearing.share-days-results")
     public void shareResultsForHearingDay(final JsonEnvelope envelope) {
+        //this method, validateIfUserHasAccessToHearing, will throw ForbiddenRequestException if user doesn't have access to hearing
+        hearingQueryService.validateIfUserHasAccessToHearing(envelope);
         sendEnvelopeWithName(envelope, "hearing.command.share-days-results");
     }
 

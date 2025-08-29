@@ -23,7 +23,7 @@ import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCa
 import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
-import uk.gov.moj.cpp.hearing.query.api.service.usergroups.UserGroupQueryService;
+import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleApplications;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleCases;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.DDJChecker;
@@ -34,6 +34,7 @@ import uk.gov.moj.cpp.hearing.query.api.service.progression.ProgressionService;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.PIEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.XhibitEventMapperCache;
+import uk.gov.moj.cpp.hearing.query.api.service.usergroups.UserGroupQueryService;
 import uk.gov.moj.cpp.hearing.query.view.HearingEventQueryView;
 import uk.gov.moj.cpp.hearing.query.view.HearingQueryView;
 import uk.gov.moj.cpp.hearing.query.view.SessionTimeQueryView;
@@ -45,6 +46,8 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetails
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,6 +128,9 @@ public class HearingQueryApi {
     @Inject
     private ProgressionService progressionService;
 
+    @Inject
+    private HearingService hearingService;
+
     @Handles("hearing.get.hearings")
     public JsonEnvelope findHearings(final JsonEnvelope query) {
 
@@ -160,6 +166,7 @@ public class HearingQueryApi {
         if (!optionalUserId.isPresent()) {
             throw new BadRequestException("No Logged in UserId found to perform hearings search");
         }
+        hearingService.validateUserPermissionForApplicationType(query);
         final String userId = optionalUserId.get();
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
         final Permissions permissions = usersAndGroupsService.permissions(userId);

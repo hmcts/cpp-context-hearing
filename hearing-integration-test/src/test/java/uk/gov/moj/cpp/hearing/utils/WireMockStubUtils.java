@@ -12,6 +12,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static java.text.MessageFormat.format;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
@@ -340,5 +342,25 @@ public class WireMockStubUtils {
                         .withHeader(ID, randomUUID().toString())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(responsePayLoad)));
+    }
+
+    public static void stubUserGroupLoggedInUserHasPermissionForObject(final boolean hasPermission) {
+        stubFor(get(urlMatching("/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions.*"))
+                .atPriority(1)
+                .withHeader("Accept", containing("application/vnd.usersgroups.is-logged-in-user-has-permission-for-object+json"))
+                .willReturn(aResponse().withStatus(OK.getStatusCode())
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(String.valueOf(createObjectBuilder().add("hasPermission", hasPermission).build()))));
+    }
+
+    public static void stubUserGroupLoggedInUserHasPermissionForAction() {
+        stubFor(get(urlMatching("/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions.*"))
+                .atPriority(1)
+                .withHeader("Accept", containing("application/vnd.usersgroups.is-logged-in-user-has-permission-for-action+json"))
+                .willReturn(aResponse().withStatus(OK.getStatusCode())
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(String.valueOf(createObjectBuilder().add("permissions", createArrayBuilder().build()).build()))));
     }
 }

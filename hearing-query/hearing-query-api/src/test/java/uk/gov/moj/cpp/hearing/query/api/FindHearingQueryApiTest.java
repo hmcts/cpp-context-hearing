@@ -24,6 +24,7 @@ import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.Permissions;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.query.view.HearingQueryView;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -93,6 +94,8 @@ public class FindHearingQueryApiTest {
 
     @InjectMocks
     private HearingQueryApi hearingQueryApi;
+    @Mock
+    private HearingService hearingService;
 
     @Test
     public void should_throw_bad_request_when_user_id_is_missing() {

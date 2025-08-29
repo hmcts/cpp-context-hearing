@@ -1018,14 +1018,15 @@ public class HearingQueryViewTest {
         final UUID courtCentreId = UUID.randomUUID();
         final UUID roomId = UUID.randomUUID();
 
-        when(hearingService.getHearings(date, "00:00", "23:59", courtCentreId, roomId, accessibleCasesAndApplicationIds, true)).thenReturn(SampleData.getHearings());
-        JsonEnvelope envelope = envelopeFrom(metadataBuilder().withId(randomUUID())
+
+        final JsonEnvelope envelope = envelopeFrom(metadataBuilder().withId(randomUUID())
                         .withName("hearing.get.hearings"),
                 Json.createObjectBuilder()
                         .add("date", date.toString())
                         .add("courtCentreId", courtCentreId.toString())
                         .add("roomId", roomId.toString())
                         .build());
+        when(hearingService.getHearings(date, "00:00", "23:59", courtCentreId, roomId, accessibleCasesAndApplicationIds, true, envelope.metadata())).thenReturn(SampleData.getHearings());
         final Envelope<GetHearings> hearings = target.findHearings(envelope, accessibleCasesAndApplicationIds, true);
         assertThat(hearings.payload().getHearingSummaries().size(), is(2));
         assertThat(hearings.metadata().name(), is("hearing.get.hearings"));
