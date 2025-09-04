@@ -354,6 +354,15 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.add-witness");
     }
 
+    /**
+     * BDF for application-finalised field on ha_target table.
+     * @param envelope
+     */
+    @Handles("hearing.patch-application-finalised-on-target")
+    public void patchApplicationFinalisedOnTarget(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.patch-application-finalised-on-target");
+    }
+
     @Handles("hearing.delete-hearing-bdf")
     public void deleteHearingBdf(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.delete-hearing-bdf");

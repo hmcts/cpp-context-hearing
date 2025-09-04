@@ -81,6 +81,7 @@ public class TargetJPAMapper {
         target.setDraftResult(pojo.getDraftResult());
         target.setOffenceId(pojo.getOffenceId());
         target.setApplicationId(pojo.getApplicationId());
+        target.setApplicationFinalised(pojo.getApplicationFinalised());
         target.setCaseId(pojo.getCaseId());
         target.setResultLines(new HashSet<>());
 

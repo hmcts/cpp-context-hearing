@@ -55,6 +55,7 @@ import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingView;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -80,6 +81,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.DraftResultResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingViewResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
@@ -287,11 +289,52 @@ public class HearingQueryViewTest {
         assertThat(approvalRequested.getRequestApprovalTime(), is(requestApprovalTime));
     }
 
+    @Test
+    public void shouldGetLatestHearingByIdApprovalRequests() {
+        final UUID hearingId = randomUUID();
+        final UUID userId = randomUUID();
+        final ZonedDateTime requestApprovalTime = ZonedDateTime.now();
+
+        final HearingView hearing = hearingView(hearingId, userId, requestApprovalTime);
+        final HearingViewResponse hearingDetailsResponse = new HearingViewResponse(hearing, HearingState.INITIALISED, randomUUID());
+        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes1 = getCrackedIneffectiveVacatedTrialTypes();
+
+        final JsonEnvelope query = envelopeFrom(
+                metadataBuilder().withId(randomUUID()).withName("hearing.get-hearing-by-id"),
+                createObjectBuilder()
+                        .add("hearingId", hearingId.toString())
+                        .build());
+
+        when(hearingService.getHearingViewResponseById(hearingId, crackedIneffectiveVacatedTrialTypes1, prosecutionCasesIdsWithAccess, false)).thenReturn(hearingDetailsResponse);
+
+        final Envelope<HearingViewResponse> hearingEnvelope = target.findHearingById(query, crackedIneffectiveVacatedTrialTypes1, prosecutionCasesIdsWithAccess, false);
+        final HearingView actualHearing = hearingEnvelope.payload().getHearing();
+
+        verify(hearingService).getHearingViewResponseById(hearingId, crackedIneffectiveVacatedTrialTypes1, prosecutionCasesIdsWithAccess, false);
+        assertThat(hearingEnvelope.metadata().name(), is("hearing.get-hearing-by-id"));
+
+        assertThat(actualHearing.getId(), is(hearingId));
+        final List<uk.gov.justice.core.courts.ApprovalRequest> approvalsRequested = actualHearing.getApprovalsRequested();
+        final uk.gov.justice.core.courts.ApprovalRequest approvalRequested = approvalsRequested.get(0);
+        assertThat(approvalRequested.getHearingId(), is(hearingId));
+        assertThat(approvalRequested.getUserId(), is(userId));
+        assertThat(approvalRequested.getRequestApprovalTime(), is(requestApprovalTime));
+    }
+
     private uk.gov.justice.core.courts.Hearing hearing(UUID hearingId, UUID userId, ZonedDateTime requestApprovalTime) {
         final List<uk.gov.justice.core.courts.ApprovalRequest> approvalsRequested = new ArrayList();
         final uk.gov.justice.core.courts.ApprovalRequest approvalRequested = new uk.gov.justice.core.courts.ApprovalRequest(CHANGE, hearingId, requestApprovalTime, userId);
         approvalsRequested.add(approvalRequested);
         final uk.gov.justice.core.courts.Hearing hearing = new uk.gov.justice.core.courts.Hearing.Builder().withId(hearingId).withApprovalsRequested(approvalsRequested).build();
+        hearing.setApprovalsRequested(approvalsRequested);
+        return hearing;
+    }
+
+    private HearingView hearingView(UUID hearingId, UUID userId, ZonedDateTime requestApprovalTime) {
+        final List<uk.gov.justice.core.courts.ApprovalRequest> approvalsRequested = new ArrayList();
+        final uk.gov.justice.core.courts.ApprovalRequest approvalRequested = new uk.gov.justice.core.courts.ApprovalRequest(CHANGE, hearingId, requestApprovalTime, userId);
+        approvalsRequested.add(approvalRequested);
+        final HearingView hearing = new HearingView.Builder().withId(hearingId).withApprovalsRequested(approvalsRequested).build();
         hearing.setApprovalsRequested(approvalsRequested);
         return hearing;
     }

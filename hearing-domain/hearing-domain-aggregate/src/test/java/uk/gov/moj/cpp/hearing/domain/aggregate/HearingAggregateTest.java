@@ -19,7 +19,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -93,7 +92,6 @@ import uk.gov.moj.cpp.hearing.command.updateEvent.UpdateHearingEventsCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.ResultsError;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
-import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingDelegate;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
@@ -125,6 +123,7 @@ import uk.gov.moj.cpp.hearing.domain.event.OffencesRemovedFromExistingHearing;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.ReusableInfoSaved;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationFinalisedOnTargetUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAddedToHearing;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
@@ -163,7 +162,6 @@ import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hamcrest.Matchers;
@@ -4427,6 +4425,46 @@ public class HearingAggregateTest {
         final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
         assertThat(events, empty());
     }
+
+    @Test
+    void shouldUpdateApplicationFinalisedOnTarget() {
+        final UUID targetId = randomUUID();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithOffencePlea();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        final Hearing hearing = hearingAggregate.getHearing();
+        final LocalDate hearingDay = LocalDate.now();
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+        final YouthCourt youthCourt = YouthCourt.youthCourt().withYouthCourtId(randomUUID()).build();
+        final UUID resultLine1Id = randomUUID();
+        final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel(OFFENCE)
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(randomUUID())
+                .withOffenceId(targetId)
+                .build();
+
+        final List<SharedResultsCommandResultLineV2> resultLines = List.of(resultLine1);
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withUserId(randomUUID()).build();
+        final List<Object> eventCollection = hearingAggregate.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1).toList();
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.stream().filter(o->o.getClass().equals(ResultsSharedV3.class)).findFirst().get();
+        final List<Target2> targets = resultsSharedV3.getTargets();
+        assertThat(targets.size(), Matchers.is(1));
+        final Target2 target2 = targets.get(0);
+        assertThat(target2.getApplicationFinalised(), nullValue());
+        hearingAggregate.apply(resultsSharedV3);
+
+        final  List<Object> events = hearingAggregate.updateApplicationFinalisedOnTarget(targetId, hearing.getId(), hearingDay, true).collect(toList());;
+        assertThat(events.size(), Matchers.is(1));
+        final ApplicationFinalisedOnTargetUpdated event = (ApplicationFinalisedOnTargetUpdated) events.get(0);
+        assertThat(event.getHearingDay(), is(hearingDay));
+        assertThat(event.getHearingId(), is(hearing.getId()));
+        assertThat(event.getId(), is(targetId));
+        assertThat(event.isApplicationFinalised(), is(true));
+    }
+
 
     private static SharedResultsCommandResultLineV2 getSharedResultsCommandResultLine(final ResultLine resultLineIn, final Target targetDraft) {
         return getSharedResultsCommandResultLineV2(resultLineIn, targetDraft, "A", true);

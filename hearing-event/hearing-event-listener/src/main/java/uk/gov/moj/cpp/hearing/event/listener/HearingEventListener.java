@@ -700,6 +700,7 @@ public class HearingEventListener {
                     t.setApplicationId(targetReq.getApplicationId());
                     t.setShadowListed(targetReq.getShadowListed());
                     t.setResultLinesJson(targetReq.getResultLinesJson());
+                    t.setApplicationFinalised(targetReq.getApplicationFinalised());
                     addOrReplaceResultLine(targetReq, t);
                 });
     }

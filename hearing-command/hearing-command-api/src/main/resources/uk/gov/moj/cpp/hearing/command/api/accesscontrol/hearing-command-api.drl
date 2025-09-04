@@ -622,3 +622,12 @@ rule "Command - API - Action - hearing.delete-hearing-bdf"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.patch-application-finalised-on-target"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.patch-application-finalised-on-target");
+    eval(userAndGroupProvider.isSystemUser($action));
+  then
+    $outcome.setSuccess(true);
+end

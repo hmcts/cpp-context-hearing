@@ -1,8 +1,10 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.JudicialResultCategory;
 import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
@@ -20,10 +22,10 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.util.CustodyTimeLimitUtil;
-import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLocked;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLockedByOtherUser;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationFinalisedOnTargetUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
@@ -63,6 +65,9 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.justice.core.courts.ApplicationStatus.FINALISED;
+import static uk.gov.justice.core.courts.ApplicationStatus.LISTED;
+import static uk.gov.justice.core.courts.JudicialResultCategory.FINAL;
 import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.core.courts.Target2.target2;
 import static uk.gov.moj.cpp.util.DuplicateApplicationsHelper.dedupAllApplications;
@@ -76,6 +81,7 @@ public class ResultsSharedDelegate implements Serializable {
     private static final String HEARING_VACATED_RESULT_DEFINITION_ID = "8cdc7be1-fc94-485b-83ee-410e710f6665";
 
     public static final String REASON_FOR_VACATING_TRIAL = "reasonForVacatingTrial";
+    private static final String FINAL_CATEGORY = "F";
 
 
     private final HearingAggregateMomento momento;
@@ -240,6 +246,12 @@ public class ResultsSharedDelegate implements Serializable {
 
     }
 
+    public void handleApplicationFinalisedOnTargetUpdated(final ApplicationFinalisedOnTargetUpdated applicationFinalisedOnTargetUpdated){
+        final Map<UUID, Target2> targetHearingMap = this.momento.getMultiDaySavedTargets().get(applicationFinalisedOnTargetUpdated.getHearingDay());
+        final Target2 target2 = targetHearingMap.get(applicationFinalisedOnTargetUpdated.getId());
+        target2.setApplicationFinalised(applicationFinalisedOnTargetUpdated.isApplicationFinalised());
+    }
+
     private void updateTransientTargets(final UUID targetId, final Target2 target) {
         this.momento.getTransientTargets().put(targetId, target);
     }
@@ -279,6 +291,10 @@ public class ResultsSharedDelegate implements Serializable {
     public Stream<Object> manageResultsFailed(final UUID hearingId, final HearingState hearingState, final ResultsError resultsError, final LocalDate hearingDay,
                                               final UUID userId, final UUID amendedByUserId, final Integer amendedResultVersion) {
         return Stream.of(new ManageResultsFailed(hearingId, hearingState, resultsError, hearingDay, amendedResultVersion, amendedByUserId, userId));
+    }
+
+    public Stream<Object> updateApplicationFinalisedOnTarget(final UUID targetId, final UUID hearingId, final LocalDate hearingDay, final boolean applicationFinalised) {
+        return Stream.of(new ApplicationFinalisedOnTargetUpdated(targetId, hearingId, hearingDay, applicationFinalised));
     }
 
     private ResultLine convert(final SharedResultsCommandResultLine resultLineIn) {
@@ -574,7 +590,15 @@ public class ResultsSharedDelegate implements Serializable {
         final Hearing hearing = dedupAllApplications(this.momento.getHearing());
         hearing.setYouthCourt(youthCourt);
         hearing.setHasSharedResults(true);
+        if (isNotEmpty(hearing.getCourtApplications())) {
+            hearing.getCourtApplications().forEach(ca -> {
+                final ApplicationStatus applicationStatus = isNotEmpty(ca.getJudicialResults())
+                        && ca.getJudicialResults().stream().anyMatch(jr -> jr.getCategory() == FINAL) ? FINALISED : LISTED;
+                ca.setApplicationStatus(applicationStatus);
+            });
+        }
 
+        final List<Target2> updatedFinalTargets = updateApplicationFinalisedFlag(finalTargets.values());
         final ResultsSharedV3.Builder resultsSharedV3Builder = ResultsSharedV3.builder()
                 .withIsReshare(previouslyShared)
                 .withHearingId(hearingId)
@@ -583,7 +607,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .withCourtClerk(courtClerk)
                 .withVariantDirectory(calculateNewVariants3(targetsInAggregate))
                 .withHearing(hearing)
-                .withTargets(new ArrayList<>(finalTargets.values()))
+                .withTargets(updatedFinalTargets)
                 .withSavedTargets(getSavedTargetsForHearingDay3(momento.getMultiDaySavedTargets(), hearingDay))
                 .withCompletedResultLinesStatus(getCompletedResultLineStatusForHearingDay(this.momento.getMultiDayCompletedResultLinesStatus(), hearingDay))
                 .withNewAmendmentResults(newAmendmentResults)
@@ -607,6 +631,22 @@ public class ResultsSharedDelegate implements Serializable {
         final Stream<Object> streams = Stream.concat(Stream.empty(), streamBuilder.build());
         new HearingDaySharedResults().setHasSharedResults(momento.getHearing(), hearingDay);
         return streams;
+    }
+
+    private List<Target2> updateApplicationFinalisedFlag(final Collection<Target2> targets) {
+        final List<Target2> updatedFinalTargets = new ArrayList<>();
+
+        targets.forEach(t -> {
+            if (isNotEmpty(t.getResultLines())) {
+                final boolean applicationFinalised = t.getResultLines().stream()
+                        .filter(rl -> nonNull(rl.getApplicationId()) && isNull(rl.getOffenceId()))
+                        .filter(rl -> FINAL_CATEGORY.equalsIgnoreCase(rl.getCategory()))
+                        .anyMatch(rl -> !Boolean.TRUE.equals(rl.getIsDeleted()));
+                t.setApplicationFinalised(applicationFinalised ? Boolean.TRUE : null);
+            }
+            updatedFinalTargets.add(t);
+        });
+        return updatedFinalTargets;
     }
 
     private void isHearingVacatedRequired(final Hearing hearing, final ResultsSharedV3 resultsSharedV3, final Stream.Builder<Object> streamBuilder) {

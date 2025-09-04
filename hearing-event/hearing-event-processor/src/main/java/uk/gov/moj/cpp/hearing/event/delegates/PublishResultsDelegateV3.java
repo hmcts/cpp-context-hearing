@@ -10,6 +10,8 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.justice.core.courts.ApplicationStatus.FINALISED;
+import static uk.gov.justice.core.courts.ApplicationStatus.LISTED;
 import static uk.gov.justice.core.courts.JurisdictionType.MAGISTRATES;
 import static uk.gov.justice.core.courts.Level.CASE;
 import static uk.gov.justice.core.courts.Level.DEFENDANT;
@@ -40,6 +42,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResultedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.ApplicationStatusHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.BailConditionsHelperV2;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.BailStatusHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.BailStatusReasonHelper;
@@ -99,6 +102,7 @@ public class PublishResultsDelegateV3 {
     private final RestructuringHelperV3 restructuringHelper;
 
     private final OffenceHelper offenceHelper;
+    private final ApplicationStatusHelper applicationStatusHelper;
 
     @Inject
     public PublishResultsDelegateV3(final Enveloper enveloper, final ObjectToJsonObjectConverter objectToJsonObjectConverter,
@@ -106,7 +110,8 @@ public class PublishResultsDelegateV3 {
                                     final CustodyTimeLimitCalculatorV3 custodyTimeLimitCalculator,
                                     final BailStatusHelper bailStatusHelper,
                                     final RestructuringHelperV3 restructuringHelper,
-                                    final OffenceHelper offenceHelper) {
+                                    final OffenceHelper offenceHelper,
+                                    final ApplicationStatusHelper applicationStatusHelper) {
         this.enveloper = enveloper;
         this.objectToJsonObjectConverter = objectToJsonObjectConverter;
         this.referenceDataService = referenceDataService;
@@ -115,6 +120,7 @@ public class PublishResultsDelegateV3 {
         this.bailStatusHelper = bailStatusHelper;
         this.restructuringHelper = restructuringHelper;
         this.offenceHelper = offenceHelper;
+        this.applicationStatusHelper = applicationStatusHelper;
     }
 
     public void shareResults(final JsonEnvelope context, final Sender sender, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> treeNodes) {
@@ -323,6 +329,12 @@ public class PublishResultsDelegateV3 {
         if (isNotEmpty(judicialResults)) {
             setPromptsAsNullIfEmpty(judicialResults);
             courtApplication.setJudicialResults(judicialResults);
+            courtApplication.setApplicationStatus(judicialResults.stream()
+                    .anyMatch(judicialResult -> JudicialResultCategory.FINAL.equals(judicialResult.getCategory()))
+                    ? FINALISED : LISTED);
+        } else {
+            //check if application previously resulted
+            courtApplication.setApplicationStatus(applicationStatusHelper.getApplicationStatus(courtApplication.getId()));
         }
     }
 

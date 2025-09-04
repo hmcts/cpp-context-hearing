@@ -55,6 +55,9 @@ public class Target {
     @Column(name = "shadow_listed")
     private Boolean shadowListed;
 
+    @Column(name = "application_finalised")
+    private Boolean applicationFinalised;
+
     public Target() {
         //For JPA
     }
@@ -144,6 +147,14 @@ public class Target {
 
     public void setShadowListed(final Boolean shadowListed) {
         this.shadowListed = shadowListed;
+    }
+
+    public Boolean getApplicationFinalised() {
+        return applicationFinalised;
+    }
+
+    public void setApplicationFinalised(final Boolean applicationFinalised) {
+        this.applicationFinalised = applicationFinalised;
     }
 
     public UUID getMasterDefendantId() {

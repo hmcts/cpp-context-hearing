@@ -366,4 +366,7 @@ subscriptions_descriptor:
         - name: hearing.event.court-application-hearing-deleted
           schema_uri: http://justice.gov.uk/hearing/event/hearing.event.court-application-hearing-deleted.json
 
+        - name: hearing.events.application-finalised-on-target-updated
+          schema_uri: http://justice.gov.uk/hearing/event/hearing.events.application-finalised-on-target-updated.json
+
       event_source_name: hearing

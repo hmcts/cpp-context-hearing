@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -12,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.ApplicationStatus.FINALISED;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
@@ -45,10 +48,15 @@ import uk.gov.justice.core.courts.ReferralReason;
 import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
+import uk.gov.justice.hearing.courts.HearingView;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantReferralReason;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.JudicialRole;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
+import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 
 import java.time.LocalDate;
@@ -111,6 +119,9 @@ public class HearingJPAMapperTest {
     @Mock
     private HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository;
 
+    @Mock
+    private HearingApplicationRepository hearingApplicationRepository;
+
     @Captor
     private ArgumentCaptor<List<CourtApplication>> courtApplicationCaptor;
 
@@ -170,7 +181,7 @@ public class HearingJPAMapperTest {
     }
 
     @Test
-    public void ShouldUpdateConvictedDateForOffenceUnderCourtApplicationCase(){
+    public void ShouldUpdateConvictedDateForOffenceUnderCourtApplicationCase() {
         final UUID courtAppId = randomUUID();
         final UUID offenceId = randomUUID();
         List<CourtApplication> courtApplications = new ArrayList<>();
@@ -196,9 +207,9 @@ public class HearingJPAMapperTest {
 
         when(courtApplicationsSerializer.courtApplications(any(String.class))).thenReturn(courtApplications);
         when(courtApplicationsSerializer.json(any())).thenReturn("EFG");
-        final LocalDate convictedDate =  LocalDate.now();
+        final LocalDate convictedDate = LocalDate.now();
 
-        final String strResult = hearingJPAMapper.updateConvictedDateOnOffencesInCourtApplication("",courtAppId, offenceId,  convictedDate );
+        final String strResult = hearingJPAMapper.updateConvictedDateOnOffencesInCourtApplication("", courtAppId, offenceId, convictedDate);
 
         verify(courtApplicationsSerializer, times(1)).json(courtApplicationCaptor.capture());
         List<CourtApplication> applicationList = courtApplicationCaptor.getValue();
@@ -219,7 +230,7 @@ public class HearingJPAMapperTest {
     }
 
     @Test
-    public void ShouldUpdateConvictedDateForOffenceUnderCourtApplicationCourtOrder(){
+    public void ShouldUpdateConvictedDateForOffenceUnderCourtApplicationCourtOrder() {
         final UUID courtAppId = randomUUID();
         final UUID offenceId = randomUUID();
         List<CourtApplication> courtApplications = new ArrayList<>();
@@ -229,7 +240,7 @@ public class HearingJPAMapperTest {
                         .withCourtOrderOffences(Arrays.asList(CourtOrderOffence.courtOrderOffence()
                                 .withOffence(uk.gov.justice.core.courts.Offence.offence()
                                         .withId(offenceId).build())
-                                .build(),CourtOrderOffence.courtOrderOffence()
+                                .build(), CourtOrderOffence.courtOrderOffence()
                                 .withOffence(uk.gov.justice.core.courts.Offence.offence()
                                         .withId(randomUUID()).build())
                                 .build()))
@@ -247,9 +258,9 @@ public class HearingJPAMapperTest {
                 .build());
         when(courtApplicationsSerializer.courtApplications(any(String.class))).thenReturn(courtApplications);
         when(courtApplicationsSerializer.json(any())).thenReturn("EFG");
-        final LocalDate convictedDate =  LocalDate.now();
+        final LocalDate convictedDate = LocalDate.now();
 
-        final String strResult = hearingJPAMapper.updateConvictedDateOnOffencesInCourtApplication("",courtAppId, offenceId,  convictedDate );
+        final String strResult = hearingJPAMapper.updateConvictedDateOnOffencesInCourtApplication("", courtAppId, offenceId, convictedDate);
 
         verify(courtApplicationsSerializer, times(1)).json(courtApplicationCaptor.capture());
         List<CourtApplication> applicationList = courtApplicationCaptor.getValue();
@@ -269,7 +280,7 @@ public class HearingJPAMapperTest {
 
 
     @Test
-    public void ShouldUpdatePleaForOffenceUnderCourtApplicationCase(){
+    public void ShouldUpdatePleaForOffenceUnderCourtApplicationCase() {
         final UUID courtAppId = randomUUID();
         final UUID offenceId = randomUUID();
         List<CourtApplication> courtApplications = new ArrayList<>();
@@ -309,7 +320,7 @@ public class HearingJPAMapperTest {
                 .withAllocationDecision(AllocationDecision.allocationDecision().build())
                 .build();
 
-        final String strResult = hearingJPAMapper.updatePleaOnOffencesInCourtApplication("",  plea );
+        final String strResult = hearingJPAMapper.updatePleaOnOffencesInCourtApplication("", plea);
 
         verify(courtApplicationsSerializer, times(1)).json(courtApplicationCaptor.capture());
         List<CourtApplication> applicationList = courtApplicationCaptor.getValue();
@@ -332,7 +343,7 @@ public class HearingJPAMapperTest {
     }
 
     @Test
-    public void ShouldRemovePleaForOffenceUnderCourtApplicationCase(){
+    public void ShouldRemovePleaForOffenceUnderCourtApplicationCase() {
         final UUID courtAppId = randomUUID();
         final UUID offenceId = randomUUID();
         List<CourtApplication> courtApplications = new ArrayList<>();
@@ -348,7 +359,7 @@ public class HearingJPAMapperTest {
                                 .withAllocationDecision(AllocationDecision.allocationDecision().build())
                                 .build(), Offence.offence()
                                 .withId(randomUUID())
-                               .build()))
+                                .build()))
                         .build()))
                 .build());
         courtApplications.add(CourtApplication.courtApplication()
@@ -367,7 +378,7 @@ public class HearingJPAMapperTest {
                 .withApplicationId(courtAppId)
                 .withOffenceId(offenceId).build();
 
-        final String strResult = hearingJPAMapper.updatePleaOnOffencesInCourtApplication("",  plea );
+        final String strResult = hearingJPAMapper.updatePleaOnOffencesInCourtApplication("", plea);
 
         verify(courtApplicationsSerializer, times(1)).json(courtApplicationCaptor.capture());
         List<CourtApplication> applicationList = courtApplicationCaptor.getValue();
@@ -390,7 +401,7 @@ public class HearingJPAMapperTest {
     }
 
     @Test
-    public void ShouldUpdatePleaForOffenceUnderCourtApplicationCourtOrders(){
+    public void ShouldUpdatePleaForOffenceUnderCourtApplicationCourtOrders() {
         final UUID courtAppId = randomUUID();
         final UUID offenceId = randomUUID();
         List<CourtApplication> courtApplications = new ArrayList<>();
@@ -400,7 +411,7 @@ public class HearingJPAMapperTest {
                         .withCourtOrderOffences(Arrays.asList(CourtOrderOffence.courtOrderOffence()
                                 .withOffence(uk.gov.justice.core.courts.Offence.offence()
                                         .withId(offenceId).build())
-                                .build(),CourtOrderOffence.courtOrderOffence()
+                                .build(), CourtOrderOffence.courtOrderOffence()
                                 .withOffence(uk.gov.justice.core.courts.Offence.offence()
                                         .withId(randomUUID()).build())
                                 .build()))
@@ -433,7 +444,7 @@ public class HearingJPAMapperTest {
                 .withAllocationDecision(AllocationDecision.allocationDecision().build())
                 .build();
 
-        final String strResult = hearingJPAMapper.updatePleaOnOffencesInCourtApplication("",  pleaModel );
+        final String strResult = hearingJPAMapper.updatePleaOnOffencesInCourtApplication("", pleaModel);
 
         verify(courtApplicationsSerializer, times(1)).json(courtApplicationCaptor.capture());
         List<CourtApplication> applicationList = courtApplicationCaptor.getValue();
@@ -454,7 +465,7 @@ public class HearingJPAMapperTest {
     }
 
     @Test
-    public void ShouldRemovePleaForOffenceUnderCourtApplicationCourtOrders(){
+    public void ShouldRemovePleaForOffenceUnderCourtApplicationCourtOrders() {
         final UUID courtAppId = randomUUID();
         final UUID offenceId = randomUUID();
         List<CourtApplication> courtApplications = new ArrayList<>();
@@ -468,7 +479,7 @@ public class HearingJPAMapperTest {
                                         .withIndicatedPlea(IndicatedPlea.indicatedPlea().build())
                                         .withAllocationDecision(AllocationDecision.allocationDecision().build())
                                         .build())
-                                .build(),CourtOrderOffence.courtOrderOffence()
+                                .build(), CourtOrderOffence.courtOrderOffence()
                                 .withOffence(Offence.offence()
                                         .withId(randomUUID()).build())
                                 .build()))
@@ -487,11 +498,11 @@ public class HearingJPAMapperTest {
 
         when(courtApplicationsSerializer.courtApplications(any(String.class))).thenReturn(courtApplications);
         when(courtApplicationsSerializer.json(any())).thenReturn("EFG");
-        final PleaModel pleaModel =  PleaModel.pleaModel()
+        final PleaModel pleaModel = PleaModel.pleaModel()
                 .withApplicationId(courtAppId)
                 .withOffenceId(offenceId).build();
 
-        final String strResult = hearingJPAMapper.updatePleaOnOffencesInCourtApplication("",  pleaModel );
+        final String strResult = hearingJPAMapper.updatePleaOnOffencesInCourtApplication("", pleaModel);
 
         verify(courtApplicationsSerializer, times(1)).json(courtApplicationCaptor.capture());
         List<CourtApplication> applicationList = courtApplicationCaptor.getValue();
@@ -512,7 +523,7 @@ public class HearingJPAMapperTest {
     }
 
     @Test
-    public void ShouldUpdateVerdictForOffenceUnderCourtApplicationCase(){
+    public void ShouldUpdateVerdictForOffenceUnderCourtApplicationCase() {
         final UUID courtAppId = randomUUID();
         final UUID offenceId = randomUUID();
         final LocalDate verdictDate = LocalDate.now();
@@ -539,13 +550,13 @@ public class HearingJPAMapperTest {
 
         when(courtApplicationsSerializer.courtApplications(any(String.class))).thenReturn(courtApplications);
         when(courtApplicationsSerializer.json(any())).thenReturn("EFG");
-        final Verdict verdict =  Verdict.verdict()
+        final Verdict verdict = Verdict.verdict()
                 .withApplicationId(courtAppId)
                 .withOffenceId(offenceId)
                 .withVerdictDate(verdictDate)
                 .withVerdictType(VerdictType.verdictType().withId(randomUUID()).withCategoryType("test").withCategory("testCategory").build()).build();
 
-        final String strResult = hearingJPAMapper.updateVerdictOnOffencesInCourtApplication("",  verdict );
+        final String strResult = hearingJPAMapper.updateVerdictOnOffencesInCourtApplication("", verdict);
 
         verify(courtApplicationsSerializer, times(1)).json(courtApplicationCaptor.capture());
         List<CourtApplication> applicationList = courtApplicationCaptor.getValue();
@@ -566,7 +577,7 @@ public class HearingJPAMapperTest {
     }
 
     @Test
-    public void ShouldUpdateClearVerdictForOffenceUnderCourtApplicationCase(){
+    public void ShouldUpdateClearVerdictForOffenceUnderCourtApplicationCase() {
         final UUID courtAppId = randomUUID();
         final UUID offenceId = randomUUID();
         final UUID offenceId1 = randomUUID();
@@ -594,7 +605,7 @@ public class HearingJPAMapperTest {
 
         when(courtApplicationsSerializer.courtApplications(any(String.class))).thenReturn(courtApplications);
         when(courtApplicationsSerializer.json(any())).thenReturn("EFG");
-        final Verdict verdict =  Verdict.verdict()
+        final Verdict verdict = Verdict.verdict()
                 .withApplicationId(courtAppId)
                 .withOffenceId(offenceId)
                 .withVerdictDate(verdictDate)
@@ -602,7 +613,7 @@ public class HearingJPAMapperTest {
                 .withIsDeleted(true)
                 .build();
 
-        final String strResult = hearingJPAMapper.updateVerdictOnOffencesInCourtApplication("",  verdict );
+        final String strResult = hearingJPAMapper.updateVerdictOnOffencesInCourtApplication("", verdict);
 
         verify(courtApplicationsSerializer, times(1)).json(courtApplicationCaptor.capture());
         List<CourtApplication> applicationList = courtApplicationCaptor.getValue();
@@ -624,7 +635,7 @@ public class HearingJPAMapperTest {
     }
 
     @Test
-    public void ShouldUpdateVerdictForOffenceUnderCourtApplicationCourtOrders(){
+    public void ShouldUpdateVerdictForOffenceUnderCourtApplicationCourtOrders() {
         final UUID courtAppId = randomUUID();
         final UUID offenceId = randomUUID();
         final LocalDate verdictDate = LocalDate.now();
@@ -635,7 +646,7 @@ public class HearingJPAMapperTest {
                         .withCourtOrderOffences(Arrays.asList(CourtOrderOffence.courtOrderOffence()
                                 .withOffence(uk.gov.justice.core.courts.Offence.offence()
                                         .withId(offenceId).build())
-                                .build(),CourtOrderOffence.courtOrderOffence()
+                                .build(), CourtOrderOffence.courtOrderOffence()
                                 .withOffence(uk.gov.justice.core.courts.Offence.offence()
                                         .withId(randomUUID()).build())
                                 .build()))
@@ -654,13 +665,13 @@ public class HearingJPAMapperTest {
 
         when(courtApplicationsSerializer.courtApplications(any(String.class))).thenReturn(courtApplications);
         when(courtApplicationsSerializer.json(any())).thenReturn("EFG");
-        final Verdict verdict =  Verdict.verdict()
+        final Verdict verdict = Verdict.verdict()
                 .withApplicationId(courtAppId)
                 .withOffenceId(offenceId)
                 .withVerdictDate(verdictDate)
                 .withVerdictType(VerdictType.verdictType().withId(randomUUID()).withCategoryType("test").withCategory("testCategory").build()).build();
 
-        final String strResult = hearingJPAMapper.updateVerdictOnOffencesInCourtApplication("",  verdict );
+        final String strResult = hearingJPAMapper.updateVerdictOnOffencesInCourtApplication("", verdict);
 
         verify(courtApplicationsSerializer, times(1)).json(courtApplicationCaptor.capture());
         List<CourtApplication> applicationList = courtApplicationCaptor.getValue();
@@ -698,10 +709,10 @@ public class HearingJPAMapperTest {
         hearingEntity.setTargets(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.Target.class)));
         hearingEntity.setHearingType(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType.class));
         hearingEntity.setHearingCaseNotes(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote.class)));
-        hearingEntity.setIsVacatedTrial(Boolean.TRUE);
+        hearingEntity.setIsVacatedTrial(TRUE);
         hearingEntity.setNumberOfGroupCases(NUMBER_OF_GROUP_CASES);
         hearingEntity.setApprovalsRequested(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.ApprovalRequested.class)));
-        hearingEntity.setIsGroupProceedings(Boolean.TRUE);
+        hearingEntity.setIsGroupProceedings(TRUE);
 
         CourtCentre courtCentreMock = mock(CourtCentre.class);
         when(courtCentreJPAMapper.fromJPA(hearingEntity.getCourtCentre())).thenReturn(courtCentreMock);
@@ -768,8 +779,8 @@ public class HearingJPAMapperTest {
                 .with(Hearing::getApprovalsRequested, first(is(approvalRequestMock)))
 
                 .withValue(Hearing::getCourtApplications, null)
-                .with(Hearing::getIsVacatedTrial, is(Boolean.TRUE))
-                .with(Hearing::getIsGroupProceedings, is(Boolean.TRUE))
+                .with(Hearing::getIsVacatedTrial, is(TRUE))
+                .with(Hearing::getIsGroupProceedings, is(TRUE))
                 .with(Hearing::getNumberOfGroupCases, is(NUMBER_OF_GROUP_CASES))
         );
     }
@@ -793,9 +804,9 @@ public class HearingJPAMapperTest {
                 .withDefendantAttendance(asList(mock(DefendantAttendance.class)))
                 .withHearingCaseNotes(asList(mock(HearingCaseNote.class)))
                 .withCourtApplications(asList())
-                .withIsVacatedTrial(Boolean.FALSE)
+                .withIsVacatedTrial(FALSE)
                 .withApprovalsRequested(asList(mock(ApprovalRequest.class)))
-                .withIsGroupProceedings(Boolean.TRUE)
+                .withIsGroupProceedings(TRUE)
                 .build();
 
 
@@ -848,8 +859,8 @@ public class HearingJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getDefendantAttendance, first(is(defendantAttendanceMock)))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getHearingCaseNotes, first(is(hearingCaseNoteMock)))
                 .withValue(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getCourtApplicationsJson, expectedCourtApplicationsJson)
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getIsVacatedTrial, is(Boolean.FALSE))
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getIsGroupProceedings, is(Boolean.TRUE))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getIsVacatedTrial, is(FALSE))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getIsGroupProceedings, is(TRUE))
         );
     }
 
@@ -872,7 +883,7 @@ public class HearingJPAMapperTest {
         hearingEntity.setTargets(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.Target.class)));
         hearingEntity.setHearingType(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType.class));
         hearingEntity.setHearingCaseNotes(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote.class)));
-        hearingEntity.setIsVacatedTrial(Boolean.TRUE);
+        hearingEntity.setIsVacatedTrial(TRUE);
         hearingEntity.setApprovalsRequested(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.ApprovalRequested.class)));
 
         CourtCentre courtCentreMock = mock(CourtCentre.class);
@@ -936,7 +947,95 @@ public class HearingJPAMapperTest {
                 .with(Hearing::getHearingCaseNotes, first(is(hearingCaseNoteMock)))
                 .with(Hearing::getApprovalsRequested, first(is(approvalRequestMock)))
                 .withValue(Hearing::getCourtApplications, null)
-                .with(Hearing::getIsVacatedTrial, is(Boolean.TRUE))
+                .with(Hearing::getIsVacatedTrial, is(TRUE))
         );
+    }
+
+    @Test
+    public void givenApplicationFinalisedWhenGetHearingShouldReturnIsAmendmentAllowedFalse() {
+        final UUID hearingId = randomUUID();
+        final UUID applicationId = randomUUID();
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearingEntity = new uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing();
+        hearingEntity.setId(hearingId);
+        hearingEntity.setCourtCentre(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre.class));
+        hearingEntity.setDefendantAttendance(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance.class)));
+        hearingEntity.setDefendantReferralReasons(asSet(mock(DefendantReferralReason.class)));
+        hearingEntity.setHasSharedResults(RandomGenerator.BOOLEAN.next());
+        hearingEntity.setHearingDays(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay.class)));
+        hearingEntity.setHearingLanguage(RandomGenerator.values(HearingLanguage.values()).next());
+        hearingEntity.setJudicialRoles(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.JudicialRole.class)));
+        hearingEntity.setJurisdictionType(RandomGenerator.values(JurisdictionType.values()).next());
+        hearingEntity.setProsecutionCases(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase.class)));
+        hearingEntity.setReportingRestrictionReason(RandomGenerator.STRING.next());
+        hearingEntity.setTargets(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.Target.class)));
+        hearingEntity.setHearingType(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType.class));
+        hearingEntity.setHearingCaseNotes(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote.class)));
+        hearingEntity.setIsVacatedTrial(TRUE);
+        hearingEntity.setNumberOfGroupCases(NUMBER_OF_GROUP_CASES);
+        hearingEntity.setApprovalsRequested(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.ApprovalRequested.class)));
+        hearingEntity.setIsGroupProceedings(TRUE);
+
+        final Target target = Target.target().setId(new HearingSnapshotKey(randomUUID(), hearingId)).setHearing(hearingEntity);
+        target.setApplicationId(applicationId);
+        target.setApplicationFinalised(TRUE);
+        hearingEntity.setTargets(Set.of(target));
+
+        CourtCentre courtCentreMock = mock(CourtCentre.class);
+        when(courtCentreJPAMapper.fromJPA(hearingEntity.getCourtCentre())).thenReturn(courtCentreMock);
+
+        ReferralReason referralReasonMock = mock(ReferralReason.class);
+        when(defendantReferralReasonsJPAMapper.fromJPA(hearingEntity.getDefendantReferralReasons())).thenReturn(asList(referralReasonMock));
+
+        uk.gov.justice.core.courts.HearingDay hearingDayMock = mock(uk.gov.justice.core.courts.HearingDay.class);
+        when(hearingDayJPAMapper.fromJPA(hearingEntity.getHearingDays())).thenReturn(asList(hearingDayMock));
+
+        uk.gov.justice.core.courts.JudicialRole judicialRoleMock = mock(uk.gov.justice.core.courts.JudicialRole.class);
+        when(judicialRoleJPAMapper.fromJPA(hearingEntity.getJudicialRoles())).thenReturn(asList(judicialRoleMock));
+
+        ProsecutionCase prosecutionCaseMock = mock(ProsecutionCase.class);
+        when(prosecutionCaseJPAMapper.fromJPA(hearingEntity.getProsecutionCases())).thenReturn(asList(prosecutionCaseMock));
+
+        HearingType hearingTypeMock = mock(HearingType.class);
+        when(hearingTypeJPAMapper.fromJPA(hearingEntity.getHearingType())).thenReturn(hearingTypeMock);
+
+        DefendantAttendance defendantAttendanceMock = mock(DefendantAttendance.class);
+        when(defendantAttendanceJPAMapper.fromJPA(hearingEntity.getDefendantAttendance())).thenReturn(asList(defendantAttendanceMock));
+
+        HearingCaseNote hearingCaseNoteMock = mock(HearingCaseNote.class);
+        when(hearingCaseNoteJPAMapper.fromJPA(hearingEntity.getHearingCaseNotes())).thenReturn(asList(hearingCaseNoteMock));
+
+        ProsecutionCounsel prosecutionCounselMock = mock(ProsecutionCounsel.class);
+        when(hearingProsecutionCounselJPAMapper.fromJPA(hearingEntity.getProsecutionCounsels())).thenReturn(asList(prosecutionCounselMock));
+
+        RespondentCounsel respondentCounselMock = mock(RespondentCounsel.class);
+        when(hearingRespondentCounselJPAMapper.fromJPA(hearingEntity.getRespondentCounsels())).thenReturn(asList(respondentCounselMock));
+
+        ApplicantCounsel applicantCounselMock = mock(ApplicantCounsel.class);
+        when(hearingApplicantCounselJPAMapper.fromJPA(hearingEntity.getApplicantCounsels())).thenReturn(asList(applicantCounselMock));
+
+        DefenceCounsel defenceCounselMock = mock(DefenceCounsel.class);
+        when(defenceCounselJPAMapper.fromJPA(hearingEntity.getDefenceCounsels())).thenReturn(asList(defenceCounselMock));
+
+        InterpreterIntermediary interpreterIntermediaryMock = mock(InterpreterIntermediary.class);
+        when(hearingInterpreterIntermediaryJPAMapper.fromJPA(hearingEntity.getHearingInterpreterIntermediaries())).thenReturn(asList(interpreterIntermediaryMock));
+
+        CompanyRepresentative companyRepresentativeMock = mock(CompanyRepresentative.class);
+        when(hearingCompanyRepresentativeJPAMapper.fromJPA(hearingEntity.getCompanyRepresentatives())).thenReturn(asList(companyRepresentativeMock));
+
+        ApprovalRequest approvalRequestMock = mock(ApprovalRequest.class);
+        when(approvalRequestedJPAMapper.fromJPA(hearingEntity.getApprovalsRequested())).thenReturn(asList(approvalRequestMock));
+
+        final List<CourtApplication> expectedCourtApplications = List.of(CourtApplication.courtApplication().withId(applicationId).withApplicationStatus(FINALISED).build());
+        when(courtApplicationsSerializer.courtApplications(hearingEntity.getCourtApplicationsJson())).thenReturn(expectedCourtApplications);
+
+        final HearingApplication mocHearingApplication = mock(HearingApplication.class);
+        when(mocHearingApplication.getHearing()).thenReturn(hearingEntity);
+        when(hearingApplicationRepository.findByApplicationId(applicationId)).thenReturn(List.of(mocHearingApplication));
+
+        final HearingView actualHearing = hearingJPAMapper.toHearingView(hearingEntity);
+        assertThat(actualHearing.getCourtApplications().size(), is(1));
+        assertThat(actualHearing.getCourtApplications().get(0).getId(), is(applicationId));
+        assertThat(actualHearing.getCourtApplications().get(0).getIsAmendmentAllowed(), is(true));
     }
 }

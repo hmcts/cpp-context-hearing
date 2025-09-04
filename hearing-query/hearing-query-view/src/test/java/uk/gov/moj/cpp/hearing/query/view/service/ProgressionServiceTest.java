@@ -8,13 +8,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.Envelope.metadataBuilder;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.moj.cpp.hearing.query.view.service.ProgressionService.APPLICATIONS_WITH_STATUS;
+import static uk.gov.moj.cpp.hearing.query.view.service.ProgressionService.APPLICATION_ID;
+import static uk.gov.moj.cpp.hearing.query.view.service.ProgressionService.APPLICATION_STATUS;
 
 import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.query.view.model.ApplicationWithStatus;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.json.Json;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -31,6 +38,9 @@ public class ProgressionServiceTest {
 
     @Mock
     private JsonEnvelope jsonEnvelope;
+
+    @Mock
+    private Envelope<JsonObject> jsonEnvelopeMock;
 
     @InjectMocks
     private ProgressionService progressionService;
@@ -64,6 +74,22 @@ public class ProgressionServiceTest {
                 .getString("id"), is("12615f6e-b1de-485c-ae69-e989445b988e"));
         assertThat(applicationOnlyResponse.get().getJsonObject("courtApplication")
                 .getString("parentApplicationId"), is("6823d502-a0ec-4861-a39f-438e28d3af13"));
+    }
+
+    @Test
+    void shouldGetApplicationStatusForGivenListOfApplicationsIds() {
+        when(requester.requestAsAdmin(any(), any(Class.class))).thenReturn(jsonEnvelopeMock);
+        when(jsonEnvelopeMock.payload()).thenReturn(Json.createObjectBuilder()
+                .add(APPLICATIONS_WITH_STATUS, Json.createArrayBuilder()
+                        .add(Json.createObjectBuilder().add(APPLICATION_ID, "uuid-1").add(APPLICATION_STATUS, "LISTED"))
+                        .add(Json.createObjectBuilder().add(APPLICATION_ID, "uuid-2").add(APPLICATION_STATUS, "FINALISED"))
+                        .build())
+                .build());
+
+        final List<ApplicationWithStatus> applicationStatus = progressionService.getApplicationStatus(List.of("uuid-1", "uuid-2"));
+        assertThat(applicationStatus.size(), is(2));
+        assertThat(applicationStatus.stream().filter(as -> as.getApplicationId().equals("uuid-1")).findFirst().get().getApplicationStatus(), is("LISTED"));
+        assertThat(applicationStatus.stream().filter(as -> as.getApplicationId().equals("uuid-2")).findFirst().get().getApplicationStatus(), is("FINALISED"));
     }
 
     private JsonEnvelope getUserEnvelope(final String name) {

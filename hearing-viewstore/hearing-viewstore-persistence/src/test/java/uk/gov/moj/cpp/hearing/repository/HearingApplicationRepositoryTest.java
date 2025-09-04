@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
@@ -42,8 +41,7 @@ public class HearingApplicationRepositoryTest {
 
     @BeforeClass
     public static void create() {
-        final InitiateHearingCommand initiateHearingCommand = minimumInitiateHearingTemplate();
-        hearings.add(initiateHearingCommand.getHearing());
+        hearings.add(minimumInitiateHearingTemplate().getHearing());
     }
 
     @Before
@@ -67,6 +65,10 @@ public class HearingApplicationRepositoryTest {
         assertThat(actual.size(), is(1));
         assertThat(actual.get(0).getId().getApplicationId(), is(applicationId));
         assertThat(actual.get(0).getId().getHearingId(), is(hearingSaved.getId()));
+
+        final List<HearingApplication> byApplicationId = hearingApplicationRepository.findByApplicationId(applicationId);
+        assertThat(byApplicationId.size(), is(1));
+        assertThat(byApplicationId.get(0).getId().getApplicationId(), is(applicationId));
     }
 
     private void saveHearingApplication(UUID applicationId, Hearing hearingSaved) {

@@ -165,6 +165,8 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         }
         final ShareDaysResultsCommand command = convertToObject(envelope, ShareDaysResultsCommand.class);
         final UUID userId = envelope.metadata().userId().map(UUID::fromString).orElse(null);
+
+
         aggregate(HearingAggregate.class, command.getHearingId(), envelope,
                 aggregate -> shareDaysResultsEnrichedWithYouthCourt(aggregate, command, userId));
     }

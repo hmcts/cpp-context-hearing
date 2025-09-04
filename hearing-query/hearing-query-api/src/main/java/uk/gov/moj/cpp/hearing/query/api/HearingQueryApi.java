@@ -43,6 +43,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingViewResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
@@ -76,6 +77,7 @@ public class HearingQueryApi {
     private static final String REASON = "reason";
     private static final String GET_HEARING_EVENT_LOG_COUNT = "hearing.get-hearing-event-log-count";
     private static final String GET_HEARING_EVENT_LOG_FOR_DOCUMENTS= "hearing.get-hearing-event-log-for-documents";
+    private static final String NO_LOGGED_IN_USER_ID_FOUND_TO_PERFORM_HEARINGS_SEARCH = "No Logged in UserId found to perform hearings search";
 
     @Inject
     private Requester requester;
@@ -136,7 +138,7 @@ public class HearingQueryApi {
 
         final Optional<String> optionalUserId = query.metadata().userId();
         if (!optionalUserId.isPresent()) {
-            throw new BadRequestException("No Logged in UserId found to perform hearings search");
+            throw new BadRequestException(NO_LOGGED_IN_USER_ID_FOUND_TO_PERFORM_HEARINGS_SEARCH);
         }
         final String userId = optionalUserId.get();
         final Permissions permissions = usersAndGroupsService.permissions(userId);
@@ -164,7 +166,7 @@ public class HearingQueryApi {
     public JsonEnvelope findHearing(final JsonEnvelope query) {
         final Optional<String> optionalUserId = query.metadata().userId();
         if (!optionalUserId.isPresent()) {
-            throw new BadRequestException("No Logged in UserId found to perform hearings search");
+            throw new BadRequestException(NO_LOGGED_IN_USER_ID_FOUND_TO_PERFORM_HEARINGS_SEARCH);
         }
         hearingService.validateUserPermissionForApplicationType(query);
         final String userId = optionalUserId.get();
@@ -175,6 +177,23 @@ public class HearingQueryApi {
 
         final List<UUID> accessibleCasesAndApplications = getAccessibleCasesAndApplications(userId, ddJorRecorder, permissions);
         final Envelope<HearingDetailsResponse> envelope = this.hearingQueryView.findHearing(query, crackedIneffectiveVacatedTrialTypes, accessibleCasesAndApplications, ddJorRecorder);
+        return getJsonEnvelope(envelope);
+    }
+
+    @Handles("hearing.get.hearing-by-id")
+    public JsonEnvelope findHearingById(final JsonEnvelope query) {
+        final Optional<String> optionalUserId = query.metadata().userId();
+        if (optionalUserId.isEmpty()) {
+            throw new BadRequestException(NO_LOGGED_IN_USER_ID_FOUND_TO_PERFORM_HEARINGS_SEARCH);
+        }
+
+        final String userId = optionalUserId.get();
+        final Permissions permissions = usersAndGroupsService.permissions(userId);
+        final boolean ddJorRecorder = isDDJorRecorder(permissions);
+        final List<UUID> accessibleCasesAndApplications = getAccessibleCasesAndApplications(userId, ddJorRecorder, permissions);
+
+        final Envelope<HearingViewResponse> envelope = this.hearingQueryView.findHearingById(query, referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes(),
+                accessibleCasesAndApplications, ddJorRecorder);
         return getJsonEnvelope(envelope);
     }
 

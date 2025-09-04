@@ -168,6 +168,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationFinalisedOnTargetUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAddedToHearing;
@@ -422,6 +423,7 @@ public class HearingAggregate implements Aggregate {
                 when(DefendantsWelshInformationRecorded.class).apply(this::handleDefendantsWelshTranslation),
                 when(HearingBreachApplicationsAdded.class).apply(this::handleBreachApplicationsAdded),
                 when(HearingBreachApplicationsToBeAddedReceived.class).apply(this::handleBreachApplicationsToBeAddedReceived),
+                when(ApplicationFinalisedOnTargetUpdated.class).apply(resultsSharedDelegate::handleApplicationFinalisedOnTargetUpdated),
                 otherwiseDoNothing()
         );
 
@@ -868,6 +870,10 @@ public class HearingAggregate implements Aggregate {
             return apply(resultsSharedDelegate.saveDraftResult(targetForEvent, newHearingState, userId));
         }
         return apply(resultsSharedDelegate.rejectSaveDraftResult(targetForEvent));
+    }
+
+    public Stream<Object> updateApplicationFinalisedOnTarget(final UUID targetId, final UUID hearingId, final LocalDate hearingDay, final boolean applicationFinalised) {
+        return apply(resultsSharedDelegate.updateApplicationFinalisedOnTarget(targetId, hearingId, hearingDay, applicationFinalised));
     }
 
     public Stream<Object> saveDraftResultV2(final UUID userId, final JsonObject draftResult, final UUID hearingId, final LocalDate hearingDay,

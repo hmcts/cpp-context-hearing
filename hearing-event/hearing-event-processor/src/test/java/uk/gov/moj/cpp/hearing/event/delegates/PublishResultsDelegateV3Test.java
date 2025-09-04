@@ -32,6 +32,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.ApplicationStatusHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.BailStatusHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.OffenceHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.AbstractRestructuringTest;
@@ -91,6 +92,9 @@ public class PublishResultsDelegateV3Test  extends AbstractRestructuringTest {
     @Mock
     private OffenceHelper offenceHelper;
 
+    @Mock
+    private ApplicationStatusHelper applicationStatusHelper;
+
 
     @Mock
     private PublishResultsDelegateV3 target;
@@ -106,7 +110,8 @@ public class PublishResultsDelegateV3Test  extends AbstractRestructuringTest {
                 custodyTimeLimitCalculator,
                 bailStatusHelper,
                 restructringHelper,
-                offenceHelper);
+                offenceHelper,
+                applicationStatusHelper);
     }
 
 

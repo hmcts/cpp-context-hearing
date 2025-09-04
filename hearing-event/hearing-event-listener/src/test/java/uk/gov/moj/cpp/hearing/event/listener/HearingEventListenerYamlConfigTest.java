@@ -249,7 +249,8 @@ public class HearingEventListenerYamlConfigTest {
                 CustodyTimeLimitEventListener.class,
                 ApplicationOrganisationDetailsUpdatedEventListener.class,
                 IndicatedPleaUpdated.class,
-                HearingJudiciaryListener.class));
+                HearingJudiciaryListener.class,
+                TargetUpdatedEventListener.class));
 
         yamlEventNames = new SubscriptionsDescriptorLoader(PATH_TO_YAML).eventNames();
     }

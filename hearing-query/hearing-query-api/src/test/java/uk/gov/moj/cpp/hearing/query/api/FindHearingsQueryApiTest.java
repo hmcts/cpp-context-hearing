@@ -19,6 +19,7 @@ import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.DDJChecker;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.RecorderChecker;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.UsersAndGroupsService;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.Permissions;
+import uk.gov.moj.cpp.hearing.query.api.service.referencedata.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.query.view.HearingQueryView;
 
 import java.util.ArrayList;
@@ -82,6 +83,9 @@ public class FindHearingsQueryApiTest {
     @Mock
     private HearingQueryView hearingQueryView;
 
+    @Mock
+    private ReferenceDataService referenceDataService;
+
     @InjectMocks
     private HearingQueryApi hearingQueryApi;
 
@@ -105,8 +109,8 @@ public class FindHearingsQueryApiTest {
 
         hearingQueryApi.findHearings(jsonInputEnvelope);
         verify(ddjChecker, times(1)).isDDJ(permissions);
-        verify(accessibleCases, times(1)).findCases(permissions,userId.toString());
-        verify(accessibleApplications, times(1)).findApplications(permissions,userId.toString());
+        verify(accessibleCases, times(1)).findCases(permissions, userId.toString());
+        verify(accessibleApplications, times(1)).findApplications(permissions, userId.toString());
         verify(usersAndGroupsService, times(1)).permissions(userId.toString());
     }
 
@@ -123,8 +127,8 @@ public class FindHearingsQueryApiTest {
 
         hearingQueryApi.findHearings(jsonInputEnvelope);
         verify(ddjChecker, times(1)).isDDJ(permissions);
-        verify(accessibleCases, times(1)).findCases(permissions,userId.toString());
-        verify(accessibleApplications, times(1)).findApplications(permissions,userId.toString());
+        verify(accessibleCases, times(1)).findCases(permissions, userId.toString());
+        verify(accessibleApplications, times(1)).findApplications(permissions, userId.toString());
         verify(usersAndGroupsService, times(1)).permissions(userId.toString());
     }
 
@@ -138,8 +142,66 @@ public class FindHearingsQueryApiTest {
         when(recorderChecker.isRecorder(permissions)).thenReturn(false);
 
         hearingQueryApi.findHearings(jsonInputEnvelope);
-        verify(accessibleCases, times(0)).findCases(permissions,userId.toString());
-        verify(accessibleApplications, times(0)).findApplications(permissions,userId.toString());
+        verify(accessibleCases, times(0)).findCases(permissions, userId.toString());
+        verify(accessibleApplications, times(0)).findApplications(permissions, userId.toString());
+        verify(usersAndGroupsService, times(1)).permissions(userId.toString());
+        verify(ddjChecker, times(1)).isDDJ(permissions);
+    }
+    @Test
+    public void findHearingById_should_throw_bad_request_when_user_id_is_missing() {
+        when(jsonInputEnvelope.metadata()).thenReturn(metadata);
+        when(metadata.userId()).thenReturn(Optional.empty());
+        assertThrows(BadRequestException.class, () -> hearingQueryApi.findHearingById(jsonInputEnvelope));
+    }
+
+    @Test
+    public void findHearingById_should_return_hearings_for_ddj() {
+        final UUID userId = UUID.randomUUID();
+        when(jsonInputEnvelope.metadata()).thenReturn(metadata);
+        when(metadata.userId()).thenReturn(Optional.of(userId.toString()));
+        when(usersAndGroupsService.permissions(userId.toString())).thenReturn(permissions);
+        when(ddjChecker.isDDJ(permissions)).thenReturn(true);
+        when(recorderChecker.isRecorder(permissions)).thenReturn(false);
+        when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(getAccessibleCaseList());
+        when(accessibleApplications.findApplications(permissions, userId.toString())).thenReturn(new ArrayList<>());
+
+        hearingQueryApi.findHearingById(jsonInputEnvelope);
+        verify(ddjChecker, times(1)).isDDJ(permissions);
+        verify(accessibleCases, times(1)).findCases(permissions, userId.toString());
+        verify(accessibleApplications, times(1)).findApplications(permissions, userId.toString());
+        verify(usersAndGroupsService, times(1)).permissions(userId.toString());
+    }
+
+    @Test
+    public void findHearingById_should_return_hearings_for_recorder() {
+        final UUID userId = UUID.randomUUID();
+        when(jsonInputEnvelope.metadata()).thenReturn(metadata);
+        when(metadata.userId()).thenReturn(Optional.of(userId.toString()));
+        when(usersAndGroupsService.permissions(userId.toString())).thenReturn(permissions);
+        when(ddjChecker.isDDJ(permissions)).thenReturn(false);
+        when(recorderChecker.isRecorder(permissions)).thenReturn(true);
+        when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(getAccessibleCaseList());
+        when(accessibleApplications.findApplications(permissions, userId.toString())).thenReturn(new ArrayList<>());
+
+        hearingQueryApi.findHearingById(jsonInputEnvelope);
+        verify(ddjChecker, times(1)).isDDJ(permissions);
+        verify(accessibleCases, times(1)).findCases(permissions, userId.toString());
+        verify(accessibleApplications, times(1)).findApplications(permissions, userId.toString());
+        verify(usersAndGroupsService, times(1)).permissions(userId.toString());
+    }
+
+    @Test
+    public void findHearingById_should_return_hearings_for_non_ddj() {
+        final UUID userId = UUID.randomUUID();
+        when(jsonInputEnvelope.metadata()).thenReturn(metadata);
+        when(metadata.userId()).thenReturn(Optional.of(userId.toString()));
+        when(usersAndGroupsService.permissions(userId.toString())).thenReturn(permissions);
+        when(ddjChecker.isDDJ(permissions)).thenReturn(false);
+        when(recorderChecker.isRecorder(permissions)).thenReturn(false);
+
+        hearingQueryApi.findHearingById(jsonInputEnvelope);
+        verify(accessibleCases, times(0)).findCases(permissions, userId.toString());
+        verify(accessibleApplications, times(0)).findApplications(permissions, userId.toString());
         verify(usersAndGroupsService, times(1)).permissions(userId.toString());
         verify(ddjChecker, times(1)).isDDJ(permissions);
     }
@@ -150,16 +212,4 @@ public class FindHearingsQueryApiTest {
         return accessibleCaseList;
     }
 
-    private List<UUID> getAccessibleApplicationsList() {
-        final List<UUID> accessibleApplicationsList = new ArrayList<>();
-        accessibleApplicationsList.add(UUID.randomUUID());
-        return accessibleApplicationsList;
-    }
-
-    private List<UUID> getAccessibleCasesAndApplicationsList() {
-        final List<UUID> accessibleCasesAndApplicationsList = new ArrayList<>();
-        accessibleCasesAndApplicationsList.addAll(getAccessibleApplicationsList());
-        accessibleCasesAndApplicationsList.addAll(getAccessibleCaseList());
-        return accessibleCasesAndApplicationsList;
-    }
 }
