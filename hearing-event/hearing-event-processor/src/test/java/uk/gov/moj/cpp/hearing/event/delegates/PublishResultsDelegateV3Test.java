@@ -152,7 +152,10 @@ public class PublishResultsDelegateV3Test  extends AbstractRestructuringTest {
         final JudicialResult judicialResult = offencesWithJudicialResults.stream()
                                 .flatMap(offence -> offence.getJudicialResults().stream()
                                         .filter(judicialResult1 -> judicialResult1.getNextHearing() != null)).findFirst().get();
+        assertEquals(false, judicialResult.getCommittedToCC());
+        assertEquals(false, judicialResult.getSentToCC());
         final NextHearing nextHearing = judicialResult.getNextHearing();
+
         assertEquals(true, nextHearing.getIsFirstReviewHearing());
         assertNotNull(nextHearing.getOrderName());
         assertEquals(10, nextHearing.getEstimatedMinutes().intValue());

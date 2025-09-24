@@ -81,6 +81,8 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
         assertThat(judicialResult.getPointsDisqualificationCode(),notNullValue());
         assertThat(judicialResult.getDvlaCode(), notNullValue());
         assertThat(judicialResult.getPoliceSubjectLineTitle(),notNullValue());
+        assertThat(judicialResult.getCommittedToCC(), is(false));
+        assertThat(judicialResult.getCommittedToCC(), is(false));
     }
 
     @Test

@@ -289,7 +289,9 @@ public class ResultTreeBuilder {
                 .withCanBeSubjectOfBreach(resultDefinition.getCanBeSubjectOfBreach())
                 .withCanBeSubjectOfVariation(resultDefinition.getCanBeSubjectOfVariation())
                 .withDvlaCode(resultDefinition.getDvlaCode())
-                .withLevel(resultDefinition.getLevel());
+                .withLevel(resultDefinition.getLevel())
+                .withCommittedToCC(getBooleanValue(resultDefinition.getCommittedToCC(), false))
+                .withSentToCC(getBooleanValue(resultDefinition.getSentToCC(), false));
         if(resultTextConfHelper.isOldResultDefinition(resultLine.getOrderedDate())) {
             judicialResult.withResultText(ResultTextHelper.getResultText(resultDefinition, resultLine));
         }

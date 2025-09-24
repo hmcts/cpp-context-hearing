@@ -24,6 +24,7 @@ import static uk.gov.moj.cpp.util.DuplicateOffencesHelper.filterDuplicateOffence
 import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupReportingRestrictions;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantJudicialResult;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
@@ -77,7 +78,7 @@ import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({"squid:S1188", "squid:S1612", "squid:UnusedPrivateMethod"})
+@SuppressWarnings({"squid:S1188", "squid:S1612", "squid:UnusedPrivateMethod", "squid:S4144"})
 public class PublishResultsDelegate {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PublishResultsDelegate.class.getName());
@@ -372,6 +373,8 @@ public class PublishResultsDelegate {
                 .withPublishedForNows(resultDefinition.getPublishedForNows())
                 .withResultWording(resultDefinition.getResultWording())
                 .withWelshResultWording(resultDefinition.getWelshResultWording())
+                .withCommittedToCC(getBooleanValue(resultDefinition.getCommittedToCC(), false))
+                .withSentToCC(getBooleanValue(resultDefinition.getSentToCC(), false))
                 .build();
     }
 
@@ -461,74 +464,64 @@ public class PublishResultsDelegate {
     }
 
     private void mapDefendantCaseLevelJudicialResults(final ResultsShared resultsShared, final List<TreeNode<ResultLine>> results) {
-        final Stream<ProsecutionCase> prosecutionCaseStream = ofNullable(resultsShared.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty);
-        prosecutionCaseStream.flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).forEach(defendant -> {
-            final List<JudicialResult> judicialResults = getDefendantCaseJudicialResults(results, defendant.getId());
-            if (isNotEmpty(judicialResults)) {
-                setPromptsAsNullIfEmpty(judicialResults);
-                defendant.setDefendantCaseJudicialResults(judicialResults);
-            } else {
-                defendant.setDefendantCaseJudicialResults(null);
+        collectDefendantCaseJudicialResults(resultsShared.getHearing(), results);
+    }
+
+    private void collectDefendantCaseJudicialResults(final Hearing resultsShared, final List<TreeNode<ResultLine>> results) {
+        final Stream<ProsecutionCase> prosecutionCaseStream = ofNullable(resultsShared.getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty);
+        for (ProsecutionCase prosecutionCase : prosecutionCaseStream.toList()) {
+            for (Defendant defendant : prosecutionCase.getDefendants()) {
+                final List<JudicialResult> judicialResults = getDefendantCaseJudicialResults(results, defendant.getId());
+                if (isNotEmpty(judicialResults)) {
+                    setPromptsAsNullIfEmpty(judicialResults);
+                    defendant.setDefendantCaseJudicialResults(judicialResults);
+                } else {
+                    defendant.setDefendantCaseJudicialResults(null);
+                }
             }
-        });
+        }
     }
 
     private void mapDefendantCaseLevelJudicialResults(final ResultsSharedV2 resultsShared, final List<TreeNode<ResultLine>> results) {
-        final Stream<ProsecutionCase> prosecutionCaseStream = ofNullable(resultsShared.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty);
-        prosecutionCaseStream.flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).forEach(defendant -> {
-            final List<JudicialResult> judicialResults = getDefendantCaseJudicialResults(results, defendant.getId());
-            if (isNotEmpty(judicialResults)) {
-                setPromptsAsNullIfEmpty(judicialResults);
-                defendant.setDefendantCaseJudicialResults(judicialResults);
-            } else {
-                defendant.setDefendantCaseJudicialResults(null);
+        collectDefendantCaseJudicialResults(resultsShared.getHearing(), results);
+    }
+
+    private List<DefendantJudicialResult> createDefendantJudicialResults(final Hearing hearing, final List<TreeNode<ResultLine>> results) {
+        final Stream<ProsecutionCase> prosecutionCaseStream = ofNullable(hearing.getProsecutionCases()).stream().flatMap(Collection::stream);
+        List<DefendantJudicialResult> allDefendantJudicialResults = new ArrayList<>();
+
+        for (ProsecutionCase prosecutionCase : prosecutionCaseStream.toList()) {
+            for (Defendant defendant : prosecutionCase.getDefendants()){
+                final List<JudicialResult> judicialResults = getDefendantJudicialResults(results, defendant.getId());
+                if (isNotEmpty(judicialResults)) {
+                    setPromptsAsNullIfEmpty(judicialResults);
+                    List<DefendantJudicialResult> defendantJudicialResults = buildDefendantJudicialResults(defendant.getMasterDefendantId(), judicialResults);
+                    allDefendantJudicialResults.addAll(defendantJudicialResults);
+                }
             }
-        });
+        }
+        return allDefendantJudicialResults;
+    }
+
+    private <T extends Hearing> void updateDefendantJudicialResults(T hearing, List<DefendantJudicialResult> defendantJudicialResults) {
+        if (isNotEmpty(defendantJudicialResults)) {
+            setDefendantJudicialResultPromptsAsNullIfEmpty(defendantJudicialResults);
+            hearing.setDefendantJudicialResults(defendantJudicialResults);
+        } else {
+            hearing.setDefendantJudicialResults(null);
+        }
     }
 
     private void mapDefendantLevelJudicialResults(final ResultsShared resultsShared, final List<TreeNode<ResultLine>> results) {
-        final Stream<ProsecutionCase> prosecutionCaseStream = ofNullable(resultsShared.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty);
-        final List<DefendantJudicialResult> defendantJudicialResults = prosecutionCaseStream.flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).map(defendant -> {
-            final List<JudicialResult> judicialResults = getDefendantJudicialResults(results, defendant.getId());
-            if (isNotEmpty(judicialResults)) { //so that judicialResults doesn't have empty tag
-                setPromptsAsNullIfEmpty(judicialResults);
-                return buildDefendantJudicialResults(defendant.getMasterDefendantId(), judicialResults);
-            }
-            return null;
-        })
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .collect(toList());
-
-        if (isNotEmpty(defendantJudicialResults)) {
-            setDefendantJudicialResultPromptsAsNullIfEmpty(defendantJudicialResults);
-            resultsShared.getHearing().setDefendantJudicialResults(defendantJudicialResults);
-        } else {
-            resultsShared.getHearing().setDefendantJudicialResults(null);
-        }
+        Hearing hearing = resultsShared.getHearing();
+        List<DefendantJudicialResult> defendantJudicialResults = createDefendantJudicialResults(hearing, results);
+        updateDefendantJudicialResults(hearing, defendantJudicialResults);
     }
 
     private void mapDefendantLevelJudicialResults(final ResultsSharedV2 resultsShared, final List<TreeNode<ResultLine>> results) {
-        final Stream<ProsecutionCase> prosecutionCaseStream = ofNullable(resultsShared.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty);
-        final List<DefendantJudicialResult> defendantJudicialResults = prosecutionCaseStream.flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                .map(defendant -> {
-                    final List<JudicialResult> judicialResults = getDefendantJudicialResults(results, defendant.getId());
-                    if (isNotEmpty(judicialResults)) { //so that judicialResults doesn't have empty tag
-                        setPromptsAsNullIfEmpty(judicialResults);
-                        return buildDefendantJudicialResults(defendant.getMasterDefendantId(), judicialResults);
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .collect(toList());
-
-        if (isNotEmpty(defendantJudicialResults)) {
-            setDefendantJudicialResultPromptsAsNullIfEmpty(defendantJudicialResults);
-            resultsShared.getHearing().setDefendantJudicialResults(defendantJudicialResults);
-        } else {
-            resultsShared.getHearing().setDefendantJudicialResults(null);
-        }
+        Hearing hearing = resultsShared.getHearing();
+        List<DefendantJudicialResult> defendantJudicialResults = createDefendantJudicialResults(hearing, results);
+        updateDefendantJudicialResults(hearing, defendantJudicialResults);
     }
 
     private void setDefendantJudicialResultPromptsAsNullIfEmpty(List<DefendantJudicialResult> defendantJudicialResults) {
@@ -570,39 +563,7 @@ public class PublishResultsDelegate {
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .flatMap(defendant -> defendant.getOffences().stream()).collect(toList());
 
-        offences.forEach(offence -> {
-
-            final List<JudicialResult> judicialResults = getOffenceLevelJudicialResults(results, offence.getId());
-            final List<ReportingRestriction> restrictions = new ArrayList<>();
-
-            if (!judicialResults.isEmpty()) { //so that judicialResults doesn't have empty tag
-                setPromptsAsNullIfEmpty(judicialResults);
-                offence.setJudicialResults(judicialResults);
-                judicialResults.forEach(result -> {
-                    if (PRESS_ON.equalsIgnoreCase(result.getResultDefinitionGroup())) {
-                        final ReportingRestriction reportingRestriction = ReportingRestriction.reportingRestriction()
-                                .withId(UUID.randomUUID())
-                                .withJudicialResultId(result.getJudicialResultId())
-                                .withLabel(result.getLabel())
-                                .withOrderedDate(result.getOrderedDate())
-                                .build();
-                        restrictions.add(reportingRestriction);
-
-                    }
-                });
-
-                if (isNotEmpty(offence.getReportingRestrictions())) {
-                    restrictions.addAll(offence.getReportingRestrictions());
-                }
-
-                if (!restrictions.isEmpty()) {
-                    offence.setReportingRestrictions(dedupReportingRestrictions(restrictions));
-                }
-
-            } else {
-                offence.setJudicialResults(null);
-            }
-        });
+        extractedOffenceJudicialResults(results, offences);
     }
 
     private void mapOffenceLevelJudicialResults(final ResultsSharedV2 resultsShared, final List<TreeNode<ResultLine>> results) {
@@ -610,6 +571,10 @@ public class PublishResultsDelegate {
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .flatMap(defendant -> defendant.getOffences().stream()).collect(toList());
 
+        extractedOffenceJudicialResults(results, offences);
+    }
+
+    private void extractedOffenceJudicialResults(final List<TreeNode<ResultLine>> results, final List<Offence> offences) {
         offences.forEach(offence -> {
                     final List<JudicialResult> judicialResults = getOffenceLevelJudicialResults(results, offence.getId());
                     final List<ReportingRestriction> restrictions = new ArrayList<>();

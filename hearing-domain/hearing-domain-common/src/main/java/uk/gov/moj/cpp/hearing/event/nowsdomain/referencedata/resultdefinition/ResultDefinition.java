@@ -104,6 +104,8 @@ public class ResultDefinition {
     private String dependantResultDefinitionGroup;
 
     private Boolean canExtendActiveOrder;
+    private Boolean sentToCC;
+    private Boolean committedToCC;
 
     public static ResultDefinition resultDefinition() {
         return new ResultDefinition();
@@ -512,4 +514,21 @@ public class ResultDefinition {
         this.policeSubjectLineTitle = policeSubjectLineTitle;
     }
 
+    public Boolean getSentToCC() {
+        return sentToCC;
+    }
+
+    public ResultDefinition setSentToCC(final Boolean sentToCC) {
+        this.sentToCC = sentToCC;
+        return this;
+    }
+
+    public Boolean getCommittedToCC() {
+        return committedToCC;
+    }
+
+    public ResultDefinition setCommittedToCC(final Boolean committedToCC) {
+        this.committedToCC = committedToCC;
+        return this;
+    }
 }
