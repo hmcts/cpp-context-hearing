@@ -210,7 +210,9 @@ public class ResultTreeBuilderV3 {
                 .withLevel(resultDefinition.getLevel())
                 .withPoliceSubjectLineTitle(resultDefinition.getPoliceSubjectLineTitle())
                 .withPreserveActiveOrder(getBooleanValue(resultDefinition.getPreserveActiveOrder(), false))
-                .withCanExtendActiveOrder(getBooleanValue(resultDefinition.getCanExtendActiveOrder(), false));;
+                .withCanExtendActiveOrder(getBooleanValue(resultDefinition.getCanExtendActiveOrder(), false))
+                .withCommittedToCC(getBooleanValue(resultDefinition.getCommittedToCC(), false))
+                .withSentToCC(getBooleanValue(resultDefinition.getSentToCC(), false));
         if(resultTextConfHelper.isOldResultDefinition(resultLine.getOrderedDate())) {
             judicialResult.withResultText(ResultTextHelperV3.getResultText(resultDefinition, resultLine));
         }

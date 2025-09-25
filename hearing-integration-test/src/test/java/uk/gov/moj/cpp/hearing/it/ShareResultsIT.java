@@ -1985,6 +1985,8 @@ public class ShareResultsIT extends AbstractIT {
         assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].level"), is("O"));
         assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].canBeSubjectOfBreach"), is("true"));
         assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].canBeSubjectOfVariation"), is("true"));
+        assertThat(publicHearingResulted.getBoolean("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].committedToCC"), is(TRUE));
+        assertThat(publicHearingResulted.getBoolean("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].sentToCC"), is(TRUE));
 
         assertHearingHasSharedResults(expectedTrialType, hearing);
     }
@@ -2195,6 +2197,8 @@ public class ShareResultsIT extends AbstractIT {
             assertThat(result.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].secondaryCJSCodes[1].cjsCode"), is("5678"));
             assertThat(result.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].drivingTestStipulation"), is("1"));
             assertThat(result.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].dvlaCode"), is("C"));
+            assertThat(result.getBoolean("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].committedToCC"), is(TRUE));
+            assertThat(result.getBoolean("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].sentToCC"), is(TRUE));
 
             if (offenceDateCodes.length > 1) {
                 assertThat(result.getInt("hearing.prosecutionCases[0].defendants[1].offences[0].offenceDateCode"), is(offenceDateCodes[1]));
@@ -2919,6 +2923,8 @@ public class ShareResultsIT extends AbstractIT {
                                                 .setLevel("O")
                                                 .setPostHearingCustodyStatus("B")
                                                 .setResultDefinitionGroup("Bail Conditions")
+                                                .setCommittedToCC(true)
+                                                .setSentToCC(true)
                         ).collect(Collectors.toList())
                 ));
 
@@ -3135,7 +3141,7 @@ public class ShareResultsIT extends AbstractIT {
                                                         .with(IndicatedPlea::getIndicatedPleaDate, is(pleaOne.getFirstIndicatedPleaDate())))
                                                 .with(Offence::getAllocationDecision, isBean(AllocationDecision.class)
                                                         .with(AllocationDecision::getOffenceId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
-                                                .with(Offence::getConvictionDate, is(convictionDateToUse))))))))));
+                                                ))))))));
         return expectedTrialType;
     }
 

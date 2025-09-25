@@ -73,7 +73,7 @@ import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({"squid:S1188", "squid:S1612", "squid:UnusedPrivateMethod"})
+@SuppressWarnings({"squid:S1188", "squid:S1612", "squid:UnusedPrivateMethod", "squid:S4144", "java:DuplicatedBlocks"})
 public class PublishResultsDelegateV3 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PublishResultsDelegateV3.class.getName());
@@ -284,6 +284,8 @@ public class PublishResultsDelegateV3 {
                 .withPublishedForNows(resultDefinition.getPublishedForNows())
                 .withResultWording(resultDefinition.getResultWording())
                 .withWelshResultWording(resultDefinition.getWelshResultWording())
+                .withSentToCC(getBooleanValue(resultDefinition.getSentToCC(), false))
+                .withCommittedToCC(getBooleanValue(resultDefinition.getCommittedToCC(), false))
                 .build();
     }
 
@@ -294,15 +296,7 @@ public class PublishResultsDelegateV3 {
                     .forEach(courtApplication -> {
                         updateApplicationLevelJudicialResults(results, courtApplication);
 
-                        ofNullable(courtApplication.getCourtApplicationCases()).map(Collection::stream).orElseGet(Stream::empty)
-                                .flatMap(courtApplicationCase -> ofNullable(courtApplicationCase.getOffences()).map(Collection::stream).orElseGet(Stream::empty))
-                                .forEach(courtApplicationOffence -> {
-                                    final Optional<Offence> offenceOptional = ofNullable(courtApplicationOffence);
-                                    if (offenceOptional.isPresent()) {
-                                        final Offence offence = offenceOptional.get();
-                                        updateApplicationOffenceJudicialResults(results, courtApplication, offence);
-                                    }
-                                });
+                        updatedApplicationOffenceJudicialResults(results, courtApplication);
 
                         if (nonNull(courtApplication.getCourtOrder())) {
                             ofNullable(courtApplication.getCourtOrder().getCourtOrderOffences()).map(Collection::stream).orElseGet(Stream::empty)
@@ -313,6 +307,18 @@ public class PublishResultsDelegateV3 {
                         }
                     });
         }
+    }
+
+    private void updatedApplicationOffenceJudicialResults(final List<TreeNode<ResultLine2>> results, final CourtApplication courtApplication) {
+        ofNullable(courtApplication.getCourtApplicationCases()).map(Collection::stream).orElseGet(Stream::empty)
+                .flatMap(courtApplicationCase -> ofNullable(courtApplicationCase.getOffences()).map(Collection::stream).orElseGet(Stream::empty))
+                .forEach(courtApplicationOffence -> {
+                    final Optional<Offence> offenceOptional = ofNullable(courtApplicationOffence);
+                    if (offenceOptional.isPresent()) {
+                        final Offence offence = offenceOptional.get();
+                        updateApplicationOffenceJudicialResults(results, courtApplication, offence);
+                    }
+                });
     }
 
 
@@ -424,10 +430,18 @@ public class PublishResultsDelegateV3 {
     private void mapOffenceLevelJudicialResults(final ResultsSharedV3 resultsShared, final List<TreeNode<ResultLine2>> results) {
         ofNullable(resultsShared.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).forEach(d -> filterDuplicateOffencesById(d.getOffences()));
-        final List<Offence> offences = ofNullable(resultsShared.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+        final List<Offence> offences = getOffences(resultsShared);
+
+        collectOffenceJudicialResults(results, offences);
+    }
+
+    private static List<Offence> getOffences(final ResultsSharedV3 resultsShared) {
+        return ofNullable(resultsShared.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .flatMap(defendant -> defendant.getOffences().stream()).collect(toList());
+    }
 
+    private void collectOffenceJudicialResults(final List<TreeNode<ResultLine2>> results, final List<Offence> offences) {
         offences.forEach(offence -> {
 
             final List<JudicialResult> judicialResults = getOffenceLevelJudicialResults(results, offence.getId());

@@ -175,6 +175,13 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest
         final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
         assertThat(defendant.isPresent(), is(true));
+        final Optional<Offence> firstOffence = defendant.get().getOffences().stream().findFirst();
+
+        assertThat(firstOffence.isPresent(), is(true));
+        final Optional<JudicialResult> firstJudicialResult = firstOffence.get().getJudicialResults().stream().findFirst();
+        assertThat(firstJudicialResult.isPresent(), is(true));
+        assertThat(firstJudicialResult.get().getCommittedToCC(), is(false));
+        assertThat(firstJudicialResult.get().getSentToCC(), is(false));
     }
 
     @Test

@@ -25,20 +25,20 @@
         <datafactory.version>0.8</datafactory.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
         <authorisation.service.version>0.1.96</authorisation.service.version>
-        <coredomain.version>17.102.9</coredomain.version>
-        <referencedata.version>17.0.111</referencedata.version>
+        <coredomain.version>17.102.11</coredomain.version>
+        <referencedata.version>17.0.113</referencedata.version>
         <material.version>17.0.57</material.version>
         <results.version>17.0.57</results.version>
         <notification.notify.version>17.0.1</notification.notify.version>
         <stagingenforcement.version>17.0.12</stagingenforcement.version>
-        <progression.version>17.0.180</progression.version>
+        <progression.version>17.0.181</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
-        <usersgroups.version>17.0.37</usersgroups.version>
-        <listing.version>17.0.107</listing.version>
+        <usersgroups.version>17.0.38</usersgroups.version>
+        <listing.version>17.0.116</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>17.0.58</systemdocgenerator.version>
 
