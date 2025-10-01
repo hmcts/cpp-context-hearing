@@ -74,14 +74,19 @@ import static uk.gov.moj.cpp.util.DuplicateApplicationsHelper.dedupAllApplicatio
 
 import javax.json.JsonObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings({"squid:S3776", "squid:S1188", "PMD.BeanMembersShouldSerialize", "pmd:NullAssignment"})
 public class ResultsSharedDelegate implements Serializable {
 
-    private static final long serialVersionUID =3L;
+    private static final long serialVersionUID =4L;
     private static final String HEARING_VACATED_RESULT_DEFINITION_ID = "8cdc7be1-fc94-485b-83ee-410e710f6665";
 
     public static final String REASON_FOR_VACATING_TRIAL = "reasonForVacatingTrial";
     private static final String FINAL_CATEGORY = "F";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResultsSharedDelegate.class);
 
 
     private final HearingAggregateMomento momento;
@@ -246,10 +251,21 @@ public class ResultsSharedDelegate implements Serializable {
 
     }
 
-    public void handleApplicationFinalisedOnTargetUpdated(final ApplicationFinalisedOnTargetUpdated applicationFinalisedOnTargetUpdated){
-        final Map<UUID, Target2> targetHearingMap = this.momento.getMultiDaySavedTargets().get(applicationFinalisedOnTargetUpdated.getHearingDay());
-        final Target2 target2 = targetHearingMap.get(applicationFinalisedOnTargetUpdated.getId());
-        target2.setApplicationFinalised(applicationFinalisedOnTargetUpdated.isApplicationFinalised());
+    public void handleApplicationFinalisedOnTargetUpdated(final ApplicationFinalisedOnTargetUpdated applicationFinalisedOnTargetUpdated) {
+        final LocalDate hearingDay = applicationFinalisedOnTargetUpdated.getHearingDay();
+        final UUID hearingId = applicationFinalisedOnTargetUpdated.getHearingId();
+        final UUID id = applicationFinalisedOnTargetUpdated.getId();
+        final Map<UUID, Target2> targetHearingMap = this.momento.getMultiDaySavedTargets().get(hearingDay);
+        if (nonNull(targetHearingMap)) {
+            final Target2 target2 = targetHearingMap.get(id);
+            if (nonNull(target2)) {
+                target2.setApplicationFinalised(applicationFinalisedOnTargetUpdated.isApplicationFinalised());
+            } else {
+                LOGGER.info("Target is empty for hearingDay:{} hearingId:{} applicationId:{}", hearingDay, hearingId, id);
+            }
+        } else {
+            LOGGER.info("MultiDaySavedTargets map is empty for hearingDay:{} hearingId:{}", hearingDay, hearingId);
+        }
     }
 
     private void updateTransientTargets(final UUID targetId, final Target2 target) {

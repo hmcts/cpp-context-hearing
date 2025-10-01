@@ -4465,6 +4465,47 @@ public class HearingAggregateTest {
         assertThat(event.isApplicationFinalised(), is(true));
     }
 
+    @Test
+    void shouldUpdateApplicationFinalisedOnTargetWhenHaveDifferentHearingDay() {
+        final UUID targetId = randomUUID();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithOffencePlea();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        final Hearing hearing = hearingAggregate.getHearing();
+        final LocalDate hearingDay = LocalDate.now();
+        final LocalDate hearingDay1 = LocalDate.now().plusDays(1);
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+        final YouthCourt youthCourt = YouthCourt.youthCourt().withYouthCourtId(randomUUID()).build();
+        final UUID resultLine1Id = randomUUID();
+        final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel(OFFENCE)
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(randomUUID())
+                .withOffenceId(targetId)
+                .build();
+
+        final List<SharedResultsCommandResultLineV2> resultLines = List.of(resultLine1);
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withUserId(randomUUID()).build();
+        final List<Object> eventCollection = hearingAggregate.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1).toList();
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.stream().filter(o->o.getClass().equals(ResultsSharedV3.class)).findFirst().get();
+        final List<Target2> targets = resultsSharedV3.getTargets();
+        assertThat(targets.size(), Matchers.is(1));
+        final Target2 target2 = targets.get(0);
+        assertThat(target2.getApplicationFinalised(), nullValue());
+        hearingAggregate.apply(resultsSharedV3);
+
+        final  List<Object> events = hearingAggregate.updateApplicationFinalisedOnTarget(targetId, hearing.getId(), hearingDay1, true).collect(toList());;
+        assertThat(events.size(), Matchers.is(1));
+        final ApplicationFinalisedOnTargetUpdated event = (ApplicationFinalisedOnTargetUpdated) events.get(0);
+        assertThat(event.getHearingDay(), is(hearingDay1));
+        assertThat(event.getHearingId(), is(hearing.getId()));
+        assertThat(event.getId(), is(targetId));
+        assertThat(event.isApplicationFinalised(), is(true));
+    }
+
+
 
     private static SharedResultsCommandResultLineV2 getSharedResultsCommandResultLine(final ResultLine resultLineIn, final Target targetDraft) {
         return getSharedResultsCommandResultLineV2(resultLineIn, targetDraft, "A", true);
