@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.jayway.jsonassert.JsonAssert.with;
 import static java.time.ZonedDateTime.now;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -26,6 +27,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.Target.target;
@@ -300,16 +302,98 @@ public class HearingAggregateTest {
                                 .withLastName(STRING.next())
                                 .build())
                         .build());
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        HEARING_AGGREGATE.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        final InheritedPlea event = (InheritedPlea) HEARING_AGGREGATE.inheritPlea(command.getHearingId(), command.getPlea()).collect(Collectors.toList()).get(0);
+        final InheritedPlea event = (InheritedPlea) HEARING_AGGREGATE.inheritPlea(initiateHearingCommand.getHearing().getId(), command.getPlea()).collect(Collectors.toList()).get(0);
 
-        assertThat(event.getHearingId(), is(command.getHearingId()));
+        assertThat(event.getHearingId(), is(initiateHearingCommand.getHearing().getId()));
         assertThat(event.getPlea().getOffenceId(), is(command.getPlea().getOffenceId()));
         assertThat(event.getPlea().getPleaDate(), is(command.getPlea().getPleaDate()));
         assertThat(event.getPlea().getPleaValue(), is(command.getPlea().getPleaValue()));
         assertThat(event.getPlea().getDelegatedPowers().getUserId(), is(command.getPlea().getDelegatedPowers().getUserId()));
         assertThat(event.getPlea().getDelegatedPowers().getFirstName(), is(command.getPlea().getDelegatedPowers().getFirstName()));
         assertThat(event.getPlea().getDelegatedPowers().getLastName(), is(command.getPlea().getDelegatedPowers().getLastName()));
+    }
+
+    @Test
+    void shouldNotInitiateHearingOffencePleaWhenHearingDateHasPassedPleaDate() {
+
+        final UpdateHearingWithInheritedPleaCommand command = new UpdateHearingWithInheritedPleaCommand(
+                randomUUID(),
+                Plea.plea()
+                        .withPleaValue(GUILTY)
+                        .withPleaDate(LocalDate.now())
+                        .withOffenceId(randomUUID())
+                        .withOriginatingHearingId(randomUUID())
+                        .withDelegatedPowers(DelegatedPowers.delegatedPowers()
+                                .withUserId(randomUUID())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .build())
+                        .build());
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        HEARING_AGGREGATE.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        final Stream<Object> results =  HEARING_AGGREGATE.inheritPlea(initiateHearingCommand.getHearing().getId(), command.getPlea());
+
+        assertTrue(results.findAny().isEmpty(), "Should return empty stream for shared hearing state");
+
+    }
+
+    @Test
+    void updateHearingWithIndicatedPlea_shouldReturnWarning_whenHearingStateIsShared() {
+        UUID hearingId = randomUUID();
+        IndicatedPlea indicatedPlea = mock(IndicatedPlea.class);
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+
+        final CaseDefendantDetailsWithHearingCommand command = with(
+                initiateDefendantCommandTemplate(initiateHearingCommand.getHearing().getId()),
+                template -> template.getDefendant().setId(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()));
+
+
+        HEARING_AGGREGATE.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        HEARING_AGGREGATE.apply(ResultsShared.builder().withHearing(Hearing.hearing().withId(randomUUID()).build()).build());
+
+        Stream<Object> result = HEARING_AGGREGATE.updateHearingWithIndicatedPlea(hearingId, indicatedPlea);
+
+        assertTrue(result.findAny().isEmpty(), "Should return empty stream for shared hearing state");
+    }
+
+    @Test
+    void shouldNotRaiseInheritedPleaEventWhenInheritPleaCalledWithHearingResultShared() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+        final Plea plea = Plea.plea()
+                .withPleaValue(GUILTY)
+                .withPleaDate(PAST_LOCAL_DATE.next())
+                .withOffenceId(randomUUID())
+                .withOriginatingHearingId(randomUUID())
+                .withDelegatedPowers(DelegatedPowers.delegatedPowers()
+                        .withUserId(randomUUID())
+                        .withFirstName(STRING.next())
+                        .withLastName(STRING.next())
+                        .build())
+                .build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+
+        final CaseDefendantDetailsWithHearingCommand command = with(
+                initiateDefendantCommandTemplate(initiateHearingCommand.getHearing().getId()),
+                template -> template.getDefendant().setId(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()));
+
+
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        hearingAggregate.apply(ResultsShared.builder().withHearing(Hearing.hearing().withId(randomUUID()).build()).build());
+
+
+        final Stream<Object> eventStream = hearingAggregate.inheritPlea(hearingId, plea);
+        final List<Object> events = eventStream.collect(Collectors.toList());
+
+        assertThat(events.size(), is(0));
+
     }
 
     @Test
@@ -3402,13 +3486,32 @@ public class HearingAggregateTest {
 
         final UUID hearingId = randomUUID();
         final IndicatedPlea indicatedPlea = IndicatedPlea.indicatedPlea()
+                .withIndicatedPleaDate(LocalDate.now().minusMonths(3))
                 .withOriginatingHearingId(hearingId)
                 .withIndicatedPleaValue(IndicatedPleaValue.INDICATED_GUILTY).build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        HEARING_AGGREGATE.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
         final IndicatedPleaUpdated event = (IndicatedPleaUpdated) HEARING_AGGREGATE.updateHearingWithIndicatedPlea(indicatedPlea.getOriginatingHearingId(), indicatedPlea).collect(Collectors.toList()).get(0);
 
         assertThat(event.getIndicatedPlea().getIndicatedPleaValue(), is(IndicatedPleaValue.INDICATED_GUILTY));
         assertThat(event.getHearingId(), is(indicatedPlea.getOriginatingHearingId()));
+    }
+
+    @Test
+    void shouldNotUpdateHearingWithIndicatedPleaWhenHearingDateHasPassedPleaDate() {
+
+        final UUID hearingId = randomUUID();
+        final IndicatedPlea indicatedPlea = IndicatedPlea.indicatedPlea()
+                .withIndicatedPleaDate(LocalDate.now())
+                .withOriginatingHearingId(hearingId)
+                .withIndicatedPleaValue(IndicatedPleaValue.INDICATED_GUILTY).build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        HEARING_AGGREGATE.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        Stream<Object> result = HEARING_AGGREGATE.updateHearingWithIndicatedPlea(hearingId, indicatedPlea);
+
+        assertTrue(result.findAny().isEmpty(), "Should return empty stream for shared hearing state");
     }
 
     @Test

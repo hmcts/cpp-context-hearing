@@ -599,7 +599,7 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> inheritPlea(final UUID hearingId, final Plea plea) {
-        if (this.momento.isDeletedOrDuplicated()) {
+        if (this.momento.isDeletedOrDuplicated() || SHARED == this.hearingState || checkIfHearingDateHasPassedPleaDate(plea.getPleaDate())) {
             return warnEventIgnored(hearingId, "inheritPlea");
         }
 
@@ -607,6 +607,9 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateHearingWithIndicatedPlea(final UUID hearingId, final IndicatedPlea indicatedPlea) {
+        if (this.momento.isDeletedOrDuplicated() || SHARED == this.hearingState || checkIfHearingDateHasPassedPleaDate(indicatedPlea.getIndicatedPleaDate())) {
+            return warnEventIgnored(hearingId, "inheritPlea");
+        }
         return apply(this.pleaDelegate.indicatedPlea(hearingId, indicatedPlea));
     }
 
@@ -1556,7 +1559,13 @@ public class HearingAggregate implements Aggregate {
     }
 
     private Stream<Object> warnEventIgnored(final UUID hearingId, final String methodName) {
-        LOGGER.warn("Ignoring '{}' event as hearing with ID '{}' is already deleted or marked as duplicate or not found", methodName, hearingId);
+        LOGGER.warn("Ignoring '{}' event as hearing with ID '{}' is already deleted or marked as duplicate or shared or not found or Passed the Plea Date", methodName, hearingId);
         return Stream.empty();
+    }
+
+    private boolean checkIfHearingDateHasPassedPleaDate(final LocalDate pleaDate) {
+        return momento.getHearing().getHearingDays().stream()
+                .map(hearingDay -> hearingDay.getSittingDay().toLocalDate())
+                .noneMatch(localDate -> (localDate.isAfter(pleaDate) || localDate.isEqual(pleaDate)));
     }
 }

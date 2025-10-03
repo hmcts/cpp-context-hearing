@@ -65,15 +65,15 @@ public class PleaUpdateEventListener {
         final PleaUpsert event = convertToObject(envelope);
         LOGGER.debug("hearing.hearing-offence-plea-updated event received for hearingId {} with offenceID {}", event.getHearingId(), event.getPleaModel().getOffenceId());
 
-        if(event.getPleaModel().getApplicationId() != null){
+        if (event.getPleaModel().getApplicationId() != null) {
             courtApplicationPleaUpdated(event.getHearingId(), event.getPleaModel());
-        }else {
+        } else {
             final UUID offenceId = event.getPleaModel().getOffenceId();
             final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(offenceId, event.getHearingId()));
 
             if (nonNull(offence)) {
                 updateOffence(event, offence);
-            }else {
+            } else {
                 updateOffenceUnderCourtApplication(event);
             }
         }
@@ -86,19 +86,11 @@ public class PleaUpdateEventListener {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.event.indicated-plea-updated event received {}", envelop.toObfuscatedDebugString());
         }
-
         final IndicatedPleaUpdated event = jsonObjectToObjectConverter.convert(envelop.payloadAsJsonObject(), IndicatedPleaUpdated.class);
-
         final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(event.getIndicatedPlea().getOffenceId(), event.getHearingId()));
-
         if (nonNull(offence)) {
-
-            final boolean shouldSetPlea = isNull(offence.getIndicatedPlea());
-
-            if (shouldSetPlea) {
-                offence.setIndicatedPlea(indicatedPleaJPAMapper.toJPA(event.getIndicatedPlea()));
-                offenceRepository.save(offence);
-            }
+            offence.setIndicatedPlea(indicatedPleaJPAMapper.toJPA(event.getIndicatedPlea()));
+            offenceRepository.save(offence);
         }
     }
 
@@ -123,7 +115,7 @@ public class PleaUpdateEventListener {
 
     private void updateOffenceUnderCourtApplication(final PleaUpsert event) {
         final Optional<Hearing> hearing = hearingRepository.findOptionalBy(event.getHearingId());
-        if(hearing.isEmpty()){
+        if (hearing.isEmpty()) {
             return;
         }
         final Hearing hearingEntity = hearing.get();
@@ -134,18 +126,18 @@ public class PleaUpdateEventListener {
 
     private void courtApplicationPleaUpdated(final UUID hearingId, PleaModel pleaModel) {
         final Optional<Hearing> hearingEnt = hearingRepository.findOptionalBy(hearingId);
-        if(hearingEnt.isEmpty()){
+        if (hearingEnt.isEmpty()) {
             return;
         }
         final Hearing hearingEntity = hearingEnt.get();
         final uk.gov.justice.core.courts.Hearing hearing = hearingJPAMapper.fromJPA(hearingEntity);
 
         final Optional<CourtApplication> courtApplication = hearing.getCourtApplications().stream()
-                .filter( ca -> ca.getId().equals(pleaModel.getApplicationId()))
+                .filter(ca -> ca.getId().equals(pleaModel.getApplicationId()))
                 .findFirst();
 
-        if(courtApplication.isPresent()) {
-            if(nonNull(pleaModel.getPlea())) {
+        if (courtApplication.isPresent()) {
+            if (nonNull(pleaModel.getPlea())) {
                 courtApplication.get().setPlea(pleaModel.getPlea());
             } else {
                 courtApplication.get().setPlea(null);
@@ -153,8 +145,8 @@ public class PleaUpdateEventListener {
             final String updatedCourtApplications = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), courtApplication.get());
             hearingEntity.setCourtApplicationsJson(updatedCourtApplications);
             hearingRepository.save(hearingEntity);
-        }else{
-            if(LOGGER.isDebugEnabled()) {
+        } else {
+            if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("hearing.hearing-court-application-plea-updated event application not found {}", pleaModel.getPlea().getApplicationId());
             }
         }

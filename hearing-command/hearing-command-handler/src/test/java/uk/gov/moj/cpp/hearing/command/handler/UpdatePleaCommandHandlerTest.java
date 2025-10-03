@@ -503,11 +503,17 @@ public class UpdatePleaCommandHandlerTest {
     @Test
     public void enrichAssociatedHearingsWithIndicatedPleaInformation() throws Throwable {
 
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(hearing.getHearing()));
+        }};
+
         final LocalDate pleaDate = PAST_LOCAL_DATE.next();
 
         when(this.eventSource.getStreamById(hearing.getHearingId())).thenReturn(this.hearingAggregateEventStream);
 
-        when(this.aggregateService.get(this.hearingAggregateEventStream, HearingAggregate.class)).thenReturn(new HearingAggregate());
+        when(this.aggregateService.get(this.hearingAggregateEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+
 
         final UpdateAssociatedHearingsWithIndicatedPlea updateAssociatedHearingsWithIndicatedPlea = new UpdateAssociatedHearingsWithIndicatedPlea();
         updateAssociatedHearingsWithIndicatedPlea.setIndicatedPlea(IndicatedPlea.indicatedPlea().withIndicatedPleaValue(INDICATED_GUILTY).withIndicatedPleaDate(pleaDate).build());
