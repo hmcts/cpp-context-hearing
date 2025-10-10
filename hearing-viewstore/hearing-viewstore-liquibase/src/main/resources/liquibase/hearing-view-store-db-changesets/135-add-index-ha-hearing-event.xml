@@ -4,8 +4,9 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
     <changeSet id="135" author="Jayen" logicalFilePath="135-add-index-ha-hearing-event.xml">
-        <createIndex tableName="ha_hearing_event" indexName="ha_hearing_event_event_date_idx">
-            <column name="event_date"/>
-        </createIndex>
+        <sql>
+            CREATE INDEX IF NOT EXISTS ha_hearing_event_event_date_idx ON ha_hearing_event (event_date);
+        </sql>
     </changeSet>
+
 </databaseChangeLog>
