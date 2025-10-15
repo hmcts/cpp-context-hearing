@@ -35,9 +35,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.ApplicationStatus.FINALISED;
-import static uk.gov.justice.core.courts.ApplicationStatus.LISTED;
 import static uk.gov.justice.core.courts.ApplicationStatus.UN_ALLOCATED;
-import static uk.gov.justice.core.courts.CourtApplication.courtApplication;
 import static uk.gov.justice.core.courts.Hearing.hearing;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.core.courts.Level.OFFENCE;
@@ -73,7 +71,6 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ApplicationStatus;
-import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationType;
 import uk.gov.justice.core.courts.DelegatedPowers;
@@ -129,8 +126,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
-import uk.gov.moj.cpp.hearing.query.view.model.Permission;
 import uk.gov.moj.cpp.hearing.query.view.model.ApplicationWithStatus;
+import uk.gov.moj.cpp.hearing.query.view.model.Permission;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
@@ -192,81 +189,56 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class HearingServiceTest {
 
-    @Mock
-    private List<UUID> prosecutionCasesIdsWithAccess;
-
-    @Mock
-    private FilterHearingsBasedOnPermissions filterHearingsBasedOnPermissions;
-
-    @Mock
-    private uk.gov.justice.core.courts.HearingEvent hearingEvent;
-
-    @Mock
-    private HearingRepository hearingRepository;
-
-    @Mock
-    private HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository;
-
-    @Mock
-    private HearingEventRepository hearingEventRepository;
-
-    @Mock
-    private HearingEventDefinitionRepository hearingEventDefinitionRepository;
-
-    @Mock
-    private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
-
-    @Mock
-    private HearingTypeJPAMapper hearingTypeJPAMapper;
-
-    @Mock
-    private HearingDayJPAMapper hearingDayJPAMapper;
-
-    @Mock
-    private TargetJPAMapper targetJPAMapper;
-
-    @Mock
-    private ResultLineJPAMapper resultLineJPAMapper;
-
-    @Mock
-    private NowsRepository nowsRepository;
-
-    @Mock
-    private NowsMaterialRepository nowsMaterialRepository;
-
-    @Mock
-    private DocumentRepository documentRepository;
-
-    @Mock
-    private HearingJPAMapper hearingJPAMapper;
-
-    @Mock
-    private DraftResultJPAMapper draftResultJPAMapper;
-
-    @Mock
-    private GetHearingsTransformer getHearingsTransformer;
-
-    @Mock
-    private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
-
-    @InjectMocks
-    private HearingService hearingService;
-
-    @Spy
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
-
-    @Spy
-    private StringToJsonObjectConverter stringToJsonObjectConverter;
-
-    @Mock
-    private TimelineHearingSummaryHelper timelineHearingSummaryHelperMock;
-
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
-
-    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
     @Mock
     ProsecutionCaseJPAMapper prosecutionCaseJPAMapper;
+    @Mock
+    private List<UUID> prosecutionCasesIdsWithAccess;
+    @Mock
+    private FilterHearingsBasedOnPermissions filterHearingsBasedOnPermissions;
+    @Mock
+    private uk.gov.justice.core.courts.HearingEvent hearingEvent;
+    @Mock
+    private HearingRepository hearingRepository;
+    @Mock
+    private HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository;
+    @Mock
+    private HearingEventRepository hearingEventRepository;
+    @Mock
+    private HearingEventDefinitionRepository hearingEventDefinitionRepository;
+    @Mock
+    private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
+    @Mock
+    private HearingTypeJPAMapper hearingTypeJPAMapper;
+    @Mock
+    private HearingDayJPAMapper hearingDayJPAMapper;
+    @Mock
+    private TargetJPAMapper targetJPAMapper;
+    @Mock
+    private ResultLineJPAMapper resultLineJPAMapper;
+    @Mock
+    private NowsRepository nowsRepository;
+    @Mock
+    private NowsMaterialRepository nowsMaterialRepository;
+    @Mock
+    private DocumentRepository documentRepository;
+    @Mock
+    private HearingJPAMapper hearingJPAMapper;
+    @Mock
+    private DraftResultJPAMapper draftResultJPAMapper;
+    @Mock
+    private GetHearingsTransformer getHearingsTransformer;
+    @Mock
+    private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
+    @InjectMocks
+    private HearingService hearingService;
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+    @Spy
+    private StringToJsonObjectConverter stringToJsonObjectConverter;
+    @Mock
+    private TimelineHearingSummaryHelper timelineHearingSummaryHelperMock;
+    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     @Mock
     private CourtApplicationsSerializer courtApplicationsSerializer;
     @Mock
@@ -276,6 +248,10 @@ public class HearingServiceTest {
 
     @Mock
     private ProgressionService progressionService;
+
+    protected static String getStringFromResource(final String path) throws IOException {
+        return Resources.toString(getResource(path), defaultCharset());
+    }
 
     @BeforeEach
     public void setup() {
@@ -948,7 +924,6 @@ public class HearingServiceTest {
 
     }
 
-
     @Test
     public void shouldFindHearingListWhenJudicialUserIsMatched() {
 
@@ -1333,9 +1308,15 @@ public class HearingServiceTest {
         final List<UUID> courtCentreIds = new ArrayList();
         courtCentreIds.add(randomUUID());
 
-        final HearingEventPojo hearingEvent = new HearingEventPojo(randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), randomUUID(), randomUUID(), ZonedDateTime.now(), "");
+        final UUID hearingId = randomUUID();
 
-        final List<HearingEventPojo> hearingEventList = asList(hearingEvent);
+        final HearingEventPojo hearingEvent = new HearingEventPojo(randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), hearingId, randomUUID(), ZonedDateTime.now(), "");
+
+        final List<Object[]> hearingEventResult1 = new ArrayList<>();
+
+        // Add arrays to the list
+        hearingEventResult1.add(new Object[]{randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), hearingId, randomUUID(), ZonedDateTime.now(), ""});
+
         final Hearing hearing = buildHearing();
 
         final uk.gov.justice.core.courts.Hearing hearinPojo = mock(uk.gov.justice.core.courts.Hearing.class);
@@ -1346,7 +1327,7 @@ public class HearingServiceTest {
         hearingEventRequiredDefinitionsIds.add(randomUUID());
         hearingEventRequiredDefinitionsIds.add(randomUUID());
 
-        when(hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventList);
+        when(hearingEventRepository.findLatestHearingsForThatDayByCourt(courtCentreIds.get(0), now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventResult1);
         when(hearingRepository.findBy(hearingEvent.getHearingId())).thenReturn(hearing);
         when(hearingJPAMapper.fromJPAWithCourtListRestrictions(hearing)).thenReturn(hearinPojo);
         when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(expectedCurrentCourtStatus);
@@ -1354,6 +1335,15 @@ public class HearingServiceTest {
         final Optional<CurrentCourtStatus> response = hearingService.getHearingsForWebPage(courtCentreIds, now, hearingEventRequiredDefinitionsIds);
 
         assertThat(response.get().getPageName(), is(expectedCurrentCourtStatus.getPageName()));
+    }
+
+    private List<Object[]> getHearingEventRawResult(final List<HearingEventPojo> hearingEventList) {
+
+        List<Object[]> list = new ArrayList<>();
+        HearingEventPojo pojo = hearingEventList.get(0);
+        // Add arrays to the list
+        list.add(new Object[]{pojo.getDefenceCounselId(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), });
+        return list;
     }
 
     @Test
@@ -1584,7 +1574,6 @@ public class HearingServiceTest {
         assertThat(getString(prosecutionCases.getJsonObject(1), "caseId").get(), is(caseId2.toString()));
         assertThat(getString(prosecutionCases.getJsonObject(1), "urn"), is(Optional.empty()));
     }
-
 
     @Test
     public void shouldReturnProsecutionCaseResponseByHearingId() {
@@ -1825,10 +1814,6 @@ public class HearingServiceTest {
                 .build(), responsePayload));
         assertDoesNotThrow(() -> hearingService.validateUserPermissionForApplicationType(jsonEnvelope),
                 "User has permission to view manage hearing of this application so not throwing any exception");
-    }
-
-    protected static String getStringFromResource(final String path) throws IOException {
-        return Resources.toString(getResource(path), defaultCharset());
     }
 
     private void assertCurrentCourtStatus(final CurrentCourtStatus actual, final CurrentCourtStatus expected) {

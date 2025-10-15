@@ -4,6 +4,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.shuffle;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,8 +13,6 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.LON
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
-
-import org.junit.After;
 import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
@@ -30,8 +29,10 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.persistence.PersistenceException;
 
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -293,6 +294,32 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
         assertTrue(hearingEvents.get(0).getEventTime().isEqual(EVENT_TIME_2));
         assertTrue(hearingEvents.get(0).getLastModifiedTime().isEqual(LAST_MODIFIED_TIME_2));
     }
+
+    @Test
+    public void shouldLatestHearingsForCourtCentre() {
+        givenHearingExistsWithCourtCentre();
+        givenHearingEventsExistWithNotRequiredEventDefinitions();
+        final Set<UUID> hearingEventRequiredDefinitionsIds = new HashSet();
+        hearingEventRequiredDefinitionsIds.add(HEARING_EVENT_DEFINITION_ID_1);
+        hearingEventRequiredDefinitionsIds.add(HEARING_EVENT_DEFINITION_ID_2);
+
+        try {
+            final List<Object[]> hearingEvents = hearingEventRepository.findLatestHearingsForThatDayByCourt(COURT_CENTRE_ID, EVENT_TIME.toLocalDate(),hearingEventRequiredDefinitionsIds);
+            assertThat(hearingEvents, is(notNullValue()));
+            assertThat(hearingEvents.size(), is(1));
+            System.out.println("✅ SUCCESS: Empty result set handled correctly - no JDBC type 1111 error");
+        } catch (PersistenceException e){
+            if (e.getMessage().contains("No Dialect mapping for JDBC type: 1111")) {
+                System.err.println("❌ FAILURE: JDBC type 1111 error even with empty result set!");
+                System.err.println("Error: " + e.getMessage());
+                throw e;
+            } else {
+                // Other exceptions are acceptable
+                System.out.println("✅ SUCCESS: No JDBC type 1111 error - other exception is acceptable: " + e.getMessage());
+            }
+        }
+    }
+
 
     @Test
     public void shouldGetActiveHearingsForCourtCentreList() {

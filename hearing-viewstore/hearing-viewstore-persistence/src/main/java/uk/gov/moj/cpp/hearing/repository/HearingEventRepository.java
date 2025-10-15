@@ -12,6 +12,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.apache.deltaspike.data.api.AbstractEntityRepository;
 import org.apache.deltaspike.data.api.Query;
@@ -21,6 +26,11 @@ import org.apache.deltaspike.data.api.Repository;
 @SuppressWarnings({"CdiManagedBeanInconsistencyInspection", "squid:S1192"})
 @Repository
 public abstract class HearingEventRepository extends AbstractEntityRepository<HearingEvent, UUID> {
+
+    @Inject
+    private EntityManager entityManager;
+
+    public static final String REPLACE_WITH_HEARING_EVENT_DEF_IDS = "REPLACE_WITH_HEARING_EVENT_DEF_IDS";
 
     private static final String GET_ACTIVE_HEARINGS_FOR_COURT_ROOM =
             "SELECT hearingEvent FROM uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent hearingEvent, " +
@@ -83,6 +93,36 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
                     "hearingEvent.deleted is false " +
                     " order by hearingEvent.eventTime desc";
 
+    private static final String LATEST_HEARINGS_FOR_COURT_CENTRE_LIST =
+            "WITH sub_qry " +
+            "AS ( " +
+                    "   SELECT max(hearingeve2_.event_time) evtme " +
+                    "   FROM ha_hearing_event hearingeve2_, ha_hearing hearing3_ " +
+                    "   WHERE hearingeve2_.event_date = :eventDate " +
+                    "       AND hearingeve2_.hearing_event_definition_id IN (" + REPLACE_WITH_HEARING_EVENT_DEF_IDS + ") " +
+                    "       AND hearingeve2_.deleted = false " +
+                    "       AND hearing3_.id = hearingeve2_.hearing_id " +
+                    "       AND hearing3_.court_centre_id = :courtCentreId " +
+                    "   GROUP BY room_id " +
+                    "   ) " +
+            "SELECT CAST(defence_counsel_id AS VARCHAR) AS defence_counsel_id, " +
+                    "   deleted, " +
+                    "   event_date, " +
+                    "   event_time, " +
+                    "   CAST(hearing_event_definition_id AS VARCHAR) AS hearing_event_definition_id, " +
+                    "   CAST(hearing_id AS VARCHAR) AS hearing_id, " +
+                    "   CAST(id AS VARCHAR) AS id, " +
+                    "   last_modified_time, " +
+                    "   recorded_label " +
+            "FROM ha_hearing_event, " +
+                    "   sub_qry " +
+            "WHERE event_date = :eventDate " +
+                    "   AND hearing_event_definition_id IN (" + REPLACE_WITH_HEARING_EVENT_DEF_IDS + ") " +
+                    "   AND deleted = false " +
+                    "   AND event_time = sub_qry.evtme " +
+            "ORDER BY event_time DESC";
+
+
     public Optional<HearingEvent> findOptionalById(final UUID hearingEventId) {
         final HearingEvent hearingEvent = findBy(hearingEventId);
         return hearingEvent == null ? empty() : Optional.of(hearingEvent);
@@ -121,4 +161,23 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
     @Query(value="SELECT COUNT(he.id) FROM HearingEvent he WHERE he.hearingId = :hearingId AND he.deleted = false AND he.recordedLabel = 'Hearing started'")
     public abstract Long findEventLogCountByHearingId(@QueryParam("hearingId") final UUID hearingId);
 
+    public List<Object[]> findLatestHearingsForThatDayByCourt(final UUID courtCentreId, final LocalDate eventDate, final Set<UUID> cppHearingEventIds){
+        final String queryString = getSQLNativeQuery(cppHearingEventIds);
+        javax.persistence.Query query = entityManager.createNativeQuery(queryString);
+        query.setParameter("courtCentreId", courtCentreId);
+        query.setParameter("eventDate", eventDate);
+        return query.getResultList();
+    }
+
+    private String getSQLNativeQuery(final Set<UUID> cppHearingEventIds) {
+        final String HearingDefIds = toSqlInClause(cppHearingEventIds);
+        String sqlNativeQuery = LATEST_HEARINGS_FOR_COURT_CENTRE_LIST.replace(REPLACE_WITH_HEARING_EVENT_DEF_IDS, HearingDefIds);
+        return sqlNativeQuery;
+    }
+
+    private static String toSqlInClause(Set<UUID> uuids) {
+        return uuids.stream()
+                .map(uuid -> "'" + uuid.toString() + "'")
+                .collect(Collectors.joining(", "));
+    }
 }

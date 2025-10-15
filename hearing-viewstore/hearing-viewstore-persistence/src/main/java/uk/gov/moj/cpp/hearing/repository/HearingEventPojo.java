@@ -46,6 +46,10 @@ public class HearingEventPojo implements Serializable {
     this.recordedLabel = recordedLabel;
   }
 
+  public HearingEventPojo() {
+
+  }
+
   public UUID getDefenceCounselId() {
     return defenceCounselId;
   }

@@ -21,8 +21,8 @@ import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
-import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.ApplicationStatus;
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
@@ -69,8 +69,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
 import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
-import uk.gov.moj.cpp.hearing.query.view.model.Permission;
 import uk.gov.moj.cpp.hearing.query.view.model.ApplicationWithStatus;
+import uk.gov.moj.cpp.hearing.query.view.model.Permission;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
@@ -203,8 +203,17 @@ public class HearingService {
     public Optional<CurrentCourtStatus> getHearingsForWebPage(final List<UUID> courtCentreList,
                                                               final LocalDate localDate,
                                                               final Set<UUID> cppHearingEventIds) {
+        LOGGER.info("courtCentreList: {}, localDate: {}, cppHearingEventIds: {}", courtCentreList, localDate, cppHearingEventIds);
+        if(courtCentreList.isEmpty()){
+            return empty();
+        }
+        final List<Object[]> results = hearingEventRepository.findLatestHearingsForThatDayByCourt(courtCentreList.get(0), localDate,cppHearingEventIds);
 
-        final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
+        final List<HearingEventPojo> hearingEventPojos = results.stream()
+                .map(this::convertToHearingEventPojo)
+                .collect(Collectors.toList());
+
+
         final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
         final List<uk.gov.justice.core.courts.Hearing> hearingList = activeHearingEventList
                 .stream()
@@ -218,6 +227,76 @@ public class HearingService {
             return Optional.of(hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper));
         }
         return empty();
+    }
+
+    private HearingEventPojo convertToHearingEventPojo(final Object[] aHearingEvent) {
+        final HearingEventPojo hearingEventPojo = new HearingEventPojo();
+
+        hearingEventPojo.setDefenceCounselId(convertToUUID(aHearingEvent[0]));
+        hearingEventPojo.setDeleted(toBoolean(aHearingEvent[1]));
+        hearingEventPojo.setEventDate(convertToLocalDate(aHearingEvent[2]));
+        hearingEventPojo.setEventTime(convertToZonedDateTime(aHearingEvent[3]));
+        hearingEventPojo.setHearingEventDefinitionId(convertToUUID(aHearingEvent[4]));
+        hearingEventPojo.setHearingId(convertToUUID(aHearingEvent[5]));
+        hearingEventPojo.setId(convertToUUID(aHearingEvent[6]));
+        hearingEventPojo.setLastModifiedTime(convertToZonedDateTime(aHearingEvent[7]));
+        hearingEventPojo.setRecordedLabel((String)aHearingEvent[8]);
+
+        return hearingEventPojo;
+    }
+    private UUID convertToUUID(Object obj) {
+        if (obj == null) return null;
+        if (obj instanceof UUID) return (UUID) obj;
+        if (obj instanceof byte[]) {
+            return UUID.nameUUIDFromBytes((byte[]) obj);
+        }
+        if (obj instanceof String) {
+            return UUID.fromString((String) obj);
+        }
+        return null;
+    }
+    private ZonedDateTime convertToZonedDateTime(Object obj) {
+        if (obj == null) return null;
+        if (obj instanceof ZonedDateTime) return (ZonedDateTime) obj;
+        if (obj instanceof String) {
+            return ZonedDateTime.parse((String)obj);
+        }
+        if (obj instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp)obj).toInstant()
+                    .atZone(ZoneId.of("Europe/London"));
+        }
+        return null;
+    }
+
+    public static boolean toBoolean(Object sqlValue) {
+        if (sqlValue == null) {
+            return false;
+        }
+
+        if (sqlValue instanceof Boolean) {
+            return (Boolean) sqlValue;
+        } else if (sqlValue instanceof Number) {
+            return ((Number) sqlValue).intValue() != 0;
+        } else if (sqlValue instanceof String) {
+            String str = ((String) sqlValue).trim().toLowerCase();
+            return str.equals("true") || str.equals("t") || str.equals("yes") || str.equals("y") || str.equals("1");
+        } else {
+            LOGGER.info("Cannot convert to boolean: " + sqlValue.getClass());
+        }
+        return false;
+    }
+
+
+    private LocalDate convertToLocalDate(Object obj) {
+        if (obj == null) return null;
+        if (obj instanceof LocalDate) return (LocalDate) obj;
+        if (obj instanceof java.sql.Date) {
+            return ((java.sql.Date) obj).toLocalDate();
+        }
+        if (obj instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) obj).toLocalDateTime().toLocalDate();
+        }
+        return null;
     }
 
 
