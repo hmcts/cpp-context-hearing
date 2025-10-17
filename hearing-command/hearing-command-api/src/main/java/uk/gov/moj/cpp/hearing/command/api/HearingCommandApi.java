@@ -255,6 +255,11 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.publish-hearing-lists-for-crown-courts");
     }
 
+    @Handles("hearing.publish-hearing-lists-for-crown-courts-with-ids")
+    public void publishHearingListsForCrownCourtsWithIds(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.publish-hearing-lists-for-crown-courts-with-ids");
+    }
+
     @Handles("hearing.compute-outstanding-fines")
     public void computeOutstandingFines(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.compute-outstanding-fines");

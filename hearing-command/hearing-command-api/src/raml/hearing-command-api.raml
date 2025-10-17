@@ -532,6 +532,25 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
     responses:
       202:
         description: Request accepted
+
+/publishHearingListsForCrownCourtsWithIds:
+  post:
+    description: |
+      Publish hearing lists for all crown courts:
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.publish-hearing-lists-for-crown-courts-with-ids+json
+        name: hearing.publish-hearing-lists-for-crown-courts-with-ids
+      ...
+    body:
+      application/vnd.hearing.publish-hearing-lists-for-crown-courts-with-ids+json:
+        schema: !include json/schema/hearing.publish-hearing-lists-for-crown-courts-with-ids.json
+        example: !include json/hearing.publish-hearing-lists-for-crown-courts-with-ids.json
+
+    responses:
+      202:
+        description: Request accepted
+
 /outstanding-fines:
   post:
       description: |
