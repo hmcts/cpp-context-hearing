@@ -18,11 +18,13 @@ import uk.gov.moj.cpp.hearing.command.courtlistpublishstatus.RecordCourtListExpo
 import uk.gov.moj.cpp.hearing.command.handler.service.XhibitCrownCourtCentresCache;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CourtListAggregate;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.json.Json;
+import javax.json.JsonString;
 import javax.json.JsonValue;
 
 import org.slf4j.Logger;
@@ -86,6 +88,14 @@ public class PublishCourtListStatusHandler extends AbstractCommandHandler {
     @Handles("hearing.command.publish-hearing-lists-for-crown-courts")
     public void publishHearingListsForCrownCourts(final JsonEnvelope commandEnvelope) {
         xhibitCrownCourtCentresCache.getAllCrownCourtCentres()
+                .forEach(courtCentreId -> publishFinalCourtList(commandEnvelope.metadata(), courtCentreId));
+    }
+
+    @Handles("hearing.command.publish-hearing-lists-for-crown-courts-with-ids")
+    public void publishHearingListsForCrownCourtsWithIds(final JsonEnvelope commandEnvelope) {
+        Optional.ofNullable(commandEnvelope.payloadAsJsonObject().getJsonArray("ids"))
+                .orElse(Json.createArrayBuilder().build()).getValuesAs(JsonString.class)
+                .stream().map(JsonString::getString).map(UUID::fromString)
                 .forEach(courtCentreId -> publishFinalCourtList(commandEnvelope.metadata(), courtCentreId));
     }
 

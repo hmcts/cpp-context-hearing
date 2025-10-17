@@ -440,6 +440,15 @@ rule "Command - API - Action - hearing.publish-hearing-lists-for-crown-courts"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.publish-hearing-lists-for-crown-courts-with-ids"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.publish-hearing-lists-for-crown-courts-with-ids");
+    eval(userAndGroupProvider.isSystemUser($action));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Command - API - Action - hearing.compute-outstanding-fines"
   when
     $outcome: Outcome();

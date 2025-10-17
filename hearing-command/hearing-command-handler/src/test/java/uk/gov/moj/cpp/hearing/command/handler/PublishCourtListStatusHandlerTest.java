@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.json.Json.createReader;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -8,6 +9,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -170,6 +172,25 @@ public class PublishCourtListStatusHandlerTest {
     }
 
     @Test
+    public void shouldNotMakeAnyRequestsToPublishACourtListWithIdsForACrownCourtWhenThereAreNone() {
+        final JsonEnvelope commandEnvelope = generateEmptyCommandEnvelope();
+        publishCourtListStatusHandler.publishHearingListsForCrownCourtsWithIds(commandEnvelope);
+
+        verifyNoInteractions(courtListAggregate);
+    }
+
+    @Test
+    public void shouldMakeRequestsToPublishACourtListWithIdsForACrownCourtWhenThereAre() {
+        when(eventSource.getStreamById(any())).thenReturn(eventStream);
+        when(aggregateService.get(eventStream, CourtListAggregate.class)).thenReturn(courtListAggregate);
+
+        final JsonEnvelope commandEnvelope = generateCommandEnvelope();
+        publishCourtListStatusHandler.publishHearingListsForCrownCourtsWithIds(commandEnvelope);
+
+        verify(courtListAggregate, times(2)).recordCourtListRequested(any(UUID.class), any(ZonedDateTime.class));
+    }
+
+    @Test
     public void shouldRequestPublicationOfACourtListEvenAfterOneFails() {
 
         final JsonEnvelope commandEnvelope = generateEmptyCommandEnvelope();
@@ -237,6 +258,12 @@ public class PublishCourtListStatusHandlerTest {
 
     private JsonEnvelope generateEmptyCommandEnvelope() {
         return createEnvelope(".", createObjectBuilder().build());
+    }
+
+    private JsonEnvelope generateCommandEnvelope() {
+        return createEnvelope(".", createObjectBuilder()
+                .add("ids", createArrayBuilder().add("10356a8a-558b-4c1d-80a7-ef96f488f9cb").add("dde1282c-ce21-41cf-8ae9-1ddf1ff989d7").build())
+                .build());
     }
 
     private Set<UUID> getPayloadOfMultipleCrownCourtCentres() {

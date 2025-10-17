@@ -44,6 +44,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_ADD_DEFENCE_COUNSEL = "hearing.add-defence-counsel";
     private static final String ACTION_NAME_COURT_LIST_PUBLISH_STATUS = "hearing.publish-court-list";
     private static final String ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS = "hearing.publish-hearing-lists-for-crown-courts";
+    private static final String ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS_WITH_IDS = "hearing.publish-hearing-lists-for-crown-courts-with-ids";
     private static final String ACTION_NAME_COMPUTE_OUTSTANDING_FINES = "hearing.compute-outstanding-fines";
 
     private static final String ACTION_NAME_RECORD_SESSION_TIME = "hearing.record-session-time";
@@ -548,6 +549,24 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUserInAuthorisedGroupToPublishHearingEventForAllCrownCourts() {
         final Action action = createActionFor(ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToPublishHearingEventForAllCrownCourtsWithIds() {
+        final Action action = createActionFor(ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS_WITH_IDS);
+        given(this.userAndGroupProvider.isSystemUser(action))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUserInAuthorisedGroupToPublishHearingEventForAllCrownCourtsWithIds() {
+        final Action action = createActionFor(ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS_WITH_IDS);
 
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);

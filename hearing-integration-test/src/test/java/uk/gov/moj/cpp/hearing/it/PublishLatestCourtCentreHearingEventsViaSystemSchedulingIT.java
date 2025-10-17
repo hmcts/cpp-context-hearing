@@ -4,6 +4,7 @@ import static java.text.MessageFormat.format;
 import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.hamcrest.Matchers.is;
@@ -48,7 +49,9 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     private static final Logger LOGGER = LoggerFactory.getLogger(PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT.class);
 
     private static final String HEARING_COMMAND_PUBLISH_HEARING_LIST = "hearing.publish-hearing-lists-for-crown-courts";
+    private static final String HEARING_COMMAND_PUBLISH_HEARING_LIST_WITH_IDS = "hearing.publish-hearing-lists-for-crown-courts-with-ids";
     private static final String MEDIA_TYPE_HEARING_COMMAND_PUBLISH_HEARING_LIST = "application/vnd.hearing.publish-hearing-lists-for-crown-courts+json";
+    private static final String MEDIA_TYPE_HEARING_COMMAND_PUBLISH_HEARING_LIST_WITH_IDS = "application/vnd.hearing.publish-hearing-lists-for-crown-courts-with-ids+json";
     private static final String START_HEARING = "Start Hearing";
     private static final String END_HEARING = "End Hearing";
 
@@ -101,6 +104,19 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
     }
 
+    @Test
+    public void shouldRequestToPublishHearingListWithIds() {
+        createHearingEvent(hearing, randomUUID().toString(), START_HEARING, eventTime.plusMinutes(rand()).plusSeconds(rand()));
+
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListWithIdsJsonString(courtCentreId);
+
+        final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
+
+        sendPublishHearingListCommandWithIdsFromSchedule(publishCourtListJsonObject);
+
+        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+    }
+
 
     private void sendPublishHearingListCommandFromSchedule(final JsonObject publishCourtListJsonObject) {
         final String updateHearingUrl = String.format("%s/%s", getBaseUri(), format(ENDPOINT_PROPERTIES.getProperty(HEARING_COMMAND_PUBLISH_HEARING_LIST)));
@@ -113,8 +129,26 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
         assertThat(response.getStatus(), equalTo(SC_ACCEPTED));
     }
 
+    private void sendPublishHearingListCommandWithIdsFromSchedule(final JsonObject publishCourtListJsonObject) {
+        final String updateHearingUrl = String.format("%s/%s", getBaseUri(), format(ENDPOINT_PROPERTIES.getProperty(HEARING_COMMAND_PUBLISH_HEARING_LIST_WITH_IDS)));
+        final String request = publishCourtListJsonObject.toString();
+
+        LOGGER.info("Post call made: \n\n\tURL = {} \n\tMedia type = {} \n\tPayload = {}\n\n", updateHearingUrl, MEDIA_TYPE_HEARING_COMMAND_PUBLISH_HEARING_LIST_WITH_IDS, request, getLoggedInSystemUserHeader());
+
+        final Response response = new RestClient().postCommand(updateHearingUrl, MEDIA_TYPE_HEARING_COMMAND_PUBLISH_HEARING_LIST_WITH_IDS, request, getLoggedInSystemUserHeader());
+
+        assertThat(response.getStatus(), equalTo(SC_ACCEPTED));
+    }
+
     private JsonObject buildPublishCourtListJsonString(final String courtCentreId, final LocalDate eventDate) {
         return createObjectBuilder().add("courtCentreId", courtCentreId).add("eventDate", eventDate.toString()).build();
+    }
+
+
+    private JsonObject buildPublishCourtListWithIdsJsonString(final String courtCentreId) {
+        return createObjectBuilder()
+                .add("ids", createArrayBuilder().add(courtCentreId).build())
+                .build();
     }
 
     private final CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final CommandHelpers.InitiateHearingCommandHelper hearing,
