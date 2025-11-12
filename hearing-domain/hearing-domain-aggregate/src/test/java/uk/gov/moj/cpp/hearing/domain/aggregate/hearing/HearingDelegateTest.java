@@ -14,8 +14,27 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
-import uk.gov.justice.core.courts.*;
-import uk.gov.moj.cpp.hearing.domain.event.*;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.Verdict;
+import uk.gov.justice.core.courts.VerdictType;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
+import uk.gov.moj.cpp.hearing.domain.event.HearingBreachApplicationsAdded;
+import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicate;
+import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingUserAddedToJudiciary;
+import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
@@ -102,13 +121,13 @@ public class HearingDelegateTest {
 
     @Test
     public void shouldAddMasterDefendantIdToDefendant() {
-        final UUID prosecutionCaseId1 = UUID.randomUUID();
-        final UUID prosecutionCaseId2 = UUID.randomUUID();
-        final UUID defendantId1 = UUID.randomUUID();
-        final UUID defendantId2 = UUID.randomUUID();
-        final UUID defendantId3 = UUID.randomUUID();
-        final UUID defendantId4 = UUID.randomUUID();
-        final UUID masterDefendantId = UUID.randomUUID();
+        final UUID prosecutionCaseId1 = randomUUID();
+        final UUID prosecutionCaseId2 = randomUUID();
+        final UUID defendantId1 = randomUUID();
+        final UUID defendantId2 = randomUUID();
+        final UUID defendantId3 = randomUUID();
+        final UUID defendantId4 = randomUUID();
+        final UUID masterDefendantId = randomUUID();
         final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
         hearingDelegate.handleHearingInitiated(new HearingInitiated(hearing.getHearing()));
         momento.getHearing().setProsecutionCases(
@@ -148,10 +167,10 @@ public class HearingDelegateTest {
 
     @Test
     public void shouldHandleHearingExtendedWhenSameCaseHasDifferentDefendant() {
-        final UUID hearingId = UUID.randomUUID();
-        final UUID caseId = UUID.randomUUID();
-        final UUID newDefendantID = UUID.randomUUID();
-        final UUID currentDefendantID = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID caseId = randomUUID();
+        final UUID newDefendantID = randomUUID();
+        final UUID currentDefendantID = randomUUID();
         final List<ProsecutionCase> extendedCases = caseList(createProsecutionCases(caseId, newDefendantID));
         final List<ProsecutionCase> currentCases = caseList(createProsecutionCases(caseId, currentDefendantID));
 
@@ -180,11 +199,11 @@ public class HearingDelegateTest {
 
     @Test
     public void shouldHandleHearingExtendedWhenHavingDifferentCase() {
-        final UUID hearingId = UUID.randomUUID();
-        final UUID newCaseId = UUID.randomUUID();
-        final UUID currentCaseId = UUID.randomUUID();
-        final UUID newDefendantID = UUID.randomUUID();
-        final UUID currentDefendantID = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID newCaseId = randomUUID();
+        final UUID currentCaseId = randomUUID();
+        final UUID newDefendantID = randomUUID();
+        final UUID currentDefendantID = randomUUID();
         final List<ProsecutionCase> extendedCases = caseList(createProsecutionCases(newCaseId, newDefendantID));
         final List<ProsecutionCase> currentCases = caseList(createProsecutionCases(currentCaseId, currentDefendantID));
 
@@ -220,11 +239,11 @@ public class HearingDelegateTest {
 
     @Test
     public void shouldHandleHearingExtendedWhenSameDefendantDifferentOffence() {
-        final UUID hearingId = UUID.randomUUID();
-        final UUID caseId = UUID.randomUUID();
-        final UUID defendantID = UUID.randomUUID();
-        final UUID newOffenceID = UUID.randomUUID();
-        final UUID currentOffenceID = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID caseId = randomUUID();
+        final UUID defendantID = randomUUID();
+        final UUID newOffenceID = randomUUID();
+        final UUID currentOffenceID = randomUUID();
         final List<ProsecutionCase> extendedCases = caseList(createProsecutionCases(caseId, defendantID, newOffenceID));
         final List<ProsecutionCase> currentCases = caseList(createProsecutionCases(caseId, defendantID, currentOffenceID));
 
@@ -260,13 +279,13 @@ public class HearingDelegateTest {
 
     @Test
     public void shouldExtendHearingWithHearingBreachApplicationsAddedEvent() {
-        final UUID hearingId = UUID.randomUUID();
-        final UUID caseId = UUID.randomUUID();
-        final UUID defendantID = UUID.randomUUID();
-        final UUID newOffenceID = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID caseId = randomUUID();
+        final UUID defendantID = randomUUID();
+        final UUID newOffenceID = randomUUID();
         final List<ProsecutionCase> extendedCases = caseList(createProsecutionCases(caseId, defendantID, newOffenceID));
-        final CourtApplication courtApplication = createCourtApplication(UUID.randomUUID());
-        final UUID secondApplicationId = UUID.randomUUID();
+        final CourtApplication courtApplication = createCourtApplication(randomUUID());
+        final UUID secondApplicationId = randomUUID();
         momento.setHearing(Hearing.hearing()
                 .withId(hearingId)
                 .withCourtApplications(asList(courtApplication))
@@ -281,10 +300,10 @@ public class HearingDelegateTest {
 
     @Test
     public void shouldSkipExtendHearingIfHearingIsNotCreatedYet() {
-        final UUID hearingId = UUID.randomUUID();
-        final UUID caseId = UUID.randomUUID();
-        final UUID defendantID = UUID.randomUUID();
-        final UUID newOffenceID = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID caseId = randomUUID();
+        final UUID defendantID = randomUUID();
+        final UUID newOffenceID = randomUUID();
         final List<ProsecutionCase> extendedCases = caseList(createProsecutionCases(caseId, defendantID, newOffenceID));
         momento.setHearing(null);
         final List<Object> eventStream = hearingDelegate.extend(hearingId,Collections.singletonList(HearingDay.hearingDay().build()), CourtCentre.courtCentre().build(), JurisdictionType.MAGISTRATES, CourtApplication.courtApplication().build(), extendedCases,null).collect(toList());
@@ -296,17 +315,17 @@ public class HearingDelegateTest {
 
     @Test
     public void shouldRemoveProsecutionCaseAndDefendantWhenAllOffencesAreRemoved() {
-        final UUID hearingId = UUID.randomUUID();
-        final UUID prosecutionCaseId1 = UUID.randomUUID();
-        final UUID prosecutionCaseId2 = UUID.randomUUID();
-        final UUID prosecutionCaseId3 = UUID.randomUUID();
-        final UUID defendantId1 = UUID.randomUUID();
-        final UUID defendantId2 = UUID.randomUUID();
-        final UUID defendantId3 = UUID.randomUUID();
-        final UUID offence1 = UUID.randomUUID();
-        final UUID offence2 = UUID.randomUUID();
-        final UUID offence3 = UUID.randomUUID();
-        final UUID offence4 = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId1 = randomUUID();
+        final UUID prosecutionCaseId2 = randomUUID();
+        final UUID prosecutionCaseId3 = randomUUID();
+        final UUID defendantId1 = randomUUID();
+        final UUID defendantId2 = randomUUID();
+        final UUID defendantId3 = randomUUID();
+        final UUID offence1 = randomUUID();
+        final UUID offence2 = randomUUID();
+        final UUID offence3 = randomUUID();
+        final UUID offence4 = randomUUID();
 
         final ProsecutionCase prosecutionCase1 = createProsecutionCase(prosecutionCaseId1, defendantId1, offence1, offence2);
         final ProsecutionCase prosecutionCase2 = createProsecutionCase(prosecutionCaseId2, defendantId2, offence3, offence4);
@@ -331,17 +350,17 @@ public class HearingDelegateTest {
 
     @Test
     public void shouldNotRemoveProsecutionCaseAndDefendantWhenSingleOffenceIsRemoved() {
-        final UUID hearingId = UUID.randomUUID();
-        final UUID prosecutionCaseId1 = UUID.randomUUID();
-        final UUID prosecutionCaseId2 = UUID.randomUUID();
-        final UUID prosecutionCaseId3 = UUID.randomUUID();
-        final UUID defendantId1 = UUID.randomUUID();
-        final UUID defendantId2 = UUID.randomUUID();
-        final UUID defendantId3 = UUID.randomUUID();
-        final UUID offence1 = UUID.randomUUID();
-        final UUID offence2 = UUID.randomUUID();
-        final UUID offence3 = UUID.randomUUID();
-        final UUID offence4 = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId1 = randomUUID();
+        final UUID prosecutionCaseId2 = randomUUID();
+        final UUID prosecutionCaseId3 = randomUUID();
+        final UUID defendantId1 = randomUUID();
+        final UUID defendantId2 = randomUUID();
+        final UUID defendantId3 = randomUUID();
+        final UUID offence1 = randomUUID();
+        final UUID offence2 = randomUUID();
+        final UUID offence3 = randomUUID();
+        final UUID offence4 = randomUUID();
 
         final ProsecutionCase prosecutionCase1 = createProsecutionCase(prosecutionCaseId1, defendantId1, offence1, offence2);
         final ProsecutionCase prosecutionCase2 = createProsecutionCase(prosecutionCaseId2, defendantId2, offence3, offence4);
@@ -367,8 +386,8 @@ public class HearingDelegateTest {
     @Test
     public void shouldRaiseEarliestNextHearingDateChangedEventWhenThereAreNoNextHearingDatesForSeedingHearing() {
 
-        final UUID hearingId = UUID.randomUUID();
-        final UUID seedingHearingId = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID seedingHearingId = randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(2);
         momento.setHearing(Hearing.hearing().withId(hearingId).build());
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingStartDate).collect(toList());
@@ -390,8 +409,8 @@ public class HearingDelegateTest {
     @Test
     public void shouldRaiseEarliestNextHearingDateChangedEventWhenSameNextHearingDateIsEarlierThanPreviousOne() {
 
-        final UUID hearingId = UUID.randomUUID();
-        final UUID seedingHearingId = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID seedingHearingId = randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(2);
         momento.setHearing(Hearing.hearing().withId(hearingId).build());
 
@@ -415,8 +434,8 @@ public class HearingDelegateTest {
     @Test
     public void shouldRaiseEarliestNextHearingDateChangedEventWhenSameNextHearingDateIsLaterThanPreviousOne() {
 
-        final UUID hearingId = UUID.randomUUID();
-        final UUID seedingHearingId = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID seedingHearingId = randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
         momento.setHearing(Hearing.hearing().withId(hearingId).build());
         momento.getNextHearingStartDates().put(hearingId, ZonedDateTime.now().plusDays(3));
@@ -438,9 +457,9 @@ public class HearingDelegateTest {
     @Test
     public void shouldRaiseEarliestNextHearingDateChangedEventWhenNextHearingDateIsEarlierThanAllThePreviousOnes() {
 
-        final UUID hearingId1 = UUID.randomUUID();
-        final UUID hearingId2 = UUID.randomUUID();
-        final UUID seedingHearingId = UUID.randomUUID();
+        final UUID hearingId1 = randomUUID();
+        final UUID hearingId2 = randomUUID();
+        final UUID seedingHearingId = randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(2);
 
         momento.setHearing(Hearing.hearing().withId(hearingId1).build());
@@ -465,9 +484,9 @@ public class HearingDelegateTest {
     @Test
     public void shouldNotRaiseEarliestNextHearingDateChangedEventWhenNextHearingDateIsLaterThanOneOfThePreviousOnes() {
 
-        final UUID hearingId1 = UUID.randomUUID();
-        final UUID hearingId2 = UUID.randomUUID();
-        final UUID seedingHearingId = UUID.randomUUID();
+        final UUID hearingId1 = randomUUID();
+        final UUID hearingId2 = randomUUID();
+        final UUID seedingHearingId = randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
         momento.setHearing(Hearing.hearing().withId(hearingId1).build());
         momento.getNextHearingStartDates().put(hearingId1, ZonedDateTime.now().plusDays(2));
@@ -486,9 +505,9 @@ public class HearingDelegateTest {
     @Test
     public void shouldNotRaiseEarliestNextHearingDateChangedEventWhenNextHearingDateIsLaterThanPreviousOnes() {
 
-        final UUID hearingId1 = UUID.randomUUID();
-        final UUID hearingId2 = UUID.randomUUID();
-        final UUID seedingHearingId = UUID.randomUUID();
+        final UUID hearingId1 = randomUUID();
+        final UUID hearingId2 = randomUUID();
+        final UUID seedingHearingId = randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
 
         momento.setHearing(Hearing.hearing().withId(hearingId1).build());
@@ -527,8 +546,8 @@ public class HearingDelegateTest {
     @Test
     public void shouldNotRaiseEventIfHearingIsAlreadyMarkedAsDuplicate(){
 
-        final UUID hearingId = UUID.randomUUID();
-        final UUID seedingHearingId = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID seedingHearingId = randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
 
         momento.setDuplicate(true);
@@ -542,8 +561,8 @@ public class HearingDelegateTest {
     @Test
     public void shouldNotRaiseEventIfHearingIsAlreadyMarkedAsDeleted(){
 
-        final UUID hearingId = UUID.randomUUID();
-        final UUID seedingHearingId = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID seedingHearingId = randomUUID();
         final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
 
         momento.setDeleted(true);
@@ -556,7 +575,7 @@ public class HearingDelegateTest {
 
     @Test
     public void shouldHandleHearingMarkedAsDuplicate() {
-        final UUID hearingId = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
         final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
         hearingDelegate.handleHearingInitiated(new HearingInitiated(hearing.getHearing()));
 
@@ -573,7 +592,7 @@ public class HearingDelegateTest {
     }
     @Test
     void updateCourtApplication_shouldReturnApplicationDetailChangedEvent() {
-        UUID hearingId = UUID.randomUUID();
+        UUID hearingId = randomUUID();
         final uk.gov.justice.core.courts.CourtApplication courtApplication = uk.gov.justice.core.courts.CourtApplication.courtApplication()
                 .withId(randomUUID())
                 .build();
@@ -591,7 +610,7 @@ public class HearingDelegateTest {
 
     @Test
     void updateCourtApplication_shouldReturnHearingIgnoredMessageWhenHearingNotFound() {
-        UUID hearingId = UUID.randomUUID();
+        UUID hearingId = randomUUID();
         momento.setHearing(null);
         Stream<Object> result = hearingDelegate.updateCourtApplication(hearingId, uk.gov.justice.core.courts.CourtApplication.courtApplication()
                 .withId(randomUUID())
@@ -607,7 +626,7 @@ public class HearingDelegateTest {
 
     @Test
     void updateCourtApplication_shouldReturnEmptyStreamWhenHearingHasSharedResults() {
-        UUID hearingId = UUID.randomUUID();
+        UUID hearingId = randomUUID();
         CourtApplication courtApplication = uk.gov.justice.core.courts.CourtApplication.courtApplication()
                 .withId(randomUUID())
                 .build();

@@ -294,7 +294,7 @@ public class CoreTestTemplates {
                     .withIsDiscontinued(true)
                     .withProceedingsConcluded(true)
                     .withEndorsableFlag(true)
-                    .withConvictionDate(withConvictionDate ? LocalDate.now().minusDays(2) : null)
+                    .withConvictionDate(withConvictionDate ? now().minusDays(2) : null)
                     .withReportingRestrictions(of(ReportingRestriction.reportingRestriction()
                                     .withId(randomUUID())
                                     .withLabel(REPORTING_RESTRICTION_LABEL_YES)
@@ -303,6 +303,7 @@ public class CoreTestTemplates {
                                     .withId(randomUUID())
                                     .withLabel(REPORTING_RESTRICTION_LABEL_SECOND)
                                     .withJudicialResultId(randomUUID()).build()))
+                    .withConvictingCourt(CourtCentre.courtCentre().withName("courtName").build())
                     .withOffenceDateCode(args.getOffenceDateCode());
         }
 
