@@ -21,6 +21,7 @@ import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingByIdPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingsByDatePollForMatch;
@@ -42,6 +43,9 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.third;
+import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationalUnit;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
@@ -88,6 +92,7 @@ import uk.gov.justice.hearing.courts.Respondents;
 import uk.gov.justice.hearing.courts.Subject;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingViewResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
@@ -106,9 +111,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import javax.json.Json;
 import javax.json.JsonObject;
 
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Test;
 
@@ -1368,6 +1375,153 @@ public class InitiateHearingIT extends AbstractIT {
         assertHearingHasBeenRemovedFromViewStore(hearingId);
     }
 
+    @Test
+    void shouldRaiseHearingDeleted_WhenHandleHearingUnallocatedCourtroomRemoved() {
+
+        final InitiateHearingCommand initiateHearing = minimumInitiateHearingTemplate();
+        final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(initiateHearing.getHearing().getId().toString()))));
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), initiateHearing));
+
+        publicEventTopic.waitFor();
+        publicEventTopic.close();
+
+        final Hearing hearing = hearingOne.getHearing();
+        final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
+
+        final HearingDay hearingDay = hearing.getHearingDays().get(0);
+
+        final JudicialRole judicialRole = hearing.getJudiciary().get(0);
+
+        getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearing.getId()))
+                        .with(Hearing::getType, isBean(HearingType.class)
+                                .with(HearingType::getId, is(hearing.getType().getId())))
+                        .with(Hearing::getJurisdictionType, is(JurisdictionType.CROWN))
+                        .with(Hearing::getHearingLanguage, is(ENGLISH))
+                        .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                                .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))
+                                .with(CourtCentre::getName, is(hearing.getCourtCentre().getName())))
+                        .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
+                                .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
+                        .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
+                                .with(JudicialRole::getJudicialId, is(judicialRole.getJudicialId()))
+                                .withValue(jr -> judicialRole.getJudicialRoleType().getJudiciaryType(), judicialRole.getJudicialRoleType().getJudiciaryType())))
+                        .with(Hearing::getCourtApplications, first(isBean(CourtApplication.class)
+                                .withValue(CourtApplication::getId, courtApplication.getId())
+                                .withValue(CourtApplication::getApplicationReference, courtApplication.getApplicationReference())
+                        ))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
+                                .with(ProsecutionCase::getInitiationCode, is(hearingOne.getFirstCase().getInitiationCode()))
+                                .with(ProsecutionCase::getStatementOfFacts, is(hearingOne.getFirstCase().getStatementOfFacts()))
+                                .with(ProsecutionCase::getStatementOfFactsWelsh, is(hearingOne.getFirstCase().getStatementOfFactsWelsh()))
+                                .with(ProsecutionCase::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
+                                        .with(ProsecutionCaseIdentifier::getProsecutionAuthorityId, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityId()))
+                                        .with(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityCode()))
+                                        .with(ProsecutionCaseIdentifier::getCaseURN, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getCaseURN()))
+                                        .with(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityReference())))
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getId, is(hearingOne.getFirstDefendantForFirstCase().getId()))
+                                        .with(Defendant::getMasterDefendantId, is(hearingOne.getFirstDefendantForFirstCase().getMasterDefendantId()))
+                                        .with(Defendant::getCourtProceedingsInitiated, is(hearingOne.getFirstDefendantForFirstCase().getCourtProceedingsInitiated().withZoneSameLocal(ZoneId.of("UTC"))))
+                                        .with(Defendant::getProsecutionCaseId, is(hearingOne.getFirstCase().getId()))
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getOffenceDefinitionId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getOffenceDefinitionId()))
+                                                .with(Offence::getOffenceCode, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getOffenceCode()))
+                                                .with(Offence::getWording, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getWording()))
+                                                .with(Offence::getStartDate, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getStartDate()))
+                                                .with(Offence::getOrderIndex, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getOrderIndex()))
+                                                .with(Offence::getCount, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getCount()))
+                                                .with(Offence::getLaidDate, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getLaidDate()))
+                                                .with(Offence::getListingNumber, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getListingNumber()))
+                                                .with(Offence::getEndorsableFlag, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getEndorsableFlag()))
+                                        ))
+                                ))
+                        ))
+                )
+        );
+
+        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
+                isBean(GetHearings.class)
+                        .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
+                                .with(HearingSummaries::getId, is(hearing.getId()))
+                                //.withValue(HearingSummaries::getJurisdictionType, hearing.getJurisdictionType())
+                                .withValue(HearingSummaries::getReportingRestrictionReason, hearing.getReportingRestrictionReason())
+                                .withValue(HearingSummaries::getHearingLanguage, ENGLISH.name())
+                                .with(HearingSummaries::getCourtCentre, isBean(CourtCentre.class)
+                                        .withValue(CourtCentre::getId, hearing.getCourtCentre().getId())
+                                        .withValue(CourtCentre::getName, hearing.getCourtCentre().getName()))
+                                .with(HearingSummaries::getType, isBean(HearingType.class)
+                                        .withValue(HearingType::getId, hearing.getType().getId())
+                                        .withValue(HearingType::getDescription, hearing.getType().getDescription()))
+                                .with(HearingSummaries::getHearingDays, first(isBean(HearingDay.class)
+                                        .withValue(HearingDay::getSittingDay, hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC")))
+                                        .withValue(HearingDay::getListedDurationMinutes, hearingDay.getListedDurationMinutes())
+                                        .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
+                                .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearing.getProsecutionCases()))
+                                .with(HearingSummaries::getCourtApplicationSummaries, hasCourtApplicationSummaries(hearing.getCourtApplications()))
+                                .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
+                                        .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
+                                        .with(CourtApplicationSummaries::getApplicant, isBean(Applicant.class)
+                                                .withValue(Applicant::getFirstName, courtApplication.getApplicant().getPersonDetails().getFirstName())
+                                                .withValue(Applicant::getMiddleName, courtApplication.getApplicant().getPersonDetails().getMiddleName())
+                                                .withValue(Applicant::getLastName, courtApplication.getApplicant().getPersonDetails().getLastName())
+                                                .withValue(Applicant::getId, courtApplication.getApplicant().getId())
+                                                .withValue(Applicant::getOrganisationName, courtApplication.getApplicant().getOrganisation().getName())
+                                                .withValue(Applicant::getSynonym, courtApplication.getApplicant().getSynonym())
+                                        )
+                                        .with(CourtApplicationSummaries::getRespondents, first(isBean(Respondents.class)
+                                                .withValue(Respondents::getFirstName, courtApplication.getRespondents().get(0).getPersonDetails().getFirstName())
+                                                .withValue(Respondents::getMiddleName, courtApplication.getRespondents().get(0).getPersonDetails().getMiddleName())
+                                                .withValue(Respondents::getLastName, courtApplication.getRespondents().get(0).getPersonDetails().getLastName())
+                                                .withValue(Respondents::getOrganisationName, courtApplication.getRespondents().get(0).getOrganisation().getName())
+                                        ))
+                                        .with(CourtApplicationSummaries::getCaseSummaries, first(isBean(CaseSummaries.class)
+                                                .withValue(CaseSummaries::getId, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseId())
+                                                .with(CaseSummaries::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
+                                                        .withValue(ProsecutionCaseIdentifier::getCaseURN, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getCaseURN())
+                                                        .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityId, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())
+                                                        .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityCode()))))
+                                        .with(CourtApplicationSummaries::getSubject, isBean(Subject.class)
+                                                .withValue(Subject::getId, courtApplication.getSubject().getId())
+                                                .withValue(Subject::getFirstName, courtApplication.getSubject().getPersonDetails().getFirstName())
+                                                .withValue(Subject::getLastName, courtApplication.getSubject().getPersonDetails().getLastName())
+                                                .withValue(Subject::getMiddleName, courtApplication.getSubject().getPersonDetails().getMiddleName())
+                                                .withValue(Subject::getOrganisationName, courtApplication.getSubject().getOrganisation().getName()))
+                                ))
+                        ))
+        );
+
+        final UUID hearingId = hearing.getId();
+
+        final JsonObject commandPayload = Json.createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .add("estimatedMinutes", 30)
+                .build();
+
+        try (final Utilities.EventListener registeredHearingAgainstDefendant = listenFor("hearing.events.hearing-deleted", "hearing.event")
+                .withFilter(convertStringTo(RegisteredHearingAgainstDefendant.class, isBean(RegisteredHearingAgainstDefendant.class)
+                        .with(RegisteredHearingAgainstDefendant::getHearingId, Matchers.is(hearingId))
+                ))) {
+
+            sendMessage(getPublicTopicInstance().createProducer(),
+                    "public.listing.hearing-unallocated-courtroom-removed",
+                    commandPayload,
+                    metadataOf(randomUUID(), "public.listing.hearing-unallocated-courtroom-removed")
+                            .withUserId(randomUUID().toString())
+                            .build()
+            );
+
+
+            registeredHearingAgainstDefendant.waitFor();
+        }
+    }
 
     private void markHearingAsADuplicate(final UUID hearingId) {
         final JsonObject payload = createObjectBuilder()

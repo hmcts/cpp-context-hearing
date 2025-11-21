@@ -456,6 +456,9 @@ subscriptions_descriptor:
         - name: public.events.listing.allocated-hearing-deleted
           schema_uri: http://justice.gov.uk/hearing/courts/public.events.listing.allocated-hearing-deleted.json
 
+        - name: public.listing.hearing-unallocated-courtroom-removed
+          schema_uri: http://justice.gov.uk/listing/courts/public.listing.hearing-unallocated-courtroom-removed.json
+
         # Listing Hearing Unallocated
         - name: public.events.listing.hearing-unallocated
           schema_uri: http://justice.gov.uk/listing/courts/public.events.listing.hearing-unallocated.json

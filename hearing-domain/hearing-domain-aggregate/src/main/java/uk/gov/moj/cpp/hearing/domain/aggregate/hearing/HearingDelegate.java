@@ -74,7 +74,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S3655", "squid:S1871", "PMD:BeanMembersShouldSerialize"})
 public class HearingDelegate implements Serializable {
 
-    private static final long serialVersionUID = 6948738797633524095L;
+    private static final long serialVersionUID = 6948738797633524096L;
 
     private final HearingAggregateMomento momento;
 
@@ -89,6 +89,7 @@ public class HearingDelegate implements Serializable {
         if (isNull(hearing)) {
             return;
         }
+
         if (nonNull(hearing.getProsecutionCases())) {
             this.momento.getHearing().getProsecutionCases().forEach(
                     prosecutionCase -> prosecutionCase.getDefendants().forEach(
@@ -119,6 +120,10 @@ public class HearingDelegate implements Serializable {
                     .map(CourtOrderOffence::getOffence)
                     .forEach(this::keepOffence);
         }
+
+        // When initiating, clear old deletion flags
+        this.momento.setDeleted(false);
+        this.momento.setDuplicate(false);
     }
 
     private void keepOffence(final Offence offence) {

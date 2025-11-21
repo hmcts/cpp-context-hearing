@@ -771,6 +771,54 @@ public class HearingDelegateTest {
                 .build();
     }
 
+    @Test
+    public void handleHearingInitiated_shouldClearDeletedFlagWhenDeletedIsTrue() {
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
+        momento.setDeleted(true);
+        momento.setDuplicate(false);
+
+        hearingDelegate.handleHearingInitiated(new HearingInitiated(hearing.getHearing()));
+
+        assertThat(momento.isDeleted(), is(false));
+        assertThat(momento.isDuplicate(), is(false));
+    }
+
+    @Test
+    public void handleHearingInitiated_shouldClearDuplicateFlagWhenDuplicateFlagIsTrue() {
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
+        momento.setDeleted(false);
+        momento.setDuplicate(true);
+
+        hearingDelegate.handleHearingInitiated(new HearingInitiated(hearing.getHearing()));
+
+        assertThat(momento.isDeleted(), is(false));
+        assertThat(momento.isDuplicate(), is(false));
+    }
+
+    @Test
+    public void handleHearingInitiated_shouldClearBothDuplicateAndDeletedFlagsWhenBothAreTrue() {
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
+        momento.setDeleted(true);
+        momento.setDuplicate(true);
+
+        hearingDelegate.handleHearingInitiated(new HearingInitiated(hearing.getHearing()));
+
+        assertThat(momento.isDeleted(), is(false));
+        assertThat(momento.isDuplicate(), is(false));
+    }
+
+    @Test
+    public void handleHearingInitiated_shouldKeepBothDuplicateAndDeletedFlagsAsFalseWhenBothFalse() {
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
+        momento.setDeleted(false);
+        momento.setDuplicate(false);
+
+        hearingDelegate.handleHearingInitiated(new HearingInitiated(hearing.getHearing()));
+
+        assertThat(momento.isDeleted(), is(false));
+        assertThat(momento.isDuplicate(), is(false));
+    }
+
 
 
 

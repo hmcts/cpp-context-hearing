@@ -68,6 +68,28 @@ public class HearingDeletedEventProcessorTest {
     }
 
     @Test
+    public void shouldHandleHearingUnallocatedCourtroomRemovedPublicEvent() {
+        final String hearingId = randomUUID().toString();
+        final JsonObject hearingDeleted = createObjectBuilder()
+                .add("hearingId", hearingId)
+                .build();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.events.listing.allocated-hearing-deleted"),
+                hearingDeleted);
+
+        hearingDeletedEventProcessor.handleHearingUnallocatedCourtroomRemovedPublicEvent(event);
+
+        verify(this.sender).send(this.publicEventArgumentCaptor.capture());
+
+        final Envelope<JsonObject> commandEvent = this.publicEventArgumentCaptor.getValue();
+
+        assertThat(commandEvent.metadata().name(), is("hearing.command.delete-hearing"));
+        assertThat(commandEvent.payload().toString(), isJson(allOf(
+                withJsonPath("$.hearingId", equalTo(hearingId))
+        )));
+    }
+
+    @Test
     public void shouldHandleHearingDeletedPrivateEvent() {
         final UUID hearingId = randomUUID();
         final UUID prosecutionCaseId1 = randomUUID();

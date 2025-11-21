@@ -36,6 +36,7 @@ public class HearingDeletedEventProcessor {
     private static final String OFFENCE_IDS_FIELD = "offenceIds";
     private static final String COURT_APPLICATION_IDS_FIELD = "courtApplicationIds";
     private static final String HEARING_ID_FIELD = "hearingId";
+    public static final String PUBLIC_LISTING_HEARING_UNALLOCATED_COURTROOM_REMOVED = "public.listing.hearing-unallocated-courtroom-removed";
 
     @Inject
     @ServiceComponent(EVENT_PROCESSOR)
@@ -47,6 +48,21 @@ public class HearingDeletedEventProcessor {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("{} event received: {}",
                     PUBLIC_EVENT_LISTING_ALLOCATED_HEARING_DELETED, jsonEnvelope.toObfuscatedDebugString());
+        }
+
+        final JsonObjectBuilder jsonObjectBuilder = createObjectBuilder();
+        jsonObjectBuilder.add(HEARING_ID_FIELD, jsonEnvelope.payloadAsJsonObject().getString(HEARING_ID_FIELD));
+
+        sender.send(envelopeFrom(metadataFrom(jsonEnvelope.metadata()).withName(HEARING_COMMAND_DELETE_HEARING),
+                jsonObjectBuilder.build()));
+    }
+
+    @Handles(PUBLIC_LISTING_HEARING_UNALLOCATED_COURTROOM_REMOVED)
+    public void handleHearingUnallocatedCourtroomRemovedPublicEvent(final JsonEnvelope jsonEnvelope) {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("{} event received: {}",
+                    PUBLIC_LISTING_HEARING_UNALLOCATED_COURTROOM_REMOVED, jsonEnvelope.toObfuscatedDebugString());
         }
 
         final JsonObjectBuilder jsonObjectBuilder = createObjectBuilder();
