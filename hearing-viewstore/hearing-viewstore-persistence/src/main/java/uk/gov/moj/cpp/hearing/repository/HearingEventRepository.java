@@ -8,6 +8,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,6 +32,8 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
     private EntityManager entityManager;
 
     public static final String REPLACE_WITH_HEARING_EVENT_DEF_IDS = "REPLACE_WITH_HEARING_EVENT_DEF_IDS";
+
+    public static final String REPLACE_WITH_COURT_CENTRE_IDS = "REPLACE_WITH_COURT_CENTRE_IDS";
 
     private static final String GET_ACTIVE_HEARINGS_FOR_COURT_ROOM =
             "SELECT hearingEvent FROM uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent hearingEvent, " +
@@ -66,32 +69,34 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
                     "hearingEvent.deleted is false and " +
                     "hearingEvent.hearingEventDefinitionId IN (:cppHearingEventIds)";
 
-
     private static final String GET_LATEST_HEARINGS_FOR_COURT_CENTRE_LIST =
-            "SELECT new uk.gov.moj.cpp.hearing.repository.HearingEventPojo( " +
-                    "hearingEvent.defenceCounselId," +
-                    "hearingEvent.deleted," +
-                    "hearingEvent.eventDate," +
-                    "hearingEvent.eventTime," +
-                    "hearingEvent.hearingEventDefinitionId," +
-                    "hearingEvent.hearingId," +
-                    "hearingEvent.id," +
-                    "hearingEvent.lastModifiedTime," +
-                    "hearingEvent.recordedLabel) " +
-                    "FROM uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent hearingEvent, " +
-                    "uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearing " +
-                    "WHERE hearing.id = hearingEvent.hearingId and " +
-                    "hearing.courtCentre.id IN (:courtCentreList) and " +
-                    "hearingEvent.eventTime = (select max(hearingEvent2.eventTime) " +
-                    "from uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent hearingEvent2, " +
-                    "uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearing2 " +
-                    "WHERE hearingEvent2.eventDate = :eventDate and  hearing2.id = hearingEvent2.hearingId and " +
-                    "hearing2.courtCentre.roomId = hearing.courtCentre.roomId and " +
-                    "hearingEvent2.hearingEventDefinitionId IN (:cppHearingEventIds) " +
-                    "group by hearing2.courtCentre.roomId) and  " +
-                    "hearingEvent.eventDate = :eventDate and " +
-                    "hearingEvent.deleted is false " +
-                    " order by hearingEvent.eventTime desc";
+            "WITH sub_qry " +
+                    "AS ( " +
+                    "   SELECT max(hearingeve2_.event_time) evtme " +
+                    "   FROM ha_hearing_event hearingeve2_, ha_hearing hearing3_ " +
+                    "   WHERE hearingeve2_.event_date = :eventDate " +
+                    "       AND hearingeve2_.hearing_event_definition_id IN (" + REPLACE_WITH_HEARING_EVENT_DEF_IDS + ") " +
+                    "       AND hearingeve2_.deleted = false " +
+                    "       AND hearing3_.id = hearingeve2_.hearing_id " +
+                    "       AND hearing3_.court_centre_id IN (" + REPLACE_WITH_COURT_CENTRE_IDS + ") " +
+                    "   GROUP BY room_id " +
+                    "   ) " +
+                    "SELECT CAST(defence_counsel_id AS VARCHAR) AS defence_counsel_id, " +
+                    "   deleted, " +
+                    "   event_date, " +
+                    "   event_time, " +
+                    "   CAST(hearing_event_definition_id AS VARCHAR) AS hearing_event_definition_id, " +
+                    "   CAST(hearing_id AS VARCHAR) AS hearing_id, " +
+                    "   CAST(id AS VARCHAR) AS id, " +
+                    "   last_modified_time, " +
+                    "   recorded_label " +
+                    "FROM ha_hearing_event, " +
+                    "   sub_qry " +
+                    "WHERE event_date = :eventDate " +
+                    "   AND hearing_event_definition_id IN (" + REPLACE_WITH_HEARING_EVENT_DEF_IDS + ") " +
+                    "   AND deleted = false " +
+                    "   AND event_time = sub_qry.evtme " +
+                    "ORDER BY event_time DESC";
 
     private static final String LATEST_HEARINGS_FOR_COURT_CENTRE_LIST =
             "WITH sub_qry " +
@@ -152,9 +157,6 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
     @Query(value = GET_CURRENT_ACTIVE_HEARINGS_FOR_COURT_CENTRE_LIST)
     public abstract List<HearingEvent> findBy(@QueryParam("courtCentreList") final List<UUID> courtCentreList, @QueryParam("lastModifiedTime") final ZonedDateTime lastModifiedTime, @QueryParam("cppHearingEventIds") final Set<UUID> cppHearingEventIds);
 
-    @Query(value = GET_LATEST_HEARINGS_FOR_COURT_CENTRE_LIST)
-    public abstract List<HearingEventPojo> findLatestHearingsForThatDay(@QueryParam("courtCentreList") final List<UUID> courtCentreList, @QueryParam("eventDate") final LocalDate eventDate, @QueryParam("cppHearingEventIds") final Set<UUID> cppHearingEventIds);
-
     @Query(value="SELECT COUNT(he.id) FROM HearingEvent he WHERE he.hearingId = :hearingId AND he.eventDate = :hearingDate AND he.deleted = false AND he.recordedLabel = 'Hearing started'")
     public abstract Long findEventLogCountByHearingIdAndEventDate(@QueryParam("hearingId") final UUID hearingId, @QueryParam("hearingDate") final LocalDate hearingDate);
 
@@ -169,9 +171,23 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
         return query.getResultList();
     }
 
+    public List<Object[]> findLatestHearingsForThatDayByCourts(final List<UUID> courtCentreIds, final LocalDate eventDate, final Set<UUID> cppHearingEventIds){
+        final String queryStringWithHearingEventDefAndCourtCentreIds = getSQLNativeQueryWithHearingEventAndCourtCentreIds(new HashSet<>(courtCentreIds), cppHearingEventIds);
+        javax.persistence.Query query = entityManager.createNativeQuery(queryStringWithHearingEventDefAndCourtCentreIds);
+        query.setParameter("eventDate", eventDate);
+        return query.getResultList();
+    }
+
+    private String getSQLNativeQueryWithHearingEventAndCourtCentreIds(final Set<UUID> courtCentreIds, final Set<UUID> cppHearingEventIds) {
+        final String HearingEventDefIds = toSqlInClause(cppHearingEventIds);
+        final String courtCentreStrIds = toSqlInClause(courtCentreIds);
+        final String sqlNativeQuery = GET_LATEST_HEARINGS_FOR_COURT_CENTRE_LIST.replace(REPLACE_WITH_HEARING_EVENT_DEF_IDS, HearingEventDefIds).replace(REPLACE_WITH_COURT_CENTRE_IDS, courtCentreStrIds);
+        return sqlNativeQuery;
+    }
+
     private String getSQLNativeQuery(final Set<UUID> cppHearingEventIds) {
         final String HearingDefIds = toSqlInClause(cppHearingEventIds);
-        String sqlNativeQuery = LATEST_HEARINGS_FOR_COURT_CENTRE_LIST.replace(REPLACE_WITH_HEARING_EVENT_DEF_IDS, HearingDefIds);
+        final String sqlNativeQuery = LATEST_HEARINGS_FOR_COURT_CENTRE_LIST.replace(REPLACE_WITH_HEARING_EVENT_DEF_IDS, HearingDefIds);
         return sqlNativeQuery;
     }
 

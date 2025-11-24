@@ -218,6 +218,8 @@ public class HearingService {
         final List<uk.gov.justice.core.courts.Hearing> hearingList = activeHearingEventList
                 .stream()
                 .map(hearingEvent -> hearingRepository.findBy(hearingEvent.getHearingId()))
+                .filter(Objects::nonNull)
+                .filter(hearing -> hearing.getIsBoxHearing() == null || !hearing.getIsBoxHearing())
                 .map(ha -> hearingJPAMapper.fromJPAWithCourtListRestrictions(ha))
                 .collect(toList());
 
@@ -304,14 +306,23 @@ public class HearingService {
     public Optional<CurrentCourtStatus> getHearingsByDate(final List<UUID> courtCentreList,
                                                           final LocalDate localDate,
                                                           final Set<UUID> cppHearingEventIds) {
+        LOGGER.info("courtCentreList: {}, localDate: {}, cppHearingEventIds: {}", courtCentreList, localDate, cppHearingEventIds);
+        if(courtCentreList.isEmpty()){
+            return empty();
+        }
+        final List<Object[]> results = hearingEventRepository.findLatestHearingsForThatDayByCourts(courtCentreList, localDate, cppHearingEventIds);
 
-        final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
+        final List<HearingEventPojo> hearingEventPojos = results.stream()
+                .map(this::convertToHearingEventPojo)
+                .collect(Collectors.toList());
+
         final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
-
         final List<Hearing> hearingsForDate = hearingRepository.findHearingsByDateAndCourtCentreList(localDate, courtCentreList);
         final List<uk.gov.justice.core.courts.Hearing> hearingList = hearingsForDate
                 .stream()
                 .map(ha -> hearingJPAMapper.fromJPAWithCourtListRestrictions(ha))
+                .filter(Objects::nonNull)
+                .filter(hearing -> hearing.getIsBoxHearing() == null || !hearing.getIsBoxHearing())
                 .collect(toList());
 
         final List<HearingEvent> allHearingEvents = hearingEventRepository.findBy(courtCentreList, localDate.atStartOfDay(ZoneOffset.UTC), cppHearingEventIds);

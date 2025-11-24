@@ -1312,10 +1312,10 @@ public class HearingServiceTest {
 
         final HearingEventPojo hearingEvent = new HearingEventPojo(randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), hearingId, randomUUID(), ZonedDateTime.now(), "");
 
-        final List<Object[]> hearingEventResult1 = new ArrayList<>();
+        final List<Object[]> hearingEventResult = new ArrayList<>();
 
         // Add arrays to the list
-        hearingEventResult1.add(new Object[]{randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), hearingId, randomUUID(), ZonedDateTime.now(), ""});
+        hearingEventResult.add(new Object[]{randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), hearingId, randomUUID(), ZonedDateTime.now(), ""});
 
         final Hearing hearing = buildHearing();
 
@@ -1327,7 +1327,7 @@ public class HearingServiceTest {
         hearingEventRequiredDefinitionsIds.add(randomUUID());
         hearingEventRequiredDefinitionsIds.add(randomUUID());
 
-        when(hearingEventRepository.findLatestHearingsForThatDayByCourt(courtCentreIds.get(0), now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventResult1);
+        when(hearingEventRepository.findLatestHearingsForThatDayByCourt(courtCentreIds.get(0), now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventResult);
         when(hearingRepository.findBy(hearingEvent.getHearingId())).thenReturn(hearing);
         when(hearingJPAMapper.fromJPAWithCourtListRestrictions(hearing)).thenReturn(hearinPojo);
         when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(expectedCurrentCourtStatus);
@@ -1347,16 +1347,18 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnHearingsByDate() {
+    public void shouldReturnHearingsByCounrtCentreIdsAndDate() {
         final LocalDate now = LocalDate.now();
         final List<UUID> courtCentreIds = new ArrayList();
         courtCentreIds.add(randomUUID());
-
-        final HearingEventPojo hearingEventPojo = new HearingEventPojo(randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), randomUUID(), randomUUID(), ZonedDateTime.now(), "");
-        final List<HearingEventPojo> hearingEventList = asList(hearingEventPojo);
+        final UUID hearingId = randomUUID();
         final Hearing hearing = buildHearing();
 
-        final uk.gov.justice.core.courts.Hearing hearingPojo = mock(uk.gov.justice.core.courts.Hearing.class);
+        final List<Object[]> hearingEventResult = new ArrayList<>();
+
+        // Add arrays to the list
+        hearingEventResult.add(new Object[]{randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), hearingId, randomUUID(), ZonedDateTime.now(), ""});
+
         final Set<UUID> activeHearingIds = new HashSet<>();
         activeHearingIds.add(randomUUID());
 
@@ -1365,11 +1367,10 @@ public class HearingServiceTest {
         final Set<UUID> hearingEventRequiredDefinitionsIds = new HashSet<>();
         hearingEventRequiredDefinitionsIds.add(randomUUID());
         hearingEventRequiredDefinitionsIds.add(randomUUID());
-
+        final uk.gov.justice.core.courts.Hearing hearinPojo = mock(uk.gov.justice.core.courts.Hearing.class);
+        when(hearingJPAMapper.fromJPAWithCourtListRestrictions(hearing)).thenReturn(hearinPojo);
         when(hearingRepository.findHearingsByDateAndCourtCentreList(now, courtCentreIds)).thenReturn(hearings);
-        when(hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventList);
-//        when(hearingRepository.findBy(hearingEventPojo.getHearingId())).thenReturn(hearing);
-//        when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearingPojo);
+        when(hearingEventRepository.findLatestHearingsForThatDayByCourts(courtCentreIds, now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventResult);
 
         final CurrentCourtStatus expectedCurrentCourtStatus = getCurrentCourtStatusWithMultipleCases(hearingEvent);
         when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(expectedCurrentCourtStatus);
