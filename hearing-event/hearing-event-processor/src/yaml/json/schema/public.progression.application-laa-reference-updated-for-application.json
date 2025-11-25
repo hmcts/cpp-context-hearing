@@ -1,15 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/progression/courts/hearing.update-laareference-for-application.json",
+  "id": "http://justice.gov.uk/progression/courts/public.progression.application-laa-reference-updated-for-application.json",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "subjectId": {
       "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
     },
     "applicationId": {
-      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
-    },
-    "offenceId": {
       "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
     },
     "laaReference": {
@@ -20,6 +18,5 @@
     "subjectId",
     "applicationId",
     "laaReference"
-  ],
-  "additionalProperties": false
+  ]
 }

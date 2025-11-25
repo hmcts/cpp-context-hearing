@@ -41,7 +41,7 @@ public class ApplicationDetailChangeCommandHandler extends AbstractCommandHandle
             LOGGER.debug("hearing.update-laareference-for-application event received {}", envelope.toObfuscatedDebugString());
         }
         final UUID applicationId = UUID.fromString(envelope.payloadAsJsonObject().getString("applicationId"));
-        final UUID offenceId = UUID.fromString(envelope.payloadAsJsonObject().getString("offenceId"));
+        final UUID offenceId = envelope.payloadAsJsonObject().containsKey("offenceId") ? UUID.fromString(envelope.payloadAsJsonObject().getString("offenceId")) : null;
         final UUID subjectId = UUID.fromString(envelope.payloadAsJsonObject().getString("subjectId"));
 
         final LaaReference laaReference = convertToObject(envelope.payloadAsJsonObject().getJsonObject("laaReference"), LaaReference.class);

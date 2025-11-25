@@ -404,26 +404,40 @@ public class HearingDelegate implements Serializable {
         }
     }
 
-    public void handleApplicationLaaReferenceUpdated(
-            final ApplicationLaareferenceUpdated applicationLaareferenceUpdated) {
-        if (momento.getHearing() != null) {
-            final Optional<CourtApplication> previousStoredApplication = momento.getHearing().getCourtApplications().stream()
-                    .filter(courtApplication -> courtApplication.getId().equals(applicationLaareferenceUpdated.getApplicationId()))
-                    .findFirst();
+    public void handleApplicationLaaReferenceUpdated(final ApplicationLaareferenceUpdated applicationLaareferenceUpdated) {
+        if (isNull(momento.getHearing())) {
+            return;
+        }
 
-            if (previousStoredApplication.isPresent()) {
+        final Optional<CourtApplication> previousStoredApplication = momento.getHearing().getCourtApplications().stream()
+                .filter(courtApplication -> courtApplication.getId().equals(applicationLaareferenceUpdated.getApplicationId()))
+                .findFirst();
 
-                CourtApplication courtApplication = previousStoredApplication.get();
+        if (previousStoredApplication.isEmpty()) {
+            return;
+        }
 
-                if (nonNull(courtApplication.getSubject()) && courtApplication.getSubject().getId().equals(applicationLaareferenceUpdated.getSubjectId()) && isNotEmpty(courtApplication.getCourtApplicationCases())) {
-                    List<CourtApplicationCase> updatedCases = getUpdatedCases(courtApplication, applicationLaareferenceUpdated);
+        final CourtApplication courtApplication = previousStoredApplication.get();
 
-                    CourtApplication updatedCourtApplication = CourtApplication.courtApplication().withValuesFrom(courtApplication).withCourtApplicationCases(updatedCases).build();
+        if (isMatchingSubject(applicationLaareferenceUpdated, courtApplication)) {
+            if (nonNull(applicationLaareferenceUpdated.getOffenceId())) {
+                if (isNotEmpty(courtApplication.getCourtApplicationCases())) {
+                    final List<CourtApplicationCase> updatedCases = getUpdatedCases(courtApplication, applicationLaareferenceUpdated);
+
+                    final CourtApplication updatedCourtApplication = CourtApplication.courtApplication().withValuesFrom(courtApplication).withCourtApplicationCases(updatedCases).build();
                     momento.getHearing().getCourtApplications().remove(previousStoredApplication.get());
                     momento.getHearing().getCourtApplications().add(updatedCourtApplication);
                 }
+            } else if (nonNull(applicationLaareferenceUpdated.getLaaReference())) { //Breach and POCA applications has no offence. Attach the laa reference to the court application level
+                final CourtApplication updatedCourtApplication = CourtApplication.courtApplication().withValuesFrom(courtApplication).withLaaApplnReference(applicationLaareferenceUpdated.getLaaReference()).build();
+                momento.getHearing().getCourtApplications().remove(previousStoredApplication.get());
+                momento.getHearing().getCourtApplications().add(updatedCourtApplication);
             }
         }
+    }
+
+    private static boolean isMatchingSubject(final ApplicationLaareferenceUpdated applicationLaareferenceUpdated, final CourtApplication courtApplication) {
+        return nonNull(courtApplication.getSubject()) && courtApplication.getSubject().getId().equals(applicationLaareferenceUpdated.getSubjectId());
     }
 
     private static List<CourtApplicationCase> getUpdatedCases(CourtApplication persistedApplication, ApplicationLaareferenceUpdated applicationLaareferenceUpdated) {
@@ -832,6 +846,7 @@ public class HearingDelegate implements Serializable {
             }
         }
     }
+
     public Stream<Object> userAddedToJudiciary(final UUID judiciaryId, final String emailId, final UUID cpUserId, final UUID hearingId, final UUID id) {
         final Stream.Builder<Object> streamBuilder = Stream.builder();
         streamBuilder.add(new HearingUserAddedToJudiciary(

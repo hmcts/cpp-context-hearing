@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
@@ -130,6 +131,36 @@ public class ApplicationDetailChangeEventProcessorTest {
                         withJsonPath("$.laaReference.statusId", is(laaReference.getStatusId().toString()))))));
 
     }
+
+    @Test
+    public void handleApplicationLaaReferenceUpdatedForApplication(){
+        final LaaReference laaReference = LaaReference.laaReference()
+                .withStatusDescription("desc")
+                .withStatusDate(LocalDate.now())
+                .withStatusId(randomUUID())
+                .withApplicationReference("reference")
+                .build();
+
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("public.progression.application-laa-reference-updated-for-application"),
+                createObjectBuilder()
+                        .add("applicationId", randomUUID().toString())
+                        .add("subjectId", randomUUID().toString())
+                        .add("laaReference",
+                                objectToJsonObjectConverter.convert(laaReference)
+                        )
+                        .build());
+        when(logger.isInfoEnabled()).thenReturn(true);
+        applicationDetailChangeEventProcessor.handleApplicationLAAReferanceUpdatedForApplication(envelope);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(),
+                jsonEnvelope(metadata().withName("hearing.update-laareference-for-application"), payloadIsJson(CoreMatchers.allOf(
+                        withJsonPath("$.laaReference.statusId", is(laaReference.getStatusId().toString())),
+                        withoutJsonPath("$.offenceId")
+                        ))));
+
+    }
+
 
     @Test
     public void handleApplicationLaaReferenceForApplicationWhenLoggerIsDisabled() {

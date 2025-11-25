@@ -1,0 +1,14 @@
+
+{
+  "applicationId": "26b856a8-ae01-4aad-814c-7cdff8db19bf",
+  "subjectId": "32b1078b-9430-4cef-ba46-eea40a129ca8",
+  "laaReference": {
+    "laaApplicationReference": "LAA REF OFF 1",
+    "statusId": "bbf6f4b1-79cd-45ef-8255-66ae0845a06d",
+    "statusCode": "LAA STATUS CODE OFF 1",
+    "statusDescription": "LAA STATUS DESC OFF 1",
+    "effectiveFromDate": "2019-08-12",
+    "effectiveToDate": "2019-10-12",
+    "laaRepresentativeAccountNumber": "LAA REPRESENTATIVE ACC NO OFF 1"
+  }
+}
