@@ -706,6 +706,7 @@ public class HearingDelegateTest {
         assertEquals("Rejecting 'hearing.change-hearing-detail' event as hearing not found", event.getReason());
     }
 
+
     private List<ProsecutionCase> caseList(ProsecutionCase... cases) {
         return new ArrayList(Arrays.asList(cases));
     }

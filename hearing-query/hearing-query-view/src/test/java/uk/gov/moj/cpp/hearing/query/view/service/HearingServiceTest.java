@@ -70,12 +70,17 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 import uk.gov.justice.core.courts.Address;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CourtApplicationType;
+import uk.gov.justice.core.courts.DefendantCase;
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationType;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.Level;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
@@ -87,6 +92,7 @@ import uk.gov.justice.hearing.courts.CourtApplicationView;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.hearing.courts.HearingView;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -143,6 +149,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRo
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.query.view.service.userdata.UserDataService;
+import uk.gov.moj.cpp.hearing.query.view.service.ctl.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
@@ -171,6 +178,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
+import javax.json.JsonValue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
@@ -200,6 +208,8 @@ public class HearingServiceTest {
     private uk.gov.justice.core.courts.HearingEvent hearingEvent;
     @Mock
     private HearingRepository hearingRepository;
+    @Mock
+    private ReferenceDataService referenceDataService;
     @Mock
     private HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository;
     @Mock
@@ -234,6 +244,8 @@ public class HearingServiceTest {
     private HearingService hearingService;
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+    @Mock
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
     @Spy
     private StringToJsonObjectConverter stringToJsonObjectConverter;
     @Mock
@@ -256,6 +268,7 @@ public class HearingServiceTest {
     @BeforeEach
     public void setup() {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
     }
 
     @Test
@@ -602,11 +615,12 @@ public class HearingServiceTest {
         when(hearingRepository.findBy(hearingId)).thenReturn(entity);
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+        when(pojo.getCourtApplications()).thenReturn(null);
 
 //        when(filterHearingsBasedOnPermissions.filterCaseHearings(Arrays.asList(entity), prosecutionCasesIdsWithAccess)).thenReturn(Arrays.asList(entity));
 
         final UUID trialTypeId = randomUUID();
-        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), prosecutionCasesIdsWithAccess, false);
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(null, hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), prosecutionCasesIdsWithAccess, false);
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
@@ -980,7 +994,7 @@ public class HearingServiceTest {
         final UUID trialTypeId = randomUUID();
 
 
-        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId1, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), accessibleCasesId, true);
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(null, hearingId1, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), accessibleCasesId, true);
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(hearingPojo))
@@ -1055,7 +1069,7 @@ public class HearingServiceTest {
                 .build();
         when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearingPojo);
 
-        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId, null, null, false);
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(null, hearingId, null, null, false);
 
         final List<UUID> filteredCases = asList(prosecutionCase1.getId().getId(), prosecutionCase3.getId().getId());
         assertThat(response, isBean(HearingDetailsResponse.class));
@@ -1117,7 +1131,7 @@ public class HearingServiceTest {
                 .build();
         when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearingPojo);
 
-        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId, null, null, false);
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(null, hearingId, null, null, false);
 
         final List<UUID> filteredCases = asList(prosecutionCase1.getId().getId(), prosecutionCase2.getId().getId(), prosecutionCase3.getId().getId());
         assertThat(response, isBean(HearingDetailsResponse.class));
@@ -1161,8 +1175,9 @@ public class HearingServiceTest {
         when(hearingRepository.findBy(hearingId)).thenReturn(entity);
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+        when(pojo.getCourtApplications()).thenReturn(null);
 
-        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), prosecutionCasesIdsWithAccess, false);
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(null, hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), prosecutionCasesIdsWithAccess, false);
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
@@ -1184,8 +1199,9 @@ public class HearingServiceTest {
         when(hearingRepository.findBy(hearingId)).thenReturn(entity);
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+        when(pojo.getCourtApplications()).thenReturn(null);
 
-        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId, buildVacatedTrialTypes(vacatedTrialReasonId), prosecutionCasesIdsWithAccess, false);
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(null, hearingId, buildVacatedTrialTypes(vacatedTrialReasonId), prosecutionCasesIdsWithAccess, false);
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
@@ -1205,9 +1221,10 @@ public class HearingServiceTest {
         when(hearingRepository.findBy(hearingId)).thenReturn(entity);
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+        when(pojo.getCourtApplications()).thenReturn(null);
 
         final UUID trialTypeId = randomUUID();
-        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), prosecutionCasesIdsWithAccess, false);
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(null, hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), prosecutionCasesIdsWithAccess, false);
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
@@ -1239,6 +1256,143 @@ public class HearingServiceTest {
         assertThat(courtApplicationsActual.size(), is(2));
         assertThat(courtApplicationsActual.stream().filter(ca -> ca.getId().equals(applicationId1)).map(CourtApplicationView::getApplicationStatus).findFirst().get(), is(ApplicationStatus.LISTED));
         assertThat(courtApplicationsActual.stream().filter(ca -> ca.getId().equals(applicationId2)).map(CourtApplicationView::getApplicationStatus).findFirst().get(), is(FINALISED));
+    }
+
+    @Test
+    void testHearingToIncludeParentApplication() {
+        /*
+        P1 (parent) => C1 (child), C2
+
+        P2 => C3
+
+        Hearing(P1, C1, C2, C3) => P1, C1, C2, C3, P2 (Expected)
+
+         */
+        final Hearing entity = mock(Hearing.class);
+
+        final uk.gov.justice.core.courts.Hearing pojo = mock(uk.gov.justice.core.courts.Hearing.class);
+
+        final UUID hearingId = randomUUID();
+        final UUID vacatedTrialReasonId = randomUUID();
+        entity.setvacatedTrialReasonId(vacatedTrialReasonId);
+        entity.setIsVacatedTrial(true);
+
+        final UUID parentApplicationIdOne = randomUUID();
+        final UUID parentApplicationIdTwo = randomUUID();
+        final UUID childApplicationIdOne = randomUUID();
+        final UUID childApplicationIdTwo = randomUUID();
+        final UUID childApplicationIdThree = randomUUID();
+
+        final UUID defendantId = randomUUID();
+        final UUID applicationTypeId = randomUUID();
+
+        final CourtApplication parentApplicationOne = createApplication(parentApplicationIdOne, null, applicationTypeId, defendantId);
+        final CourtApplication childApplicationOne = createApplication(childApplicationIdOne, parentApplicationIdOne, applicationTypeId, defendantId);
+        final CourtApplication childApplicationTwo = createApplication(childApplicationIdTwo, parentApplicationIdOne, applicationTypeId, defendantId);
+
+        final CourtApplication parentApplicationTwo = createApplication(parentApplicationIdTwo, null, applicationTypeId, defendantId);
+        final CourtApplication childApplicationThree = createApplication(childApplicationIdThree, parentApplicationIdTwo, applicationTypeId, defendantId);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(entity);
+        when(referenceDataService.isOffenceActiveOrder(applicationTypeId)).thenReturn(true);
+        when(progressionService.retrieveApplicationOnly(any(), eq(parentApplicationIdTwo))).thenReturn(JsonValue.EMPTY_JSON_OBJECT);
+        when(jsonObjectToObjectConverter.convert(any(), eq(CourtApplication.class))).thenReturn(parentApplicationTwo);
+
+        when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+
+        final List<CourtApplication> list = new ArrayList<>(List.of(childApplicationOne, childApplicationTwo, childApplicationThree, parentApplicationOne));
+
+        when(pojo.getCourtApplications()).thenReturn(list);
+
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(null,
+                hearingId, buildVacatedTrialTypes(vacatedTrialReasonId), prosecutionCasesIdsWithAccess, false);
+
+        assertThat(response, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, is(pojo))
+        );
+        assertThat(response.getHearing().getCourtApplications().size(), is(5));
+        assertThat(response.getHearing().getCourtApplications().get(0).getId(), is(childApplicationIdOne));
+        assertThat(response.getHearing().getCourtApplications().get(1).getId(), is(childApplicationIdTwo));
+        assertThat(response.getHearing().getCourtApplications().get(2).getId(), is(childApplicationIdThree));
+        assertThat(response.getHearing().getCourtApplications().get(3).getId(), is(parentApplicationIdOne));
+        assertThat(response.getHearing().getCourtApplications().get(4).getId(), is(parentApplicationIdTwo));
+        assertThat(response.getRelatedApplicationId(), is(childApplicationIdOne));
+    }
+
+    private static CourtApplication createApplication(final UUID applicationId, final UUID parentApplicationId, final UUID applicationTypeId, final UUID defendantId) {
+        return CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withParentApplicationId(parentApplicationId)
+                .withType(CourtApplicationType.courtApplicationType()
+                        .withId(applicationTypeId).build())
+                .withApplicant(CourtApplicationParty.courtApplicationParty()
+                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                .withDefendantCase(Collections.singletonList(DefendantCase.defendantCase().build()))
+                                .withMasterDefendantId(defendantId)
+                                .withPersonDefendant(PersonDefendant.personDefendant().build())
+                                .build())
+                        .build())
+                .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                .withDefendantCase(Collections.singletonList(DefendantCase.defendantCase().build()))
+                                .withMasterDefendantId(defendantId)
+                                .withPersonDefendant(PersonDefendant.personDefendant().build())
+                                .build())
+                        .build())
+                .build();
+    }
+
+    @Test
+    void testHearingNotToIncludeParentApplicationWhenChildAppOffenceActiveOrderIsFalse() {
+        final Hearing entity = mock(Hearing.class);
+
+        final uk.gov.justice.core.courts.Hearing pojo = mock(uk.gov.justice.core.courts.Hearing.class);
+
+        final UUID hearingId = randomUUID();
+        final UUID vacatedTrialReasonId = randomUUID();
+        entity.setvacatedTrialReasonId(vacatedTrialReasonId);
+        entity.setIsVacatedTrial(true);
+
+        final UUID childApplicationId = randomUUID();
+        final UUID parentApplicationId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID applicationTypeId = randomUUID();
+
+        final CourtApplication childApplication = CourtApplication.courtApplication()
+                .withId(childApplicationId)
+                .withParentApplicationId(parentApplicationId)
+                .withType(CourtApplicationType.courtApplicationType()
+                        .withId(applicationTypeId).build())
+                .withApplicant(CourtApplicationParty.courtApplicationParty()
+                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                .withDefendantCase(Collections.singletonList(DefendantCase.defendantCase().build()))
+                                .withMasterDefendantId(defendantId)
+                                .withPersonDefendant(PersonDefendant.personDefendant().build())
+                                .build())
+                        .build())
+                .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                .withDefendantCase(Collections.singletonList(DefendantCase.defendantCase().build()))
+                                .withMasterDefendantId(defendantId)
+                                .withPersonDefendant(PersonDefendant.personDefendant().build())
+                                .build())
+                        .build())
+                .build();
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(entity);
+        when(referenceDataService.isOffenceActiveOrder(applicationTypeId)).thenReturn(false);
+        when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+        when(pojo.getCourtApplications()).thenReturn(List.of(childApplication));
+
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(null,
+                hearingId, buildVacatedTrialTypes(vacatedTrialReasonId), prosecutionCasesIdsWithAccess, false);
+
+        assertThat(response, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, is(pojo))
+        );
+        assertThat(response.getHearing().getCourtApplications().size(), is(1));
+        assertThat(response.getHearing().getCourtApplications().get(0).getId(), is(childApplicationId));
+        assertThat(response.getRelatedApplicationId(), is(childApplicationId));
     }
 
     @Test

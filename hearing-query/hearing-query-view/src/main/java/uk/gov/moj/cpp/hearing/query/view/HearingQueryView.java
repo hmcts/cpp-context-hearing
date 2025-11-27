@@ -173,7 +173,7 @@ public class HearingQueryView {
                                                         final List<UUID> accessibleCaseAndApplicationIds,
                                                         final boolean isDDJ) {
         final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
-        final HearingDetailsResponse hearingDetailsResponse = hearingService.getHearingDetailsResponseById(hearingId.get(), crackedIneffectiveVacatedTrialTypes, accessibleCaseAndApplicationIds, isDDJ);
+        final HearingDetailsResponse hearingDetailsResponse = hearingService.getHearingDetailsResponseById(envelope, hearingId.get(), crackedIneffectiveVacatedTrialTypes, accessibleCaseAndApplicationIds, isDDJ);
 
         return envelop(hearingDetailsResponse)
                 .withName("hearing.get-hearing")

@@ -1,9 +1,11 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.YouthCourt;
@@ -21,12 +23,19 @@ import uk.gov.moj.cpp.hearing.command.result.SaveMultipleDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveMultipleResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.command.result.UpdateDaysResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
+import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -233,8 +242,43 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         }
 
         return hearingAggregate.shareResultForDay(command.getHearingId(), command.getCourtClerk(), clock.now(), command.getResultLines(),
+                getAdditionalApplications(getDistinctApplicationIdsFromResultLines(command.getResultLines()), command.getHearingId()),
                 command.getNewHearingState(), youthCourt, command.getHearingDay(), userId, command.getVersion());
 
+    }
+
+    static Set<UUID> getDistinctApplicationIdsFromResultLines(final List<SharedResultsCommandResultLineV2> resultLines) {
+        final Set<UUID> distinctApplicationIds = new HashSet<>();
+        resultLines.forEach(resultLine -> {
+            final UUID applicationId = resultLine.getApplicationId();
+            if (nonNull(applicationId) && !distinctApplicationIds.contains(applicationId)) {
+                distinctApplicationIds.add(applicationId);
+            }
+        });
+        return distinctApplicationIds;
+    }
+
+    List<CourtApplication> getAdditionalApplications(final Set<UUID> distinctApplicationIds, final UUID resultedHearingId) {
+        return distinctApplicationIds.stream()
+                .map(applicationId -> {
+                    final ApplicationAggregate applicationAggregate = aggregateService.get(eventSource.getStreamById(applicationId), ApplicationAggregate.class);
+                    if (isNotEmpty(applicationAggregate.getHearingIds())) {
+                        final UUID latestHearingId = applicationAggregate.getHearingIds().get(applicationAggregate.getHearingIds().size() - 1);
+                        if (!latestHearingId.equals(resultedHearingId)) {
+                            final HearingAggregate hearingAggregate = aggregateService.get(eventSource.getStreamById(latestHearingId), HearingAggregate.class);
+                            final List<CourtApplication> courtApplications = hearingAggregate.getHearing().getCourtApplications();
+                            if (isNotEmpty(courtApplications)) {
+                                return courtApplications.stream()
+                                        .filter(application -> application.getId().equals(applicationId))
+                                        .findFirst()
+                                        .orElse(null);
+                            }
+                        }
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
 }

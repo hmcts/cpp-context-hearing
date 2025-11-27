@@ -64,6 +64,7 @@ import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.ApplicationStatus.FINALISED;
 import static uk.gov.justice.core.courts.ApplicationStatus.LISTED;
@@ -579,7 +580,7 @@ public class ResultsSharedDelegate implements Serializable {
      * This feature has been developed by the NFT team in the scope of the performance improvement
      */
     public Stream<Object> shareResultForDay(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime,
-                                            final List<SharedResultsCommandResultLineV2> resultLines, final List<UUID> defendantDetailsChanged,
+                                            final List<SharedResultsCommandResultLineV2> resultLines, final List<CourtApplication> additionalApplications, final List<UUID> defendantDetailsChanged,
                                             final YouthCourt youthCourt, final LocalDate hearingDay, final Integer version) {
 
         addParenetResultLineIds(resultLines);
@@ -603,7 +604,8 @@ public class ResultsSharedDelegate implements Serializable {
 
         final Stream.Builder<Object> streamBuilder = Stream.builder();
         enrichHearingV2(resultLines);
-        final Hearing hearing = dedupAllApplications(this.momento.getHearing());
+        final Hearing hearing = dedupAllApplications(isEmpty(additionalApplications) ?
+                this.momento.getHearing() : getHearingWithAdditionalApplications(additionalApplications));
         hearing.setYouthCourt(youthCourt);
         hearing.setHasSharedResults(true);
         if (isNotEmpty(hearing.getCourtApplications())) {
@@ -663,6 +665,19 @@ public class ResultsSharedDelegate implements Serializable {
             updatedFinalTargets.add(t);
         });
         return updatedFinalTargets;
+    }
+
+    Hearing getHearingWithAdditionalApplications(final List<CourtApplication> additionalApplications) {
+        final List<CourtApplication> allCourtApplications = new ArrayList<>();
+        if (isNotEmpty(momento.getHearing().getCourtApplications())) {
+            allCourtApplications.addAll(momento.getHearing().getCourtApplications());
+        }
+        allCourtApplications.addAll(additionalApplications);
+
+        return Hearing.hearing()
+                .withValuesFrom(momento.getHearing())
+                .withCourtApplications(allCourtApplications)
+                .build();
     }
 
     private void isHearingVacatedRequired(final Hearing hearing, final ResultsSharedV3 resultsSharedV3, final Stream.Builder<Object> streamBuilder) {

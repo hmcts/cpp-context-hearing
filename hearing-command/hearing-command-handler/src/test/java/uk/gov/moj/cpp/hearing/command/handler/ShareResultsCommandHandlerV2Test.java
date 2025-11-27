@@ -8,6 +8,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.Target2.target2;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -68,6 +79,7 @@ import uk.gov.moj.cpp.hearing.command.result.UpdateDaysResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.ResultsError;
+import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
@@ -93,9 +105,13 @@ import uk.gov.moj.cpp.hearing.test.TestUtilities;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -104,12 +120,15 @@ import javax.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * Creating a new test file for V2 due to the poor static implementation of {@link
@@ -143,9 +162,19 @@ public class ShareResultsCommandHandlerV2Test {
     @Mock
     private EventStream hearingEventStream;
     @Mock
+    private EventStream applicationEventStream;
+    @Mock
     private EventSource eventSource;
     @Mock
     private AggregateService aggregateService;
+    @Mock
+    private HearingAggregate hearingAggregate;
+    @Mock
+    private ApplicationAggregate applicationAggregate;
+    @Mock
+    private Hearing hearing;
+    @Mock
+    private CourtApplication courtApplication;
     @Mock
     private Clock clock;
     @Spy
@@ -593,6 +622,264 @@ public class ShareResultsCommandHandlerV2Test {
                 .with(DaysResultLinesStatusUpdated::getSharedResultLines, first(isBean(SharedResultLineId.class)
                         .with(SharedResultLineId::getSharedResultLineId, is(sharedResultLineId)))));
 
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void shouldReturnEmptyListWhenInputResultLinesIsEmpty() {
+        final List<SharedResultsCommandResultLineV2> emptyResultLines = new ArrayList<>();
+
+        final Set<UUID> result = shareResultsCommandHandler.getDistinctApplicationIdsFromResultLines(emptyResultLines);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void shouldThrowExceptionWhenResultLinesInputIsNull() {
+        assertThrows(NullPointerException.class, () ->
+                shareResultsCommandHandler.getDistinctApplicationIdsFromResultLines(null)
+        );
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void shouldFilterOutNullApplicationsIdsForResultLines() {
+        final UUID validId = UUID.randomUUID();
+
+        final SharedResultsCommandResultLineV2 lineWithNull = mock(SharedResultsCommandResultLineV2.class);
+        when(lineWithNull.getApplicationId()).thenReturn(null);
+
+        final SharedResultsCommandResultLineV2 lineWithId = mock(SharedResultsCommandResultLineV2.class);
+        when(lineWithId.getApplicationId()).thenReturn(validId);
+
+        final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(lineWithNull, lineWithId);
+
+        final Set<UUID> result = shareResultsCommandHandler.getDistinctApplicationIdsFromResultLines(resultLines);
+
+        assertEquals(1, result.size());
+        assertEquals(validId, result.iterator().next());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void shouldReturnDistinctApplicationIdsWhenDuplicationExists() {
+        final UUID id1 = UUID.randomUUID();
+        final UUID id2 = UUID.randomUUID();
+
+        final SharedResultsCommandResultLineV2 line1 = mock(SharedResultsCommandResultLineV2.class);
+        when(line1.getApplicationId()).thenReturn(id1);
+
+        final SharedResultsCommandResultLineV2 line2 = mock(SharedResultsCommandResultLineV2.class);
+        when(line2.getApplicationId()).thenReturn(id2);
+
+        final SharedResultsCommandResultLineV2 line3 = mock(SharedResultsCommandResultLineV2.class);
+        when(line3.getApplicationId()).thenReturn(id1);
+
+        final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(line1, line2, line3);
+
+        final Set<UUID> result = shareResultsCommandHandler.getDistinctApplicationIdsFromResultLines(resultLines);
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(id1));
+        assertTrue(result.contains(id2));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void shouldReturnEmptyListWhenNoApplicationIdsProvided() {
+        final Set<UUID> emptyApplicationIds = new HashSet<>();
+        final UUID resultedHearingId = UUID.randomUUID();
+
+        final List<CourtApplication> result = shareResultsCommandHandler.getAdditionalApplications(
+                emptyApplicationIds, resultedHearingId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(aggregateService);
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void shouldSkipApplicationWhenLatestHearingIdMatchesResultedHearingId() {
+        final UUID applicationId = UUID.randomUUID();
+        final UUID resultedHearingId = UUID.randomUUID();
+        final Set<UUID> applicationIds = new HashSet<>(Collections.singleton(applicationId));
+
+        when(eventSource.getStreamById(applicationId)).thenReturn(applicationEventStream);
+        when(aggregateService.get(applicationEventStream, ApplicationAggregate.class))
+                .thenReturn(applicationAggregate);
+        when(applicationAggregate.getHearingIds())
+                .thenReturn(Collections.singletonList(resultedHearingId));
+
+        final List<CourtApplication> result = shareResultsCommandHandler.getAdditionalApplications(
+                applicationIds, resultedHearingId);
+
+        assertTrue(result.isEmpty());
+        verify(aggregateService, times(1)).get(applicationEventStream, ApplicationAggregate.class);
+        verify(aggregateService, never()).get(any(), eq(HearingAggregate.class));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void shouldIncludeApplicationWhenLatestHearingIdDifferentThanResultedHearingId() {
+        final UUID applicationId = UUID.randomUUID();
+        final UUID resultedHearingId = UUID.randomUUID();
+        final UUID hearingId1 = UUID.randomUUID();
+        final UUID hearingId2 = UUID.randomUUID();
+
+        final Set<UUID> applicationIds = new HashSet<>(Collections.singleton(applicationId));
+
+        when(eventSource.getStreamById(applicationId)).thenReturn(applicationEventStream);
+        when(eventSource.getStreamById(hearingId2)).thenReturn(hearingEventStream);
+
+        when(aggregateService.get(applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
+        when(applicationAggregate.getHearingIds()).thenReturn(Arrays.asList(hearingId1, hearingId2));
+
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+        when(hearingAggregate.getHearing()).thenReturn(hearing);
+        when(courtApplication.getId()).thenReturn(applicationId);
+        when(hearing.getCourtApplications())
+                .thenReturn(Collections.singletonList(courtApplication));
+
+        final List<CourtApplication> result = shareResultsCommandHandler.getAdditionalApplications(
+                applicationIds, resultedHearingId);
+
+        assertEquals(1, result.size());
+        assertEquals(courtApplication, result.get(0));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void shouldHandleEmptyCourtApplicationsList() {
+        final UUID applicationId = UUID.randomUUID();
+        final UUID resultedHearingId = UUID.randomUUID();
+        final UUID latestHearingId = UUID.randomUUID();
+        final Set<UUID> applicationIds = new HashSet<>(Collections.singleton(applicationId));
+
+        when(eventSource.getStreamById(applicationId)).thenReturn(applicationEventStream);
+        when(eventSource.getStreamById(latestHearingId)).thenReturn(hearingEventStream);
+
+        when(aggregateService.get(applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
+        when(applicationAggregate.getHearingIds()).thenReturn(Arrays.asList(latestHearingId));
+
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+        when(hearingAggregate.getHearing()).thenReturn(hearing);
+        when(hearing.getCourtApplications()).thenReturn(new ArrayList<>());
+
+        final List<CourtApplication> result = shareResultsCommandHandler.getAdditionalApplications(
+                applicationIds, resultedHearingId);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void shouldHandleNullCourtApplicationsList() {
+        final UUID applicationId = UUID.randomUUID();
+        final UUID resultedHearingId = UUID.randomUUID();
+        final UUID latestHearingId = UUID.randomUUID();
+        final Set<UUID> applicationIds = new HashSet<>(Collections.singleton(applicationId));
+
+        when(eventSource.getStreamById(applicationId)).thenReturn(applicationEventStream);
+        when(eventSource.getStreamById(latestHearingId)).thenReturn(hearingEventStream);
+
+        when(aggregateService.get(applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
+        when(applicationAggregate.getHearingIds()).thenReturn(Arrays.asList(latestHearingId));
+
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+        when(hearingAggregate.getHearing()).thenReturn(hearing);
+        when(hearing.getCourtApplications()).thenReturn(null);
+
+        final List<CourtApplication> result = shareResultsCommandHandler.getAdditionalApplications(
+                applicationIds, resultedHearingId);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void shouldFilterCourtApplicationsByMatchingApplicationId() {
+        final UUID applicationId1 = UUID.randomUUID();
+        final UUID applicationId2 = UUID.randomUUID();
+        final UUID resultedHearingId = UUID.randomUUID();
+        final UUID latestHearingId = UUID.randomUUID();
+        final Set<UUID> applicationIds = new HashSet<>(Collections.singleton(applicationId1));
+
+        final CourtApplication courtApp1 = mock(CourtApplication.class);
+        when(courtApp1.getId()).thenReturn(applicationId1);
+
+        final CourtApplication courtApp2 = mock(CourtApplication.class);
+        when(courtApp2.getId()).thenReturn(applicationId2);
+
+        when(eventSource.getStreamById(applicationId1)).thenReturn(applicationEventStream);
+        when(eventSource.getStreamById(latestHearingId)).thenReturn(hearingEventStream);
+
+        when(aggregateService.get(applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
+        when(applicationAggregate.getHearingIds()).thenReturn(Arrays.asList(latestHearingId));
+
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+        when(hearingAggregate.getHearing()).thenReturn(hearing);
+        when(hearing.getCourtApplications()).thenReturn(Arrays.asList(courtApp1, courtApp2));
+
+        final List<CourtApplication> result = shareResultsCommandHandler.getAdditionalApplications(
+                applicationIds, resultedHearingId);
+
+        assertEquals(1, result.size());
+        assertEquals(courtApp1, result.get(0));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void shouldProcessMultipleDistinctApplicationIds() {
+        final UUID applicationId1 = UUID.randomUUID();
+        final UUID applicationId2 = UUID.randomUUID();
+        final UUID resultedHearingId = UUID.randomUUID();
+        final UUID latestHearingId1 = UUID.randomUUID();
+        final UUID latestHearingId2 = UUID.randomUUID();
+        final Set<UUID> applicationIds = new HashSet<>(Arrays.asList(applicationId1, applicationId2));
+
+        final ApplicationAggregate appAggregate1 = mock(ApplicationAggregate.class);
+        final ApplicationAggregate appAggregate2 = mock(ApplicationAggregate.class);
+        final HearingAggregate hearingAggregate1 = mock(HearingAggregate.class);
+        final HearingAggregate hearingAggregate2 = mock(HearingAggregate.class);
+        final Hearing hearing1 = mock(Hearing.class);
+        final Hearing hearing2 = mock(Hearing.class);
+        final CourtApplication courtApp1 = mock(CourtApplication.class);
+        final CourtApplication courtApp2 = mock(CourtApplication.class);
+
+        final EventStream stream1 = mock(EventStream.class);
+        final EventStream stream2 = mock(EventStream.class);
+        final EventStream hearingStream1 = mock(EventStream.class);
+        final EventStream hearingStream2 = mock(EventStream.class);
+
+        when(eventSource.getStreamById(applicationId1)).thenReturn(stream1);
+        when(eventSource.getStreamById(applicationId2)).thenReturn(stream2);
+        when(eventSource.getStreamById(latestHearingId1)).thenReturn(hearingStream1);
+        when(eventSource.getStreamById(latestHearingId2)).thenReturn(hearingStream2);
+
+        when(aggregateService.get(stream1, ApplicationAggregate.class)).thenReturn(appAggregate1);
+        when(aggregateService.get(stream2, ApplicationAggregate.class)).thenReturn(appAggregate2);
+        when(appAggregate1.getHearingIds()).thenReturn(Collections.singletonList(latestHearingId1));
+        when(appAggregate2.getHearingIds()).thenReturn(Collections.singletonList(latestHearingId2));
+
+        when(aggregateService.get(hearingStream1, HearingAggregate.class)).thenReturn(hearingAggregate1);
+        when(aggregateService.get(hearingStream2, HearingAggregate.class)).thenReturn(hearingAggregate2);
+        when(hearingAggregate1.getHearing()).thenReturn(hearing1);
+        when(hearingAggregate2.getHearing()).thenReturn(hearing2);
+
+        when(courtApp1.getId()).thenReturn(applicationId1);
+        when(courtApp2.getId()).thenReturn(applicationId2);
+        when(hearing1.getCourtApplications()).thenReturn(Collections.singletonList(courtApp1));
+        when(hearing2.getCourtApplications()).thenReturn(Collections.singletonList(courtApp2));
+
+        final List<CourtApplication> result = shareResultsCommandHandler.getAdditionalApplications(
+                applicationIds, resultedHearingId);
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(courtApp1));
+        assertTrue(result.contains(courtApp2));
     }
 
     private static List<SharedResultsCommandResultLineV2> getResultLines(final ResultLine resultLineIn, final Target targetDraft, final List<UUID> childResultLineIds, final List<UUID> parentResultLineIds) {

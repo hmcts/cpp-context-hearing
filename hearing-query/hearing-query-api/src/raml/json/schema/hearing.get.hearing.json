@@ -6,6 +6,9 @@
   "properties": {
     "hearing": {
       "$ref": "http://justice.gov.uk/core/courts/hearing.json"
+    },
+    "relatedApplicationId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
     }
   },
   "required": [

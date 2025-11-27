@@ -4,6 +4,7 @@ import static java.time.LocalDate.now;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createReader;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,6 +18,7 @@ import uk.gov.moj.cpp.hearing.query.view.service.ctl.model.PublicHoliday;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,6 +96,27 @@ public class ReferenceDataServiceTest {
         assertEquals(0, judiciaries.size());
     }
 
+    @Test
+    public void shouldReturnTrueIfTypeOffenceActiveOrderIsOffence() {
+        final JsonEnvelope value = getCourtApplicationType("court-application-type.json");
+        when(requester.requestAsAdmin(any(), any(Class.class))).thenReturn(value);
+
+        boolean results = referenceDataService.isOffenceActiveOrder(UUID.fromString("62fab61d-e166-4e44-9a4e-046866511993"));
+
+        assertTrue(results);
+
+    }
+
+    @Test
+    public void shouldReturnTrueIfTypeOffenceActiveOrderIsNonOffence() {
+        final JsonEnvelope value = getCourtApplicationType("court-application-type-non-offence.json");
+        when(requester.requestAsAdmin(any(), any(Class.class))).thenReturn(value);
+
+        boolean results = referenceDataService.isOffenceActiveOrder(UUID.fromString("72fab61d-e166-4e44-9a4e-046866511993"));
+
+        assertFalse(results);
+
+    }
 
     private JsonEnvelope JudiciaryResponseEnvelope() {
         return envelopeFrom(
@@ -124,6 +147,17 @@ public class ReferenceDataServiceTest {
                         withId(randomUUID()),
                 createReader(getClass().getClassLoader().
                         getResourceAsStream("judiciariesEmpty.json")).
+                        readObject()
+        );
+    }
+
+    private JsonEnvelope getCourtApplicationType(String fileName) {
+        return envelopeFrom(
+                metadataBuilder().
+                        withName("referencedata.query.application-type").
+                        withId(randomUUID()),
+                createReader(getClass().getClassLoader().
+                        getResourceAsStream(fileName)).
                         readObject()
         );
     }

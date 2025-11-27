@@ -414,7 +414,7 @@ public class ResultsSharedDelegateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(2));
@@ -468,7 +468,7 @@ public class ResultsSharedDelegateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(2));
@@ -519,7 +519,7 @@ public class ResultsSharedDelegateTest {
                 .build();
 
 
-        Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
 
         List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(2));
@@ -545,7 +545,7 @@ public class ResultsSharedDelegateTest {
         hearingAggregate.apply(resultsSharedV3);
         hearingAggregate.apply(daysResultLinesStatusUpdated);
 
-        eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 3);
+        eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 3);
         eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(2));
 
@@ -648,7 +648,7 @@ public class ResultsSharedDelegateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(2));
@@ -710,7 +710,7 @@ public class ResultsSharedDelegateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(2));
@@ -725,6 +725,43 @@ public class ResultsSharedDelegateTest {
         assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV3.getIsReshare(), is(false));
         assertNotNull(resultsSharedSuccessV3);
+    }
+
+    @Test
+    public void shouldIncludeAdditionalApplicationsWhenSharingResults() {
+        final UUID existingAppId1 = randomUUID();
+        final UUID existingAppId2 = randomUUID();
+        final UUID newAppId = randomUUID();
+
+        final CourtApplication existingApp1 = CourtApplication.courtApplication().withId(existingAppId1).build();
+        final CourtApplication existingApp2 = CourtApplication.courtApplication().withId(existingAppId2).build();
+        hearingAggregateMomento.getHearing().setCourtApplications(Arrays.asList(existingApp1, existingApp2));
+
+        final CourtApplication additionalApp1 = CourtApplication.courtApplication().withId(existingAppId2).build();
+        final CourtApplication additionalApp2 = CourtApplication.courtApplication().withId(newAppId).build();
+        final List<CourtApplication> additionalApplications = Arrays.asList(additionalApp1, additionalApp2);
+
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.of(2025, 10, 10);
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+        final YouthCourt youthCourt = getYouthCourt();
+        final DelegatedPowers courtClerk = getDelegatedPowers();
+        final List<SharedResultsCommandResultLineV2> resultLines = getSharedResultsCommandResultLineV2s(sharedTime);
+
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(
+                hearingId, courtClerk, sharedTime, resultLines, additionalApplications, emptyList(), youthCourt, hearingDay, 1
+        );
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(2));
+
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
+        final List<CourtApplication> resultingApplications = resultsSharedV3.getHearing().getCourtApplications();
+
+        assertThat(resultingApplications.size(), is(3));
+
+        final List<UUID> resultingIds = resultingApplications.stream().map(CourtApplication::getId).collect(toList());
+        assertThat(resultingIds.containsAll(Arrays.asList(existingAppId1, existingAppId2, newAppId)), is(true));
     }
 
     @Test
@@ -780,7 +817,7 @@ public class ResultsSharedDelegateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(3));
@@ -844,7 +881,7 @@ public class ResultsSharedDelegateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(2));
@@ -914,7 +951,7 @@ public class ResultsSharedDelegateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(2));
@@ -942,7 +979,7 @@ public class ResultsSharedDelegateTest {
 
         final ZonedDateTime sharedTime = ZonedDateTime.now();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, getDelegatedPowers(), sharedTime, getSharedResultsCommandResultLineV2s(sharedTime), emptyList(), getYouthCourt(), hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, getDelegatedPowers(), sharedTime, getSharedResultsCommandResultLineV2s(sharedTime), emptyList(), emptyList(), getYouthCourt(), hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(2));
@@ -968,7 +1005,7 @@ public class ResultsSharedDelegateTest {
 
         final ZonedDateTime sharedTime = ZonedDateTime.now();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, getDelegatedPowers(), sharedTime, getSharedResultsCommandResultLineV2s(sharedTime), emptyList(), getYouthCourt(), hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, getDelegatedPowers(), sharedTime, getSharedResultsCommandResultLineV2s(sharedTime), emptyList(), emptyList(), getYouthCourt(), hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(2));
@@ -1071,7 +1108,7 @@ public class ResultsSharedDelegateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(2));
@@ -1142,7 +1179,7 @@ public class ResultsSharedDelegateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.toList();
         assertThat(eventCollection.size(), is(2));
@@ -1194,7 +1231,7 @@ public class ResultsSharedDelegateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.toList();
         assertThat(eventCollection.size(), is(2));
@@ -1249,7 +1286,7 @@ public class ResultsSharedDelegateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.toList();
         assertThat(eventCollection.size(), is(2));
@@ -1291,7 +1328,7 @@ public class ResultsSharedDelegateTest {
         final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLineApp, resultLineOffence);
         final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next()).withLastName(STRING.next()).withUserId(randomUUID()).build();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
 
         final List<Object> eventCollection = eventStreams.toList();
         assertThat(eventCollection.size(), is(2));
@@ -1304,7 +1341,7 @@ public class ResultsSharedDelegateTest {
 
         final List<SharedResultsCommandResultLineV2> resultLinesWithAmendment = Arrays.asList(resultLineAmended, resultLineGranted);
 
-        final Stream<Object> eventStreamsForAmendment = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLinesWithAmendment, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreamsForAmendment = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLinesWithAmendment, emptyList(), emptyList(), youthCourt, hearingDay, 1);
         final List<Object> events = eventStreamsForAmendment.toList();
         assertThat(eventCollection.size(), is(2));
         final ResultsSharedV3 resultsSharedV3Amended = (ResultsSharedV3) events.get(1);
@@ -1375,7 +1412,7 @@ public class ResultsSharedDelegateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay, 1);
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), emptyList(), youthCourt, hearingDay, 1);
         final List<Object> eventCollection = eventStreams.toList();
         final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
         resultsSharedDelegate.handleResultsSharedV3(resultsSharedV3);
