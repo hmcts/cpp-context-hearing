@@ -100,7 +100,7 @@ rule "Query - API - hearing.get-draft-result-v2"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-draft-result-v2");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators", "Operational Delivery Admin"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "System Users",  "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators", "Operational Delivery Admin"));
   then
     $outcome.setSuccess(true);
 end
