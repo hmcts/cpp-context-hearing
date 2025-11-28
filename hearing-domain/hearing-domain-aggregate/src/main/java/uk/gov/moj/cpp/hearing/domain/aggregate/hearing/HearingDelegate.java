@@ -690,6 +690,7 @@ public class HearingDelegate implements Serializable {
                 .orElseGet(ArrayList::new);
 
         hearing.setProsecutionCases(prosecutionCases);
+
     }
 
     public Stream<Object> changeNextHearingStartDate(final UUID hearingId, final UUID seedingHearingId, final ZonedDateTime nextHearingStartDate) {

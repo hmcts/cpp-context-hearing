@@ -527,7 +527,7 @@ public class HearingAggregateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = HEARING_AGGREGATE.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1);
+        final Stream<Object> eventStreams = HEARING_AGGREGATE.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, emptyList(), HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), Matchers.is(2));
@@ -600,7 +600,7 @@ public class HearingAggregateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = HEARING_AGGREGATE.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1);
+        final Stream<Object> eventStreams = HEARING_AGGREGATE.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, emptyList(), HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1);
 
         final List<Object> eventCollection = eventStreams.toList();
         assertThat(eventCollection.size(), Matchers.is(2));
@@ -678,7 +678,7 @@ public class HearingAggregateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = HEARING_AGGREGATE.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1);
+        final Stream<Object> eventStreams = HEARING_AGGREGATE.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, emptyList(), HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), Matchers.is(2));
@@ -748,7 +748,7 @@ public class HearingAggregateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = HEARING_AGGREGATE.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1);
+        final Stream<Object> eventStreams = HEARING_AGGREGATE.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, emptyList(), HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), Matchers.is(2));
@@ -3201,7 +3201,7 @@ public class HearingAggregateTest {
         final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
         targetDraft.setResultLines(null);
         final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine = getSharedResultsCommandResultLineV2(resultLineIn, targetDraft, "I", false);
-        final ResultsSharedSuccess resultsShared = (ResultsSharedSuccess) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine), HearingState.SHARED, null, LocalDate.now(), USER_ID, 1)
+        final ResultsSharedSuccess resultsShared = (ResultsSharedSuccess) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine), emptyList(), HearingState.SHARED, null, LocalDate.now(), USER_ID, 1)
                 .toList().get(0);
 
         assertEquals(hearing.getId(), resultsShared.getHearingId());
@@ -3271,7 +3271,7 @@ public class HearingAggregateTest {
         final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
         targetDraft.setResultLines(null);
         final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine = getSharedResultsCommandResultLineV2(resultLineIn, targetDraft, "I", false);
-        final ResultsSharedSuccess resultsShared = (ResultsSharedSuccess) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine), HearingState.SHARED, null, LocalDate.now(), USER_ID, 1)
+        final ResultsSharedSuccess resultsShared = (ResultsSharedSuccess) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine), emptyList(), HearingState.SHARED, null, LocalDate.now(), USER_ID, 1)
                 .collect(Collectors.toList()).get(0);
 
         assertEquals(hearing.getId(), resultsShared.getHearingId());
@@ -3364,7 +3364,7 @@ public class HearingAggregateTest {
         final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
         targetDraft.setResultLines(null);
         final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine = getSharedResultsCommandResultLineV2(resultLineIn, targetDraft, "A", true);
-        final ManageResultsFailed resultsShared = (ManageResultsFailed) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine), INITIALISED, null, LocalDate.now(), USER_ID, 1)
+        final ManageResultsFailed resultsShared = (ManageResultsFailed) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine), emptyList(), INITIALISED, null, LocalDate.now(), USER_ID, 1)
                 .collect(Collectors.toList()).get(0);
 
         assertEquals(hearing.getId(), resultsShared.getHearingId());
@@ -3401,7 +3401,7 @@ public class HearingAggregateTest {
         final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine = getSharedResultsCommandResultLine(resultLineIn, targetDraft);
 
         final ResultsSharedSuccess resultsSharedSuccess = (ResultsSharedSuccess) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(),
-                newArrayList(sharedResultsCommandResultLine), INITIALISED, null, hearingDay, USER_ID, 1).toList().get(0);
+                newArrayList(sharedResultsCommandResultLine), emptyList(), INITIALISED, null, hearingDay, USER_ID, 1).toList().get(0);
         assertEquals(hearing.getId(), resultsSharedSuccess.getHearingId());
 
         final Target targetDraft2 = saveDraftResultCommand.getTarget();
@@ -3412,11 +3412,11 @@ public class HearingAggregateTest {
 
         final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine2 = getSharedResultsCommandResultLine(resultLineIn2, targetDraft2);
 
-        final ResultsSharedSuccess resultsSharedSuccess2 = (ResultsSharedSuccess) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine2), SHARED, null, hearingDay, USER_ID, 2)
+        final ResultsSharedSuccess resultsSharedSuccess2 = (ResultsSharedSuccess) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine2), emptyList(), SHARED, null, hearingDay, USER_ID, 2)
                 .toList().get(0);
         assertEquals(hearing.getId(), resultsSharedSuccess2.getHearingId());
 
-        final ManageResultsFailed manageResultsFailed = (ManageResultsFailed) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine2), SHARED, null, hearingDay, USER_ID, 1)
+        final ManageResultsFailed manageResultsFailed = (ManageResultsFailed) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine2), emptyList(), SHARED, null, hearingDay, USER_ID, 1)
                 .toList().get(0);
         assertEquals(hearing.getId(), manageResultsFailed.getHearingId());
         assertEquals(SHARED, manageResultsFailed.getHearingState());
@@ -4223,7 +4223,7 @@ public class HearingAggregateTest {
                 .withUserId(randomUUID())
                 .build();
 
-        final Stream<Object> eventStreams = hearingAggregate.shareResultForDay(hearing.getId(), courtClerk, ZonedDateTime.now(), resultLines, HearingState.SHARED, youthCourt, hearingDay, USER_ID, 3);
+        final Stream<Object> eventStreams = hearingAggregate.shareResultForDay(hearing.getId(), courtClerk, ZonedDateTime.now(), resultLines, emptyList(), HearingState.SHARED, youthCourt, hearingDay, USER_ID, 3);
         final List<Object> eventList = eventStreams.toList();
         final ResultsSharedSuccess resultsSharedSuccess = (ResultsSharedSuccess) eventList.get(0);
         assertThat(resultsSharedSuccess.getHearingId(), is(hearing.getId()));
@@ -4551,7 +4551,7 @@ public class HearingAggregateTest {
 
         final List<SharedResultsCommandResultLineV2> resultLines = List.of(resultLine1);
         final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withUserId(randomUUID()).build();
-        final List<Object> eventCollection = hearingAggregate.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1).toList();
+        final List<Object> eventCollection = hearingAggregate.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, emptyList(), HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1).toList();
         final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.stream().filter(o->o.getClass().equals(ResultsSharedV3.class)).findFirst().get();
         final List<Target2> targets = resultsSharedV3.getTargets();
         assertThat(targets.size(), Matchers.is(1));
@@ -4591,7 +4591,7 @@ public class HearingAggregateTest {
 
         final List<SharedResultsCommandResultLineV2> resultLines = List.of(resultLine1);
         final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withUserId(randomUUID()).build();
-        final List<Object> eventCollection = hearingAggregate.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1).toList();
+        final List<Object> eventCollection = hearingAggregate.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, emptyList(), HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1).toList();
         final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.stream().filter(o->o.getClass().equals(ResultsSharedV3.class)).findFirst().get();
         final List<Target2> targets = resultsSharedV3.getTargets();
         assertThat(targets.size(), Matchers.is(1));

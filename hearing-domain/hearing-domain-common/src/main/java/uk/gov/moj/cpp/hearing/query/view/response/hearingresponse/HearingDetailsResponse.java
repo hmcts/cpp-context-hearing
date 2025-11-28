@@ -23,6 +23,7 @@ public class HearingDetailsResponse {
 
     private ZonedDateTime firstSharedDate;
 
+    private UUID relatedApplicationId;
 
 
     public HearingDetailsResponse() {
@@ -79,5 +80,11 @@ public class HearingDetailsResponse {
         this.firstSharedDate = firstSharedDate;
     }
 
+    public UUID getRelatedApplicationId() {
+        return relatedApplicationId;
+    }
 
+    public void setRelatedApplicationId(final UUID relatedApplicationId) {
+        this.relatedApplicationId = relatedApplicationId;
+    }
 }

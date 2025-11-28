@@ -713,7 +713,7 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> shareResultForDay(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLineV2> resultLines,
-                                            final HearingState newHearingState, final YouthCourt youthCourt, final LocalDate hearingDay, final UUID userId, final Integer version) {
+                                            final List<CourtApplication> additionalApplications, final HearingState newHearingState, final YouthCourt youthCourt, final LocalDate hearingDay, final UUID userId, final Integer version) {
 
         if (HEARING_STATES_SHARE_NOT_ALLOWED.contains(this.hearingState)
                 || (INITIALISED == newHearingState && SHARED == this.hearingState)) {
@@ -742,7 +742,7 @@ public class HearingAggregate implements Aggregate {
                     hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
         }
 
-        return apply(resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, this.defendantDelegate.getDefendantDetailsChanged(), youthCourt, hearingDay, version));
+        return apply(resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, additionalApplications, this.defendantDelegate.getDefendantDetailsChanged(), youthCourt, hearingDay, version));
     }
 
     private boolean isResultVersionMismatch(final LocalDate hearingDay, final Integer version) {

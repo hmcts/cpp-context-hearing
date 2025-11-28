@@ -100,6 +100,7 @@ public class ApplicationTimelineIT extends AbstractIT {
         });
     }
 
+
     @Test
     public void shouldDisplayApplicationsOnTimeline() {
 

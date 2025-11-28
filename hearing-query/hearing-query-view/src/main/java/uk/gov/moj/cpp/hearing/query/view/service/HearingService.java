@@ -85,6 +85,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCas
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
+import uk.gov.moj.cpp.hearing.query.view.service.ctl.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.query.view.service.userdata.UserDataService;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.DraftResultRepository;
@@ -198,16 +199,18 @@ public class HearingService {
 
     @Inject
     private ProgressionService progressionService;
+    @Inject
+    private ReferenceDataService referenceDataService;
 
     @Transactional()
     public Optional<CurrentCourtStatus> getHearingsForWebPage(final List<UUID> courtCentreList,
                                                               final LocalDate localDate,
                                                               final Set<UUID> cppHearingEventIds) {
         LOGGER.info("courtCentreList: {}, localDate: {}, cppHearingEventIds: {}", courtCentreList, localDate, cppHearingEventIds);
-        if(courtCentreList.isEmpty()){
+        if (courtCentreList.isEmpty()) {
             return empty();
         }
-        final List<Object[]> results = hearingEventRepository.findLatestHearingsForThatDayByCourt(courtCentreList.get(0), localDate,cppHearingEventIds);
+        final List<Object[]> results = hearingEventRepository.findLatestHearingsForThatDayByCourt(courtCentreList.get(0), localDate, cppHearingEventIds);
 
         final List<HearingEventPojo> hearingEventPojos = results.stream()
                 .map(this::convertToHearingEventPojo)
@@ -242,10 +245,11 @@ public class HearingService {
         hearingEventPojo.setHearingId(convertToUUID(aHearingEvent[5]));
         hearingEventPojo.setId(convertToUUID(aHearingEvent[6]));
         hearingEventPojo.setLastModifiedTime(convertToZonedDateTime(aHearingEvent[7]));
-        hearingEventPojo.setRecordedLabel((String)aHearingEvent[8]);
+        hearingEventPojo.setRecordedLabel((String) aHearingEvent[8]);
 
         return hearingEventPojo;
     }
+
     private UUID convertToUUID(Object obj) {
         if (obj == null) return null;
         if (obj instanceof UUID) return (UUID) obj;
@@ -257,14 +261,15 @@ public class HearingService {
         }
         return null;
     }
+
     private ZonedDateTime convertToZonedDateTime(Object obj) {
         if (obj == null) return null;
         if (obj instanceof ZonedDateTime) return (ZonedDateTime) obj;
         if (obj instanceof String) {
-            return ZonedDateTime.parse((String)obj);
+            return ZonedDateTime.parse((String) obj);
         }
         if (obj instanceof java.sql.Timestamp) {
-            return ((java.sql.Timestamp)obj).toInstant()
+            return ((java.sql.Timestamp) obj).toInstant()
                     .atZone(ZoneId.of("Europe/London"));
         }
         return null;
@@ -600,33 +605,67 @@ public class HearingService {
     }
 
     @Transactional
-    public HearingDetailsResponse getHearingDetailsResponseById(final UUID hearingId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes,
+    public HearingDetailsResponse getHearingDetailsResponseById(final JsonEnvelope envelope, final UUID hearingId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes,
                                                                 final List<UUID> accessibleCaseAndApplicationIds,
                                                                 final boolean isDDJ) {
         if (null == hearingId) {
             return new HearingDetailsResponse();
         }
+        UUID relatedApplicationId = null;
 
-        Hearing hearing = hearingRepository.findBy(hearingId);
+        Hearing hearingEntity = hearingRepository.findBy(hearingId);
         if (isDDJ) {
-            hearing = filterHearingsBasedOnPermissions.filterHearings(Arrays.asList(hearing), accessibleCaseAndApplicationIds).stream().findFirst().orElse(null);
+            hearingEntity = filterHearingsBasedOnPermissions.filterHearings(Arrays.asList(hearingEntity), accessibleCaseAndApplicationIds).stream().findFirst().orElse(null);
         }
 
-        if (hearing == null) {
+        if (hearingEntity == null) {
             return new HearingDetailsResponse();
+        }
+        final uk.gov.justice.core.courts.Hearing hearing = hearingJPAMapper.fromJPA(hearingEntity);
+
+        if (hearing.getCourtApplications() != null) {
+
+            Set<UUID> uniqueApplications = hearing.getCourtApplications().stream().map(CourtApplication::getId).collect(Collectors.toSet());
+            relatedApplicationId = hearing.getCourtApplications().get(0).getId();
+
+            final List<CourtApplication> parentCourtApplications = hearing.getCourtApplications().stream()
+                    .filter(courtApplication -> courtApplication.getParentApplicationId() != null)
+                    .filter(courtApplication -> uniqueApplications.add(courtApplication.getParentApplicationId()))
+                    .filter(childApplicationWithParentApplication -> referenceDataService.isOffenceActiveOrder(childApplicationWithParentApplication.getType().getId()))
+                    .map(courtApplication -> {
+                        final JsonObject courtApplicationJson = progressionService.retrieveApplicationOnly(envelope, courtApplication.getParentApplicationId());
+                        return jsonObjectToObjectConverter.convert(courtApplicationJson.getJsonObject("courtApplication"), CourtApplication.class);
+                    }).toList();
+
+            if (!parentCourtApplications.isEmpty()) {
+                hearing.getCourtApplications().addAll(parentCourtApplications);
+            }
         }
 
         final HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse(
-                hearingJPAMapper.fromJPA(hearing),
-                getHearingState(hearing),
-                hearing.getAmendedByUserId()
+                hearing,
+                getHearingState(hearingEntity),
+                hearingEntity.getAmendedByUserId()
         );
-        hearingDetailsResponse.setWitnesses(hearing.getWitnesses().stream().map(Witness::getName).toList());
-        hearingDetailsResponse.setFirstSharedDate(hearing.getFirstSharedDate());
+        hearingDetailsResponse.setWitnesses(hearingEntity.getWitnesses().stream().map(x -> x.getName()).collect(toList()));
+        hearingDetailsResponse.setFirstSharedDate(hearingEntity.getFirstSharedDate());
+        hearingDetailsResponse.setRelatedApplicationId(relatedApplicationId);
 
-        updateTrialAttributes(crackedIneffectiveVacatedTrialTypes, hearing, hearingDetailsResponse);
+        updateTrialAttributes(crackedIneffectiveVacatedTrialTypes, hearingEntity, hearingDetailsResponse);
 
         filterProsecutionCases(hearingDetailsResponse);
+
+        if (isNotEmpty(hearingDetailsResponse.getHearing().getCourtApplications())) {
+            final List<String> applicationIdList = hearingDetailsResponse.getHearing().getCourtApplications()
+                    .stream().map(courtApplication -> courtApplication.getId().toString()).toList();
+            final List<ApplicationWithStatus> applicationWithStatuses = progressionService.getApplicationStatus(applicationIdList);
+
+            if (isNotEmpty(applicationWithStatuses)) {
+                hearingDetailsResponse.getHearing().getCourtApplications()
+                        .forEach(courtApplication -> getApplicationStatus(applicationWithStatuses, courtApplication.getId().toString())
+                                .ifPresent(courtApplication::setApplicationStatus));
+            }
+        }
 
         return hearingDetailsResponse;
     }
