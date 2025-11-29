@@ -436,6 +436,9 @@ subscriptions_descriptor:
         - name: public.progression.application-offences-updated
           schema_uri: http://justice.gov.uk/progression/courts/public.progression.application-offences-updated.json
 
+        - name: public.progression.application-laa-reference-updated-for-application
+          schema_uri: http://justice.gov.uk/progression/courts/public.progression.application-laa-reference-updated-for-application.json
+
         # Progression Hearing Resulted Case Updated
         - name: public.progression.hearing-resulted-case-updated
           schema_uri: http://justice.gov.uk/core/courts/hearing-resulted-case-updated.json

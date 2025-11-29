@@ -60,7 +60,7 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({"squid:S2201","squid:S134"})
+@SuppressWarnings({"squid:S2201", "squid:S134"})
 @ServiceComponent(EVENT_LISTENER)
 public class InitiateHearingEventListener {
     private static final String GUILTY = "GUILTY";
@@ -137,7 +137,7 @@ public class InitiateHearingEventListener {
         final HearingExtended hearingExtended = jsonObjectToObjectConverter.convert(payload, HearingExtended.class);
 
         final Optional<Hearing> hearingEntityOpt = hearingRepository.findOptionalBy(hearingExtended.getHearingId());
-        if(hearingEntityOpt.isEmpty()){
+        if (hearingEntityOpt.isEmpty()) {
             return;
         }
 
@@ -173,18 +173,14 @@ public class InitiateHearingEventListener {
         final ApplicationDetailChanged applicationDetailChanged = jsonObjectToObjectConverter.convert(payload, ApplicationDetailChanged.class);
 
         final Optional<Hearing> hearing = hearingRepository.findOptionalBy(applicationDetailChanged.getHearingId());
-        if(hearing.isEmpty()){
+        if (hearing.isEmpty()) {
             return;
         }
 
         final Hearing hearingEntity = hearing.get();
         LOGGER.debug("hearing.events.application-detail-changed event received for hearingId {}", hearingEntity.getId());
 
-        final String courtApplicationsJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), applicationDetailChanged.getCourtApplication());
-
-        hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
-
-        hearingRepository.save(hearingEntity);
+        updateApplicationAndPersistHearing(hearingEntity, applicationDetailChanged.getCourtApplication());
     }
 
     @Transactional
@@ -207,18 +203,38 @@ public class InitiateHearingEventListener {
 
             CourtApplication courtApplication = persistedApplication.get();
 
-            if (nonNull(courtApplication.getSubject()) && courtApplication.getSubject().getId().equals(applicationLaareferenceUpdated.getSubjectId()) && isNotEmpty(courtApplication.getCourtApplicationCases())) {
-                List<CourtApplicationCase> updatedCases = getUpdatedCases(courtApplication, applicationLaareferenceUpdated);
+            if (isSubjectMatches(courtApplication, applicationLaareferenceUpdated)) {
 
-                CourtApplication updatedCourtApplication = CourtApplication.courtApplication().withValuesFrom(courtApplication).withCourtApplicationCases(updatedCases).build();
+                if (nonNull(applicationLaareferenceUpdated.getOffenceId())) {
+                    if (isNotEmpty(courtApplication.getCourtApplicationCases())) {
+                        final CourtApplication updatedCourtApplication = CourtApplication.courtApplication()
+                                .withValuesFrom(courtApplication)
+                                .withCourtApplicationCases(getUpdatedCases(courtApplication, applicationLaareferenceUpdated))
+                                .build();
 
-                final String courtApplicationsJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), updatedCourtApplication);
+                        updateApplicationAndPersistHearing(hearingEntity, updatedCourtApplication);
+                    }
+                } else if (nonNull(applicationLaareferenceUpdated.getLaaReference())) { //Breach and POCA applications has no offence. Attach the laa reference to the court application level
+                    final CourtApplication updatedCourtApplication = CourtApplication.courtApplication()
+                            .withValuesFrom(courtApplication)
+                            .withLaaApplnReference(applicationLaareferenceUpdated.getLaaReference()).build();
 
-                hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
-
-                hearingRepository.save(hearingEntity);
+                    updateApplicationAndPersistHearing(hearingEntity, updatedCourtApplication);
+                }
             }
         }
+    }
+
+    private static boolean isSubjectMatches(final CourtApplication courtApplication, final ApplicationLaareferenceUpdated applicationLaareferenceUpdated) {
+        return nonNull(courtApplication.getSubject()) && courtApplication.getSubject().getId().equals(applicationLaareferenceUpdated.getSubjectId());
+    }
+
+    private void updateApplicationAndPersistHearing(final Hearing hearingEntity, final CourtApplication updatedCourtApplication) {
+        final String courtApplicationsJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), updatedCourtApplication);
+
+        hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
+
+        hearingRepository.save(hearingEntity);
     }
 
     private static List<CourtApplicationCase> getUpdatedCases(CourtApplication persistedApplication, ApplicationLaareferenceUpdated applicationLaareferenceUpdated) {
@@ -308,7 +324,7 @@ public class InitiateHearingEventListener {
             final boolean shouldSetVerdict = isNull(offence.getVerdict()) || isVerdictInherited(event, offence);
 
             if (shouldSetVerdict && !isVerdictDeleted(event)) {
-                    offence.setVerdict(verdictJPAMapper.toJPA(event.getVerdict()));
+                offence.setVerdict(verdictJPAMapper.toJPA(event.getVerdict()));
             } else {
                 offence.setVerdict(null);
             }
@@ -325,7 +341,7 @@ public class InitiateHearingEventListener {
 
         final Optional<Hearing> hearingEntity = hearingRepository.findOptionalBy(existingHearingUpdated.getHearingId());
 
-        if(hearingEntity.isEmpty()){
+        if (hearingEntity.isEmpty()) {
             return;
         }
 
@@ -491,9 +507,9 @@ public class InitiateHearingEventListener {
     private void updateConvictionDate(final UUID hearingId, final UUID offenceId, final UUID courtApplicationID, final LocalDate convictionDate) {
         if (courtApplicationID == null) {
             save(offenceId, hearingId, o -> o.setConvictionDate(convictionDate));
-        } else{
+        } else {
             final Optional<Hearing> hearingEnt = hearingRepository.findOptionalBy(hearingId);
-            if(hearingEnt.isEmpty()){
+            if (hearingEnt.isEmpty()) {
                 return;
             }
             final Hearing hearingEntity = hearingEnt.get();

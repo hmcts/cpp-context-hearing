@@ -6,6 +6,9 @@
         <version>17.0.134-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-viewstore-persistence</artifactId>
+    <properties>
+        <h2.version>1.4.196</h2.version>
+    </properties>
     <build>
         <plugins>
             <plugin>
@@ -190,6 +193,12 @@
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-ra</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

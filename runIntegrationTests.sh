@@ -4,9 +4,10 @@
 
 CONTEXT_NAME=hearing
 
-FRAMEWORK_LIBRARIES_VERSION=17.101.2
-FRAMEWORK_VERSION=17.101.6
-EVENT_STORE_VERSION=17.101.5
+FRAMEWORK_LIBRARIES_VERSION=$(mvn help:evaluate -Dexpression=framework-libraries.version -q -DforceStdout)
+FRAMEWORK_VERSION=$(mvn help:evaluate -Dexpression=framework.version -q -DforceStdout)
+EVENT_STORE_VERSION=$(mvn help:evaluate -Dexpression=event-store.version -q -DforceStdout)
+FILE_SERVICE_VERSION=$(mvn help:evaluate -Dexpression=file-service.version -q -DforceStdout)
 
 DOCKER_CONTAINER_REGISTRY_HOST_NAME=crmdvrepo01
 

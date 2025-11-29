@@ -5,6 +5,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.mockito.Mockito.when;
@@ -236,6 +237,52 @@ public class ApplicationDetailChangeCommandHandlerTest {
                                 allOf(
                                         withJsonPath("$.hearingId", is(arbitraryHearingId.toString())),
                                         withJsonPath("$.applicationId", is(applicationId.toString()))
+                                ))
+                )));
+    }
+
+    @Test
+    void testUpdateLaaRefernceForApplicationShouldApply_When_Application_Already_Added_And_OffenceId_Null() throws EventStreamException {
+        //Given
+        final UUID arbitraryHearingId = UUID.randomUUID();
+        final CommandHelpers.InitiateHearingCommandHelper arbitraryHearingObject = h(standardInitiateHearingTemplate());
+        final UUID applicationId = UUID.randomUUID();
+        final UUID subjectId = UUID.randomUUID();
+        final LaaReference laaReference = LaaReference.laaReference()
+                .withStatusDescription("desc")
+                .withStatusDate(LocalDate.now())
+                .withStatusId(randomUUID())
+                .withApplicationReference("reference")
+                .build();
+        final ApplicationAggregate applicationAggregate = new ApplicationAggregate() {{
+            apply(RegisteredHearingAgainstApplication.builder().withApplicationId(applicationId).withHearingId(arbitraryHearingId).build());
+        }};
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(arbitraryHearingObject.getHearing()));
+        }};
+
+        when(this.eventSource.getStreamById(arbitraryHearingId)).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+        when(this.eventSource.getStreamById(applicationId)).thenReturn(this.applicationEventStream);
+        when(this.aggregateService.get(this.applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
+
+
+        JsonObject payload = Json.createObjectBuilder()
+                .add("applicationId", applicationId.toString())
+                .add("subjectId", subjectId.toString() )
+                .add("laaReference", objectToJsonObjectConverter.convert(laaReference))
+                .build();
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-laareference-for-application"), payload);
+
+        applicationDetailChangeCommandHandler.updateLaaReferenceCourtApplication(envelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.events.application-laareference-updated"),
+                        payloadIsJson(
+                                allOf(
+                                        withJsonPath("$.hearingId", is(arbitraryHearingId.toString())),
+                                        withJsonPath("$.applicationId", is(applicationId.toString())),
+                                        withoutJsonPath("$.offenceId")
                                 ))
                 )));
     }
