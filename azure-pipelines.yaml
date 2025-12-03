@@ -21,7 +21,9 @@ resources:
       type: github
       name: hmcts/cpp-azure-devops-templates
       endpoint: 'hmcts'
-      ref: 'main'
+      # TODO: After PR merge, uncomment the line below and remove the test branch reference - i.e. ref: '1671-azure-artifactory-publishing-test'
+      # ref: 'main'
+      ref: 'team/artifact-dualpublishing'
 
 pool:
   name: "MDV-ADO-AGENT-AKS-01"
@@ -42,7 +44,7 @@ stages:
           sonarqube_project: ${{ variables['sonarqubeProject'] }}
           sonarQubeType: 'sonarQubeAKS'
 
-  - ${{ if eq(variables['Build.Reason'], 'IndividualCI') }}:
+  - ${{ if or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'Manual')) }}:
       - template: pipelines/context-validation.yaml@cppAzureDevOpsTemplates
         parameters:
           repo: "$(Build.Repository.Name)"
