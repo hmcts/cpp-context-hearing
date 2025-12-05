@@ -6,6 +6,7 @@ trigger:
     include:
       - main
       - 'team/*'
+      - 'team/test-release-logic'
     exclude:
       - 'dev/release-*'
   paths:
@@ -23,7 +24,7 @@ resources:
       endpoint: 'hmcts'
       # TODO: After PR merge, uncomment the line below and remove the test branch reference - i.e. ref: '1671-azure-artifactory-publishing-test'
       # ref: 'main'
-      ref: 'team/artifact-dualpublishing'
+      ref: 'team/test-release-logic'
 
 pool:
   name: "MDV-ADO-AGENT-AKS-01"
