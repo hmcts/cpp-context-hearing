@@ -106,6 +106,8 @@ public class ResultDefinition {
     private Boolean canExtendActiveOrder;
     private Boolean sentToCC;
     private Boolean committedToCC;
+    private Boolean isDeemedServed;
+
 
     public static ResultDefinition resultDefinition() {
         return new ResultDefinition();
@@ -530,5 +532,13 @@ public class ResultDefinition {
     public ResultDefinition setCommittedToCC(final Boolean committedToCC) {
         this.committedToCC = committedToCC;
         return this;
+    }
+
+    public Boolean getIsDeemedServed() {
+        return isDeemedServed;
+    }
+
+    public void setIsDeemedServed(final Boolean deemedServed) {
+        isDeemedServed = deemedServed;
     }
 }

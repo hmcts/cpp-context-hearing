@@ -15,20 +15,3 @@ description = "Identify banned IDs"
 regex = '''${GITLEAKS_REGEX_BANNED_IDS}'''
 tags = ["banned-ids"]
 
-[allowlist]
-description = "Global allowlist"
-paths = [
-  ".idea/.*",
-  "(.*/)?target/.*",
-  ".gitreview"
-]
-regexes = [
-  '''(?i).*query\.local-justice.*''',
-  '''(?i).*referencedata\.query\.local-justice-areas.*''',
-  '''(?i).*referencedata\.local-authority-address.*''',
-  '''(?i).*referencedata\.local-justice-area-address.*''',
-  '''(?i).*referencedata\.query\.local.*''',
-  '''(?i).*vnd\.referencedata\.query\.local.*''',
-  '''(?i).*referencedata\.local.*'''
-]
-

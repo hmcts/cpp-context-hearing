@@ -1,16 +1,24 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
+import static net.bytebuddy.matcher.ElementMatchers.anyOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.DeletedJudicialResultTransformer.toDeletedResults;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_DATEORDERS_HEARING_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_DELETED_RESULTLINES_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_DELETED_RESULTLINES_PARENT_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_LINKED_APP_DELETED_RESULTLINES_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_NEW_REVIEW_HEARING_ALWAYS_PUBLISHED_LEAF_NODE_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_NEW_REVIEW_HEARING_JSON;
 
+import uk.gov.justice.core.courts.DeletedJudicialResults;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.ResultLine2;
@@ -26,11 +34,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -55,19 +66,19 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
     public void shouldPublishWhenAlwaysPublishedIsALeafNode() throws IOException {
         final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_NEW_REVIEW_HEARING_ALWAYS_PUBLISHED_LEAF_NODE_JSON, ResultsSharedV3.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
-        List<UUID> resultDefinitionIds=resultsShared.getTargets().stream()
-                .flatMap(t->t.getResultLines().stream())
+        List<UUID> resultDefinitionIds = resultsShared.getTargets().stream()
+                .flatMap(t -> t.getResultLines().stream())
                 .map(ResultLine2::getResultDefinitionId)
                 .collect(Collectors.toList());
 
         final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
 
-          for(UUID resulDefinitionId:resultDefinitionIds){
-              TreeNode<ResultDefinition> resultDefinitionTreeNode=new TreeNode(resulDefinitionId,resultDefinitions);
-              resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
-              resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
-              treeNodes.add(resultDefinitionTreeNode);
-          }
+        for (UUID resulDefinitionId : resultDefinitionIds) {
+            TreeNode<ResultDefinition> resultDefinitionTreeNode = new TreeNode(resulDefinitionId, resultDefinitions);
+            resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
+            resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
+            treeNodes.add(resultDefinitionTreeNode);
+        }
 
         final List<TreeNode<ResultLine2>> restructuredTree = target.restructure(envelope, resultsShared, treeNodes);
 
@@ -100,15 +111,15 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
         assertThat(rl2.getPrompts().size(), is(3));
         assertThat(firstReviewResultLint.getPrompts().size(), is(12));
 
-        List<UUID> resultDefinitionIds=resultsShared.getTargets().stream()
-                .flatMap(t->t.getResultLines().stream())
+        List<UUID> resultDefinitionIds = resultsShared.getTargets().stream()
+                .flatMap(t -> t.getResultLines().stream())
                 .map(ResultLine2::getResultDefinitionId)
                 .collect(Collectors.toList());
 
         final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
 
-        for(UUID resulDefinitionId:resultDefinitionIds){
-            TreeNode<ResultDefinition> resultDefinitionTreeNode=new TreeNode(resulDefinitionId,resultDefinitions);
+        for (UUID resulDefinitionId : resultDefinitionIds) {
+            TreeNode<ResultDefinition> resultDefinitionTreeNode = new TreeNode(resulDefinitionId, resultDefinitions);
             resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
             resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
             treeNodes.add(resultDefinitionTreeNode);
@@ -140,15 +151,15 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
         final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_DATEORDERS_HEARING_JSON, ResultsSharedV3.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
 
-        List<UUID> resultDefinitionIds=resultsShared.getTargets().stream()
-                .flatMap(t->t.getResultLines().stream())
+        List<UUID> resultDefinitionIds = resultsShared.getTargets().stream()
+                .flatMap(t -> t.getResultLines().stream())
                 .map(ResultLine2::getResultDefinitionId)
                 .collect(Collectors.toList());
 
         final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
 
-        for(UUID resulDefinitionId:resultDefinitionIds){
-            TreeNode<ResultDefinition> resultDefinitionTreeNode=new TreeNode(resulDefinitionId,resultDefinitions);
+        for (UUID resulDefinitionId : resultDefinitionIds) {
+            TreeNode<ResultDefinition> resultDefinitionTreeNode = new TreeNode(resulDefinitionId, resultDefinitions);
             resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
             resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
             treeNodes.add(resultDefinitionTreeNode);
@@ -163,6 +174,58 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
 
         restructuredTree.forEach(resultLine2TreeNode ->
                 assertNotNull(resultLine2TreeNode.getJudicialResult().getResultText()));
+    }
 
+    @ParameterizedTest
+    @MethodSource("amendmentsWithDeletedResults")
+    void ShouldReturnDeletedResultLines(final String resultsSharedEventPayloadFile, final int deletedProsecutionCaseResultsCount, final int deletedApplicationResultsCount,
+                                        final int deletedApplicationCaseResultsCount,
+                                        final int deletedApplicationCourtOrderResultsCount) throws IOException {
+
+        final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(resultsSharedEventPayloadFile, ResultsSharedV3.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+
+        final List<UUID> resultDefinitionIds = resultsShared.getTargets().stream()
+                .flatMap(t -> t.getResultLines().stream())
+                .map(ResultLine2::getResultDefinitionId)
+                .toList();
+
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+
+        for (UUID resulDefinitionId : resultDefinitionIds) {
+            TreeNode<ResultDefinition> resultDefinitionTreeNode = new TreeNode(resulDefinitionId, resultDefinitions);
+            resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
+            resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
+            treeNodes.add(resultDefinitionTreeNode);
+        }
+        when(hearingTypeReverseLookup.getHearingTypeByName(any(), any())).thenReturn(HearingType.hearingType().withDescription("REV").build());
+        ResultTextConfHelper resultTextConfHelper = new ResultTextConfHelper();
+        setField(resultTextConfHelper, "liveDateOfResultTextTemplateConf", "01042023");
+        resultTextConfHelper.setDate();
+        resultTreeBuilder = new ResultTreeBuilderV3(referenceDataService, nextHearingHelperV3, resultLineHelperV3, resultTextConfHelper);
+        target = new RestructuringHelperV3(resultTreeBuilder, resultTextConfHelper);
+        final List<TreeNode<ResultLine2>> restructuredTree = target.getDeletedResults(envelope, resultsShared, treeNodes);
+        final DeletedJudicialResults deletedResults = toDeletedResults(restructuredTree, resultsShared.getHearing());
+
+        assertResultList(deletedResults.getProsecutionCaseResults(), deletedProsecutionCaseResultsCount);
+        assertResultList(deletedResults.getApplicationResults(), deletedApplicationResultsCount);
+        assertResultList(deletedResults.getApplicationCaseResults(), deletedApplicationCaseResultsCount);
+        assertResultList(deletedResults.getApplicationCourtOrderResults(), deletedApplicationCourtOrderResultsCount);
+    }
+
+    public static Stream<Arguments> amendmentsWithDeletedResults() {
+        return Stream.of(
+                Arguments.of(HEARING_RESULTS_DELETED_RESULTLINES_PARENT_JSON, 1, 0, 0, 0),
+                Arguments.of(HEARING_RESULTS_DELETED_RESULTLINES_JSON, 1, 0, 0, 0),
+                Arguments.of(HEARING_RESULTS_LINKED_APP_DELETED_RESULTLINES_JSON, 0, 4, 0, 0)
+        );
+    }
+
+    private void assertResultList(final List<?> results, final int expectedCount){
+        if (expectedCount == 0) {
+            assertThat(results, nullValue());
+        } else {
+            assertThat(results.size(), is(expectedCount));
+        }
     }
 }
