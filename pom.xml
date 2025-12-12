@@ -8,7 +8,7 @@
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
-    <version>17.0.140-SNAPSHOT</version>
+    <version>17.0.87-cimd1560-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Hearing Context - Parent Module</name>
@@ -28,9 +28,9 @@
         <coredomain.version>17.103.10</coredomain.version>
         <referencedata.version>17.0.120</referencedata.version>
         <material.version>17.0.57</material.version>
-        <results.version>17.0.57</results.version>
+        <results.version>17.0.58</results.version>
         <notification.notify.version>17.0.1</notification.notify.version>
-        <stagingenforcement.version>17.0.64</stagingenforcement.version>
+        <stagingenforcement.version>17.0.52-cimd2438-SNAPSHOT</stagingenforcement.version>
         <progression.version>17.0.215</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
@@ -41,7 +41,6 @@
         <listing.version>17.0.116</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>17.0.96</systemdocgenerator.version>
-
         <sonar.coverage.exclusions>
             **/uk/gov/moj/cpp/hearing/nows/events/**/*,
             **/uk/gov/moj/cpp/hearing/common/**/*,
