@@ -1,0 +1,23 @@
+{
+  "defendantDetails": [
+    {
+      "defendantId": "30b83084-d2fe-4a70-bbd1-fae1dfdb4b95",
+      "caseId": "30b83084-d2fe-4a70-bbd1-fae1dfdb4b95",
+      "courtCentreId": "3e5ed259-9613-42d6-aa2c-08bcfbdfd9f1",
+      "dateOfHearing": "26-03-202",
+      "timeOfHearing": "10:30",
+      "firstName": "test",
+      "lastName": "testsurname",
+      "dateOfBirth": "1998-10-12",
+      "nationalInsuranceNumber": "SP123456"
+    },
+    {
+      "defendantId": "30b83084-d2fe-4a70-bbd1-fae1dfdb4b95",
+      "caseId": "30b83084-d2fe-4a70-bbd1-fae1dfdb4b95",
+      "courtCentreId": "4d698dcd-8c3c-4554-b2ef-40247ce7e375",
+      "dateOfHearing": "26-03-202",
+      "timeOfHearing": "11:30",
+      "legalEntityDefendantName": "Facebook"
+    }
+  ]
+}

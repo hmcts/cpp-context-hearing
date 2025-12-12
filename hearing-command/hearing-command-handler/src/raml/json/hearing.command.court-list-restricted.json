@@ -1,0 +1,7 @@
+{
+  "hearingId": "HEARING_ID_1",
+  "caseIds": [
+    "CASE_ID_1"
+  ],
+  "restrictCourtList": true
+}

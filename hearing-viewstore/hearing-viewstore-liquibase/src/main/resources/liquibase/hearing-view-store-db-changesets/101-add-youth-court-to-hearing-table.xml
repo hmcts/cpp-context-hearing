@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="101" author="hearing"
+               logicalFilePath="099-add-youth-court-to-hearing-table.xml">
+
+        <addColumn tableName="ha_hearing">
+            <column name="yc_code_id"  type="UUID"/>
+        </addColumn>
+        <addColumn tableName="ha_hearing">
+            <column name="yc_code" type="integer"/>
+        </addColumn>
+        <addColumn tableName="ha_hearing">
+            <column name="yc_name" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="ha_hearing">
+            <column name="yc_welsh_name" type="TEXT"/>
+        </addColumn>
+
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,37 @@
+{
+  "hearingTypes": [
+    {
+      "id": "06b0c2bf-3f98-46ed-ab7e-56efaf9ecced",
+      "seqId": 1,
+      "hearingCode": "TIS",
+      "hearingDescription": "Trial of Issue / Newton hearing",
+      "welshHearingDescription": "Treial Pwnc Dadl",
+      "defaultDurationMin": 30,
+      "exhibitHearingCode": "TIS",
+      "exhibitHearingDescription": "For Trial of Issue",
+      "trialTypeFlag": true
+    },
+    {
+      "id": "9cc41e45-b594-4ba6-906e-1a4626b08fed",
+      "seqId": 2,
+      "hearingCode": "FPTP",
+      "hearingDescription": "Further Plea & Trial Preparation",
+      "welshHearingDescription": "Diffynnydd i fynychu 2",
+      "defaultDurationMin": 20,
+      "exhibitHearingCode": "FCM",
+      "exhibitHearingDescription": "Further Case Management",
+      "trialTypeFlag": false
+    },
+    {
+      "id": "9cc41e45-b594-4ba6-906e-1a4626b08fed",
+      "seqId": 2,
+      "hearingCode": "PTP",
+      "hearingDescription": "Plea and Trial Preparation",
+      "welshHearingDescription": "Diffynnydd i fynychu 2",
+      "defaultDurationMin": 20,
+      "exhibitHearingCode": "PTP",
+      "exhibitHearingDescription": "Plea and Trial Preparation",
+      "trialTypeFlag": true
+    }
+  ]
+}

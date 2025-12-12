@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.enrich-associated-hearings-with-indicated-plea.json",
+  "type": "object",
+  "properties": {
+    "hearingIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+      }
+    },
+    "indicatedPlea": {
+      "$ref": "http://justice.gov.uk/core/courts/indicatedPlea.json"
+    }
+  },
+  "required": [
+    "hearingIds",
+    "indicatedPlea"
+  ],
+  "additionalProperties": false
+}

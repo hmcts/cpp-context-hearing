@@ -1,0 +1,89 @@
+{
+  "targets": [
+    {
+      "applicationId": "60ebb72a-5075-45b4-8fa2-d5a2640598d4",
+      "draftResult": "{}",
+      "hearingDay": "2021-09-09",
+      "hearingId": "6366b08a-b38e-42b6-a7e6-ca967b932d3e",
+      "resultLines": [
+        {
+          "childResultLineIds": [],
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2021-09-09",
+          "prompts": [],
+          "resultDefinitionId": "2b3f7c20-8fc1-4fad-9076-df196c24b27e",
+          "resultLabel": "Granted",
+          "resultLineId": "d1a9f6f6-7ce7-456f-80ef-b0a2e2557dd6",
+          "sharedDate": "2021-09-09",
+          "shortCode": "g"
+        },
+        {
+          "amendmentDate": "2021-09-08T16:19:11.348Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "applicationOffenceId": "0523bff5-024b-4cbd-b8f5-37a84d67b098",
+          "childResultLineIds": [],
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "orderedDate": "2021-09-09",
+          "prompts": [
+            {
+              "id": "8a11df41-cc91-4b67-80c4-6108c9b5e324",
+              "label": "Third party's name (victim or police)",
+              "promptRef": "thirdPartysNameVictimOrPolice",
+              "value": "Added applicationId #3"
+            },
+            {
+              "id": "a06952c1-4bfe-4004-b6ac-6908afefdd6a",
+              "label": "Third party's address address line 1",
+              "promptRef": "thirdpartysaddressAddress1",
+              "value": "testing"
+            },
+            {
+              "id": "a06952c1-4bfe-4004-b6ac-6908afefdd6a",
+              "label": "Third party's address post code",
+              "promptRef": "thirdpartysaddressPostCode",
+              "value": "HP18 0ER"
+            },
+            {
+              "id": "2ade6e72-ee41-4718-87a0-1a396579ac56",
+              "label": "Original order made by",
+              "promptRef": "originalOrderMadeBy",
+              "value": "Airdrie Sheriff Court District"
+            },
+            {
+              "id": "39355876-d028-48fa-82d8-ccedbe4312f8",
+              "label": "Date original order made",
+              "promptRef": "dateOriginalOrderMade",
+              "value": "2020-11-11"
+            },
+            {
+              "id": "2da599de-da03-492e-b66f-e7aad32fcfa5",
+              "label": "Terms of variation",
+              "promptRef": "termsOfVariation",
+              "value": "testing"
+            },
+            {
+              "id": "49a85507-8a96-4201-965d-a11879c73f8c",
+              "label": "Order now expires",
+              "promptRef": "orderNowExpires",
+              "value": "tesing"
+            }
+          ],
+          "resultDefinitionId": "c2200b1d-a47d-4d02-9b88-58f8bbed7ea9",
+          "resultLabel": "Restraining order varied",
+          "resultLineId": "47d5ea28-5596-4781-b751-526a2e98a1d9",
+          "sharedDate": "2021-09-09",
+          "shortCode": "restrav"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "60ebb72a-5075-45b4-8fa2-d5a2640598d4"
+    }
+  ]
+}

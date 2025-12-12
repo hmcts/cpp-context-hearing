@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="88" author="hearing" logicalFilePath="088-create-session-time">
+
+        <createTable tableName="ha_session_time">
+            <column name="court_session_id" type="UUID"/>
+            <column name="court_session_date" type="date"/>
+            <column name="court_house_id" type="UUID"/>
+            <column name="court_room_id" type="UUID"/>
+            <column name="am_court_session" type="jsonb"/>
+            <column name="pm_court_session" type="jsonb"/>
+        </createTable>
+        <addPrimaryKey columnNames="court_session_id" constraintName="pk_ha_session_time"
+                       tableName="ha_session_time"/>
+    </changeSet>
+
+</databaseChangeLog>

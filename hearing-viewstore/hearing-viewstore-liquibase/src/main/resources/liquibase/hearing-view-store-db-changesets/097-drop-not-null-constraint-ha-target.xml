@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="97" author="hearing" logicalFilePath="097-drop-not-null-constraint-ha-target">
+
+        <dropNotNullConstraint tableName="ha_target" columnName="defendant_id" columnDataType="UUID"/>
+        <dropNotNullConstraint tableName="ha_target" columnName="offence_id" columnDataType="UUID"/>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.get.hearing-by-id.json",
+  "type": "object",
+  "properties": {
+    "hearing": {
+      "$ref": "http://justice.gov.uk/hearing/courts/hearingView.json"
+    },
+    "hearingState": {
+      "description": "The state of the hearing",
+      "enum": [
+        "INITIALISED",
+        "SHARED",
+        "SHARED_AMEND_LOCKED_ADMIN_ERROR",
+        "SHARED_AMEND_LOCKED_USER_ERROR",
+        "VALIDATED",
+        "APPROVAL_REQUESTED"
+      ]
+    },
+    "amendedByUserId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "witnesses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "firstSharedDate": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "hearing",
+    "hearingState"
+  ]
+}

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="60" author="hearing" logicalFilePath="060-add-defence-counsel">
+
+        <createTable tableName="ha_hearing_defence_counsel">
+            <column name="id" type="UUID"/>
+            <column name="hearing_id" type="UUID"/>
+            <column name="deleted" type="boolean"/>
+            <column name="payload" type="jsonb"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_ha_hearing_defence_counsel"
+                       tableName="ha_hearing_defence_counsel"/>
+
+        <addForeignKeyConstraint baseColumnNames="hearing_id"
+                                 baseTableName="ha_hearing_defence_counsel"
+                                 constraintName="fk_hearing_defence_counsel_id" deferrable="false"
+                                 initiallyDeferred="false"
+                                 onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
+                                 referencedTableName="ha_hearing"/>
+
+    </changeSet>
+
+</databaseChangeLog>

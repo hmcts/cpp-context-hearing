@@ -1,0 +1,137 @@
+{
+  "prosecutionCase":
+    {
+      "id": "CASE_ID",
+      "prosecutionCaseIdentifier": {
+        "prosecutionAuthorityId": "cf73207f-3ced-488a-82a0-3fba79c2ce85",
+        "prosecutionAuthorityCode": "TFL",
+        "prosecutionAuthorityReference": "TFL12345"
+      },
+      "prosecutor": {
+        "prosecutorId": "cf73207f-3ced-488a-82a0-3fba79c2ce86",
+        "prosecutorCode": "TFL",
+        "prosecutorName": "TFL12345"
+      },
+      "originatingOrganisation": "G01FT01AB",
+      "initiationCode": "J",
+      "caseStatus" : "CLOSED",
+      "defendants": [
+        {
+          "id": "DEFENDANT_ID",
+          "masterDefendantId": "DEFENDANT_ID",
+          "courtProceedingsInitiated": "2018-10-09T06:11:10.828Z",
+          "prosecutionCaseId": "CASE_ID",
+          "proceedingsConcluded": true,
+          "numberOfPreviousConvictionsCited": 5,
+          "prosecutionAuthorityReference": "TFL12345-ABC",
+          "numberOfPreviousConvictionsCited": 1,
+          "aliases": [
+            {
+              "firstName": "PersonGivenName11",
+              "lastName": "PersonFamilyName2",
+              "middleName": "PersonGivenName21 PersonGivenName31",
+              "title": "MR"
+            }
+          ],
+          "offences": [
+            {
+              "id": "OFFENCE_ID",
+              "offenceDefinitionId": "490dce00-8591-49af-b2d0-1e161e7d0c36",
+              "offenceCode" :"code",
+              "offenceTitle" :"title",
+              "wording": "No Travel Card",
+              "wordingWelsh": "No Travel Card In Welsh",
+              "startDate": "2018-01-01",
+              "endDate": "2018-01-01",
+              "arrestDate": "2018-01-01",
+              "chargeDate": "2018-01-01",
+              "orderIndex": 1,
+              "count": 0,
+              "notifiedPlea": {
+                "offenceId": "3789ab16-0bb7-4ef1-87ef-c936bf0364f1",
+                "notifiedPleaDate": "2018-04-01",
+                "notifiedPleaValue": "NOTIFIED_GUILTY"
+              }
+            }
+          ],
+          "associatedPersons": [
+            {
+              "person": {
+                "title": "MR",
+                "firstName": "Harry",
+                "middleName": "Jack",
+                "lastName": "Kane",
+                "dateOfBirth": "1995-01-01",
+                "nationalityId": "0f36a570-46ef-41d1-b290-9037a64fa1a4",
+                "additionalNationalityId": "9aa0ffba-67a4-4137-b392-3c01951eb9c2",
+                "disabilityStatus": "a",
+                "gender": "MALE",
+                "interpreterLanguageNeeds": "Hindi",
+                "documentationLanguageNeeds": "WELSH",
+                "nationalInsuranceNumber": "NH222222B",
+                "occupation": "Footballer",
+                "occupationCode": "F",
+                "address": {
+                  "address1": "22",
+                  "address2": "Acacia Avenue",
+                  "address3": "Acacia Town",
+                  "address4": "Acacia City",
+                  "address5": "Acacia Country"
+                },
+                "contact": {
+                  "home": "123456",
+                  "work": "7891011",
+                  "mobile": "45678910",
+                  "primaryEmail": "harry.kane@spurs.co.uk",
+                  "secondaryEmail": "harry.kane@hotmail.com",
+                  "fax": "3425678"
+                }
+              },
+              "role": "parent"
+            }
+          ],
+          "personDefendant": {
+            "personDetails": {
+              "title": "MR",
+              "firstName": "Harry",
+              "middleName": "Jack",
+              "lastName": "Kane Junior",
+              "dateOfBirth": "2010-01-01",
+              "nationalityId": "0f36a570-46ef-41d1-b290-9037a64fa1a4",
+              "additionalNationalityId": "9aa0ffba-67a4-4137-b392-3c01951eb9c2",
+              "disabilityStatus": "a",
+              "gender": "MALE",
+              "interpreterLanguageNeeds": "Welsh",
+              "documentationLanguageNeeds": "WELSH",
+              "nationalInsuranceNumber": "NH323232B",
+              "occupation": "Kid",
+              "occupationCode": "F",
+              "specificRequirements": "Screen",
+              "address": {
+                "address1": "22",
+                "address2": "Acacia Avenue",
+                "address3": "Acacia Town",
+                "address4": "Acacia City",
+                "address5": "Acacia Country",
+                "postcode": "GIR 0AA"
+              },
+              "contact": {
+                "home": "123456",
+                "work": "7891011",
+                "mobile": "45678910",
+                "primaryEmail": "harry.kanejunior@spurs.co.uk",
+                "secondaryEmail": "harry.kanejunior@hotmail.com",
+                "fax": "3425678"
+              }
+            },
+            "custodyTimeLimit": "2018-01-01",
+            "perceivedBirthYear": 2015,
+            "driverNumber": "AACC12345",
+            "arrestSummonsNumber": "arrest123",
+            "employerPayrollReference": "payyou1234"
+          }
+        }
+      ]
+    }
+
+}

@@ -1,0 +1,16 @@
+{
+  "hearingId": "HEARING_ID",
+  "defenceCounsel": {
+    "id": "fab947a3-c50c-4dbb-accf-b2758b1d2d6d",
+    "status": "QC",
+    "title": "Mr",
+    "firstName": "Eric",
+    "lastName": "Ormsby",
+    "defendants": [
+      "DEFENDANT_ID1"
+    ],
+    "attendanceDays": [
+      "2025-02-15"
+    ]
+  }
+}

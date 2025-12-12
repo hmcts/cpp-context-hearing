@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="87" author="hearing" logicalFilePath="087-add-column-court-proceedings-Initiated-to-defendant.xml">
+
+        <addColumn tableName="ha_defendant">
+            <column name="court_proceedings_initiated" type="DATETIME TZ">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <update tableName="ha_defendant">
+            <column name="court_proceedings_initiated" type="DATETIME TZ" value="2020-04-16 15:00:00.000000"/>
+        </update>
+
+        <addNotNullConstraint
+                columnName="court_proceedings_initiated"
+                tableName="ha_defendant"/>
+
+    </changeSet>
+
+</databaseChangeLog>

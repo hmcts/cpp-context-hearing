@@ -1,0 +1,27 @@
+{
+  "hearingId": "b869f4b2-d037-433a-ae7d-ecaa235d5062",
+  "verdict": {
+    "jurors": {
+      "numberOfJurors": 10,
+      "numberOfSplitJurors": 0,
+      "unanimous": true
+    },
+    "lesserOrAlternativeOffence": {
+      "offenceCode": "tfRNdbheqV",
+      "offenceDefinitionId": "9272ac7b-5ac6-4525-90a5-1f2410a0e375",
+      "offenceLegislation": "FLipU2x71y",
+      "offenceLegislationWelsh": "kugJJJpouj",
+      "offenceTitle": "lQlSXbVg9L",
+      "offenceTitleWelsh": "KyKQaXNvzM"
+    },
+    "offenceId": "f19ef881-476b-42f2-8753-c861b2d89d68",
+    "verdictDate": "2016-12-14",
+    "verdictType": {
+      "category": "z2qbsEeClX",
+      "categoryType": "GUILTY",
+      "description": "HbniAIjF1J",
+      "sequence": 1754580548,
+      "verdictTypeId": "87bc16a6-4e0c-4888-9fc9-d84d07bf0990"
+    }
+  }
+}

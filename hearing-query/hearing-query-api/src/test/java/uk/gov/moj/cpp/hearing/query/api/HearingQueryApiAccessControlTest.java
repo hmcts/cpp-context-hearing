@@ -1,0 +1,241 @@
+package uk.gov.moj.cpp.hearing.query.api;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.ArrayMatching.arrayContainingInAnyOrder;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+import uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider;
+import uk.gov.moj.cpp.accesscontrol.drools.Action;
+import uk.gov.moj.cpp.accesscontrol.test.utils.BaseDroolsAccessControlTest;
+
+import java.util.Collections;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+
+public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTest {
+
+    private static final String ACTION_NAME_GET_HEARING = "hearing.get.hearing";
+    private static final String ACTION_NAME_GET_HEARINGS = "hearing.get.hearings";
+    private static final String ACTION_NAME_GET_HEARINGS_FOR_TODAY = "hearing.get.hearings-for-today";
+    private static final String ACTION_NAME_GET_DRAFT_RESULT = "hearing.get-draft-result";
+    private static final String ACTION_NAME_GET_RESULTS = "hearing.get-results";
+    private static final String ACTION_NAME_GET_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
+    private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
+    private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
+    private static final String HEARING_QUERY_SEARCH_BY_MATERIAL_ID = "hearing.query.search-by-material-id";
+    private static final String HEARING_QUERY_GET_CASE_TIMELINE = "hearing.case.timeline";
+    private static final String HEARING_QUERY_GET_APPLICATION_TIMELINE = "hearing.application.timeline";
+    private static final String HEARING_QUERY_DEFENDANT_OUTSTANDING_FINES = "hearing.defendant.outstanding-fines";
+
+    private static final String HEARING_QUERY_COURT_LIST_PUBLISH_STATUS = "hearing.court.list.publish.status";
+    private static final String HEARING_QUERY_SEARCH_BY_COURT_CENTRE_ID = "hearing.latest-hearings-by-court-centres";
+
+    private static final String HEARING_QUERY_SESSION_TIME = "hearing.query.session-time";
+
+    private static final String HEARING_CUSTODY_TIME_LIMIT = "hearing.custody-time-limit";
+
+
+    @Mock
+    private UserAndGroupProvider userAndGroupProvider;
+
+    @Captor
+    private ArgumentCaptor<String[]> arrayCaptor;
+
+    public HearingQueryApiAccessControlTest() {
+        super("QUERY_API_SESSION");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetHearing() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetHearing() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetHearings() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "CPS", "Non CPS Prosecutors", "Advocates", "Defence Users", "Recorders", "Defence Lawyers", "Court Administrators");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetHearingsByDateV2() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "CPS", "Non CPS Prosecutors", "Advocates", "Defence Users", "Recorders", "Defence Lawyers", "Court Administrators");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetHearingsForToday() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_FOR_TODAY, "Magistrates");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetHearingsForToday() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_FOR_TODAY, "Magistrates");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetDraftResult() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators","Operational Delivery Admin");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetResults() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_RESULTS, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetDraftResult() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators","Operational Delivery Admin");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetHearingEventLog() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_LOG, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "System Users", "Recorders", "Court Administrators");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetHearingEventLog() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_LOG, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "System Users","Recorders", "Court Administrators");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetHearingEventDefinitions() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS, "Listing Officers", "Court Clerks", "Legal Advisers", "Judge", "Deputies", "DJMC", "Judiciary", "Court Associate", "Recorders", "Court Administrators");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetHearingEventDefinitions() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS, "Listing Officers", "Court Clerks", "Legal Advisers", "Judge", "Deputies", "DJMC", "Judiciary", "Court Associate", "Recorders", "Court Administrators");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetHearingEventDefinition() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITION, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetHearingEventDefinition() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITION, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators");
+    }
+
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToSearchByMaterialId() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SEARCH_BY_MATERIAL_ID, "System Users");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToSearchByMaterialId() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SEARCH_BY_MATERIAL_ID, "System Users");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetCaseTimeline() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_CASE_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge", "Police Admin", "DJMC", "Deputies", "Victims & Witness Care Admin", "Recorders", "System Users", "Court Administrators");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToToGetCaseTimeline() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_CASE_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge", "Police Admin", "DJMC", "Deputies", "Victims & Witness Care Admin", "Recorders", "System Users", "Court Administrators");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetApplicationTimeline() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_APPLICATION_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge", "Police Admin", "DJMC", "Deputies", "Victims & Witness Care Admin", "Recorders", "System Users", "Advocates", "Defence Lawyers", "Court Administrators", "Non CPS Prosecutors");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToToGetApplicationTimeline() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_APPLICATION_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge", "Police Admin", "DJMC", "Deputies", "Victims & Witness Care Admin", "Recorders", "System Users", "Advocates", "Defence Lawyers", "Court Administrators", "Non CPS Prosecutors");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToSearchForCourtListPublishStatus() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_COURT_LIST_PUBLISH_STATUS, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users", "Court Associate", "Court Administrators");
+    }
+
+    @Test
+    public void shouldNotAllowUserInAuthorisedGroupToSearchForCourtListPublishStatus() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_COURT_LIST_PUBLISH_STATUS, "Listing Officers", "Court Clerks", "Legal Advisers","System Users", "Court Associate", "Court Administrators");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToSearchForHearingByCourtCentreId() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SEARCH_BY_COURT_CENTRE_ID, "System Users");
+    }
+
+    @Test
+    public void shouldNotAllowUserInAuthorisedGroupToSearchForHearingByCourtCentreId() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SEARCH_BY_COURT_CENTRE_ID, "System Users");
+    }
+
+    @Test
+    public void shouldAllowUserInUnauthorisedGroupToGetDefendantOutstandingFines() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_DEFENDANT_OUTSTANDING_FINES, "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators");
+    }
+
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetDefendantOutstandingFines() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_DEFENDANT_OUTSTANDING_FINES, "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToQuerySessionTime() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SESSION_TIME, "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators", "Crown Court Admin", "Court Administrators");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnAuthorisedGroupToQuerySessionTime() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SESSION_TIME, "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators", "Crown Court Admin", "Court Administrators");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToCustodyTimeLimit() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_CUSTODY_TIME_LIMIT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnAuthorisedGroupToCustodyTimeLimit() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_CUSTODY_TIME_LIMIT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators");
+    }
+
+    @Override
+    protected Map<Class<?>, Object> getProviderMocks() {
+        return Collections.singletonMap(UserAndGroupProvider.class, this.userAndGroupProvider);
+    }
+
+    private void assertFailureOutcomeOnActionForTheSuppliedGroups(final String actionName, final String... groupNames) {
+        final Action action = createActionFor(actionName);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, groupNames))
+                .willReturn(false);
+
+        assertFailureOutcome(executeRulesWith(action));
+
+        verify(this.userAndGroupProvider).isMemberOfAnyOfTheSuppliedGroups(eq(action), this.arrayCaptor.capture());
+        assertThat(this.arrayCaptor.getAllValues().get(0), arrayContainingInAnyOrder(groupNames));
+        verifyNoMoreInteractions(this.userAndGroupProvider);
+    }
+
+    private void assertSuccessfulOutcomeOnActionForTheSuppliedGroups(final String actionName, final String... groupNames) {
+        final Action action = createActionFor(actionName);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, groupNames))
+                .willReturn(true);
+
+        assertSuccessfulOutcome(executeRulesWith(action));
+
+        verify(this.userAndGroupProvider).isMemberOfAnyOfTheSuppliedGroups(eq(action), this.arrayCaptor.capture());
+        assertThat(this.arrayCaptor.getAllValues().get(0), arrayContainingInAnyOrder(groupNames));
+        verifyNoMoreInteractions(this.userAndGroupProvider);
+    }
+
+}

@@ -1,0 +1,166 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/event/hearing.event.reusable-info-saved.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "promptList": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "promptRef": {
+            "type": "string"
+          },
+          "masterDefendantId": {
+            "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+          },
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/definitions/address"
+              },
+              {
+                "$ref": "#/definitions/nameaddress"
+              }
+            ]
+          },
+          "cacheable": {
+            "type": "integer"
+          },
+          "cacheDataPath": {
+            "type": "string"
+          },
+          "offenceId": {
+            "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "masterDefendantId",
+          "promptRef",
+          "value",
+          "type",
+          "offenceId"
+        ]
+      }
+    },
+    "resultsList": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "shortCode": {
+            "type": "string"
+          },
+          "value": {
+              "type": "string"
+          },
+          "masterDefendantId": {
+            "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+          },
+          "offenceId": {
+            "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "masterDefendantId",
+          "shortCode",
+          "value",
+          "offenceId"
+        ]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "address": {
+      "items": {
+        "type": "object",
+        "properties": {
+          "parentguardiansaddressAddress1": {
+            "type": "string"
+          },
+          "parentguardiansaddressAddress2": {
+            "type": "string"
+          },
+          "parentguardiansaddressAddress3": {
+            "type": "string"
+          },
+          "parentguardiansaddressAddress4": {
+            "type": "string"
+          },
+          "parentguardiansaddressAddress5": {
+            "type": "string"
+          },
+          "parentguardiansaddressPostCode": {
+            "type": "string"
+          },
+          "parentguardiansaddressEmailAddress1": {
+            "type": "string"
+          },
+          "parentguardiansaddressEmailAddress2": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "nameaddress": {
+      "items": {
+        "type": "object",
+        "properties": {
+          "prisonOrganisationName": {
+            "type": "string"
+          },
+          "prisonOrganisationFirstName": {
+            "type": "string"
+          },
+          "prisonOrganisationMiddleName": {
+            "type": "string"
+          },
+          "prisonOrganisationLastName": {
+            "type": "string"
+          },
+          "prisonOrganisationAddress1": {
+            "type": "string"
+          },
+          "prisonOrganisationAddress2": {
+            "type": "string"
+          },
+          "prisonOrganisationAddress3": {
+            "type": "string"
+          },
+          "prisonOrganisationAddress4": {
+            "type": "string"
+          },
+          "prisonOrganisationAddress5": {
+            "type": "string"
+          },
+          "prisonOrganisationPostCode": {
+            "type": "string"
+          },
+          "prisonOrganisationEmailAddress1": {
+            "type": "string"
+          },
+          "prisonOrganisationEmailAddress2": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

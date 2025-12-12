@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns="http://java.sun.com/xml/ns/persistence"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
+ http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
+             version="1.0">
+
+    <persistence-unit name="hearing-persistence-unit">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <jta-data-source>java:/DS.hearing</jta-data-source>
+        <class>uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing</class>
+        <class>uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote</class>
+        <class>uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome</class>
+    </persistence-unit>
+
+</persistence>

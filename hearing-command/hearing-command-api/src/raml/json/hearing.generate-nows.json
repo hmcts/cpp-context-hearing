@@ -1,0 +1,384 @@
+{
+  "hearing": {
+    "courtCentre": {
+      "id": "3b72daf1-57f1-4918-bb1c-ba9b116d2901",
+      "name": "ABXOzN94yv",
+      "roomId": "d8deddf9-c647-467b-be13-fee51b061f15",
+      "roomName": "2WcLO4qmdD",
+      "welshName": "uJ9tkfkDNs",
+      "welshRoomName": "z6dfKZ0byk"
+    },
+    "defendantReferralReasons": [
+      {
+        "defendantId": "65eff392-e777-4a1f-bbf5-e8a4db2b3cfa",
+        "description": "zuuT1tndzM",
+        "id": "9f525957-f493-40a3-988b-d656e381600c"
+      }
+    ],
+    "hasSharedResults": false,
+    "hearingDays": [
+      {
+        "listedDurationMinutes": 1186308803,
+        "listingSequence": 541958646,
+        "sittingDay": "2016-11-13T10:04:58.28Z"
+      }
+    ],
+    "id": "4dc97948-83e1-4a9a-8e3b-cbf5a36e02f5",
+    "judiciary": [
+      {
+        "firstName": "kDrg3WFb30",
+        "isBenchChairman": true,
+        "isDeputy": false,
+        "judicialId": "77cfbe6c-5e83-41e2-921c-ed014f41dfe6",
+        "judicialRoleType": "CIRCUIT_JUDGE",
+        "lastName": "U7McG985Hf",
+        "middleName": "fvGqaiRh8R",
+        "title": "WDz37UgN9t"
+      }
+    ],
+    "jurisdictionType": "CROWN",
+    "prosecutionCases": [
+      {
+        "caseStatus": "d9rabZvbST",
+        "defendants": [
+          {
+            "associatedPersons": [
+              {
+                "person": {
+                  "additionalNationalityCode": "BWb2oIG3Kb",
+                  "additionalNationalityId": "cca72366-4f17-4bbc-9838-27c854952193",
+                  "address": {
+                    "address1": "e5O7C3YFQS",
+                    "address2": "J8s3Bxw9QE",
+                    "address3": "rzpshtNxa8",
+                    "address4": "kI5EU2fS6W",
+                    "address5": "usqiaGGcTo",
+                    "postcode": "BN61 7PR"
+                  },
+                  "contact": {
+                    "fax": "1198045329",
+                    "home": "186887435",
+                    "mobile": "1863268224",
+                    "primaryEmail": "dol9b6gdoi@2ulumgwlcl.hvu1qoulyh",
+                    "secondaryEmail": "iw2ffbmesm@x0awpjbrix.3ilivrzlmx",
+                    "work": "1624064096"
+                  },
+                  "dateOfBirth": "2015-09-08",
+                  "disabilityStatus": "RVUUwnxJD5",
+                  "documentationLanguageNeeds": "ENGLISH",
+                  "ethnicity": "dxN0K3c81M",
+                  "ethnicityId": "7fd7ec8d-72be-4d4d-aaae-6010b307320d",
+                  "firstName": "RAlFNM6FUY",
+                  "gender": "NOT_SPECIFIED",
+                  "interpreterLanguageNeeds": "ZY6TBU0Hvb",
+                  "lastName": "wJglcgkmwr",
+                  "middleName": "QyttW10yYn",
+                  "nationalInsuranceNumber": "BK430519D",
+                  "nationalityCode": "sSaFDEIqrg",
+                  "nationalityId": "d6657120-4f63-429e-a0cd-cd1aa02a7547",
+                  "occupation": "6oWcz1QHN7",
+                  "occupationCode": "404smx62Om",
+                  "specificRequirements": "JiczoADayF",
+                  "title": "MS"
+                },
+                "role": "BjvCqiKiYO"
+              }
+            ],
+            "defenceOrganisation": {
+              "address": {
+                "address1": "h69vn1Cy2e",
+                "address2": "EpSbR77wZQ",
+                "address3": "T9HdT3O0ra",
+                "address4": "lhkKnzXepP",
+                "address5": "lWyUQySIBA",
+                "postcode": "SV17 8RX"
+              },
+              "contact": {
+                "fax": "2104732217",
+                "home": "1447065504",
+                "mobile": "1622524729",
+                "primaryEmail": "mliqydslxe@lrj5zd1tqa.eq6zdju7pe",
+                "secondaryEmail": "a5dg06wvgd@yejxeasknr.zaaeg68jqm",
+                "work": "220861932"
+              },
+              "id": "6d1d20f5-a29f-440d-a876-da73deb2f3cf",
+              "incorporationNumber": "kZJgwBslxJ",
+              "name": "4l9iDtFR1H",
+              "registeredCharityNumber": "BjGtkTNVmu"
+            },
+            "id": "d216f08a-eacb-4b91-b7d5-243aa627f9c3",
+            "numberOfPreviousConvictionsCited": 152468078,
+            "offences": [
+              {
+                "arrestDate": "2014-04-13",
+                "chargeDate": "2017-04-12",
+                "count": 2113164857,
+                "endDate": "2014-08-23",
+                "id": "644e6a75-d645-46e3-8cd6-b34528043f01",
+                "indicatedPlea": {
+                  "allocationDecision": {
+                    "courtDecision": "CONSENT_SUMMARY_TRIAL",
+                    "defendantRepresentation": "CONSENT_SUMMARY_TRIAL",
+                    "indicationOfSentence": "xe2vCIlX0p",
+                    "prosecutionRepresentation": "ELECT_TRIAL_ON_INDICTMENT"
+                  },
+                  "indicatedPleaDate": "2014-12-05",
+                  "indicatedPleaValue": "INDICATED_GUILTY",
+                  "offenceId": "644e6a75-d645-46e3-8cd6-b34528043f01",
+                  "source": "IN_COURT"
+                },
+                "modeOfTrial": "FQlQ6PGvaZ",
+                "notifiedPlea": {
+                  "notifiedPleaDate": "2018-04-16",
+                  "notifiedPleaValue": "NO_NOTIFICATION",
+                  "offenceId": "644e6a75-d645-46e3-8cd6-b34528043f01"
+                },
+                "offenceCode": "lUdsziawR4",
+                "offenceDefinitionId": "86efd8ce-0952-4b45-a0f9-a6cf0d04d747",
+                "offenceFacts": {
+                  "alcoholReadingAmount": "PDhA4frAic",
+                  "alcoholReadingMethod": "jZPshxabJQ",
+                  "vehicleRegistration": "MV67urnMcH"
+                },
+                "offenceLegislation": "bofgMbX8AK",
+                "offenceLegislationWelsh": "GWYcISLUUi",
+                "offenceTitle": "3KpXMANlUi",
+                "offenceTitleWelsh": "lWGFseJwTC",
+                "orderIndex": 574679143,
+                "startDate": "2014-10-11",
+                "wording": "AaBoqNQfGD",
+                "wordingWelsh": "rKN0YI1dAz"
+              }
+            ],
+            "personDefendant": {
+              "aliases": [
+                "bBWqytm08d"
+              ],
+              "arrestSummonsNumber": "sY6UhoEbv9",
+              "bailStatus": "lssR6uEkQV",
+              "custodyTimeLimit": "2016-02-03",
+              "driverNumber": "3A3O09DuRQ",
+              "employerOrganisation": {
+                "address": {
+                  "address1": "5ggkm9ogey",
+                  "address2": "wvIoszlBI7",
+                  "address3": "GcgahDqzc9",
+                  "address4": "tfdFb4zhsR",
+                  "address5": "WiO3Oi1p7i",
+                  "postcode": "Z04 5RY"
+                },
+                "contact": {
+                  "fax": "1886378305",
+                  "home": "459620186",
+                  "mobile": "839827693",
+                  "primaryEmail": "bt5wr8roub@fpcihxkwcb.qk6mqvjzrk",
+                  "secondaryEmail": "hq9foqrgv3@zhvhe00yn0.lb5ygdt3ro",
+                  "work": "1755875720"
+                },
+                "id": "350c9844-a1aa-42c0-98b4-04fde4aeba16",
+                "incorporationNumber": "ryMOADSlRb",
+                "name": "bkKB7yneiy",
+                "registeredCharityNumber": "gnZw1tZuqO"
+              },
+              "employerPayrollReference": "mze6CFQ5qf",
+              "observedEthnicityCode": "4yXyPCgLM3",
+              "observedEthnicityId": "26bdfa23-262a-4af1-982c-d2620989b56a",
+              "perceivedBirthYear": 2069054740,
+              "personDetails": {
+                "additionalNationalityCode": "oAAvtR5t0D",
+                "additionalNationalityId": "fc00c1b2-4daf-452e-9ec1-630950c33650",
+                "address": {
+                  "address1": "MjUJvs5ZuU",
+                  "address2": "CFTsIwEgMk",
+                  "address3": "MYNwpDHZF5",
+                  "address4": "858FoMAUoA",
+                  "address5": "XUHJPGHYcP",
+                  "postcode": "W9 2TB"
+                },
+                "contact": {
+                  "fax": "694930694",
+                  "home": "1078351985",
+                  "mobile": "1355778193",
+                  "primaryEmail": "ujhtgqet32@lcgb500duk.ag19b4ahbp",
+                  "secondaryEmail": "w6clehec3x@coh7sf3rlv.pyvyowzczo",
+                  "work": "657891467"
+                },
+                "dateOfBirth": "2016-12-29",
+                "disabilityStatus": "riogAxzlye",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": "woTpWFWIrt",
+                "ethnicityId": "49952c6a-4a5c-410d-8258-1cebd742a7d3",
+                "firstName": "8cA8AxQXnY",
+                "gender": "NOT_KNOWN",
+                "interpreterLanguageNeeds": "Yhe3fd2jme",
+                "lastName": "YzNcTuRYVn",
+                "middleName": "Xb6496JUgy",
+                "nationalInsuranceNumber": "MW387790D",
+                "nationalityCode": "u1wju2xKnh",
+                "nationalityId": "f9f3b563-b693-4ef9-b838-9659bdfa8c62",
+                "occupation": "fMi1wizK1s",
+                "occupationCode": "uzjqeRX4kd",
+                "specificRequirements": "GoexM2TKlP",
+                "title": "MR"
+              },
+              "pncId": "DJBure9wQX",
+              "selfDefinedEthnicityCode": "8fxcMOGRF3",
+              "selfDefinedEthnicityId": "1dc9b1a0-88f6-47ed-96f2-79fe40287824"
+            },
+            "prosecutionAuthorityReference": "u99UqtjJpF",
+            "prosecutionCaseId": "e11c1f07-fd5d-4cbd-8954-ac192fe8f006"
+          }
+        ],
+        "id": "e11c1f07-fd5d-4cbd-8954-ac192fe8f006",
+        "initiationCode": "Z",
+        "originatingOrganisation": "Dq3O6Q9hco",
+        "prosecutionCaseIdentifier": {
+          "prosecutionAuthorityCode": "RL45tVFnpB",
+          "prosecutionAuthorityId": "6c021626-73db-45ff-981d-fe39f90b1bf7",
+          "caseURN": "saI7ny8Bl1"
+        },
+        "statementOfFacts": "Ov1qWo2i4w",
+        "statementOfFactsWelsh": "c6Bmh96ZpL"
+      }
+    ],
+    "reportingRestrictionReason": "8GiHe4kRs2",
+    "type": {
+      "description": "1q2fh2qFLD",
+      "id": "33b44af0-b361-4414-90a3-0ea7d2988ebd"
+    }
+  },
+  "nows": [
+    {
+      "id": "35eda3d8-4f1d-426e-b475-7e7b0b7da02e",
+      "nowsTypeId": "3f8642ff-c000-4cc0-8ec8-7e30799adf3c",
+      "nowsTemplateName": "7kjl5guOQd",
+      "defendantId": "d216f08a-eacb-4b91-b7d5-243aa627f9c3",
+      "materials": [
+        {
+          "id": "94f83260-9f37-40ae-b0f2-c167677476e1",
+          "language": "p31jmxGPjl",
+          "nowResult": [
+            {
+              "sharedResultId": "fce71000-a548-4862-a265-8fd4322dbd79",
+              "sequence": 2142205572,
+              "prompts": [
+                {
+                  "id": "58acaf80-121f-4679-b41c-c83a6d2fc556",
+                  "label": "WLVKZFKqMz",
+                  "value": "IiTofXDW7O"
+                }
+              ]
+            },
+            {
+              "sharedResultId": "f21dd0d0-e4de-40b7-8ef7-e834f6377987",
+              "sequence": 1801685530,
+              "prompts": [
+                {
+                  "id": "ba2d45a9-dbd9-485a-9e9c-a8b4f546253a",
+                  "label": "x5yaqY6cDd",
+                  "value": "3WcHEq4nbR"
+                }
+              ]
+            },
+            {
+              "sharedResultId": "3d9ca3ef-1c7c-404b-9265-4a14be8fc4b1",
+              "sequence": 1388686131,
+              "prompts": [
+                {
+                  "id": "59902d78-e38a-4615-b066-8eaac47b6156",
+                  "label": "fhfVWSlOYO",
+                  "value": "QXX5jhqYJs"
+                }
+              ]
+            }
+          ],
+          "userGroups": [
+            {
+              "group": "courtAdmin"
+            },
+            {
+              "group": "defence"
+            }
+          ],
+          "amended": true
+        }
+      ]
+    }
+  ],
+  "nowTypes": [
+    {
+      "id": "3f8642ff-c000-4cc0-8ec8-7e30799adf3c",
+      "description": "wamYGceeKu",
+      "templateName": "ej39lEYexe",
+      "rank": 132127886,
+      "staticText": "N2QMLqREP4",
+      "welshStaticText": "XLUIlbKehn",
+      "priority": "1345319323",
+      "jurisdiction": "vbFPxtME1W",
+      "welshDescription": "Fdac2vtPF1",
+      "bilingualTemplateName": "7BQfpWUMxz",
+      "remotePrintingRequired": false
+    }
+  ],
+  "sharedResultLines": [
+    {
+      "id": "fce71000-a548-4862-a265-8fd4322dbd79",
+      "caseId": "e11c1f07-fd5d-4cbd-8954-ac192fe8f006",
+      "defendantId": "d216f08a-eacb-4b91-b7d5-243aa627f9c3",
+      "offenceId": "644e6a75-d645-46e3-8cd6-b34528043f01",
+      "sharedDate": "2018-02-02T06:12:29.464+02:59:01",
+      "orderedDate": "2015-09-17",
+      "level": "CASE",
+      "label": "rQgGthbhSA",
+      "rank": 1028752537,
+      "prompts": [
+        {
+          "id": "58acaf80-121f-4679-b41c-c83a6d2fc556",
+          "label": "VDiJSFVuTm",
+          "value": "7SEebkjBPm"
+        }
+      ]
+    },
+    {
+      "id": "f21dd0d0-e4de-40b7-8ef7-e834f6377987",
+      "caseId": "e11c1f07-fd5d-4cbd-8954-ac192fe8f006",
+      "defendantId": "d216f08a-eacb-4b91-b7d5-243aa627f9c3",
+      "offenceId": "644e6a75-d645-46e3-8cd6-b34528043f01",
+      "sharedDate": "2017-09-13T22:39:08.451-06:46:39",
+      "orderedDate": "2015-01-11",
+      "level": "DEFENDANT",
+      "label": "mVFeRYdLNP",
+      "rank": 1615217970,
+      "prompts": [
+        {
+          "id": "ba2d45a9-dbd9-485a-9e9c-a8b4f546253a",
+          "label": "eOZYszPfXt",
+          "value": "u6F9VyoRd8"
+        }
+      ]
+    },
+    {
+      "id": "3d9ca3ef-1c7c-404b-9265-4a14be8fc4b1",
+      "caseId": "e11c1f07-fd5d-4cbd-8954-ac192fe8f006",
+      "defendantId": "d216f08a-eacb-4b91-b7d5-243aa627f9c3",
+      "offenceId": "644e6a75-d645-46e3-8cd6-b34528043f01",
+      "sharedDate": "2015-04-30T22:23:51.927-02:51:06",
+      "orderedDate": "2016-10-08",
+      "level": "OFFENCE",
+      "label": "IIL53SJ2oK",
+      "rank": 1955723004,
+      "prompts": [
+        {
+          "id": "59902d78-e38a-4615-b066-8eaac47b6156",
+          "label": "v3ZhaAwi6d",
+          "value": "acBpCUgD2m"
+        }
+      ]
+    }
+  ],
+  "courtClerk": {
+    "firstName": "Prlmwmz14M",
+    "id": "0431d785-b441-4d22-bb38-aec6af4cc16d",
+    "lastName": "5ZLuRVfgUN"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-slots-provisionally-booked.json",
+  "type": "object",
+  "properties": {
+    "bookingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "error": {
+      "type": "string"
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "bookingId"
+      ]
+    },
+    {
+      "required": [
+        "error"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/listing/courts/public.events.listing.next-hearing-day-changed.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "seedingHearingId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "hearingStartDate": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "hearingId",
+    "seedingHearingId",
+    "hearingStartDate"
+  ],
+  "additionalProperties": false
+}

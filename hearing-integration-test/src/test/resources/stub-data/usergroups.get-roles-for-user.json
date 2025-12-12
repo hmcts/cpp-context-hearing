@@ -1,0 +1,21 @@
+{
+  "groups": [
+    {
+      "groupId": "1e2f843e-d639-40b3-8611-8015f3a18958"
+    },
+    {
+      "groupId": "1e2f843e-d639-40b3-8211-8015f3a18958"
+    }
+  ],
+  "allRoles": [
+    {
+      "roleId": "1e2f843e-d649-40b3-8611-8015f3a18952",
+      "label" : "role label",
+      "description": "role description",
+      "selectable" : true,
+      "startDate" : null,
+      "endDate" : null
+    }
+  ]
+}
+

@@ -1,0 +1,27 @@
+{
+  "courtApplication": {
+    "id": "12615f6e-b1de-485c-ae69-e989445b988e",
+    "parentApplicationId": "6823d502-a0ec-4861-a39f-438e28d3af13",
+    "type": {
+      "id": "f8f346d6-2099-4f6b-977d-b237ca6562d7",
+      "applicationCode": "a",
+      "applicationType": "a",
+      "applicationTypeWelsh": "a",
+      "applicationLegislation": "a",
+      "applicationLegislationWelsh": "a",
+      "applicationCategory": "a",
+      "linkType": "STANDALONE",
+      "applicantSynonym": "a",
+      "respondentSynonym": "a",
+      "applicationJurisdictionType": "MAGISTRATES"
+    },
+    "applicationReceivedDate": "0000-01-01",
+    "applicationReference": "a",
+    "applicant": {
+      "id": "55e89805-731b-4e1e-9490-01a081741dc8"
+    },
+    "linkedCaseId": "55e89805-731b-4e1e-9490-01a081741dc8",
+    "applicationStatus": "DRAFT",
+    "outOfTimeReasons": "a"
+  }
+}

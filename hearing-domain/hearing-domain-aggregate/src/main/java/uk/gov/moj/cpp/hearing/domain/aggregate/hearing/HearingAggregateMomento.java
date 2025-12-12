@@ -1,0 +1,221 @@
+package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
+
+import uk.gov.justice.core.courts.*;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.*;
+
+import static uk.gov.moj.cpp.util.DuplicateApplicationsHelper.dedupAllApplications;
+import static uk.gov.moj.cpp.util.DuplicateOffencesHelper.filterDuplicateOffencesByIdForHearing;
+import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupAllReportingRestrictions;
+
+@SuppressWarnings({"squid:S2384", "PMD.BeanMembersShouldSerialize"})
+public class HearingAggregateMomento implements Serializable {
+
+    private static final long serialVersionUID = -561416825201569300L;
+
+    private final Map<UUID, HearingEventDelegate.HearingEvent> hearingEvents = new HashMap<>();
+    private final Map<UUID, ProsecutionCounsel> prosecutionCounsels = new HashMap<>();
+    private final Map<UUID, ApplicantCounsel> applicantCounsels = new HashMap<>();
+    private final Map<UUID, DefenceCounsel> defenceCounsels = new HashMap<>();
+    private final Map<UUID, Plea> pleas = new HashMap<>();
+    private final Map<UUID, IndicatedPlea> indicatedPleas = new HashMap<>();
+    private final Map<UUID, AllocationDecision> allocationDecisions = new HashMap<>();
+    private final Map<UUID, Verdict> verdicts = new HashMap<>();
+    private final Map<UUID, RespondentCounsel> respondentCounsels = new HashMap<>();
+    private final Map<UUID, CompanyRepresentative> companyRepresentatives = new HashMap<>();
+    private final Map<UUID, InterpreterIntermediary> interpreterIntermediary = new HashMap<>();
+    private Map<UUID, Target2> sharedTargets = new HashMap<>();
+    private Map<UUID, Target2> transientTargets = new HashMap<>();
+    private Map<UUID, UUID> groupAndMaster = new HashMap<>();
+
+    private Hearing hearing;
+    private List<Variant> variantDirectory = new ArrayList<>();
+    private Map<UUID, LocalDate> convictionDates = new HashMap<>();
+    private boolean published = false;
+    private boolean duplicate = false;
+    private ZonedDateTime lastSharedTime;
+    private boolean deleted = false;
+    private Map<UUID, ZonedDateTime> nextHearingStartDates = new HashMap<>();
+    private Map<UUID, ZonedDateTime> resultsAmendmentDateMap = new HashMap<>();
+    private Map<LocalDate, Map<UUID, Target2>> multiDayTargets = new HashMap<>();
+    private Map<LocalDate, Map<UUID, Target2>> multiDaySavedTargets = new HashMap<>();
+    private Map<LocalDate, Map<UUID, CompletedResultLineStatus>> multiDayCompletedResultLinesStatus = new HashMap<>();
+    private Map<LocalDate, Boolean> isHearingDayPreviouslyShared = new HashMap<>();
+
+    private  List<UUID> breachApplicationsToBeAdded;
+
+
+
+
+    private List<SharedResultsCommandResultLineV2> sharedResultsCommandResultLineV2s = new ArrayList<>();
+
+
+    public Map<UUID, HearingEventDelegate.HearingEvent> getHearingEvents() {
+        return hearingEvents;
+    }
+
+    public Map<UUID, ProsecutionCounsel> getProsecutionCounsels() {
+        return prosecutionCounsels;
+    }
+
+    public Map<UUID, DefenceCounsel> getDefenceCounsels() {
+        return defenceCounsels;
+    }
+
+    public Map<UUID, InterpreterIntermediary> getInterpreterIntermediary() {
+        return interpreterIntermediary;
+    }
+
+    public Map<UUID, Plea> getPleas() {
+        return pleas;
+    }
+
+    public Map<UUID, IndicatedPlea> getIndicatedPlea() {
+        return indicatedPleas;
+    }
+
+    public Map<UUID, AllocationDecision> getAllocationDecision() {
+        return allocationDecisions;
+    }
+
+    public Map<UUID, Verdict> getVerdicts() {
+        return verdicts;
+    }
+
+    public Hearing getHearing() {
+        return hearing;
+    }
+
+    public void setHearing(Hearing hearing) {
+        this.hearing = dedupAllReportingRestrictions(hearing);
+        this.hearing = dedupAllApplications(this.hearing);
+        filterDuplicateOffencesByIdForHearing(this.hearing);
+    }
+
+
+    public List<Variant> getVariantDirectory() {
+        return variantDirectory;
+    }
+
+    public void setVariantDirectory(Collection<Variant> variantDirectory) {
+        this.variantDirectory = new ArrayList<>(variantDirectory);
+    }
+
+    public boolean isPublished() {
+        return published;
+    }
+
+    public void setPublished(boolean published) {
+        this.published = published;
+    }
+
+    public Map<UUID, LocalDate> getConvictionDates() {
+        return convictionDates;
+    }
+
+    public Map<UUID, RespondentCounsel> getRespondentCounsels() {
+        return respondentCounsels;
+    }
+
+    public Map<UUID, ApplicantCounsel> getApplicantCounsels() {
+        return applicantCounsels;
+    }
+
+    public Map<UUID, CompanyRepresentative> getCompanyRepresentatives() {
+        return companyRepresentatives;
+    }
+
+    protected boolean isDuplicate() {
+        return this.duplicate;
+    }
+
+    public void setDuplicate(final boolean duplicate) {
+        this.duplicate = duplicate;
+    }
+
+    public Map<UUID, Target2> getSharedTargets() {
+        return this.sharedTargets;
+    }
+
+    public Map<UUID, Target2> getTransientTargets() {
+        return this.transientTargets;
+    }
+
+    public void setSharedTargets(final Map<UUID, Target2> sharedTargets) {
+        this.sharedTargets = sharedTargets;
+    }
+
+    public void setTransientTargets(final Map<UUID, Target2> transientTargets) {
+        this.transientTargets = transientTargets;
+    }
+
+    public void setSharedResultsCommandResultLineV2s(List<SharedResultsCommandResultLineV2> sharedResultsCommandResultLineV2s) {
+        this.sharedResultsCommandResultLineV2s = sharedResultsCommandResultLineV2s;
+    }
+
+    public ZonedDateTime getLastSharedTime() {
+        return this.lastSharedTime;
+    }
+
+    public void setLastSharedTime(ZonedDateTime lastSharedTime) {
+        this.lastSharedTime = lastSharedTime;
+    }
+
+    protected boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public Map<UUID, ZonedDateTime> getNextHearingStartDates() {
+        return nextHearingStartDates;
+    }
+
+    public Map<UUID, ZonedDateTime> getResultsAmendmentDateMap() {
+        return resultsAmendmentDateMap;
+    }
+
+    public Map<LocalDate, Map<UUID, Target2>> getMultiDaySavedTargets() {
+        return multiDaySavedTargets;
+    }
+
+    public Map<LocalDate, Map<UUID, CompletedResultLineStatus>> getMultiDayCompletedResultLinesStatus() {
+        return multiDayCompletedResultLinesStatus;
+    }
+
+    public Map<LocalDate, Boolean> getIsHearingDayPreviouslyShared() {
+        return isHearingDayPreviouslyShared;
+    }
+
+    public Map<LocalDate, Map<UUID, Target2>> getMultiDayTargets() {
+        return multiDayTargets;
+    }
+
+    public List<SharedResultsCommandResultLineV2> getSharedResultsCommandResultLineV2s() {
+        return sharedResultsCommandResultLineV2s;
+    }
+
+    public List<UUID> getBreachApplicationsToBeAdded() {
+        return breachApplicationsToBeAdded;
+    }
+
+    public void setBreachApplicationsToBeAdded(final List<UUID> breachApplicationsToBeAdded) {
+        this.breachApplicationsToBeAdded = breachApplicationsToBeAdded;
+    }
+
+    public Map<UUID, UUID> getGroupAndMaster() {
+        return this.groupAndMaster;
+    }
+
+    public boolean isDeletedOrDuplicated()  {
+        return this.isDeleted() || this.isDuplicate();
+    }
+}

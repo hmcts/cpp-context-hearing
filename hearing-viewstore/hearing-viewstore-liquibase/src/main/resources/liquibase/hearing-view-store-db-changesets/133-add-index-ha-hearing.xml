@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+    <changeSet id="133" author="sham.kumar" logicalFilePath="133-add-index-ha-hearing.xml">
+        <createIndex tableName="ha_hearing" indexName="ha_hearing_court_centre_id_room_id_idx">
+            <column name="court_centre_id"/>
+            <column name="room_id"/>
+        </createIndex>
+
+        <dropIndex indexName="ha_hearing_court_centre_id_idx" tableName="ha_hearing"/>
+        <dropIndex indexName="ha_hearing_room_id_idx" tableName="ha_hearing"/>
+        <dropIndex indexName="ha_hearing_event_event_date_idx" tableName="ha_hearing_event"/>
+
+        <rollback>
+            <dropIndex indexName="ha_hearing_court_centre_id_room_id_idx" tableName="ha_hearing"/>
+
+            <createIndex tableName="ha_hearing" indexName="ha_hearing_court_centre_id_idx">
+                <column name="court_centre_id"/>
+            </createIndex>
+            <createIndex tableName="ha_hearing" indexName="ha_hearing_room_id_idx">
+                <column name="room_id"/>
+            </createIndex>
+            <createIndex tableName="ha_hearing_event" indexName="ha_hearing_event_event_date_idx">
+                <column name="event_date"/>
+            </createIndex>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

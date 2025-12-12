@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="132" author="hearing"
+               logicalFilePath="132-update-columns-civil-related-attributes.xml">
+
+        <addDefaultValue tableName="ha_hearing" columnName="is_group_proceedings"
+                         defaultValueBoolean="false" columnDataType="BOOLEAN"/>
+
+        <addDefaultValue tableName="ha_case" columnName="is_civil" defaultValueBoolean="false"
+                         columnDataType="BOOLEAN"/>
+
+        <addDefaultValue tableName="ha_case" columnName="is_group_member"
+                         defaultValueBoolean="false" columnDataType="BOOLEAN"/>
+
+        <addDefaultValue tableName="ha_case" columnName="is_group_master"
+                         defaultValueBoolean="false" columnDataType="BOOLEAN"/>
+
+        <addDefaultValue tableName="ha_offence" columnName="civil_offence_is_exparte"
+                         defaultValueBoolean="false" columnDataType="BOOLEAN"/>
+
+        <addDefaultValue tableName="ha_offence" columnName="civil_offence_is_respondent"
+                         defaultValueBoolean="false" columnDataType="BOOLEAN"/>
+
+        <sql>
+            ALTER TABLE ha_hearing
+            ADD CONSTRAINT number_of_group_cases_non_negative CHECK (number_of_group_cases > -1)
+        </sql>
+
+        <rollback>
+            <sql>
+                ALTER TABLE ha_hearing DROP CHECK number_of_group_cases_non_negative
+            </sql>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/hearing.update-prosecution-counsel.json",
+  "type": "object",
+  "properties": {
+    "prosecutionCounsel": {
+      "$ref": "http://justice.gov.uk/core/courts/prosecutionCounsel.json"
+    }
+  },
+  "required": [
+    "prosecutionCounsel"
+  ],
+  "additionalProperties": false
+}

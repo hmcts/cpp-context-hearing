@@ -1,0 +1,16 @@
+{
+  "hearingId": "029034d9-0f54-43c5-ba36-e5deadd62474",
+  "interpreterIntermediary": {
+    "id": "fab947a3-c50c-4dbb-accf-b2758b1d2d6d",
+    "role": "INTERPRETER",
+    "firstName": "Eric",
+    "lastName": "Ormsby",
+    "attendant": {
+      "attendantType" : "WITNESS",
+      "name" : "Tomsy"
+    },
+    "attendanceDays": [
+      "2019-07-17"
+    ]
+  }
+}

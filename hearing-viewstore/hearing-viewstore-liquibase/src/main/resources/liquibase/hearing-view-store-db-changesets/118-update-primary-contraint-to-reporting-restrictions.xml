@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="118" author="hearing"
+               logicalFilePath="118-update-primary-contraint-to-reporting-restrictions.xml">
+
+        <dropPrimaryKey constraintName="pk_ha_reporting_restriction" tableName="ha_reporting_restriction"/>
+
+        <addPrimaryKey columnNames="id, hearing_id, offence_id" constraintName="pk_ha_reporting_restriction"
+                       tableName="ha_reporting_restriction"/>
+        <rollback>
+            <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_ha_reporting_restriction"
+                           tableName="ha_reporting_restriction"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

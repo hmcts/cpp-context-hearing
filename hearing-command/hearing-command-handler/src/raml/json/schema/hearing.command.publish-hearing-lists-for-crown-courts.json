@@ -1,0 +1,5 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/command/hearing.command.publish-hearing-lists-for-crown-courts.json",
+  "type": "object"
+}

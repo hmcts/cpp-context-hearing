@@ -1,0 +1,18 @@
+{
+  "hearingCaseNote": {
+    "id": "60e7f03c-dd61-4aab-86aa-2d83e9d8d9b6",
+    "note": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam lorem risus, volutpat et rhoncus ut, ultricies eu lacus. Sed lacinia rutrum libero, vitae finibus neque suscipit at. Suspendisse interdum lectus blandit tempus gravida. Fusce nec justo suscipit, dictum diam maximus, congue lacus. Nullam augue lectus, scelerisque non arcu sed, rhoncus hendrerit eros. Morbi maximus rutrum dui sed faucibus. Quisque pretium urna nisl, sed congue tortor accumsan non. Duis fringilla ultrices vestibulum. Suspendisse potenti. Quisque aliquam ipsum sapien, ut posuere sapien aliquam non. Cras porta lacinia libero vitae finibus.",
+    "noteDateTime": "2018-10-09T06:11:10.828Z",
+    "noteType": "LEGAL",
+    "originatingHearingId": "e9b2ef55-5dc0-4eb1-b0e3-f22f31a0e5cb",
+    "courtClerk": {
+      "id": "252d5de5-7f64-44e4-a7a5-2b955482a26b",
+      "firstName": "John",
+      "lastName": "doe"
+    },
+    "prosecutionCases": [
+      "98ffe827-7a8a-4117-b3cf-b9548d6a42da",
+      "c9de1f3e-0621-40c8-a12c-69eb5b735554"
+    ]
+  }
+}

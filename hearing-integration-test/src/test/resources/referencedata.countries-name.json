@@ -1,0 +1,28 @@
+{
+  "countryNationality": [
+    {
+      "id": "22ef7a73-df50-4349-8c72-ca3b9ace6363",
+      "cjsCode": 0,
+      "countryName": "Unknown",
+      "nationality": "Unknown"
+    },
+    {
+      "id": "1506e1e5-84d5-4bfd-8ad8-4e094c851416",
+      "cjsCode": 120,
+      "govCode": "CS",
+      "countryName": "Czechoslovakia",
+      "nationality": "Czechoslovak",
+      "endDate": "1992-12-31"
+    },
+    {
+      "id": "137aa150-129b-4e88-ae1a-077f8f456021",
+      "cjsCode": 22,
+      "isoCode": "",
+      "govCode": "",
+      "countryName": "Anguilla",
+      "nationality": "",
+      "endDate": "2017-12-31",
+      "exhibitNationalityCode": "AIA"
+    }
+  ]
+}

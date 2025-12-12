@@ -1,0 +1,22 @@
+{
+  "crackedIneffectiveVacatedTrialTypes": [
+    {
+      "id": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+      "seqNo": 1,
+      "reasonCode": "A",
+      "trialType": "Cracked",
+      "jurisdiction": "CCM",
+      "reasonShortDescription": "Acceptable guilty plea(s) entered late to some or all charges / counts on the charge sheet, offered for the first time by the defence",
+      "reasonFullDescription": "On the date of trial the defendant, for the first time, enters a guilty plea which the prosecution accepts."
+    },
+    {
+      "id": "6f4922f4-5568-361a-8cdf-4ad2299f6d23",
+      "seqNo": 18,
+      "reasonCode": "N3",
+      "trialType": "Ineffective",
+      "jurisdiction": "CCM",
+      "reasonShortDescription": "Prosecution witness absent: other",
+      "reasonFullDescription": "One or more civilian witnesses failed to attend on the date set for trial. If the reason for non-attendance is known, please record this in the comments box for discussion at local management meetings."
+    }
+  ]
+}

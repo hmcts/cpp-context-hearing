@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.correct-hearing-event.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "hearingEventDefinitionId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "hearingEventId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "latestHearingEventId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "recordedLabel": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string",
+      "maxLength": 3000
+    },
+    "eventTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastModifiedTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "alterable": {
+      "type": "boolean"
+    },
+    "defenceCounselId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    }
+  },
+  "required": [
+    "hearingId",
+    "hearingEventId",
+    "latestHearingEventId",
+    "recordedLabel",
+    "eventTime",
+    "lastModifiedTime",
+    "alterable"
+  ],
+  "additionalProperties": false
+}

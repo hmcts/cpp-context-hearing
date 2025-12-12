@@ -1,0 +1,205 @@
+{
+  "resultDefinitions": [
+    {
+      "id": "eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8",
+      "version": "2018-07-03T06:09:05.124Z",
+      "startDate": "2018-07-03",
+      "label": "Next hearing in Crown Court",
+      "shortCode": "NHCCS",
+      "level": "O",
+      "rank": 399,
+      "wordGroups": [
+        {
+          "wordGroup": [
+            "Next",
+            "hearing",
+            "scheduled"
+          ]
+        },
+        {
+          "wordGroup": [
+            "NHCCS"
+          ]
+        }
+      ],
+      "prompts": [
+        {
+          "id": "d27a5d86-d51f-4c6e-914b-cb4b0abc4283",
+          "label": "Date of hearing",
+          "resultPromptRule": "mandatory",
+          "type": "DATE",
+          "sequence": 1,
+           "hidden": false,
+          "reference": "HDATE",
+          "userGroups": [
+            "Court Clerks",
+            "Prison Admin",
+            "Probation Admin",
+            "Police Admin",
+            "Victims & Witness Care Admin",
+            "Youth Offending Service Admin"
+          ]
+        },
+        {
+          "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
+          "label": "Time of hearing",
+          "resultPromptRule": "optional",
+          "type": "TIME",
+          "sequence": 2,
+           "hidden": false,
+          "reference": "HTIME",
+          "userGroups": [
+            "Court Clerks",
+            "Prison Admin",
+            "Probation Admin",
+            "Police Admin",
+            "Victims & Witness Care Admin",
+            "Youth Offending Service Admin"
+          ]
+        },
+        {
+          "id": "5f507153-6dc9-4ec0-94db-c821eff333f1",
+          "label": "Courtroom",
+          "resultPromptRule": "optional",
+          "type": "INT",
+          "sequence": 3,
+           "hidden": false,
+          "reference": "HCROOM",
+          "userGroups": [
+            "Court Clerks",
+            "Prison Admin",
+            "Probation Admin",
+            "Police Admin",
+            "Victims & Witness Care Admin",
+            "Youth Offending Service Admin"
+          ]
+        },
+        {
+          "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
+          "label": "Courthouse name",
+          "resultPromptRule": "optional",
+          "type": "TXT",
+          "sequence": 4,
+           "hidden": false,
+          "reference": "HCHOUSE",
+          "userGroups": [
+            "Court Clerks",
+            "Prison Admin",
+            "Probation Admin",
+            "Police Admin",
+            "Victims & Witness Care Admin",
+            "Youth Offending Service Admin"
+          ]
+        },
+        {
+          "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+          "label": "Hearing type",
+          "resultPromptRule": "mandatory",
+          "type": "FIXL",
+          "sequence": 5,
+          "hidden": false,
+          "reference": "HTYPE",
+          "fixedListId": "5591d709-4397-452c-8533-998165d58d9c",
+          "userGroups": [
+            "Court Clerks",
+            "Prison Admin",
+            "Probation Admin",
+            "Police Admin",
+            "Victims & Witness Care Admin",
+            "Youth Offending Service Admin"
+          ]
+        },
+        {
+          "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+          "label": "Estimated duration",
+          "resultPromptRule": "mandatory",
+          "type": "INT",
+          "sequence": 6,
+          "hidden": false,
+          "duration": "Weeks",
+          "reference": "HEST",
+          "userGroups": [
+            "Court Clerks",
+            "Prison Admin",
+            "Probation Admin",
+            "Police Admin",
+            "Victims & Witness Care Admin",
+            "Youth Offending Service Admin"
+          ]
+        },
+        {
+          "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+          "label": "Estimated duration",
+          "resultPromptRule": "mandatory",
+          "type": "INT",
+          "sequence": 7,
+          "hidden": false,
+          "duration": "Days",
+          "reference": "HEST",
+          "userGroups": [
+            "Court Clerks",
+            "Prison Admin",
+            "Probation Admin",
+            "Police Admin",
+            "Victims & Witness Care Admin",
+            "Youth Offending Service Admin"
+          ]
+        },
+        {
+          "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+          "label": "Estimated duration",
+          "resultPromptRule": "mandatory",
+          "type": "INT",
+          "hidden": false,
+          "sequence": 8,
+          "duration": "Hours",
+          "reference": "HEST",
+          "userGroups": [
+            "Court Clerks",
+            "Prison Admin",
+            "Probation Admin",
+            "Police Admin",
+            "Victims & Witness Care Admin",
+            "Youth Offending Service Admin"
+          ]
+        },
+        {
+          "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+          "label": "Estimated duration",
+          "resultPromptRule": "mandatory",
+          "type": "INT",
+          "sequence": 9,
+          "hidden": false,
+          "duration": "Minutes",
+          "reference": "HEST",
+          "userGroups": [
+            "Court Clerks",
+            "Prison Admin",
+            "Probation Admin",
+            "Police Admin",
+            "Victims & Witness Care Admin",
+            "Youth Offending Service Admin"
+          ]
+        },
+        {
+          "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
+          "label": "Remand Status",
+          "resultPromptRule": "mandatory",
+          "type": "FIXL",
+          "sequence": 10,
+          "reference": "REST",
+          "hidden": false,
+          "fixedListId": "c82897b8-7e25-4b5d-9cd3-dbf3e1cb7c0c",
+          "userGroups": [
+            "Court Clerks",
+            "Prison Admin",
+            "Probation Admin",
+            "Police Admin",
+            "Victims & Witness Care Admin",
+            "Youth Offending Service Admin"
+          ]
+        }
+      ]
+    }
+  ]
+}

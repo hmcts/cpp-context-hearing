@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.mark-as-duplicate.json",
+  "type": "object",
+  "properties": {
+    "overwriteWithResults": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

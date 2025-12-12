@@ -1,0 +1,14 @@
+{
+  "items": [
+    {
+      "etag": "p09XKJF7DC7F4CN3gPSsOGAeU5c",
+      "key": ".appconfig.featureflag/amendReshare",
+      "label": "STE11",
+      "content_type": "application/vnd.microsoft.appconfig.ff+json;charset=utf-8",
+      "value": "{\"id\":\"amendReshare\",\"description\":\"CCT-1013 Amend and Reshare results\",\"enabled\":true,\"conditions\":{\"client_filters\":[]}}",
+      "tags": {},
+      "locked": false,
+      "last_modified": "2020-11-02T10:03:33+00:00"
+    }
+  ]
+}

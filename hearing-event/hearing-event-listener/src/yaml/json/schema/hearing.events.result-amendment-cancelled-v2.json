@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.result-amendments-cancelled-v2.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "latestSharedTargets": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "http://justice.gov.uk/core/courts/target2.json"
+      }
+    }
+  },
+  "required": [
+    "hearingId",
+    "latestSharedTargets"
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/defendant-attendance-updated.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "defendantId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "attendanceDay": {
+      "$ref": "http://justice.gov.uk/core/courts/attendanceDay.json"
+    }
+  },
+  "required": [
+    "hearingId",
+    "defendantId",
+    "attendanceDay"
+  ],
+  "additionalProperties": false
+}

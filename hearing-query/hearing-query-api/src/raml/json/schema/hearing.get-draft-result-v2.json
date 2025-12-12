@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.get-draft-result-v2.json",
+  "description": "The draft result",
+  "type": "object",
+  "properties": {
+    "draftResults": {
+      "type": "array",
+      "items": {
+        "$ref": "http://justice.gov.uk/core/courts/draftResult.json"
+      }
+    }
+  },
+  "required": [
+    "draftResults"
+  ]
+}

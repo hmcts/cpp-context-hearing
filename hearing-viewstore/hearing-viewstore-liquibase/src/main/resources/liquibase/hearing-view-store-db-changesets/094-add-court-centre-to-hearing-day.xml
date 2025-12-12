@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="94" author="hearing" logicalFilePath="094-add-court-centre-to-hearing-day">
+
+        <addColumn tableName="ha_hearing_day">
+            <column name="court_centre_id" type="UUID"/>
+            <column name="court_room_id" type="UUID"/>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="ha_hearing_day">
+                <column name="court_centre_id"/>
+                <column name="court_room_id"/>
+            </dropColumn>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

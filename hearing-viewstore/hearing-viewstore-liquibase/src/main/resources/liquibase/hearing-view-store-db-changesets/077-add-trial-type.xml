@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="77" author="hearing" logicalFilePath="077-add-trial-type.xml">
+
+        <addColumn tableName="ha_hearing">
+            <column name="trial_type_id" type="UUID"/>
+            <column name="is_effective_trial" type="boolean"/>
+        </addColumn>
+
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,18 @@
+{
+  "hearingId": "a8dcc5c8-70fe-4d3b-81a2-c48e4ff3f0e8",
+  "groupId": "289f2b51-04bc-417f-9a73-8fca9be887a6",
+  "removedCase": {
+    "id": "ce5c1957-0b9d-4f76-bae6-4f8c1b5927fe",
+    "groupId": "6c2ce21e-fd4d-4089-9b87-655b6c3e74ae",
+    "isCivil": true,
+    "isGroupMember": false,
+    "isGroupMaster": false
+  },
+  "newGroupMaster": {
+    "id": "7976fbf9-16f9-4fd2-9003-2a1e0c24200a",
+    "groupId": "6c2ce21e-fd4d-4089-9b87-655b6c3e74ae",
+    "isCivil": true,
+    "isGroupMember": true,
+    "isGroupMaster": true
+  }
+}

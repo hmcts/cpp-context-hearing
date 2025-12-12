@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/hearing.command.set-trial-type.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "trialTypeId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "isEffectiveTrial": {
+      "type": "boolean"
+    },
+    "vacatedTrialReasonId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "hearingId",
+        "trialTypeId"
+      ]
+    },
+    {
+      "required": [
+        "hearingId",
+        "isEffectiveTrial"
+      ]
+    },
+    {
+      "required": [
+        "hearingId",
+        "vacatedTrialReasonId"
+      ]
+    }
+  ],
+  "additionalProperties": false
+}

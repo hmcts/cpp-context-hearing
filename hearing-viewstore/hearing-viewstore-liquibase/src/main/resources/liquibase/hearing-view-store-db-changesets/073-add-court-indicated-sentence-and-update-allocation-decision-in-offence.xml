@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="73" author="hearing"
+               logicalFilePath="073-add-court-indicated-sentence-and-update-allocation-decision-in-offence.xml">
+
+        <addColumn tableName="ha_offence">
+            <column name="ad_originating_hearing_id" type="UUID"/>
+            <column name="mot_reason_id" type="UUID"/>
+            <column name="mot_reason_description" type="TEXT"/>
+            <column name="mot_reason_code" type="TEXT"/>
+            <column name="allocation_decision_date" type="date"/>
+            <column name="court_indicated_sentence_id" type="UUID"/>
+            <column name="court_indicated_sentence_description" type="TEXT"/>
+            <column name="court_indicated_sentence_type_id" type="UUID"/>
+        </addColumn>
+
+        <dropColumn tableName="ha_offence" columnName="court_decision"/>
+        <dropColumn tableName="ha_offence" columnName="prosecution_representation"/>
+        <dropColumn tableName="ha_offence" columnName="defendant_representation"/>
+        <dropColumn tableName="ha_offence" columnName="indication_of_sentence"/>
+
+    </changeSet>
+</databaseChangeLog>

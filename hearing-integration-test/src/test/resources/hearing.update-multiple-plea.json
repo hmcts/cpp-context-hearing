@@ -1,0 +1,27 @@
+{
+  "caseId": "RANDOM_CASE_ID",
+  "defendants": [
+    {
+      "id": "RANDOM_DEFENDANT_ID",
+      "personId": "d3a0d0f9-78b0-47c6-a362-5febf0485d0f",
+      "offences": [
+        {
+          "id": "RANDOM_OFFENCE_ID_1",
+          "plea": {
+            "id": "RANDOM_PLEA_ID_1",
+            "value": "PLEA_VALUE_1",
+            "pleaDate": "PLEA_DATE_1"
+          }
+        },
+        {
+          "id": "RANDOM_OFFENCE_ID_2",
+          "plea": {
+            "id": "RANDOM_PLEA_ID_2",
+            "value": "PLEA_VALUE_2",
+            "pleaDate": "PLEA_DATE_2"
+          }
+        }
+      ]
+    }
+  ]
+}

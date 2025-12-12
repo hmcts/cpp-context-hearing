@@ -1,0 +1,79 @@
+package uk.gov.moj.cpp.hearing.event.relist;
+
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory;
+import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
+import uk.gov.moj.cpp.hearing.event.CommandEventTestBase;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+public class RelistReferenceDataServiceTest {
+
+    public static final String JSON_RESULT_DEFINITION_JSON = "json/result-definitions.json";
+    private static final String RESULT_QUERY = "referencedata.query-result-definitions";
+
+    @InjectMocks
+    private RelistReferenceDataService relistReferenceDataService;
+
+    @Spy
+    private Enveloper enveloper = EnveloperFactory.createEnveloper();
+
+    @Mock
+    private Requester requester;
+
+    @Captor
+    private ArgumentCaptor<JsonEnvelope> captor;
+
+    @Spy
+    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
+
+    @Test
+    public void shouldReturnValidResultDefinition() {
+        final JsonObject jsonObjectPayload = CommandEventTestBase.readJson(JSON_RESULT_DEFINITION_JSON, JsonObject.class);
+        final Metadata metadata = CommandEventTestBase.metadataFor(RESULT_QUERY, randomUUID().toString());
+        final Envelope envelope = Envelope.envelopeFrom(metadata, jsonObjectPayload);
+
+        when(requester.requestAsAdmin(any(), any())).thenReturn(envelope);
+        final ResultDefinition results = relistReferenceDataService.getResults(envelope, "DDCH");
+
+        assertThat(results.getId().toString(), is("8c67b30a-418c-11e8-842f-0ed5f89f718b"));
+    }
+
+
+    @Test
+    public void shouldReturnEmptyResultDefinition() {
+        final JsonObject jsonObjectPayload = Json.createObjectBuilder().add("resultDefinitions", Json.createArrayBuilder().add(Json.createObjectBuilder().build())).build();
+        final Metadata metadata = CommandEventTestBase.metadataFor(RESULT_QUERY, randomUUID().toString());
+        final Envelope envelope = Envelope.envelopeFrom(metadata, jsonObjectPayload);
+
+        when(requester.requestAsAdmin(any(), any())).thenReturn(envelope);
+        final ResultDefinition results = relistReferenceDataService.getResults(envelope, "DDCH");
+        assertThat(results.getId(), nullValue());
+    }
+
+}

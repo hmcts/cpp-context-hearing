@@ -1,0 +1,111 @@
+{
+  "courtApplications": [
+    {
+      "applicant": {
+        "id": "8450881f-36dc-4b91-b410-1f8fce0271d0",
+        "notificationRequired": true,
+        "prosecutingAuthority": {
+          "address": {
+            "address1": "Criminal Justice Department",
+            "address2": "Derbyshire Constabulary",
+            "address3": "Butterley Hall",
+            "address4": "Ripley",
+            "address5": "Derby",
+            "postcode": "DE5 3RS"
+          },
+          "contact": {
+            "primaryEmail": "criminaldataderbyshire@derbyshire.police.uk"
+          },
+          "majorCreditorCode": "PO30",
+          "name": "Derbyshire Police",
+          "prosecutionAuthorityCode": "DERPF",
+          "prosecutionAuthorityId": "bdc190e7-c939-37ca-be4b-9f615d6ef40e",
+          "prosecutionAuthorityOUCode": "0300000",
+          "welshName": "Heddlu Derbyshire"
+        },
+        "summonsRequired": false
+      },
+      "applicationReceivedDate": "2024-01-21",
+      "applicationReference": "50MR1811177",
+      "applicationStatus": "UN_ALLOCATED",
+      "commissionerOfOath": false,
+      "courtApplicationCases": [
+        {
+          "caseStatus": "ACTIVE",
+          "isSJP": false,
+          "prosecutionCaseId": "842858f4-b3ea-4701-90a4-a67adb36ad68",
+          "prosecutionCaseIdentifier": {
+            "address": {
+              "address1": "Criminal Justice Department",
+              "address2": "Derbyshire Constabulary",
+              "address3": "Butterley Hall",
+              "address4": "Ripley",
+              "address5": "Derby",
+              "postcode": "DE5 3RS"
+            },
+            "contact": {
+              "primaryEmail": "criminaldataderbyshire@derbyshire.police.uk"
+            },
+            "majorCreditorCode": "PO30",
+            "prosecutionAuthorityCode": "DERPF",
+            "prosecutionAuthorityId": "bdc190e7-c939-37ca-be4b-9f615d6ef40e",
+            "prosecutionAuthorityName": "Derbyshire Police",
+            "prosecutionAuthorityOUCode": "0300000",
+            "caseURN": "50MR1811177"
+          }
+        }
+      ],
+      "id": "7c5e6d65-2705-443f-b3fe-6dd9e1ac27d4",
+      "subject": {
+        "id": "8450881f-36dc-4b91-b410-1f8fce0271d0",
+        "notificationRequired": true,
+        "prosecutingAuthority": {
+          "address": {
+            "address1": "Criminal Justice Department",
+            "address2": "Derbyshire Constabulary",
+            "address3": "Butterley Hall",
+            "address4": "Ripley",
+            "address5": "Derby",
+            "postcode": "DE5 3RS"
+          },
+          "contact": {
+            "primaryEmail": "criminaldataderbyshire@derbyshire.police.uk"
+          },
+          "majorCreditorCode": "PO30",
+          "name": "Derbyshire Police",
+          "prosecutionAuthorityCode": "DERPF",
+          "prosecutionAuthorityId": "bdc190e7-c939-37ca-be4b-9f615d6ef40e",
+          "prosecutionAuthorityOUCode": "0300000",
+          "welshName": "Heddlu Derbyshire"
+        },
+        "summonsRequired": false
+      },
+      "type": {
+        "appealFlag": false,
+        "applicantAppellantFlag": false,
+        "boxworkNotifTemplate": "NOT_APPLICABLE",
+        "breachType": "NOT_APPLICABLE",
+        "categoryCode": "CO",
+        "code": "CJ03520",
+        "commrOfOathFlag": false,
+        "courtExtractAvlFlag": true,
+        "courtOfAppealFlag": false,
+        "hearingCode": "APN",
+        "id": "00201dcc-0480-3d7e-90af-2e5190a62338",
+        "jurisdiction": "EITHER",
+        "legislation": "In accordance with Part 3 of Schedule 8 to the Criminal Justice Act 2003.",
+        "legislationWelsh": "Yn unol â Rhan 3 Atodlen 8 Deddf Cyfiawnder Troseddol 2003.",
+        "linkType": "LINKED",
+        "listingNotifTemplate": "POSTAL_NOTIFICATION",
+        "offenceActiveOrder": "OFFENCE",
+        "pleaApplicableFlag": false,
+        "prosecutorThirdPartyFlag": false,
+        "resentencingActivationCode": "CJ03522",
+        "spiOutApplicableFlag": true,
+        "summonsTemplateType": "NOT_APPLICABLE",
+        "type": "Application to revoke a community order and re-sentence",
+        "typeWelsh": "Cais i ddiddymu gorchymyn cymunedol ac ailddedfrydu"
+      }
+    }
+  ]
+}

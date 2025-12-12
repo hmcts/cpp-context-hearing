@@ -1,0 +1,9 @@
+{
+  "hearingId": "e085c62c-dc4a-11e7-9296-cec278b6b50a",
+  "indicatedPlea": {
+    "offenceId": "05e3788d-fd77-4744-a1e2-668f79ffd9e8",
+    "indicatedPleaDate": "2017-02-02",
+    "indicatedPleaValue": "INDICATED_GUILTY",
+    "source": "IN_COURT"
+  }
+}

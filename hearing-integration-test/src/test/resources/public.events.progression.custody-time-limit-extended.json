@@ -1,0 +1,8 @@
+{
+  "hearingIds": [
+    "HEARING_ID1",
+    "HEARING_ID2"
+  ],
+  "offenceId": "OFFENCE_ID",
+  "extendedTimeLimit": "EXTENDED_CTL_DATE"
+}

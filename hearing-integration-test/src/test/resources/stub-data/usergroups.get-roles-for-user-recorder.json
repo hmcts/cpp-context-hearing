@@ -1,0 +1,13 @@
+{
+  "allRoles": [
+    {
+      "roleId": "1e2f843e-d649-40b3-8611-8015f3a18952",
+      "label" : "Recorder",
+      "description": "role description",
+      "selectable" : true,
+      "startDate" : null,
+      "endDate" : null
+    }
+  ]
+}
+

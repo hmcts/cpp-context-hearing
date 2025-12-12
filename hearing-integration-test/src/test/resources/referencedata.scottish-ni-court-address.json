@@ -1,0 +1,48 @@
+{
+  "scottish-ni-courts": [
+    {
+      "id": "4aaecac5-222b-402d-9047-84803679edac",
+      "seqNum": 1,
+      "courtId": "1",
+      "courtCode": "9701",
+      "courtName": "Aberdeen Sheriff Court District",
+      "courtType": "SCSCRT",
+      "locationId": "2019343437",
+      "startDate": "2019-05-27",
+      "endDate": "2019-06-27",
+      "address1": "Sheriff Court House",
+      "address2": "Castle Street",
+      "address3": "Aberdeen",
+      "address4": "Banff",
+      "address5": "6 West Bell Street",
+      "postCode": "AB10 1WP",
+      "phoneNo": "01224 657200",
+      "faxNo": "01224 657234",
+      "dxAddress": "61 ABERDEEN",
+      "validFrom": "2019-07-02",
+      "validTo": "2019-07-08"
+    },
+    {
+      "id": "5aaecac5-222b-402d-9047-84803679edac",
+      "seqNum": 2,
+      "courtId": "2",
+      "courtCode": "9703",
+      "courtName": "West Cross Court District",
+      "courtType": "SCSCRY",
+      "locationId": "201954545",
+      "startDate": "2019-05-27",
+      "endDate": "2019-06-27",
+      "address1": "Sheriff Court House2",
+      "address2": "Castle Street",
+      "address3": "Aberdeen",
+      "address4": "Banff",
+      "address5": "5 West Bell Street",
+      "postCode": "AB10 1WQ",
+      "phoneNo": "01224 657200",
+      "faxNo": "01224 657234",
+      "dxAddress": "61 ABERDEEN",
+      "validFrom": "2019-07-02",
+      "validTo": "2019-07-07"
+    }
+  ]
+}

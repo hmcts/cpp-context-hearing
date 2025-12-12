@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/command/hearing.command.publish-hearing-lists-for-crown-courts-with-ids.json",
+  "type": "object",
+  "properties": {
+    "ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "ids"
+  ],
+  "additionalProperties": false
+}
