@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="84" author="hearing" logicalFilePath="084-add-associated-defence-organisation-to-defendant.xml">
+        <addColumn tableName="ha_defendant">
+            <column name ="application_reference" type="TEXT"/>
+            <column name ="association_start_date" type="date" />
+            <column name ="association_end_date" type="date" />
+            <column name ="funding_type" type="TEXT"/>
+            <column name="is_associated_by_laa" type="BOOLEAN" defaultValue="false"/>
+            <column name="laa_contract_ref" type="TEXT"/>
+            <column name="org_name" type="TEXT" />
+            <column name="org_inc_no" type="TEXT" />
+            <column name="org_reg_charity_no" type="TEXT" />
+            <column name="associate_org_address_1" type="TEXT" />
+            <column name="associate_org_address_2" type="TEXT" />
+            <column name="associate_org_address_3" type="TEXT" />
+            <column name="associate_org_address_4" type="TEXT" />
+            <column name="associate_org_address_5" type="TEXT" />
+            <column name="associate_org_post_code" type="TEXT" />
+            <column name="associate_org_contact_home" type="TEXT"/>
+            <column name="associate_org_contact_work" type="TEXT"/>
+            <column name="associate_org_contact_mobile" type="TEXT" />
+            <column name="associate_org_contact_primary_email" type="TEXT" />
+            <column name="associate_org_contact_secondary_email" type="TEXT"/>
+            <column name="associate_org_contact_fax" type="TEXT" />
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

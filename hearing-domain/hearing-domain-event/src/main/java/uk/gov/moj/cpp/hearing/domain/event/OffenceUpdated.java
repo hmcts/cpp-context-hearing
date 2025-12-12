@@ -1,0 +1,88 @@
+package uk.gov.moj.cpp.hearing.domain.event;
+
+import uk.gov.justice.core.courts.IndicatedPlea;
+import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.Verdict;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@Event("hearing.events.offence-updated")
+@SuppressWarnings("squid:S00107")
+public class OffenceUpdated implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private UUID hearingId;
+    private UUID defendantId;
+    private Offence offence;
+
+    private OffenceUpdated() {
+    }
+
+    @JsonCreator
+    protected OffenceUpdated(@JsonProperty(value = "hearingId", required = true) UUID hearingId,
+                             @JsonProperty(value = "defendantId", required = true) UUID defendantId,
+                             @JsonProperty(value = "offence", required = true) final Offence offence) {
+        this.hearingId = hearingId;
+        this.defendantId = defendantId;
+        this.offence = offence;
+    }
+
+    public static OffenceUpdated offenceUpdated() {
+        return new OffenceUpdated();
+    }
+
+    public UUID getHearingId() {
+        return hearingId;
+    }
+
+    public UUID getDefendantId() {
+        return defendantId;
+    }
+
+    public Offence getOffence() {
+        return offence;
+    }
+
+    public OffenceUpdated withHearingId(final UUID hearingId) {
+        this.hearingId = hearingId;
+        return this;
+    }
+
+    public OffenceUpdated withDefendantId(UUID defendantId) {
+        this.defendantId = defendantId;
+        return this;
+    }
+
+    public OffenceUpdated withOffence(final Offence offence) {
+        this.offence = offence;
+        return this;
+    }
+
+    public OffenceUpdated withPlea(final Plea plea) {
+        this.offence.setPlea(plea);
+        return this;
+    }
+
+    public OffenceUpdated withIndicatedPlea(final IndicatedPlea indicatedPlea) {
+        this.offence.setIndicatedPlea(indicatedPlea);
+        return this;
+    }
+
+    public OffenceUpdated withVerdict(final Verdict verdict) {
+        this.offence.setVerdict(verdict);
+        return this;
+    }
+
+    public OffenceUpdated withConvictionDate(final LocalDate convictionDate) {
+        offence.setConvictionDate(convictionDate);
+        return this;
+    }
+}

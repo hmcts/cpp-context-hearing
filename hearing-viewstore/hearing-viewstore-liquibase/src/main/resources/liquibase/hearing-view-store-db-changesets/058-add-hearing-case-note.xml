@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="58" author="hearing" logicalFilePath="058-add-hearing-case-note">
+
+        <createTable tableName="ha_hearing_case_note">
+            <column name="id" type="UUID"/>
+            <column name="hearing_id" type="UUID"/>
+            <column name="payload" type="jsonb"/>
+        </createTable>
+
+        <sql>CREATE INDEX idx_hearing_by_id_by_date ON ha_hearing_case_note USING GIN ((payload ->
+            'originatingHearingId'), (payload -> 'noteDateTime'))
+        </sql>
+
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="ha_hearing_case_note"
+                                 constraintName="fk_hearing_case_note_hearing" deferrable="false"
+                                 initiallyDeferred="false"
+                                 onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
+                                 referencedTableName="ha_hearing"/>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,34 @@
+{
+  "publicHolidays": [
+    {
+      "id": "a77dec1b-9a34-4051-8695-9b1271f4f92a",
+      "division": "england-and-wales",
+      "title": "New Year’s Day",
+      "date": "2016-01-01"
+    },
+    {
+      "id": "bd8dec1b-9a34-4051-8695-9b1271f4f92a",
+      "division": "england-and-wales",
+      "title": "Good Friday",
+      "date": "2016-03-25"
+    },
+    {
+      "id": "7d90b94a-f47e-4914-830b-ca58aa4bf113",
+      "division": "england-and-wales",
+      "title": "Easter Monday",
+      "date": "2016-03-28"
+    },
+    {
+      "id": "d8af8cc1-4e93-49c0-9796-02f29aa87078",
+      "division": "scotland",
+      "title": "New Year’s Day",
+      "date": "2016-01-01"
+    },
+    {
+      "id": "7ccd9318-3898-4fb2-9bf6-55efd26a3ec3",
+      "division": "scotland",
+      "title": "2nd January",
+      "date": "2016-01-04"
+    }
+  ]
+}

@@ -1,0 +1,528 @@
+{
+  "type": "object",
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/public-nows-requested.json",
+  "properties": {
+    "hearing": {
+      "$id": "/properties/hearing",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$id": "/properties/hearing/properties/id",
+          "type": "string"
+        },
+        "hearingType": {
+          "$id": "/properties/hearing/properties/hearingType",
+          "type": "string"
+        },
+        "startDateTime": {
+          "$id": "/properties/hearing/properties/startDateTime",
+          "type": "string"
+        },
+        "hearingDates": {
+          "$id": "/properties/hearing/properties/hearingDates",
+          "type": "array",
+          "items": {
+            "$id": "/properties/hearing/properties/hearingDates/items",
+            "type": "string"
+          }
+        },
+        "courtCentre": {
+          "$id": "/properties/hearing/properties/courtCentre",
+          "type": "object",
+          "properties": {
+            "courtCentreId": {
+              "$id": "/properties/hearing/properties/courtCentre/properties/courtCentreId",
+              "type": "string"
+            },
+            "courtCentreName": {
+              "$id": "/properties/hearing/properties/courtCentre/properties/courtCentreName",
+              "type": "string"
+            },
+            "courtRoomId": {
+              "$id": "/properties/hearing/properties/courtCentre/properties/courtRoomId",
+              "type": "string"
+            },
+            "courtRoomName": {
+              "$id": "/properties/hearing/properties/courtCentre/properties/courtRoomName",
+              "type": "string"
+            }
+          }
+        },
+        "attendees": {
+          "$id": "/properties/hearing/properties/attendees",
+          "type": "array",
+          "items": {
+            "$id": "/properties/hearing/properties/attendees/items",
+            "type": "object",
+            "properties": {
+              "firstName": {
+                "$id": "/properties/hearing/properties/attendees/items/properties/firstName",
+                "type": "string"
+              },
+              "lastName": {
+                "$id": "/properties/hearing/properties/attendees/items/properties/lastName",
+                "type": "string"
+              },
+              "type": {
+                "$id": "/properties/hearing/properties/attendees/items/properties/type",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "defendants": {
+          "$id": "/properties/hearing/properties/defendants",
+          "type": "array",
+          "items": {
+            "$id": "/properties/hearing/properties/defendants/items",
+            "type": "object",
+            "properties": {
+              "id": {
+                "$id": "/properties/hearing/properties/defendants/items/properties/id",
+                "type": "string"
+              },
+              "person": {
+                "$id": "/properties/hearing/properties/defendants/items/properties/person",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/id",
+                    "type": "string"
+                  },
+                  "title": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/title",
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/firstName",
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/lastName",
+                    "type": "string"
+                  },
+                  "dateOfBirth": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/dateOfBirth",
+                    "type": "string"
+                  },
+                  "nationality": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/nationality",
+                    "type": "string"
+                  },
+                  "gender": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/gender",
+                    "type": "string"
+                  },
+                  "homeTelephone": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/homeTelephone",
+                    "type": "string"
+                  },
+                  "workTelephone": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/workTelephone",
+                    "type": "string"
+                  },
+                  "mobile": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/mobile",
+                    "type": "string"
+                  },
+                  "fax": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/fax",
+                    "type": "string"
+                  },
+                  "email": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/email",
+                    "type": "string"
+                  },
+                  "address": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/address",
+                    "type": "object",
+                    "properties": {
+                      "addressId": {
+                        "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/address/properties/addressId",
+                        "type": "string"
+                      },
+                      "address1": {
+                        "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/address/properties/address1",
+                        "type": "string"
+                      },
+                      "address2": {
+                        "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/address/properties/address2",
+                        "type": "string"
+                      },
+                      "address3": {
+                        "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/address/properties/address3",
+                        "type": "string"
+                      },
+                      "address4": {
+                        "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/address/properties/address4",
+                        "type": "string"
+                      },
+                      "postCode": {
+                        "$id": "/properties/hearing/properties/defendants/items/properties/person/properties/address/properties/postCode",
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "defenceOrganisation": {
+                "$id": "/properties/hearing/properties/defendants/items/properties/defenceOrganisation",
+                "type": "string"
+              },
+              "interpreter": {
+                "$id": "/properties/hearing/properties/defendants/items/properties/interpreter",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/interpreter/properties/name",
+                    "type": "string"
+                  },
+                  "language": {
+                    "$id": "/properties/hearing/properties/defendants/items/properties/interpreter/properties/language",
+                    "type": "string"
+                  }
+                }
+              },
+              "cases": {
+                "$id": "/properties/hearing/properties/defendants/items/properties/cases",
+                "type": "array",
+                "items": {
+                  "$id": "/properties/hearing/properties/defendants/items/properties/cases/items",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/id",
+                      "type": "string"
+                    },
+                    "urn": {
+                      "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/urn",
+                      "type": "string"
+                    },
+                    "bailStatus": {
+                      "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/bailStatus",
+                      "type": "string"
+                    },
+                    "custodyTimeLimitDate": {
+                      "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/custodyTimeLimitDate",
+                      "type": "string"
+                    },
+                    "offences": {
+                      "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences",
+                      "type": "array",
+                      "items": {
+                        "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items",
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/id",
+                            "type": "string"
+                          },
+                          "code": {
+                            "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/code",
+                            "type": "string"
+                          },
+                          "convictionDate": {
+                            "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/convictionDate",
+                            "type": "string"
+                          },
+                          "plea": {
+                            "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/plea",
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/plea/properties/id",
+                                "type": "string"
+                              },
+                              "value": {
+                                "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/plea/properties/value",
+                                "type": "string"
+                              },
+                              "date": {
+                                "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/plea/properties/date",
+                                "type": "string"
+                              },
+                              "enteredHearingId": {
+                                "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/plea/properties/enteredHearingId",
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "verdict": {
+                            "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict",
+                            "type": "object",
+                            "properties": {
+                              "typeId": {
+                                "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict/properties/typeId",
+                                "type": "string"
+                              },
+                              "verdictDescription": {
+                                "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict/properties/verdictDescription",
+                                "type": "string"
+                              },
+                              "verdictCategory": {
+                                "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict/properties/verdictCategory",
+                                "type": "string"
+                              },
+                              "lesserOrAlternativeOffence": {
+                                "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict/properties/lesserOrAlternativeOffence",
+                                "type": "object",
+                                "properties": {
+                                  "offenceTypeId": {
+                                    "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict/properties/lesserOrAlternativeOffence/properties/offenceTypeId",
+                                    "type": "string"
+                                  },
+                                  "code": {
+                                    "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict/properties/lesserOrAlternativeOffence/properties/code",
+                                    "type": "string"
+                                  },
+                                  "convictionDate": {
+                                    "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict/properties/lesserOrAlternativeOffence/properties/convictionDate",
+                                    "type": "string"
+                                  },
+                                  "wording": {
+                                    "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict/properties/lesserOrAlternativeOffence/properties/wording",
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "numberOfSplitJurors": {
+                                "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict/properties/numberOfSplitJurors",
+                                "type": "string"
+                              },
+                              "verdictDate": {
+                                "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict/properties/verdictDate",
+                                "type": "string"
+                              },
+                              "numberOfJurors": {
+                                "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict/properties/numberOfJurors",
+                                "type": "integer"
+                              },
+                              "unanimous": {
+                                "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict/properties/unanimous",
+                                "type": "boolean"
+                              },
+                              "enteredHearingId": {
+                                "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/verdict/properties/enteredHearingId",
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "wording": {
+                            "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/wording",
+                            "type": "string"
+                          },
+                          "startDate": {
+                            "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/startDate",
+                            "type": "string"
+                          },
+                          "endDate": {
+                            "$id": "/properties/hearing/properties/defendants/items/properties/cases/items/properties/offences/items/properties/endDate",
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "sharedResultLines": {
+          "$id": "/properties/hearing/properties/sharedResultLines",
+          "type": "array",
+          "items": {
+            "$id": "/properties/hearing/properties/sharedResultLines/items",
+            "type": "object",
+            "properties": {
+              "id": {
+                "$id": "/properties/hearing/properties/sharedResultLines/items/properties/id",
+                "type": "string"
+              },
+              "defendantId": {
+                "$id": "/properties/hearing/properties/sharedResultLines/items/properties/defendantId",
+                "type": "string"
+              },
+              "caseId": {
+                "$id": "/properties/hearing/properties/sharedResultLines/items/properties/caseId",
+                "type": "string"
+              },
+              "offenceId": {
+                "$id": "/properties/hearing/properties/sharedResultLines/items/properties/offenceId",
+                "type": "string"
+              },
+              "sharedDate": {
+                "$id": "/properties/hearing/properties/sharedResultLines/items/properties/sharedDate",
+                "type": "string"
+              },
+              "orderedDate": {
+                "$id": "/properties/hearing/properties/sharedResultLines/items/properties/orderedDate",
+                "type": "string"
+              },
+              "level": {
+                "$id": "/properties/hearing/properties/sharedResultLines/items/properties/level",
+                "type": "string"
+              },
+              "label": {
+                "$id": "/properties/hearing/properties/sharedResultLines/items/properties/label",
+                "type": "string"
+              },
+              "rank": {
+                "$id": "/properties/hearing/properties/sharedResultLines/items/properties/rank",
+                "type": "integer"
+              },
+              "prompts": {
+                "$id": "/properties/hearing/properties/sharedResultLines/items/properties/prompts",
+                "type": "array",
+                "items": {
+                  "$id": "/properties/hearing/properties/sharedResultLines/items/properties/prompts/items",
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "$id": "/properties/hearing/properties/sharedResultLines/items/properties/prompts/items/properties/label",
+                      "type": "string"
+                    },
+                    "value": {
+                      "$id": "/properties/hearing/properties/sharedResultLines/items/properties/prompts/items/properties/value",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "nows": {
+          "$id": "/properties/hearing/properties/nows",
+          "type": "array",
+          "items": {
+            "$id": "/properties/hearing/properties/nows/items",
+            "type": "object",
+            "properties": {
+              "id": {
+                "$id": "/properties/hearing/properties/nows/items/properties/id",
+                "type": "string"
+              },
+              "nowsTypeId": {
+                "$id": "/properties/hearing/properties/nows/items/properties/nowsTypeId",
+                "type": "string"
+              },
+              "nowsTemplateName": {
+                "$id": "/properties/hearing/properties/nows/items/properties/nowsTemplateName",
+                "type": "string"
+              },
+              "defendantId": {
+                "$id": "/properties/hearing/properties/nows/items/properties/defendantId",
+                "type": "string"
+              },
+              "materials": {
+                "$id": "/properties/hearing/properties/nows/items/properties/material",
+                "type": "array",
+                "items": {
+                  "$id": "/properties/hearing/properties/nows/items/properties/material/items",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "$id": "/properties/hearing/properties/nows/items/properties/material/items/properties/id",
+                      "type": "string"
+                    },
+                    "nowResult": {
+                      "$id": "/properties/hearing/properties/nows/items/properties/material/items/properties/nowResult",
+                      "type": "array",
+                      "items": {
+                        "$id": "/properties/hearing/properties/nows/items/properties/material/items/properties/nowResult/items",
+                        "type": "object",
+                        "properties": {
+                          "sharedResultId": {
+                            "$id": "/properties/hearing/properties/nows/items/properties/material/items/properties/nowResult/items/properties/sharedResultId",
+                            "type": "string"
+                          },
+                          "sequence": {
+                            "$id": "/properties/hearing/properties/nows/items/properties/material/items/properties/nowResult/items/properties/sequence",
+                            "type": "integer"
+                          },
+                          "prompts": {
+                            "$id": "/properties/hearing/properties/nows/items/properties/material/items/properties/nowResult/items/properties/prompts",
+                            "type": "array",
+                            "items": {
+                              "$id": "/properties/hearing/properties/nows/items/properties/material/items/properties/nowResult/items/properties/prompts/items",
+                              "type": "object",
+                              "properties": {
+                                "label": {
+                                  "$id": "/properties/hearing/properties/nows/items/properties/material/items/properties/nowResult/items/properties/prompts/items/properties/label",
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "userGroups": {
+                      "$id": "/properties/hearing/properties/nows/items/properties/material/items/properties/userGroups",
+                      "type": "array",
+                      "items": {
+                        "$id": "/properties/hearing/properties/nows/items/properties/material/items/properties/userGroups/items",
+                        "type": "object",
+                        "properties": {
+                          "group": {
+                            "$id": "/properties/hearing/properties/nows/items/properties/material/items/properties/userGroups/items/properties/group",
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "nowTypes": {
+          "$id": "/properties/hearing/properties/nowTypes",
+          "type": "array",
+          "items": {
+            "$id": "/properties/hearing/properties/nowTypes/items",
+            "type": "object",
+            "properties": {
+              "id": {
+                "$id": "/properties/hearing/properties/nowTypes/items/properties/id",
+                "type": "string"
+              },
+              "templateName": {
+                "$id": "/properties/hearing/properties/nowTypes/items/properties/templateName",
+                "type": "string"
+              },
+              "description": {
+                "$id": "/properties/hearing/properties/nowTypes/items/properties/description",
+                "type": "string"
+              },
+              "rank": {
+                "$id": "/properties/hearing/properties/nowTypes/items/properties/rank",
+                "type": "integer"
+              },
+              "staticText": {
+                "$id": "/properties/hearing/properties/nowTypes/items/properties/staticText",
+                "type": "string"
+              },
+              "welshStaticText": {
+                "$id": "/properties/hearing/properties/nowTypes/items/properties/welshStaticText",
+                "type": "string"
+              },
+              "priority": {
+                "$id": "/properties/hearing/properties/nowTypes/items/properties/priority",
+                "type": "string"
+              },
+              "jurisdiction": {
+                "$id": "/properties/hearing/properties/nowTypes/items/properties/jurisdiction",
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

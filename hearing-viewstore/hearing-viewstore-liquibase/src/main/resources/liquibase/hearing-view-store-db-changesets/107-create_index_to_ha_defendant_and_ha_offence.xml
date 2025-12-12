@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+    <changeSet id="028" author="hearing" logicalFilePath="107-create_index_to_ha_defendant_and_ha_offence.xml">
+        <createIndex tableName="ha_defendant"
+                     indexName="ha_defendant_hearing_id_prosecution_case_id_idx">
+            <column name="hearing_id"/>
+            <column name="prosecution_case_id"/>
+        </createIndex>
+        <createIndex tableName="ha_offence"
+                     indexName="ha_offence_hearing_id_defendant_id_idx">
+            <column name="hearing_id"/>
+            <column name="defendant_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

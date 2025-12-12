@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/public-defence-counsel-change-ignored.json",
+  "type": "object",
+  "properties": {
+    "reason": {
+      "type": "string"
+    },
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "defenceCounsel": {
+      "$ref": "http://justice.gov.uk/core/courts/defenceCounsel.json"
+    },
+    "caseURN": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reason"
+  ]
+}

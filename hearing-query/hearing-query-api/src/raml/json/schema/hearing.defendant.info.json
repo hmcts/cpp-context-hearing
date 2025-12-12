@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/domains/sjp/queries/defendant.info.json",
+  "type": "object",
+  "properties": {
+    "courtRooms": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/courtRooms"
+      }
+    }
+  },
+  "required": [
+    "courtRooms"
+  ],
+  "definitions": {
+    "courtRooms": {
+      "type": "object",
+      "properties": {
+        "courtRoomName": {
+          "type": "string"
+        },
+        "defendantDetails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/defendantDetails"
+          }
+        }
+      },
+      "required": [
+        "courtRoomName",
+        "defendantDetails"
+      ]
+    },
+    "defendantDetails": {
+      "type": "object",
+      "properties": {
+        "defendantId": {
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "dateOfBirth": {
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+        },
+        "nationalInsuranceNumber": {
+          "type": "string"
+        },
+        "legalEntityOrganizationName": {
+          "description": "The name of legal entity.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  }
+}

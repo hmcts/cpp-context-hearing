@@ -1,0 +1,25 @@
+{
+  "subscriptions": [
+    {
+      "channel": "LDFstteEHj",
+      "destination": "8mOPzQAdC1",
+      "channelProperties": {
+        "vsayRFs6l2": "fNvXaa54F3",
+        "9wqktNme08": "Q8rOBh6Tfr",
+        "dTjOzrtpMI": "OQsmIS77ET"
+      },
+      "userGroups": [
+        "biA01BcaYw",
+        "kgH1FgW0UY"
+      ],
+      "courtCentreIds": [
+        "8197b8c1-65d7-428c-9cfb-c15c4f6e633b",
+        "b7e83659-72d1-47a6-8661-a8495fe58146"
+      ],
+      "nowTypeIds": [
+        "85f418ed-8a5d-4268-b801-40fc43d18524",
+        "9675c44c-5a6e-4547-af0d-64986708407e"
+      ]
+    }
+  ]
+}

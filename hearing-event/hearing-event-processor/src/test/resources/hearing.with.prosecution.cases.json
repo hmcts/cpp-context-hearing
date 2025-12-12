@@ -1,0 +1,87 @@
+{
+  "prosecutionCases": [
+    {
+      "caseMarkers": [],
+      "caseStatus": "ACTIVE",
+      "defendants": [
+        {
+          "associatedPersons": [],
+          "courtProceedingsInitiated": "2022-07-29T10:48:10.393Z",
+          "id": "29cd0025-77ce-4d85-905a-ec316ccaa578",
+          "isYouth": false,
+          "masterDefendantId": "29cd0025-77ce-4d85-905a-ec316ccaa578",
+          "offences": [
+            {
+              "arrestDate": "2021-01-01",
+              "chargeDate": "2020-12-28",
+              "count": 0,
+              "endorsableFlag": true,
+              "id": "8296d38a-5098-437e-b937-68606ff878a8",
+              "introducedAfterInitialProceedings": false,
+              "isDiscontinued": false,
+              "listingNumber": 1,
+              "modeOfTrial": "Summary",
+              "offenceCode": "CA03012",
+              "offenceDefinitionId": "3ebe41c9-666d-4964-aa80-a005d89927a3",
+              "offenceLegislation": "Contrary to section 363(3)(b) and (4) of the    Communications Act 2003.",
+              "offenceTitle": "Possess /    control TV set with intent another use install without a licence",
+              "orderIndex": 1,
+              "proceedingsConcluded": false,
+              "reportingRestrictions": [],
+              "startDate": "2022-05-28",
+              "wording": "Theft of pedal cycle."
+            }
+          ],
+          "personDefendant": {
+            "arrestSummonsNumber": "D28GC01125783977",
+            "bailStatus": {
+              "code": "C",
+              "description": "Custody or remanded into custody",
+              "id": "12e69486-4d01-3403-a50a-7419ca040635"
+            },
+            "driverNumber": "VANFL002222OW9PH",
+            "personDetails": {
+              "address": {
+                "address1": "9999A9999AAAA",
+                "address2": "Woodlane",
+                "address3": "addressline 3",
+                "address4": "Bristol",
+                "address5": "Avon"
+              },
+              "contact": {
+                "home": "0205783977",
+                "mobile": "07775783977",
+                "primaryEmail": "REDDY.TEST015783977@gmail.com"
+              },
+              "dateOfBirth": "1976-12-13",
+              "documentationLanguageNeeds": "ENGLISH",
+              "ethnicity": {
+                "observedEthnicityCode": "1",
+                "observedEthnicityDescription": "White - North European",
+                "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                "selfDefinedEthnicityCode": "W1",
+                "selfDefinedEthnicityDescription": "British",
+                "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+              },
+              "firstName": "Derek",
+              "gender": "MALE",
+              "lastName": "Irvine",
+              "title": "Mr"
+            }
+          },
+          "proceedingsConcluded": false,
+          "prosecutionAuthorityReference": "D28GC01125783977",
+          "prosecutionCaseId": "999b7608-c9db-45f6-970a-88f6dd7d7365"
+        }
+      ],
+      "id": "999b7608-c9db-45f6-970a-88f6dd7d7365",
+      "initiationCode": "C",
+      "originatingOrganisation": "130SU01",
+      "prosecutionCaseIdentifier": {
+        "prosecutionAuthorityCode": "DERPF",
+        "prosecutionAuthorityId": "bdc190e7-c939-37ca-be4b-9f615d6ef40e",
+        "caseURN": "28DI5783977"
+      }
+    }
+  ]
+}

@@ -1,0 +1,1157 @@
+{
+  "hearingId": "3552b731-0d04-4a51-a9e1-48dc46df2119",
+  "sharedTime": "2023-05-15T14:28:14.715Z",
+  "courtClerk": {
+    "firstName": "Emma",
+    "lastName": "Cleaner",
+    "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+  },
+  "hearing": {
+    "courtCentre": {
+      "address": {
+        "address1": "176A Lavender Hill",
+        "address2": "London",
+        "address3": "",
+        "address4": "",
+        "address5": "",
+        "postcode": "SW11 1JU"
+      },
+      "code": "B01LY00",
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "lja": {
+        "ljaCode": "2577",
+        "ljaName": "South West London Magistrates' Court"
+      },
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01"
+    },
+    "defendantReferralReasons": [
+      {
+        "defendantId": "79f62022-7486-4c92-8aa0-a24ac8bf37a5",
+        "description": "For trial",
+        "id": "809f7aac-d285-43a5-9fb1-3a894db71530"
+      },
+      {
+        "defendantId": "79f62022-7486-4c92-8aa0-a24ac8bf37a5",
+        "description": "For trial",
+        "id": "809f7aac-d285-43a5-9fb1-3a894db71530"
+      }
+    ],
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "courtCentreId": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+        "courtRoomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+        "isCancelled": false,
+        "listedDurationMinutes": 1,
+        "listingSequence": 0,
+        "sittingDay": "2021-11-17T10:00:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "3552b731-0d04-4a51-a9e1-48dc46df2119",
+    "judiciary": [
+      {
+        "firstName": "Christine Lesley",
+        "isBenchChairman": false,
+        "isDeputy": true,
+        "judicialId": "0fc170ec-bb8f-31af-b2c6-de48ea5343e7",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "0fc170ec-bb8f-31af-b2c6-de48ea5343e7",
+          "judiciaryType": "Magistrate"
+        },
+        "lastName": "Marsters",
+        "title": "Mrs"
+      },
+      {
+        "firstName": "Robert Stewart",
+        "isBenchChairman": false,
+        "isDeputy": true,
+        "judicialId": "0a87257e-5308-397d-b432-30edf4ad1dae",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "0a87257e-5308-397d-b432-30edf4ad1dae",
+          "judiciaryType": "Magistrate"
+        },
+        "lastName": "Horton",
+        "title": "Mr"
+      },
+      {
+        "firstName": "Susan Katherine",
+        "isBenchChairman": true,
+        "isDeputy": false,
+        "judicialId": "00ac8ed3-b432-3bdd-8ebb-ebcb2ba10a00",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "00ac8ed3-b432-3bdd-8ebb-ebcb2ba10a00",
+          "judiciaryType": "Magistrate"
+        },
+        "lastName": "Bonnell",
+        "title": "Mrs"
+      }
+    ],
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [
+      {
+        "caseStatus": "SJP_REFERRAL",
+        "defendants": [
+          {
+            "courtProceedingsInitiated": "2021-11-17T13:42:42.085Z",
+            "id": "79f62022-7486-4c92-8aa0-a24ac8bf37a5",
+            "isYouth": false,
+            "masterDefendantId": "79f62022-7486-4c92-8aa0-a24ac8bf37a5",
+            "numberOfPreviousConvictionsCited": 0,
+            "offences": [
+              {
+                "arrestDate": "2023-03-17",
+                "chargeDate": "2023-03-30",
+                "count": 0,
+                "endorsableFlag": false,
+                "id": "5e2ffc6a-8f4b-435d-bea2-408ba4fcddd0",
+                "listingNumber": 1,
+                "modeOfTrial": "N/A",
+                "offenceCode": "XXXXXXX",
+                "offenceDateCode": 5,
+                "offenceDefinitionId": "984a183b-424a-4194-a789-2d7bbc3f2ffe",
+                "offenceLegislation": "Case Eject",
+                "offenceTitle": "This is a placeholder non offence to enable ejection from CP",
+                "orderIndex": 1,
+                "startDate": "2023-03-16",
+                "wording": "english words"
+              },
+              {
+                "arrestDate": "2023-03-17",
+                "chargeDate": "2023-03-30",
+                "count": 0,
+                "endorsableFlag": false,
+                "id": "f0a91897-209f-436b-b928-db5cfcd6eae5",
+                "listingNumber": 1,
+                "modeOfTrial": "N/A",
+                "offenceCode": "XXXXXXX",
+                "offenceDateCode": 5,
+                "offenceDefinitionId": "984a183b-424a-4194-a789-2d7bbc3f2ffe",
+                "offenceLegislation": "Case Eject",
+                "offenceTitle": "This is a placeholder non offence to enable ejection from CP",
+                "orderIndex": 2,
+                "startDate": "2023-03-16",
+                "wording": "english words"
+              },
+              {
+                "arrestDate": "2023-03-17",
+                "chargeDate": "2023-03-30",
+                "count": 0,
+                "endorsableFlag": false,
+                "id": "2e4b4ea3-1492-44bf-9589-d14d89067679",
+                "listingNumber": 1,
+                "modeOfTrial": "N/A",
+                "offenceCode": "XXXXXXX",
+                "offenceDateCode": 5,
+                "offenceDefinitionId": "984a183b-424a-4194-a789-2d7bbc3f2ffe",
+                "offenceLegislation": "Case Eject",
+                "offenceTitle": "This is a placeholder non offence to enable ejection from CP",
+                "orderIndex": 3,
+                "startDate": "2023-03-16",
+                "wording": "english words"
+              },
+              {
+                "arrestDate": "2023-03-17",
+                "chargeDate": "2023-03-30",
+                "convictionDate": "2023-04-20",
+                "count": 0,
+                "endorsableFlag": false,
+                "id": "64947824-98b8-422f-8ce8-7ef16df936b3",
+                "indicatedPlea": {
+                  "indicatedPleaDate": "2023-04-20",
+                  "indicatedPleaValue": "INDICATED_GUILTY",
+                  "offenceId": "64947824-98b8-422f-8ce8-7ef16df936b3",
+                  "originatingHearingId": "3552b731-0d04-4a51-a9e1-48dc46df2119",
+                  "source": "IN_COURT"
+                },
+                "listingNumber": 1,
+                "modeOfTrial": "Either Way",
+                "offenceCode": "SX03204",
+                "offenceDateCode": 5,
+                "offenceDefinitionId": "fea6c701-0fcb-4ab9-a82c-0c54886317f9",
+                "offenceLegislation": "Contrary to section 91(1)(a) and    (2) of the Sexual Offences Act 2003",
+                "offenceLegislationWelsh": "Yn groes i adran 91(1)(a) a (2) Deddf Troseddau Rhywiol 2003.",
+                "offenceTitle": "Sex offenders register - fail comply with notification requirements - SOA 2003",
+                "offenceTitleWelsh": "Cofrestr troseddwyr rhyw – methu cydymffurfio â gofynion hysbysu - Deddf Troseddau Rhywiol 2003",
+                "orderIndex": 4,
+                "startDate": "2023-03-16",
+                "wording": "english words"
+              },
+              {
+                "convictionDate": "2023-04-20",
+                "dvlaOffenceCode": "",
+                "id": "bebf02be-16e6-45cc-b46c-8e63beff0bee",
+                "indicatedPlea": {
+                  "indicatedPleaDate": "2023-04-20",
+                  "indicatedPleaValue": "INDICATED_GUILTY",
+                  "offenceId": "bebf02be-16e6-45cc-b46c-8e63beff0bee",
+                  "originatingHearingId": "3552b731-0d04-4a51-a9e1-48dc46df2119",
+                  "source": "IN_COURT"
+                },
+                "modeOfTrial": "Either Way",
+                "offenceCode": "SX03220",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "501c7b0c-5cff-4d24-a984-58e3c9db0a4d",
+                "offenceLegislation": "Contrary to section 103I(1) and (3) of the Sexual Offences Act 2003.",
+                "offenceTitle": "Breach SHPO / interim SHPO / SOPO / interim SOPO / foreign travel order",
+                "orderIndex": 7,
+                "startDate": "2023-03-16",
+                "wording": "english words"
+              },
+              {
+                "convictionDate": "2023-04-20",
+                "dvlaOffenceCode": "",
+                "id": "aca3a83e-409e-47c3-be28-c67e1f869e7c",
+                "indicatedPlea": {
+                  "indicatedPleaDate": "2023-04-20",
+                  "indicatedPleaValue": "INDICATED_GUILTY",
+                  "offenceId": "aca3a83e-409e-47c3-be28-c67e1f869e7c",
+                  "originatingHearingId": "3552b731-0d04-4a51-a9e1-48dc46df2119",
+                  "source": "IN_COURT"
+                },
+                "modeOfTrial": "Either Way",
+                "offenceCode": "SX03220",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "501c7b0c-5cff-4d24-a984-58e3c9db0a4d",
+                "offenceLegislation": "Contrary to section 103I(1) and (3) of the Sexual Offences Act 2003.",
+                "offenceTitle": "Breach SHPO / interim SHPO / SOPO / interim SOPO / foreign travel order",
+                "orderIndex": 5,
+                "startDate": "2023-03-16",
+                "wording": "english words"
+              },
+              {
+                "convictionDate": "2023-04-20",
+                "dvlaOffenceCode": "",
+                "id": "4dedabf0-d94a-46c3-a38f-389374de8ac4",
+                "indicatedPlea": {
+                  "indicatedPleaDate": "2023-04-20",
+                  "indicatedPleaValue": "INDICATED_GUILTY",
+                  "offenceId": "4dedabf0-d94a-46c3-a38f-389374de8ac4",
+                  "originatingHearingId": "3552b731-0d04-4a51-a9e1-48dc46df2119",
+                  "source": "IN_COURT"
+                },
+                "modeOfTrial": "Either Way",
+                "offenceCode": "SX03220",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "501c7b0c-5cff-4d24-a984-58e3c9db0a4d",
+                "offenceLegislation": "Contrary to section 103I(1) and (3) of the Sexual Offences Act 2003.",
+                "offenceTitle": "Breach SHPO / interim SHPO / SOPO / interim SOPO / foreign travel order",
+                "orderIndex": 6,
+                "startDate": "2023-03-16",
+                "wording": "english words"
+              }
+            ],
+            "personDefendant": {
+              "personDetails": {
+                "address": {
+                  "address1": "Rowe Dale",
+                  "address2": "BRISTOL",
+                  "postcode": "CR8 2EJ"
+                },
+                "contact": {
+
+                },
+                "dateOfBirth": "2001-05-25",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+
+                },
+                "firstName": "uuubyxrunee",
+                "gender": "NOT_SPECIFIED",
+                "lastName": "llvkiZozk",
+                "occupationCode": "0",
+                "title": "MR"
+              }
+            },
+            "prosecutionCaseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134"
+          }
+        ],
+        "id": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+        "initiationCode": "Q",
+        "originatingOrganisation": "007EZ15",
+        "prosecutionCaseIdentifier": {
+          "address": {
+            "address1": "Finance Operations",
+            "address2": "C3 East",
+            "address3": "DVLA",
+            "address4": "Longview Road",
+            "address5": "Swansea",
+            "postcode": "SA6 7JL"
+          },
+          "contact": {
+            "primaryEmail": "sjp@dvla.gov.uk"
+          },
+          "majorCreditorCode": "DVL2",
+          "prosecutionAuthorityCode": "DVLA",
+          "prosecutionAuthorityId": "6ae4b163-658b-3ae2-a66d-43401cac2f96",
+          "prosecutionAuthorityName": "Driver and Vehicle Licensing Agency",
+          "prosecutionAuthorityOUCode": "G94DV00",
+          "prosecutionAuthorityReference": "DV02011416"
+        }
+      }
+    ],
+    "type": {
+      "description": "First hearing",
+      "id": "4a0e892d-c0c5-3c51-95b8-704d8c781776"
+    }
+  },
+  "variantDirectory": [],
+  "completedResultLinesStatus": {
+
+  },
+  "targets": [
+    {
+      "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+      "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "draftResult": "{}",
+      "hearingDay": "2023-04-20",
+      "hearingId": "3552b731-0d04-4a51-a9e1-48dc46df2119",
+      "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "offenceId": "4dedabf0-d94a-46c3-a38f-389374de8ac4",
+      "resultLines": [
+        {
+          "amendmentDate": "2023-05-15T14:28:05.175Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [
+            "42ce2540-3484-4e5c-93e7-d8319d948a19"
+          ],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "4dedabf0-d94a-46c3-a38f-389374de8ac4",
+          "orderedDate": "2023-04-20",
+          "prompts": [
+            {
+              "id": "5e9f69e4-299d-41e0-93ef-b7523df86954",
+              "label": "Committed",
+              "promptRef": "committed",
+              "value": "for sentence (Section 14 of the Sentencing Act 2020)"
+            },
+            {
+              "id": "4d10cd4b-fb39-40dd-88e1-2397832bc914",
+              "label": "Bail remand days to count (tagged days)",
+              "promptRef": "bailRemandDaysToCountTaggedDays",
+              "value": "0"
+            },
+            {
+              "id": "07fe6e7e-dde2-45d6-b0c0-aa8e1b2883b8",
+              "label": "No indication given re victim personal statement",
+              "promptRef": "noIndicationGivenReVictimPersonalStatement",
+              "value": "true"
+            },
+            {
+              "id": "ed26a92b-0850-435b-a4c7-2c77baaea4b3",
+              "label": "PSR ordered",
+              "promptRef": "pSROrdered",
+              "value": "true"
+            },
+            {
+              "id": "714cfc3a-c860-49e0-a775-32fa7a1540db",
+              "label": "Probation / YOT to be notified organisation name",
+              "promptRef": "probationyottobenotifiedOrganisationName",
+              "value": "ghghj"
+            },
+            {
+              "id": "714cfc3a-c860-49e0-a775-32fa7a1540db",
+              "label": "Probation / YOT to be notified email address 1",
+              "promptRef": "probationyottobenotifiedEmailAddress1",
+              "value": "ghgjhghj@hjhj"
+            }
+          ],
+          "resultDefinitionId": "3c03001c-56b3-4c64-bc0f-a3c57c3f424f",
+          "resultLabel": "Committed to Crown Court for sentence on unconditional bail",
+          "resultLineId": "6e95fc9a-68fc-4eb3-a39f-d575cc16f081",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "ccsu"
+        },
+        {
+          "amendmentDate": "2023-05-15T14:28:05.175Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [
+            "6c8a2a12-af80-4c5f-b41b-e6780457cc5f"
+          ],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "4dedabf0-d94a-46c3-a38f-389374de8ac4",
+          "orderedDate": "2023-04-20",
+          "parentResultLineIds": [
+            "6e95fc9a-68fc-4eb3-a39f-d575cc16f081"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "resultLabel": "Next hearing",
+          "resultLineId": "42ce2540-3484-4e5c-93e7-d8319d948a19",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "nexh"
+        },
+        {
+          "amendmentDate": "2023-05-15T14:28:05.175Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "4dedabf0-d94a-46c3-a38f-389374de8ac4",
+          "orderedDate": "2023-04-20",
+          "parentResultLineIds": [
+            "42ce2540-3484-4e5c-93e7-d8319d948a19"
+          ],
+          "prompts": [
+            {
+              "id": "aea2ee79-47b4-4023-9a95-1b327e6e03d5",
+              "label": "Fixed Date",
+              "promptRef": "fixedDate",
+              "value": "2023-05-18"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "10:30"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "Chester Crown Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "The Castle"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "Chester"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "CH1 2AN"
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "promptRef": "HTYPE",
+              "value": "Committal for Sentence"
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "promptRef": "HEST",
+              "value": "30 MINUTES"
+            }
+          ],
+          "resultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c9",
+          "resultLabel": "Next hearing in Crown Court",
+          "resultLineId": "6c8a2a12-af80-4c5f-b41b-e6780457cc5f",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "nhccs"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "4dedabf0-d94a-46c3-a38f-389374de8ac4"
+    },
+    {
+      "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+      "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "draftResult": "{}",
+      "hearingDay": "2023-04-20",
+      "hearingId": "3552b731-0d04-4a51-a9e1-48dc46df2119",
+      "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "offenceId": "64947824-98b8-422f-8ce8-7ef16df936b3",
+      "resultLines": [
+        {
+          "amendmentDate": "2023-05-15T14:27:56.088Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [
+            "b91c94d1-77a0-4045-b532-d3022d3b8305"
+          ],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "64947824-98b8-422f-8ce8-7ef16df936b3",
+          "orderedDate": "2023-04-20",
+          "prompts": [
+            {
+              "id": "5e9f69e4-299d-41e0-93ef-b7523df86954",
+              "label": "Committed",
+              "promptRef": "committed",
+              "value": "for sentence (Section 14 of the Sentencing Act 2020)"
+            },
+            {
+              "id": "4d10cd4b-fb39-40dd-88e1-2397832bc914",
+              "label": "Bail remand days to count (tagged days)",
+              "promptRef": "bailRemandDaysToCountTaggedDays",
+              "value": "0"
+            },
+            {
+              "id": "07fe6e7e-dde2-45d6-b0c0-aa8e1b2883b8",
+              "label": "No indication given re victim personal statement",
+              "promptRef": "noIndicationGivenReVictimPersonalStatement",
+              "value": "true"
+            },
+            {
+              "id": "ed26a92b-0850-435b-a4c7-2c77baaea4b3",
+              "label": "PSR ordered",
+              "promptRef": "pSROrdered",
+              "value": "true"
+            },
+            {
+              "id": "714cfc3a-c860-49e0-a775-32fa7a1540db",
+              "label": "Probation / YOT to be notified organisation name",
+              "promptRef": "probationyottobenotifiedOrganisationName",
+              "value": "North West Division NPS"
+            },
+            {
+              "id": "714cfc3a-c860-49e0-a775-32fa7a1540db",
+              "label": "Probation / YOT to be notified email address 1",
+              "promptRef": "probationyottobenotifiedEmailAddress1",
+              "value": "hgjfhgjkfhg@ghfjghjfg"
+            }
+          ],
+          "resultDefinitionId": "3c03001c-56b3-4c64-bc0f-a3c57c3f424f",
+          "resultLabel": "Committed to Crown Court for sentence on unconditional bail",
+          "resultLineId": "e272fa82-90e8-4a7f-be51-5025099505b9",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "ccsu"
+        },
+        {
+          "amendmentDate": "2023-05-15T14:27:56.088Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [
+            "7ff3add6-4a7e-4684-9633-dcac6a9e5a49"
+          ],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "64947824-98b8-422f-8ce8-7ef16df936b3",
+          "orderedDate": "2023-04-20",
+          "parentResultLineIds": [
+            "e272fa82-90e8-4a7f-be51-5025099505b9"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "resultLabel": "Next hearing",
+          "resultLineId": "b91c94d1-77a0-4045-b532-d3022d3b8305",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "nexh"
+        },
+        {
+          "amendmentDate": "2023-05-15T14:27:56.088Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "64947824-98b8-422f-8ce8-7ef16df936b3",
+          "orderedDate": "2023-04-20",
+          "parentResultLineIds": [
+            "b91c94d1-77a0-4045-b532-d3022d3b8305"
+          ],
+          "prompts": [
+            {
+              "id": "aea2ee79-47b4-4023-9a95-1b327e6e03d5",
+              "label": "Fixed Date",
+              "promptRef": "fixedDate",
+              "value": "2023-05-18"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "10:30"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "Chester Crown Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "The Castle"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "Chester"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "CH1 2AN"
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "promptRef": "HTYPE",
+              "value": "Committal for Sentence"
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "promptRef": "HEST",
+              "value": "30 MINUTES"
+            }
+          ],
+          "resultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c9",
+          "resultLabel": "Next hearing in Crown Court",
+          "resultLineId": "7ff3add6-4a7e-4684-9633-dcac6a9e5a49",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "nhccs"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "64947824-98b8-422f-8ce8-7ef16df936b3"
+    },
+    {
+      "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+      "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "draftResult": "{}",
+      "hearingDay": "2023-04-20",
+      "hearingId": "3552b731-0d04-4a51-a9e1-48dc46df2119",
+      "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "offenceId": "bebf02be-16e6-45cc-b46c-8e63beff0bee",
+      "resultLines": [
+        {
+          "amendmentDate": "2023-05-15T14:28:09.488Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [
+            "0e959c9b-7c05-477e-bd76-f03ec6c14a26"
+          ],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "bebf02be-16e6-45cc-b46c-8e63beff0bee",
+          "orderedDate": "2023-04-20",
+          "prompts": [
+            {
+              "id": "5e9f69e4-299d-41e0-93ef-b7523df86954",
+              "label": "Committed",
+              "promptRef": "committed",
+              "value": "for sentence (Section 14 of the Sentencing Act 2020)"
+            },
+            {
+              "id": "4d10cd4b-fb39-40dd-88e1-2397832bc914",
+              "label": "Bail remand days to count (tagged days)",
+              "promptRef": "bailRemandDaysToCountTaggedDays",
+              "value": "0"
+            },
+            {
+              "id": "07fe6e7e-dde2-45d6-b0c0-aa8e1b2883b8",
+              "label": "No indication given re victim personal statement",
+              "promptRef": "noIndicationGivenReVictimPersonalStatement",
+              "value": "true"
+            },
+            {
+              "id": "ed26a92b-0850-435b-a4c7-2c77baaea4b3",
+              "label": "PSR ordered",
+              "promptRef": "pSROrdered",
+              "value": "true"
+            },
+            {
+              "id": "714cfc3a-c860-49e0-a775-32fa7a1540db",
+              "label": "Probation / YOT to be notified organisation name",
+              "promptRef": "probationyottobenotifiedOrganisationName",
+              "value": "North West Division NPS"
+            },
+            {
+              "id": "714cfc3a-c860-49e0-a775-32fa7a1540db",
+              "label": "Probation / YOT to be notified email address 1",
+              "promptRef": "probationyottobenotifiedEmailAddress1",
+              "value": "hjghfjghkjf@gjffjghjf"
+            }
+          ],
+          "resultDefinitionId": "3c03001c-56b3-4c64-bc0f-a3c57c3f424f",
+          "resultLabel": "Committed to Crown Court for sentence on unconditional bail",
+          "resultLineId": "b88c809e-9319-4f8b-859c-8aab3a93a0ca",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "ccsu"
+        },
+        {
+          "amendmentDate": "2023-05-15T14:28:09.488Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [
+            "f37727d0-55a6-4a01-a652-28152527583a"
+          ],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "bebf02be-16e6-45cc-b46c-8e63beff0bee",
+          "orderedDate": "2023-04-20",
+          "parentResultLineIds": [
+            "b88c809e-9319-4f8b-859c-8aab3a93a0ca"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "resultLabel": "Next hearing",
+          "resultLineId": "0e959c9b-7c05-477e-bd76-f03ec6c14a26",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "nexh"
+        },
+        {
+          "amendmentDate": "2023-05-15T14:28:09.488Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "bebf02be-16e6-45cc-b46c-8e63beff0bee",
+          "orderedDate": "2023-04-20",
+          "parentResultLineIds": [
+            "0e959c9b-7c05-477e-bd76-f03ec6c14a26"
+          ],
+          "prompts": [
+            {
+              "id": "aea2ee79-47b4-4023-9a95-1b327e6e03d5",
+              "label": "Fixed Date",
+              "promptRef": "fixedDate",
+              "value": "2023-05-18"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "10:30"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "Chester Crown Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "The Castle"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "Chester"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "CH1 2AN"
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "promptRef": "HTYPE",
+              "value": "Committal for Sentence"
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "promptRef": "HEST",
+              "value": "30 MINUTES"
+            }
+          ],
+          "resultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c9",
+          "resultLabel": "Next hearing in Crown Court",
+          "resultLineId": "f37727d0-55a6-4a01-a652-28152527583a",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "nhccs"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "bebf02be-16e6-45cc-b46c-8e63beff0bee"
+    },
+    {
+      "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+      "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "draftResult": "{}",
+      "hearingDay": "2023-04-20",
+      "hearingId": "3552b731-0d04-4a51-a9e1-48dc46df2119",
+      "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "offenceId": "5e2ffc6a-8f4b-435d-bea2-408ba4fcddd0",
+      "resultLines": [
+        {
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "5e2ffc6a-8f4b-435d-bea2-408ba4fcddd0",
+          "orderedDate": "2023-03-31",
+          "prompts": [],
+          "resultDefinitionId": "c36fed37-b635-4303-b514-2273e9e2594d",
+          "resultLabel": "Entered in error",
+          "resultLineId": "21052736-2638-452f-aa2e-d5556c85b867",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "err"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "5e2ffc6a-8f4b-435d-bea2-408ba4fcddd0"
+    },
+    {
+      "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+      "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "draftResult": "{}",
+      "hearingDay": "2023-04-20",
+      "hearingId": "3552b731-0d04-4a51-a9e1-48dc46df2119",
+      "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "offenceId": "aca3a83e-409e-47c3-be28-c67e1f869e7c",
+      "resultLines": [
+        {
+          "amendmentDate": "2023-05-15T14:28:00.583Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [
+            "25288f6e-196c-4bd9-a790-dffe1435435e"
+          ],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "aca3a83e-409e-47c3-be28-c67e1f869e7c",
+          "orderedDate": "2023-04-20",
+          "prompts": [
+            {
+              "id": "5e9f69e4-299d-41e0-93ef-b7523df86954",
+              "label": "Committed",
+              "promptRef": "committed",
+              "value": "for sentence (Section 14 of the Sentencing Act 2020)"
+            },
+            {
+              "id": "4d10cd4b-fb39-40dd-88e1-2397832bc914",
+              "label": "Bail remand days to count (tagged days)",
+              "promptRef": "bailRemandDaysToCountTaggedDays",
+              "value": "0"
+            },
+            {
+              "id": "07fe6e7e-dde2-45d6-b0c0-aa8e1b2883b8",
+              "label": "No indication given re victim personal statement",
+              "promptRef": "noIndicationGivenReVictimPersonalStatement",
+              "value": "true"
+            },
+            {
+              "id": "ed26a92b-0850-435b-a4c7-2c77baaea4b3",
+              "label": "PSR ordered",
+              "promptRef": "pSROrdered",
+              "value": "true"
+            },
+            {
+              "id": "714cfc3a-c860-49e0-a775-32fa7a1540db",
+              "label": "Probation / YOT to be notified organisation name",
+              "promptRef": "probationyottobenotifiedOrganisationName",
+              "value": "North West Division NPS"
+            },
+            {
+              "id": "714cfc3a-c860-49e0-a775-32fa7a1540db",
+              "label": "Probation / YOT to be notified email address 1",
+              "promptRef": "probationyottobenotifiedEmailAddress1",
+              "value": "hfjghfjg@gjhgjjhj"
+            }
+          ],
+          "resultDefinitionId": "3c03001c-56b3-4c64-bc0f-a3c57c3f424f",
+          "resultLabel": "Committed to Crown Court for sentence on unconditional bail",
+          "resultLineId": "f3d7f8b6-8e3f-4890-9d4e-d872fad83a81",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "ccsu"
+        },
+        {
+          "amendmentDate": "2023-05-15T14:28:00.583Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [
+            "e0d332f6-aef0-41bb-9021-1a25fc57822a"
+          ],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "aca3a83e-409e-47c3-be28-c67e1f869e7c",
+          "orderedDate": "2023-04-20",
+          "parentResultLineIds": [
+            "f3d7f8b6-8e3f-4890-9d4e-d872fad83a81"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "resultLabel": "Next hearing",
+          "resultLineId": "25288f6e-196c-4bd9-a790-dffe1435435e",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "nexh"
+        },
+        {
+          "amendmentDate": "2023-05-15T14:28:00.583Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "aca3a83e-409e-47c3-be28-c67e1f869e7c",
+          "orderedDate": "2023-04-20",
+          "parentResultLineIds": [
+            "25288f6e-196c-4bd9-a790-dffe1435435e"
+          ],
+          "prompts": [
+            {
+              "id": "aea2ee79-47b4-4023-9a95-1b327e6e03d5",
+              "label": "Fixed Date",
+              "promptRef": "fixedDate",
+              "value": "2023-05-18"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "10:30"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "Chester Crown Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "The Castle"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "Chester"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "CH1 2AN"
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "promptRef": "HTYPE",
+              "value": "Committal for Sentence"
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "promptRef": "HEST",
+              "value": "30 MINUTES"
+            }
+          ],
+          "resultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c9",
+          "resultLabel": "Next hearing in Crown Court",
+          "resultLineId": "e0d332f6-aef0-41bb-9021-1a25fc57822a",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "nhccs"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "aca3a83e-409e-47c3-be28-c67e1f869e7c"
+    },
+    {
+      "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+      "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "draftResult": "{}",
+      "hearingDay": "2023-04-20",
+      "hearingId": "3552b731-0d04-4a51-a9e1-48dc46df2119",
+      "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "offenceId": "f0a91897-209f-436b-b928-db5cfcd6eae5",
+      "resultLines": [
+        {
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "f0a91897-209f-436b-b928-db5cfcd6eae5",
+          "orderedDate": "2023-03-31",
+          "prompts": [],
+          "resultDefinitionId": "c36fed37-b635-4303-b514-2273e9e2594d",
+          "resultLabel": "Entered in error",
+          "resultLineId": "71c6894b-889e-4bf1-85b6-e8f64380c505",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "err"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "f0a91897-209f-436b-b928-db5cfcd6eae5"
+    },
+    {
+      "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+      "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "draftResult": "{}",
+      "hearingDay": "2023-04-20",
+      "hearingId": "3552b731-0d04-4a51-a9e1-48dc46df2119",
+      "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+      "offenceId": "2e4b4ea3-1492-44bf-9589-d14d89067679",
+      "resultLines": [
+        {
+          "caseId": "37f8d1a9-e8ea-4b3b-ae9a-d8b87b269134",
+          "childResultLineIds": [],
+          "defendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "e739c427-9758-4912-8e0a-3b19aa372485",
+          "offenceId": "2e4b4ea3-1492-44bf-9589-d14d89067679",
+          "orderedDate": "2023-03-31",
+          "prompts": [],
+          "resultDefinitionId": "c36fed37-b635-4303-b514-2273e9e2594d",
+          "resultLabel": "Entered in error",
+          "resultLineId": "a0c2748a-4480-4f45-b1e0-b9a1a8a783f8",
+          "shadowListed": false,
+          "sharedDate": "2023-05-15",
+          "shortCode": "err"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "2e4b4ea3-1492-44bf-9589-d14d89067679"
+    }
+  ],
+  "savedTargets": [
+  ],
+  "defendantDetailsChanged": [],
+  "isReshare": true,
+  "newAmendmentResults": [
+    {
+      "id": "e272fa82-90e8-4a7f-be51-5025099505b9",
+      "amendmentDateTime": "2023-05-15T14:27:56.088Z"
+    },
+    {
+      "id": "b91c94d1-77a0-4045-b532-d3022d3b8305",
+      "amendmentDateTime": "2023-05-15T14:27:56.088Z"
+    },
+    {
+      "id": "7ff3add6-4a7e-4684-9633-dcac6a9e5a49",
+      "amendmentDateTime": "2023-05-15T14:27:56.088Z"
+    },
+    {
+      "id": "f3d7f8b6-8e3f-4890-9d4e-d872fad83a81",
+      "amendmentDateTime": "2023-05-15T14:28:00.583Z"
+    },
+    {
+      "id": "25288f6e-196c-4bd9-a790-dffe1435435e",
+      "amendmentDateTime": "2023-05-15T14:28:00.583Z"
+    },
+    {
+      "id": "e0d332f6-aef0-41bb-9021-1a25fc57822a",
+      "amendmentDateTime": "2023-05-15T14:28:00.583Z"
+    },
+    {
+      "id": "6e95fc9a-68fc-4eb3-a39f-d575cc16f081",
+      "amendmentDateTime": "2023-05-15T14:28:05.175Z"
+    },
+    {
+      "id": "42ce2540-3484-4e5c-93e7-d8319d948a19",
+      "amendmentDateTime": "2023-05-15T14:28:05.175Z"
+    },
+    {
+      "id": "6c8a2a12-af80-4c5f-b41b-e6780457cc5f",
+      "amendmentDateTime": "2023-05-15T14:28:05.175Z"
+    },
+    {
+      "id": "b88c809e-9319-4f8b-859c-8aab3a93a0ca",
+      "amendmentDateTime": "2023-05-15T14:28:09.488Z"
+    },
+    {
+      "id": "0e959c9b-7c05-477e-bd76-f03ec6c14a26",
+      "amendmentDateTime": "2023-05-15T14:28:09.488Z"
+    },
+    {
+      "id": "f37727d0-55a6-4a01-a652-28152527583a",
+      "amendmentDateTime": "2023-05-15T14:28:09.488Z"
+    }
+  ],
+  "hearingDay": "2023-04-20"
+}

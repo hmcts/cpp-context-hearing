@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.save-days-draft-result.json",
+  "type": "object",
+  "properties": {
+    "hearingDay": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+    },
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "resultLines": {
+      "type": "array",
+      "items": {
+        "$ref": "http://justice.gov.uk/core/courts/resultLine.json"
+      }
+    },
+    "reasonsList": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "userId": {
+      "type": "string"
+    },
+    "defendantId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "targetId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "offenceId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "draftResult": {
+      "type": "string"
+    },
+    "shadowListed" : {
+      "type": "boolean"
+    },
+    "applicationId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "hearingId",
+        "targetId",
+        "defendantId",
+        "offenceId",
+        "draftResult"
+      ]
+    },
+    {
+      "required": [
+        "hearingId",
+        "targetId",
+        "applicationId",
+        "draftResult"
+      ]
+    }
+  ],
+  "additionalProperties": true
+}

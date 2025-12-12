@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/addCompanyRepresentative.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "companyRepresentative": {
+      "$ref": "http://justice.gov.uk/core/courts/companyRepresentative.json"
+    }
+  },
+  "required": [
+    "hearingId",
+    "companyRepresentative"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-case-note-saved.json",
+  "type": "object",
+  "properties": {
+    "hearingCaseNote": {
+      "$ref": "http://justice.gov.uk/core/courts/hearingCaseNote.json"
+    }
+  },
+  "required": [
+    "hearingCaseNote"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,678 @@
+#%RAML 0.8
+title: Hearing API
+baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
+
+
+/hearings:
+    post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.initiate+json
+            name: hearing.initiate
+        (mapping):
+            requestType: application/vnd.hearing.generate-nows+json
+            name: hearing.generate-nows
+        (mapping):
+            requestType: application/vnd.hearing.update-defendant-attendance-on-hearing-day+json
+            name: hearing.update-defendant-attendance-on-hearing-day
+        ...
+      body:
+        application/vnd.hearing.initiate+json:
+            example:
+             !include json/hearing.initiate.json
+            schema:
+             !include json/schema/hearing.initiate.json
+        application/vnd.hearing.generate-nows+json:
+            example:
+             !include json/hearing.generate-nows.json
+            schema:
+             !include json/schema/hearing.generate-nows.json
+        application/vnd.hearing.update-defendant-attendance-on-hearing-day+json:
+            example:
+             !include json/hearing.update-defendant-attendance-on-hearing-day.json
+            schema:
+             !include json/schema/hearing.update-defendant-attendance-on-hearing-day.json
+      responses:
+            202:
+                description: OK
+
+/hearings/{hearingId}/{hearingDay}:
+  post:
+    description: |
+      ...
+      (mapping):
+          requestType: application/vnd.hearing.shared-results+json
+          name: hearing.share-days-results
+      (mapping):
+          requestType: application/vnd.hearing.draft-result+json
+          name: hearing.save-days-draft-result
+      (mapping):
+          requestType: application/vnd.hearing.draft-results+json
+          name: hearing.save-days-draft-results
+      (mapping):
+          requestType: application/vnd.hearing.save-draft-result-v2+json
+          name: hearing.save-draft-result-v2
+      (mapping):
+          requestType: application/vnd.hearing.delete-draft-result-v2+json
+          name: hearing.delete-draft-result-v2
+      ...
+    body:
+      application/vnd.hearing.shared-results+json:
+          example:
+           !include json/hearing.share-days-results.json
+          schema:
+           !include json/schema/hearing.share-days-results.json
+      application/vnd.hearing.draft-result+json:
+          example:
+           !include json/hearing.save-days-draft-result.json
+          schema:
+           !include json/schema/hearing.save-days-draft-result.json
+      application/vnd.hearing.draft-results+json:
+          example:
+           !include json/hearing.save-days-draft-results.json
+          schema:
+           !include json/schema/hearing.save-days-draft-results.json
+      application/vnd.hearing.save-draft-result-v2+json:
+          example:
+           !include json/hearing.save-draft-result-v2.json
+          schema:
+           !include json/schema/hearing.save-draft-result-v2.json
+      application/vnd.hearing.delete-draft-result-v2+json:
+          example:
+           !include json/hearing.delete-draft-result-v2.json
+          schema:
+           !include json/schema/hearing.delete-draft-result-v2.json
+    responses:
+          202:
+              description: Accepted
+
+/hearings/{hearingId}:
+  displayName: Hearing
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.add-prosecution-counsel+json
+            name: hearing.add-prosecution-counsel
+        (mapping):
+            requestType: application/vnd.hearing.save-defendants-welsh-translations+json
+            name: hearing.save-defendants-welsh-translations
+        (mapping):
+            requestType: application/vnd.hearing.remove-prosecution-counsel+json
+            name: hearing.remove-prosecution-counsel
+        (mapping):
+            requestType: application/vnd.hearing.update-prosecution-counsel+json
+            name: hearing.update-prosecution-counsel
+        (mapping):
+            requestType: application/vnd.hearing.add-defence-counsel+json
+            name: hearing.add-defence-counsel
+        (mapping):
+            requestType: application/vnd.hearing.remove-defence-counsel+json
+            name: hearing.remove-defence-counsel
+        (mapping):
+            requestType: application/vnd.hearing.update-defence-counsel+json
+            name: hearing.update-defence-counsel
+        (mapping):
+            requestType: application/vnd.hearing.save-multiple-draft-results+json
+            name: hearing.save-multiple-draft-results
+        (mapping):
+            requestType: application/vnd.hearing.save-draft-result+json
+            name: hearing.save-draft-result
+        (mapping):
+            requestType: application/vnd.hearing.update-plea+json
+            name: hearing.update-plea
+        (mapping):
+            requestType: application/vnd.hearing.update-verdict+json
+            name: hearing.update-verdict
+        (mapping):
+            requestType: application/vnd.hearing.save-hearing-case-note+json
+            name: hearing.save-hearing-case-note
+        (mapping):
+            requestType: application/vnd.hearing.add-respondent-counsel+json
+            name: hearing.add-respondent-counsel
+        (mapping):
+            requestType: application/vnd.hearing.remove-respondent-counsel+json
+            name: hearing.remove-respondent-counsel
+        (mapping):
+            requestType: application/vnd.hearing.update-respondent-counsel+json
+            name: hearing.update-respondent-counsel
+        (mapping):
+            requestType: application/vnd.hearing.add-applicant-counsel+json
+            name: hearing.add-applicant-counsel
+        (mapping):
+            requestType: application/vnd.hearing.remove-applicant-counsel+json
+            name: hearing.remove-applicant-counsel
+        (mapping):
+            requestType: application/vnd.hearing.update-applicant-counsel+json
+            name: hearing.update-applicant-counsel
+        (mapping):
+            requestType: application/vnd.hearing.add-company-representative+json
+            name: hearing.add-company-representative
+        (mapping):
+            requestType: application/vnd.hearing.update-company-representative+json
+            name: hearing.update-company-representative
+        (mapping):
+            requestType: application/vnd.hearing.remove-company-representative+json
+            name: hearing.remove-company-representative
+        (mapping):
+            requestType: application/vnd.hearing.add-interpreter-intermediary+json
+            name: hearing.add-interpreter-intermediary
+        (mapping):
+            requestType: application/vnd.hearing.update-interpreter-intermediary+json
+            name: hearing.update-interpreter-intermediary
+        (mapping):
+            requestType: application/vnd.hearing.remove-interpreter-intermediary+json
+            name: hearing.remove-interpreter-intermediary
+        (mapping):
+            requestType: application/vnd.hearing.set-trial-type+json
+            name: hearing.set-trial-type
+        (mapping):
+            requestType: application/vnd.hearing.remove-targets+json
+            name: hearing.remove-targets
+        (mapping):
+            requestType: application/vnd.hearing.master-defendant-id+json
+            name: hearing.add-master-defendant-id-to-defendant
+        (mapping):
+            requestType: application/vnd.hearing.duplicate+json
+            name: hearing.mark-as-duplicate
+        (mapping):
+            requestType: application/vnd.hearing.duplicate.v2+json
+            name: hearing.mark-as-duplicate-v2
+        (mapping):
+            requestType: application/vnd.hearing.mark-as-duplicate-with-reason+json
+            name: hearing.mark-as-duplicate-with-reason        
+        (mapping):
+            requestType: application/vnd.hearing.change-hearing-detail+json
+            name: hearing.change-hearing-detail
+        (mapping):
+            requestType: application/vnd.hearing.related-hearing+json
+            name: hearing.update-related-hearing
+        (mapping):
+            requestType: application/vnd.hearing.change-cancel-amendments+json
+            name: hearing.change-cancel-amendments
+        (mapping):
+            requestType: application/vnd.hearing.update-resultline-shared-dates+json
+            name: hearing.update-resultline-shared-dates
+        (mapping):
+            requestType: application/vnd.hearing.youth-court-defendants+json
+            name: hearing.youth-court-defendants
+        (mapping):
+            requestType: application/vnd.hearing.amend+json
+            name: hearing.amend
+        (mapping):
+            requestType: application/vnd.hearing.amend-for-support+json
+            name: hearing.amend-for-support
+        (mapping):
+            requestType: application/vnd.hearing.unlock-hearing+json
+            name: hearing.unlock-hearing
+        (mapping):
+            requestType: application/vnd.hearing.replicate-shared-results+json
+            name: hearing.replicate-shared-results
+        (mapping):
+            requestType: application/vnd.hearing.add-witness+json
+            name: hearing.add-witness
+        (mapping):
+            requestType: application/vnd.hearing.delete-hearing-bdf+json
+            name: hearing.delete-hearing-bdf
+        (mapping):
+            requestType: application/vnd.hearing.patch-application-finalised-on-target+json
+            name: hearing.patch-application-finalised-on-target
+
+        ...
+      body:
+        application/vnd.hearing.save-draft-result+json:
+            example:
+             !include json/hearing.save-draft-result.json
+            schema:
+             !include json/schema/hearing.save-draft-result.json
+        application/vnd.hearing.save-defendants-welsh-translations+json:
+            example:
+             !include json/hearing.save-defendants-welsh-translations.json
+            schema:
+             !include json/schema/hearing.save-defendants-welsh-translations.json
+        application/vnd.hearing.save-multiple-draft-results+json:
+            example:
+             !include json/hearing.save-multiple-draft-results.json
+            schema:
+             !include json/schema/hearing.save-multiple-draft-results.json
+        application/vnd.hearing.add-prosecution-counsel+json:
+            example:
+             !include json/hearing.add-prosecution-counsel.json
+            schema:
+             !include json/schema/hearing.add-prosecution-counsel.json
+        application/vnd.hearing.remove-prosecution-counsel+json:
+            example:
+             !include json/hearing.remove-prosecution-counsel.json
+            schema:
+             !include json/schema/hearing.remove-prosecution-counsel.json
+        application/vnd.hearing.update-prosecution-counsel+json:
+            example:
+              !include json/hearing.update-prosecution-counsel.json
+            schema:
+              !include json/schema/hearing.update-prosecution-counsel.json
+        application/vnd.hearing.add-defence-counsel+json:
+            example:
+             !include json/hearing.add-defence-counsel.json
+            schema:
+             !include json/schema/hearing.add-defence-counsel.json
+        application/vnd.hearing.remove-defence-counsel+json:
+            example:
+             !include json/hearing.remove-defence-counsel.json
+            schema:
+             !include json/schema/hearing.remove-defence-counsel.json
+        application/vnd.hearing.update-defence-counsel+json:
+            example:
+             !include json/hearing.update-defence-counsel.json
+            schema:
+             !include json/schema/hearing.update-defence-counsel.json
+        application/vnd.hearing.update-plea+json:
+            example:
+             !include json/hearing.update-plea.json
+            schema:
+             !include json/schema/hearing.update-plea.json
+        application/vnd.hearing.update-verdict+json:
+            example:
+             !include json/hearing.update-verdict.json
+            schema:
+             !include json/schema/hearing.update-verdict.json
+        application/vnd.hearing.save-hearing-case-note+json:
+            example: !include json/hearing.save-hearing-case-note.json
+            schema: !include json/schema/hearing.save-hearing-case-note.json
+        application/vnd.hearing.add-respondent-counsel+json:
+            example: !include json/hearing.add-respondent-counsel.json
+            schema:  !include json/schema/hearing.add-respondent-counsel.json
+        application/vnd.hearing.remove-respondent-counsel+json:
+            example: !include json/hearing.remove-respondent-counsel.json
+            schema:  !include json/schema/hearing.remove-respondent-counsel.json
+        application/vnd.hearing.update-respondent-counsel+json:
+            example: !include json/hearing.update-respondent-counsel.json
+            schema:  !include json/schema/hearing.update-respondent-counsel.json
+        application/vnd.hearing.add-applicant-counsel+json:
+            example: !include json/hearing.add-applicant-counsel.json
+            schema:  !include json/schema/hearing.add-applicant-counsel.json
+        application/vnd.hearing.remove-applicant-counsel+json:
+            example: !include json/hearing.remove-applicant-counsel.json
+            schema:  !include json/schema/hearing.remove-applicant-counsel.json
+        application/vnd.hearing.update-applicant-counsel+json:
+            example: !include json/hearing.update-applicant-counsel.json
+            schema:  !include json/schema/hearing.update-applicant-counsel.json
+        application/vnd.hearing.add-company-representative+json:
+            example: !include json/hearing.add-company-representative.json
+            schema:  !include json/schema/hearing.add-company-representative.json
+        application/vnd.hearing.update-company-representative+json:
+            example: !include json/hearing.update-company-representative.json
+            schema:  !include json/schema/hearing.update-company-representative.json
+        application/vnd.hearing.remove-company-representative+json:
+            example: !include json/hearing.remove-company-representative.json
+            schema:  !include json/schema/hearing.remove-company-representative.json
+        application/vnd.hearing.add-interpreter-intermediary+json:
+            example: !include json/hearing.add-interpreter-intermediary.json
+            schema:  !include json/schema/hearing.add-interpreter-intermediary.json
+        application/vnd.hearing.update-interpreter-intermediary+json:
+            example: !include json/hearing.update-interpreter-intermediary.json
+            schema:  !include json/schema/hearing.update-interpreter-intermediary.json
+        application/vnd.hearing.remove-interpreter-intermediary+json:
+            example: !include json/hearing.remove-interpreter-intermediary.json
+            schema:  !include json/schema/hearing.remove-interpreter-intermediary.json
+        application/vnd.hearing.set-trial-type+json:
+            example: !include json/hearing.set-trial-type.json
+            schema: !include json/schema/hearing.set-trial-type.json
+        application/vnd.hearing.remove-targets+json:
+            example: !include json/hearing.remove-targets.json
+            schema: !include json/schema/hearing.remove-targets.json
+        application/vnd.hearing.change-hearing-detail+json:
+            schema: !include json/schema/hearing.change-hearing-detail.json
+            example: !include json/hearing.change-hearing-detail.json
+        application/vnd.hearing.master-defendant-id+json:
+            example: !include json/hearing.add-master-defendant-id-to-defendant.json
+            schema: !include json/schema/hearing.add-master-defendant-id-to-defendant.json
+        application/vnd.hearing.duplicate+json:
+            example: !include json/hearing.mark-as-duplicate.json
+            schema: !include json/schema/hearing.mark-as-duplicate.json
+        application/vnd.hearing.duplicate.v2+json: !!null
+        application/vnd.hearing.mark-as-duplicate-with-reason+json:
+          example: !include json/hearing.mark-as-duplicate-with-reason.json
+          schema: !include json/schema/hearing.mark-as-duplicate-with-reason.json
+        application/vnd.hearing.change-cancel-amendments+json:
+            schema: !include json/schema/hearing.change-cancel-amendments.json
+            example: !include json/hearing.change-cancel-amendments.json
+        application/vnd.hearing.related-hearing+json:
+            example: !include json/hearing.update-related-hearing.json
+            schema: !include json/schema/hearing.update-related-hearing.json
+        application/vnd.hearing.update-resultline-shared-dates+json:
+            example: !include json/hearing.update-resultline-shared-dates.json
+            schema: !include json/schema/hearing.update-resultline-shared-dates.json
+        application/vnd.hearing.youth-court-defendants+json:
+            example: !include json/hearing.youth-court-defendants.json
+            schema: !include json/schema/hearing.youth-court-defendants.json
+        application/vnd.hearing.amend+json:
+            example: !include json/hearing.amend.json
+            schema: !include json/schema/hearing.amend.json
+        application/vnd.hearing.amend-for-support+json:
+            example: !include json/hearing.amend.json
+            schema: !include json/schema/hearing.amend.json
+        application/vnd.hearing.unlock-hearing+json:
+            example: !include json/hearing.unlock-hearing.json
+            schema: !include json/schema/hearing.unlock-hearing.json
+        application/vnd.hearing.replicate-shared-results+json:
+            schema: !include json/schema/hearing.replicate-results.json
+            example: !include json/hearing.replicate-results.json
+        application/vnd.hearing.add-witness+json:
+            example:
+             !include json/hearing.add-witness.json
+            schema:
+             !include json/schema/hearing.add-witness.json
+        application/vnd.hearing.delete-hearing-bdf+json:
+          example: !include json/hearing.delete-hearing-bdf.json
+          schema: !include json/schema/hearing.delete-hearing-bdf.json
+        application/vnd.hearing.patch-application-finalised-on-target+json:
+          schema: !include json/schema/hearing.patch-application-finalised-on-target.json
+          example: !include json/hearing.patch-application-finalised-on-target.json
+      responses:
+            202:
+                description: OK
+
+/hearings/{hearingId}/hearing-slots:
+    post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.book-provisional-hearing-slots+json
+            name: hearing.book-provisional-hearing-slots
+        ...
+      body:
+        application/vnd.hearing.book-provisional-hearing-slots+json:
+            example:
+             !include json/hearing.book-provisional-hearing-slots.json
+            schema:
+             !include json/schema/hearing.book-provisional-hearing-slots.json
+      responses:
+            202:
+                description: OK
+
+/hearings/event-definitions:
+    post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.create-hearing-event-definitions+json
+            name: hearing.create-hearing-event-definitions
+        ...
+      body:
+        application/vnd.hearing.create-hearing-event-definitions+json:
+            example:
+             !include json/hearing.create-hearing-event-definitions.json
+            schema:
+             !include json/schema/hearing.create-hearing-event-definitions.json
+      responses:
+            202:
+                description: OK
+
+/hearings/{hearingId}/event:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.log-hearing-event+json
+            name: hearing.log-hearing-event
+        ...
+      body:
+        application/vnd.hearing.log-hearing-event+json:
+            example: !include json/hearing.log-hearing-event.json
+            schema: !include json/schema/hearing.log-hearing-event.json
+      responses:
+            202:
+              description: OK
+
+/hearings/{hearingId}/events:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.update-hearing-events+json
+            name: hearing.update-hearing-events	
+        ...
+      body:
+        application/vnd.hearing.update-hearing-events+json:
+            example: !include json/hearing.update-hearing-events.json
+            schema: !include json/schema/hearing.update-hearing-events.json
+      responses:
+            202:
+                description: OK
+
+/hearings/{hearingId}/event/{hearingEventId}:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.correct-hearing-event+json
+            name: hearing.correct-hearing-event
+        ...
+      body:
+        application/vnd.hearing.correct-hearing-event+json:
+            example: !include json/hearing.correct-hearing-event.json
+            schema: !include json/schema/hearing.correct-hearing-event.json
+      responses:
+            202:
+                description: OK
+
+/hearings/{hearingId}/share-results:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.share-results+json
+            name: hearing.share-results
+        (mapping):
+            requestType: application/vnd.hearing.share-results-v2+json
+            name: hearing.share-results-v2
+        ...
+      body:
+        application/vnd.hearing.share-results+json:
+            example: !include json/hearing.share-results.json
+            schema: !include json/schema/hearing.share-results.json
+        application/vnd.hearing.share-results-v2+json:
+            example: !include json/hearing.share-results-v2.json
+            schema: !include json/schema/hearing.share-results-v2.json
+      responses:
+            202:
+                description: OK
+
+
+/upload-subscriptions/{referenceDate}:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.upload-subscriptions+json
+            name: hearing.upload-subscriptions
+        ...
+
+      body:
+        application/vnd.hearing.upload-subscriptions+json:
+            example: !include json/hearing.upload-subscriptions.json
+            schema: !include json/schema/hearing.upload-subscriptions.json
+      responses:
+            202:
+                description: OK
+
+/publish-court-list:
+  post:
+    description: |
+      Publish court list
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.publish-court-list+json
+        name: hearing.publish-court-list
+      ...
+    body:
+      application/vnd.hearing.publish-court-list+json:
+        schema: !include json/schema/hearing.publish-court-list.json
+        example: !include json/hearing.publish-court-list.json
+
+    responses:
+      202:
+        description: Request accepted
+
+/publishHearingListsForCrownCourts:
+  post:
+    description: |
+      Publish hearing lists for all crown courts:
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.publish-hearing-lists-for-crown-courts+json
+        name: hearing.publish-hearing-lists-for-crown-courts
+      ...
+    body:
+      application/vnd.hearing.publish-hearing-lists-for-crown-courts+json:
+        schema: !include json/schema/hearing.publish-hearing-lists-for-crown-courts.json
+        example: !include json/hearing.publish-hearing-lists-for-crown-courts.json
+
+    responses:
+      202:
+        description: Request accepted
+
+/publishHearingListsForCrownCourtsWithIds:
+  post:
+    description: |
+      Publish hearing lists for all crown courts:
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.publish-hearing-lists-for-crown-courts-with-ids+json
+        name: hearing.publish-hearing-lists-for-crown-courts-with-ids
+      ...
+    body:
+      application/vnd.hearing.publish-hearing-lists-for-crown-courts-with-ids+json:
+        schema: !include json/schema/hearing.publish-hearing-lists-for-crown-courts-with-ids.json
+        example: !include json/hearing.publish-hearing-lists-for-crown-courts-with-ids.json
+
+    responses:
+      202:
+        description: Request accepted
+
+/outstanding-fines:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.compute-outstanding-fines+json
+            name: hearing.compute-outstanding-fines
+        ...
+      body:
+        application/vnd.hearing.compute-outstanding-fines+json:
+            example: !include json/hearing.compute-outstanding-fines.json
+            schema: !include json/schema/hearing.compute-outstanding-fines.json
+      responses:
+            202:
+                description: OK
+
+/record-session-time:
+  post:
+    description: |
+      Record Session time:
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.record-session-time+json
+        name: hearing.record-session-time
+      ...
+    body:
+      application/vnd.hearing.record-session-time+json:
+        schema: !include json/schema/hearing.record-session-time.json
+        example: !include json/hearing.record-session-time.json
+
+    responses:
+      202:
+        description: Request accepted
+
+/correct-hearing-days-without-court-centre:
+    post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.correct-hearing-days-without-court-centre+json
+            name: hearing.correct-hearing-days-without-court-centre
+        ...
+      body:
+        application/vnd.hearing.correct-hearing-days-without-court-centre+json:
+            example:
+             !include json/hearing.correct-hearing-days-without-court-centre.json
+            schema:
+             !include json/schema/hearing.correct-hearing-days-without-court-centre.json
+      responses:
+            202:
+                description: OK
+
+
+/request-approval:
+  post:
+    description: |
+      Request Approval:
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.request-approval+json
+        name: hearing.request-approval
+      ...
+    body:
+      application/vnd.hearing.request-approval+json:
+        schema: !include json/schema/hearing.request-approval.json
+        example: !include json/hearing.request-approval.json
+
+    responses:
+      202:
+        description: Request accepted
+
+/validate-result-amendments:
+  post:
+    description: |
+      Validate Result Amendments :
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.validate-result-amendments+json
+        name: hearing.validate-result-amendments
+      ...
+    body:
+      application/vnd.hearing.validate-result-amendments+json:
+        schema: !include json/schema/hearing.validate-result-amendments.json
+        example: !include json/hearing.validate-result-amendments.json
+
+    responses:
+      202:
+        description: Request accepted
+
+/reusable-info/{hearingId}:
+  post:
+    description: |
+      Reuse of Information through Caching :
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.reusable-info+json
+        name: hearing.reusable-info
+      ...
+    body:
+      application/vnd.hearing.reusable-info+json:
+        schema: !include json/schema/hearing.reusable-info.json
+        example: !include json/hearing.reusable-info.json
+
+    responses:
+      202:
+        description: Request accepted
+
+
+/remove-offences-from-existing-hearing:
+  post:
+    description: |
+      Rmove Offence from Manage Hearing :
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.remove-offences-from-existing-hearing+json
+        name: hearing.remove-offences-from-existing-hearing
+      ...
+    body:
+      application/vnd.hearing.remove-offences-from-existing-hearing+json:
+        schema: !include json/schema/hearing.remove-offences-from-existing-hearing.json
+        example: !include json/hearing.remove-offences-from-existing-hearing.json
+
+    responses:
+      202:
+        description: Request accepted

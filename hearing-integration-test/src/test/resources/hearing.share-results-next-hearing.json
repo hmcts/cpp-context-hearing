@@ -1,0 +1,92 @@
+{
+  "courtClerk": {
+    "userId": "a085e359-6069-4694-8820-7810e7dfe762",
+    "firstName": "Erica",
+    "lastName": "Wilson"
+  },
+  "resultLines": [{
+    "resultLineId": "e5e381e2-8083-4674-8533-dee96881197a",
+    "sharedDate": "SHARED_DATE",
+    "resultDefinitionId": "70c98fa6-804d-11e8-adc0-fa7ae01bbebc",
+    "level": "OFFENCE",
+    "resultLabel": "Next hearing in magistrates' court",
+    "prompts": [{
+      "id": "d27a5d86-d51f-4c6e-914b-cb4b0abc4283",
+      "label": "Date of hearing",
+      "promptRef":"HDATE",
+      "value": "SHARED_DATE",
+      "welshValue": ""
+    },
+      {
+        "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
+        "label": "End Date",
+        "promptRef": "endDate",
+        "value": "2021-11-11",
+        "welshValue": ""
+      },
+      {
+        "id": "bc256fd1-dedd-43ab-8882-f9fbb448a62d",
+        "label": "First review date",
+        "promptRef": "firstReviewDate",
+        "value": "2021-11-10",
+        "welshValue": ""
+      },
+      {
+        "id": "f622f008-f8e7-4f34-a7df-df85a7ed4d47",
+        "label": "First review time",
+        "promptRef": "firstReviewTime",
+        "value": "13:00",
+        "welshValue": ""
+      },
+      {
+      "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
+      "label": "Time of hearing",
+      "value": "10:00",
+      "welshValue": "",
+      "promptRef": "timeOfHearing"
+    }, {
+      "id": "5f507153-6dc9-4ec0-94db-c821eff333f1",
+      "label": "Courtroom",
+      "value": "Courtroom 05",
+      "promptRef": "HCROOM",
+      "welshValue": ""
+    }, {
+      "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+      "label": "Hearing type",
+      "value": "Trial",
+      "welshValue": ""
+    }, {
+      "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+      "label": "Estimated duration",
+      "value": "10 MINUTES",
+      "promptRef":"HEST",
+      "welshValue": ""
+    }, {
+      "id": "e73e6ab8-9bfe-4135-9fe6-f526544584d6",
+      "label": "Booking reference",
+      "value": "b1033542-a60d-4193-b3df-f3f5655c01af",
+      "welshValue": ""
+    }],
+    "isModified": false,
+    "isComplete": true,
+    "shadowListed": true,
+    "defendantId": "DEFENDANT_ID",
+    "offenceId": "OFFENCE_ID",
+    "orderedDate": "SHARED_DATE",
+    "parentResultLineIds": ["b2a59cf4-42a2-408a-b1a0-b48e7cddd5d9"]
+  }, {
+    "resultLineId": "b2a59cf4-42a2-408a-b1a0-b48e7cddd5d9",
+    "sharedDate": "SHARED_DATE",
+    "resultDefinitionId": "c93c5a18-838a-41d3-a017-c203b37f5655",
+    "level": "OFFENCE",
+    "resultLabel": "Next hearing",
+    "prompts": [],
+    "isModified": false,
+    "isComplete": true,
+    "defendantId": "DEFENDANT_ID",
+    "offenceId": "OFFENCE_ID",
+    "orderedDate": "SHARED_DATE",
+    "childResultLineIds": ["e5e381e2-8083-4674-8533-dee96881197a"]
+  }],
+  "hearingDay": "2021-11-16"
+}

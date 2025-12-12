@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "id": "http://justice.gov.uk/hearing/courts/referencedata/fixedListResult.json",
+  "properties": {
+    "fixedListCollection": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/fixedList"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "fixedListCollection"
+  ],
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "isoDate": {
+      "type": "string",
+      "pattern": "^\\d{4}-[01]\\d-[0-3]\\d$"
+    },
+    "fixedList": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "version": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "startDate": {
+          "$ref": "#/definitions/isoDate"
+        },
+        "endDate": {
+          "$ref": "#/definitions/isoDate"
+        },
+        "cjsQualifier": {
+          "type": "string"
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              },
+              "welshValue": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "value"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "elements",
+        "startDate"
+      ]
+    }
+  }
+}

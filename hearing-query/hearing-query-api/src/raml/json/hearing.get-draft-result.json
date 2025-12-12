@@ -1,0 +1,12 @@
+{
+  "hearingId": "1daefec3-2f76-8109-82d9-2e60544a6c01",
+  "targets": [
+    {
+      "defendantId": "ab746921-d839-4867-bcf9-b41db8ebc852",
+      "masterDefendantId": "abffab00-879d-4b22-b66a-1445f151e46b",
+      "targetId": "a06f6539-2a7c-4bc8-bca3-A1e5a225471b",
+      "offenceId": "0baecac5-222b-402d-9047-84803679edad",
+      "draftResult": "{\"caseId\":\"7e2f843e-d639-40b3-8611-8015f3a18958\",\"defendantId\":\"ab746921-d839-4867-bcf9-b41db8ebc852\",\"offenceId\":\"0baecac5-222b-402d-9047-84803679edad\",\"offenceNum\":1,\"results\":[{\"originalText\":\"imp 2 yr sus 4 yr conc\",\"parts\":[{\"label\":\"Imprisonment\",\"state\":\"RESOLVED\",\"type\":\"RESULT\"},{\"label\":\"2\",\"state\":\"UNRESOLVED\",\"type\":\"INT\"},{\"label\":\"yr\",\"state\":\"UNRESOLVED\",\"type\":\"ENUM\"},{\"label\":\"Suspended\",\"state\":\"RESOLVED\",\"type\":\"RESULT\"},{\"label\":\"4\",\"state\":\"UNRESOLVED\",\"type\":\"INT\"},{\"label\":\"yr\",\"state\":\"UNRESOLVED\",\"type\":\"ENUM\"},{\"label\":\"Concurrent\",\"state\":\"RESOLVED\",\"type\":\"RESULT\"}],\"resultCode\":\"4\",\"showDefendantName\":true,\"state\":\"POST_PARSE\",\"targetId\":\"76c44c4a-ea9f-45de-868a-07368fd4627f\"}]}"
+    }
+  ]
+}

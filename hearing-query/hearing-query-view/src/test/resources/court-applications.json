@@ -1,0 +1,55 @@
+{
+  "courtApplications": [
+    {
+      "applicant": {
+        "id": "4b1c7908-606e-4439-b690-7ff1ba80cf48",
+        "personDetails": {
+          "address": {
+            "address1": "12 Southern House",
+            "address2": "Wellesley Grove",
+            "address3": "Croydon",
+            "postcode": "CR0 1GX"
+          },
+          "firstName": "Neil",
+          "gender": "NOT_SPECIFIED",
+          "lastName": "Chukshi"
+        }
+      },
+      "applicationReceivedDate": "2019-09-09",
+      "applicationReference": "FPHNY0K3Q9",
+      "applicationStatus": "DRAFT",
+      "id": "d0a4ac2a-96df-414d-a9d4-70da9e0dc328",
+      "respondents": [
+        {
+          "partyDetails": {
+            "id": "83645ca9-7f9a-4983-a813-575ae6cd236d",
+            "personDetails": {
+              "address": {
+                "address1": "34 Regent Street",
+                "address2": "Regent Park",
+                "address3": "London",
+                "postcode": "SW11 5TQ"
+              },
+              "firstName": "Alan",
+              "gender": "NOT_SPECIFIED",
+              "lastName": "Hugh"
+            }
+          }
+        }
+      ],
+      "type": {
+        "applicantSynonym": "Applicant",
+        "applicationCategory": "CO",
+        "applicationCode": "BA76509",
+        "applicationJurisdictionType": "MAGISTRATES",
+        "applicationLegislation": "In accordance with section 43B of the Magistrates\u0027 Courts Act 1980.",
+        "applicationType": "Application to vary bail conditions imposed by police",
+        "id": "3962173c-e099-326a-b5a1-c72c1bd2f1dc",
+        "isAppealApplication": false,
+        "isBreachApplication": false,
+        "linkType": "STANDALONE",
+        "respondentSynonym": "Respondent"
+      }
+    }
+  ]
+}

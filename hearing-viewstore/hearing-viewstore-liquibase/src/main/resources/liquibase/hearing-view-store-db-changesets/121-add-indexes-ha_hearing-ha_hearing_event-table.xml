@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="121" author="erol.kureli"
+               logicalFilePath="121-add-indexes-ha_hearing-ha_hearing_event-table">
+
+        <sql>
+            CREATE INDEX IF NOT EXISTS ha_hearing_event_hearing_id_idx on ha_hearing_event (hearing_id);
+            CREATE INDEX IF NOT EXISTS ha_hearing_event_hearing_event_definition_id_idx on ha_hearing_event (hearing_event_definition_id);
+            CREATE INDEX IF NOT EXISTS ha_hearing_event_event_date_idx on ha_hearing_event (event_date);
+            CREATE INDEX IF NOT EXISTS ha_hearing_court_centre_id_idx on ha_hearing (court_centre_id);
+            CREATE INDEX IF NOT EXISTS ha_hearing_room_id_idx on ha_hearing (room_id);
+        </sql>
+
+    </changeSet>
+
+</databaseChangeLog>

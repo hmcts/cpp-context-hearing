@@ -1,0 +1,527 @@
+package uk.gov.moj.cpp.hearing.mapping;
+
+import static java.util.Collections.emptyList;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.deltaspike.core.util.CollectionUtils.isEmpty;
+import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
+import static uk.gov.moj.cpp.hearing.mapping.ApplicationAmendmentAllowedResolver.isAmendmentAllowed;
+
+import uk.gov.justice.core.courts.ApplicationStatus;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
+import uk.gov.justice.core.courts.CourtOrder;
+import uk.gov.justice.core.courts.CourtOrderOffence;
+import uk.gov.justice.core.courts.HearingLanguage;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.PleaModel;
+import uk.gov.justice.core.courts.Verdict;
+import uk.gov.justice.hearing.courts.ApplicationCourtListRestriction;
+import uk.gov.justice.hearing.courts.CourtApplicationView;
+import uk.gov.justice.hearing.courts.HearingView;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
+import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+@SuppressWarnings({"squid:S00107", "squid:S3655", "squid:CommentedOutCodeLine", "squid:S1172"})
+@ApplicationScoped
+public class HearingJPAMapper {
+
+    private CourtCentreJPAMapper courtCentreJPAMapper;
+    private HearingDefenceCounselJPAMapper hearingDefenceCounselJPAMapper;
+    private DefendantAttendanceJPAMapper defendantAttendanceJPAMapper;
+    private DefendantReferralReasonJPAMapper defendantReferralReasonsJPAMapper;
+    private HearingCaseNoteJPAMapper hearingCaseNoteJPAMapper;
+    private HearingDayJPAMapper hearingDayJPAMapper;
+    private JudicialRoleJPAMapper judicialRoleJPAMapper;
+    private ProsecutionCaseJPAMapper prosecutionCaseJPAMapper;
+    private HearingProsecutionCounselJPAMapper hearingProsecutionCounselJPAMapper;
+    private HearingTypeJPAMapper hearingTypeJPAMapper;
+    private CourtApplicationsSerializer courtApplicationsSerializer;
+    private HearingRespondentCounselJPAMapper hearingRespondentCounselJPAMapper;
+    private HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper;
+    private HearingInterpreterIntermediaryJPAMapper hearingInterpreterIntermediaryJPAMapper;
+    private HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper;
+    private ApprovalRequestedJPAMapper approvalRequestedJPAMapper;
+    private HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository;
+    private ApplicationCourtListRestrictionMapper applicationCourtListRestrictionMapper;
+    private HearingApplicationRepository hearingApplicationRepository;
+
+
+    @Inject
+    public HearingJPAMapper(final CourtCentreJPAMapper courtCentreJPAMapper,
+                            final HearingDefenceCounselJPAMapper hearingDefenceCounselJPAMapper,
+                            final DefendantAttendanceJPAMapper defendantAttendanceJPAMapper,
+                            final DefendantReferralReasonJPAMapper defendantReferralReasonsJPAMapper,
+                            final HearingCaseNoteJPAMapper hearingCaseNoteJPAMapper,
+                            final HearingDayJPAMapper hearingDayJPAMapper,
+                            final JudicialRoleJPAMapper judicialRoleJPAMapper,
+                            final ProsecutionCaseJPAMapper prosecutionCaseJPAMapper,
+                            final HearingProsecutionCounselJPAMapper hearingProsecutionCounselJPAMapper,
+                            final HearingTypeJPAMapper hearingTypeJPAMapper,
+                            final CourtApplicationsSerializer courtApplicationsSerializer,
+                            final HearingRespondentCounselJPAMapper hearingRespondentCounselJPAMapper,
+                            final HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper,
+                            final HearingInterpreterIntermediaryJPAMapper hearingInterpreterIntermediaryJPAMapper,
+                            final HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper,
+                            final ApprovalRequestedJPAMapper approvalRequestedJPAMapper,
+                            final HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository,
+                            final ApplicationCourtListRestrictionMapper applicationCourtListRestrictionMapper,
+                            final HearingApplicationRepository hearingApplicationRepository) {
+        this.courtCentreJPAMapper = courtCentreJPAMapper;
+        this.hearingDefenceCounselJPAMapper = hearingDefenceCounselJPAMapper;
+        this.defendantAttendanceJPAMapper = defendantAttendanceJPAMapper;
+        this.defendantReferralReasonsJPAMapper = defendantReferralReasonsJPAMapper;
+        this.hearingCaseNoteJPAMapper = hearingCaseNoteJPAMapper;
+        this.hearingDayJPAMapper = hearingDayJPAMapper;
+        this.judicialRoleJPAMapper = judicialRoleJPAMapper;
+        this.prosecutionCaseJPAMapper = prosecutionCaseJPAMapper;
+        this.hearingProsecutionCounselJPAMapper = hearingProsecutionCounselJPAMapper;
+        this.hearingTypeJPAMapper = hearingTypeJPAMapper;
+        this.courtApplicationsSerializer = courtApplicationsSerializer;
+        this.hearingRespondentCounselJPAMapper = hearingRespondentCounselJPAMapper;
+        this.hearingApplicantCounselJPAMapper = hearingApplicantCounselJPAMapper;
+        this.hearingInterpreterIntermediaryJPAMapper = hearingInterpreterIntermediaryJPAMapper;
+        this.hearingCompanyRepresentativeJPAMapper = hearingCompanyRepresentativeJPAMapper;
+        this.approvalRequestedJPAMapper = approvalRequestedJPAMapper;
+        this.hearingYouthCourtDefendantsRepository = hearingYouthCourtDefendantsRepository;
+        this.applicationCourtListRestrictionMapper = applicationCourtListRestrictionMapper;
+        this.hearingApplicationRepository = hearingApplicationRepository;
+    }
+
+    //to keep cditester happy
+    public HearingJPAMapper() {
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    public Hearing toJPA(final uk.gov.justice.core.courts.Hearing pojo) {
+        if (null == pojo) {
+            return null;
+        }
+        final Hearing hearing = new Hearing();
+        hearing.setId(pojo.getId());
+        hearing.setCourtCentre(courtCentreJPAMapper.toJPA(pojo.getCourtCentre()));
+        hearing.setDefenceCounsels(hearingDefenceCounselJPAMapper.toJPA(hearing, pojo.getDefenceCounsels()));
+        hearing.setDefendantAttendance(defendantAttendanceJPAMapper.toJPA(pojo.getDefendantAttendance()));
+        hearing.setDefendantReferralReasons(defendantReferralReasonsJPAMapper.toJPA(hearing, pojo.getDefendantReferralReasons()));
+        hearing.setHasSharedResults(pojo.getHasSharedResults());
+        hearing.setIsBoxHearing(pojo.getIsBoxHearing());
+        hearing.setIsVacatedTrial(pojo.getIsVacatedTrial());
+        hearing.setHearingCaseNotes(hearingCaseNoteJPAMapper.toJPA(hearing, pojo.getHearingCaseNotes()));
+        hearing.setHearingDays(hearingDayJPAMapper.toJPA(hearing, pojo.getHearingDays()));
+        hearing.setHearingLanguage(ofNullable(pojo.getHearingLanguage()).orElse(HearingLanguage.ENGLISH));
+        hearing.setJudicialRoles(judicialRoleJPAMapper.toJPA(hearing, pojo.getJudiciary()));
+        hearing.setJurisdictionType(pojo.getJurisdictionType());
+        hearing.setProsecutionCases(prosecutionCaseJPAMapper.toJPA(hearing, pojo.getProsecutionCases()));
+        hearing.setProsecutionCounsels(hearingProsecutionCounselJPAMapper.toJPA(hearing, pojo.getProsecutionCounsels()));
+        hearing.setHearingInterpreterIntermediaries(hearingInterpreterIntermediaryJPAMapper.toJPA(hearing, pojo.getIntermediaries()));
+        hearing.setReportingRestrictionReason(pojo.getReportingRestrictionReason());
+        hearing.setHearingType(hearingTypeJPAMapper.toJPA(pojo.getType()));
+        hearing.setCourtApplicationsJson(courtApplicationsSerializer.json(pojo.getCourtApplications()));
+        hearing.setApprovalsRequested(approvalRequestedJPAMapper.toJPA(pojo.getApprovalsRequested()));
+        hearing.setIsGroupProceedings(pojo.getIsGroupProceedings());
+        hearing.setNumberOfGroupCases(pojo.getNumberOfGroupCases());
+        return hearing;
+    }
+
+    public uk.gov.justice.core.courts.Hearing fromJPA(final Hearing entity) {
+        if (null == entity) {
+            return null;
+        }
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(entity.getCourtApplicationsJson());
+        if (!isEmpty(courtApplications)) {
+            courtApplications = courtApplications.stream().filter(ca -> !EJECTED.equals(ca.getApplicationStatus())).collect(toList());
+        }
+        return uk.gov.justice.core.courts.Hearing.hearing()
+                .withId(entity.getId())
+                .withCourtCentre(courtCentreJPAMapper.fromJPA(entity.getCourtCentre()))
+                .withDefenceCounsels(hearingDefenceCounselJPAMapper.fromJPA(entity.getDefenceCounsels()))
+                .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
+                .withDefendantReferralReasons(defendantReferralReasonsJPAMapper.fromJPA(entity.getDefendantReferralReasons()))
+                .withHasSharedResults(entity.getHasSharedResults())
+                .withIsBoxHearing(entity.getIsBoxHearing())
+                .withIsVacatedTrial(entity.getIsVacatedTrial())
+                .withHearingCaseNotes(hearingCaseNoteJPAMapper.fromJPA(entity.getHearingCaseNotes()))
+                .withHearingDays(hearingDayJPAMapper.fromJPA(entity.getHearingDays()))
+                .withHearingLanguage(entity.getHearingLanguage())
+                .withJudiciary(judicialRoleJPAMapper.fromJPA(entity.getJudicialRoles()))
+                .withJurisdictionType(entity.getJurisdictionType())
+                .withProsecutionCases(prosecutionCaseJPAMapper.fromJPA(entity.getProsecutionCases()))
+                .withProsecutionCounsels(hearingProsecutionCounselJPAMapper.fromJPA(entity.getProsecutionCounsels()))
+                .withReportingRestrictionReason(entity.getReportingRestrictionReason())
+                .withType(hearingTypeJPAMapper.fromJPA(entity.getHearingType()))
+                .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
+                .withCourtApplications(courtApplications == null || courtApplications.isEmpty() ? null : courtApplications)
+                .withRespondentCounsels(hearingRespondentCounselJPAMapper.fromJPA(entity.getRespondentCounsels()))
+                .withApplicantCounsels(hearingApplicantCounselJPAMapper.fromJPA(entity.getApplicantCounsels()))
+                .withIntermediaries(hearingInterpreterIntermediaryJPAMapper.fromJPA(entity.getHearingInterpreterIntermediaries()))
+                .withCompanyRepresentatives(hearingCompanyRepresentativeJPAMapper.fromJPA(entity.getCompanyRepresentatives()))
+                .withApprovalsRequested(approvalRequestedJPAMapper.fromJPA(entity.getApprovalsRequested()))
+                .withYouthCourtDefendantIds(getDefendantsSelectedForYouthDefendant(entity))
+                .withEarliestNextHearingDate(entity.getEarliestNextHearingDate())
+                .withIsGroupProceedings(entity.getIsGroupProceedings())
+                .withNumberOfGroupCases(entity.getNumberOfGroupCases())
+                .build();
+    }
+
+    public HearingView toHearingView(final Hearing entity) {
+        if (null == entity) {
+            return null;
+        }
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(entity.getCourtApplicationsJson());
+        final List<CourtApplicationView> courtApplicationViews = new ArrayList<>();
+        if (!isEmpty(courtApplications)) {
+            courtApplications.stream()
+                    .filter(ca -> !EJECTED.equals(ca.getApplicationStatus()))
+                    .map(ca -> {
+                        final List<HearingApplication> applicationHearings = hearingApplicationRepository.findByApplicationId(ca.getId());
+                        return toCourtApplicationView(ca, isAmendmentAllowed(entity.getId(), applicationHearings));
+                    })
+                    .forEach(courtApplicationViews::add);
+        }
+        return HearingView.hearingView()
+                .withId(entity.getId())
+                .withCourtCentre(courtCentreJPAMapper.fromJPA(entity.getCourtCentre()))
+                .withDefenceCounsels(hearingDefenceCounselJPAMapper.fromJPA(entity.getDefenceCounsels()))
+                .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
+                .withDefendantReferralReasons(defendantReferralReasonsJPAMapper.fromJPA(entity.getDefendantReferralReasons()))
+                .withHasSharedResults(entity.getHasSharedResults())
+                .withIsBoxHearing(entity.getIsBoxHearing())
+                .withIsVacatedTrial(entity.getIsVacatedTrial())
+                .withHearingCaseNotes(hearingCaseNoteJPAMapper.fromJPA(entity.getHearingCaseNotes()))
+                .withHearingDays(hearingDayJPAMapper.fromJPA(entity.getHearingDays()))
+                .withHearingLanguage(entity.getHearingLanguage())
+                .withJudiciary(judicialRoleJPAMapper.fromJPA(entity.getJudicialRoles()))
+                .withJurisdictionType(entity.getJurisdictionType())
+                .withProsecutionCases(prosecutionCaseJPAMapper.fromJPA(entity.getProsecutionCases()))
+                .withProsecutionCounsels(hearingProsecutionCounselJPAMapper.fromJPA(entity.getProsecutionCounsels()))
+                .withReportingRestrictionReason(entity.getReportingRestrictionReason())
+                .withType(hearingTypeJPAMapper.fromJPA(entity.getHearingType()))
+                .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
+                .withCourtApplications(courtApplicationViews.isEmpty() ? null : courtApplicationViews)
+                .withRespondentCounsels(hearingRespondentCounselJPAMapper.fromJPA(entity.getRespondentCounsels()))
+                .withApplicantCounsels(hearingApplicantCounselJPAMapper.fromJPA(entity.getApplicantCounsels()))
+                .withIntermediaries(hearingInterpreterIntermediaryJPAMapper.fromJPA(entity.getHearingInterpreterIntermediaries()))
+                .withCompanyRepresentatives(hearingCompanyRepresentativeJPAMapper.fromJPA(entity.getCompanyRepresentatives()))
+                .withApprovalsRequested(approvalRequestedJPAMapper.fromJPA(entity.getApprovalsRequested()))
+                .withYouthCourtDefendantIds(getDefendantsSelectedForYouthDefendant(entity))
+                .withEarliestNextHearingDate(entity.getEarliestNextHearingDate())
+                .withIsGroupProceedings(entity.getIsGroupProceedings())
+                .withNumberOfGroupCases(entity.getNumberOfGroupCases())
+                .build();
+    }
+
+    private CourtApplicationView toCourtApplicationView(final CourtApplication courtApplication, final boolean isAmendmentAllowed) {
+        final CourtApplicationView.Builder courtApplicationView = CourtApplicationView.courtApplicationView();
+
+        courtApplicationView.withAllegationOrComplaintEndDate(courtApplication.getAllegationOrComplaintEndDate());
+        courtApplicationView.withAllegationOrComplaintStartDate(courtApplication.getAllegationOrComplaintStartDate());
+        courtApplicationView.withApplicant(courtApplication.getApplicant());
+        courtApplicationView.withApplicationDecisionSoughtByDate(courtApplication.getApplicationDecisionSoughtByDate());
+        courtApplicationView.withApplicationExternalCreatorType(courtApplication.getApplicationExternalCreatorType());
+        courtApplicationView.withApplicationParticulars(courtApplication.getApplicationParticulars());
+        courtApplicationView.withApplicationReceivedDate(courtApplication.getApplicationReceivedDate());
+        courtApplicationView.withApplicationReference(courtApplication.getApplicationReference());
+        courtApplicationView.withApplicationResultCodeForLaa(courtApplication.getApplicationResultCodeForLaa());
+        courtApplicationView.withApplicationStatus(courtApplication.getApplicationStatus());
+        courtApplicationView.withCommissionerOfOath(courtApplication.getCommissionerOfOath());
+        courtApplicationView.withConvictionDate(courtApplication.getConvictionDate());
+        courtApplicationView.withCourtApplicationCases(courtApplication.getCourtApplicationCases());
+        courtApplicationView.withCourtApplicationPayment(courtApplication.getCourtApplicationPayment());
+        courtApplicationView.withCourtCivilApplication(courtApplication.getCourtCivilApplication());
+        courtApplicationView.withCourtOrder(courtApplication.getCourtOrder());
+        courtApplicationView.withDefendantASN(courtApplication.getDefendantASN());
+        courtApplicationView.withFutureSummonsHearing(courtApplication.getFutureSummonsHearing());
+        courtApplicationView.withHasSummonsSupplied(courtApplication.getHasSummonsSupplied());
+        courtApplicationView.withHearingIdToBeVacated(courtApplication.getHearingIdToBeVacated());
+        courtApplicationView.withId(courtApplication.getId());
+        courtApplicationView.withIsAmendmentAllowed(courtApplication.getIsGroupCaseApplication());
+        courtApplicationView.withIsGroupCaseApplication(courtApplication.getIsGroupCaseApplication());
+        courtApplicationView.withJudicialResults(courtApplication.getJudicialResults());
+        courtApplicationView.withOutOfTimeReasons(courtApplication.getOutOfTimeReasons());
+        courtApplicationView.withParentApplicationId(courtApplication.getParentApplicationId());
+        courtApplicationView.withPlea(courtApplication.getPlea());
+        courtApplicationView.withProceedingsConcluded(courtApplication.getProceedingsConcluded());
+        courtApplicationView.withRemovalReason(courtApplication.getRemovalReason());
+        courtApplicationView.withRespondents(courtApplication.getRespondents());
+        courtApplicationView.withSubject(courtApplication.getSubject());
+        courtApplicationView.withThirdParties(courtApplication.getThirdParties());
+        courtApplicationView.withType(courtApplication.getType());
+        courtApplicationView.withVerdict(courtApplication.getVerdict());
+        courtApplicationView.withIsAmendmentAllowed(isAmendmentAllowed);
+
+        return courtApplicationView.build();
+    }
+
+    public uk.gov.justice.core.courts.Hearing fromJPAWithCourtListRestrictions(final Hearing entity) {
+        if (null == entity) {
+            return null;
+        }
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(entity.getCourtApplicationsJson());
+        if (!isEmpty(courtApplications)) {
+            courtApplications = courtApplications.stream().filter(ca -> !EJECTED.equals(ca.getApplicationStatus())).collect(toList());
+
+            final Optional<ApplicationCourtListRestriction> applicationCourtListRestriction = applicationCourtListRestrictionMapper.getCourtListRestriction(entity.getRestrictCourtListJson());
+            if (applicationCourtListRestriction.isPresent()) {
+                courtApplications = applicationCourtListRestrictionMapper.getCourtApplications(courtApplications, applicationCourtListRestriction.get());
+            }
+        }
+
+        return uk.gov.justice.core.courts.Hearing.hearing()
+                .withId(entity.getId())
+                .withCourtCentre(courtCentreJPAMapper.fromJPA(entity.getCourtCentre()))
+                .withDefenceCounsels(hearingDefenceCounselJPAMapper.fromJPA(entity.getDefenceCounsels()))
+                .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
+                .withDefendantReferralReasons(defendantReferralReasonsJPAMapper.fromJPA(entity.getDefendantReferralReasons()))
+                .withHasSharedResults(entity.getHasSharedResults())
+                .withIsBoxHearing(entity.getIsBoxHearing())
+                .withIsVacatedTrial(entity.getIsVacatedTrial())
+                .withHearingCaseNotes(hearingCaseNoteJPAMapper.fromJPA(entity.getHearingCaseNotes()))
+                .withHearingDays(hearingDayJPAMapper.fromJPA(entity.getHearingDays()))
+                .withHearingLanguage(entity.getHearingLanguage())
+                .withJudiciary(judicialRoleJPAMapper.fromJPA(entity.getJudicialRoles()))
+                .withJurisdictionType(entity.getJurisdictionType())
+                .withProsecutionCases(prosecutionCaseJPAMapper.fromJPAWithCourtListRestrictions(entity.getProsecutionCases()))
+                .withProsecutionCounsels(hearingProsecutionCounselJPAMapper.fromJPA(entity.getProsecutionCounsels()))
+                .withReportingRestrictionReason(entity.getReportingRestrictionReason())
+                .withType(hearingTypeJPAMapper.fromJPA(entity.getHearingType()))
+                .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
+                .withCourtApplications(courtApplications == null || courtApplications.isEmpty() ? null : courtApplications)
+                .withRespondentCounsels(hearingRespondentCounselJPAMapper.fromJPA(entity.getRespondentCounsels()))
+                .withApplicantCounsels(hearingApplicantCounselJPAMapper.fromJPA(entity.getApplicantCounsels()))
+                .withIntermediaries(hearingInterpreterIntermediaryJPAMapper.fromJPA(entity.getHearingInterpreterIntermediaries()))
+                .withCompanyRepresentatives(hearingCompanyRepresentativeJPAMapper.fromJPA(entity.getCompanyRepresentatives()))
+                .withApprovalsRequested(approvalRequestedJPAMapper.fromJPA(entity.getApprovalsRequested()))
+                .withYouthCourtDefendantIds(getDefendantsSelectedForYouthDefendant(entity))
+                .withEarliestNextHearingDate(entity.getEarliestNextHearingDate())
+                .build();
+    }
+
+
+    @SuppressWarnings("squid:S1172")
+    private List<UUID> getDefendantsSelectedForYouthDefendant(final Hearing hearing) {
+        return hearingYouthCourtDefendantsRepository.findAllByHearingId(hearing.getId()).stream().map(h -> h.getId().getDefendantId()).collect(toList());
+    }
+
+    public Optional<CourtApplication> getCourtApplication(final String courtApplicationsJson, final UUID applicationId) {
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        return courtApplications.stream().filter(
+                ca -> ca.getId().equals(applicationId)
+        ).findFirst();
+    }
+
+
+    public String addOrUpdateCourtApplication(final String courtApplicationsJson, final CourtApplication courtApplicationUpdate) {
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        if (courtApplications == null) {
+            courtApplications = emptyList();
+        }
+        courtApplications = courtApplications.stream().filter(
+                ca -> !ca.getId().equals(courtApplicationUpdate.getId())
+        ).collect(toList());
+        courtApplications.add(courtApplicationUpdate);
+        return courtApplicationsSerializer.json(courtApplications);
+    }
+
+
+    public String updateLinkedApplicationStatus(final String courtApplicationsJson, final UUID prosecutionCaseId, final ApplicationStatus status) {
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        if (courtApplications == null) {
+            courtApplications = emptyList();
+        }
+        return courtApplicationsSerializer.json(courtApplications);
+    }
+
+    public String updateStandaloneApplicationStatus(final String courtApplicationsJson, final UUID applicationId, final ApplicationStatus status) {
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        if (courtApplications == null) {
+            courtApplications = emptyList();
+        }
+        courtApplications.stream().filter(
+                ca -> ca.getId().equals(applicationId) ||
+                        applicationId.equals(ca.getParentApplicationId())).forEach(ca -> ca.setApplicationStatus(status));
+        return courtApplicationsSerializer.json(courtApplications);
+    }
+
+    public String updateConvictedDateOnOffencesInCourtApplication(final String courtApplicationsJson, final UUID courtApplicationId, final UUID offenceId, final LocalDate convictedDate) {
+        final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        final List<CourtApplication> updatedCourtApplications = courtApplications.stream()
+                .map(application -> !application.getId().equals(courtApplicationId) ? application :
+                        CourtApplication.courtApplication().withValuesFrom(application)
+                                .withCourtApplicationCases(getCourtApplicationCasesWithConvictionDate(offenceId, convictedDate, application))
+                                .withCourtOrder(getCourtOrderWithConvictionDate(offenceId, convictedDate, application))
+                                .build())
+                .collect(toList());
+        return courtApplicationsSerializer.json(updatedCourtApplications);
+    }
+
+
+    private CourtOrder getCourtOrderWithConvictionDate(final UUID offenceId, final LocalDate convictedDate, final CourtApplication application) {
+        return application.getCourtOrder() == null ? null : of(application.getCourtOrder())
+                .map(co -> CourtOrder.courtOrder().withValuesFrom(co)
+                        .withCourtOrderOffences(co.getCourtOrderOffences().stream()
+                                .map(o -> getCourtOrderOffenceWithConvictionDate(offenceId, convictedDate, o)).collect(toList())).build()).orElse(null);
+    }
+
+    private List<CourtApplicationCase> getCourtApplicationCasesWithConvictionDate(final UUID offenceId, final LocalDate convictedDate, final CourtApplication application) {
+        return application.getCourtApplicationCases() == null ? null : application.getCourtApplicationCases().stream()
+                .map(applicationCase -> CourtApplicationCase.courtApplicationCase().withValuesFrom(applicationCase)
+                        .withOffences(applicationCase.getOffences().stream()
+                                .map(courtApplicationOffence -> getCourtApplicationOffenceWithConvictionDate(offenceId, convictedDate, courtApplicationOffence))
+                                .collect(toList()))
+                        .build())
+                .collect(toList());
+    }
+
+    private Offence getCourtApplicationOffenceWithConvictionDate(final UUID offenceId, final LocalDate convictedDate, final Offence offence) {
+        return !offence.getId().equals(offenceId) ? offence :
+                Offence.offence().withValuesFrom(offence)
+                        .withConvictionDate(convictedDate)
+                        .build();
+    }
+
+    private CourtOrderOffence getCourtOrderOffenceWithConvictionDate(final UUID offenceId, final LocalDate convictedDate, final CourtOrderOffence o) {
+        return !o.getOffence().getId().equals(offenceId) ? o : CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
+                .withOffence(Offence.offence().withValuesFrom(o.getOffence())
+                        .withConvictionDate(convictedDate)
+                        .build())
+                .build();
+    }
+
+    public String updatePleaOnOffencesInCourtApplication(final String courtApplicationsJson, final PleaModel pleaModel) {
+        final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        final CourtApplication courtApplication = getCourtApplication(courtApplications, pleaModel.getOffenceId());
+        final int index = courtApplications.indexOf(courtApplication);
+
+        final CourtApplication updatedCourtApplication = CourtApplication.courtApplication().withValuesFrom(courtApplication)
+                .withCourtApplicationCases(ofNullable(courtApplication.getCourtApplicationCases()).stream().flatMap(Collection::stream)
+                        .map(applicationCase -> CourtApplicationCase.courtApplicationCase().withValuesFrom(applicationCase)
+                                .withOffences(ofNullable(applicationCase.getOffences()).orElse(emptyList()).stream()
+                                        .map(courtApplicationOffence -> getCourtApplicationOffenceWithPlea(pleaModel, courtApplicationOffence))
+                                        .collect(toList()))
+                                .build())
+                        .collect(toList()))
+                .withCourtOrder(courtApplication.getCourtOrder() == null ? null : of(courtApplication.getCourtOrder())
+                        .map(co -> CourtOrder.courtOrder().withValuesFrom(co)
+                                .withCourtOrderOffences(co.getCourtOrderOffences().stream()
+                                        .map(o -> getCourtOrderOffenceWithPlea(pleaModel, o)).collect(toList())).build()).orElse(null))
+                .build();
+
+        courtApplications.set(index, updatedCourtApplication);
+        return courtApplicationsSerializer.json(courtApplications);
+    }
+
+    private CourtOrderOffence getCourtOrderOffenceWithPlea(final PleaModel pleaModel, final CourtOrderOffence o) {
+        if (o.getOffence().getId().equals(pleaModel.getOffenceId())) {
+            return CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
+                    .withOffence(Offence.offence().withValuesFrom(o.getOffence())
+                            .withPlea(pleaModel.getPlea())
+                            .withIndicatedPlea(pleaModel.getIndicatedPlea())
+                            .withAllocationDecision(pleaModel.getAllocationDecision())
+                            .build())
+                    .build();
+        } else {
+            return o;
+        }
+    }
+
+    private Offence getCourtApplicationOffenceWithPlea(final PleaModel pleaModel, final Offence offence) {
+        if (offence.getId().equals(pleaModel.getOffenceId())) {
+            return Offence.offence().withValuesFrom(offence)
+                    .withPlea(pleaModel.getPlea())
+                    .withIndicatedPlea(pleaModel.getIndicatedPlea())
+                    .withAllocationDecision(pleaModel.getAllocationDecision())
+                    .build();
+        } else {
+            return offence;
+        }
+    }
+
+    public String updateVerdictOnOffencesInCourtApplication(final String courtApplicationsJson, final Verdict verdict) {
+        final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        final CourtApplication courtApplication = getCourtApplication(courtApplications, verdict.getOffenceId());
+        final int index = courtApplications.indexOf(courtApplication);
+
+        final CourtApplication updatedCourtApplication = CourtApplication.courtApplication().withValuesFrom(courtApplication)
+                .withCourtApplicationCases(courtApplication.getCourtApplicationCases() == null ? null : courtApplication.getCourtApplicationCases().stream()
+                        .map(applicationCase -> CourtApplicationCase.courtApplicationCase().withValuesFrom(applicationCase)
+                                .withOffences(applicationCase.getOffences().stream()
+                                        .map(courtApplicationOffence -> getCourtApplicationOffenceWithVerdict(verdict, courtApplicationOffence))
+                                        .collect(toList()))
+                                .build())
+                        .collect(toList()))
+                .withCourtOrder(courtApplication.getCourtOrder() == null ? null : of(courtApplication.getCourtOrder())
+                        .map(co -> CourtOrder.courtOrder().withValuesFrom(co)
+                                .withCourtOrderOffences(co.getCourtOrderOffences().stream()
+                                        .map(o -> getCourtOrderOffenceWithVerdict(verdict, o)).collect(toList())).build()).orElse(null))
+                .build();
+
+        courtApplications.set(index, updatedCourtApplication);
+        return courtApplicationsSerializer.json(courtApplications);
+    }
+
+    private CourtOrderOffence getCourtOrderOffenceWithVerdict(final Verdict verdict, final CourtOrderOffence o) {
+        return !o.getOffence().getId().equals(verdict.getOffenceId()) ? o :
+                getCourtOrderOffenceWithUpdatedVerdict(verdict, o);
+    }
+
+    private CourtOrderOffence getCourtOrderOffenceWithUpdatedVerdict(final Verdict verdict, final CourtOrderOffence o) {
+        return (verdict.getIsDeleted() != null && verdict.getIsDeleted()) ?
+                CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
+                        .withOffence(Offence.offence().withValuesFrom(o.getOffence())
+                                .withVerdict(null).build()).build() :
+                CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
+                        .withOffence(Offence.offence().withValuesFrom(o.getOffence())
+                                .withVerdict(verdict)
+                                .build())
+                        .build();
+    }
+
+    private Offence getCourtApplicationOffenceWithVerdict(final Verdict verdict, final Offence offence) {
+        return !offence.getId().equals(verdict.getOffenceId()) ? offence :
+                getCourtApplicationOffenceWithUpdatedVerdict(verdict, offence);
+    }
+
+    private Offence getCourtApplicationOffenceWithUpdatedVerdict(final Verdict verdict, final Offence offence) {
+        return (verdict.getIsDeleted() != null && verdict.getIsDeleted()) ?
+                Offence.offence().withValuesFrom(offence)
+                        .withVerdict(null).build() :
+                Offence.offence().withValuesFrom(offence)
+                        .withVerdict(verdict)
+                        .build();
+    }
+
+    private CourtApplication getCourtApplication(final List<CourtApplication> courtApplications, UUID offenceID) {
+        return courtApplications.stream()
+                .filter(ca -> ofNullable(ca.getCourtApplicationCases()).orElse(emptyList()).stream()
+                        .filter(cac -> isNotEmpty(cac.getOffences()))
+                        .flatMap(cac -> cac.getOffences().stream())
+                        .anyMatch(o -> o.getId().equals(offenceID)) ||
+                        (ca.getCourtOrder() != null &&
+                                ca.getCourtOrder().getCourtOrderOffences().stream().anyMatch(co -> co.getOffence().getId().equals(offenceID)))
+                )
+                .findFirst().get();
+    }
+}

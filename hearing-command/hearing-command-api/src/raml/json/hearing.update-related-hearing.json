@@ -1,0 +1,387 @@
+{
+  "prosecutionCases": [
+    {
+      "caseIdentifier": {
+        "authorityCode": "bRWgGVFlMy",
+        "authorityId": "a81ebac0-0160-4ca7-abd4-ee58781851ea",
+        "caseReference": "VpQV3976109"
+      },
+      "defendants": [
+        {
+          "address": {
+            "address1": "address1",
+            "address2": "address2",
+            "address3": "address3",
+            "address4": "address4",
+            "address5": "address5",
+            "postcode": "CR1 4BX"
+          },
+          "bailStatus": {
+            "code": "P",
+            "description": "Custody or remanded into custody",
+            "id": "34443c87-fa6f-34c0-897f-0cce45773df5"
+          },
+          "courtProceedingsInitiated": "2020-04-17T13:32:50.964Z",
+          "dateOfBirth": "1999-04-17",
+          "firstName": "Oz2QCg3vJE",
+          "id": "2ee17e85-442a-435d-9921-4a50b6dcb357",
+          "isYouth": true,
+          "lastName": "azeT8stGBb",
+          "masterDefendantId": "006e79c9-0615-4a7a-bb2d-c80185883649",
+          "nationalityDescription": "British",
+          "offences": [
+            {
+              "id": "497aa280-f8d1-4392-aa38-5743a208e6c8",
+              "laaApplnReference": {
+                "applicationReference": "7I1fsDyL7D",
+                "statusCode": "PEcAVAwqsK",
+                "statusDate": "2020-04-17",
+                "statusDescription": "ytg4qWtleY",
+                "statusId": "c0e3aa00-b434-47bd-92e7-bbcd74ece2c0"
+              },
+              "offenceCode": "oTD8dk57N4",
+              "offenceWording": "22cREhTTKf",
+              "restrictFromCourtList": false,
+              "startDate": "2020-04-17",
+              "statementOfOffence": {
+                "title": "oMFYFjh78b",
+                "welshTitle": "oMFYFjh78b"
+              },
+              "seedingHearing" : {
+                "seedingHearingId": "ced2d8e5-9fe2-4003-a40b-cee8d1f235d8",
+                "jurisdictionType": "MAGISTRATES"
+              }
+            },
+            {
+              "id": "db32d247-161a-4715-baaf-0e414741785c",
+              "laaApplnReference": {
+                "applicationReference": "2UhrVFJmLJ",
+                "statusCode": "DMp0eBXsUD",
+                "statusDate": "2020-04-17",
+                "statusDescription": "AKC3oDRZK1",
+                "statusId": "22ff54bf-160b-475e-b9d1-bf8a37a78189"
+              },
+              "offenceCode": "83CYoKjuce",
+              "offenceWording": "Ydb6M7dpRv",
+              "restrictFromCourtList": false,
+              "startDate": "2020-04-17",
+              "statementOfOffence": {
+                "title": "9SI3klkGow",
+                "welshTitle": "9SI3klkGow"
+              },
+              "seedingHearing" : {
+                "seedingHearingId": "ced2d8e5-9fe2-4003-a40b-cee8d1f235d8",
+                "jurisdictionType": "MAGISTRATES"
+              }
+            },
+            {
+              "id": "46c8b6e3-188c-4573-aa68-64b1984f4cb1",
+              "laaApplnReference": {
+                "applicationReference": "iZJcvdgpMA",
+                "statusCode": "9nuvb6YdnF",
+                "statusDate": "2020-04-17",
+                "statusDescription": "Eviv14uKMx",
+                "statusId": "19fad412-1282-4c4f-bf37-05166633e54b"
+              },
+              "offenceCode": "Wu080TLiem",
+              "offenceWording": "1MxVKyBv1i",
+              "restrictFromCourtList": false,
+              "startDate": "2020-04-17",
+              "statementOfOffence": {
+                "title": "9HN0B6gTm6",
+                "welshTitle": "9HN0B6gTm6"
+              },
+              "seedingHearing" : {
+                "seedingHearingId": "ced2d8e5-9fe2-4003-a40b-cee8d1f235d8",
+                "jurisdictionType": "MAGISTRATES"
+              }
+            }
+          ],
+          "restrictFromCourtList": false
+        },
+        {
+          "address": {
+            "address1": "address1",
+            "address2": "address2",
+            "address3": "address3",
+            "address4": "address4",
+            "address5": "address5",
+            "postcode": "CR1 4BX"
+          },
+          "bailStatus": {
+            "code": "P",
+            "description": "Custody or remanded into custody",
+            "id": "34443c87-fa6f-34c0-897f-0cce45773df5"
+          },
+          "courtProceedingsInitiated": "2020-04-17T13:32:50.964Z",
+          "dateOfBirth": "1999-04-17",
+          "firstName": "E5mI4w3via",
+          "id": "e1944e76-9696-481c-92ac-0f8655d4808a",
+          "isYouth": true,
+          "lastName": "64qPVDwfRZ",
+          "masterDefendantId": "ae2e3a9b-307f-4b9c-9d47-f88a8588f3f5",
+          "nationalityDescription": "British",
+          "offences": [
+            {
+              "id": "deb64feb-1c7e-4082-8cb3-5f846a1da867",
+              "laaApplnReference": {
+                "applicationReference": "sMQ8fVYZr2",
+                "statusCode": "quDhtQrEwK",
+                "statusDate": "2020-04-17",
+                "statusDescription": "CcoFRXkWNB",
+                "statusId": "f208607e-aaf2-45fb-a050-dabe634d0a00"
+              },
+              "offenceCode": "0oL5755xq6",
+              "offenceWording": "ylMwpUmBkP",
+              "restrictFromCourtList": false,
+              "startDate": "2020-04-17",
+              "statementOfOffence": {
+                "title": "ESZlI3GBFF",
+                "welshTitle": "ESZlI3GBFF"
+              },
+              "seedingHearing" : {
+                "seedingHearingId": "ced2d8e5-9fe2-4003-a40b-cee8d1f235d8",
+                "jurisdictionType": "MAGISTRATES"
+              }
+            },
+            {
+              "id": "e4f3572a-e999-426e-b3f1-f44dea9deffd",
+              "laaApplnReference": {
+                "applicationReference": "k3p7Q0Nws2",
+                "statusCode": "KjbINgvlHq",
+                "statusDate": "2020-04-17",
+                "statusDescription": "J2aHvLR4yO",
+                "statusId": "f26099e9-b759-488f-9608-ea140a222d53"
+              },
+              "offenceCode": "xngPZDCHaF",
+              "offenceWording": "MdhntvHGJh",
+              "restrictFromCourtList": false,
+              "startDate": "2020-04-17",
+              "statementOfOffence": {
+                "title": "8Bwr1w5Iwz",
+                "welshTitle": "8Bwr1w5Iwz"
+              },
+              "seedingHearing" : {
+                "seedingHearingId": "ced2d8e5-9fe2-4003-a40b-cee8d1f235d8",
+                "jurisdictionType": "MAGISTRATES"
+              }
+            },
+            {
+              "id": "c4129731-40f9-4cfc-9d3b-d6c54d0a235f",
+              "laaApplnReference": {
+                "applicationReference": "43HiVH9k6n",
+                "statusCode": "rJqW7li4XD",
+                "statusDate": "2020-04-17",
+                "statusDescription": "1hkvjYyrKp",
+                "statusId": "ad6576df-8ce3-4881-9e9e-6de89b3b1a0e"
+              },
+              "offenceCode": "ojnHP9uVlt",
+              "offenceWording": "NnFFR156Gl",
+              "restrictFromCourtList": false,
+              "startDate": "2020-04-17",
+              "statementOfOffence": {
+                "title": "XnqFP9UPC0",
+                "welshTitle": "XnqFP9UPC0"
+              },
+              "seedingHearing" : {
+                "seedingHearingId": "ced2d8e5-9fe2-4003-a40b-cee8d1f235d8",
+                "jurisdictionType": "MAGISTRATES"
+              }
+            }
+          ],
+          "restrictFromCourtList": false
+        }
+      ],
+      "id": "badaef85-7d26-45eb-9c09-9c7e12e16069",
+      "markers": [
+        {
+          "id": "cf4d8654-d1ad-4007-9f48-b649caf52d27",
+          "markerTypeCode": "C",
+          "markerTypeDescription": "Description",
+          "markerTypeid": "35d8b2d5-4a7e-40c0-8c06-eb1caa7ec753"
+        }
+      ],
+      "restrictFromCourtList": false
+    },
+    {
+      "caseIdentifier": {
+        "authorityCode": "KAJmzzPWt5",
+        "authorityId": "9162ed3c-6b1d-47b7-8229-7720d0655290",
+        "caseReference": "3Zqu2600203"
+      },
+      "defendants": [
+        {
+          "address": {
+            "address1": "address1",
+            "address2": "address2",
+            "address3": "address3",
+            "address4": "address4",
+            "address5": "address5",
+            "postcode": "CR1 4BX"
+          },
+          "bailStatus": {
+            "code": "P",
+            "description": "Custody or remanded into custody",
+            "id": "34443c87-fa6f-34c0-897f-0cce45773df5"
+          },
+          "courtProceedingsInitiated": "2020-04-17T13:32:50.965Z",
+          "dateOfBirth": "1999-04-17",
+          "firstName": "HPykdfV4Oh",
+          "id": "5cb75f9c-c062-489a-8dec-3d48c3fa5fda",
+          "isYouth": true,
+          "lastName": "6aSCnnfHTm",
+          "masterDefendantId": "9cfbbfd4-dc49-49e7-a63c-583da31e2be7",
+          "nationalityDescription": "British",
+          "offences": [
+            {
+              "id": "b9933095-8655-4473-afdc-a31a219f9c40",
+              "laaApplnReference": {
+                "applicationReference": "2Qnwc918Bm",
+                "statusCode": "obM1OGDU7c",
+                "statusDate": "2020-04-17",
+                "statusDescription": "YYanaItNOX",
+                "statusId": "26d50823-c6ee-415f-b0bd-61e7792590ea"
+              },
+              "offenceCode": "LTkEOB0Gtl",
+              "offenceWording": "nEy5mwzxHu",
+              "restrictFromCourtList": false,
+              "startDate": "2020-04-17",
+              "statementOfOffence": {
+                "title": "08kOEjCMI5",
+                "welshTitle": "08kOEjCMI5"
+              }
+            },
+            {
+              "id": "17c98451-c7df-47ae-ae74-69f78bb468ac",
+              "laaApplnReference": {
+                "applicationReference": "lR0M7757NI",
+                "statusCode": "IfnDz7x9VO",
+                "statusDate": "2020-04-17",
+                "statusDescription": "3n5SWnFmzJ",
+                "statusId": "43b10547-dfd1-4252-8d1b-dd06cc232094"
+              },
+              "offenceCode": "2m2tvrvex8",
+              "offenceWording": "cm5Fl5pvz1",
+              "restrictFromCourtList": false,
+              "startDate": "2020-04-17",
+              "statementOfOffence": {
+                "title": "4tUMCs0hyC",
+                "welshTitle": "4tUMCs0hyC"
+              }
+            },
+            {
+              "id": "dd569868-179f-4740-969b-9061f4ff65e0",
+              "laaApplnReference": {
+                "applicationReference": "ytNxlHvWgz",
+                "statusCode": "Ah6XA4aGde",
+                "statusDate": "2020-04-17",
+                "statusDescription": "D4NVWwS4gj",
+                "statusId": "50198704-e8e5-48c2-9bcd-0a5c106c817e"
+              },
+              "offenceCode": "3fFvsFiTWS",
+              "offenceWording": "nHdIMb0Q06",
+              "restrictFromCourtList": false,
+              "startDate": "2020-04-17",
+              "statementOfOffence": {
+                "title": "ghpJ1bdkcv",
+                "welshTitle": "ghpJ1bdkcv"
+              }
+            }
+          ],
+          "restrictFromCourtList": false
+        },
+        {
+          "address": {
+            "address1": "address1",
+            "address2": "address2",
+            "address3": "address3",
+            "address4": "address4",
+            "address5": "address5",
+            "postcode": "CR1 4BX"
+          },
+          "bailStatus": {
+            "code": "P",
+            "description": "Custody or remanded into custody",
+            "id": "34443c87-fa6f-34c0-897f-0cce45773df5"
+          },
+          "courtProceedingsInitiated": "2020-04-17T13:32:50.965Z",
+          "dateOfBirth": "1999-04-17",
+          "firstName": "DwewUOV6TK",
+          "id": "356f0728-a81e-4d96-8752-a27fac4f54f9",
+          "isYouth": true,
+          "lastName": "FV16VhAWUY",
+          "masterDefendantId": "5d4bf308-cbbf-4c71-8a1e-025c91f1692d",
+          "nationalityDescription": "British",
+          "offences": [
+            {
+              "id": "7720f6f1-eb07-4936-b11e-75bf4e415e18",
+              "laaApplnReference": {
+                "applicationReference": "G7Wi6hgaUp",
+                "statusCode": "79tiFe31oC",
+                "statusDate": "2020-04-17",
+                "statusDescription": "ZHDKaOmTrt",
+                "statusId": "7c5e714a-2892-407a-9916-48f08d1cc0a4"
+              },
+              "offenceCode": "FOYbNCh7aE",
+              "offenceWording": "S01Sd8ka8x",
+              "restrictFromCourtList": false,
+              "startDate": "2020-04-17",
+              "statementOfOffence": {
+                "title": "TGPlAleNIo",
+                "welshTitle": "TGPlAleNIo"
+              }
+            },
+            {
+              "id": "48d718b3-d57a-4e7b-a591-6408c9fd9add",
+              "laaApplnReference": {
+                "applicationReference": "I7paPhyIID",
+                "statusCode": "JxLpZsP7Il",
+                "statusDate": "2020-04-17",
+                "statusDescription": "O6aWiIymbI",
+                "statusId": "8b00c3e3-2ee6-44a9-95e9-c2446ae09560"
+              },
+              "offenceCode": "3qxYiD4QTE",
+              "offenceWording": "OBFuhAsPOZ",
+              "restrictFromCourtList": false,
+              "startDate": "2020-04-17",
+              "statementOfOffence": {
+                "title": "KVSB9HbRzr",
+                "welshTitle": "KVSB9HbRzr"
+              }
+            },
+            {
+              "id": "113b6ad6-ec90-41a9-976a-0c9d7718d766",
+              "laaApplnReference": {
+                "applicationReference": "Ieu5a61qcI",
+                "statusCode": "SeOQzVi4uq",
+                "statusDate": "2020-04-17",
+                "statusDescription": "OFGjiP4HB1",
+                "statusId": "adb8d4a9-ada8-4dc4-b65c-6e48dda02a0b"
+              },
+              "offenceCode": "IWWtr3deX9",
+              "offenceWording": "QLFebfwFCT",
+              "restrictFromCourtList": false,
+              "startDate": "2020-04-17",
+              "statementOfOffence": {
+                "title": "RXYJbX0PDp",
+                "welshTitle": "RXYJbX0PDp"
+              }
+            }
+          ],
+          "restrictFromCourtList": false
+        }
+      ],
+      "id": "e06caff4-4480-4582-822f-dc7f7824a751",
+      "markers": [
+        {
+          "id": "f19a6237-78e0-4308-9798-2c6c3a8a25c9",
+          "markerTypeCode": "C",
+          "markerTypeDescription": "Description",
+          "markerTypeid": "fe90a1ba-8f40-437e-8c93-b4c6a8e2ee79"
+        }
+      ],
+      "restrictFromCourtList": false
+    }
+  ],
+  "shadowListedOffences": ["fe1c6806-6858-45f4-b7db-36628e7f401f", "8c8cb318-4688-45a0-bea0-68f268c66a0d"]
+}

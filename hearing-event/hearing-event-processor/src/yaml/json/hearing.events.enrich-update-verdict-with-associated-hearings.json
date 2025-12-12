@@ -1,0 +1,29 @@
+{
+  "verdict": {
+    "jurors": {
+      "numberOfJurors": 10,
+      "numberOfSplitJurors": 2,
+      "unanimous": false
+    },
+    "lesserOrAlternativeOffence": {
+      "offenceCode": "rCZ0fT3g9L",
+      "offenceDefinitionId": "fd871360-e06d-4612-a400-d9e1364e855a",
+      "offenceLegislation": "vm9tsbhz3r",
+      "offenceLegislationWelsh": "01PhtXcOFB",
+      "offenceTitle": "H8bRwxMTCY",
+      "offenceTitleWelsh": "0yTEG4EGGS"
+    },
+    "offenceId": "a21b8173-4732-4d70-aaa5-0423a44d05c5",
+    "verdictDate": "2014-02-01",
+    "verdictType": {
+      "category": "ablq93xXJP",
+      "categoryType": "GUILTY",
+      "description": "0CsHFMYvvZ",
+      "sequence": 70988711,
+      "verdictTypeId": "53d07290-5fe6-4e60-8529-7295c140e587"
+    }
+  },
+  "hearingIds": [
+    "7237da65-c6fb-46a3-8921-cf8286a174d8"
+  ]
+}

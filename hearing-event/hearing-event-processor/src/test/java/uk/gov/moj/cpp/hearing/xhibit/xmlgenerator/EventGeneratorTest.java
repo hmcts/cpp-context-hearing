@@ -1,0 +1,123 @@
+package uk.gov.moj.cpp.hearing.xhibit.xmlgenerator;
+
+import static java.time.ZonedDateTime.now;
+import static java.time.format.DateTimeFormatter.ofPattern;
+import static java.util.UUID.randomUUID;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.HearingEvent.hearingEvent;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+
+import uk.gov.justice.core.courts.DefenceCounsel;
+import uk.gov.justice.core.courts.HearingEvent;
+import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.Currentstatus;
+import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.Event20903OptionType;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
+import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+public class EventGeneratorTest {
+
+    @Mock
+    private XhibitEventMapperCache eventMapperCache;
+
+    @InjectMocks
+    private EventGenerator eventGenerator;
+
+    private final DateTimeFormatter timeFormatter = ofPattern("HH:mm");
+    private final DateTimeFormatter dateFormatter = ofPattern("dd/MM/yy");
+    private static final ZoneId localZoneId = ZoneId.of("Europe/London");
+    private final LocalDate eventDate = LocalDate.of(2020, 03, 30);
+    private final String formattedEventDate = eventDate.format(dateFormatter);
+    private ZonedDateTime lastModifiedTime;
+
+    @BeforeEach
+    public void setup() {
+        lastModifiedTime = ZonedDateTime.parse("2020-03-30T15:00Z");
+        final PopulateComplexEventType populateComplexEventType = new PopulateComplexEventType();
+        final ComplexTypeDataProcessor complexTypeDataProcessor = new ComplexTypeDataProcessor();
+        setField(populateComplexEventType, "complexTypeDataProcessor", complexTypeDataProcessor);
+        setField(eventGenerator, "populateComplexEventType", populateComplexEventType);
+    }
+
+    @Test
+    public void shouldGenerateCurrentStatus() {
+        final HearingEvent hearingEvent = createHearingEvent(null);
+        final String type = "10100";
+        final CourtRoom courtRoom = CourtRoom.courtRoom().withHearingEvent(hearingEvent).build();
+
+        when(eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString())).thenReturn(type);
+
+        final Currentstatus currentstatus = eventGenerator.generate(courtRoom);
+
+        assertThat(currentstatus.getEvent().getDate(), is(formattedEventDate));
+        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.withZoneSameInstant(localZoneId).format(timeFormatter)));
+        assertThat(currentstatus.getEvent().getType(), is(type));
+        assertThat(currentstatus.getEvent().getFreeText(), is(EMPTY));
+    }
+
+    @Test
+    public void shouldGenerateCurrentStatusWithComplexEvent() {
+        final HearingEvent hearingEvent = createHearingEvent(null);
+        final String type = "20903";
+        final CourtRoom courtRoom = CourtRoom.courtRoom().withHearingEvent(hearingEvent).build();
+
+        when(eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString())).thenReturn(type);
+
+        final Currentstatus currentstatus = eventGenerator.generate(courtRoom);
+
+        assertThat(currentstatus.getEvent().getDate(), is(formattedEventDate));
+        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.withZoneSameInstant(localZoneId).format(timeFormatter)));
+        assertThat(currentstatus.getEvent().getType(), is(type));
+        assertThat(currentstatus.getEvent().getFreeText(), is(EMPTY));
+        assertThat(currentstatus.getEvent().getE20903ProsecutionCaseOptions().getE20903PCOType(), is(Event20903OptionType.E_20903_PROSECUTION_OPENING));
+    }
+
+    @Test
+    public void shouldGenerateCurrentStatusWithComplexEventDefenceCounsel() {
+        final UUID defenceCounselId = randomUUID();
+        final HearingEvent hearingEvent = createHearingEvent(defenceCounselId);
+        final String type = "20906";
+        final DefenceCounsel defenceCounsel = DefenceCounsel.defenceCounsel().withId(defenceCounselId).withFirstName("Sid").withLastName("Sox").build();
+        final CourtRoom courtRoom = CourtRoom.courtRoom().withHearingEvent(hearingEvent).withDefenceCouncil(Collections.singletonList(defenceCounsel)).build();
+
+        when(eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString())).thenReturn(type);
+
+        final Currentstatus currentstatus = eventGenerator.generate(courtRoom);
+
+        assertThat(currentstatus.getEvent().getDate(), is(formattedEventDate));
+        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.withZoneSameInstant(localZoneId).format(timeFormatter)));
+        assertThat(currentstatus.getEvent().getType(), is(type));
+        assertThat(currentstatus.getEvent().getFreeText(), is(EMPTY));
+        assertThat(currentstatus.getEvent().getE20906DefenceCOName(), is("Sid Sox"));
+    }
+
+    private HearingEvent createHearingEvent(final UUID defenceCounselId) {
+        final UUID hearingEventId = randomUUID();
+        final UUID hearingEventDefinitionId = randomUUID();
+
+        return hearingEvent()
+                .withLastModifiedTime(lastModifiedTime)
+                .withEventDate(eventDate.toString())
+                .withDefenceCounselId(defenceCounselId)
+                .withId(hearingEventId)
+                .withHearingEventDefinitionId(hearingEventDefinitionId)
+                .build();
+    }
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.hearing-breach-applications-added.json",
+  "type": "object",
+  "properties": {
+    "courtApplications": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "http://justice.gov.uk/core/courts/courtApplication.json#"
+      }
+    }
+  },
+  "required": [
+    "courtApplications"
+  ],
+  "additionalProperties": true
+}
+

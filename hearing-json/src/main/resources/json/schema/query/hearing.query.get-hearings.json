@@ -1,0 +1,303 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/get-hearings.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "hearingSummaries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/hearingSearchSummary"
+      }
+    }
+  },
+  "required": [
+    "hearings"
+  ],
+  "definitions": {
+    "hearingSearchSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "courtCentreId": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "roomId": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "type": {
+          "$ref": "http://justice.gov.uk/core/courts/hearingType.json#"
+        },
+        "jurisdictionType": {
+          "$ref": "http://justice.gov.uk/core/courts/jurisdictionType.json"
+        },
+        "reportingRestrictionReason": {
+          "type": "string"
+        },
+        "hearingLanguage": {
+          "type": "string"
+        },
+        "hearingDays": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "http://justice.gov.uk/core/courts/hearingDay.json#"
+          }
+        },
+        "isGroupProceedings": {
+          "description": "The hearing is a logical grouping of cases when it is true",
+          "type": "boolean"
+        },
+        "numberOfGroupCases": {
+          "type": "integer"
+        },
+        "prosecutionCaseSummaries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/prosecutionCaseSummary"
+          }
+        },
+        "courtApplicationSummaries": {
+          "description": "The collection of applications to be heard with respect to an application hearing or the applications for a case with respect to a hearing related to the case",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/courtApplicationSummary"
+          }
+        },
+        "hasSharedResults": {
+          "description": "Indicates that the hearing has at least one result shared",
+          "type": "boolean"
+        },
+        "courtCentre": {
+          "$ref": "http://justice.gov.uk/core/courts/courtCentre.json"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "jurisdictionType"
+      ],
+      "additionalProperties": false
+    },
+    "courtApplicationSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "parentApplicationId": {
+          "description": "The identifier of the linked parent application.  Linked applications are a single level deep",
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "applicationReference": {
+		  "description": "The human readable reference for the application.  For linked applications this will be the case urn or the prosecution authority reference suffixed with a numerical sequence",
+		  "type": "string"
+		},
+        "caseSummaries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/courtApplicationCaseSummary"
+          }
+        },
+		"applicant": {
+          "$ref": "#/definitions/partySummary"
+        },
+        "respondents": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/partySummary"
+          }
+        },
+        "subject": {
+          "$ref": "#/definitions/partySummary"
+        },
+        "type": {
+          "description": "The type of application made to court for judicial decision.  Taken from reference data",
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "The CJS Title for the court application type",
+              "type": "string"
+            },
+            "typeWelsh": {
+              "type": "string"
+            },
+            "legislation": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "id",
+        "applicationReference",
+        "respondents"
+      ],
+      "additionalProperties": false
+    },
+    "prosecutionCaseSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "prosecutionCaseIdentifier": {
+          "$ref": "http://justice.gov.uk/core/courts/prosecutionCaseIdentifier.json#"
+        },
+        "isCivil": {
+          "type": "boolean"
+        },
+        "groupId": {
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+        },
+        "isGroupMember": {
+          "type": "boolean"
+        },
+        "isGroupMaster": {
+          "type": "boolean"
+        },
+        "defendants": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/partySummary"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "prosecutionCaseIdentifier",
+        "defendants"
+      ],
+      "additionalProperties": false
+    },
+    "partySummary": {
+      "type": "object",
+      "description": "The party for an individual prosecution case or application.  Party details are NOT associated to multiple prosecution cases or applications.  HMCTS business does not have authority to merge defendant details or recognise a single view of defendant",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "synonym": {
+			"description": "Provides the additional business persona of an applicant or respondent e.g. appellant, complainant, appellee, suspect",
+			"type": "string"
+		},
+        "masterDefendantId": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "courtProceedingsInitiated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "firstName": {
+          "description": "The first name of the party when the party is a person",
+          "type": "string"
+        },
+        "middleName": {
+          "description": "The middle name of the party when the party is a person",
+          "type": "string"
+        },
+        "lastName": {
+          "description": "The last name of the party when the party is a person",
+          "type": "string"
+        },
+        "dateOfBirth": {
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+        },
+        "organisationName": {
+          "description": "The organisation name of the party when the party is a legal entity",
+          "type": "string"
+        },
+        "organisationCode": {
+          "description": "The organisation code of the party when the party is a legal entity, ex. prosecutionAuthorityCode",
+          "type": "string"
+        },
+        "offences": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/offenceSummary"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "masterDefendantId",
+        "courtProceedingsInitiated"
+      ],
+      "additionalProperties": false
+    },
+    "offenceSummary": {
+      "type": "object",
+      "description": "Information about the offences committed by a party",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+        },
+        "offenceTitle": {
+          "type": "string"
+        },
+        "offenceTitleWelsh": {
+          "type": "string"
+        },
+        "wording": {
+          "type": "string"
+        },
+        "wordingWelsh": {
+          "type": "string"
+        },
+        "reportingRestrictions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/reportingRestriction"
+          }
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "reportingRestriction": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "judicialResultId": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "label": {
+          "type": "string"
+        },
+        "orderedDate": {
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "courtApplicationCaseSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "prosecutionCaseIdentifier": {
+          "$ref": "http://justice.gov.uk/core/courts/prosecutionCaseIdentifier.json"
+        }
+      }
+    }
+  }
+}

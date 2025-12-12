@@ -1,0 +1,232 @@
+subscriptions_descriptor:
+  spec_version: 1.0.0
+  service: hearing
+  service_component: EVENT_PROCESSOR
+  subscriptions:
+    - name: public event processor subscription
+      events:
+
+        # Initiate Hearing
+        - name: public.hearing.initiated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-initiated.json
+
+        - name: public.hearing.initiate-ignored
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-initiate-ignored.json
+
+        # Initiate Mags Court Hearing
+        - name: public.mags.hearing.initiated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-mags-hearing-initiated.json
+
+        # Events
+        - name: public.hearing.event-logged
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-event-logged.json
+
+        # hearing amended
+        - name: public.hearing.event-amended
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.event-amended.json
+
+        - name: public.hearing.event-ignored
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-event-ignored.json
+
+        - name: public.hearing.event-timestamp-corrected
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-event-timestamp-corrected.json
+
+        - name: public.hearing.events-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-events-updated.json
+
+        # Share Results
+        - name: public.hearing.resulted
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-resulted.json
+
+        # Share Results V2
+        - name: public.events.hearing.hearing-resulted
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.events.hearing.hearing-resulted.json
+
+        - name: public.events.hearing.hearing-resulted-success
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.events.hearing.hearing-resulted-success.json
+
+        - name: public.hearing.draft-result-saved
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-draft-result-saved.json
+
+        - name: public.hearing.draft-result-deleted-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-draft-result-deleted-v2.json
+
+        - name: public.hearing.multiple-draft-results-saved
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-multiple-draft-results-saved.json
+
+        - name: public.hearing.save-draft-result-failed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-save-draft-result-failed.json
+
+        - name: public.hearing.share-results-failed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-share-results-failed.json
+
+        - name: public.hearing.manage-results-failed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-manage-results-failed.json
+
+        # Pleas
+        - name: public.hearing.plea-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-plea-updated.json
+
+        - name: public.hearing.update-plea-ignored
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-update-plea-ignored.json
+
+        # Verdicts
+        - name: public.hearing.verdict-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-verdict-updated.json
+
+        - name: public.hearing.hearing-offence-verdict-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.hearing-offence-verdict-updated.json
+
+        # Conviction Date
+        - name: public.hearing.offence-conviction-date-changed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-offence-conviction-date-changed.json
+
+        - name: public.hearing.offence-conviction-date-removed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-offence-conviction-date-removed.json
+
+        # Nows
+        - name: public.hearing.now-document-requested
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-now-document-requested.json
+
+        - name: public.hearing.events.nows-requested
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-nows-requested.json
+
+        # Attendees
+        - name: public.hearing.events.attendee-deleted
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-attendee-deleted.json
+
+        # Hearing Adjourned
+        - name: public.hearing.adjourned
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-adjourned.json
+
+        # Hearing Slots Provisionally Booked
+        - name: public.hearing.hearing-slots-provisionally-booked
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-slots-provisionally-booked.json
+
+        # Hearing Adjourned
+        - name: public.hearing.defendant-attendance-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-defendant-attendance-updated.json
+
+        # Company Representative
+        - name: public.hearing.company-representative-change-ignored
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-company-representative-change-ignored.json
+
+        # defendant case withdrawn or dismissed
+        - name: public.hearing.defendant-case-withdrawn-or-dismissed
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/public.hearing.defendant-case-withdrawn-or-dismissed.json
+
+        # Defense Counsel
+        - name: public.hearing.defence-counsel-added
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-added.json
+
+        # Defence Counsel Change Ignored
+        - name: public.hearing.defence-counsel-removed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-removed.json
+
+        - name: public.hearing.defence-counsel-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-updated.json
+
+        # Defence Counsel Change Ignored
+        - name: public.hearing.defence-counsel-change-ignored
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-defence-counsel-change-ignored.json
+
+        # Prosecution Counsel
+        - name: public.hearing.prosecution-counsel-added
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/prosecution-counsel-added.json
+
+        # Prosecution Counsel Change Ignored
+        - name: public.hearing.prosecution-counsel-removed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/prosecution-counsel-removed.json
+
+        - name: public.hearing.prosecution-counsel-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/prosecution-counsel-updated.json
+
+        # Prosecution Counsel Change Ignored
+        - name: public.hearing.prosecution-counsel-change-ignored
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-prosecution-counsel-change-ignored.json
+
+        # NCES Notification
+        - name: public.hearing.event.nces-notification-requested
+          schema_uri: http://justice.gov.uk/hearing/json/schema/event/public-nces-notification-requested.json
+
+        # Set Trial Type
+        - name: public.hearing.trial-vacated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-trial-vacated.json
+
+        # Set Hearing Days Cancelled
+        - name: public.hearing.hearing-days-cancelled
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-days-cancelled.json
+
+        - name: public.hearing.nces-email-notification-for-application
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.nces-email-notification-for-application.json
+
+        # Duplicate Hearing
+        - name: public.events.hearing.marked-as-duplicate
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.events.hearing.marked-as-duplicate.json
+
+        # Youth court defendants
+        - name: public.hearing.defendants-in-youthcourt-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-defendants-in-youthcourt-updated.json
+
+        - name: public.hearing.result-amendments-rejected
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.result-amendments-rejected.json
+
+        - name: public.hearing.result-amendments-cancelled
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.result-amendments-cancelled.json
+
+        - name: public.hearing.result-amendments-validated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.result-amendments-validated.json
+
+        - name: public.hearing.approval-rejected
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.event.approval-rejected.json
+
+        - name: public.hearing.hearing-locked
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.event.hearing-locked.json
+
+        - name: public.hearing.hearing-locked-by-other-user
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.event.hearing-locked-by-other-user.json
+
+        - name: public.hearing.approval-requested
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.approval-requested.json
+
+        - name: public.hearing.result-amendments-validation-failed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-validation-failed.json
+
+        - name: public.events.hearing.custody-time-limit-clock-stopped
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.events.hearing.custody-time-limit-clock-stopped.json
+
+        # Prosecution Case created in Hearing
+        - name: public.events.hearing.prosecution-case-created-in-hearing
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.events.hearing.prosecution-case-created-in-hearing.json
+
+        - name: public.hearing.hearing-offence-plea-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing-offence-plea-updated.json
+
+        # Defendants Welsh information recorded
+        - name: public.hearing.defendants-welsh-information-recorded
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.defendants-welsh-information-recorded.json
+
+        # Selected Offences Removed From Existing Hearing
+        - name: public.hearing.selected-offences-removed-from-existing-hearing
+          schema_uri: http://justice.gov.uk/hearing/courts/public.hearing.selected-offences-removed-from-existing-hearing.json
+
+        - name: public.hearing.live-status-published
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.live-status-published.json
+
+        # Hearing Unlocked
+        - name: public.hearing.hearing-unlocked
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.hearing-unlocked.json
+
+        - name: public.hearing.hearing-unlock-failed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.hearing-unlock-failed.json
+
+        - name: public.hearing.hearing-witness-added
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.hearing-witness-added.json
+
+
+        - name: public.hearing.hearing-extended
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-extended.json
+        - name: public.hearing.hearing-breach-applications-added
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.hearing-breach-applications-added.json
+
+      event_source_name: public.event.source

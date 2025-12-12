@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/core/courts/prompt.json",
+  "description": "The resultLine",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "promptRef" : {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "welshLabel": {
+      "type": "string"
+    },
+    "fixedListCode": {
+      "type": "string"
+    },
+    "value": {
+      "type": "string"
+    },
+    "welshValue": {
+      "type": "string"
+    },
+    "hidden": {
+      "description": "Indicates if the result prompt is hidden",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "id",
+    "label",
+    "value"
+  ],
+  "additionalProperties": false
+}

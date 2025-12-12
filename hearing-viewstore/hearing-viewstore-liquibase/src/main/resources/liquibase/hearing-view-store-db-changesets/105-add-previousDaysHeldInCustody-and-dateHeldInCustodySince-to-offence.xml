@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="105" author="jive"
+               logicalFilePath="105-add-previousDaysHeldInCustody-and-dateHeldInCustodySince-to-offence">
+
+        <addColumn tableName="ha_offence">
+            <column name="previous_days_held_in_custody" type="integer"/>
+            <column name="date_held_in_custody_since" type="date"/>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="ha_offence">
+                <column name="previous_days_held_in_custody"/>
+                <column name="date_held_in_custody_since"/>
+            </dropColumn>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

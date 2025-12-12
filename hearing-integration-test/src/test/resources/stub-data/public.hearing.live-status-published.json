@@ -1,0 +1,57 @@
+{
+  "documentDate": "2022-07-14T10:00:00.000Z",
+  "courtRooms": [
+    {
+      "roomId": "010",
+      "courtRoomName": "Courtroom 01",
+      "sessions": [
+        {
+          "sittings": [
+            {
+              "hearing": [
+                {
+                  "prosecutingAuthority": "CPS-EM",
+                  "sequence": 1,
+                  "hearingType": "First hearing",
+                  "caseNumber": [
+                    "53NP8105522"
+                  ],
+                  "hearingEvents": [
+                    {
+                      "hearingEvent":"Test",
+                      "hearingEventTime":"2022-07-08T10:14:28.257Z"
+                    }
+                  ],
+                  "startTime": "10:01"
+                },
+                {
+                  "prosecutingAuthority": "CPS-EM",
+                  "sequence": 2,
+                  "hearingType": "First hearing",
+                  "caseNumber": [
+                    "53NP1454922"
+                  ],
+                  "startTime": "10:01"
+                },
+                {
+                  "prosecutingAuthority": "CPS-EM",
+                  "sequence": 3,
+                  "hearingType": "First hearing",
+                  "caseNumber": [
+                    "53NP7998322"
+                  ],
+                  "startTime": "10:01"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "address1": "176A Lavender Hill London",
+  "hearingDate": "2022-07-11",
+  "documentName": "Live Case Updates",
+  "courtCentreName": "Lavender Hill Magistrates' Court",
+  "version": "1.0"
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="99" author="jive"
+               logicalFilePath="099-add-column-has-shared-results-to-hearing-day">
+
+        <addColumn tableName="ha_hearing_day">
+            <column name="has_shared_results" type="boolean"/>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="ha_hearing_day">
+                <column name="has_shared_results"/>
+            </dropColumn>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

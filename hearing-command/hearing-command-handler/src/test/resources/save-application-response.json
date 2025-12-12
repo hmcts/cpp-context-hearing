@@ -1,0 +1,13 @@
+{
+  "hearingId": "60d46e6a-0248-4a8d-96a2-8dcd2814dc17",
+  "applicationResponse": {
+    "applicationId": "724a53b3-bf7d-44be-91d1-71ae0dac13f2",
+    "originatingHearingId": "60d46e6a-0248-4a8d-96a2-8dcd2814dc17",
+    "applicationResponseDate": "2011-07-14",
+    "applicationResponseType": {
+      "id": "d8756d94-b5a5-4b61-9b3b-50ad9b3a7d0d",
+      "description": "Admitted",
+      "sequence": 1
+    }
+  }
+}

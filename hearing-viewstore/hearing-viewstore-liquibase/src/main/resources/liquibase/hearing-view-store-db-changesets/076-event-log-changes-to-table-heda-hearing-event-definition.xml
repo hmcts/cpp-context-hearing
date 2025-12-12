@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="76" author="hearing"
+               logicalFilePath="076-event-log-changes-to-table-heda-hearing-event-definition.xml">
+
+        <addColumn tableName="heda_hearing_event_definition">
+            <column name="ACTION_SEQUENCE" type="integer"/>
+        </addColumn>
+        <addColumn tableName="heda_hearing_event_definition">
+            <column name="GROUP_SEQUENCE" type="integer"/>
+        </addColumn>
+
+        <dropColumn tableName="heda_hearing_event_definition" columnName="SEQUENCE_NUMBER"/>
+        <dropColumn tableName="heda_hearing_event_definition" columnName="SEQUENCE_TYPE"/>
+        <dropColumn tableName="heda_hearing_event_definition" columnName="ACTION_LABEL_EXTENSION"/>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,28 @@
+{
+  "hearingId": "e085c62c-dc4a-11e7-9296-cec278b6b50a",
+  "verdict": {
+    "originatingHearingId": "e085c62c-dc4a-11e7-9296-cec278b6b50a",
+    "offenceId": "e085c62c-dc4a-11e7-9296-cec278b6b50a",
+    "verdictDate": "2018-01-01",
+    "verdictType": {
+      "verdictTypeId": "dc311fc5-654e-4476-8dcc-dbab3626fbd3",
+      "sequence": 1,
+      "description": "Test Description",
+      "category": "verdict category",
+      "categoryType": "verdict category type"
+    },
+    "jurors": {
+      "numberOfJurors": 12,
+      "numberOfSplitJurors": 1,
+      "unanimous": true
+    },
+    "lesserOrAlternativeOffence": {
+      "offenceDefinitionId": "0f1980cf-84a1-4ffb-a353-5bbd8d06457f",
+      "offenceCode": "Test Code",
+      "offenceTitle": "Test Title",
+      "offenceTitleWelsh": "Test title welsh",
+      "offenceLegislation": "Test Legislation",
+      "offenceLegislationWelsh": "Test Legislation welsh"
+    }
+  }
+}

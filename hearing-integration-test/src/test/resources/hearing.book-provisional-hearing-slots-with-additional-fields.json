@@ -1,0 +1,18 @@
+{
+  "slots": [
+    {
+      "courtScheduleId": "UUID1",
+      "hearingStartTime": "HEARING_START_TIME1"
+    },
+    {
+      "courtScheduleId": "UUID2",
+      "hearingStartTime": "HEARING_START_TIME2"
+    }
+  ],
+  "bookingType" : "Video",
+  "priority" : "High",
+  "specialRequirements": [
+    "UG",
+    "FHL"
+  ]
+}

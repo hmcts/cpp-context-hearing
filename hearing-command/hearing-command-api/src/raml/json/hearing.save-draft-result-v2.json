@@ -1,0 +1,40 @@
+{
+  "hearingId": "d0353c34-445f-422c-bd1f-cd1e50d7d9b2",
+  "relations": [
+    {
+      "resultLineId": "2a3fa3d7-9658-4ee2-b5ca-ec98e190fd5b",
+      "childResultLineIds": [],
+      "ruleType": "standalone"
+    }
+  ],
+  "shadowListedOffenceIds": [
+    "b64f3be1-52cf-4df4-836b-330da89fe9f1"
+  ],
+  "resultLines": {
+    "2a3fa3d7-9658-4ee2-b5ca-ec98e190fd5b": {
+      "caseId": "01eb3311-86de-4ce4-8726-c480becd7ddb",
+      "masterDefendantId": "f11671e5-4476-4342-8cf3-a8193512bd98",
+      "offenceId": "b64f3be1-52cf-4df4-836b-330da89fe9f1",
+      "resultLineId": "2a3fa3d7-9658-4ee2-b5ca-ec98e190fd5b",
+      "level": "C",
+      "orderedDate": "2021-05-04",
+      "originalText": "NCOSTS",
+      "unresolvedParts": [],
+      "resultDefinitionId": "baf94928-04ae-4609-8e96-efc9f081b2be",
+      "label": "No order for costs",
+      "shortCode": "NCOSTS",
+      "resultPrompts": [
+        {
+          "promptId": "be2a46db-709d-4e0d-9b63-aeb831564c1d",
+          "promptRef": "reasonForNoCosts",
+          "promptLabel": "Reason for no costs",
+          "type": "TXT",
+          "value": "Because yes!"
+        }
+      ]
+    }
+  },
+  "__metadata__": {
+    "version": 1
+  }
+}

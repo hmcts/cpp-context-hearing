@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.hearing-event-logged.json",
+  "type": "object",
+  "properties": {
+    "hearingEventId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "lastHearingEventId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "hearingEventDefinitionId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "defenceCounselId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "recordedLabel": {
+      "type": "string"
+    },
+    "eventTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastModifiedTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "alterable": {
+      "type": "boolean"
+    },
+    "courtCentre": {
+      "$ref": "http://justice.gov.uk/core/courts/courtCentre.json"
+    },
+    "hearingType": {
+      "$ref": "http://justice.gov.uk/core/courts/hearingType.json"
+    },
+    "caseURN": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "hearingEventId",
+    "hearingId",
+    "hearingEventDefinitionId",
+    "recordedLabel",
+    "eventTime",
+    "lastModifiedTime",
+    "alterable",
+    "courtCentre",
+    "hearingType",
+    "caseURN"
+  ],
+  "additionalProperties": false
+}

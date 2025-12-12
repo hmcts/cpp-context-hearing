@@ -1,0 +1,292 @@
+{
+  "hearing": {
+    "courtCentre": {
+      "address": {
+        "address1": "176A Lavender Hill",
+        "address2": "London",
+        "address3": "",
+        "address4": "",
+        "address5": "",
+        "postcode": "SW11 1JU"
+      },
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01"
+    },
+    "defendantAttendance": [{
+      "attendanceDays": [{
+        "attendanceType": "IN_PERSON",
+        "day": "2020-05-29"
+      }],
+      "defendantId": "7912d9d7-cfca-429d-a63b-6d72585967bd"
+    }],
+    "hasSharedResults": true,
+    "hearingDays": [{
+      "listedDurationMinutes": 20,
+      "listingSequence": 0,
+      "sittingDay": "2020-05-29T09:01:01.001Z"
+    }],
+    "hearingLanguage": "ENGLISH",
+    "id": "d45c7cd4-e3de-47d0-aaca-580b0a9fdff1",
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [{
+      "defendants": [{
+        "courtProceedingsInitiated": "2020-05-29T08:26:26.322Z",
+        "id": "7912d9d7-cfca-429d-a63b-6d72585967bd",
+        "masterDefendantId": "d6891576-ff4a-4f2e-a22b-f50ee070cbf6",
+        "offences": [{
+          "arrestDate": "2005-11-19",
+          "chargeDate": "2004-12-09",
+          "count": 0,
+          "id": "899af0e7-94ff-4747-b478-2652249ec580",
+          "judicialResults": [{
+            "alwaysPublished": false,
+            "category": "ANCILLARY",
+            "courtClerk": {
+              "firstName": "Erica",
+              "lastName": "Wilson",
+              "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+            },
+            "d20": false,
+            "excludedFromResults": false,
+            "isAdjournmentResult": false,
+            "isAvailableForCourtExtract": true,
+            "isConvictedResult": false,
+            "isDeleted": false,
+            "isFinancialResult": false,
+            "judicialResultId": "ce034bd2-602e-4642-a90c-c80318228081",
+            "judicialResultTypeId": "c93c5a18-838a-41d3-a017-c203b37f5655",
+            "label": "Adjournment reason: At request of the defence",
+            "lastSharedDateTime": "2020-05-29",
+            "lifeDuration": false,
+            "orderedDate": "2020-05-29",
+            "orderedHearingId": "d45c7cd4-e3de-47d0-aaca-580b0a9fdff1",
+            "postHearingCustodyStatus": "A",
+            "publishedAsAPrompt": true,
+            "rank": 11800,
+            "resultDefinitionGroup": "Adjournment reasons",
+            "resultText": "Adjournment reason: At request of the defence\n",
+            "terminatesOffenceProceedings": false,
+            "urgent": false,
+            "usergroups": [],
+            "welshLabel": "Rheswm dros ohirio:  Ar gais yr amddiffyniad"
+          }, {
+            "alwaysPublished": false,
+            "category": "ANCILLARY",
+            "cjsCode": "4506",
+            "courtClerk": {
+              "firstName": "Erica",
+              "lastName": "Wilson",
+              "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+            },
+            "d20": false,
+            "excludedFromResults": false,
+            "isAdjournmentResult": false,
+            "isAvailableForCourtExtract": true,
+            "isConvictedResult": false,
+            "isDeleted": false,
+            "isFinancialResult": false,
+            "judicialResultId": "f4ef97a9-3745-403a-b7d1-812e0ed2c1dc",
+            "judicialResultTypeId": "d278650c-e429-11e8-9f32-f2801f1b9fd1",
+            "label": "Adjournment",
+            "lastSharedDateTime": "2020-05-29",
+            "lifeDuration": false,
+            "orderedDate": "2020-05-29",
+            "orderedHearingId": "d45c7cd4-e3de-47d0-aaca-580b0a9fdff1",
+            "postHearingCustodyStatus": "A",
+            "publishedAsAPrompt": false,
+            "rank": 53400,
+            "resultText": "Adjournment\n",
+            "terminatesOffenceProceedings": false,
+            "urgent": false,
+            "usergroups": [],
+            "welshLabel": "Gohiriad"
+          }, {
+            "alwaysPublished": false,
+            "category": "ANCILLARY",
+            "courtClerk": {
+              "firstName": "Erica",
+              "lastName": "Wilson",
+              "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+            },
+            "d20": false,
+            "excludedFromResults": false,
+            "isAdjournmentResult": false,
+            "isAvailableForCourtExtract": true,
+            "isConvictedResult": false,
+            "isDeleted": false,
+            "isFinancialResult": false,
+            "judicialResultId": "3557aa3f-94de-4e01-aa82-8a51b65185ee",
+            "judicialResultPrompts": [{
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "d27a5d86-d51f-4c6e-914b-cb4b0abc4283",
+              "label": "Date of hearing",
+              "promptReference": "HDATE",
+              "promptSequence": 100,
+              "type": "DATE",
+              "usergroups": ["Court Clerks", "Legal Advisers"],
+              "value": "05 Jun 2020",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
+              "label": "Time of hearing",
+              "promptReference": "timeOfHearing",
+              "promptSequence": 200,
+              "type": "TIME",
+              "usergroups": ["Court Clerks", "Legal Advisers"],
+              "value": "10:00",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse name",
+              "promptReference": "HCHOUSE",
+              "promptSequence": 300,
+              "type": "TXT",
+              "usergroups": ["Court Clerks", "Legal Advisers"],
+              "value": "Lavender Hill Magistrates' Court",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "5f507153-6dc9-4ec0-94db-c821eff333f1",
+              "label": "Courtroom",
+              "promptReference": "HCROOM",
+              "promptSequence": 400,
+              "type": "INT",
+              "usergroups": ["Court Clerks", "Legal Advisers"],
+              "value": "Courtroom 01",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "promptReference": "HTYPE",
+              "promptSequence": 500,
+              "type": "TXT",
+              "usergroups": ["Court Clerks", "Legal Advisers"],
+              "value": "Further Plea & Trial Preparation",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "promptReference": "HEST",
+              "promptSequence": 600,
+              "type": "INT",
+              "usergroups": ["Court Clerks", "Legal Advisers"],
+              "value": "20 MINUTES",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "N",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "e73e6ab8-9bfe-4135-9fe6-f526544584d6",
+              "label": "Booking reference",
+              "promptReference": "bookingReference",
+              "promptSequence": 700,
+              "type": "TXT",
+              "usergroups": ["Court Clerks", "Legal Advisers"],
+              "value": "8cbc8cf8-7f97-484d-b705-5f46318fb19f",
+              "welshLabel": ""
+            }],
+            "judicialResultTypeId": "70c98fa6-804d-11e8-adc0-fa7ae01bbebc",
+            "label": "Next hearing in magistrates' court",
+            "lastSharedDateTime": "2020-05-29",
+            "lifeDuration": false,
+            "nextHearing": {
+              "adjournmentReason": "Adjournment reason: At request of the defence\n",
+              "bookingReference": "8cbc8cf8-7f97-484d-b705-5f46318fb19f",
+              "courtCentre": {
+                "address": {
+                  "address1": "176A Lavender Hill",
+                  "address2": "London",
+                  "postcode": "SW11 1JU"
+                },
+                "courtHearingLocation": "B01LY01",
+                "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+                "name": "Lavender Hill Magistrates' Court",
+                "psaCode": 2577,
+                "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+                "roomName": "Courtroom 01",
+                "welshName": "Llys Ynadon Lavender Hill"
+              },
+              "estimatedMinutes": 20,
+              "jurisdictionType": "MAGISTRATES",
+              "listedStartDateTime": "2020-06-05T09:00:00.000Z",
+              "type": {
+                "description": "Further Plea & Trial Preparation",
+                "id": "9cc41e45-b594-4ba6-906e-1a4626b08fed"
+              }
+            },
+            "orderedDate": "2020-05-29",
+            "orderedHearingId": "d45c7cd4-e3de-47d0-aaca-580b0a9fdff1",
+            "postHearingCustodyStatus": "A",
+            "publishedAsAPrompt": true,
+            "rank": 600,
+            "resultDefinitionGroup": "Next hearing",
+            "resultText": "Next hearing in magistrates' court\nDate of hearing 05 Jun 2020\nTime of hearing 10:00\nCourthouse name Lavender Hill Magistrates' Court\nCourtroom Courtroom 01\nHearing type Further Plea & Trial Preparation\nEstimated duration 20 MINUTES\nBooking reference 8cbc8cf8-7f97-484d-b705-5f46318fb19f",
+            "terminatesOffenceProceedings": false,
+            "urgent": false,
+            "usergroups": [],
+            "welshLabel": "Ni wnaeth y Llys barhau â’r treial yn absenoldeb y diffynnydd"
+          }],
+          "modeOfTrial": "Summary",
+          "offenceCode": "TW01046",
+          "offenceDefinitionId": "62fa56a4-3cea-41b7-a062-4d71e8ca74bc",
+          "offenceLegislation": "Contrary to byelaw 19 and 31(1) of the Tyne and Wear Metro Byelaws made under sections 58 and 62 of the Tyneside Metropolitan Railway Act 1973.",
+          "offenceTitle": "Occupy reserved seat / berth without a valid ticket on the Tyne and Wear Metro",
+          "orderIndex": 500,
+          "proceedingsConcluded": false,
+          "startDate": "2004-12-09",
+          "wording": "Has a violent past and fear that he will commit further offences and\n                interfere with witnesse"
+        }],
+        "personDefendant": {
+          "arrestSummonsNumber": "TFL",
+          "bailConditions": "",
+          "bailReasons": "",
+          "bailStatus": {
+            "code": "C",
+            "description": "Custody or remanded into custody",
+            "id": "12e69486-4d01-3403-a50a-7419ca040635"
+          },
+          "personDetails": {
+            "address": {
+              "address1": "56Police House",
+              "address2": "StreetDescription",
+              "address3": "Locality2O"
+            },
+            "dateOfBirth": "1998-08-08",
+            "documentationLanguageNeeds": "ENGLISH",
+            "firstName": "TIM",
+            "gender": "MALE",
+            "lastName": "Ormsby",
+            "nationalityDescription": "Unknown",
+            "nationalityId": "22ef7a73-df50-4349-8c72-ca3b9ace6363",
+            "title": "Ormsby"
+          }
+        },
+        "proceedingsConcluded": false,
+        "prosecutionCaseId": "e3852f62-4412-40b2-b326-b6b1b62482ee"
+      }],
+      "id": "e3852f62-4412-40b2-b326-b6b1b62482ee",
+      "initiationCode": "C",
+      "originatingOrganisation": "B01BH00",
+      "prosecutionCaseIdentifier": {
+        "prosecutionAuthorityCode": "DVL2",
+        "prosecutionAuthorityId": "bcdca7df-ab21-45f6-bc19-f883cf3d407e",
+        "caseURN": "89GD7528020"
+      }
+    }],
+    "type": {
+      "description": "First hearing",
+      "id": "4a0e892d-c0c5-3c51-95b8-704d8c781776"
+    }
+  }
+}

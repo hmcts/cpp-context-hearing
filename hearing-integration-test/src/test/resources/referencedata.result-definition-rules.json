@@ -1,0 +1,1487 @@
+{
+  "resultDefinitionRules": [
+    {
+      "parentResultDefinitionId": "418b3aa7-65ab-4a4a-bab9-2f96b698118c",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "9bec5977-1796-4645-9b9e-687d4f23d37d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "45ea2d9f-ddd8-4c39-9585-780746ee6a8d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "06b4c31d-1b3d-4850-b64c-4cad870b3a25",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "6577e3ca-3e80-4412-8cba-bc608e012cf0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "2a9f9e63-c76a-4728-bc7f-025fed59b741",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ca79e8fc-6b65-400e-97b6-214c79388a6c",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "cc2cbb94-b75a-4a8c-9840-31c5f8007724",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "61ea03c9-c113-446b-a392-402144fcd9e8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "45a926ed-0b7f-4ba2-afeb-969697ca8415",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "bcf1b451-af1e-4603-9605-586310d0e61e",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a5aa694e-4729-40f5-814e-60a75d9429e0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ce5f92f8-2b32-4364-964b-2ea4b6ec0cae",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "65a59f46-61ae-4dac-a040-a25fca647cb2",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "40e88b4e-4f34-463d-92d3-1c5b03d05490",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "1c40353b-a3b8-4437-8691-6b54d5842010",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ea74de19-9918-434d-92ea-1e4e332c0d3d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b0cb8194-0ccb-401d-b548-88a019aa6de0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d1205bd2-b883-4f42-8be1-2aa797af3b47",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c1b0dedf-1380-4889-9d31-1816b850e348",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7eb72e0e-3a24-4f27-8593-84f7bdd432e1",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a19714a0-5d58-4666-bc15-3d9dd2692f77",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b7bb83be-aa21-4c62-9e08-012c5fbdf07c",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "364d3065-0699-4df1-a68f-a69c429d0867",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9941e3d0-0e80-46c6-95c6-5b4f1a88c83d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7f80f0f4-ae8a-4965-9cc6-ef5c2c5caef7",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "99586f43-5b18-45da-87f7-1764ad149985",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "f9eac601-a1e7-4d45-99ee-c49e2c4ca85b",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d54c3093-6b9b-4b61-80cf-a0bf4ed5d2e8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d683f73c-488e-4d8e-a685-d37049c2a3e5",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "dc86a3bd-2fa0-4f90-b046-4ecc8d6c6265",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "54f41331-f5cb-44b3-ab88-ae063fb39e26",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "5473390c-dbe2-4026-a95f-8bb99d2e011d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7a31e2e7-3a90-4210-aa6e-b7c226af4b97",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "959dfbc9-5fc5-4aa1-ac26-135f28b09e23",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "091cd45b-4312-476e-a122-18cc02fd1699",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9b216a08-4df8-41c2-a947-66506cd1e1b5",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "8cf3b54b-bec8-4bcf-aac4-62561dcc8080",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "525c4660-9a0b-4a86-80fc-0efce539d6a5",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "e073f3ba-2585-4c0d-8c31-e51a1662d143",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "1aa6a828-fedb-43bd-89e8-bc74586d5e85",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "136725da-5b0a-43d3-adac-54f916bcf2bb",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "09be7e95-2ed6-448c-9550-fd2f84a0c9e3",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9c88a9f3-fc2f-4001-80f1-c6e88c12defd",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "12e15e99-e0f9-4e6c-bf1c-1de8bdda1f3b",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "bd82eb10-60c4-437d-80e1-f4aff5a7e3d8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "6889288e-5e4a-4523-be2c-cc993a00af29",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "0649851f-01f8-48fb-928d-6fe100042b2a",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "f5eb4016-d862-4b0a-b9bc-7b3e535476e5",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "fa49f99a-a2f1-4d4a-bd14-d18ab1c9eca5",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "03edddce-c188-4b38-9832-988d9d1ee802",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "5c02ff4c-6a33-4089-8c9e-f120a688b018",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d45c8150-3095-4cb3-a55e-b4fd094af560",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "922386e1-bdc2-403e-8902-af1da14e1fd8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d34b643e-74d5-4288-a4b9-bce14d0069d5",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "fb9b273e-06c3-4a4a-940c-3c053c559abe",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "481547e6-9099-475e-8028-2bce2c52ff5f",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a8c4fc20-6eee-4ff1-8244-d2d167e88a13",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "dfa19118-e944-43f4-93b2-2ed49df5553f",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c1d490ed-1754-43b8-a485-fdab1a25f8cb",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "90146942-b1b9-4a2e-af2b-141f50d45e5c",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9da5909e-d715-4f79-a1b8-34780c57acf1",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d709a455-02cc-40d9-b3d2-e4194dc46792",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9b18ec3a-5eb3-4bfc-a129-623ceb3de8cd",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "3c98b287-fd01-471a-ac34-e0a56d9e95c2",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ac44c4ed-c77c-4552-aed7-b4f05f1dc9db",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c9ae30f1-3c3b-4edf-a7d4-49bd027977c3",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "4c79ea50-6e14-4c47-8836-c0d0f647e45a",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "834ed20a-d7d8-419b-b72d-61b30db36560",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "46051d94-0e60-4010-b86d-cf65e1a464d8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "3ac96bce-c14d-4f90-9ed3-29aa7bd92c24",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "2eb11fe9-9b82-43a4-b195-ec1da6a43f8a",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "bf85c3eb-47a8-49c3-aa3e-ced9fcb81991",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "f717c363-dc51-4c65-8d85-7c7c6f57f0b6",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a50ad03e-d299-4da7-874c-0f233d7d503d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c18dd89d-e057-42aa-b071-0a91226da3bf",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "795079ed-4b5a-4750-b077-d653180d43ae",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "71efa12c-a68e-4537-ac7d-27ebf91557a6",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "36951b36-de01-45bc-91a7-1c68f5989ed5",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "91141263-7f27-494f-95e9-04a113952974",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "76cabfae-b8de-4988-ba5a-3b9ac9115ee8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "1e30f5c0-b1bc-4fb4-9d35-813915cd228d",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "70c98fa6-804d-11e8-adc0-fa7ae01bbebc",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "d076bd4a-17d5-4720-899a-1c6f96e3b35f",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "10ba4bc8-e5ff-432c-aa98-3e7352d6c879",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "0056b9e1-7585-4bfa-82ec-f06202670bb1",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "d0a369c9-5a28-40ec-99cb-da7943550b18",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "e3315a27-35fd-4c43-8ba6-8b5d69aa96fb",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "d30f1863-f319-49fd-855d-2cf3fa6b3cea",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6af22d8d-6157-460e-b641-e6db90d15289",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7a0932f5-8264-412e-a83c-2b6d1dce1506",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "074124d5-b07a-4b73-8b9a-792e8462138a",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "62cd1ba4-9aaf-413b-96b0-238cfc82ef18",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "fcbf777d-1a73-47e7-ab9b-7c51091a022c",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "f5e309fc-0ec0-40ef-b12d-be27aa3d6f8c",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "89e3c24b-acbf-42fb-9eee-169b83423035",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c265d589-fcc0-451b-be43-7856e32524ba",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "393c5be8-dadb-484b-ab39-0f1eb57aeae5",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9647428f-0946-4a09-aec1-7bdfcd324ac6",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "21271525-76f4-4134-9c93-1be012a574c8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d023e3a7-33ef-45b4-a19b-5137afecbf1f",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "2c18aff1-b535-47b6-8415-8841e85eac49",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "335204e2-6b6e-4ea8-ae72-f3341ea75777",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "2e725ba6-0e29-4ffb-a5c7-31b67344c211",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "98366b12-b70a-4e66-b71d-a5bbd39bd595",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b27b42bf-e20e-46ec-a6e3-5c2e8a076c20",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ef32ed9b-228d-4f73-9106-e7e3ce81c6ed",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c68e0c5f-3f82-4989-b1d0-e09cf545d62f",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b3035ace-15d4-44ca-9d79-c83a57dc0e30",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "84222bcb-05ac-4c67-82df-cc8742a850d1",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "07d8fab1-366d-43c5-bdb4-223f8c1229f5",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "bb90e801-0066-4bdf-85e6-8d64bc683f0c",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "46bf6aa2-23f3-4c78-8c52-49b567d1193b",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "c98cb51f-8639-49c1-91f0-a7e820c34355",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b4f7c223-b9d1-4409-b6d3-039f66eb9645",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "671df737-9901-4fa5-b245-aeff0c4c7495",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c8c962df-e28c-4ea8-8496-721badb77b7b",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "73242763-44db-4d57-a855-44a6cf4f6226",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9b35f4f5-531e-48b4-858d-d81e15e77c23",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "31b29c58-cfd2-41c6-addf-53f5a2c99fdc",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "76b02133-4927-4f21-9f79-1ce361a17b0f",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "733545c5-5612-40b8-bd81-df1a6a154182",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "159c3430-fda4-4aea-8adc-62e4b6f07797",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "574fb809-4473-4a90-ba0f-519a50cfc9ec",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "55a1cab9-8aa6-41f6-a116-0345198324e6",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "dc37e9dd-b8b2-4c99-8bc2-b756a8bdffc0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c5e204ce-9a2d-4911-96f7-e189565f429e",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "fa06d9ea-edc9-4e1e-9ff4-19587653ac12",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "191ec139-10b6-4b18-8a2c-1359425244c3",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "536adc8b-1f26-43f0-9659-4bf25e2b42db",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "1819e6a0-b13d-47e0-9027-388819457256",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "27528205-a237-471b-a487-7943e9284c44",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d3313cb9-c75e-45e4-b833-8479ff80f9ac",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a50ab50d-a029-4476-8a8b-f4a7e577fdcc",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "fb9fedf8-2b60-496b-8147-168233e81be3",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "5ab456c8-d272-4082-87ed-cd1f44a0603a",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "8f979084-dc3b-4e71-bceb-87e30a4fc381",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7a02b2e5-30a9-4c9d-b55f-0c47a1798f4a",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "63f8c00a-2115-46a9-94ff-b30bbad0f287",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "30bd1b11-5336-486e-aae6-1285ab4c8d65",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d3a030ab-17f6-4f1f-911d-d5b9ef7acedb",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "edf5c7fd-ff29-49a7-a8b9-1d2e7cdb49b2",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "152d6ed2-1e9b-4208-a7e9-7258d397aaa7",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "3a8b97dd-7ac9-46e7-8b29-ea01168a3238",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "4e786114-e1c0-42bb-9c52-64edeffa3a3b",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "1e78e819-13fc-4e14-a263-c632e4e3c85e",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "03a1cbef-e54a-4a00-bcd5-44350f882ced",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a17f9787-ba56-43d4-be5f-6fc91d29646e",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b986b6ad-816c-44d6-bdf8-0df189732648",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a15102d7-a151-425a-a827-0e35bc159049",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "416684ab-755f-4958-ab83-2795a21d62a3",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d79c92bb-c301-491a-b4d2-cb86e473b5af",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "0f7eade6-3602-486c-8491-45e2bdee9960",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b8654020-f9ed-4707-8757-8db6efb323b9",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "78d6e77c-fb17-46ae-a719-66eacd6281a9",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "48646574-8bd7-49f7-9fa1-3aeb60f7c059",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "79deff01-d3b0-4453-b290-ea34c60ce3e9",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "2e9d9eae-53f3-45ab-9ab3-083bd9e566e8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ea2b5f73-b1fd-4a6a-9058-fd3102b3f8ec",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "0c5824cd-b6db-4c8f-a8c3-92e7e4cc0195",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "02c8aef6-601a-46e8-bbe5-d614e0da764a",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "028f5bea-fe0c-4c1b-a650-e4e0a4259f01",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b172d954-5aca-447b-b19e-2c836053b0af",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "41a18cc7-3106-4e84-8f66-ad52fe6dee75",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ee74631f-c144-4a25-8a93-0253b98a7642",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "702b365f-dde6-4543-8fb5-1324c6a84ec4",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c20cca8f-6ef5-4dff-b8fa-d05a9b0a1a0d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "38fdaaae-2a4c-4e6b-abf4-a6cdd212c6a9",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "52218899-8f26-45cd-ae30-aeff5c189261",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "633d192a-cc90-484e-aa1d-318816b7d44a",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "67a91dc8-f4f9-4f80-b644-e219326045cc",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "ae617390-b41e-46ac-bd63-68a28512676a",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "9bec5977-1796-4645-9b9e-687d4f23d37d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "45ea2d9f-ddd8-4c39-9585-780746ee6a8d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "06b4c31d-1b3d-4850-b64c-4cad870b3a25",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "6577e3ca-3e80-4412-8cba-bc608e012cf0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "2a9f9e63-c76a-4728-bc7f-025fed59b741",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ca79e8fc-6b65-400e-97b6-214c79388a6c",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "cc2cbb94-b75a-4a8c-9840-31c5f8007724",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "61ea03c9-c113-446b-a392-402144fcd9e8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "45a926ed-0b7f-4ba2-afeb-969697ca8415",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "bcf1b451-af1e-4603-9605-586310d0e61e",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a5aa694e-4729-40f5-814e-60a75d9429e0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ce5f92f8-2b32-4364-964b-2ea4b6ec0cae",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "65a59f46-61ae-4dac-a040-a25fca647cb2",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "40e88b4e-4f34-463d-92d3-1c5b03d05490",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "1c40353b-a3b8-4437-8691-6b54d5842010",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ea74de19-9918-434d-92ea-1e4e332c0d3d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b0cb8194-0ccb-401d-b548-88a019aa6de0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d1205bd2-b883-4f42-8be1-2aa797af3b47",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c1b0dedf-1380-4889-9d31-1816b850e348",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7eb72e0e-3a24-4f27-8593-84f7bdd432e1",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a19714a0-5d58-4666-bc15-3d9dd2692f77",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b7bb83be-aa21-4c62-9e08-012c5fbdf07c",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "364d3065-0699-4df1-a68f-a69c429d0867",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9941e3d0-0e80-46c6-95c6-5b4f1a88c83d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7f80f0f4-ae8a-4965-9cc6-ef5c2c5caef7",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "99586f43-5b18-45da-87f7-1764ad149985",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "f9eac601-a1e7-4d45-99ee-c49e2c4ca85b",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d54c3093-6b9b-4b61-80cf-a0bf4ed5d2e8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d683f73c-488e-4d8e-a685-d37049c2a3e5",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "dc86a3bd-2fa0-4f90-b046-4ecc8d6c6265",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "54f41331-f5cb-44b3-ab88-ae063fb39e26",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "5473390c-dbe2-4026-a95f-8bb99d2e011d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7a31e2e7-3a90-4210-aa6e-b7c226af4b97",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "959dfbc9-5fc5-4aa1-ac26-135f28b09e23",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "091cd45b-4312-476e-a122-18cc02fd1699",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9b216a08-4df8-41c2-a947-66506cd1e1b5",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "92ccea16-370d-42cf-ae54-ed0951eaec95",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "d18e6f8d-e91d-4d2b-8585-5513cfd07d13",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "fe77f387-ee64-4cef-8e95-c0776b9799e7",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "e7e02d63-46c2-4603-8255-921427f410fe",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "3a529001-2f43-45ba-a0a8-d3ced7e9e7ad",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "3a529001-2f43-45ba-a0a8-d3ced7e9e7ad",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "ruleType": "mandatory"
+        },
+        {
+          "childResultDefinitionId": "8cf3b54b-bec8-4bcf-aac4-62561dcc8080",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "abb95a52-2a75-40c3-8d3f-a1d75a199c47",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "72393fb6-77dd-45b2-98f5-6612966de882",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "cfbe83c8-935b-4410-a68c-49452519f2d3",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "96349367-2d04-4265-978f-6c6b417497fd",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "3f608dba-20ad-4710-bebc-d78b4b3ff08d",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "d65f3285-f5f0-4ab1-b703-0c95f0f6ed89",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "d844cdd8-c110-4bb8-b8f2-1a8bd5fdc0c7",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "66aac609-8987-44cf-a0dc-fb49a7195090",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "9bec5977-1796-4645-9b9e-687d4f23d37d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "45ea2d9f-ddd8-4c39-9585-780746ee6a8d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "06b4c31d-1b3d-4850-b64c-4cad870b3a25",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "6577e3ca-3e80-4412-8cba-bc608e012cf0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "2a9f9e63-c76a-4728-bc7f-025fed59b741",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ca79e8fc-6b65-400e-97b6-214c79388a6c",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "cc2cbb94-b75a-4a8c-9840-31c5f8007724",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "61ea03c9-c113-446b-a392-402144fcd9e8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "45a926ed-0b7f-4ba2-afeb-969697ca8415",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "bcf1b451-af1e-4603-9605-586310d0e61e",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a5aa694e-4729-40f5-814e-60a75d9429e0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ce5f92f8-2b32-4364-964b-2ea4b6ec0cae",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "65a59f46-61ae-4dac-a040-a25fca647cb2",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "40e88b4e-4f34-463d-92d3-1c5b03d05490",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "1c40353b-a3b8-4437-8691-6b54d5842010",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ea74de19-9918-434d-92ea-1e4e332c0d3d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b0cb8194-0ccb-401d-b548-88a019aa6de0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d1205bd2-b883-4f42-8be1-2aa797af3b47",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c1b0dedf-1380-4889-9d31-1816b850e348",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7eb72e0e-3a24-4f27-8593-84f7bdd432e1",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a19714a0-5d58-4666-bc15-3d9dd2692f77",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b7bb83be-aa21-4c62-9e08-012c5fbdf07c",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "364d3065-0699-4df1-a68f-a69c429d0867",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9941e3d0-0e80-46c6-95c6-5b4f1a88c83d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7f80f0f4-ae8a-4965-9cc6-ef5c2c5caef7",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "99586f43-5b18-45da-87f7-1764ad149985",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "f9eac601-a1e7-4d45-99ee-c49e2c4ca85b",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d54c3093-6b9b-4b61-80cf-a0bf4ed5d2e8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d683f73c-488e-4d8e-a685-d37049c2a3e5",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "dc86a3bd-2fa0-4f90-b046-4ecc8d6c6265",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "54f41331-f5cb-44b3-ab88-ae063fb39e26",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "5473390c-dbe2-4026-a95f-8bb99d2e011d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7a31e2e7-3a90-4210-aa6e-b7c226af4b97",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "959dfbc9-5fc5-4aa1-ac26-135f28b09e23",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "091cd45b-4312-476e-a122-18cc02fd1699",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9b216a08-4df8-41c2-a947-66506cd1e1b5",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "cf70d7ed-8049-4fe2-b02f-5a23b5e39184",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "6e42d694-a785-4cbf-a4a8-09f2d1802d4d",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "4f640ea6-88d4-4a3a-b816-ff5a79eaaa14",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "a920be42-b376-420b-ace9-d2d0634559b0",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "optional"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "752aab8f-ba5f-45a8-80c8-4df7770e70e4",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "1dd2e245-a9af-4d04-84b6-92f64dc312fe",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "892de3ce-1e80-454e-8c72-44e694b06e93",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "optional"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "70fe7114-b511-4d9b-a550-2c040b9a8d34",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "7f410e16-bda3-4bca-944e-ef88832e41b5",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "1bcdae76-37f8-4331-9076-fd46dbd4b1fc",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "32cc8e43-1d98-4fc9-a11a-265ea5af0715",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "3f4f9b75-418f-46ed-a311-230a6dbca6cb",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d35f14b6-1fef-42d3-b6d9-05e9e686af6d",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "47f143eb-7961-4e85-834b-1aa5e47cb3ef",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "97fdae65-37a0-4156-912f-a35363e26f31",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "ruleType": "mandatory"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "66105417-41c8-420d-820f-40b61b507442",
+          "ruleType": "optional"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "5f938747-a0aa-47b7-84a5-31fe87cfb15b",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "66105417-41c8-420d-820f-40b61b507442",
+          "ruleType": "optional"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "b4cd9c69-ed12-4d23-948c-f35e7386a05f",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "66105417-41c8-420d-820f-40b61b507442",
+          "ruleType": "optional"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "005c9631-a1f1-4222-9702-88fb9368a17c",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "66105417-41c8-420d-820f-40b61b507442",
+          "ruleType": "optional"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "381f97b8-b8c8-45b0-a8d6-ac8f58da5493",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "66105417-41c8-420d-820f-40b61b507442",
+          "ruleType": "optional"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "c09416e2-327c-11e8-b467-0ed5f89f718b",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "66105417-41c8-420d-820f-40b61b507442",
+          "ruleType": "optional"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "0683d44b-c84f-49e7-b449-242bb6a9c60e",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "2852b770-a7ad-11e8-98d0-529269fb1459",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "32177be4-0a1f-4889-9ca2-c729f49d7d85",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "290435b9-cce7-43be-b340-1c7db48c5413",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "0a68824c-e5bb-43d0-b3c1-ae8aee0bfec8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b914e5b8-b84c-4ffd-8d20-634d8ad6ef00",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "285f5fb8-6c90-45ba-a7ce-4be76867f3e9",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "e7ef0248-fe71-4733-8749-ff0c23a04f95",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "19026543-7d59-467b-9649-35ddf89b30cc",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7610d8a1-07fe-4e69-812d-22f821d3f334",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "6532b8f4-7794-420a-9f30-8aced3e41517",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "661bdce3-ce01-4cb6-a152-6424540bbbce",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "7fc17a01-2f5a-4433-aae9-28e0c959f73b",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "c93c5a18-838a-41d3-a017-c203b37f5655",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "4958de15-8a0a-4d2b-9f7e-56e037cf03da",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "1d55fdeb-7dbc-46ec-b3ff-7b15fe08a476",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c2eca548-4511-4023-bbe6-50fe0b679b4a",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9c1dcdfa-ec44-4167-bbd4-d29c3a63a7fc",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a1f2e6d7-7a21-41f8-9a9a-854b25a606d4",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9fd6a4ef-1055-4e54-b035-f1130a524388",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c514dcec-804c-11e8-adc0-fa7ae01bbebc",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "e15c9dc1-5d7a-4f7a-8d61-b443f99b2724",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "4fdd9548-c521-48c9-baa3-1bd2f13a4fcc",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "a22f62fa-b9c5-45be-bd79-07d3ae7418f9",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a0b426c1-74b8-43cd-9885-f0f31625352e",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a09bbfa0-5dd5-11e8-9c2d-fa7ae01bbebc",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d6e93aae-5dd7-11e8-9c2d-fa7ae01bbebc",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9ba8f03a-5dda-11e8-9c2d-fa7ae01bbebc",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "272d1ec2-634b-11e8-adc0-fa7ae01bbebc",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "6d76b10c-64c4-11e8-adc0-fa7ae01bbebc",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "bcb5a496-f7cf-11e8-8eb2-f2801f1b9fd1",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "dcf459c4-9508-4e8c-ae2e-2414a0e831f7",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "e26940b7-2534-42f2-9c44-c70072bf6ad2",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "3a529001-2f43-45ba-a0a8-d3ced7e9e7ad",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "90d8268d-cc6a-4a09-bdb3-ddf8ea8ef2f9",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    },
+    {
+      "parentResultDefinitionId": "874911d0-acf2-4b6f-bcca-cacbb6bb2862",
+      "childResultDefinitions": [
+        {
+          "childResultDefinitionId": "4ddda002-526e-4d70-9df7-eeaae75cfab7",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d85486c4-06f1-4813-859b-5495ca578bde",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "bb0a2862-a565-46aa-96ed-1e6f972949d0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "1ebd5ca1-866d-43a0-ad9a-464e8a228235",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "279fd36e-17c5-42b2-b56b-a6ab27b9b592",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "21a44cbb-fe6b-4246-bf10-85bc1eef9fff",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "e5864697-640a-47be-9289-9e6205bbe579",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ef8ca749-d5c7-4a33-8b72-1c643f38aaa8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "5a7fc626-56ec-4ccc-ae1b-fe508265c44b",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b53d0e01-a6e9-4817-abba-1f4e07ef6ac9",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "4558f9b2-47f8-4430-a0f8-684df5d55761",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b9581c12-81c9-434d-8851-03d9638547fa",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b922e6bd-70a4-4b28-b583-165179af6162",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "f41509fd-3a6a-405e-9f82-85ae3cfc2d48",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c51e3522-5363-4af0-b5af-97a5f9eb5462",
+          "ruleType": "atleastOneOf"
+        }
+      ]
+    }
+  ]
+}

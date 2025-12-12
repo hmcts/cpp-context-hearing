@@ -1,0 +1,20 @@
+{
+  "hearingId": "HEARING_ID",
+  "prosecutionCounsel": {
+    "id": "PROSECUTION_COUNSEL_ID",
+    "status": "QC",
+    "title": "Mr",
+    "firstName": "Eric",
+    "lastName": "Ormsby",
+    "prosecutionCases": [
+      "CASE_ID"
+    ],
+    "attendanceDays": [
+      "2018-07-17",
+      "2018-07-18",
+      "2018-07-19",
+      "2018-07-21",
+      "2018-07-22"
+    ]
+  }
+}

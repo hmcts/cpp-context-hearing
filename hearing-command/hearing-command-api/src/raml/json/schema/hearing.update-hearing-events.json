@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.update-hearing-events.json",
+  "type": "object",
+  "properties": {
+    "hearingEvents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "hearingEventId": {
+            "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+          },
+          "recordedLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 3000
+          }
+        },
+        "required": [
+          "hearingEventId",
+          "recordedLabel"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "hearingEvents"
+  ],
+  "additionalProperties": false
+}

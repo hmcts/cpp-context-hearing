@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/core/courts/hearingContainer.json",
+  "type": "object",
+  "properties": {
+    "hearing": {
+      "$ref": "http://justice.gov.uk/core/courts/hearing.json"
+    },
+    "nextHearing": {
+      "$ref": "http://justice.gov.uk/core/courts/nextHearing.json"
+    },
+    "emailNotifications": {
+      "$ref": "http://justice.gov.uk/core/courts/notification/email-channel.json"
+    },
+    "defendantCaseOffences": {
+      "$ref": "http://justice.gov.uk/core/courts/nowdocument/defendant-case-offence.json"
+    },
+    "createNowsRequest": {
+      "$ref": "http://justice.gov.uk/core/courts/createNowsRequest.json"
+    }
+  },
+  "additionalProperties": false
+}

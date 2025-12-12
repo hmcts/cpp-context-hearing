@@ -1,0 +1,11 @@
+{
+  "defendantId": "41f8cef8-6e32-4fa1-85a5-2a1ffc837895",
+  "offenceIds": [
+    "b722a322-ae9e-4087-a194-38677f68c6b1",
+    "c8749a27-9f3b-4154-92f8-44ab2eb57f94"
+  ],
+  "resultedOffences": {
+    "350e79ff-19e5-44f1-95f5-fd12b185e2dc": "DISMISSED",
+    "220c53f2-0221-44b7-8d21-cb505dc11ab3": "GUILTY"
+  }
+}

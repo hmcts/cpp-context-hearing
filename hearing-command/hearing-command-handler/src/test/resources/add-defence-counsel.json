@@ -1,0 +1,21 @@
+{
+  "hearingId": "HEARING_ID",
+  "defenceCounsel": {
+    "id": "DEFENCE_COUNSEL_ID",
+    "status": "QC",
+    "title": "Mr",
+    "firstName": "Eric",
+    "lastName": "Ormsby",
+    "defendants": [
+      "DEFENDANT_ID1",
+      "DEFENDANT_ID2"
+    ],
+    "attendanceDays": [
+      "2018-07-17",
+      "2018-07-18",
+      "2018-07-19",
+      "2018-07-21",
+      "2018-07-22"
+    ]
+  }
+}

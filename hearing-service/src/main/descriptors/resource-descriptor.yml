@@ -1,0 +1,58 @@
+---
+resource_descriptor:
+  spec_version: '1.0.0'
+  version: '${project.version}'
+
+  resources:
+    - name: java:/app/hearing-service/DS.eventstore
+      type: xa-datasource
+      setup:
+        - type: liquibase
+          maven:
+            groupId: uk.gov.justice.services
+            artifactId: event-repository-liquibase
+            type: jar
+            version: '${cpp.framework.version}'
+        - type: liquibase
+          maven:
+            groupId: uk.gov.justice.services
+            artifactId: aggregate-snapshot-repository-liquibase
+            type: jar
+            version: '${project.version}'
+
+    - name: java:/DS.hearing
+      type: xa-datasource
+      setup:
+        - type: liquibase
+          maven:
+            groupId: uk.gov.justice.services
+            artifactId: event-buffer-liquibase
+            type: jar
+            version: '${cpp.framework.version}'
+        - type: liquibase
+          maven:
+            groupId: uk.gov.moj.cpp.hearing
+            artifactId: hearing-viewstore-liquibase
+            type: jar
+            version: '${project.version}'
+
+    - name: hearing.handler.command
+      type: queue
+    - name: hearing.event
+      type: topic
+    - name: public.event
+      type: topic
+
+  services:
+    # hearing provides these service mappings
+    - name: 'hearing-service'
+      id: 'hearing_service'
+      target: '/hearing-service'
+      map:
+        - '/hearing-command-api'
+        - '/hearing-command-handler'
+        - '/hearing-event-listener'
+        - '/hearing-event-processor'
+        - '/hearing-query-api'
+        - '/hearing-query-view'
+      matcher: '/hearing-[^/]+'

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+
+    <changeSet id="129" author="hearing" logicalFilePath="129-alter-primary-key-to-ha_target.xml">
+
+
+
+        <dropPrimaryKey constraintName="target_pkey"
+                        tableName="ha_target"/>
+        <dropIndex indexName="ha_target_id"
+                   tableName="ha_target"/>
+        <addPrimaryKey columnNames="id,hearing_id" constraintName="ha_target_pkey" tableName="ha_target"/>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,387 @@
+{
+  "hearingId": "b02ac988-c8a7-4aa4-8723-25665b5df119",
+  "sharedTime": "2024-04-29T15:10:13.745Z",
+  "courtClerk": {
+    "firstName": "Erica",
+    "lastName": "Wilson",
+    "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+  },
+  "hearing": {
+    "courtCentre": {
+      "address": {
+        "address1": "176A Lavender Hill",
+        "address2": "London",
+        "address3": "",
+        "address4": "",
+        "address5": "",
+        "postcode": "SW11 1JU"
+      },
+      "code": "B01LY00",
+      "courtHearingLocation": "B01LY01",
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "lja": {
+        "ljaCode": "2577",
+        "ljaName": "South West London Magistrates' Court"
+      },
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01"
+    },
+    "defendantAttendance": [
+      {
+        "attendanceDays": [
+          {
+            "attendanceType": "IN_PERSON",
+            "day": "2024-04-29"
+          }
+        ],
+        "defendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d"
+      }
+    ],
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "courtCentreId": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+        "courtRoomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+        "hasSharedResults": true,
+        "isCancelled": false,
+        "listedDurationMinutes": 20,
+        "listingSequence": 0,
+        "sittingDay": "2024-04-29T22:30:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "b02ac988-c8a7-4aa4-8723-25665b5df119",
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [
+      {
+        "caseStatus": "ACTIVE",
+        "cpsOrganisation": "A30AB00",
+        "defendants": [
+          {
+            "courtProceedingsInitiated": "2024-04-29T15:08:24.493Z",
+            "id": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+            "isYouth": false,
+            "masterDefendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+            "offences": [
+              {
+                "arrestDate": "2022-12-14",
+                "chargeDate": "2022-12-15",
+                "count": 0,
+                "endorsableFlag": false,
+                "id": "c4003a5c-54c1-4f7f-b95a-bb3c207d91ef",
+                "listingNumber": 1,
+                "maxPenalty": "S:L3",
+                "modeOfTrial": "Summary",
+                "offenceCode": "CA03012",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "6588ffee-89ec-36a2-ab90-a54177cbda97",
+                "offenceLegislation": "Contrary to section 363(3)(b) and (4) of the Communications Act 2003.",
+                "offenceLegislationWelsh": "Yn groes i adran 363(3)(b) a (4) Deddf Cyfathrebu 2003.",
+                "offenceTitle": "Possess / control TV set with intent another use install without a licence",
+                "offenceTitleWelsh": "Meddu ar/mewn rheolaeth set deledu gan fwriadu i unigolyn arall ei ddefnyddio/osod heb drwydded",
+                "orderIndex": 1,
+                "startDate": "2022-12-12",
+                "wording": "Kirk Stoltenberg have set up a TV cable without a valid license."
+              }
+            ],
+            "personDefendant": {
+              "arrestSummonsNumber": "DEF015731387",
+              "bailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              },
+              "personDetails": {
+                "address": {
+                  "address1": "21",
+                  "address2": "Furnburry Park Road",
+                  "address3": "London",
+                  "postcode": "SW11 3TQ"
+                },
+                "contact": {
+                  "home": "015325443756"
+                },
+                "dateOfBirth": "1991-02-18",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+                  "observedEthnicityCode": "1",
+                  "observedEthnicityDescription": "White",
+                  "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                  "selfDefinedEthnicityCode": "W1",
+                  "selfDefinedEthnicityDescription": "British",
+                  "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                },
+                "firstName": "Kirk",
+                "gender": "MALE",
+                "hearingLanguageNeeds": "ENGLISH",
+                "lastName": "Stoltenberg",
+                "occupation": "Accountant",
+                "occupationCode": "2201",
+                "title": "MR"
+              },
+              "policeBailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              }
+            },
+            "prosecutionAuthorityReference": "DEF015731387",
+            "prosecutionCaseId": "5f744807-8b11-452b-b9ee-91af06ed56fc"
+          }
+        ],
+        "id": "5f744807-8b11-452b-b9ee-91af06ed56fc",
+        "initiationCode": "C",
+        "originatingOrganisation": "0450000",
+        "prosecutionCaseIdentifier": {
+          "address": {
+            "address1": "Surrey Police",
+            "address2": "Mount Browne",
+            "address3": "Sandy Lane",
+            "address4": "Guildford",
+            "postcode": "GU3 1HG"
+          },
+          "contact": {
+            "primaryEmail": "mail_data_bureau_res@surrey.pnn.police.uk"
+          },
+          "majorCreditorCode": "PO45",
+          "prosecutionAuthorityCode": "SURRPF",
+          "prosecutionAuthorityId": "764bff92-a135-34cb-b858-8bb6b4b66301",
+          "prosecutionAuthorityName": "Surrey Police",
+          "prosecutionAuthorityOUCode": "0450000",
+          "caseURN": "28DI5731387"
+        }
+      }
+    ],
+    "type": {
+      "description": "First hearing",
+      "id": "4a0e892d-c0c5-3c51-95b8-704d8c781776"
+    }
+  },
+  "variantDirectory": [],
+  "completedResultLinesStatus": {},
+  "targets": [
+    {
+      "caseId": "5f744807-8b11-452b-b9ee-91af06ed56fc",
+      "defendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+      "draftResult": "{}",
+      "hearingDay": "2024-04-29",
+      "hearingId": "b02ac988-c8a7-4aa4-8723-25665b5df119",
+      "masterDefendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+      "offenceId": "c4003a5c-54c1-4f7f-b95a-bb3c207d91ef",
+      "resultLines": [
+        {
+          "caseId": "5f744807-8b11-452b-b9ee-91af06ed56fc",
+          "childResultLineIds": [
+            "a16243d1-601f-4b2d-ab1f-72fd2e9a03df",
+            "284287f5-a546-4ade-99e0-12762150ed5e"
+          ],
+          "defendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+          "offenceId": "c4003a5c-54c1-4f7f-b95a-bb3c207d91ef",
+          "orderedDate": "2024-04-29",
+          "prompts": [
+            {
+              "id": "61f951c3-f18d-4a44-ae4a-0cad4efb4133",
+              "label": "Defendant to attend the next hearing",
+              "promptRef": "defendantToAttendTheNextHearing",
+              "value": "true"
+            }
+          ],
+          "resultDefinitionId": "d278650c-e429-11e8-9f32-f2801f1b9fd1",
+          "resultLabel": "Adjournment",
+          "resultLineId": "88aa2061-39d9-4b27-aad0-4cbab39dfcaf",
+          "shadowListed": false,
+          "sharedDate": "2024-04-29",
+          "shortCode": "a"
+        },
+        {
+          "caseId": "5f744807-8b11-452b-b9ee-91af06ed56fc",
+          "childResultLineIds": [
+            "dfab100e-d9c9-4582-a045-2345ddd6c872"
+          ],
+          "defendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+          "offenceId": "c4003a5c-54c1-4f7f-b95a-bb3c207d91ef",
+          "orderedDate": "2024-04-29",
+          "parentResultLineIds": [
+            "88aa2061-39d9-4b27-aad0-4cbab39dfcaf"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "resultLabel": "Next hearing",
+          "resultLineId": "a16243d1-601f-4b2d-ab1f-72fd2e9a03df",
+          "shadowListed": false,
+          "sharedDate": "2024-04-29",
+          "shortCode": "nexh"
+        },
+        {
+          "caseId": "5f744807-8b11-452b-b9ee-91af06ed56fc",
+          "childResultLineIds": [
+            "c47fa162-6efd-4e77-91da-83b88990b058"
+          ],
+          "defendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+          "offenceId": "c4003a5c-54c1-4f7f-b95a-bb3c207d91ef",
+          "orderedDate": "2024-04-29",
+          "parentResultLineIds": [
+            "88aa2061-39d9-4b27-aad0-4cbab39dfcaf"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "7fc17a01-2f5a-4433-aae9-28e0c959f73b",
+          "resultLabel": "Adjournment reasons",
+          "resultLineId": "284287f5-a546-4ade-99e0-12762150ed5e",
+          "shadowListed": false,
+          "sharedDate": "2024-04-29",
+          "shortCode": "adjr"
+        },
+        {
+          "caseId": "5f744807-8b11-452b-b9ee-91af06ed56fc",
+          "childResultLineIds": [],
+          "defendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+          "offenceId": "c4003a5c-54c1-4f7f-b95a-bb3c207d91ef",
+          "orderedDate": "2024-04-29",
+          "parentResultLineIds": [
+            "a16243d1-601f-4b2d-ab1f-72fd2e9a03df"
+          ],
+          "prompts": [
+            {
+              "id": "aea2ee79-47b4-4023-9a95-1b327e6e03d5",
+              "label": "Fixed Date",
+              "promptRef": "fixedDate",
+              "value": "2024-04-29"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "10:00"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "Southwark Crown Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "1 English Grounds"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "(Off Battlebridge Lane)"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 3",
+              "promptRef": "hCHOUSEAddress3",
+              "value": "Southwark"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 4",
+              "promptRef": "hCHOUSEAddress4",
+              "value": "London"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "SE1 2HU"
+            },
+            {
+              "id": "49ec9b26-dd63-4637-b2e9-55ba9948a90f",
+              "label": "Courtroom",
+              "promptRef": "HCROOM",
+              "value": "Courtroom 01"
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "promptRef": "HTYPE",
+              "value": "Plea & Trial Preparation"
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "promptRef": "HEST",
+              "value": "1 HOURS"
+            }
+          ],
+          "resultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c8",
+          "resultLabel": "Next hearing in Crown Court",
+          "resultLineId": "dfab100e-d9c9-4582-a045-2345ddd6c872",
+          "shadowListed": false,
+          "sharedDate": "2024-04-29",
+          "shortCode": "nhccs"
+        },
+        {
+          "caseId": "5f744807-8b11-452b-b9ee-91af06ed56fc",
+          "childResultLineIds": [],
+          "defendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "0ed16d1e-b964-4195-ba1d-b5be5b73ee6d",
+          "offenceId": "c4003a5c-54c1-4f7f-b95a-bb3c207d91ef",
+          "orderedDate": "2024-04-29",
+          "parentResultLineIds": [
+            "284287f5-a546-4ade-99e0-12762150ed5e"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "69ff04d5-84e8-4a61-8478-82c2999c1969",
+          "resultLabel": "To attend or a warrant to issue",
+          "resultLineId": "c47fa162-6efd-4e77-91da-83b88990b058",
+          "shadowListed": false,
+          "sharedDate": "2024-04-29",
+          "shortCode": "awi"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "c4003a5c-54c1-4f7f-b95a-bb3c207d91ef"
+    }
+  ],
+  "savedTargets": [],
+  "defendantDetailsChanged": [],
+  "isReshare": false,
+  "newAmendmentResults": [
+    {
+      "id": "88aa2061-39d9-4b27-aad0-4cbab39dfcaf"
+    },
+    {
+      "id": "a16243d1-601f-4b2d-ab1f-72fd2e9a03df"
+    },
+    {
+      "id": "284287f5-a546-4ade-99e0-12762150ed5e"
+    },
+    {
+      "id": "dfab100e-d9c9-4582-a045-2345ddd6c872"
+    },
+    {
+      "id": "c47fa162-6efd-4e77-91da-83b88990b058"
+    }
+  ],
+  "hearingDay": "2024-04-29"
+}

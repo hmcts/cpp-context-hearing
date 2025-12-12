@@ -1,0 +1,152 @@
+package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
+
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Marker;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
+import uk.gov.justice.core.courts.Prosecutor;
+import uk.gov.moj.cpp.hearing.domain.event.AddCaseDefendantsForHearing;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
+import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.CasesUpdatedAfterCaseRemovedFromGroupCases;
+import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class ProsecutionCaseDelegate implements Serializable {
+
+    private static final long serialVersionUID = -6459704029050560451L;
+
+    private final HearingAggregateMomento momento;
+
+    public ProsecutionCaseDelegate(final HearingAggregateMomento momento) {
+        this.momento = momento;
+    }
+
+    public void handleCaseMarkersUpdated(final CaseMarkersUpdated caseMarkersUpdated) {
+        if (momento.getHearing() != null) {
+            ofNullable(momento.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                    .filter(prosecutionCase -> prosecutionCase.getId().equals(caseMarkersUpdated.getProsecutionCaseId()))
+                    .findFirst()
+                    .ifPresent(prosecutionCase -> setCaseMarkers(prosecutionCase, caseMarkersUpdated.getCaseMarkers()));
+        }
+    }
+
+    public void handleProsecutorUpdated(final CpsProsecutorUpdated cpsProsecutorUpdated) {
+        if (momento.getHearing() != null) {
+            ofNullable(momento.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                    .filter(prosecutionCase -> prosecutionCase.getId().equals(cpsProsecutorUpdated.getProsecutionCaseId()))
+                    .findFirst()
+                    .ifPresent(prosecutionCase -> setProsecutor(prosecutionCase, cpsProsecutorUpdated));
+        }
+    }
+
+    public Stream<Object> updateCaseMarkers(final UUID hearingId, final UUID prosecutionCaseId, List<Marker> markers) {
+        if (!this.momento.isPublished()) {
+            return Stream.of(CaseMarkersUpdated.caseMarkersUpdated()
+                    .setHearingId(hearingId)
+                    .setProsecutionCaseId(prosecutionCaseId)
+                    .setCaseMarkers(markers == null || markers.isEmpty() ? null : markers)
+            );
+        }
+        return Stream.empty();
+    }
+
+    public Stream<Object> updateProsecutor(final UUID hearingId, final UUID prosecutionCaseId, final ProsecutionCaseIdentifier prosecutionCaseIdentifier) {
+        if (momento.getHearing() != null && !this.momento.isPublished()) {
+            return Stream.of(CpsProsecutorUpdated.cpsProsecutorUpdated()
+                    .setHearingId(hearingId)
+                    .setProsecutionCaseId(prosecutionCaseId)
+                    .setProsecutionAuthorityId(prosecutionCaseIdentifier.getProsecutionAuthorityId())
+                    .setProsecutionAuthorityCode(prosecutionCaseIdentifier.getProsecutionAuthorityCode())
+                    .setProsecutionAuthorityName(prosecutionCaseIdentifier.getProsecutionAuthorityName())
+                    .setProsecutionAuthorityReference(prosecutionCaseIdentifier.getProsecutionAuthorityReference())
+                    .setCaseURN(prosecutionCaseIdentifier.getCaseURN())
+                    .setAddress(prosecutionCaseIdentifier.getAddress()));
+        }
+        return Stream.empty();
+    }
+
+    public void onDefendantLegalaidStatusTobeUpdatedForHearing(final DefendantLegalAidStatusUpdatedForHearing defendantLegalAidStatusUpdatedForHearing) {
+        if (momento.getHearing() != null) {
+            ofNullable(momento.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                    .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                    .filter(defendant -> defendant.getId().equals(defendantLegalAidStatusUpdatedForHearing.getDefendantId()))
+                    .findFirst().ifPresent(defendant ->
+                    defendant.setLegalAidStatus(defendantLegalAidStatusUpdatedForHearing.getLegalAidStatus()));
+        }
+    }
+
+    public void onCaseDefendantUpdatedForHearing(final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing) {
+        final ProsecutionCase updatedProsecutionCase = caseDefendantsUpdatedForHearing.getProsecutionCase();
+        ofNullable(momento.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                .filter(prosecutionCase -> prosecutionCase.getId().equals(updatedProsecutionCase.getId()))
+                .map(prosecutionCase -> {
+                    prosecutionCase.setCaseStatus(updatedProsecutionCase.getCaseStatus());
+                    return prosecutionCase;
+                })
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .forEach(defendant ->
+                        updatedProsecutionCase.getDefendants().stream()
+                                .filter(updatedDefendant -> defendant.getId().equals(updatedDefendant.getId()))
+                                .findFirst().ifPresent(updatedDefendant ->
+                                defendant.setProceedingsConcluded(updatedDefendant.getProceedingsConcluded())
+                        ));
+
+    }
+
+    public void onCaseDefendantsAddedForHearing(final AddCaseDefendantsForHearing caseDefendantsAddedForHearing) {
+        final UUID caseId = caseDefendantsAddedForHearing.getCaseId();
+        final List<Defendant> newDefendants = caseDefendantsAddedForHearing.getDefendants();
+        ofNullable(momento.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                .filter(prosecutionCase -> prosecutionCase.getId().equals(caseId))
+                .findFirst().ifPresent(prosecutionCase ->
+                            prosecutionCase.getDefendants().addAll(newDefendants));
+    }
+
+    public void onCasesUpdatedAfterCaseRemovedFromGroupCases(final CasesUpdatedAfterCaseRemovedFromGroupCases casesUpdatedAfterCaseRemovedFromGroupCases) {
+        final UUID groupId = casesUpdatedAfterCaseRemovedFromGroupCases.getGroupId();
+        final ProsecutionCase removedCase = casesUpdatedAfterCaseRemovedFromGroupCases.getRemovedCase();
+        final ProsecutionCase newGroupMaster = casesUpdatedAfterCaseRemovedFromGroupCases.getNewGroupMaster();
+
+        this.momento.getHearing().setProsecutionCases(this.momento.getHearing().getProsecutionCases().stream()
+                .map(o -> nonNull(removedCase) && o.getId().equals(removedCase.getId()) ? removedCase : o)
+                .map(o -> nonNull(newGroupMaster) && o.getId().equals(newGroupMaster.getId()) ? newGroupMaster : o)
+                .collect(Collectors.toList()));
+
+        if (this.momento.getHearing().getProsecutionCases().stream()
+                .noneMatch(pc -> pc.getId().equals(removedCase.getId()))) {
+            this.momento.getHearing().getProsecutionCases().add(removedCase);
+        }
+
+        if (nonNull(newGroupMaster)) {
+            if (this.momento.getHearing().getProsecutionCases().stream()
+                    .noneMatch(pc -> pc.getId().equals(newGroupMaster.getId()))) {
+                this.momento.getHearing().getProsecutionCases().add(newGroupMaster);
+            }
+            this.momento.getGroupAndMaster().put(groupId, newGroupMaster.getId());
+        }
+    }
+
+    private void setCaseMarkers(final ProsecutionCase prosecutionCase, final List<Marker> markers) {
+        prosecutionCase.setCaseMarkers(markers == null || markers.isEmpty() ? null : markers);
+    }
+
+    private void setProsecutor(final ProsecutionCase prosecutionCase, final CpsProsecutorUpdated cpsProsecutorUpdated) {
+        // isCps flag need to set from CpsProsecutorUpdated
+        prosecutionCase.setProsecutor(Prosecutor.prosecutor().withProsecutorCode(cpsProsecutorUpdated.getProsecutionAuthorityCode())
+                .withProsecutorId(cpsProsecutorUpdated.getProsecutionAuthorityId())
+                .withProsecutorName(cpsProsecutorUpdated.getProsecutionAuthorityName())
+                .withAddress(cpsProsecutorUpdated.getAddress())
+                .withIsCps(true).build());
+    }
+}

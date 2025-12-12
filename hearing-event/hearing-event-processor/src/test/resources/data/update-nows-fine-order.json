@@ -1,0 +1,132 @@
+{
+  "orderName": "Fine",
+  "courtCentreName": "Liverpool Crown Court",
+  "courtClerkName": "Nina Logan",
+  "sharedDate": "2018-04-20",
+  "defendant": {
+    "name": "Robert Ormbsy",
+    "dateOfBirth": "1980-10-12",
+    "address": {
+      "line1": "Flat 35,London Road",
+      "line2": "London",
+      "postCode": "WC1 8GF"
+    }
+  },
+  "caseUrns": [
+    "85GD2951718"
+  ],
+  "cases": [
+    {
+      "defendantCaseResults": [
+        {
+          "urn": "85GD2951718",
+          "label": "Surcharge",
+          "prompts": [
+            {
+              "label": "Amount of surcharge",
+              "value": "£ 30"
+            }
+          ]
+        },
+        {
+          "urn": "85GD2951718",
+          "label": "Payment terms - in full",
+          "prompts": [
+            {
+              "label": "Paid in full by",
+              "value": "01.06.2018"
+            }
+          ]
+        }
+      ],
+      "defendantCaseOffences": [
+        {
+          "wording": "Wounding/inflicting grievous bodily harm.",
+          "startDate": "2009-08-01",
+          "convictionDate": "2018-04-16",
+          "results": [
+            {
+              "label": "Compensation",
+              "prompts": [
+                {
+                  "label": "Amount of compensation",
+                  "value": "£ 50"
+                },
+                {
+                  "label": "Creditor name",
+                  "value": "John Smith"
+                },
+                {
+                  "label": "Creditor address",
+                  "value": "His home address"
+                }
+              ]
+            },
+            {
+              "label": "Fine with imprisonment in default",
+              "prompts": [
+                {
+                  "label": "Amount of fine",
+                  "value": "£ 100"
+                },
+                {
+                  "label": "Period of imprisonment in default",
+                  "value": "7 Days"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "wording": "Wounding/inflicting grievous bodily harm.",
+          "startDate": "2009-08-01",
+          "convictionDate": "2018-04-16",
+          "results": [
+            {
+              "label": "Compensation",
+              "prompts": [
+                {
+                  "label": "Amount of compensation",
+                  "value": "£ 50"
+                },
+                {
+                  "label": "Creditor name",
+                  "value": "John Jones"
+                },
+                {
+                  "label": "Creditor address",
+                  "value": "His home address"
+                }
+              ]
+            },
+            {
+              "label": "Fine with imprisonment in default",
+              "prompts": [
+                {
+                  "label": "Amount of fine",
+                  "value": "£ 100"
+                },
+                {
+                  "label": "Period of imprisonment in default",
+                  "value": "7 Days"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "caseResults": [
+        {
+          "label": "Costs to Crown Prosecution Service",
+          "prompts": [
+            {
+              "label": "Amount of costs",
+              "value": "£ 300"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "nowText": "<p>FURTHER IMPORTANT DETAILS ???????</p>"
+}

@@ -1,0 +1,41 @@
+{
+  "applicationId": "APPLICATION_ID",
+  "defendantId": "DEFENDANT_ID",
+  "draftResult": "{}",
+  "hearingDay": "2022-09-28",
+  "hearingId": "HEARING_ID",
+  "masterDefendantId": "DEFENDANT_ID",
+  "shadowListed" : false,
+  "resultLines": [
+    {
+      "applicationId": "APPLICATION_ID",
+      "defendantId" : "DEFENDANT_ID",
+      "masterDefendantId": "DEFENDANT_ID",
+      "childResultLineIds" : [
+      ],
+      "isComplete": true,
+      "isDeleted": false,
+      "isModified": true,
+      "level": "OFFENCE",
+      "orderedDate": "ORDERED_DATE",
+      "prompts": [
+        {
+          "id": "a593ae4a-9d69-45b9-9585-c11aeed28404",
+          "label": "Defendant driving licence number",
+          "value": "DVL123"
+        }
+      ],
+      "resultDefinitionId": "b2d06bbc-e90e-4df8-8851-6e4a70894828",
+      "resultLabel": "Obligatory disqualification",
+      "resultLineId": "b645746a-86c8-474c-baae-6abe8209db9f",
+      "shadowListed": false,
+      "sharedDate": "2022-09-29",
+      "shortCode": "DDO"
+    }
+  ],
+  "courtClerk": {
+    "firstName": "Andrew",
+    "userId": "05683290-f82a-456f-8017-12d9717b703a",
+    "lastName": "Eldritch"
+  }
+}

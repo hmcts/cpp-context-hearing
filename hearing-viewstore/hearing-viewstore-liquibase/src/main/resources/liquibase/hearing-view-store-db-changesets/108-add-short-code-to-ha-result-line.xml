@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="108" author="hearing"
+               logicalFilePath="108-add-short-code-to-ha-result-line.xml">
+
+        <addColumn tableName="ha_result_line">
+            <column name="short_code" type="TEXT">
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="ha_result_line">
+                <column name="short_code"/>
+            </dropColumn>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

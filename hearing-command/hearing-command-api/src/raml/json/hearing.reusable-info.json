@@ -1,0 +1,43 @@
+{
+  "reusablePrompts": [
+    {
+      "promptRef": "bailExceptionReason",
+      "masterDefendantId": "d0fb99b4-0c5b-4eb5-995a-ed6a2b9cb6d0",
+      "type": "FIXLOM",
+      "value": "Attempted suicide###Broken bail conditions"
+    },
+    {
+      "promptRef": "designatedLocalAuthority",
+      "masterDefendantId": "d0fb99b4-0c5b-4eb5-995a-ed6a2b9cb6d0",
+      "type": "FIXL",
+      "value": "Brent Borough Council"
+    },
+    {
+      "promptRef": "bailException",
+      "masterDefendantId": "d0fb99b4-0c5b-4eb5-995a-ed6a2b9cb6d0",
+      "type": "FIXLM",
+      "value": "Already in custody"
+    },
+    {
+      "promptRef": "remandBasis",
+      "masterDefendantId": "d0fb99b4-0c5b-4eb5-995a-ed6a2b9cb6d0",
+      "type": "FIXL",
+      "value": "Not stated"
+    },
+    {
+      "promptRef": "bailConditionReason",
+      "masterDefendantId": "d0fb99b4-0c5b-4eb5-995a-ed6a2b9cb6d0",
+      "type": "FIXLM",
+      "value": "To prevent offending"
+    }
+  ],
+  "reusableResults": [
+    {
+      "shortCode": "BAIC",
+      "value":
+        "Exclusion-not to leave",
+      "masterDefendantId": "d0fb99b4-0c5b-4eb5-995a-ed6a2b9cb6d0",
+      "offenceId": "d46035c9-8efb-4c65-b4fe-1d6297b67688"
+    }
+  ]
+}

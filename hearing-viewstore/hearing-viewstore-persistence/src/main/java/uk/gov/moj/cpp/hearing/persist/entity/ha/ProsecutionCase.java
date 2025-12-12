@@ -1,0 +1,236 @@
+package uk.gov.moj.cpp.hearing.persist.entity.ha;
+
+import uk.gov.justice.core.courts.InitiationCode;
+
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "ha_case")
+public class ProsecutionCase {
+
+    @EmbeddedId
+    private HearingSnapshotKey id;
+
+    @ManyToOne
+    @JoinColumn(name = "hearing_id", insertable = false, updatable = false)
+    private Hearing hearing;
+
+    @Column(name = "originating_organisation")
+    private String originatingOrganisation;
+
+    @Embedded
+    private ProsecutionCaseIdentifier prosecutionCaseIdentifier;
+
+    @Embedded
+    private CpsProsecutor cpsProsecutor;
+
+    @Column(name = "initiation_code")
+    @Enumerated(EnumType.STRING)
+    private InitiationCode initiationCode;
+
+    @Column(name = "case_status")
+    private String caseStatus;
+
+    @Column(name = "statement_of_facts")
+    private String statementOfFacts;
+
+    @Column(name = "statement_of_facts_welsh")
+    private String statementOfFactsWelsh;
+
+    @Column(name = "trial_receipt_type")
+    private String trialReceiptType;
+
+    @Column(name = "is_civil")
+    private Boolean isCivil;
+
+    @Column(name = "group_id")
+    private UUID groupId;
+
+    @Column(name = "is_group_member")
+    private Boolean isGroupMember;
+
+    @Column(name = "is_group_master")
+    private Boolean isGroupMaster;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "prosecutionCase", orphanRemoval = true)
+    private Set<Defendant> defendants = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "prosecutionCase", orphanRemoval = true)
+    private Set<CaseMarker> markers = new HashSet<>();
+
+    @Column(name = "is_court_list_restricted")
+    private Boolean isCourtListRestricted;
+
+    public ProsecutionCase() {
+        //For JPA
+    }
+
+    public HearingSnapshotKey getId() {
+        return id;
+    }
+
+    public void setId(HearingSnapshotKey id) {
+        this.id = id;
+    }
+
+    public Hearing getHearing() {
+        return hearing;
+    }
+
+    public void setHearing(Hearing hearing) {
+        this.hearing = hearing;
+    }
+
+    public String getOriginatingOrganisation() {
+        return originatingOrganisation;
+    }
+
+    public void setOriginatingOrganisation(String originatingOrganisation) {
+        this.originatingOrganisation = originatingOrganisation;
+    }
+
+    public ProsecutionCaseIdentifier getProsecutionCaseIdentifier() {
+        return prosecutionCaseIdentifier;
+    }
+
+    public void setProsecutionCaseIdentifier(ProsecutionCaseIdentifier prosecutionCaseIdentifier) {
+        this.prosecutionCaseIdentifier = prosecutionCaseIdentifier;
+    }
+
+    public InitiationCode getInitiationCode() {
+        return initiationCode;
+    }
+
+    public void setInitiationCode(InitiationCode initiationCode) {
+        this.initiationCode = initiationCode;
+    }
+
+    public String getCaseStatus() {
+        return caseStatus;
+    }
+
+    public void setCaseStatus(String caseStatus) {
+        this.caseStatus = caseStatus;
+    }
+
+    public String getStatementOfFacts() {
+        return statementOfFacts;
+    }
+
+    public void setStatementOfFacts(String statementOfFacts) {
+        this.statementOfFacts = statementOfFacts;
+    }
+
+    public String getStatementOfFactsWelsh() {
+        return statementOfFactsWelsh;
+    }
+
+    public void setStatementOfFactsWelsh(String statementOfFactsWelsh) {
+        this.statementOfFactsWelsh = statementOfFactsWelsh;
+    }
+
+    public Set<Defendant> getDefendants() {
+        return defendants;
+    }
+
+    public void setDefendants(Set<Defendant> defendants) {
+        this.defendants = defendants;
+    }
+
+    public Set<CaseMarker> getMarkers() {
+        return markers;
+    }
+
+    public void setMarkers(Set<CaseMarker> markers) {
+        this.markers = markers;
+    }
+
+
+    public CpsProsecutor getCpsProsecutor() {
+        return cpsProsecutor;
+    }
+
+    public void setCpsProsecutor(final CpsProsecutor cpsProsecutor) {
+        this.cpsProsecutor = cpsProsecutor;
+    }
+
+    public String getTrialReceiptType() {
+        return trialReceiptType;
+    }
+
+    public void setTrialReceiptType(final String trialReceiptType) {
+        this.trialReceiptType = trialReceiptType;
+    }
+
+    public Boolean getCourtListRestricted() {
+        return isCourtListRestricted;
+    }
+
+    public void setCourtListRestricted(Boolean courtListRestricted) {
+        isCourtListRestricted = courtListRestricted;
+    }
+
+    public Boolean getIsCivil() {
+        return this.isCivil;
+    }
+
+    public void setIsCivil(final Boolean isCivil) {
+        this.isCivil = isCivil;
+    }
+
+    public UUID getGroupId() {
+        return this.groupId;
+    }
+
+    public void setGroupId(final UUID groupId) {
+        this.groupId = groupId;
+    }
+
+    public Boolean getIsGroupMember() {
+        return this.isGroupMember;
+    }
+
+    public void setIsGroupMember(final Boolean isGroupMember) {
+        this.isGroupMember = isGroupMember;
+    }
+
+    public Boolean getIsGroupMaster() {
+        return this.isGroupMaster;
+    }
+
+    public void setIsGroupMaster(final Boolean isGroupMaster) {
+        this.isGroupMaster = isGroupMaster;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.id);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (null == o || getClass() != o.getClass()) {
+            return false;
+        }
+        return Objects.equals(this.id, ((ProsecutionCase) o).id);
+    }
+}

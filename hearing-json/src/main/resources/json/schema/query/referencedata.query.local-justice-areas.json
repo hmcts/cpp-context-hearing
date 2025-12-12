@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "id": "http://justice.gov.uk/hearing/courts/referencedata/localJusticeAreasResult.json",
+  "properties": {
+    "localJusticeAreas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nationalCourtCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "welshName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "nationalCourtCode",
+          "name"
+        ]
+      }
+    }
+  },
+  "required": [
+    "localJusticeAreas"
+  ]
+}

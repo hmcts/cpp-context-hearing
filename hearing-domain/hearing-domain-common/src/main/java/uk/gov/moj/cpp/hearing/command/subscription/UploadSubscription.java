@@ -1,0 +1,89 @@
+package uk.gov.moj.cpp.hearing.command.subscription;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class UploadSubscription {
+
+    @JsonProperty("id")
+    private UUID id;
+
+    @JsonProperty("channel")
+    private String channel;
+
+    @JsonProperty("channelProperties")
+    private Map<String, String> channelProperties = new HashMap<>();
+
+    @JsonProperty("userGroups")
+    private List<String> userGroups = new ArrayList<>();
+
+    @JsonProperty("destination")
+    private String destination;
+
+    @JsonProperty("courtCentreIds")
+    private List<UUID> courtCentreIds = new ArrayList<>();
+
+    @JsonProperty("nowTypeIds")
+    private List<UUID> nowTypeIds = new ArrayList<>();
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getChannel() {
+        return channel;
+    }
+
+    public void setChannel(String channel) {
+        this.channel = channel;
+    }
+
+    public Map<String, String> getChannelProperties() {
+        return channelProperties;
+    }
+
+    public void setChannelProperties(Map<String, String> channelProperties) {
+        this.channelProperties = channelProperties;
+    }
+
+    public List<String> getUserGroups() {
+        return userGroups;
+    }
+
+    public void setUserGroups(List<String> userGroups) {
+        this.userGroups = userGroups;
+    }
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
+
+    public List<UUID> getCourtCentreIds() {
+        return courtCentreIds;
+    }
+
+    public void setCourtCentreIds(List<UUID> courtCentreIds) {
+        this.courtCentreIds = courtCentreIds;
+    }
+
+    public List<UUID> getNowTypeIds() {
+        return nowTypeIds;
+    }
+
+    public void setNowTypeIds(List<UUID> nowTypeIds) {
+        this.nowTypeIds = nowTypeIds;
+    }
+}
