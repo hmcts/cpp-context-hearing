@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.query.view;
 
 import static com.google.common.io.Resources.getResource;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.nio.charset.Charset.defaultCharset;
 import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
@@ -55,7 +54,6 @@ import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.GetHearings;
-import uk.gov.justice.hearing.courts.HearingView;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -81,7 +79,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.DraftResultResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingViewResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
@@ -120,7 +117,6 @@ import javax.persistence.NoResultException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Resources;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -130,7 +126,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class HearingQueryViewTest {
+public class HearingQueryTest {
 
     private static final UUID COURT_CENTRE_ID = randomUUID();
     private static final UUID HEARING_ID = randomUUID();
@@ -295,23 +291,23 @@ public class HearingQueryViewTest {
         final UUID userId = randomUUID();
         final ZonedDateTime requestApprovalTime = ZonedDateTime.now();
 
-        final HearingView hearing = hearingView(hearingId, userId, requestApprovalTime);
-        final HearingViewResponse hearingDetailsResponse = new HearingViewResponse(hearing, HearingState.INITIALISED, randomUUID());
+        final Hearing hearing = hearing(hearingId, userId, requestApprovalTime);
+        final HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse(hearing, HearingState.INITIALISED, randomUUID());
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes1 = getCrackedIneffectiveVacatedTrialTypes();
 
         final JsonEnvelope query = envelopeFrom(
-                metadataBuilder().withId(randomUUID()).withName("hearing.get-hearing-by-id"),
+                metadataBuilder().withId(randomUUID()).withName("hearing.get.hearing"),
                 createObjectBuilder()
                         .add("hearingId", hearingId.toString())
                         .build());
 
-        when(hearingService.getHearingViewResponseById(hearingId, crackedIneffectiveVacatedTrialTypes1, prosecutionCasesIdsWithAccess, false)).thenReturn(hearingDetailsResponse);
+        when(hearingService.getHearingDetailsResponseById(query, hearingId, crackedIneffectiveVacatedTrialTypes1, prosecutionCasesIdsWithAccess, false)).thenReturn(hearingDetailsResponse);
 
-        final Envelope<HearingViewResponse> hearingEnvelope = target.findHearingById(query, crackedIneffectiveVacatedTrialTypes1, prosecutionCasesIdsWithAccess, false);
-        final HearingView actualHearing = hearingEnvelope.payload().getHearing();
+        final Envelope<HearingDetailsResponse> hearingEnvelope = target.findHearing(query, crackedIneffectiveVacatedTrialTypes1, prosecutionCasesIdsWithAccess, false);
+        final Hearing actualHearing = hearingEnvelope.payload().getHearing();
 
-        verify(hearingService).getHearingViewResponseById(hearingId, crackedIneffectiveVacatedTrialTypes1, prosecutionCasesIdsWithAccess, false);
-        assertThat(hearingEnvelope.metadata().name(), is("hearing.get-hearing-by-id"));
+        verify(hearingService).getHearingDetailsResponseById(query, hearingId, crackedIneffectiveVacatedTrialTypes1, prosecutionCasesIdsWithAccess, false);
+        assertThat(hearingEnvelope.metadata().name(), is("hearing.get-hearing"));
 
         assertThat(actualHearing.getId(), is(hearingId));
         final List<uk.gov.justice.core.courts.ApprovalRequest> approvalsRequested = actualHearing.getApprovalsRequested();
@@ -326,15 +322,6 @@ public class HearingQueryViewTest {
         final uk.gov.justice.core.courts.ApprovalRequest approvalRequested = new uk.gov.justice.core.courts.ApprovalRequest(CHANGE, hearingId, requestApprovalTime, userId);
         approvalsRequested.add(approvalRequested);
         final uk.gov.justice.core.courts.Hearing hearing = new uk.gov.justice.core.courts.Hearing.Builder().withId(hearingId).withApprovalsRequested(approvalsRequested).build();
-        hearing.setApprovalsRequested(approvalsRequested);
-        return hearing;
-    }
-
-    private HearingView hearingView(UUID hearingId, UUID userId, ZonedDateTime requestApprovalTime) {
-        final List<uk.gov.justice.core.courts.ApprovalRequest> approvalsRequested = new ArrayList();
-        final uk.gov.justice.core.courts.ApprovalRequest approvalRequested = new uk.gov.justice.core.courts.ApprovalRequest(CHANGE, hearingId, requestApprovalTime, userId);
-        approvalsRequested.add(approvalRequested);
-        final HearingView hearing = new HearingView.Builder().withId(hearingId).withApprovalsRequested(approvalsRequested).build();
         hearing.setApprovalsRequested(approvalsRequested);
         return hearing;
     }

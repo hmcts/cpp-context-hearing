@@ -7,7 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @SuppressWarnings({"squid:S2384"})
@@ -25,6 +27,8 @@ public class HearingDetailsResponse {
 
     private UUID relatedApplicationId;
 
+    //courtApplicationId
+    private final Map<UUID, CourtApplicationAdditionalFields> courtApplicationAdditionalFields = new HashMap<>();
 
     public HearingDetailsResponse() {
     }
@@ -86,5 +90,9 @@ public class HearingDetailsResponse {
 
     public void setRelatedApplicationId(final UUID relatedApplicationId) {
         this.relatedApplicationId = relatedApplicationId;
+    }
+
+    public Map<UUID, CourtApplicationAdditionalFields> getCourtApplicationAdditionalFields() {
+        return courtApplicationAdditionalFields;
     }
 }
