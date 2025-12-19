@@ -21,12 +21,7 @@ resources:
       type: github
       name: hmcts/cpp-azure-devops-templates
       endpoint: 'hmcts'
-      # We are temporarily pointing to the Azure dual-publishing feature branch
-      # to validate that the main branch of the CPP Hearing Context application
-      # runs correctly. This will be reverted to the main branch once validation
-      # is successful
-      ref: 'team/artifact-dualpublishing'
-
+      ref: 'main'
 
 pool:
   name: "MDV-ADO-AGENT-AKS-01"
