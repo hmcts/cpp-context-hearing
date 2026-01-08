@@ -7,7 +7,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-parent</artifactId>
-        <version>17.0.142-PEG-2843-SNAPSHOT</version>
+        <version>17.0.143-PEG-2843-SNAPSHOT</version>
     </parent>
 
     <dependencies>
