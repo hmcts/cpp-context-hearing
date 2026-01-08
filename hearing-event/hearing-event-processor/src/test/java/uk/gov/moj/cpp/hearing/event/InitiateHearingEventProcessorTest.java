@@ -178,13 +178,16 @@ public class InitiateHearingEventProcessorTest {
                                 .add("applicationStatus", "UN_ALLOCATED")
                                 .build()).build()));
 
+        final List<CourtApplicationCase> courtApplicationCases = createCourtApplicationCases();
+        final UUID caseId1 = courtApplicationCases.get(0).getProsecutionCaseId();
+        final UUID caseId2 = courtApplicationCases.get(1).getProsecutionCaseId();
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingWithApplicationTemplate(singletonList(CourtApplication.courtApplication()
                 .withType(CourtApplicationType.courtApplicationType()
                         .withId(randomUUID())
                         .withCode(applicationTypeId)
                         .build())
-                .withCourtApplicationCases(createCourtApplicationCases())
+                .withCourtApplicationCases(courtApplicationCases)
                 .withId(applicationId)
                 .withSubject(CourtApplicationParty.courtApplicationParty()
                         .withMasterDefendant(MasterDefendant.masterDefendant()
@@ -212,6 +215,8 @@ public class InitiateHearingEventProcessorTest {
                                 withJsonPath("$.listingDate", is(dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))),
                                 withJsonPath("$.caseUrns[0]", is("caseURN1")),
                                 withJsonPath("$.caseUrns[1]", is("caseURN2")),
+                                withJsonPath("$.caseIds[0]", is(caseId1.toString())),
+                                withJsonPath("$.caseIds[1]", is(caseId2.toString())),
                                 withJsonPath("$.hearingCourtCentreName", is(notNullValue()))
                         ))));
 
@@ -416,13 +421,16 @@ public class InitiateHearingEventProcessorTest {
                                 .add("applicationStatus", "UN_ALLOCATED")
                                 .build()).build()));
 
+        final List<CourtApplicationCase> courtApplicationCases = createCourtApplicationCases();
+        final UUID caseId1 = courtApplicationCases.get(0).getProsecutionCaseId();
+        final UUID caseId2 = courtApplicationCases.get(1).getProsecutionCaseId();
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingWithApplicationTemplate(singletonList(CourtApplication.courtApplication()
                 .withType(CourtApplicationType.courtApplicationType()
                         .withCode(applicationTypeId).build())
                 .withId(applicationId)
                 .withApplicationStatus(ApplicationStatus.UN_ALLOCATED)
-                .withCourtApplicationCases(createCourtApplicationCases())
+                .withCourtApplicationCases(courtApplicationCases)
                 .withSubject(CourtApplicationParty.courtApplicationParty()
                         .withMasterDefendant(MasterDefendant.masterDefendant()
                                 .withMasterDefendantId(masterDefendantId)
@@ -449,6 +457,8 @@ public class InitiateHearingEventProcessorTest {
                                 withJsonPath("$.listingDate", is(dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))),
                                 withJsonPath("$.caseUrns[0]", is("caseURN1")),
                                 withJsonPath("$.caseUrns[1]", is("caseURN2")),
+                                withJsonPath("$.caseIds[0]", is(caseId1.toString())),
+                                withJsonPath("$.caseIds[1]", is(caseId2.toString())),
                                 withJsonPath("$.hearingCourtCentreName", is(notNullValue())),
                                 withJsonPath("$.caseOffenceIdList.size()", is(2))
                         ))));
@@ -471,6 +481,8 @@ public class InitiateHearingEventProcessorTest {
         final List<CourtApplicationCase> courtApplicationCases = createCourtApplicationCases();
         final UUID offenceId1 = courtApplicationCases.get(0).getOffences().get(0).getId();
         final UUID offenceId2 = courtApplicationCases.get(1).getOffences().get(0).getId();
+        final UUID caseId1 = courtApplicationCases.get(0).getProsecutionCaseId();
+        final UUID caseId2 = courtApplicationCases.get(1).getProsecutionCaseId();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingWithApplicationTemplate(singletonList(CourtApplication.courtApplication()
                 .withType(CourtApplicationType.courtApplicationType()
                         .withCode(APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_CODE).build())
@@ -503,6 +515,8 @@ public class InitiateHearingEventProcessorTest {
                                 withJsonPath("$.listingDate", is(dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))),
                                 withJsonPath("$.caseUrns[0]", is("caseURN1")),
                                 withJsonPath("$.caseUrns[1]", is("caseURN2")),
+                                withJsonPath("$.caseIds[0]", is(caseId1.toString())),
+                                withJsonPath("$.caseIds[1]", is(caseId2.toString())),
                                 withJsonPath("$.hearingCourtCentreName", is(notNullValue())),
                                 withJsonPath("$.caseOffenceIdList[0]", is(offenceId1.toString())),
                                 withJsonPath("$.caseOffenceIdList[1]", is(offenceId2.toString()))
