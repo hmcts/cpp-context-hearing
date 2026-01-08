@@ -154,6 +154,7 @@ public class InitiateHearingEventProcessor {
                                     .add("masterDefendantId", courtApplication.getSubject().getMasterDefendant().getMasterDefendantId().toString())
                                     .add("listingDate", dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))
                                     .add("caseUrns", createCaseUrns(courtApplication).build())
+                                    .add("caseIds", createCaseIds(courtApplication).build())
                                     .add("hearingCourtCentreName", initiateHearingCommand.getHearing().getCourtCentre().getName())
                                     .add("caseOffenceIdList", createCaseOffenceIds(courtApplication.getCourtApplicationCases()))
                                     .build()).withName("public.hearing.nces-email-notification-for-application").withMetadataFrom(event));
@@ -199,6 +200,14 @@ public class InitiateHearingEventProcessor {
                     .map(offence -> offence.getId().toString())
                     .forEach(builder::add);
         }
+        return builder;
+    }
+
+    private JsonArrayBuilder createCaseIds(final CourtApplication courtApplication) {
+        final JsonArrayBuilder builder = createArrayBuilder();
+        courtApplication.getCourtApplicationCases().stream()
+                .map(cac -> cac.getProsecutionCaseId().toString())
+                .forEach(builder::add);
         return builder;
     }
 
