@@ -29,7 +29,6 @@ import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCo
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstOffenceCommand;
 import uk.gov.moj.cpp.hearing.event.service.ProgressionService;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingInitiated;
-import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.util.HearingDetailUtil;
 
 import java.time.format.DateTimeFormatter;
@@ -39,12 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
@@ -143,22 +138,21 @@ public class InitiateHearingEventProcessor {
 
 
         final List<CourtApplication> courtApplications = initiateHearingCommand.getHearing().getCourtApplications();
-        ofNullable(courtApplications).map(Collection::stream).orElseGet(Stream::empty)
+        ofNullable(courtApplications).stream().flatMap(Collection::stream)
                 .filter(courtApplication -> ENFORCEMENT_NOTIFICATION_APPLICATION_TYPES.containsKey(courtApplication.getType().getCode()))
                 .filter(courtApplication -> courtApplication.getSubject().getMasterDefendant() != null)
                 .filter(courtApplication -> !isApplicationFinalisedOrListed(event, courtApplication.getId()))
                 .forEach(
-                        courtApplication -> {
-                            this.sender.send(Enveloper.envelop(createObjectBuilder()
-                                    .add("applicationType", ENFORCEMENT_NOTIFICATION_APPLICATION_TYPES.get(courtApplication.getType().getCode()))
-                                    .add("masterDefendantId", courtApplication.getSubject().getMasterDefendant().getMasterDefendantId().toString())
-                                    .add("listingDate", dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))
-                                    .add("caseUrns", createCaseUrns(courtApplication).build())
-                                    .add("caseIds", createCaseIds(courtApplication).build())
-                                    .add("hearingCourtCentreName", initiateHearingCommand.getHearing().getCourtCentre().getName())
-                                    .add("caseOffenceIdList", createCaseOffenceIds(courtApplication.getCourtApplicationCases()))
-                                    .build()).withName("public.hearing.nces-email-notification-for-application").withMetadataFrom(event));
-                        });
+                        courtApplication -> this.sender.send(Enveloper.envelop(createObjectBuilder()
+                                .add("applicationType", ENFORCEMENT_NOTIFICATION_APPLICATION_TYPES.get(courtApplication.getType().getCode()))
+                                .add("masterDefendantId", courtApplication.getSubject().getMasterDefendant().getMasterDefendantId().toString())
+                                .add("listingDate", dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))
+                                .add("caseUrns", createCaseUrns(courtApplication).build())
+                                .add("caseIds", createCaseIds(courtApplication).build())
+                                .add("hearingCourtCentreName", initiateHearingCommand.getHearing().getCourtCentre().getName())
+                                .add("hearingCourtCentreId", initiateHearingCommand.getHearing().getCourtCentre().getId().toString())
+                                .add("caseOffenceIdList", createCaseOffenceIds(courtApplication.getCourtApplicationCases()))
+                                .build()).withName("public.hearing.nces-email-notification-for-application").withMetadataFrom(event)));
     }
 
     @Handles("hearing.events.hearing-initiate-ignored")
