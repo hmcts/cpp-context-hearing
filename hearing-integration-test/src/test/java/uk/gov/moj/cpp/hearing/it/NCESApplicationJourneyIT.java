@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Collections.singletonList;
-import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -42,7 +41,8 @@ public class NCESApplicationJourneyIT extends AbstractIT {
                         withJsonPath("$.listingDate", notNullValue()),
                         withJsonPath("$.caseUrns[0]", is("prosecutionAuthorityReference")),
                         withJsonPath("$.caseIds[0]", is(caseId.toString())),
-                        withJsonPath("$.hearingCourtCentreName", notNullValue())
+                        withJsonPath("$.hearingCourtCentreName", notNullValue()),
+                        withJsonPath("$.hearingCourtCentreId", notNullValue())
                 )));
 
         h(initiateHearing(getRequestSpec(),
