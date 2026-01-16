@@ -36,10 +36,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.ApplicationStatus.FINALISED;
 import static uk.gov.justice.core.courts.ApplicationStatus.UN_ALLOCATED;
+import static uk.gov.justice.core.courts.CourtApplication.courtApplication;
 import static uk.gov.justice.core.courts.Hearing.hearing;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.core.courts.Level.OFFENCE;
-import static uk.gov.justice.hearing.courts.CourtApplicationView.courtApplicationView;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
@@ -75,8 +75,6 @@ import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtApplicationType;
 import uk.gov.justice.core.courts.DefendantCase;
 import uk.gov.justice.core.courts.ApplicationStatus;
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationType;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.Level;
@@ -88,10 +86,8 @@ import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
-import uk.gov.justice.hearing.courts.CourtApplicationView;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
-import uk.gov.justice.hearing.courts.HearingView;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -121,6 +117,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplicationKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
@@ -140,7 +138,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTar
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingViewResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
@@ -151,6 +148,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Current
 import uk.gov.moj.cpp.hearing.query.view.service.userdata.UserDataService;
 import uk.gov.moj.cpp.hearing.query.view.service.ctl.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
@@ -186,6 +184,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -257,6 +256,8 @@ public class HearingServiceTest {
     private Requester requester;
     @Mock
     private UserDataService userDataService;
+    @Mock
+    private HearingApplicationRepository hearingApplicationRepository;
 
     @Mock
     private ProgressionService progressionService;
@@ -408,7 +409,7 @@ public class HearingServiceTest {
         final LocalDate startDateStartOfDay = START_DATE_1.toLocalDate();
         final HearingTestUtils.HearingHelper hearingHelper = helper(HearingTestUtils.buildHearing());
         final Hearing hearingEntity = hearingHelper.it();
-        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withCourtApplications(singletonList(CourtApplication.courtApplication().withType(CourtApplicationType.courtApplicationType().withCode(applicationTypeCode).build()).build())).build();
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withCourtApplications(singletonList(courtApplication().withType(CourtApplicationType.courtApplicationType().withCode(applicationTypeCode).build()).build())).build();
         final UUID hearingSummaryId = randomUUID();
         final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
         hearingEntity.setCourtApplicationsJson(createObjectBuilder().add("type", createObjectBuilder().add("code", applicationTypeCode).build()).build().toString());
@@ -435,7 +436,7 @@ public class HearingServiceTest {
         final LocalDate startDateStartOfDay = START_DATE_1.toLocalDate();
         final HearingTestUtils.HearingHelper hearingHelper = helper(HearingTestUtils.buildHearing());
         final Hearing hearingEntity = hearingHelper.it();
-        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withCourtApplications(singletonList(CourtApplication.courtApplication().withType(CourtApplicationType.courtApplicationType().withCode(applicationTypeCode).build()).build())).build();
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withCourtApplications(singletonList(courtApplication().withType(CourtApplicationType.courtApplicationType().withCode(applicationTypeCode).build()).build())).build();
         final UUID hearingSummaryId = randomUUID();
         final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
         hearingEntity.setCourtApplicationsJson(createObjectBuilder().add("type", createObjectBuilder().add("code", applicationTypeCode).build()).build().toString());
@@ -464,7 +465,7 @@ public class HearingServiceTest {
         final LocalDate startDateStartOfDay = START_DATE_1.toLocalDate();
         final HearingTestUtils.HearingHelper hearingHelper = helper(HearingTestUtils.buildHearing());
         final Hearing hearingEntity = hearingHelper.it();
-        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withCourtApplications(singletonList(CourtApplication.courtApplication().withType(CourtApplicationType.courtApplicationType().withCode(applicationTypeCode).build()).build())).build();
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withCourtApplications(singletonList(courtApplication().withType(CourtApplicationType.courtApplicationType().withCode(applicationTypeCode).build()).build())).build();
         final UUID hearingSummaryId = randomUUID();
         final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
         hearingEntity.setCourtApplicationsJson(createObjectBuilder().add("type", createObjectBuilder().add("code", applicationTypeCode).build()).build().toString());
@@ -1235,27 +1236,52 @@ public class HearingServiceTest {
     void shouldUpdateCourtApplicationStatusFromProgressionInTheHearing() {
         final UUID applicationId1 = randomUUID();
         final UUID applicationId2 = randomUUID();
-        final List<CourtApplicationView> courtApplications = List.of(courtApplicationView().withId(applicationId1).withApplicationStatus(UN_ALLOCATED).build(),
-                courtApplicationView().withId(applicationId2).withApplicationStatus(UN_ALLOCATED).build());
+        final List<CourtApplication> courtApplications = List.of(courtApplication().withId(applicationId1).withApplicationStatus(UN_ALLOCATED).build(),
+                courtApplication().withId(applicationId2).withApplicationStatus(UN_ALLOCATED).build());
 
         final Hearing entity = mock(Hearing.class);
-        final HearingView pojo = HearingView.hearingView().withCourtApplications(courtApplications).build();
+        final uk.gov.justice.core.courts.Hearing hearing = uk.gov.justice.core.courts.Hearing.hearing().withCourtApplications(courtApplications).build();
         final UUID hearingId = randomUUID();
         entity.setIsEffectiveTrial(true);
         when(hearingRepository.findBy(hearingId)).thenReturn(entity);
-        when(hearingJPAMapper.toHearingView(entity)).thenReturn(pojo);
+        when(entity.getId()).thenReturn(hearingId);
+        when(hearingJPAMapper.fromJPA(entity)).thenReturn(hearing);
 
         when(progressionService.getApplicationStatus(any())).thenReturn(List.of(new ApplicationWithStatus(applicationId1.toString(), "LISTED"),
                 new ApplicationWithStatus(applicationId2.toString(), "FINALISED")));
 
-        final UUID trialTypeId = randomUUID();
-        final HearingViewResponse response = hearingService.getHearingViewResponseById(hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), prosecutionCasesIdsWithAccess, false);
+        final HearingApplication hearingApplication = getHearingApplication(hearingId, applicationId2);
 
-        final List<CourtApplicationView> courtApplicationsActual = response.getHearing().getCourtApplications();
+        when(hearingApplicationRepository.findByApplicationId(applicationId1)).thenReturn(List.of());
+        when(hearingApplicationRepository.findByApplicationId(applicationId2)).thenReturn(List.of(hearingApplication));
+
+        final UUID trialTypeId = randomUUID();
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(null,hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), prosecutionCasesIdsWithAccess, false);
+
+        final List<CourtApplication> courtApplicationsActual = response.getHearing().getCourtApplications();
 
         assertThat(courtApplicationsActual.size(), is(2));
-        assertThat(courtApplicationsActual.stream().filter(ca -> ca.getId().equals(applicationId1)).map(CourtApplicationView::getApplicationStatus).findFirst().get(), is(ApplicationStatus.LISTED));
-        assertThat(courtApplicationsActual.stream().filter(ca -> ca.getId().equals(applicationId2)).map(CourtApplicationView::getApplicationStatus).findFirst().get(), is(FINALISED));
+        assertThat(courtApplicationsActual.stream().filter(ca -> ca.getId().equals(applicationId1)).map(CourtApplication::getApplicationStatus).findFirst().get(), is(ApplicationStatus.LISTED));
+        assertThat(courtApplicationsActual.stream().filter(ca -> ca.getId().equals(applicationId2)).map(CourtApplication::getApplicationStatus).findFirst().get(), is(FINALISED));
+
+        //check court application additional fields
+        assertThat(response.getCourtApplicationAdditionalFields().size(), is(2));
+        assertThat(response.getCourtApplicationAdditionalFields().get(applicationId1).getAmendmentAllowed(), is(true));
+        assertThat(response.getCourtApplicationAdditionalFields().get(applicationId2).getAmendmentAllowed(), is(false));
+
+    }
+
+    private static HearingApplication getHearingApplication(final UUID hearingId, final UUID applicationId2) {
+        final HearingApplication hearingApplication = new HearingApplication();
+        hearingApplication.setId(new HearingApplicationKey(hearingId, applicationId2));
+        final Hearing hearing = new Hearing();
+        hearing.setId(randomUUID());
+        Target target = new Target();
+        target.setId(new HearingSnapshotKey(randomUUID(), hearingId));
+        target.setApplicationFinalised(true); // not allowed amendment
+        hearing.setTargets(Set.of(target));
+        hearingApplication.setHearing(hearing);
+        return hearingApplication;
     }
 
     @Test
@@ -1320,7 +1346,7 @@ public class HearingServiceTest {
     }
 
     private static CourtApplication createApplication(final UUID applicationId, final UUID parentApplicationId, final UUID applicationTypeId, final UUID defendantId) {
-        return CourtApplication.courtApplication()
+        return courtApplication()
                 .withId(applicationId)
                 .withParentApplicationId(parentApplicationId)
                 .withType(CourtApplicationType.courtApplicationType()
@@ -1358,7 +1384,7 @@ public class HearingServiceTest {
         final UUID defendantId = randomUUID();
         final UUID applicationTypeId = randomUUID();
 
-        final CourtApplication childApplication = CourtApplication.courtApplication()
+        final CourtApplication childApplication = courtApplication()
                 .withId(childApplicationId)
                 .withParentApplicationId(parentApplicationId)
                 .withType(CourtApplicationType.courtApplicationType()
@@ -1929,7 +1955,7 @@ public class HearingServiceTest {
         hearing.setCourtApplicationsJson(eventPayloadString);
         when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
         when(courtApplicationsSerializer.courtApplications(anyString()))
-                .thenReturn(List.of(CourtApplication.courtApplication()
+                .thenReturn(List.of(courtApplication()
                         .withType(CourtApplicationType.courtApplicationType()
                                 .withCode("PL302487").build())
                         .build()));
@@ -1956,7 +1982,7 @@ public class HearingServiceTest {
         hearing.setCourtApplicationsJson(eventPayloadString);
         when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
         when(courtApplicationsSerializer.courtApplications(anyString()))
-                .thenReturn(List.of(CourtApplication.courtApplication()
+                .thenReturn(List.of(courtApplication()
                         .withType(CourtApplicationType.courtApplicationType()
                                 .withCode("PL302487").build())
                         .build()));

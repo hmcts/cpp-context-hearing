@@ -42,15 +42,6 @@ rule "Query - API - hearing.get.hearing"
     $outcome.setSuccess(true);
 end
 
-rule "Query - API - hearing.get.hearing-by-id"
-  when
-    $outcome: Outcome();
-    $action: Action(name == "hearing.get.hearing-by-id");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders",  "Court Administrators"));
-  then
-    $outcome.setSuccess(true);
-end
-
 rule "Query - API - hearing.get-hearing-event-definitions"
   when
     $outcome: Outcome();

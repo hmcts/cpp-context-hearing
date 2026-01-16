@@ -7,7 +7,6 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.deltaspike.core.util.CollectionUtils.isEmpty;
 import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
-import static uk.gov.moj.cpp.hearing.mapping.ApplicationAmendmentAllowedResolver.isAmendmentAllowed;
 
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
@@ -19,15 +18,11 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.hearing.courts.ApplicationCourtListRestriction;
-import uk.gov.justice.hearing.courts.CourtApplicationView;
-import uk.gov.justice.hearing.courts.HearingView;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -184,95 +179,6 @@ public class HearingJPAMapper {
                 .withIsGroupProceedings(entity.getIsGroupProceedings())
                 .withNumberOfGroupCases(entity.getNumberOfGroupCases())
                 .build();
-    }
-
-    public HearingView toHearingView(final Hearing entity) {
-        if (null == entity) {
-            return null;
-        }
-        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(entity.getCourtApplicationsJson());
-        final List<CourtApplicationView> courtApplicationViews = new ArrayList<>();
-        if (!isEmpty(courtApplications)) {
-            courtApplications.stream()
-                    .filter(ca -> !EJECTED.equals(ca.getApplicationStatus()))
-                    .map(ca -> {
-                        final List<HearingApplication> applicationHearings = hearingApplicationRepository.findByApplicationId(ca.getId());
-                        return toCourtApplicationView(ca, isAmendmentAllowed(entity.getId(), applicationHearings));
-                    })
-                    .forEach(courtApplicationViews::add);
-        }
-        return HearingView.hearingView()
-                .withId(entity.getId())
-                .withCourtCentre(courtCentreJPAMapper.fromJPA(entity.getCourtCentre()))
-                .withDefenceCounsels(hearingDefenceCounselJPAMapper.fromJPA(entity.getDefenceCounsels()))
-                .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
-                .withDefendantReferralReasons(defendantReferralReasonsJPAMapper.fromJPA(entity.getDefendantReferralReasons()))
-                .withHasSharedResults(entity.getHasSharedResults())
-                .withIsBoxHearing(entity.getIsBoxHearing())
-                .withIsVacatedTrial(entity.getIsVacatedTrial())
-                .withHearingCaseNotes(hearingCaseNoteJPAMapper.fromJPA(entity.getHearingCaseNotes()))
-                .withHearingDays(hearingDayJPAMapper.fromJPA(entity.getHearingDays()))
-                .withHearingLanguage(entity.getHearingLanguage())
-                .withJudiciary(judicialRoleJPAMapper.fromJPA(entity.getJudicialRoles()))
-                .withJurisdictionType(entity.getJurisdictionType())
-                .withProsecutionCases(prosecutionCaseJPAMapper.fromJPA(entity.getProsecutionCases()))
-                .withProsecutionCounsels(hearingProsecutionCounselJPAMapper.fromJPA(entity.getProsecutionCounsels()))
-                .withReportingRestrictionReason(entity.getReportingRestrictionReason())
-                .withType(hearingTypeJPAMapper.fromJPA(entity.getHearingType()))
-                .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
-                .withCourtApplications(courtApplicationViews.isEmpty() ? null : courtApplicationViews)
-                .withRespondentCounsels(hearingRespondentCounselJPAMapper.fromJPA(entity.getRespondentCounsels()))
-                .withApplicantCounsels(hearingApplicantCounselJPAMapper.fromJPA(entity.getApplicantCounsels()))
-                .withIntermediaries(hearingInterpreterIntermediaryJPAMapper.fromJPA(entity.getHearingInterpreterIntermediaries()))
-                .withCompanyRepresentatives(hearingCompanyRepresentativeJPAMapper.fromJPA(entity.getCompanyRepresentatives()))
-                .withApprovalsRequested(approvalRequestedJPAMapper.fromJPA(entity.getApprovalsRequested()))
-                .withYouthCourtDefendantIds(getDefendantsSelectedForYouthDefendant(entity))
-                .withEarliestNextHearingDate(entity.getEarliestNextHearingDate())
-                .withIsGroupProceedings(entity.getIsGroupProceedings())
-                .withNumberOfGroupCases(entity.getNumberOfGroupCases())
-                .build();
-    }
-
-    private CourtApplicationView toCourtApplicationView(final CourtApplication courtApplication, final boolean isAmendmentAllowed) {
-        final CourtApplicationView.Builder courtApplicationView = CourtApplicationView.courtApplicationView();
-
-        courtApplicationView.withAllegationOrComplaintEndDate(courtApplication.getAllegationOrComplaintEndDate());
-        courtApplicationView.withAllegationOrComplaintStartDate(courtApplication.getAllegationOrComplaintStartDate());
-        courtApplicationView.withApplicant(courtApplication.getApplicant());
-        courtApplicationView.withApplicationDecisionSoughtByDate(courtApplication.getApplicationDecisionSoughtByDate());
-        courtApplicationView.withApplicationExternalCreatorType(courtApplication.getApplicationExternalCreatorType());
-        courtApplicationView.withApplicationParticulars(courtApplication.getApplicationParticulars());
-        courtApplicationView.withApplicationReceivedDate(courtApplication.getApplicationReceivedDate());
-        courtApplicationView.withApplicationReference(courtApplication.getApplicationReference());
-        courtApplicationView.withApplicationResultCodeForLaa(courtApplication.getApplicationResultCodeForLaa());
-        courtApplicationView.withApplicationStatus(courtApplication.getApplicationStatus());
-        courtApplicationView.withCommissionerOfOath(courtApplication.getCommissionerOfOath());
-        courtApplicationView.withConvictionDate(courtApplication.getConvictionDate());
-        courtApplicationView.withCourtApplicationCases(courtApplication.getCourtApplicationCases());
-        courtApplicationView.withCourtApplicationPayment(courtApplication.getCourtApplicationPayment());
-        courtApplicationView.withCourtCivilApplication(courtApplication.getCourtCivilApplication());
-        courtApplicationView.withCourtOrder(courtApplication.getCourtOrder());
-        courtApplicationView.withDefendantASN(courtApplication.getDefendantASN());
-        courtApplicationView.withFutureSummonsHearing(courtApplication.getFutureSummonsHearing());
-        courtApplicationView.withHasSummonsSupplied(courtApplication.getHasSummonsSupplied());
-        courtApplicationView.withHearingIdToBeVacated(courtApplication.getHearingIdToBeVacated());
-        courtApplicationView.withId(courtApplication.getId());
-        courtApplicationView.withIsAmendmentAllowed(courtApplication.getIsGroupCaseApplication());
-        courtApplicationView.withIsGroupCaseApplication(courtApplication.getIsGroupCaseApplication());
-        courtApplicationView.withJudicialResults(courtApplication.getJudicialResults());
-        courtApplicationView.withOutOfTimeReasons(courtApplication.getOutOfTimeReasons());
-        courtApplicationView.withParentApplicationId(courtApplication.getParentApplicationId());
-        courtApplicationView.withPlea(courtApplication.getPlea());
-        courtApplicationView.withProceedingsConcluded(courtApplication.getProceedingsConcluded());
-        courtApplicationView.withRemovalReason(courtApplication.getRemovalReason());
-        courtApplicationView.withRespondents(courtApplication.getRespondents());
-        courtApplicationView.withSubject(courtApplication.getSubject());
-        courtApplicationView.withThirdParties(courtApplication.getThirdParties());
-        courtApplicationView.withType(courtApplication.getType());
-        courtApplicationView.withVerdict(courtApplication.getVerdict());
-        courtApplicationView.withIsAmendmentAllowed(isAmendmentAllowed);
-
-        return courtApplicationView.build();
     }
 
     public uk.gov.justice.core.courts.Hearing fromJPAWithCourtListRestrictions(final Hearing entity) {

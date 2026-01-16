@@ -39,7 +39,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.DraftResultResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingViewResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
@@ -177,26 +176,6 @@ public class HearingQueryView {
 
         return envelop(hearingDetailsResponse)
                 .withName("hearing.get-hearing")
-                .withMetadataFrom(envelope);
-    }
-
-    /**
-     *
-     * @param envelope
-     * @param crackedIneffectiveVacatedTrialTypes
-     * @param accessibleCaseAndApplicationIds
-     * @param isDDJ
-     * @return HearingViewResponse is using custom Hearing and CourtApplication objects
-     */
-    public Envelope<HearingViewResponse> findHearingById(final JsonEnvelope envelope,
-                                                        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes,
-                                                        final List<UUID> accessibleCaseAndApplicationIds,
-                                                        final boolean isDDJ) {
-        final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
-        final HearingViewResponse hearingDetailsResponse = hearingService.getHearingViewResponseById(hearingId.get(), crackedIneffectiveVacatedTrialTypes, accessibleCaseAndApplicationIds, isDDJ);
-
-        return envelop(hearingDetailsResponse)
-                .withName("hearing.get-hearing-by-id")
                 .withMetadataFrom(envelope);
     }
 

@@ -22,14 +22,12 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_WAIT_TIME_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
 import uk.gov.justice.hearing.courts.GetHearings;
-import uk.gov.justice.hearing.courts.HearingView;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.test.utils.core.http.RequestParams;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.core.http.RestPoller;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingViewResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
@@ -68,14 +66,6 @@ public class Queries {
                 .build();
 
         pollQueryEndpoint(jsonPayloadMatchesBean(HearingDetailsResponse.class, resultMatcher), timeout, requestParams);
-    }
-
-    public static void getHearingByIdPollForMatch(final UUID hearingId, final long timeout, final BeanMatcher<HearingViewResponse> resultMatcher) {
-        final RequestParams requestParams = requestParams(getURL("hearing.get.hearing-by-id", hearingId), "application/vnd.hearing.get.hearing-by-id+json")
-                .withHeader(HeaderConstants.USER_ID, getLoggedInUser())
-                .build();
-
-        pollQueryEndpoint(jsonPayloadMatchesBean(HearingViewResponse.class, resultMatcher), timeout, requestParams);
     }
 
     public static void getHearingsByDatePollForMatch(final UUID courtCentreId, final UUID roomId, final String date, final String startTime, final String endTime, final BeanMatcher<GetHearings> resultMatcher) {

@@ -48,10 +48,8 @@ import uk.gov.justice.core.courts.ReferralReason;
 import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
-import uk.gov.justice.hearing.courts.HearingView;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantReferralReason;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.JudicialRole;
@@ -1029,13 +1027,8 @@ public class HearingJPAMapperTest {
         final List<CourtApplication> expectedCourtApplications = List.of(CourtApplication.courtApplication().withId(applicationId).withApplicationStatus(FINALISED).build());
         when(courtApplicationsSerializer.courtApplications(hearingEntity.getCourtApplicationsJson())).thenReturn(expectedCourtApplications);
 
-        final HearingApplication mocHearingApplication = mock(HearingApplication.class);
-        when(mocHearingApplication.getHearing()).thenReturn(hearingEntity);
-        when(hearingApplicationRepository.findByApplicationId(applicationId)).thenReturn(List.of(mocHearingApplication));
-
-        final HearingView actualHearing = hearingJPAMapper.toHearingView(hearingEntity);
+        final Hearing actualHearing = hearingJPAMapper.fromJPA(hearingEntity);
         assertThat(actualHearing.getCourtApplications().size(), is(1));
         assertThat(actualHearing.getCourtApplications().get(0).getId(), is(applicationId));
-        assertThat(actualHearing.getCourtApplications().get(0).getIsAmendmentAllowed(), is(true));
     }
 }
