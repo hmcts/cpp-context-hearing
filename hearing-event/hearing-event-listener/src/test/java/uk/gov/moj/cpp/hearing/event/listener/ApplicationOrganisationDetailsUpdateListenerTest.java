@@ -31,7 +31,7 @@ import java.io.StringReader;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
@@ -115,7 +115,7 @@ public class ApplicationOrganisationDetailsUpdateListenerTest {
         verify(hearingRepository).save(hearingArgumentCaptor.capture());
         final Hearing hearingOut = hearingArgumentCaptor.getValue();
         assertThat(hearingOut.getId(), is(hearingId));
-        final JsonArray applicationsJsonArray = Json.createReader(new StringReader(hearingOut.getCourtApplicationsJson())).readObject().getJsonArray("courtApplications");
+        final JsonArray applicationsJsonArray = JsonObjects.createReader(new StringReader(hearingOut.getCourtApplicationsJson())).readObject().getJsonArray("courtApplications");
         assertThat(applicationsJsonArray.size(), is(2));
         assertThat(applicationsJsonArray.get(0).asJsonObject().getString("id"), is(applicationId.toString()));
         assertThat(applicationsJsonArray.get(0).asJsonObject().getJsonObject("subject").getJsonObject("associatedDefenceOrganisation").getString("applicationReference"), is(associatedDefenceOrganisation.getApplicationReference()));

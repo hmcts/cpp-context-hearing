@@ -51,7 +51,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
@@ -374,7 +374,7 @@ public class NextHearingHelperV3Test  {
 
     private static JsonObject givenPayload(final String filePath) {
         try (InputStream inputStream = NextHearingHelperV3Test.class.getResourceAsStream(filePath)) {
-            final JsonReader jsonReader = Json.createReader(inputStream);
+            final JsonReader jsonReader = JsonObjects.createReader(inputStream);
             return jsonReader.readObject();
         } catch (Exception e) {
             throw new RuntimeException(e);

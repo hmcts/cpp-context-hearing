@@ -36,7 +36,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpdated;
 import java.util.List;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObjectBuilder;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -174,7 +174,7 @@ public class UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandlerTest {
 
     private JsonEnvelope getJsonEnvelopeForRemoveCommand(final UUID hearingId, final UUID groupId,
                                                          final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
-        JsonObjectBuilder builder = Json.createObjectBuilder()
+        JsonObjectBuilder builder = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("groupId", groupId.toString())
                 .add("removedCase", objectToJsonObjectConverter.convert(removedCase));

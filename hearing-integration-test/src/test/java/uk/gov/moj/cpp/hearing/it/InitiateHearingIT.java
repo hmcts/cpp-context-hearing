@@ -5,7 +5,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
@@ -106,7 +106,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.hamcrest.Matcher;
@@ -1421,7 +1421,7 @@ public class InitiateHearingIT extends AbstractIT {
 
         final UUID hearingId = hearing.getId();
 
-        final JsonObject commandPayload = Json.createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("estimatedMinutes", 30)
                 .build();

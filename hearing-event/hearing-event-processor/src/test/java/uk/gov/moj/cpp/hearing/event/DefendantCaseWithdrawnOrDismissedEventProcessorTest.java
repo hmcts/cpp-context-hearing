@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
@@ -127,7 +127,7 @@ public class DefendantCaseWithdrawnOrDismissedEventProcessorTest {
     }
 
     public static JsonObject readJson(final String jsonString) {
-        try (final JsonReader jsonReader = Json.createReader(new StringReader(jsonString))) {
+        try (final JsonReader jsonReader = JsonObjects.createReader(new StringReader(jsonString))) {
             return jsonReader.readObject();
         }
     }

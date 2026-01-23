@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.test;
 
 import static java.nio.charset.Charset.defaultCharset;
-import static javax.json.Json.createReader;
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;

@@ -16,7 +16,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import java.util.List;
 import java.util.UUID;
@@ -64,7 +64,7 @@ public class DefendantLegalAidStatusUpdatedProcessorTest {
 
     @Test
     public void testDefendantLegalAidStatusUpdate() {
-        final JsonObject eventPayload = Json.createObjectBuilder()
+        final JsonObject eventPayload = JsonObjects.createObjectBuilder()
                 .add(DEFENDANT_ID, defendantId)
                 .add(CASE_ID, caseId)
                 .add(LEGAL_AID_STATUS, "Granted")
@@ -95,9 +95,9 @@ public class DefendantLegalAidStatusUpdatedProcessorTest {
         final UUID defendantId = randomUUID();
         final UUID hearingId = randomUUID();
 
-        final JsonObject eventPayload = Json.createObjectBuilder()
+        final JsonObject eventPayload = JsonObjects.createObjectBuilder()
                 .add(DEFENDANT_ID, defendantId.toString())
-                .add("hearingIds", Json.createArrayBuilder().add(hearingId.toString()).build())
+                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()).build())
                 .add(LEGAL_AID_STATUS, "Granted")
                 .build();
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.defendant-legalaid-status-updated"),

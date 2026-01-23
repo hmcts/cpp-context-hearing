@@ -12,8 +12,8 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -161,7 +161,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.apache.commons.lang3.SerializationException;
@@ -4184,7 +4184,7 @@ public class HearingAggregateTest {
                 .withHearing(hearing)
                 .build());
         hearingAggregate.apply(new HearingAmended(hearing.getId(), userId, SHARED_AMEND_LOCKED_ADMIN_ERROR));
-        hearingAggregate.apply(new DraftResultSavedV2(hearing.getId(), hearingDay, Json.createObjectBuilder().build(), userId, 3));
+        hearingAggregate.apply(new DraftResultSavedV2(hearing.getId(), hearingDay, JsonObjects.createObjectBuilder().build(), userId, 3));
         hearingAggregate.apply(new ResultAmendmentsValidated(hearing.getId(), userId, ZonedDateTime.now()));
 
         assertThat(hearingAggregate.getHearingDaySharedOffencesMap().get(hearingDay).size(), is(2));

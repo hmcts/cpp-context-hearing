@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
@@ -29,7 +29,7 @@ public class ApplicationCourtListRestrictionMapper {
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     private JsonObject jsonFromString(String jsonObjectStr) {
-        try (JsonReader jsonReader = Json.createReader(new StringReader(jsonObjectStr))) {
+        try (JsonReader jsonReader = JsonObjects.createReader(new StringReader(jsonObjectStr))) {
             return jsonReader.readObject();
         }
     }

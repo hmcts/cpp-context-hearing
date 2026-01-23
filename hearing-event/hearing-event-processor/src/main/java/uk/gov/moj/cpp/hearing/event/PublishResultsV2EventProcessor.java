@@ -58,7 +58,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
@@ -152,7 +152,7 @@ public class PublishResultsV2EventProcessor {
 
     public void updateTheDefendantsCase(final JsonEnvelope event, final UUID hearingId, final UUID caseId, final UUID defendantId, final List<UUID> offenceIds, final Map<UUID, OffenceResult> offenceResultMap) {
 
-        final JsonObject payload = Json.createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("caseId", caseId.toString())
                 .add("defendantId", defendantId.toString())
@@ -166,15 +166,15 @@ public class PublishResultsV2EventProcessor {
     }
 
     private JsonArrayBuilder convertToJsonArray(final List<UUID> offenceIds) {
-        final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
         offenceIds.stream().map(UUID::toString).forEach(arrayBuilder::add);
         return arrayBuilder;
     }
 
     private JsonArrayBuilder convertOffenceResultMapToJsonArray(final Map<UUID, OffenceResult> offenceResultMap) {
-        final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
         offenceResultMap.entrySet().stream().forEach(offenceResult -> {
-            final JsonObject offenceResultObject = Json.createObjectBuilder()
+            final JsonObject offenceResultObject = JsonObjects.createObjectBuilder()
                     .add("offenceId", offenceResult.getKey().toString())
                     .add("offenceResult", offenceResult.getValue().name())
                     .build();
