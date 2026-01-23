@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.event;
 
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
@@ -11,7 +11,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +41,7 @@ public class CaseApplicationEjectedEventProcessorTest {
     public void processCaseApplicationEjected() {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.events.case-or-application-ejected"),
-                Json.createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingIds", createArrayBuilder().add(randomUUID().toString()))
                         .build());
 

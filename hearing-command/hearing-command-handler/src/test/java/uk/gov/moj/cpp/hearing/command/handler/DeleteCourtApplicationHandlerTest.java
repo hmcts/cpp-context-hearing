@@ -21,7 +21,7 @@ import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationHearingDeleted;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,7 @@ public class DeleteCourtApplicationHandlerTest {
         when(eventSource.getStreamById(any())).thenReturn(eventStream);
         when(aggregateService.get(eventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
         when(hearingAggregate.deleteCourtApplicationHearing(hearingId)).thenReturn(mock(Stream.class));
-        final JsonObject payload = Json.createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .build();
         final JsonEnvelope commandEnvelope = createEnvelope("hearing.command.delete-court-application-hearing", payload);

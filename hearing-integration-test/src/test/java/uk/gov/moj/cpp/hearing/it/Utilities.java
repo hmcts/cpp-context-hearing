@@ -25,7 +25,7 @@ import java.util.UUID;
 
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -160,7 +160,7 @@ public class Utilities {
                     }
 
                     jsonObjectMutable.remove("_metadata");
-                    JsonObject jsonObject = Json.createReader(new StringReader(jsonObjectMutable.toString())).readObject();
+                    JsonObject jsonObject = JsonObjects.createReader(new StringReader(jsonObjectMutable.toString())).readObject();
                     beanValue = MapJsonObjectToTypeMatcher.convert(PublicHearingDraftResultSaved.class, jsonObject);
                     return beanMatcher.matches(beanValue);
                 }

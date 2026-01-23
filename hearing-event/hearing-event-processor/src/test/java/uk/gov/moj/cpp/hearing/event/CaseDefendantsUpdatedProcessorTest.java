@@ -19,7 +19,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import java.util.Arrays;
 import java.util.List;
@@ -68,8 +68,8 @@ public class CaseDefendantsUpdatedProcessorTest {
                         .withProceedingsConcluded(true).build()))
                 .build();
 
-        final JsonObject eventPayload = Json.createObjectBuilder()
-                .add("hearingIds", Json.createArrayBuilder().add(hearingId.toString()).build())
+        final JsonObject eventPayload = JsonObjects.createObjectBuilder()
+                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()).build())
                 .add("prosecutionCase",objectToJsonObjectConverter.convert(prosecutionCase))
                 .build();
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.case-defendants-updated"),
@@ -103,8 +103,8 @@ public class CaseDefendantsUpdatedProcessorTest {
                         .build())
                 .build();
 
-        final JsonObject eventPayload = Json.createObjectBuilder()
-                .add("hearingIds", Json.createArrayBuilder().add(hearingId.toString()).build())
+        final JsonObject eventPayload = JsonObjects.createObjectBuilder()
+                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()).build())
                 .add("courtApplication",objectToJsonObjectConverter.convert(courtApplication))
                 .build();
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.application-defendants-updated"),

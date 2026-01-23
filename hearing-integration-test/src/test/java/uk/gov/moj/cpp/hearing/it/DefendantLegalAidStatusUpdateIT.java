@@ -19,7 +19,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Disabled;
@@ -42,7 +42,7 @@ public class DefendantLegalAidStatusUpdateIT extends AbstractIT {
         final UUID defendantId = hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId();
         final UUID caseId = hearingOne.getHearing().getProsecutionCases().get(0).getId();
 
-        final JsonObject commandPayload = Json.createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                 .add("defendantId", defendantId.toString())
                 .add("legalAidStatus", "Granted")
                 .add("caseId", caseId.toString())

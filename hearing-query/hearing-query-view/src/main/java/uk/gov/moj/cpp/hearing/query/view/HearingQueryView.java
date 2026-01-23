@@ -5,7 +5,7 @@ import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -357,7 +357,7 @@ public class HearingQueryView {
 
     public JsonEnvelope getOutstandingFinesQueryFromDefendantId(final JsonEnvelope envelope) {
         final Optional<UUID> defendantId = getUUID(envelope.payloadAsJsonObject(), FIELD_DEFENDANT_ID);
-        final JsonEnvelope jsonEnvelopeWithoutPayload = envelopeFrom(envelope.metadata(), Json.createObjectBuilder().build());
+        final JsonEnvelope jsonEnvelopeWithoutPayload = envelopeFrom(envelope.metadata(), JsonObjects.createObjectBuilder().build());
         if (defendantId.isPresent()) {
             try {
                 final DefendantSearch defendantSearch = defendantRepository.getDefendantDetailsForSearching(defendantId.get());
@@ -413,7 +413,7 @@ public class HearingQueryView {
 
         } catch (final NoResultException nre) {
             LOGGER.error("### No defendant found with {}. Exception: {}", envelope.toObfuscatedDebugString(), nre);
-            return envelopeFrom(envelope.metadata(), Json.createObjectBuilder().build());
+            return envelopeFrom(envelope.metadata(), JsonObjects.createObjectBuilder().build());
         }
     }
 
@@ -423,7 +423,7 @@ public class HearingQueryView {
         final Optional<uk.gov.justice.core.courts.Hearing> hearingEntity = hearingService.getHearingDomainById(hearingId);
 
         if (!hearingEntity.isPresent()) {
-            return envelopeFrom(envelope.metadata(), Json.createObjectBuilder().build());
+            return envelopeFrom(envelope.metadata(), JsonObjects.createObjectBuilder().build());
         }
 
         final uk.gov.justice.core.courts.Hearing hearing = hearingEntity.get();
@@ -461,7 +461,7 @@ public class HearingQueryView {
             return envelopeFrom(envelope.metadata(), ctlExpiryDate);
 
         } else {
-            return envelopeFrom(envelope.metadata(), Json.createObjectBuilder().build());
+            return envelopeFrom(envelope.metadata(), JsonObjects.createObjectBuilder().build());
         }
 
     }

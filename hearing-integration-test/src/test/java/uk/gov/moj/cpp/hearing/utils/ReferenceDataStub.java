@@ -10,9 +10,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static java.lang.String.format;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-import static javax.json.Json.createReader;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.http.HttpStatus.SC_OK;
 import static uk.gov.moj.cpp.hearing.it.Utilities.JsonUtil.toJsonString;
@@ -43,7 +43,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -917,10 +917,10 @@ public class ReferenceDataStub {
         builder.add("courtNameWelsh", "courtNameWelsh");
         builder.add("id", randomUUID().toString());
 
-        final JsonArrayBuilder youthCourtsBuilder = Json.createArrayBuilder();
+        final JsonArrayBuilder youthCourtsBuilder = JsonObjects.createArrayBuilder();
         youthCourtsBuilder.add(builder.build());
         final JsonObject payload =
-                Json.createObjectBuilder().add("youthCourts", youthCourtsBuilder.build()).build();
+                JsonObjects.createObjectBuilder().add("youthCourts", youthCourtsBuilder.build()).build();
         stub(payload, REFERENCE_DATA_YOUTH_COURT_QUERY_URL, REFERENCE_DATA_QUERY_YOUTH_COURT_MEDIA_TYPE, "magsUUID", magsUUID.toString());
     }
 

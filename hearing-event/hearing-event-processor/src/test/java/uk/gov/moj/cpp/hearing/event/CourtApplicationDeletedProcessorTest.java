@@ -11,7 +11,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
@@ -37,7 +37,7 @@ public class CourtApplicationDeletedProcessorTest {
 
     @Test
     public void shouldHandleCourtApplicationDeletedPublicEvent(){
-        final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+        final JsonObjectBuilder objectBuilder = JsonObjects.createObjectBuilder();
         final String hearingId = randomUUID().toString();
         final String applicationId = randomUUID().toString();
         objectBuilder

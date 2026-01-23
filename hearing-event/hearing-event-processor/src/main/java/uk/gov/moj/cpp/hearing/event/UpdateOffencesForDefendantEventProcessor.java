@@ -8,7 +8,7 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 import static uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstOffenceCommand.registerHearingAgainstOffenceDefendantCommand;
 
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -65,7 +65,7 @@ public class UpdateOffencesForDefendantEventProcessor {
 
         final JsonObject payload = event.payloadAsJsonObject();
         payload.getJsonArray("offences").stream().map(o -> (JsonObject)o).forEach(offence -> {
-            sender.send(enveloper.withMetadataFrom(event, "hearing.command.register-hearing-against-offence-v2").apply(Json.createObjectBuilder()
+            sender.send(enveloper.withMetadataFrom(event, "hearing.command.register-hearing-against-offence-v2").apply(JsonObjects.createObjectBuilder()
                     .add("offenceId",offence.getString("id") ).add("hearingIds", payload.getJsonArray("hearingIds")).build()));
         });
 
@@ -136,7 +136,7 @@ public class UpdateOffencesForDefendantEventProcessor {
         }
 
         if( jsonEnvelope.payloadAsJsonObject().containsKey(DEFENDANT_IDS) && !jsonEnvelope.payloadAsJsonObject().getJsonArray(DEFENDANT_IDS).isEmpty() ) {
-            final JsonObject cmdPayload = Json.createObjectBuilder()
+            final JsonObject cmdPayload = JsonObjects.createObjectBuilder()
                     .add(HEARING_ID, jsonEnvelope.payloadAsJsonObject().get(HEARING_ID))
                     .add(DEFENDANT_IDS, jsonEnvelope.payloadAsJsonObject().get(DEFENDANT_IDS))
                     .build();
@@ -144,7 +144,7 @@ public class UpdateOffencesForDefendantEventProcessor {
         }
 
         if("Hearing".equals(jsonEnvelope.payloadAsJsonObject().getString("sourceContext", "Hearing"))) {
-            final JsonObject payload = Json.createObjectBuilder()
+            final JsonObject payload = JsonObjects.createObjectBuilder()
                     .add(HEARING_ID, jsonEnvelope.payloadAsJsonObject().get(HEARING_ID))
                     .add("offenceIds", jsonEnvelope.payloadAsJsonObject().get("offenceIds"))
                     .build();

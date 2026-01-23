@@ -19,7 +19,7 @@ import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFact
 import uk.gov.moj.cpp.hearing.event.CommandEventTestBase;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -67,7 +67,7 @@ public class RelistReferenceDataServiceTest {
 
     @Test
     public void shouldReturnEmptyResultDefinition() {
-        final JsonObject jsonObjectPayload = Json.createObjectBuilder().add("resultDefinitions", Json.createArrayBuilder().add(Json.createObjectBuilder().build())).build();
+        final JsonObject jsonObjectPayload = JsonObjects.createObjectBuilder().add("resultDefinitions", JsonObjects.createArrayBuilder().add(JsonObjects.createObjectBuilder().build())).build();
         final Metadata metadata = CommandEventTestBase.metadataFor(RESULT_QUERY, randomUUID().toString());
         final Envelope envelope = Envelope.envelopeFrom(metadata, jsonObjectPayload);
 

@@ -70,7 +70,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -944,7 +944,7 @@ public class InitiateHearingEventListenerTest {
     public void shouldPassSchemaValidationForValidPayloadOfConvictionDateAdded() {
         //given
         JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
-                Json.createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("caseId", "30dd24a6-e383-48f6-afa0-e4b174ecb89c")
                         .add("hearingId", "c76ead4b-5ac8-48e0-b744-f4ade56c8198")
                         .add("offenceId", "0683dfed-f9a4-4661-aaa9-d43fda9ef93d")
@@ -960,7 +960,7 @@ public class InitiateHearingEventListenerTest {
     public void shouldPassSchemaValidationForValidPayloadOfConvictionDateRemoved() {
         //given
         JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
-                Json.createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("caseId", "30dd24a6-e383-48f6-afa0-e4b174ecb89c")
                         .add("hearingId", "c76ead4b-5ac8-48e0-b744-f4ade56c8198")
                         .add("offenceId", "0683dfed-f9a4-4661-aaa9-d43fda9ef93d")
@@ -1147,7 +1147,7 @@ public class InitiateHearingEventListenerTest {
         } catch (final JsonProcessingException jpe) {
             throw new RuntimeException("failed ot serialise " + document, jpe);
         }
-        final JsonObject jsonObject = Json.createReader(new StringReader(strJsonDocument)).readObject();
+        final JsonObject jsonObject = JsonObjects.createReader(new StringReader(strJsonDocument)).readObject();
 
         return envelopeFrom((Metadata) null, jsonObject);
     }

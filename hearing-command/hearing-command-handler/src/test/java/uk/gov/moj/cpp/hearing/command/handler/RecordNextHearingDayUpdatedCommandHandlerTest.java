@@ -32,7 +32,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.hamcrest.Matchers;
@@ -76,7 +76,7 @@ public class RecordNextHearingDayUpdatedCommandHandlerTest {
         final UUID seedingHearingId = randomUUID();
         final ZonedDateTime earliestNextHearingDate = ZonedDateTime.of(2022, 01, 01, 0, 0, 0, 0, ZoneId.of("UTC"));
 
-        final JsonObject payload = Json.createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("seedingHearingId", seedingHearingId.toString())
                 .add("hearingStartDate", "2021-06-20T00:00:00.000Z")

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
@@ -76,7 +76,7 @@ public class JudgeNameMapperTest {
     }
 
     private JsonObject createJudiciaryWithRequestedName() {
-        final JsonObjectBuilder judiciaryBuilder = Json.createObjectBuilder();
+        final JsonObjectBuilder judiciaryBuilder = JsonObjects.createObjectBuilder();
         judiciaryBuilder.add(REQUESTED_NAME, REQUESTED_NAME);
         judiciaryBuilder.add(SURNAME, SURNAME);
         judiciaryBuilder.add(FORENAMES, FORENAMES);
@@ -87,7 +87,7 @@ public class JudgeNameMapperTest {
     }
 
     private JsonObject createJudiciaryWithoutRequestedName() {
-        final JsonObjectBuilder judiciaryBuilder = Json.createObjectBuilder();
+        final JsonObjectBuilder judiciaryBuilder = JsonObjects.createObjectBuilder();
         judiciaryBuilder.add(SURNAME, SURNAME);
         judiciaryBuilder.add(FORENAMES, FORENAMES);
         judiciaryBuilder.add(TITLE_SUFFIX, TITLE_SUFFIX);

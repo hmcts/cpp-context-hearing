@@ -42,7 +42,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -99,8 +99,8 @@ public class AddDefendantCommandHandlerTest {
         when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
         when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
 
-        JsonObject payload = Json.createObjectBuilder()
-                .add("defendants", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
+        JsonObject payload = JsonObjects.createObjectBuilder()
+                .add("defendants", JsonObjects.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
                 .build();
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-defendant"), payload);
 
@@ -130,8 +130,8 @@ public class AddDefendantCommandHandlerTest {
         when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
         when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
 
-        JsonObject payload = Json.createObjectBuilder()
-                .add("defendants", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
+        JsonObject payload = JsonObjects.createObjectBuilder()
+                .add("defendants", JsonObjects.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
                 .build();
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-defendant"), payload);
         when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
@@ -167,8 +167,8 @@ public class AddDefendantCommandHandlerTest {
         when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
         when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
 
-        JsonObject payload = Json.createObjectBuilder()
-                .add("defendants", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
+        JsonObject payload = JsonObjects.createObjectBuilder()
+                .add("defendants", JsonObjects.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
                 .build();
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-defendant"), payload);
         when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
@@ -204,8 +204,8 @@ public class AddDefendantCommandHandlerTest {
         when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
         when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
 
-        JsonObject payload = Json.createObjectBuilder()
-                .add("defendants", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
+        JsonObject payload = JsonObjects.createObjectBuilder()
+                .add("defendants", JsonObjects.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
                 .build();
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-defendant"), payload);
         when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
@@ -248,8 +248,8 @@ public class AddDefendantCommandHandlerTest {
         when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
         when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
 
-        JsonObject payload = Json.createObjectBuilder()
-                .add("defendants", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
+        JsonObject payload = JsonObjects.createObjectBuilder()
+                .add("defendants", JsonObjects.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
                 .build();
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-defendant"), payload);
         when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
@@ -284,9 +284,9 @@ public class AddDefendantCommandHandlerTest {
         when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
         when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
 
-        JsonObject payload = Json.createObjectBuilder()
-                .add("defendants", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
-                .add("listHearingRequests", Json.createArrayBuilder().build())
+        JsonObject payload = JsonObjects.createObjectBuilder()
+                .add("defendants", JsonObjects.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
+                .add("listHearingRequests", JsonObjects.createArrayBuilder().build())
                 .build();
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-defendant"), payload);
         when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
@@ -328,9 +328,9 @@ public class AddDefendantCommandHandlerTest {
                 .build();
 
 
-        JsonObject payload = Json.createObjectBuilder()
-                .add("defendants", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
-                .add("listHearingRequests", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(listHearingRequest)).build())
+        JsonObject payload = JsonObjects.createObjectBuilder()
+                .add("defendants", JsonObjects.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
+                .add("listHearingRequests", JsonObjects.createArrayBuilder().add(objectToJsonObjectConverter.convert(listHearingRequest)).build())
                 .build();
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-defendant"), payload);
         when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
@@ -374,9 +374,9 @@ public class AddDefendantCommandHandlerTest {
                 .build();
 
 
-        JsonObject payload = Json.createObjectBuilder()
-                .add("defendants", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
-                .add("listHearingRequests", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(listHearingRequest)).build())
+        JsonObject payload = JsonObjects.createObjectBuilder()
+                .add("defendants", JsonObjects.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
+                .add("listHearingRequests", JsonObjects.createArrayBuilder().add(objectToJsonObjectConverter.convert(listHearingRequest)).build())
                 .build();
 
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-defendant"), payload);

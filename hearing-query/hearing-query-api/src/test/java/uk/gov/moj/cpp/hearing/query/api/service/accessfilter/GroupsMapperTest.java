@@ -12,7 +12,7 @@ import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.Group;
 import java.util.List;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 
@@ -45,21 +45,21 @@ public class GroupsMapperTest {
         final Metadata metadata = metadataBuilder().withName("usersgroups.get-logged-in-user-permissions")
                 .withId(randomUUID()).withUserId(userId).build();
 
-        final JsonObjectBuilder group1Json = Json.createObjectBuilder();
+        final JsonObjectBuilder group1Json = JsonObjects.createObjectBuilder();
         group1Json.add(GROUP_ID, GROUP_ID1.toString());
         group1Json.add(GROUP_NAME, GROUP_NAME1);
         group1Json.add(PROSECUTING_AUTHORITY, PROSECURITY_AUTH1);
 
-        final JsonObjectBuilder group2Json = Json.createObjectBuilder();
+        final JsonObjectBuilder group2Json = JsonObjects.createObjectBuilder();
         group2Json.add(GROUP_ID, GROUP_ID2.toString());
         group2Json.add(GROUP_NAME, GROUP_NAME2);
         group2Json.add(PROSECUTING_AUTHORITY, PROSECURITY_AUTH2);
 
-        final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
         arrayBuilder.add(group1Json);
         arrayBuilder.add(group2Json);
 
-        final JsonObjectBuilder permissions = Json.createObjectBuilder();
+        final JsonObjectBuilder permissions = JsonObjects.createObjectBuilder();
         permissions.add(GROUPS, arrayBuilder.build());
 
         final Envelope envelope = Envelope.envelopeFrom(metadata, permissions.build());
@@ -73,7 +73,7 @@ public class GroupsMapperTest {
         final Metadata metadata = metadataBuilder().withName("usersgroups.get-logged-in-user-permissions")
                 .withId(randomUUID()).withUserId(userId).build();
 
-        final Envelope envelope = Envelope.envelopeFrom(metadata, Json.createObjectBuilder().build());
+        final Envelope envelope = Envelope.envelopeFrom(metadata, JsonObjects.createObjectBuilder().build());
         final List<Group> groups = groupsMapper.mapGroups(envelope);
         assertThat(groups.size(), is(0));
     }

@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +78,7 @@ public class ApplicationTimelineIT extends AbstractIT {
         stubApplicationsByParentId(applicationId);
         sendMessage(getPublicTopicInstance().createProducer(),
                 "public.progression.events.court-application-deleted",
-                Json.createObjectBuilder().add("hearingId",hearingOne.getId().toString()).add("applicationId",applicationId.toString() ).build(),
+                JsonObjects.createObjectBuilder().add("hearingId",hearingOne.getId().toString()).add("applicationId",applicationId.toString() ).build(),
                 metadataOf(randomUUID(),"public.progression.events.court-application-deleted")
                         .withUserId(randomUUID().toString())
                         .build()

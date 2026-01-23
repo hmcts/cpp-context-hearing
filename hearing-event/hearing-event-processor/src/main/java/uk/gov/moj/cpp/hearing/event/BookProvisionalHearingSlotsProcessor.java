@@ -14,15 +14,15 @@ import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingServiceResponse;
 import uk.gov.moj.cpp.hearing.event.service.ProvisionalBookingService;
 
 import javax.inject.Inject;
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 @ServiceComponent(EVENT_PROCESSOR)
@@ -73,11 +73,11 @@ public class BookProvisionalHearingSlotsProcessor {
 
         //raise public event for UI
         if (!provisionalBookingServiceResponse.hasError()) {
-            sender.send(Enveloper.envelop(Json.createObjectBuilder().add("bookingId", provisionalBookingServiceResponse.getBookingId()).build())
+            sender.send(Enveloper.envelop(JsonObjects.createObjectBuilder().add("bookingId", provisionalBookingServiceResponse.getBookingId()).build())
                     .withName("public.hearing.hearing-slots-provisionally-booked")
                     .withMetadataFrom(event));
         } else {
-            sender.send(Enveloper.envelop(Json.createObjectBuilder().add("error", provisionalBookingServiceResponse.getErrorMessage()).build())
+            sender.send(Enveloper.envelop(JsonObjects.createObjectBuilder().add("error", provisionalBookingServiceResponse.getErrorMessage()).build())
                     .withName("public.hearing.hearing-slots-provisionally-booked")
                     .withMetadataFrom(event));
         }

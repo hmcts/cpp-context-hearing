@@ -18,7 +18,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -66,9 +66,9 @@ public class CourtApplicationEjectedEventListenerTest {
     }
 
     private JsonEnvelope getCourtApplicationEjectedEventEnvelope(final UUID hearingId) {
-        JsonObject payload = Json.createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("applicationId", randomUUID().toString())
-                .add("hearingIds", Json.createArrayBuilder().add(hearingId.toString()))
+                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()))
                 .build();
         final Metadata metadata = metadataOf(randomUUID(), "event-name").build();
 

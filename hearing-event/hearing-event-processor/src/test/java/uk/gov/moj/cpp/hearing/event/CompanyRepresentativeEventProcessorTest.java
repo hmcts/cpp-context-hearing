@@ -28,7 +28,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 
 @ExtendWith(MockitoExtension.class)
 public class CompanyRepresentativeEventProcessorTest {
@@ -55,7 +55,7 @@ public class CompanyRepresentativeEventProcessorTest {
     public void processPublicHearingCompanyRepresentativeChangeIgnored() {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.company-representative-change-ignored"),
-                Json.createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("reason", "company representative already added")
                         .build());
 

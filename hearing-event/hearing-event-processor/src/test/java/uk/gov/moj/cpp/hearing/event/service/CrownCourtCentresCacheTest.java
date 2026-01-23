@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ public class CrownCourtCentresCacheTest {
         final List<UUID> expectedCourtCentreIds = Arrays.asList(courtCentreId);
          Set<UUID> resultCourCentreIds = new HashSet<>();
          resultCourCentreIds.add(courtCentreId);
-        final JsonObject courCentre = Json.createObjectBuilder().add("id",expectedCourtCentreIds.get(0).toString()).build();
+        final JsonObject courCentre = JsonObjects.createObjectBuilder().add("id",expectedCourtCentreIds.get(0).toString()).build();
         when( referenceDataLoader.getAllCrownCourtCentres()).thenReturn(Collections.singletonList(courCentre));
         target.init();
         Set<UUID> result = target.getAllCrownCourtCentres();

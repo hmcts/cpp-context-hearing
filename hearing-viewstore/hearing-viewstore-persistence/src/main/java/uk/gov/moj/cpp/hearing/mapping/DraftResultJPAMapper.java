@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
@@ -40,7 +40,7 @@ public class DraftResultJPAMapper {
 
     private JsonObject jsonFromString(String jsonObjectStr) {
         JsonObject object;
-        try (JsonReader jsonReader = Json.createReader(new StringReader(jsonObjectStr))) {
+        try (JsonReader jsonReader = JsonObjects.createReader(new StringReader(jsonObjectStr))) {
             object = jsonReader.readObject();
         }
 

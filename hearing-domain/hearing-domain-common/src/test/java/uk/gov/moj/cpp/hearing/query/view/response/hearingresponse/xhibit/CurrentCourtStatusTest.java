@@ -8,7 +8,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
 import java.io.StringReader;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +20,7 @@ public class CurrentCourtStatusTest {
 
     @Test
     public void testConversion() {
-        final CurrentCourtStatus currentCourtStatus = jsonObjectToObjectConverter.convert(Json.createReader(new StringReader(TEST_JSON)).readObject(), CurrentCourtStatus.class);
+        final CurrentCourtStatus currentCourtStatus = jsonObjectToObjectConverter.convert(JsonObjects.createReader(new StringReader(TEST_JSON)).readObject(), CurrentCourtStatus.class);
         assertNotNull(currentCourtStatus);
     }
 
