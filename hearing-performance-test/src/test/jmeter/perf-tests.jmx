@@ -1,0 +1,2384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan" enabled="true">
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="numberOfThreads" elementType="Argument">
+            <stringProp name="Argument.name">numberOfThreads</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.numberOfThreads, 1)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="loopCount" elementType="Argument">
+            <stringProp name="Argument.name">loopCount</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.loopCount, 1)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="rampUpPeriod" elementType="Argument">
+            <stringProp name="Argument.name">rampUpPeriod</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.rampUpPeriod, 1)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="protocol" elementType="Argument">
+            <stringProp name="Argument.name">protocol</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.protocol, http)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="hostName" elementType="Argument">
+            <stringProp name="Argument.name">hostName</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.hostName, localhost)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="port" elementType="Argument">
+            <stringProp name="Argument.name">port</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.port, 8080)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="userId" elementType="Argument">
+            <stringProp name="Argument.name">userId</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.userId, 7a04cabb-102a-4737-9ae1-a703dcf62cff)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="dbHost" elementType="Argument">
+            <stringProp name="Argument.name">dbHost</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.dbHost, localhost)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="dbPort" elementType="Argument">
+            <stringProp name="Argument.name">dbPort</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.dbPort, 5432)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="dbUserName" elementType="Argument">
+            <stringProp name="Argument.name">dbUserName</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.dbUserName, postgres)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="dbPassword" elementType="Argument">
+            <stringProp name="Argument.name">dbPassword</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.dbPassword, postgres)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="metricsIntervalInMs" elementType="Argument">
+            <stringProp name="Argument.name">metricsIntervalInMs</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.metricsIntervalInMs, 10000)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="resultDir" elementType="Argument">
+            <stringProp name="Argument.name">resultDir</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.resultDir)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="pollerTimeout" elementType="Argument">
+            <stringProp name="Argument.name">pollerTimeout</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.pollerTimeout, 10000)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="pollInterval" elementType="Argument">
+            <stringProp name="Argument.name">pollInterval</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.usersgroups.pollInterval, 100)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="ViewStoreJDBCConfig">
+        <boolProp name="autocommit">true</boolProp>
+        <stringProp name="checkQuery"></stringProp>
+        <stringProp name="connectionAge">5000</stringProp>
+        <stringProp name="connectionProperties"></stringProp>
+        <stringProp name="dataSource">hearingviewstore</stringProp>
+        <stringProp name="dbUrl">jdbc:postgresql://${dbHost}:${dbPort}/usersgroupsviewstore</stringProp>
+        <stringProp name="driver">org.postgresql.Driver</stringProp>
+        <stringProp name="initQuery"></stringProp>
+        <boolProp name="keepAlive">true</boolProp>
+        <stringProp name="password">${dbPassword}</stringProp>
+        <stringProp name="poolMax">0</stringProp>
+        <boolProp name="preinit">false</boolProp>
+        <stringProp name="timeout">10000</stringProp>
+        <stringProp name="transactionIsolation">DEFAULT</stringProp>
+        <stringProp name="trimInterval">60000</stringProp>
+        <stringProp name="username">${dbUserName}</stringProp>
+      </JDBCDataSource>
+      <hashTree/>
+      <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="EventStoreJDBCConfig">
+        <boolProp name="autocommit">true</boolProp>
+        <stringProp name="checkQuery"></stringProp>
+        <stringProp name="connectionAge">5000</stringProp>
+        <stringProp name="connectionProperties"></stringProp>
+        <stringProp name="dataSource">hearingseventstore</stringProp>
+        <stringProp name="dbUrl">jdbc:postgresql://${dbHost}:${dbPort}/usersgroupseventstore</stringProp>
+        <stringProp name="driver">org.postgresql.Driver</stringProp>
+        <stringProp name="initQuery"></stringProp>
+        <boolProp name="keepAlive">true</boolProp>
+        <stringProp name="password">${dbPassword}</stringProp>
+        <stringProp name="poolMax">0</stringProp>
+        <boolProp name="preinit">false</boolProp>
+        <stringProp name="timeout">10000</stringProp>
+        <stringProp name="transactionIsolation">DEFAULT</stringProp>
+        <stringProp name="trimInterval">60000</stringProp>
+        <stringProp name="username">${dbUserName}</stringProp>
+      </JDBCDataSource>
+      <hashTree/>
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </SetupThreadGroup>
+      <hashTree>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Initializer" enabled="false">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script"></stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <TestAction guiclass="TestActionGui" testclass="TestAction" testname="Flow Control Action" enabled="true">
+          <intProp name="ActionProcessor.action">1</intProp>
+          <intProp name="ActionProcessor.target">0</intProp>
+          <stringProp name="ActionProcessor.duration">0</stringProp>
+        </TestAction>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Initializer" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import org.apache.jmeter.services.FileServer;
+import org.apache.jmeter.util.JMeterUtils;
+
+def baseDir = FileServer.getFileServer().getBaseDir();
+def projectRoot = new File(baseDir).getParentFile();
+def dataDir = new File(projectRoot, &quot;data&quot;)
+
+// Save as variable
+JMeterUtils.setProperty(&quot;DATA_DIR&quot;, dataDir.getAbsolutePath())
+
+log.info(&quot;DATA_DIR -&gt; &quot; + dataDir.getAbsolutePath())
+log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;))
+
+
+</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Create and Retrieve Roles" enabled="false">
+        <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">startnextloop</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">${loopCount}</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+          <collectionProp name="Arguments.arguments">
+            <elementProp name="roleCount" elementType="Argument">
+              <stringProp name="Argument.name">roleCount</stringProp>
+              <stringProp name="Argument.value">1</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+          </collectionProp>
+        </Arguments>
+        <hashTree/>
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+          <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </ConfigTestElement>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add Organisation" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/usersgroups-service/command/api/rest/usersgroups/organisation</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.usersgroups.create-organisation-with-details+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="AddOrganisationPreProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;create-organisation-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+vars.put(&quot;organisationId&quot;, UUID.randomUUID().toString())
+log.info(&quot;organisationId-&gt; &quot; + vars.get(&quot;organisationId&quot;))
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Poll Organisation" enabled="true"/>
+        <hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Init poller" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">vars.put(&quot;pollStartTime&quot;, System.currentTimeMillis() as String)
+vars.put(&quot;loopStop&quot;, &quot;false&quot;)
+log.info(&quot;Group Poller - Poll start time: &quot; + vars.get(&quot;pollStartTime&quot;))</stringProp>
+          </JSR223Sampler>
+          <hashTree>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">prev.setIgnore();</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+          </hashTree>
+          <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="While Controller" enabled="true">
+            <stringProp name="WhileController.condition">${__jexl3(vars.get(&quot;loopStop&quot;) != &quot;true&quot;)}
+</stringProp>
+          </WhileController>
+          <hashTree>
+            <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Wait for Poll Interval" enabled="true">
+              <stringProp name="ConstantTimer.delay">${pollInterval}</stringProp>
+            </ConstantTimer>
+            <hashTree/>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get OrganisationId" enabled="true">
+              <stringProp name="dataSource">usergroupsviewstore</stringProp>
+              <stringProp name="query">select id from cpp_organisation where id = &apos;${organisationId}&apos;;</stringProp>
+              <stringProp name="queryArguments"></stringProp>
+              <stringProp name="queryArgumentsTypes"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="queryType">Select Statement</stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultVariable">organisationIdResultSet</stringProp>
+              <stringProp name="variableNames"></stringProp>
+            </JDBCSampler>
+            <hashTree/>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assertion - Check if poller has a result or timed out" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">def start = vars.get(&quot;pollStartTime&quot;) as long
+def timeout = vars.get(&quot;pollerTimeout&quot;) as long
+def now = System.currentTimeMillis()
+prev.setIgnore();
+if (now - start &gt; timeout) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.warn(&quot;Polling timeout exceeded, stopping loop&quot;)
+    prev.setSuccessful(false);
+    AssertionResult.setFailureMessage(&quot;Polling timeout exceeded, stopping loop&quot;);
+    AssertionResult.setFailure(true);
+} else if (vars.getObject(&apos;organisationIdResultSet&apos;) != null &amp;&amp; vars.getObject(&apos;organisationIdResultSet&apos;).size() &gt; 0) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.info(&quot;Organisation found: &quot; + vars.getObject(&apos;organisationIdResultSet&apos;))
+}</stringProp>
+            </JSR223Assertion>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <stringProp name="LoopController.loops">${roleCount}</stringProp>
+        </LoopController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Group Request" enabled="true">
+            <intProp name="HTTPSampler.concurrentPool">6</intProp>
+            <stringProp name="HTTPSampler.path">/usersgroups-command-api/command/api/rest/usersgroups/groups/</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">CJSCPPUID</stringProp>
+                  <stringProp name="Header.value">${userId}</stringProp>
+                </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/vnd.usersgroups.command.create-group+json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CreateGroupPreProcessor" enabled="true">
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;create-group-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+vars.put(&quot;groupName&quot;, org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric(50))
+log.info(&quot;groupName -&gt; &quot; + vars.get(&quot;groupName&quot;))
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+              <stringProp name="scriptLanguage">groovy</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+          </hashTree>
+          <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Poll GroupId" enabled="true"/>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Init poller" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">vars.put(&quot;pollStartTime&quot;, System.currentTimeMillis() as String)
+vars.put(&quot;loopStop&quot;, &quot;false&quot;)
+log.info(&quot;Group Poller - Poll start time: &quot; + vars.get(&quot;pollStartTime&quot;))</stringProp>
+            </JSR223Sampler>
+            <hashTree>
+              <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">prev.setIgnore();</stringProp>
+              </JSR223PostProcessor>
+              <hashTree/>
+            </hashTree>
+            <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="While Controller" enabled="true">
+              <stringProp name="WhileController.condition">${__jexl3(vars.get(&quot;loopStop&quot;) != &quot;true&quot;)}
+</stringProp>
+            </WhileController>
+            <hashTree>
+              <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Wait for Poll Interval" enabled="true">
+                <stringProp name="ConstantTimer.delay">${pollInterval}</stringProp>
+              </ConstantTimer>
+              <hashTree/>
+              <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get GroupId" enabled="true">
+                <stringProp name="dataSource">usergroupsviewstore</stringProp>
+                <stringProp name="query">select id from cpp_group where group_name = &apos;${groupName}&apos;;</stringProp>
+                <stringProp name="queryArguments"></stringProp>
+                <stringProp name="queryArgumentsTypes"></stringProp>
+                <stringProp name="queryTimeout"></stringProp>
+                <stringProp name="queryType">Select Statement</stringProp>
+                <stringProp name="resultSetHandler">Store as String</stringProp>
+                <stringProp name="resultSetMaxRows"></stringProp>
+                <stringProp name="resultVariable">groupIdResultSet</stringProp>
+                <stringProp name="variableNames"></stringProp>
+              </JDBCSampler>
+              <hashTree/>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assertion - Check if poller has a result or timed out" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def start = vars.get(&quot;pollStartTime&quot;) as long
+def timeout = vars.get(&quot;pollerTimeout&quot;) as long
+def now = System.currentTimeMillis()
+prev.setIgnore();
+if (now - start &gt; timeout) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.warn(&quot;Polling timeout exceeded, stopping loop&quot;)
+    prev.setSuccessful(false);
+    AssertionResult.setFailureMessage(&quot;Polling timeout exceeded, stopping loop&quot;);
+    AssertionResult.setFailure(true);
+} else if (vars.getObject(&apos;groupIdResultSet&apos;) != null &amp;&amp; vars.getObject(&apos;groupIdResultSet&apos;).size() &gt; 0) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.info(&quot;Group found&quot;+vars.getObject(&apos;groupIdResultSet&apos;))
+}</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Role Request" enabled="true">
+            <intProp name="HTTPSampler.concurrentPool">6</intProp>
+            <stringProp name="HTTPSampler.path">/usersgroups-command-api/command/api/rest/usersgroups/roles</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">CJSCPPUID</stringProp>
+                  <stringProp name="Header.value">${userId}</stringProp>
+                </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/vnd.usersgroups.create-role-with-details+json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CreateRolePreProcessor" enabled="true">
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;create-role-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+vars.put(&quot;groupId&quot;, vars.getObject(&quot;groupIdResultSet&quot;)[0].get(&quot;id&quot;).toString())
+log.info(&quot;groupId -&gt; &quot; + vars.get(&quot;groupId&quot;))
+
+def rawJson = file.text
+
+
+vars.put(&quot;roleName&quot;, org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric(50))
+log.info(&quot;roleName -&gt; &quot; + vars.get(&quot;roleName&quot;))
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+              <stringProp name="scriptLanguage">groovy</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
+          <boolProp name="ResultCollector.error_logging">true</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">${resultDir}/errors.csv</stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Logged In User Roles And Permissions" enabled="false">
+        <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">startnextloop</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">${loopCount}</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+          <collectionProp name="Arguments.arguments">
+            <elementProp name="permissionCount" elementType="Argument">
+              <stringProp name="Argument.name">permissionCount</stringProp>
+              <stringProp name="Argument.value">5</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+          </collectionProp>
+        </Arguments>
+        <hashTree/>
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+          <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </ConfigTestElement>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add Organisation" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/usersgroups-service/command/api/rest/usersgroups/organisation</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.usersgroups.create-organisation-with-details+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="AddOrganisationPreProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;create-organisation-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+vars.put(&quot;organisationId&quot;, UUID.randomUUID().toString())
+log.info(&quot;organisationId-&gt; &quot; + vars.get(&quot;organisationId&quot;))
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Poll Organisation" enabled="true"/>
+        <hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Init poller" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">vars.put(&quot;pollStartTime&quot;, System.currentTimeMillis() as String)
+vars.put(&quot;loopStop&quot;, &quot;false&quot;)
+log.info(&quot;Group Poller - Poll start time: &quot; + vars.get(&quot;pollStartTime&quot;))</stringProp>
+          </JSR223Sampler>
+          <hashTree>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">prev.setIgnore();</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+          </hashTree>
+          <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="While Controller" enabled="true">
+            <stringProp name="WhileController.condition">${__jexl3(vars.get(&quot;loopStop&quot;) != &quot;true&quot;)}
+</stringProp>
+          </WhileController>
+          <hashTree>
+            <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Wait for Poll Interval" enabled="true">
+              <stringProp name="ConstantTimer.delay">${pollInterval}</stringProp>
+            </ConstantTimer>
+            <hashTree/>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get OrganisationId" enabled="true">
+              <stringProp name="dataSource">usergroupsviewstore</stringProp>
+              <stringProp name="query">select id from cpp_organisation where id = &apos;${organisationId}&apos;;</stringProp>
+              <stringProp name="queryArguments"></stringProp>
+              <stringProp name="queryArgumentsTypes"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="queryType">Select Statement</stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultVariable">organisationIdResultSet</stringProp>
+              <stringProp name="variableNames"></stringProp>
+            </JDBCSampler>
+            <hashTree/>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assertion - Check if poller has a result or timed out" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">def start = vars.get(&quot;pollStartTime&quot;) as long
+def timeout = vars.get(&quot;pollerTimeout&quot;) as long
+def now = System.currentTimeMillis()
+prev.setIgnore();
+if (now - start &gt; timeout) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.warn(&quot;Polling timeout exceeded, stopping loop&quot;)
+    prev.setSuccessful(false);
+    AssertionResult.setFailureMessage(&quot;Polling timeout exceeded, stopping loop&quot;);
+    AssertionResult.setFailure(true);
+} else if (vars.getObject(&apos;organisationIdResultSet&apos;) != null &amp;&amp; vars.getObject(&apos;organisationIdResultSet&apos;).size() &gt; 0) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.info(&quot;Organisation found: &quot; + vars.getObject(&apos;organisationIdResultSet&apos;))
+}</stringProp>
+            </JSR223Assertion>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add User" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/usersgroups-service/command/api/rest/usersgroups/users/${newUserId}</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.usersgroups.user-details+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="AddUserPreProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;create-user-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+vars.put(&quot;newUserId&quot;, UUID.randomUUID().toString())
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Poll User" enabled="true"/>
+        <hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Init poller" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">vars.put(&quot;pollStartTime&quot;, System.currentTimeMillis() as String)
+vars.put(&quot;loopStop&quot;, &quot;false&quot;)
+log.info(&quot;Group Poller - Poll start time: &quot; + vars.get(&quot;pollStartTime&quot;))</stringProp>
+          </JSR223Sampler>
+          <hashTree>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">prev.setIgnore();</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+          </hashTree>
+          <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="While Controller" enabled="true">
+            <stringProp name="WhileController.condition">${__jexl3(vars.get(&quot;loopStop&quot;) != &quot;true&quot;)}
+</stringProp>
+          </WhileController>
+          <hashTree>
+            <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Wait for Poll Interval" enabled="true">
+              <stringProp name="ConstantTimer.delay">${pollInterval}</stringProp>
+            </ConstantTimer>
+            <hashTree/>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get User" enabled="true">
+              <stringProp name="dataSource">usergroupsviewstore</stringProp>
+              <stringProp name="query">select id from cpp_user where id = &apos;${newUserId}&apos;;</stringProp>
+              <stringProp name="queryArguments"></stringProp>
+              <stringProp name="queryArgumentsTypes"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="queryType">Select Statement</stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultVariable">userIdResultSet</stringProp>
+              <stringProp name="variableNames"></stringProp>
+            </JDBCSampler>
+            <hashTree/>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assertion - Check if poller has a result or timed out" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">def start = vars.get(&quot;pollStartTime&quot;) as long
+def timeout = vars.get(&quot;pollerTimeout&quot;) as long
+def now = System.currentTimeMillis()
+prev.setIgnore();
+if (now - start &gt; timeout) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.warn(&quot;Polling timeout exceeded, stopping loop&quot;)
+    prev.setSuccessful(false);
+    AssertionResult.setFailureMessage(&quot;Polling timeout exceeded, stopping loop&quot;);
+    AssertionResult.setFailure(true);
+} else if (vars.getObject(&apos;userIdResultSet&apos;) != null &amp;&amp; vars.getObject(&apos;userIdResultSet&apos;).size() &gt; 0) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.info(&quot;user found: &quot; + vars.getObject(&apos;userIdResultSet&apos;))
+}</stringProp>
+            </JSR223Assertion>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Create Group1 and Role1" enabled="true"/>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Group Request" enabled="true">
+            <intProp name="HTTPSampler.concurrentPool">6</intProp>
+            <stringProp name="HTTPSampler.path">/usersgroups-command-api/command/api/rest/usersgroups/groups/</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">CJSCPPUID</stringProp>
+                  <stringProp name="Header.value">${userId}</stringProp>
+                </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/vnd.usersgroups.command.create-group+json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Create Group PreProcessor" enabled="true">
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;create-group-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+vars.put(&quot;groupName&quot;, org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric(50))
+log.info(&quot;groupName -&gt; &quot; + vars.get(&quot;groupName&quot;))
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+              <stringProp name="scriptLanguage">groovy</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+          </hashTree>
+          <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Poll GroupId" enabled="true"/>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Init poller" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">vars.put(&quot;pollStartTime&quot;, System.currentTimeMillis() as String)
+vars.put(&quot;loopStop&quot;, &quot;false&quot;)
+log.info(&quot;Group Poller - Poll start time: &quot; + vars.get(&quot;pollStartTime&quot;))</stringProp>
+            </JSR223Sampler>
+            <hashTree>
+              <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">prev.setIgnore();</stringProp>
+              </JSR223PostProcessor>
+              <hashTree/>
+            </hashTree>
+            <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="While Controller" enabled="true">
+              <stringProp name="WhileController.condition">${__jexl3(vars.get(&quot;loopStop&quot;) != &quot;true&quot;)}
+</stringProp>
+            </WhileController>
+            <hashTree>
+              <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Wait for Poll Interval" enabled="true">
+                <stringProp name="ConstantTimer.delay">${pollInterval}</stringProp>
+              </ConstantTimer>
+              <hashTree/>
+              <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get GroupId" enabled="true">
+                <stringProp name="dataSource">usergroupsviewstore</stringProp>
+                <stringProp name="query">select id from cpp_group where group_name = &apos;${groupName}&apos;;</stringProp>
+                <stringProp name="queryArguments"></stringProp>
+                <stringProp name="queryArgumentsTypes"></stringProp>
+                <stringProp name="queryTimeout"></stringProp>
+                <stringProp name="queryType">Select Statement</stringProp>
+                <stringProp name="resultSetHandler">Store as String</stringProp>
+                <stringProp name="resultSetMaxRows"></stringProp>
+                <stringProp name="resultVariable">groupIdResultSet</stringProp>
+                <stringProp name="variableNames"></stringProp>
+              </JDBCSampler>
+              <hashTree/>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assertion - Check if poller has a result or timed out" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def start = vars.get(&quot;pollStartTime&quot;) as long
+def timeout = vars.get(&quot;pollerTimeout&quot;) as long
+def now = System.currentTimeMillis()
+prev.setIgnore();
+if (now - start &gt; timeout) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.warn(&quot;Polling timeout exceeded, stopping loop&quot;)
+    prev.setSuccessful(false);
+    AssertionResult.setFailureMessage(&quot;Polling timeout exceeded, stopping loop&quot;);
+    AssertionResult.setFailure(true);
+} else if (vars.getObject(&apos;groupIdResultSet&apos;) != null &amp;&amp; vars.getObject(&apos;groupIdResultSet&apos;).size() &gt; 0) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.info(&quot;Group found&quot;+vars.getObject(&apos;groupIdResultSet&apos;))
+}</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Role Request" enabled="true">
+            <intProp name="HTTPSampler.concurrentPool">6</intProp>
+            <stringProp name="HTTPSampler.path">/usersgroups-command-api/command/api/rest/usersgroups/roles</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">CJSCPPUID</stringProp>
+                  <stringProp name="Header.value">${userId}</stringProp>
+                </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/vnd.usersgroups.create-role-with-details+json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CreateRole PreProcessor" enabled="true">
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;create-role-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+vars.put(&quot;groupId&quot;, vars.getObject(&quot;groupIdResultSet&quot;)[0].get(&quot;id&quot;).toString())
+log.info(&quot;groupId -&gt; &quot; + vars.get(&quot;groupId&quot;))
+
+def rawJson = file.text
+
+
+vars.put(&quot;roleName&quot;, org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric(50))
+log.info(&quot;roleName -&gt; &quot; + vars.get(&quot;roleName&quot;))
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+              <stringProp name="scriptLanguage">groovy</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+          </hashTree>
+          <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Poll RoleId" enabled="true"/>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Init poller" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">vars.put(&quot;pollStartTime&quot;, System.currentTimeMillis() as String)
+vars.put(&quot;loopStop&quot;, &quot;false&quot;)
+log.info(&quot;Group Poller - Poll start time: &quot; + vars.get(&quot;pollStartTime&quot;))</stringProp>
+            </JSR223Sampler>
+            <hashTree>
+              <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">prev.setIgnore();</stringProp>
+              </JSR223PostProcessor>
+              <hashTree/>
+            </hashTree>
+            <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="While Controller" enabled="true">
+              <stringProp name="WhileController.condition">${__jexl3(vars.get(&quot;loopStop&quot;) != &quot;true&quot;)}
+</stringProp>
+            </WhileController>
+            <hashTree>
+              <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Wait for Poll Interval" enabled="true">
+                <stringProp name="ConstantTimer.delay">${pollInterval}</stringProp>
+              </ConstantTimer>
+              <hashTree/>
+              <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get RoleId" enabled="true">
+                <stringProp name="dataSource">usergroupsviewstore</stringProp>
+                <stringProp name="query">select id from cpp_role where label = &apos;${roleName}&apos;;</stringProp>
+                <stringProp name="queryArguments"></stringProp>
+                <stringProp name="queryArgumentsTypes"></stringProp>
+                <stringProp name="queryTimeout"></stringProp>
+                <stringProp name="queryType">Select Statement</stringProp>
+                <stringProp name="resultSetHandler">Store as String</stringProp>
+                <stringProp name="resultSetMaxRows"></stringProp>
+                <stringProp name="resultVariable">roleIdResultSet</stringProp>
+                <stringProp name="variableNames"></stringProp>
+              </JDBCSampler>
+              <hashTree/>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assertion - Check if poller has a result or timed out" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def start = vars.get(&quot;pollStartTime&quot;) as long
+def timeout = vars.get(&quot;pollerTimeout&quot;) as long
+def now = System.currentTimeMillis()
+prev.setIgnore();
+if (now - start &gt; timeout) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.warn(&quot;Polling timeout exceeded, stopping loop&quot;)
+    prev.setSuccessful(false);
+    AssertionResult.setFailureMessage(&quot;Polling timeout exceeded, stopping loop&quot;);
+    AssertionResult.setFailure(true);
+} else if (vars.getObject(&apos;roleIdResultSet&apos;) != null &amp;&amp; vars.getObject(&apos;roleIdResultSet&apos;).size() &gt; 0) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.info(&quot;Role found&quot;+vars.getObject(&apos;roleIdResultSet&apos;))
+}</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Set RoleId1 variable" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">vars.put(&quot;roleId1&quot;, vars.getObject(&quot;roleIdResultSet&quot;)[0].get(&quot;id&quot;).toString())
+</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223Sampler>
+          <hashTree>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="SetRoleIdPostProcessor" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">prev.setIgnore();</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Create Group2 and Role2" enabled="true"/>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Group Request - 2" enabled="true">
+            <intProp name="HTTPSampler.concurrentPool">6</intProp>
+            <stringProp name="HTTPSampler.path">/usersgroups-command-api/command/api/rest/usersgroups/groups/</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">CJSCPPUID</stringProp>
+                  <stringProp name="Header.value">${userId}</stringProp>
+                </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/vnd.usersgroups.command.create-group+json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CreateGroupPreProcessor" enabled="true">
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;create-group-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+vars.put(&quot;groupName&quot;, org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric(50))
+log.info(&quot;groupName -&gt; &quot; + vars.get(&quot;groupName&quot;))
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+              <stringProp name="scriptLanguage">groovy</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+          </hashTree>
+          <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Poll GroupId" enabled="true"/>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Init poller" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">vars.put(&quot;pollStartTime&quot;, System.currentTimeMillis() as String)
+vars.put(&quot;loopStop&quot;, &quot;false&quot;)
+log.info(&quot;Group Poller - Poll start time: &quot; + vars.get(&quot;pollStartTime&quot;))</stringProp>
+            </JSR223Sampler>
+            <hashTree>
+              <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">prev.setIgnore();</stringProp>
+              </JSR223PostProcessor>
+              <hashTree/>
+            </hashTree>
+            <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="While Controller" enabled="true">
+              <stringProp name="WhileController.condition">${__jexl3(vars.get(&quot;loopStop&quot;) != &quot;true&quot;)}
+</stringProp>
+            </WhileController>
+            <hashTree>
+              <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Wait for Poll Interval" enabled="true">
+                <stringProp name="ConstantTimer.delay">${pollInterval}</stringProp>
+              </ConstantTimer>
+              <hashTree/>
+              <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get GroupId" enabled="true">
+                <stringProp name="dataSource">usergroupsviewstore</stringProp>
+                <stringProp name="query">select id from cpp_group where group_name = &apos;${groupName}&apos;;</stringProp>
+                <stringProp name="queryArguments"></stringProp>
+                <stringProp name="queryArgumentsTypes"></stringProp>
+                <stringProp name="queryTimeout"></stringProp>
+                <stringProp name="queryType">Select Statement</stringProp>
+                <stringProp name="resultSetHandler">Store as String</stringProp>
+                <stringProp name="resultSetMaxRows"></stringProp>
+                <stringProp name="resultVariable">groupIdResultSet</stringProp>
+                <stringProp name="variableNames"></stringProp>
+              </JDBCSampler>
+              <hashTree/>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assertion - Check if poller has a result or timed out" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def start = vars.get(&quot;pollStartTime&quot;) as long
+def timeout = vars.get(&quot;pollerTimeout&quot;) as long
+def now = System.currentTimeMillis()
+prev.setIgnore();
+if (now - start &gt; timeout) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.warn(&quot;Polling timeout exceeded, stopping loop&quot;)
+    prev.setSuccessful(false);
+    AssertionResult.setFailureMessage(&quot;Polling timeout exceeded, stopping loop&quot;);
+    AssertionResult.setFailure(true);
+} else if (vars.getObject(&apos;groupIdResultSet&apos;) != null &amp;&amp; vars.getObject(&apos;groupIdResultSet&apos;).size() &gt; 0) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.info(&quot;Group found&quot;+vars.getObject(&apos;groupIdResultSet&apos;))
+}</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Role Request - 2" enabled="true">
+            <intProp name="HTTPSampler.concurrentPool">6</intProp>
+            <stringProp name="HTTPSampler.path">/usersgroups-command-api/command/api/rest/usersgroups/roles</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">CJSCPPUID</stringProp>
+                  <stringProp name="Header.value">${userId}</stringProp>
+                </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/vnd.usersgroups.create-role-with-details+json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;create-role-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+vars.put(&quot;groupId&quot;, vars.getObject(&quot;groupIdResultSet&quot;)[0].get(&quot;id&quot;).toString())
+log.info(&quot;groupId -&gt; &quot; + vars.get(&quot;groupId&quot;))
+
+def rawJson = file.text
+
+
+vars.put(&quot;roleName&quot;, org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric(50))
+log.info(&quot;roleName -&gt; &quot; + vars.get(&quot;roleName&quot;))
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+              <stringProp name="scriptLanguage">groovy</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+          </hashTree>
+          <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Poll RoleId" enabled="true"/>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Init poller" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">vars.put(&quot;pollStartTime&quot;, System.currentTimeMillis() as String)
+vars.put(&quot;loopStop&quot;, &quot;false&quot;)
+log.info(&quot;Group Poller - Poll start time: &quot; + vars.get(&quot;pollStartTime&quot;))</stringProp>
+            </JSR223Sampler>
+            <hashTree>
+              <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">prev.setIgnore();</stringProp>
+              </JSR223PostProcessor>
+              <hashTree/>
+            </hashTree>
+            <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="While Controller" enabled="true">
+              <stringProp name="WhileController.condition">${__jexl3(vars.get(&quot;loopStop&quot;) != &quot;true&quot;)}
+</stringProp>
+            </WhileController>
+            <hashTree>
+              <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Wait for Poll Interval" enabled="true">
+                <stringProp name="ConstantTimer.delay">${pollInterval}</stringProp>
+              </ConstantTimer>
+              <hashTree/>
+              <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get RoleId" enabled="true">
+                <stringProp name="dataSource">usergroupsviewstore</stringProp>
+                <stringProp name="query">select id from cpp_role where label = &apos;${roleName}&apos;;</stringProp>
+                <stringProp name="queryArguments"></stringProp>
+                <stringProp name="queryArgumentsTypes"></stringProp>
+                <stringProp name="queryTimeout"></stringProp>
+                <stringProp name="queryType">Select Statement</stringProp>
+                <stringProp name="resultSetHandler">Store as String</stringProp>
+                <stringProp name="resultSetMaxRows"></stringProp>
+                <stringProp name="resultVariable">roleIdResultSet</stringProp>
+                <stringProp name="variableNames"></stringProp>
+              </JDBCSampler>
+              <hashTree/>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assertion - Check if poller has a result or timed out" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def start = vars.get(&quot;pollStartTime&quot;) as long
+def timeout = vars.get(&quot;pollerTimeout&quot;) as long
+def now = System.currentTimeMillis()
+prev.setIgnore();
+if (now - start &gt; timeout) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.warn(&quot;Polling timeout exceeded, stopping loop&quot;)
+    prev.setSuccessful(false);
+    AssertionResult.setFailureMessage(&quot;Polling timeout exceeded, stopping loop&quot;);
+    AssertionResult.setFailure(true);
+} else if (vars.getObject(&apos;roleIdResultSet&apos;) != null &amp;&amp; vars.getObject(&apos;roleIdResultSet&apos;).size() &gt; 0) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.info(&quot;Role found&quot;+vars.getObject(&apos;roleIdResultSet&apos;))
+}</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Set RoleId2 variable" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">vars.put(&quot;roleId2&quot;, vars.getObject(&quot;roleIdResultSet&quot;)[0].get(&quot;id&quot;).toString())
+</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223Sampler>
+          <hashTree>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="SetRoleIdPostProcessor" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">prev.setIgnore();</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Assign User to Role 1" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/usersgroups-service/command/api/rest/usersgroups/users/${newUserId}</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.usersgroups.command.assign-role-to-user+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;assign-user-to-role.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+vars.put(&quot;userIdParam&quot;, &quot;${newUserId}&quot;)
+vars.put(&quot;roleIdParam&quot;, &quot;${roleId1}&quot;)
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Assign User to Role 2" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/usersgroups-service/command/api/rest/usersgroups/users/${newUserId}</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.usersgroups.command.assign-role-to-user+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;assign-user-to-role.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+vars.put(&quot;userIdParam&quot;, &quot;${newUserId}&quot;)
+vars.put(&quot;roleIdParam&quot;, &quot;${roleId2}&quot;)
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Create list of permissions" enabled="true">
+          <stringProp name="LoopController.loops">${permissionCount}</stringProp>
+        </LoopController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Permission" enabled="true">
+            <intProp name="HTTPSampler.concurrentPool">6</intProp>
+            <stringProp name="HTTPSampler.path">/usersgroups-service/command/api/rest/usersgroups/permissions</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">CJSCPPUID</stringProp>
+                  <stringProp name="Header.value">${userId}</stringProp>
+                </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/vnd.usersgroups.create-permission-with-details+json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;create-permission-with-details.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+vars.put(&quot;userIdParam&quot;, &quot;${newUserId}&quot;)
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+              <stringProp name="scriptLanguage">groovy</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Poll Permissions" enabled="true"/>
+        <hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Init poller" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">vars.put(&quot;pollStartTime&quot;, System.currentTimeMillis() as String)
+vars.put(&quot;loopStop&quot;, &quot;false&quot;)
+log.info(&quot;Group Poller - Poll start time: &quot; + vars.get(&quot;pollStartTime&quot;))</stringProp>
+          </JSR223Sampler>
+          <hashTree>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">prev.setIgnore();</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+          </hashTree>
+          <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="While Controller" enabled="true">
+            <stringProp name="WhileController.condition">${__jexl3(vars.get(&quot;loopStop&quot;) != &quot;true&quot;)}
+</stringProp>
+          </WhileController>
+          <hashTree>
+            <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Wait for Poll Interval" enabled="true">
+              <stringProp name="ConstantTimer.delay">${pollInterval}</stringProp>
+            </ConstantTimer>
+            <hashTree/>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Permissions" enabled="true">
+              <stringProp name="dataSource">usergroupsviewstore</stringProp>
+              <stringProp name="query">select count(1) as cnt from cpp_permission where source = &apos;${newUserId}&apos;;</stringProp>
+              <stringProp name="queryArguments"></stringProp>
+              <stringProp name="queryArgumentsTypes"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="queryType">Select Statement</stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultVariable">permissionCountResultSet</stringProp>
+              <stringProp name="variableNames"></stringProp>
+            </JDBCSampler>
+            <hashTree/>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assertion - Check if poller has a result or timed out" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">def start = vars.get(&quot;pollStartTime&quot;) as long
+def timeout = vars.get(&quot;pollerTimeout&quot;) as long
+def permissionCount = vars.get(&quot;permissionCount&quot;) as long
+def now = System.currentTimeMillis()
+prev.setIgnore();
+if (now - start &gt; timeout) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.warn(&quot;Polling timeout exceeded, stopping loop&quot;)
+    prev.setSuccessful(false);
+    AssertionResult.setFailureMessage(&quot;Polling timeout exceeded, stopping loop&quot;);
+    AssertionResult.setFailure(true);
+} else if (vars.getObject(&apos;permissionCountResultSet&apos;) != null &amp;&amp; vars.getObject(&apos;permissionCountResultSet&apos;).size() &gt; 0 &amp;&amp; vars.getObject(&quot;permissionCountResultSet&quot;)[0].get(&quot;cnt&quot;) == permissionCount) {
+    vars.put(&quot;loopStop&quot;, &quot;true&quot;)
+    log.info(&quot;Polling Permissions is completed, stopping loop&quot;)
+}</stringProp>
+            </JSR223Assertion>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Get Logged in User Roles and Permissions" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/usersgroups-query-api/query/api/rest/usersgroups/users/logged-in-user/permissions</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${newUserId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Accept</stringProp>
+                <stringProp name="Header.value">application/vnd.usersgroups.get-logged-in-user-permissions+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
+          <boolProp name="ResultCollector.error_logging">true</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">${resultDir}/errors.csv</stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict">
+        <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">${loopCount}</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+          <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation"></stringProp>
+        </ConfigTestElement>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.hearing.initiate+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="InitiateHearingPreProcessor">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;initiate-hearing-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+vars.put(&quot;hearingId&quot;, UUID.randomUUID().toString())
+log.info(&quot;hearingId-&gt; &quot; + vars.get(&quot;hearingId&quot;))
+
+vars.put(&quot;applicationId&quot;, UUID.randomUUID().toString())
+log.info(&quot;applicationId-&gt; &quot; + vars.get(&quot;applicationId&quot;))
+
+vars.put(&quot;caseId&quot;, UUID.randomUUID().toString())
+log.info(&quot;caseId-&gt; &quot; + vars.get(&quot;caseId&quot;))
+
+vars.put(&quot;courtOrderId&quot;, UUID.randomUUID().toString())
+log.info(&quot;courtOrderId-&gt; &quot; + vars.get(&quot;courtOrderId&quot;))
+
+vars.put(&quot;defendantId&quot;, UUID.randomUUID().toString())
+log.info(&quot;defendantId-&gt; &quot; + vars.get(&quot;defendantId&quot;))
+
+vars.put(&quot;offenceId&quot;, UUID.randomUUID().toString())
+log.info(&quot;offenceId-&gt; &quot; + vars.get(&quot;offenceId&quot;))
+
+vars.put(&quot;courtOrderOffenceId&quot;, UUID.randomUUID().toString())
+log.info(&quot;courtOrderOffenceId-&gt; &quot; + vars.get(&quot;courtOrderOffenceId&quot;))
+
+vars.put(&quot;courtApplicationOffenceId&quot;, UUID.randomUUID().toString())
+log.info(&quot;courtApplicationOffenceId-&gt; &quot; + vars.get(&quot;courtApplicationOffenceId&quot;))
+
+vars.put(&quot;courtApplicationCaseId&quot;, UUID.randomUUID().toString())
+log.info(&quot;courtApplicationCaseId-&gt; &quot; + vars.get(&quot;courtApplicationCaseId&quot;))
+
+vars.put(&quot;courtOrderCaseId&quot;, UUID.randomUUID().toString())
+log.info(&quot;courtOrderCaseId-&gt; &quot; + vars.get(&quot;courtOrderCaseId&quot;))
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.hearing.update-defendant-attendance-on-hearing-day+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="UpdateDefendantAttendancePreProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;update-defendant-attendance-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add Prosecution Counsel" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.hearing.add-prosecution-counsel+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="AddProsecutionCounselPreProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;add-prosecution-counsel-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+vars.put(&quot;prosecutionCounselId&quot;, UUID.randomUUID().toString())
+log.info(&quot;prosecutionCounselId-&gt; &quot; + vars.get(&quot;prosecutionCounselId&quot;))
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Verdict" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.hearing.update-verdict+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="UpdateVerdictPreProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;update-verdict-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Shared Results" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}/${hearingDay}</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.hearing.shared-results+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="SharedResultsPreProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;shared-results-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+vars.put(&quot;hearingDay&quot;, &quot;2026-01-23&quot;)
+log.info(&quot;hearingDay-&gt; &quot; + vars.get(&quot;hearingDay&quot;))
+
+vars.put(&quot;resultLineId&quot;, UUID.randomUUID().toString())
+log.info(&quot;resultLineId-&gt; &quot; + vars.get(&quot;resultLineId&quot;))
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Verdict 2" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.hearing.update-verdict+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="UpdateVerdict2PreProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;update-verdict-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Shared Results 2" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}/${hearingDay}</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.hearing.shared-results+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="SharedResults2PreProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;shared-results-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+vars.put(&quot;resultLineId&quot;, UUID.randomUUID().toString())
+log.info(&quot;resultLineId-&gt; &quot; + vars.get(&quot;resultLineId&quot;))
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">${resultDir}/ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict.csv</stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Metrics Collection Thread Group" enabled="false">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <intProp name="LoopController.loops">-1</intProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Processed Event Count" enabled="true">
+          <stringProp name="dataSource">usergroupsviewstore</stringProp>
+          <stringProp name="query">select count(1) as processed_event_count from processed_event;</stringProp>
+          <stringProp name="queryArguments"></stringProp>
+          <stringProp name="queryArgumentsTypes"></stringProp>
+          <stringProp name="queryTimeout"></stringProp>
+          <stringProp name="queryType">Select Statement</stringProp>
+          <stringProp name="resultSetHandler">Store as String</stringProp>
+          <stringProp name="resultSetMaxRows"></stringProp>
+          <stringProp name="resultVariable">processedEventCountResultSet</stringProp>
+          <stringProp name="variableNames"></stringProp>
+        </JDBCSampler>
+        <hashTree>
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
+            <stringProp name="BeanShellAssertion.query">vars.put(&quot;prevProcessedEventCount&quot;, org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().get(&quot;processedEventCount&quot;));
+org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().put(&quot;processedEventCount&quot;, vars.getObject(&quot;processedEventCountResultSet&quot;).get(0).get(&quot;processed_event_count&quot;).toString())</stringProp>
+            <stringProp name="BeanShellAssertion.filename"></stringProp>
+            <stringProp name="BeanShellAssertion.parameters"></stringProp>
+            <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
+          </BeanShellAssertion>
+          <hashTree/>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">prev.setIgnore();</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
+        </hashTree>
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Event Log Count" enabled="true">
+          <stringProp name="dataSource">usergroupseventstore</stringProp>
+          <stringProp name="query">select count(1) as event_log_count from event_log;</stringProp>
+          <stringProp name="queryArguments"></stringProp>
+          <stringProp name="queryArgumentsTypes"></stringProp>
+          <stringProp name="queryTimeout"></stringProp>
+          <stringProp name="queryType">Select Statement</stringProp>
+          <stringProp name="resultSetHandler">Store as String</stringProp>
+          <stringProp name="resultSetMaxRows"></stringProp>
+          <stringProp name="resultVariable">eventLogCountResultSet</stringProp>
+          <stringProp name="variableNames"></stringProp>
+        </JDBCSampler>
+        <hashTree>
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
+            <stringProp name="BeanShellAssertion.query">vars.put(&quot;prevEventLogCount&quot;, org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().get(&quot;eventLogCount&quot;));
+org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().put(&quot;eventLogCount&quot;, vars.getObject(&quot;eventLogCountResultSet&quot;).get(0).get(&quot;event_log_count&quot;).toString())</stringProp>
+            <stringProp name="BeanShellAssertion.filename"></stringProp>
+            <stringProp name="BeanShellAssertion.parameters"></stringProp>
+            <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
+          </BeanShellAssertion>
+          <hashTree/>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">prev.setIgnore();</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
+        </hashTree>
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Published Event Count" enabled="true">
+          <stringProp name="dataSource">usergroupseventstore</stringProp>
+          <stringProp name="query">select count(1) as published_event_count from published_event;</stringProp>
+          <stringProp name="queryArguments"></stringProp>
+          <stringProp name="queryArgumentsTypes"></stringProp>
+          <stringProp name="queryTimeout"></stringProp>
+          <stringProp name="queryType">Select Statement</stringProp>
+          <stringProp name="resultSetHandler">Store as String</stringProp>
+          <stringProp name="resultSetMaxRows"></stringProp>
+          <stringProp name="resultVariable">publishedEventCountResultSet</stringProp>
+          <stringProp name="variableNames"></stringProp>
+        </JDBCSampler>
+        <hashTree>
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
+            <stringProp name="BeanShellAssertion.query">vars.put(&quot;prevPublishedEventCount&quot;, org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().get(&quot;publishedEventCount&quot;));
+
+org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().put(&quot;publishedEventCount&quot;, vars.getObject(&quot;publishedEventCountResultSet&quot;).get(0).get(&quot;published_event_count&quot;).toString())</stringProp>
+            <stringProp name="BeanShellAssertion.filename"></stringProp>
+            <stringProp name="BeanShellAssertion.parameters"></stringProp>
+            <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
+          </BeanShellAssertion>
+          <hashTree/>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">prev.setIgnore();</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
+        </hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">def processedEventCount = org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().get(&quot;processedEventCount&quot;) as long
+def eventLogCount = org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().get(&quot;eventLogCount&quot;) as long
+def publishedEventCount = org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().get(&quot;publishedEventCount&quot;) as long
+
+if (vars.get(&quot;lastMetricsCollectionTime&quot;) != null) {
+	def lastMetricsCollectionTime = vars.get(&quot;lastMetricsCollectionTime&quot;) as long;
+	def timeDiff = (System.currentTimeMillis() - lastMetricsCollectionTime)/1000;
+	def prevProcessedEventCount = vars.get(&quot;prevProcessedEventCount&quot;) as long;
+	def prevEventLogCount = vars.get(&quot;prevEventLogCount&quot;) as long;
+	def prevPublishedEventCount = vars.get(&quot;prevPublishedEventCount&quot;) as long;
+
+	def processedEventTps = (processedEventCount - prevProcessedEventCount) / timeDiff;
+	def eventLogTps = (eventLogCount - prevEventLogCount) / timeDiff;
+	def publishedEventTps = (publishedEventCount - prevPublishedEventCount)/timeDiff;
+	println(&quot;processedEventTps: &quot; +  String.format(&quot;%.2f&quot;, processedEventTps) + &quot;, eventLogTps: &quot; +  String.format(&quot;%.2f&quot;, eventLogTps) + &quot;, publishedEventTps: &quot; +  String.format(&quot;%.2f&quot;, publishedEventTps));
+
+}
+
+
+vars.put(&quot;lastMetricsCollectionTime&quot;, System.currentTimeMillis().toString())
+println(&quot;processedEventCount: &quot; + processedEventCount + &quot;, eventLogCount: &quot; + eventLogCount + &quot;, publishedEventCount: &quot; + publishedEventCount);</stringProp>
+        </JSR223Sampler>
+        <hashTree>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">prev.setIgnore();</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+            <stringProp name="ConstantTimer.delay">${metricsIntervalInMs}</stringProp>
+          </ConstantTimer>
+          <hashTree/>
+        </hashTree>
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Check if the test is completed" enabled="true">
+          <stringProp name="IfController.condition">${__groovy((org.apache.jmeter.threads.JMeterContextService.getThreadCounts().activeThreads == 1 &amp;&amp; vars.getIteration() &gt; 1),)}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+          <TestAction guiclass="TestActionGui" testclass="TestAction" testname="Terminate current thread" enabled="true">
+            <intProp name="ActionProcessor.action">2</intProp>
+            <intProp name="ActionProcessor.target">0</intProp>
+            <stringProp name="ActionProcessor.duration">0</stringProp>
+          </TestAction>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">${resultDir}/custom-metrics.csv</stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

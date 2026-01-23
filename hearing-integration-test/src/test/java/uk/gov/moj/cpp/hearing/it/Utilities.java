@@ -289,6 +289,12 @@ public class Utilities {
                     .header(new Header(USER_ID, cppUserId != null ? cppUserId.toString() : getLoggedInUser().toString())).when()
                     .post(url)
                     .then().extract().response();
+
+            System.out.println(type);
+            System.out.println(url);
+            System.out.println(this.payloadAsString);
+            System.out.println("======================================================================");
+            System.out.println();
             assertThat(writeResponse.getStatusCode(), equalTo(httpStatusCode));
         }
     }

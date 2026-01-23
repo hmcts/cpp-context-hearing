@@ -1,0 +1,20 @@
+{
+  "timeTriggered": "2011-12-03T10:15:30+01:00",
+  "organisationId": "${organisationId}",
+  "organisationType": "CPS",
+  "organisationName": "${__RandomString(20,abcdefghijklmnoprqstvwxyz,)}",
+  "addressLine1": "Legal House",
+  "addressLine2": "15 Sewell Street",
+  "addressLine3": "Hammersmith",
+  "addressLine4": "London",
+  "addressPostcode": "SE14 2AB",
+  "phoneNumber": "080012345678",
+  "email": "joe@example.com",
+  "_metadata": {
+    "name": "usersgroups.create-organisation-with-details",
+    "context": {
+      "user": "${userId}"
+    },
+    "id": "${__UUID}"
+  }
+}

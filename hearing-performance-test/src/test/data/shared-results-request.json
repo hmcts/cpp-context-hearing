@@ -1,0 +1,57 @@
+{
+  "courtClerk": {
+    "firstName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+    "lastName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+    "userId": "${__UUID}"
+  },
+  "resultLines": [
+    {
+      "shortCode": "SHORT_CODE",
+      "delegatedPowers": {
+        "firstName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "lastName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "userId": "${__UUID}"
+      },
+      "orderedDate": "2025-09-07",
+      "sharedDate": "${hearingDay}",
+      "resultLineId": "${resultLineId}",
+      "offenceId": "${offenceId}",
+      "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+      "prompts": [
+        {
+          "id": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "label": "promptLabel",
+          "fixedListCode": "fixedListCode",
+          "value": "value1",
+          "welshValue": "wvalue1",
+          "promptRef": "bailConditionReason"
+        },
+        {
+          "id": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "label": "promptLabel",
+          "value": "false",
+          "welshValue": "false",
+          "promptRef": "PARENT_GAURDIAN_TO_PAY"
+        }
+      ],
+      "resultLabel": "imprisonment",
+      "level": "OFFENCE",
+      "isModified": true,
+      "isComplete": true,
+      "applicationId": "${applicationId}",
+      "caseId": "${caseId}",
+      "amendmentDate": "2026-01-23T11:54:42.585634329Z",
+      "isDeleted": false,
+      "shadowListed": false,
+      "draftResult": "{}",
+      "amendmentsLog": "AMENDMENTS_LOG",
+      "category": "I",
+      "nonStandaloneAncillaryResult": false,
+      "autoPopulateBooleanResult": "${__UUID}",
+      "disabled": false
+    }
+  ],
+  "hearingDay": "${hearingDay}",
+  "version": 1
+}
+

@@ -1,0 +1,246 @@
+{
+  "hearing": {
+    "courtApplications": [
+      {
+        "applicant": {
+          "id": "${__UUID}",
+          "notificationRequired": false,
+          "organisation": {
+            "name": "OrganisationName"
+          },
+          "personDetails": {
+            "firstName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+            "gender": "FEMALE",
+            "lastName": "${__RandomString(20,abcdefghijklmnoprqstvwxyz,)}",
+            "middleName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+          },
+          "prosecutingAuthority": {
+            "prosecutionAuthorityCode": "j7TOYA96md",
+            "prosecutionAuthorityId": "ae88eff2-a3e4-4845-b793-05896e8c07e2"
+          },
+          "summonsRequired": false
+        },
+        "applicationReceivedDate": "2026-01-20",
+        "applicationReference": "12AA3456716",
+        "applicationStatus": "DRAFT",
+        "courtApplicationCases": [
+          {
+            "caseStatus": "INACTIVE",
+            "isSJP": false,
+            "offences": [
+              {
+                "id": "${courtApplicationOffenceId}",
+                "offenceCode": "offenceCode",
+                "offenceDefinitionId": "67f1a0db-c703-4705-b224-7f023cb47ce5",
+                "offenceTitle": "offenceTitle",
+                "startDate": "2026-01-20",
+                "wording": "wording"
+              }
+            ],
+            "prosecutionCaseId": "${courtApplicationCaseId}",
+            "prosecutionCaseIdentifier": {
+              "prosecutionAuthorityCode": "prodAuthCode",
+              "prosecutionAuthorityId": "a8897f5e-42a9-43d5-940d-ca9df8b84bf2",
+              "prosecutionAuthorityReference": "prosecutionAuthorityReference"
+            }
+          }
+        ],
+        "courtOrder": {
+          "canBeSubjectOfBreachProceedings": false,
+          "canBeSubjectOfVariationProceedings": false,
+          "courtOrderOffences": [
+            {
+              "offence": {
+                "id": "${courtOrderOffenceId}",
+                "offenceCode": "offenceCode",
+                "offenceDefinitionId": "1fc16701-cae4-41e4-b4b9-1413ba42bcb1",
+                "offenceTitle": "offenceTitle",
+                "startDate": "2026-01-20",
+                "wording": "wording"
+              },
+              "prosecutionCaseId": "${courtOrderCaseId}",
+              "prosecutionCaseIdentifier": {
+                "prosecutionAuthorityCode": "prodAuthCode",
+                "prosecutionAuthorityId": "6d2c790e-ab5b-4738-be5e-1f834e2cc52f",
+                "prosecutionAuthorityReference": "prosecutionAuthorityReference"
+              }
+            }
+          ],
+          "id": "${courtOrderId}",
+          "isSJPOrder": false,
+          "judicialResultTypeId": "bacdfcc7-46a4-4a8f-8260-8f79b9b01e5f",
+          "label": "label",
+          "orderDate": "2026-01-20",
+          "orderingCourt": {
+            "id": "ca8ae807-d925-4931-8cb7-455d6bc53d6e",
+            "name": "courtName"
+          },
+          "orderingHearingId": "b3849551-529b-41a3-b2e8-dd3bf6365cfa",
+          "startDate": "2026-01-21"
+        },
+        "hearingIdToBeVacated": "282fe98c-6ddb-447e-929d-7c92d3e8191f",
+        "id": "${applicationId}",
+        "respondents": [
+          {
+            "id": "4bfe0098-ec6c-4172-bd52-6db4272adef2",
+            "notificationRequired": false,
+            "organisation": {
+              "name": "OrganisationName"
+            },
+            "personDetails": {
+              "firstName": "Nina",
+              "gender": "FEMALE",
+              "lastName": "Turner"
+            },
+            "prosecutingAuthority": {
+              "prosecutionAuthorityCode": "RHbiYcF0Ci",
+              "prosecutionAuthorityId": "60eb6f53-9908-4759-ab32-745ed716e909"
+            },
+            "summonsRequired": false
+          }
+        ],
+        "subject": {
+          "id": "7cb00f54-a847-4b51-a72b-68796372a404",
+          "notificationRequired": false,
+          "organisation": {
+            "name": "OrganisationName"
+          },
+          "personDetails": {
+            "firstName": "Lauren",
+            "gender": "FEMALE",
+            "lastName": "Michelle",
+            "middleName": "Mia"
+          },
+          "prosecutingAuthority": {
+            "prosecutionAuthorityCode": "j7TOYA96md",
+            "prosecutionAuthorityId": "ae88eff2-a3e4-4845-b793-05896e8c07e2"
+          },
+          "summonsRequired": false
+        },
+        "type": {
+          "appealFlag": false,
+          "applicantAppellantFlag": false,
+          "breachType": "NOT_APPLICABLE",
+          "categoryCode": "appCategory",
+          "code": "appCode",
+          "commrOfOathFlag": false,
+          "courtExtractAvlFlag": false,
+          "courtOfAppealFlag": false,
+          "id": "22ad6fc5-9e0a-4452-a339-7b7679407aff",
+          "jurisdiction": "EITHER",
+          "legislation": "appLegislation",
+          "linkType": "LINKED",
+          "offenceActiveOrder": "NOT_APPLICABLE",
+          "pleaApplicableFlag": false,
+          "prosecutorThirdPartyFlag": false,
+          "spiOutApplicableFlag": false,
+          "summonsTemplateType": "BREACH",
+          "type": "applicationType"
+        }
+      }
+    ],
+    "courtCentre": {
+      "id": "b52f805c-2821-4904-a0e0-26f7fda6dd08",
+      "name": "8hsBh0ZDod",
+      "roomId": "5d5d7b5e-7833-4dc1-b94a-d1a5c635c623",
+      "roomName": "WIZXpa0OOw",
+      "welshName": "RRiSWWmVlO",
+      "welshRoomName": "pwUFk0Ccg1"
+    },
+    "hearingDays": [
+      {
+        "courtCentreId": "b52f805c-2821-4904-a0e0-26f7fda6dd08",
+        "courtRoomId": "5d5d7b5e-7833-4dc1-b94a-d1a5c635c623",
+        "hasSharedResults": true,
+        "listedDurationMinutes": 876436711,
+        "listingSequence": 631433925,
+        "sittingDay": "2026-01-10T15:54:36.393Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "${hearingId}",
+    "isGroupProceedings": false,
+    "judiciary": [
+      {
+        "firstName": "m4Do0AdtmK",
+        "isBenchChairman": true,
+        "isDeputy": false,
+        "judicialId": "a07fb1ad-c8cd-4f51-994a-6f95e574d0c5",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "3cbda180-6e28-4e86-8827-e0a1c813c17d",
+          "judiciaryType": "CIRCUIT_JUDGE"
+        },
+        "lastName": "rrwpl7yUjZ",
+        "middleName": "ehfJYESLFh",
+        "title": "xzOMitR9eh",
+        "userId": "5b4c725b-ad50-492b-b4b3-a42b824f181a"
+      }
+    ],
+    "jurisdictionType": "CROWN",
+    "numberOfGroupCases": 0,
+    "prosecutionCases": [
+      {
+        "caseStatus": "xnKVZk5Vtl",
+        "classOfCase": "Class 1",
+        "defendants": [
+          {
+            "courtProceedingsInitiated": "2026-01-20T15:54:36.421Z",
+            "id": "${defendantId}",
+            "isYouth": true,
+            "masterDefendantId": "${defendantId}",
+            "numberOfPreviousConvictionsCited": 855030297,
+            "offences": [
+              {
+                "arrestDate": "2024-07-01",
+                "chargeDate": "2024-06-19",
+                "count": 1117366867,
+                "endDate": "2022-08-29",
+                "endorsableFlag": true,
+                "id": "${offenceId}",
+                "laidDate": "2023-06-01",
+                "listingNumber": 1750859322,
+                "modeOfTrial": "Either Way",
+                "offenceCode": "I7DAVA9QhH",
+                "offenceDefinitionId": "0dec3e1f-c08e-4f4b-85a4-82e9ba4cd15b",
+                "offenceTitle": "DTU0NrmP5A",
+                "orderIndex": 2030006957,
+                "proceedingsConcluded": true,
+                "startDate": "2025-02-11",
+                "wording": "2hcayBZcZu"
+              }
+            ],
+            "personDefendant": {
+              "personDetails": {
+                "firstName": "AtRIwDWgMY",
+                "gender": "FEMALE",
+                "lastName": "K3JES1hhAq",
+                "middleName": "WlA5TjLcQL",
+                "title": "Lieutanant"
+              }
+            },
+            "proceedingsConcluded": false,
+            "prosecutionCaseId": "${caseId}"
+          }
+        ],
+        "id": "${caseId}",
+        "initiationCode": "O",
+        "isGroupMaster": false,
+        "originatingOrganisation": "BSh5JUEn6D",
+        "prosecutionCaseIdentifier": {
+          "prosecutionAuthorityCode": "M0ibyD9cLq",
+          "prosecutionAuthorityId": "406a61c5-4d71-4a81-82e4-16e7234424dd",
+          "caseURN": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+        },
+        "statementOfFacts": "JjfUxJWmrn",
+        "statementOfFactsWelsh": "Uki6Q8Cewu"
+      }
+    ],
+    "reportingRestrictionReason": "bv7N1W8K4V",
+    "type": {
+      "description": "9XxhRjrq8K",
+      "id": "9cc41e45-b594-4ba6-906e-1a4626b08fed",
+      "welshDescription": "aj24P8ZbB1"
+    }
+  }
+}
+

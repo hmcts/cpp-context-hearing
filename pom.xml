@@ -41,6 +41,7 @@
         <listing.version>17.0.116</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>17.0.96</systemdocgenerator.version>
+        <jmeter-maven-plugin.version>3.8.0</jmeter-maven-plugin.version>
 
         <sonar.coverage.exclusions>
             **/uk/gov/moj/cpp/hearing/nows/events/**/*,
@@ -94,6 +95,7 @@
         <module>hearing-event-sources</module>
         <module>hearing-common</module>
         <module>hearing-healthchecks</module>
+        <module>hearing-performance-test</module>
     </modules>
 
     <build>
