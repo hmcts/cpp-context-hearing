@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.mapping;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
-import static uk.gov.justice.services.messaging.JsonObjects.createReader;;
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 
 import uk.gov.justice.core.courts.Attendant;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
