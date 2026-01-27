@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -66,13 +66,13 @@ public class ComputeOutstandingFinesRequestedProcessorTest {
 
     @Test
     public void publicComputeOutstandingFinesRequested() {
-        final JsonObject outstandingFinesQuery = Json.createObjectBuilder().build();
+        final JsonObject outstandingFinesQuery = JsonObjects.createObjectBuilder().build();
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.compute-outstanding-fines-requested"),
                 outstandingFinesQuery);
 
 
         final Envelope<JsonObject> courtBasedDefendantQueryInformation = mock(Envelope.class);
-        when(courtBasedDefendantQueryInformation.payload()).thenReturn(Json.createObjectBuilder().build());
+        when(courtBasedDefendantQueryInformation.payload()).thenReturn(JsonObjects.createObjectBuilder().build());
 
         final OutstandingFinesQueried outstandingFinesQueried = OutstandingFinesQueried.newBuilder()
                 .withCourtCentreId(UUID.fromString("cb41f33d-9de0-4f49-9f8e-b7b06de4279a"))

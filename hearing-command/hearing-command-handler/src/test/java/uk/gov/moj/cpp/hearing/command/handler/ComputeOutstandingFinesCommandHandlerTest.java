@@ -28,7 +28,7 @@ import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesQueried;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -98,9 +98,9 @@ public class ComputeOutstandingFinesCommandHandlerTest {
     }
 
     private JsonObject createCourtRoomsOutstandingFInesQuery() {
-        return Json.createObjectBuilder()
+        return JsonObjects.createObjectBuilder()
                 .add("courtCentreId", "88abd281-8c52-4171-aca1-740f734b43d7")
-                .add("courtRoomIds", Json.createArrayBuilder()
+                .add("courtRoomIds", JsonObjects.createArrayBuilder()
                         .add(COURT_ROOM_ID1)
                         .add(COURT_ROOM_ID2)
                         .add(COURT_ROOM_ID3))

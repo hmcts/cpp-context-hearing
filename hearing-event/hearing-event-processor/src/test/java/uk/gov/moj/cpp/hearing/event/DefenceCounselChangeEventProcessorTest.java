@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.event;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -18,7 +18,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -95,7 +95,7 @@ public class DefenceCounselChangeEventProcessorTest {
     @Test
     public void processDefenceCounselRemovedEvent() {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.defence-counsel-removed"),
-                Json.createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("id", ID)
                         .add("hearingId", HEARING_ID)
                         .build());

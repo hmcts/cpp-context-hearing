@@ -21,7 +21,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
@@ -90,13 +90,13 @@ public class SessionTimeIT extends AbstractIT {
         final UUID courtRoomId = randomUUID();
         final LocalDate courtSessionDate = LocalDate.now();
 
-        final JsonObjectBuilder recordSessionTime1 = Json.createObjectBuilder();
+        final JsonObjectBuilder recordSessionTime1 = JsonObjects.createObjectBuilder();
         recordSessionTime1.add("courtHouseId", courtHouseId.toString());
         recordSessionTime1.add("courtRoomId", courtRoomId.toString());
         recordSessionTime1.add("courtSessionDate", courtSessionDate.toString());
 
-        final JsonObjectBuilder courtSession = Json.createObjectBuilder();
-        final JsonArrayBuilder judiciaryList = Json.createArrayBuilder();
+        final JsonObjectBuilder courtSession = JsonObjects.createObjectBuilder();
+        final JsonArrayBuilder judiciaryList = JsonObjects.createArrayBuilder();
         judiciaryList.add(judiciary(jud1, jud1Name, chair1));
         judiciaryList.add(judiciary(jud2, jud2Name, chair2));
         courtSession.add("judiciaries", judiciaryList);
@@ -119,14 +119,14 @@ public class SessionTimeIT extends AbstractIT {
         verifyPartialCourtSession(jud1, jud1Name, chair1, amCourtSession);
 
         //Second Request
-        final JsonObjectBuilder recordSessionTime2 = Json.createObjectBuilder();
+        final JsonObjectBuilder recordSessionTime2 = JsonObjects.createObjectBuilder();
         recordSessionTime2.add("courtHouseId", courtHouseId.toString());
         recordSessionTime2.add("courtRoomId", courtRoomId.toString());
         recordSessionTime2.add("courtSessionDate", courtSessionDate.toString());
 
 
-        final JsonObjectBuilder amCourtSession2 = Json.createObjectBuilder();
-        final JsonArrayBuilder judiciaryList2 = Json.createArrayBuilder();
+        final JsonObjectBuilder amCourtSession2 = JsonObjects.createObjectBuilder();
+        final JsonArrayBuilder judiciaryList2 = JsonObjects.createArrayBuilder();
         judiciaryList2.add(judiciary(jud2, jud2Name, chair2));
         amCourtSession2.add("judiciaries", judiciaryList2);
         recordSessionTime2.add("amCourtSession", amCourtSession2);
@@ -135,8 +135,8 @@ public class SessionTimeIT extends AbstractIT {
         final String jud3Name = STRING.next();
         final boolean chair3 = false;
 
-        final JsonObjectBuilder pmCourtSession2 = Json.createObjectBuilder();
-        final JsonArrayBuilder judiciaryList3 = Json.createArrayBuilder();
+        final JsonObjectBuilder pmCourtSession2 = JsonObjects.createObjectBuilder();
+        final JsonArrayBuilder judiciaryList3 = JsonObjects.createArrayBuilder();
         judiciaryList3.add(judiciary(jud3pm, jud3Name, chair3));
         pmCourtSession2.add("judiciaries", judiciaryList3);
         recordSessionTime2.add("pmCourtSession", pmCourtSession2);
@@ -239,7 +239,7 @@ public class SessionTimeIT extends AbstractIT {
                                          final boolean chair3
     ) {
 
-        final JsonObjectBuilder recordSessionTime = Json.createObjectBuilder();
+        final JsonObjectBuilder recordSessionTime = JsonObjects.createObjectBuilder();
         recordSessionTime.add("courtHouseId", courtHouseId.toString());
         recordSessionTime.add("courtRoomId", courtRoomId.toString());
         recordSessionTime.add("courtSessionDate", courtSessionDate.toString());
@@ -264,14 +264,14 @@ public class SessionTimeIT extends AbstractIT {
                                     final boolean chair3
     ) {
 
-        final JsonObjectBuilder courtSession = Json.createObjectBuilder();
+        final JsonObjectBuilder courtSession = JsonObjects.createObjectBuilder();
         courtSession.add("courtAssociateId", courtAssociateId.toString());
         courtSession.add("courtClerkId", courtClerkId.toString());
         courtSession.add("legalAdviserId", legalAdviserId.toString());
         courtSession.add("startTime", startTime);
         courtSession.add("endTime", endTime);
 
-        final JsonArrayBuilder judiciaryList = Json.createArrayBuilder();
+        final JsonArrayBuilder judiciaryList = JsonObjects.createArrayBuilder();
         judiciaryList.add(judiciary(jud1, judName1, chair1));
         judiciaryList.add(judiciary(jud2, judName2, chair2));
         judiciaryList.add(judiciary(jud3, judName3, chair3));
@@ -281,7 +281,7 @@ public class SessionTimeIT extends AbstractIT {
     }
 
     private JsonObject judiciary(final UUID judId, final String jud1Name, final boolean chair) {
-        final JsonObjectBuilder judiciary = Json.createObjectBuilder();
+        final JsonObjectBuilder judiciary = JsonObjects.createObjectBuilder();
         judiciary.add("benchChairman", chair);
         judiciary.add("judiciaryId", judId.toString());
         judiciary.add("judiciaryName", jud1Name);

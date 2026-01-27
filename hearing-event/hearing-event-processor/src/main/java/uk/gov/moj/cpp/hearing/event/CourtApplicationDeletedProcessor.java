@@ -10,7 +10,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
@@ -31,7 +31,7 @@ public class CourtApplicationDeletedProcessor {
             LOGGER.debug("Received '{}' event with payload {}", "public.progression.events.court-application-deleted", envelope.toObfuscatedDebugString());
         }
 
-        final JsonObjectBuilder commandBuilder = Json.createObjectBuilder();
+        final JsonObjectBuilder commandBuilder = JsonObjects.createObjectBuilder();
         final JsonObject payload = envelope.payloadAsJsonObject();
         commandBuilder
                 .add("hearingId", payload.getJsonString("hearingId"))

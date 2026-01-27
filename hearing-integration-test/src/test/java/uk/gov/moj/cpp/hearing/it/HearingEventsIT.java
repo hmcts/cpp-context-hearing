@@ -87,7 +87,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
@@ -599,16 +599,16 @@ public class HearingEventsIT extends AbstractIT {
     private JsonObject updateHearingEvents(final RequestSpecification requestSpec,
                                            final UUID hearingId, final List<HearingEvent> hearingEvents,
                                            final String updateEventsEndpoint, final Header headers) {
-        final JsonArrayBuilder hearingEventsArray = Json.createArrayBuilder();
+        final JsonArrayBuilder hearingEventsArray = JsonObjects.createArrayBuilder();
         hearingEvents.stream().forEach(event -> {
-            final JsonObject hearingEvent = Json.createObjectBuilder()
+            final JsonObject hearingEvent = JsonObjects.createObjectBuilder()
                     .add("hearingEventId", event.getHearingEventId().toString())
                     .add("recordedLabel", event.getRecordedLabel())
                     .build();
             hearingEventsArray.add(hearingEvent);
         });
         final JsonObject payload =
-                Json.createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingEvents", hearingEventsArray).build();
         final Utilities.EventListener publicEventTopic =
                 listenFor("public.hearing.events-updated")

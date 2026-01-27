@@ -23,7 +23,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 
@@ -94,7 +94,7 @@ public class PublishCourtListStatusHandler extends AbstractCommandHandler {
     @Handles("hearing.command.publish-hearing-lists-for-crown-courts-with-ids")
     public void publishHearingListsForCrownCourtsWithIds(final JsonEnvelope commandEnvelope) {
         Optional.ofNullable(commandEnvelope.payloadAsJsonObject().getJsonArray("ids"))
-                .orElse(Json.createArrayBuilder().build()).getValuesAs(JsonString.class)
+                .orElse(JsonObjects.createArrayBuilder().build()).getValuesAs(JsonString.class)
                 .stream().map(JsonString::getString).map(UUID::fromString)
                 .forEach(courtCentreId -> publishFinalCourtList(commandEnvelope.metadata(), courtCentreId));
     }
@@ -121,7 +121,7 @@ public class PublishCourtListStatusHandler extends AbstractCommandHandler {
     }
 
     public static JsonValue asJson(final PublishCourtList publishCourtList) {
-        return Json.createObjectBuilder()
+        return JsonObjects.createObjectBuilder()
                 .add(PublishCourtListFields.COURT_CENTRE_ID.getInternalName(), publishCourtList.getCourtCentreId().toString())
                 .add(PublishCourtListFields.CREATED_TIME.getInternalName(), publishCourtList.getCreatedTime().toString())
                 .build();

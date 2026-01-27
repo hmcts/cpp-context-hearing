@@ -14,7 +14,7 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
@@ -123,7 +123,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -817,8 +817,8 @@ public class HearingService {
     @Transactional
     public JsonObject getNowsRepository(final String q) {
         LOGGER.debug("Searching for allowed user groups with materialId='{}'", q);
-        final JsonObjectBuilder json = Json.createObjectBuilder();
-        final JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+        final JsonObjectBuilder json = JsonObjects.createObjectBuilder();
+        final JsonArrayBuilder jsonArrayBuilder = JsonObjects.createArrayBuilder();
         final NowsMaterial nowsMaterial = nowsMaterialRepository.findBy(fromString(q));
         if (nowsMaterial != null) {
             nowsMaterial.getUserGroups().stream().sorted().collect(toList()).forEach(jsonArrayBuilder::add);
@@ -865,7 +865,7 @@ public class HearingService {
 
             LOGGER.error(format("Exception occurred while retrieve get subscriptions = '%s - %s'", referenceDateParam, nowTypeParam), e);
 
-            return Json.createObjectBuilder().build();
+            return JsonObjects.createObjectBuilder().build();
         }
     }
 
@@ -1122,7 +1122,7 @@ public class HearingService {
     }
 
     public static boolean isUserHasPermissionForApplicationTypeCode(final Metadata metadata, final Requester requester, final String applicationTypeCode) {
-        final JsonObject getOrganisationForUserRequest = Json.createObjectBuilder()
+        final JsonObject getOrganisationForUserRequest = JsonObjects.createObjectBuilder()
                 .add(ACTION, ACCESS_TO_STANDALONE_APPLICATION)
                 .add(OBJECT, applicationTypeCode)
                 .build();
