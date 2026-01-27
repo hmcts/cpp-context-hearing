@@ -12,6 +12,8 @@ import static uk.gov.justice.services.messaging.JsonMetadata.CONTEXT;
 import static uk.gov.justice.services.messaging.JsonMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonMetadata.USER_ID;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
@@ -65,10 +67,10 @@ public class HearingDetailChangeEventProcessorTest {
     private HearingDetailChangeEventProcessor testObj;
 
     public static Metadata createMetadataWithUserId(final String id, final String name, final String userId) {
-        JsonObject jsonObject = JsonObjects.createObjectBuilder()
+        JsonObject jsonObject = createObjectBuilder()
                 .add(ID, id)
                 .add(NAME, name)
-                .add(CONTEXT, JsonObjects.createObjectBuilder()
+                .add(CONTEXT, createObjectBuilder()
                         .add(USER_ID, userId).build())
                 .build();
 
@@ -105,20 +107,20 @@ public class HearingDetailChangeEventProcessorTest {
     }
 
     private JsonObject publicHearingChangedEvent() {
-        return JsonObjects.createObjectBuilder()
-                .add("hearing", JsonObjects.createObjectBuilder()
+        return createObjectBuilder()
+                .add("hearing", createObjectBuilder()
                         .add("id", ARBITRARY_HEARING_ID)
                         .add("type", ARBITRARY_TRIAL)
                         .add("judge", getJudge())
                         .add("courtRoomId", ARBITRARY_HEARING_COURT_ROOM_ID)
                         .add("courtRoomName", ARBITRARY_COURT_NAME)
-                        .add("hearingDays", JsonObjects.createArrayBuilder().add(ARBITRARY_HEARING_DAY).add("2016-07-03T10:15:00Z").build())
+                        .add("hearingDays", createArrayBuilder().add(ARBITRARY_HEARING_DAY).add("2016-07-03T10:15:00Z").build())
                         .build())
                 .build();
     }
 
     private JsonObject getJudge() {
-        final JsonObject judgeJsonObject = JsonObjects.createObjectBuilder()
+        final JsonObject judgeJsonObject = createObjectBuilder()
                 .add("id", ARBITRARY_HEARING_JUDGE_ID)
                 .add("firstName", ARBITRARY_HEARING_JUDGE_FIRST_NAME)
                 .add("lastName", ARBITRARY_HEARING_JUDGE_LAST_NAME)

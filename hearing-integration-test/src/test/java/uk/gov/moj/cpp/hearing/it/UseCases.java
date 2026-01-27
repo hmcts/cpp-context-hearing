@@ -6,6 +6,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.hamcrest.Matchers.hasItems;
@@ -971,7 +972,7 @@ public class UseCases {
                 eventName,
                 createObjectBuilder()
                         .add("foooo", "to test additional properties")
-                        .add("defendants", JsonObjects.createArrayBuilder().add(createObjectBuilder(jsonObject).build()))
+                        .add("defendants", createArrayBuilder().add(createObjectBuilder(jsonObject).build()))
                         .build(),
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
 
@@ -1103,7 +1104,7 @@ public class UseCases {
     public static void updateCaseMarkers(final UUID prosecutionCaseId, final UUID hearingId, final List<Marker> markers) throws Exception {
 
         final String eventName = "public.progression.case-markers-updated";
-        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
         for (final Marker marker : markers) {
             final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
             final String payloadAsString = mapper.writeValueAsString(marker);
@@ -1162,7 +1163,7 @@ public class UseCases {
     public static void updateProsecutor(final UUID prosecutionCaseId, final List<UUID> hearingIds, final CpsProsecutorUpdated cpsProsecutorUpdated) throws JsonProcessingException {
 
         final String eventName = "public.progression.events.cps-prosecutor-updated";
-        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
         for (final UUID hearingId : hearingIds) {
             arrayBuilder.add(hearingId.toString());
         }
@@ -1208,7 +1209,7 @@ public class UseCases {
 
     public static void correctHearingDaysWithoutCourtCentre(final RequestSpecification requestSpec, final UUID hearingId, final List<HearingDay> hearingDays) {
 
-        final JsonArrayBuilder hearingDayArrayBuilder = JsonObjects.createArrayBuilder();
+        final JsonArrayBuilder hearingDayArrayBuilder = createArrayBuilder();
         hearingDays.forEach(d -> {
             try {
                 hearingDayArrayBuilder.add(objectToJsonObject(d));
@@ -1217,7 +1218,7 @@ public class UseCases {
             }
         });
 
-        final JsonObject commandPayload = JsonObjects.createObjectBuilder().add("id", hearingId.toString())
+        final JsonObject commandPayload = createObjectBuilder().add("id", hearingId.toString())
                 .add("hearingDays", hearingDayArrayBuilder).build();
 
 

@@ -14,13 +14,12 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
+import static uk.gov.justice.services.messaging.JsonObjects.*;
 import static uk.gov.moj.cpp.hearing.mapping.ApplicationAmendmentAllowedResolver.isAmendmentAllowed;
 
 import uk.gov.justice.core.courts.ApplicationStatus;
@@ -817,8 +816,8 @@ public class HearingService {
     @Transactional
     public JsonObject getNowsRepository(final String q) {
         LOGGER.debug("Searching for allowed user groups with materialId='{}'", q);
-        final JsonObjectBuilder json = JsonObjects.createObjectBuilder();
-        final JsonArrayBuilder jsonArrayBuilder = JsonObjects.createArrayBuilder();
+        final JsonObjectBuilder json = createObjectBuilder();
+        final JsonArrayBuilder jsonArrayBuilder = createArrayBuilder();
         final NowsMaterial nowsMaterial = nowsMaterialRepository.findBy(fromString(q));
         if (nowsMaterial != null) {
             nowsMaterial.getUserGroups().stream().sorted().collect(toList()).forEach(jsonArrayBuilder::add);
@@ -865,7 +864,7 @@ public class HearingService {
 
             LOGGER.error(format("Exception occurred while retrieve get subscriptions = '%s - %s'", referenceDateParam, nowTypeParam), e);
 
-            return JsonObjects.createObjectBuilder().build();
+            return createObjectBuilder().build();
         }
     }
 
@@ -1122,7 +1121,7 @@ public class HearingService {
     }
 
     public static boolean isUserHasPermissionForApplicationTypeCode(final Metadata metadata, final Requester requester, final String applicationTypeCode) {
-        final JsonObject getOrganisationForUserRequest = JsonObjects.createObjectBuilder()
+        final JsonObject getOrganisationForUserRequest = createObjectBuilder()
                 .add(ACTION, ACCESS_TO_STANDALONE_APPLICATION)
                 .add(OBJECT, applicationTypeCode)
                 .build();

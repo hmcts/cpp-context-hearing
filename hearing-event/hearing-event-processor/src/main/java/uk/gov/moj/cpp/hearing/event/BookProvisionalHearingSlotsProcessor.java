@@ -73,11 +73,11 @@ public class BookProvisionalHearingSlotsProcessor {
 
         //raise public event for UI
         if (!provisionalBookingServiceResponse.hasError()) {
-            sender.send(Enveloper.envelop(JsonObjects.createObjectBuilder().add("bookingId", provisionalBookingServiceResponse.getBookingId()).build())
+            sender.send(Enveloper.envelop(createObjectBuilder().add("bookingId", provisionalBookingServiceResponse.getBookingId()).build())
                     .withName("public.hearing.hearing-slots-provisionally-booked")
                     .withMetadataFrom(event));
         } else {
-            sender.send(Enveloper.envelop(JsonObjects.createObjectBuilder().add("error", provisionalBookingServiceResponse.getErrorMessage()).build())
+            sender.send(Enveloper.envelop(createObjectBuilder().add("error", provisionalBookingServiceResponse.getErrorMessage()).build())
                     .withName("public.hearing.hearing-slots-provisionally-booked")
                     .withMetadataFrom(event));
         }

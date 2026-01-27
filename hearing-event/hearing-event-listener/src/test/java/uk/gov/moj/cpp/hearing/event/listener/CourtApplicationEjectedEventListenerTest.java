@@ -5,6 +5,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
@@ -66,9 +68,9 @@ public class CourtApplicationEjectedEventListenerTest {
     }
 
     private JsonEnvelope getCourtApplicationEjectedEventEnvelope(final UUID hearingId) {
-        JsonObject payload = JsonObjects.createObjectBuilder()
+        JsonObject payload = createObjectBuilder()
                 .add("applicationId", randomUUID().toString())
-                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()))
+                .add("hearingIds", createArrayBuilder().add(hearingId.toString()))
                 .build();
         final Metadata metadata = metadataOf(randomUUID(), "event-name").build();
 

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
 
@@ -92,7 +93,7 @@ public class AddDefendantEventListenerTest {
 
     private JsonEnvelope getDefendantAddedJsonEnvelope(final UUID arbitraryHearingId) {
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant arbitraryDefendant = defendantTemplate();
-        JsonObject payload = JsonObjects.createObjectBuilder()
+        JsonObject payload = createObjectBuilder()
                 .add("hearingId", arbitraryHearingId.toString())
                 .add("defendant", objectToJsonObjectConverter.convert(arbitraryDefendant))
                 .build();

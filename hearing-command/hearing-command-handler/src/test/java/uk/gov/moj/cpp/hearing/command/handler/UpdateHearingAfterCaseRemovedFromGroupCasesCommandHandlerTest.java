@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.command.handler.util.EventStreamHelperUtil.verifyAndGetEvents;
@@ -174,7 +175,7 @@ public class UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandlerTest {
 
     private JsonEnvelope getJsonEnvelopeForRemoveCommand(final UUID hearingId, final UUID groupId,
                                                          final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
-        JsonObjectBuilder builder = JsonObjects.createObjectBuilder()
+        JsonObjectBuilder builder = createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("groupId", groupId.toString())
                 .add("removedCase", objectToJsonObjectConverter.convert(removedCase));

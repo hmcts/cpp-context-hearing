@@ -7,6 +7,7 @@ import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
@@ -78,7 +79,7 @@ public class HearingVacatedTrialDetailChangeEventProcessorTest {
     }
 
     private JsonObject publicHearingVacatedTrialDetailUpdatedEvent() {
-        return JsonObjects.createObjectBuilder()
+        return createObjectBuilder()
                 .add("hearingId", HEARING_ID)
                 .add("vacatedTrialReasonId", VACATED_TRIAL_REASON_ID)
                 .add("isVacated", true)

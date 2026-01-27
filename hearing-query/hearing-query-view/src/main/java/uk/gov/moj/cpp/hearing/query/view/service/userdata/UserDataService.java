@@ -61,7 +61,7 @@ public class UserDataService {
     }
 
     public List<Permission> getUserPermissionForApplicationTypes(final Metadata metadata) {
-        final JsonObject getOrganisationForUserRequest = JsonObjects.createObjectBuilder()
+        final JsonObject getOrganisationForUserRequest = createObjectBuilder()
                 .add(ACTION, ACCESS_TO_STANDALONE_APPLICATION)
                 .build();
         final MetadataBuilder metadataWithActionName = Envelope.metadataFrom(metadata).withName("usersgroups.is-logged-in-user-has-permission-for-action");

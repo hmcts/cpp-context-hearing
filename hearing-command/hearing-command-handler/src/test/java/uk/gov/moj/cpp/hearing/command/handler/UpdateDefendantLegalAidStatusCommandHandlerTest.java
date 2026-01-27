@@ -7,6 +7,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
@@ -87,10 +89,10 @@ public class UpdateDefendantLegalAidStatusCommandHandlerTest {
 
         defendantAggregate.registerHearing(defendantId, hearingId);
 
-        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
+        final JsonObject commandPayload = createObjectBuilder()
                 .add("defendantId", defendantId.toString())
                 .add("legalAidStatus", "Granted")
-                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()).build())
+                .add("hearingIds", createArrayBuilder().add(hearingId.toString()).build())
                 .build();
 
 
@@ -114,10 +116,10 @@ public class UpdateDefendantLegalAidStatusCommandHandlerTest {
 
 
 
-        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
+        final JsonObject commandPayload = createObjectBuilder()
                 .add("defendantId", defendantId.toString())
                 .add("legalAidStatus", "Granted")
-                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()).build())
+                .add("hearingIds", createArrayBuilder().add(hearingId.toString()).build())
                 .build();
 
 
@@ -137,7 +139,7 @@ public class UpdateDefendantLegalAidStatusCommandHandlerTest {
         hearingAggregate.initiate(initiateHearingCommand.getHearing());
 
 
-        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
+        final JsonObject commandPayload = createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("defendantId", defendantId.toString())
                 .add("legalAidStatus", "Granted")

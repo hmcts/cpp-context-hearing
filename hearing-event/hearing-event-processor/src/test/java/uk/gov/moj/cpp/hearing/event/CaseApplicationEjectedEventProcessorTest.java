@@ -4,6 +4,7 @@ import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
@@ -41,7 +42,7 @@ public class CaseApplicationEjectedEventProcessorTest {
     public void processCaseApplicationEjected() {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.events.case-or-application-ejected"),
-                JsonObjects.createObjectBuilder()
+                createObjectBuilder()
                         .add("hearingIds", createArrayBuilder().add(randomUUID().toString()))
                         .build());
 

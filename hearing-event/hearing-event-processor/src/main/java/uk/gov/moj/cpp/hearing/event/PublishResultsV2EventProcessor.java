@@ -9,6 +9,8 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.Address.address;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
@@ -152,7 +154,7 @@ public class PublishResultsV2EventProcessor {
 
     public void updateTheDefendantsCase(final JsonEnvelope event, final UUID hearingId, final UUID caseId, final UUID defendantId, final List<UUID> offenceIds, final Map<UUID, OffenceResult> offenceResultMap) {
 
-        final JsonObject payload = JsonObjects.createObjectBuilder()
+        final JsonObject payload = createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("caseId", caseId.toString())
                 .add("defendantId", defendantId.toString())
@@ -166,15 +168,15 @@ public class PublishResultsV2EventProcessor {
     }
 
     private JsonArrayBuilder convertToJsonArray(final List<UUID> offenceIds) {
-        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
         offenceIds.stream().map(UUID::toString).forEach(arrayBuilder::add);
         return arrayBuilder;
     }
 
     private JsonArrayBuilder convertOffenceResultMapToJsonArray(final Map<UUID, OffenceResult> offenceResultMap) {
-        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
         offenceResultMap.entrySet().stream().forEach(offenceResult -> {
-            final JsonObject offenceResultObject = JsonObjects.createObjectBuilder()
+            final JsonObject offenceResultObject = createObjectBuilder()
                     .add("offenceId", offenceResult.getKey().toString())
                     .add("offenceResult", offenceResult.getValue().name())
                     .build();

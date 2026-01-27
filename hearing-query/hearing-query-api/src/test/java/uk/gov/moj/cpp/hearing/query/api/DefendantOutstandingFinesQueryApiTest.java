@@ -90,7 +90,7 @@ public class DefendantOutstandingFinesQueryApiTest {
     @Test
     public void should_return_NO_outstanding_fines_when_defendant_id_is_unknown() {
         when(hearingQueryView.getOutstandingFinesQueryFromDefendantId(any())).thenReturn(jsonEnvelopeFromHearing);
-        JsonObject emptyResponseFromHearingQueryView = JsonObjects.createObjectBuilder().build();
+        JsonObject emptyResponseFromHearingQueryView = createObjectBuilder().build();
 
         setUp(emptyResponseFromHearingQueryView);
 

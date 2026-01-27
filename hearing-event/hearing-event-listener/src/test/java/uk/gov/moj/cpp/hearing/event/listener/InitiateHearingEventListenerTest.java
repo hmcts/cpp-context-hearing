@@ -14,6 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
@@ -944,7 +945,7 @@ public class InitiateHearingEventListenerTest {
     public void shouldPassSchemaValidationForValidPayloadOfConvictionDateAdded() {
         //given
         JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
-                JsonObjects.createObjectBuilder()
+                createObjectBuilder()
                         .add("caseId", "30dd24a6-e383-48f6-afa0-e4b174ecb89c")
                         .add("hearingId", "c76ead4b-5ac8-48e0-b744-f4ade56c8198")
                         .add("offenceId", "0683dfed-f9a4-4661-aaa9-d43fda9ef93d")
@@ -960,7 +961,7 @@ public class InitiateHearingEventListenerTest {
     public void shouldPassSchemaValidationForValidPayloadOfConvictionDateRemoved() {
         //given
         JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
-                JsonObjects.createObjectBuilder()
+                createObjectBuilder()
                         .add("caseId", "30dd24a6-e383-48f6-afa0-e4b174ecb89c")
                         .add("hearingId", "c76ead4b-5ac8-48e0-b744-f4ade56c8198")
                         .add("offenceId", "0683dfed-f9a4-4661-aaa9-d43fda9ef93d")

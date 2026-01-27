@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.it;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
@@ -42,7 +43,7 @@ public class DefendantLegalAidStatusUpdateIT extends AbstractIT {
         final UUID defendantId = hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId();
         final UUID caseId = hearingOne.getHearing().getProsecutionCases().get(0).getId();
 
-        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
+        final JsonObject commandPayload = createObjectBuilder()
                 .add("defendantId", defendantId.toString())
                 .add("legalAidStatus", "Granted")
                 .add("caseId", caseId.toString())

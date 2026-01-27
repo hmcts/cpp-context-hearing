@@ -340,7 +340,7 @@ public class HearingQueryApi {
             return requestStagingEnforcementToGetOutstandingFines(query, viewResponseEnvelopePayload);
         }
         return envelopeFrom(query.metadata(),
-                JsonObjects.createObjectBuilder()
+                createObjectBuilder()
                         .add("outstandingFines",
                                 createArrayBuilder()).build());
     }

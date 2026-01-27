@@ -9,6 +9,7 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.status;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapper;
 import uk.gov.justice.services.adapter.rest.multipart.FileInputDetailsFactory;
@@ -67,7 +68,7 @@ public class DefaultQueryApiHearingsEventLogExtractResource implements QueryApiH
     @Override
     public Response getHearingsEventLogExtract(final String caseId, final String hearingId, final String applicationId, final String hearingDate, final UUID userId) throws IOException {
 
-        final JsonObjectBuilder payloadBuilder = JsonObjects.createObjectBuilder();
+        final JsonObjectBuilder payloadBuilder = createObjectBuilder();
 
         if (nonNull(hearingId)) {
             payloadBuilder.add("hearingId", hearingId);

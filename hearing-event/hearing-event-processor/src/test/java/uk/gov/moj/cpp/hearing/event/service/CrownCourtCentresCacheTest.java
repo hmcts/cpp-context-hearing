@@ -4,6 +4,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,7 +37,7 @@ public class CrownCourtCentresCacheTest {
         final List<UUID> expectedCourtCentreIds = Arrays.asList(courtCentreId);
          Set<UUID> resultCourCentreIds = new HashSet<>();
          resultCourCentreIds.add(courtCentreId);
-        final JsonObject courCentre = JsonObjects.createObjectBuilder().add("id",expectedCourtCentreIds.get(0).toString()).build();
+        final JsonObject courCentre = createObjectBuilder().add("id",expectedCourtCentreIds.get(0).toString()).build();
         when( referenceDataLoader.getAllCrownCourtCentres()).thenReturn(Collections.singletonList(courCentre));
         target.init();
         Set<UUID> result = target.getAllCrownCourtCentres();

@@ -3,6 +3,8 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.codehaus.groovy.runtime.InvokerHelper.asList;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
@@ -44,9 +46,9 @@ public class YouthCourtDefendantsUpdatedIT extends AbstractIT {
 
         try (EventListener eventListener = listenFor("public.hearing.defendants-in-youthcourt-updated")
                 .withFilter(isJson(withJsonPath("$.hearingId", Is.is(hearingId.toString()))))) {
-            final JsonObjectBuilder jsonObjectBuilder = JsonObjects.createObjectBuilder();
+            final JsonObjectBuilder jsonObjectBuilder = createObjectBuilder();
 
-            final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
+            final JsonArrayBuilder arrayBuilder = createArrayBuilder();
             defendantsInYouthCourt.stream().forEach(d -> arrayBuilder.add(d.toString()));
             jsonObjectBuilder.add("youthCourtDefendantIds", arrayBuilder.build());
             makeCommand(requestSpec, "hearing.youth-court-defendants")

@@ -7,6 +7,8 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
@@ -211,9 +213,9 @@ public class ExtendHearingIT extends AbstractIT {
 
         UUID courtApplicationId = randomUUID();
 
-        final JsonObject publicEventBreachApplicationsToBeAdded = JsonObjects.createObjectBuilder()
+        final JsonObject publicEventBreachApplicationsToBeAdded = createObjectBuilder()
                 .add("hearingId", hearing.getId().toString())
-                .add("breachedApplications", JsonObjects.createArrayBuilder().add(courtApplicationId.toString()))
+                .add("breachedApplications", createArrayBuilder().add(courtApplicationId.toString()))
                 .build();
 
         sendMessage(getPublicTopicInstance().createProducer(),

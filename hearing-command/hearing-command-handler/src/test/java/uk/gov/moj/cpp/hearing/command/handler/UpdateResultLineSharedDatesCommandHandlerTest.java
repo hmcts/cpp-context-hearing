@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
@@ -79,10 +81,10 @@ public class UpdateResultLineSharedDatesCommandHandlerTest {
         final UUID resultLineId1 = UUID.randomUUID();
         final String sharedDate = "2020-02-05";
 
-        final JsonObject payload = JsonObjects.createObjectBuilder()
+        final JsonObject payload = createObjectBuilder()
                 .add("hearingId", hearingId.toString())
-                .add("resultLinesToBeUpdated", JsonObjects.createArrayBuilder()
-                        .add(JsonObjects.createObjectBuilder()
+                .add("resultLinesToBeUpdated", createArrayBuilder()
+                        .add(createObjectBuilder()
                                 .add("resultLineId", resultLineId1.toString())
                                 .add("sharedDate", sharedDate)
                         )).build();

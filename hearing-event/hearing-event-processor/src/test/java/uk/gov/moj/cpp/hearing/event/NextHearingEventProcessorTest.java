@@ -9,6 +9,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
@@ -58,7 +59,7 @@ public class NextHearingEventProcessorTest {
         final String seedingHearingId = randomUUID().toString();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.events.listing.next-hearing-day-changed"),
-                JsonObjects.createObjectBuilder()
+                createObjectBuilder()
                         .add("hearingId", hearingId)
                         .add("seedingHearingId", seedingHearingId)
                         .add("hearingStartDate", "2021-06-20T00:00:00.000Z")

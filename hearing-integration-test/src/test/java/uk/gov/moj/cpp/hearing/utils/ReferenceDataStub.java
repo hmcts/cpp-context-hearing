@@ -917,10 +917,10 @@ public class ReferenceDataStub {
         builder.add("courtNameWelsh", "courtNameWelsh");
         builder.add("id", randomUUID().toString());
 
-        final JsonArrayBuilder youthCourtsBuilder = JsonObjects.createArrayBuilder();
+        final JsonArrayBuilder youthCourtsBuilder = createArrayBuilder();
         youthCourtsBuilder.add(builder.build());
         final JsonObject payload =
-                JsonObjects.createObjectBuilder().add("youthCourts", youthCourtsBuilder.build()).build();
+                createObjectBuilder().add("youthCourts", youthCourtsBuilder.build()).build();
         stub(payload, REFERENCE_DATA_YOUTH_COURT_QUERY_URL, REFERENCE_DATA_QUERY_YOUTH_COURT_MEDIA_TYPE, "magsUUID", magsUUID.toString());
     }
 

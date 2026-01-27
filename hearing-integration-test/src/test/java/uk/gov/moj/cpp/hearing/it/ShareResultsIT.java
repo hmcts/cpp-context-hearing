@@ -1691,7 +1691,7 @@ public class ShareResultsIT extends AbstractIT {
                 .replaceAll("OFFENCE_ID", randomUUID().toString());
 
         final JsonObject saveDraftResultJson = new StringToJsonObjectConverter().convert(eventPayloadString);
-        JsonObjectBuilder builder = JsonObjects.createObjectBuilder();
+        JsonObjectBuilder builder = createObjectBuilder();
         saveDraftResultJson.forEach(builder::add);
         builder.add("version", version);
         final JsonObject draftResultWithVersionJson = builder.build();

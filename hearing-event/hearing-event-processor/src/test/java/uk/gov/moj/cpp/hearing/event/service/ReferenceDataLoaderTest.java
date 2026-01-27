@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.event.service;
 
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -61,7 +62,7 @@ public class ReferenceDataLoaderTest {
 
     private JsonEnvelope generateReferenceDataServiceResponse(final List<UUID> expectedCourtCentreIds) {
         return createEnvelope(".", createObjectBuilder()
-                .add("organisationunits", JsonObjects.createArrayBuilder()
+                .add("organisationunits", createArrayBuilder()
                         .add(buildOrgUnit(expectedCourtCentreIds.get(0)))
                         .add(buildOrgUnit(expectedCourtCentreIds.get(1)))
                 )
@@ -69,7 +70,7 @@ public class ReferenceDataLoaderTest {
     }
 
     private JsonObject buildOrgUnit(final UUID courtCentreId) {
-        return JsonObjects.createObjectBuilder()
+        return createObjectBuilder()
                 .add("id", courtCentreId.toString())
                 .build();
     }

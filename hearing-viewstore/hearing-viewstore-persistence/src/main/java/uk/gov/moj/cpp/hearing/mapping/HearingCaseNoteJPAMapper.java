@@ -56,7 +56,7 @@ public class HearingCaseNoteJPAMapper {
                 .add("originatingHearingId", pojo.getOriginatingHearingId().toString())
                 .add("noteDateTime", ZonedDateTimes.toString(pojo.getNoteDateTime()))
                 .add("prosecutionCases", prosecutionCases)
-                .add("courtClerk", JsonObjects.createObjectBuilder()
+                .add("courtClerk", createObjectBuilder()
                         .add("userId", pojo.getCourtClerk().getUserId().toString())
                         .add("firstName", pojo.getCourtClerk().getFirstName())
                         .add("lastName", pojo.getCourtClerk().getLastName())

@@ -8,6 +8,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -71,7 +73,7 @@ public class ReferenceDataServiceTest {
 
     @Test
     public void shouldReturnEmptyResultDefinition() {
-        final JsonObject jsonObjectPayload = JsonObjects.createObjectBuilder().add("resultDefinitions", JsonObjects.createArrayBuilder().add(JsonObjects.createObjectBuilder().build())).build();
+        final JsonObject jsonObjectPayload = createObjectBuilder().add("resultDefinitions", createArrayBuilder().add(createObjectBuilder().build())).build();
         final Metadata metadata = CommandAPITestBase.metadataFor(RESULT_QUERY, randomUUID().toString());
         final Envelope envelope = Envelope.envelopeFrom(metadata, jsonObjectPayload);
 

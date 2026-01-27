@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialRole;
@@ -76,7 +77,7 @@ public class JudgeNameMapperTest {
     }
 
     private JsonObject createJudiciaryWithRequestedName() {
-        final JsonObjectBuilder judiciaryBuilder = JsonObjects.createObjectBuilder();
+        final JsonObjectBuilder judiciaryBuilder = createObjectBuilder();
         judiciaryBuilder.add(REQUESTED_NAME, REQUESTED_NAME);
         judiciaryBuilder.add(SURNAME, SURNAME);
         judiciaryBuilder.add(FORENAMES, FORENAMES);
@@ -87,7 +88,7 @@ public class JudgeNameMapperTest {
     }
 
     private JsonObject createJudiciaryWithoutRequestedName() {
-        final JsonObjectBuilder judiciaryBuilder = JsonObjects.createObjectBuilder();
+        final JsonObjectBuilder judiciaryBuilder = createObjectBuilder();
         judiciaryBuilder.add(SURNAME, SURNAME);
         judiciaryBuilder.add(FORENAMES, FORENAMES);
         judiciaryBuilder.add(TITLE_SUFFIX, TITLE_SUFFIX);

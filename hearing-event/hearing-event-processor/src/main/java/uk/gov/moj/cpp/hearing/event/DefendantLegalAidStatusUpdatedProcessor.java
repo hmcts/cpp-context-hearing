@@ -75,7 +75,7 @@ public class DefendantLegalAidStatusUpdatedProcessor {
             final String defendantId = eventPayload.getString(DEFENDANT_ID);
             final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(UUID.fromString(defendantId), UUID.fromString(((JsonString)hearingId).getString())));
             if(defendant != null){
-                final JsonObject commandPayload = JsonObjects.createObjectBuilder()
+                final JsonObject commandPayload = createObjectBuilder()
                         .add(HEARING_ID, hearingId)
                         .add(DEFENDANT_ID, defendantId)
                         .add(LEGAL_AID_STATUS, eventPayload.getString(LEGAL_AID_STATUS))

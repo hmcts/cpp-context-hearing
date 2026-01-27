@@ -95,7 +95,7 @@ public class DefenceCounselChangeEventProcessorTest {
     @Test
     public void processDefenceCounselRemovedEvent() {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.defence-counsel-removed"),
-                JsonObjects.createObjectBuilder()
+                createObjectBuilder()
                         .add("id", ID)
                         .add("hearingId", HEARING_ID)
                         .build());

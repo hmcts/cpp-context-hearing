@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
@@ -55,7 +56,7 @@ public class CompanyRepresentativeEventProcessorTest {
     public void processPublicHearingCompanyRepresentativeChangeIgnored() {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.company-representative-change-ignored"),
-                JsonObjects.createObjectBuilder()
+                createObjectBuilder()
                         .add("reason", "company representative already added")
                         .build());
 

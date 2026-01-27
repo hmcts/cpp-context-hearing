@@ -8,6 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
@@ -120,7 +121,7 @@ public class CaseDefendantsUpdatedForHearingProcessorTest {
     @Test
     public void shouldCallCommand(){
         final String hearingId = randomUUID().toString();
-        JsonObject relatedHearingUpdatedforAdhocHearing = JsonObjects.createObjectBuilder()
+        JsonObject relatedHearingUpdatedforAdhocHearing = createObjectBuilder()
                 .add("hearingId", hearingId)
                 .build();
 

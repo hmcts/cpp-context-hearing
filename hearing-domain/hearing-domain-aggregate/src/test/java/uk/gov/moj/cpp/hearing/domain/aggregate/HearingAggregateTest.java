@@ -4184,7 +4184,7 @@ public class HearingAggregateTest {
                 .withHearing(hearing)
                 .build());
         hearingAggregate.apply(new HearingAmended(hearing.getId(), userId, SHARED_AMEND_LOCKED_ADMIN_ERROR));
-        hearingAggregate.apply(new DraftResultSavedV2(hearing.getId(), hearingDay, JsonObjects.createObjectBuilder().build(), userId, 3));
+        hearingAggregate.apply(new DraftResultSavedV2(hearing.getId(), hearingDay, createObjectBuilder().build(), userId, 3));
         hearingAggregate.apply(new ResultAmendmentsValidated(hearing.getId(), userId, ZonedDateTime.now()));
 
         assertThat(hearingAggregate.getHearingDaySharedOffencesMap().get(hearingDay).size(), is(2));

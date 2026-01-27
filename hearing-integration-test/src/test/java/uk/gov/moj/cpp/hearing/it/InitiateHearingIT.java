@@ -1421,7 +1421,7 @@ public class InitiateHearingIT extends AbstractIT {
 
         final UUID hearingId = hearing.getId();
 
-        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
+        final JsonObject commandPayload = createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("estimatedMinutes", 30)
                 .build();

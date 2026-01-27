@@ -50,7 +50,7 @@ public class ProsecutionCounselChangeEventProcessorTest {
     public void processProsecutionCounselChangeIgnoredEvent() {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.prosecution-counsel-change-ignored"),
-                JsonObjects.createObjectBuilder()
+                createObjectBuilder()
                         .add("reason", REASON)
                         .build());
 
@@ -96,7 +96,7 @@ public class ProsecutionCounselChangeEventProcessorTest {
     @Test
     public void processProsecutionCounselRemovedEvent() {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.prosecution-counsel-removed"),
-                JsonObjects.createObjectBuilder()
+                createObjectBuilder()
                         .add("id", ID)
                         .add("hearingId", HEARING_ID)
                         .build());

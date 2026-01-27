@@ -1,13 +1,13 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.util.UUID.randomUUID;
-import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.Envelope.metadataBuilder;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.*;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgressionService.APPLICATIONS_WITH_STATUS;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgressionService.APPLICATION_ID;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgressionService.APPLICATION_STATUS;
@@ -79,10 +79,10 @@ public class ProgressionServiceTest {
     @Test
     void shouldGetApplicationStatusForGivenListOfApplicationsIds() {
         when(requester.requestAsAdmin(any(), any(Class.class))).thenReturn(jsonEnvelopeMock);
-        when(jsonEnvelopeMock.payload()).thenReturn(JsonObjects.createObjectBuilder()
-                .add(APPLICATIONS_WITH_STATUS, JsonObjects.createArrayBuilder()
-                        .add(JsonObjects.createObjectBuilder().add(APPLICATION_ID, "uuid-1").add(APPLICATION_STATUS, "LISTED"))
-                        .add(JsonObjects.createObjectBuilder().add(APPLICATION_ID, "uuid-2").add(APPLICATION_STATUS, "FINALISED"))
+        when(jsonEnvelopeMock.payload()).thenReturn(createObjectBuilder()
+                .add(APPLICATIONS_WITH_STATUS, createArrayBuilder()
+                        .add(createObjectBuilder().add(APPLICATION_ID, "uuid-1").add(APPLICATION_STATUS, "LISTED"))
+                        .add(createObjectBuilder().add(APPLICATION_ID, "uuid-2").add(APPLICATION_STATUS, "FINALISED"))
                         .build())
                 .build());
 

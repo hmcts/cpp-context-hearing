@@ -124,7 +124,7 @@ public class ResultsSharedHelperV3 {
         for (final HearingDay hearingDay : hearingDaysList) {
             arrayBuilder.add(createObjectBuilder(objectToJsonObjectConverter.convert(hearingDay)).build());
         }
-        final JsonObject payload = JsonObjects.createObjectBuilder()
+        final JsonObject payload = createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("hearingDays", arrayBuilder)
                 .build();

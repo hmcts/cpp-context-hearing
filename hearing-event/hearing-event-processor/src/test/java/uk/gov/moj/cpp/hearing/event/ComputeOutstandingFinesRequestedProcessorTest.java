@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
@@ -66,13 +67,13 @@ public class ComputeOutstandingFinesRequestedProcessorTest {
 
     @Test
     public void publicComputeOutstandingFinesRequested() {
-        final JsonObject outstandingFinesQuery = JsonObjects.createObjectBuilder().build();
+        final JsonObject outstandingFinesQuery = createObjectBuilder().build();
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.compute-outstanding-fines-requested"),
                 outstandingFinesQuery);
 
 
         final Envelope<JsonObject> courtBasedDefendantQueryInformation = mock(Envelope.class);
-        when(courtBasedDefendantQueryInformation.payload()).thenReturn(JsonObjects.createObjectBuilder().build());
+        when(courtBasedDefendantQueryInformation.payload()).thenReturn(createObjectBuilder().build());
 
         final OutstandingFinesQueried outstandingFinesQueried = OutstandingFinesQueried.newBuilder()
                 .withCourtCentreId(UUID.fromString("cb41f33d-9de0-4f49-9f8e-b7b06de4279a"))

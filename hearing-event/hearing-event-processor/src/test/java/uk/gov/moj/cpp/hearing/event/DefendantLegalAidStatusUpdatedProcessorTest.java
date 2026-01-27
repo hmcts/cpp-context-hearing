@@ -29,6 +29,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
@@ -64,7 +66,7 @@ public class DefendantLegalAidStatusUpdatedProcessorTest {
 
     @Test
     public void testDefendantLegalAidStatusUpdate() {
-        final JsonObject eventPayload = JsonObjects.createObjectBuilder()
+        final JsonObject eventPayload = createObjectBuilder()
                 .add(DEFENDANT_ID, defendantId)
                 .add(CASE_ID, caseId)
                 .add(LEGAL_AID_STATUS, "Granted")
@@ -95,9 +97,9 @@ public class DefendantLegalAidStatusUpdatedProcessorTest {
         final UUID defendantId = randomUUID();
         final UUID hearingId = randomUUID();
 
-        final JsonObject eventPayload = JsonObjects.createObjectBuilder()
+        final JsonObject eventPayload = createObjectBuilder()
                 .add(DEFENDANT_ID, defendantId.toString())
-                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()).build())
+                .add("hearingIds", createArrayBuilder().add(hearingId.toString()).build())
                 .add(LEGAL_AID_STATUS, "Granted")
                 .build();
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.defendant-legalaid-status-updated"),

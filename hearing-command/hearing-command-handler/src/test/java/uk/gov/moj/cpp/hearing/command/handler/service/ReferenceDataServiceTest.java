@@ -93,7 +93,7 @@ public class ReferenceDataServiceTest {
 
     private JsonEnvelope generateReferenceDataServiceResponse(final List<UUID> expectedCourtCentreIds) {
         return createEnvelope(".", createObjectBuilder()
-                .add("organisationunits", JsonObjects.createArrayBuilder()
+                .add("organisationunits", createArrayBuilder()
                         .add(buildOrgUnit(expectedCourtCentreIds.get(0)))
                         .add(buildOrgUnit(expectedCourtCentreIds.get(1)))
                 )
@@ -101,7 +101,7 @@ public class ReferenceDataServiceTest {
     }
 
     private JsonObject buildOrgUnit(final UUID courtCentreId) {
-        return JsonObjects.createObjectBuilder()
+        return createObjectBuilder()
                 .add("id", courtCentreId.toString())
                 .build();
     }

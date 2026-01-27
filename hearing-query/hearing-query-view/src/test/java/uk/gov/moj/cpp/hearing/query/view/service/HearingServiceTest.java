@@ -1959,7 +1959,7 @@ public class HearingServiceTest {
                         .withType(CourtApplicationType.courtApplicationType()
                                 .withCode("PL302487").build())
                         .build()));
-        final JsonObject responsePayload = JsonObjects.createObjectBuilder()
+        final JsonObject responsePayload = createObjectBuilder()
                 .add("hasPermission", false)
                 .build();
         when(requester.request(any(), any())).thenReturn(Envelope.envelopeFrom(Envelope.metadataBuilder()
@@ -1986,7 +1986,7 @@ public class HearingServiceTest {
                         .withType(CourtApplicationType.courtApplicationType()
                                 .withCode("PL302487").build())
                         .build()));
-        final JsonObject responsePayload = JsonObjects.createObjectBuilder()
+        final JsonObject responsePayload = createObjectBuilder()
                 .add("hasPermission", true)
                 .build();
         when(requester.request(any(), any())).thenReturn(Envelope.envelopeFrom(Envelope.metadataBuilder()

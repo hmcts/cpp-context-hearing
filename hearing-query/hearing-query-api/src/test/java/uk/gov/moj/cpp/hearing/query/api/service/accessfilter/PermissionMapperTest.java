@@ -5,6 +5,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.services.messaging.Envelope.metadataBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.Metadata;
@@ -49,23 +51,23 @@ public class PermissionMapperTest{
         final Metadata metadata = metadataBuilder().withName("usersgroups.get-logged-in-user-permissions")
                 .withId(randomUUID()).withUserId(userId).build();
 
-        final JsonObjectBuilder permission1Json = JsonObjects.createObjectBuilder();
+        final JsonObjectBuilder permission1Json = createObjectBuilder();
         permission1Json.add(OBJECT, OBJECT1);
         permission1Json.add(ACTION, ACTION1);
         permission1Json.add(SOURCE, SOURCE1.toString());
         permission1Json.add(TARGET, TARGET1.toString());
 
-        final JsonObjectBuilder permission2Json = JsonObjects.createObjectBuilder();
+        final JsonObjectBuilder permission2Json = createObjectBuilder();
         permission2Json.add(OBJECT, OBJECT2);
         permission2Json.add(ACTION, ACTION2);
         permission2Json.add(SOURCE, SOURCE2.toString());
         permission2Json.add(TARGET, TARGET2.toString());
 
-        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
         arrayBuilder.add(permission1Json);
         arrayBuilder.add(permission2Json);
 
-        final JsonObjectBuilder permissionsJson = JsonObjects.createObjectBuilder();
+        final JsonObjectBuilder permissionsJson = createObjectBuilder();
         permissionsJson.add(PERMISSIONS, arrayBuilder.build());
 
         final Envelope envelope = Envelope.envelopeFrom(metadata, permissionsJson.build());
@@ -79,7 +81,7 @@ public class PermissionMapperTest{
         final Metadata metadata = metadataBuilder().withName("usersgroups.get-logged-in-user-permissions")
                 .withId(randomUUID()).withUserId(userId).build();
 
-        final Envelope envelope = Envelope.envelopeFrom(metadata, JsonObjects.createObjectBuilder().build());
+        final Envelope envelope = Envelope.envelopeFrom(metadata, createObjectBuilder().build());
         final List<Permission> permissions = permissionsMapper.mapPermissions(envelope);
         assertThat(permissions.size(), is(0));
     }
@@ -90,14 +92,14 @@ public class PermissionMapperTest{
         final Metadata metadata = metadataBuilder().withName("usersgroups.get-logged-in-user-permissions")
                 .withId(randomUUID()).withUserId(userId).build();
 
-        final JsonObjectBuilder permission1Json = JsonObjects.createObjectBuilder();
+        final JsonObjectBuilder permission1Json = createObjectBuilder();
         permission1Json.add(OBJECT, OBJECT1);
         permission1Json.add(ACTION, ACTION1);
 
-        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
         arrayBuilder.add(permission1Json);
 
-        final JsonObjectBuilder permissionsJson = JsonObjects.createObjectBuilder();
+        final JsonObjectBuilder permissionsJson = createObjectBuilder();
         permissionsJson.add(PERMISSIONS, arrayBuilder.build());
 
         final Envelope envelope = Envelope.envelopeFrom(metadata, permissionsJson.build());
