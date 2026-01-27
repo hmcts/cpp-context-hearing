@@ -2,8 +2,8 @@ package uk.gov.moj.cpp.hearing.command.handler.service;
 
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -93,7 +93,7 @@ public class ReferenceDataServiceTest {
 
     private JsonEnvelope generateReferenceDataServiceResponse(final List<UUID> expectedCourtCentreIds) {
         return createEnvelope(".", createObjectBuilder()
-                .add("organisationunits", Json.createArrayBuilder()
+                .add("organisationunits", JsonObjects.createArrayBuilder()
                         .add(buildOrgUnit(expectedCourtCentreIds.get(0)))
                         .add(buildOrgUnit(expectedCourtCentreIds.get(1)))
                 )
@@ -101,7 +101,7 @@ public class ReferenceDataServiceTest {
     }
 
     private JsonObject buildOrgUnit(final UUID courtCentreId) {
-        return Json.createObjectBuilder()
+        return JsonObjects.createObjectBuilder()
                 .add("id", courtCentreId.toString())
                 .build();
     }

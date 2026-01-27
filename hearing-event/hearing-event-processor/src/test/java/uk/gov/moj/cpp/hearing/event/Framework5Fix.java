@@ -10,7 +10,7 @@ import uk.gov.justice.services.messaging.spi.DefaultJsonEnvelopeProvider;
 import java.io.StringReader;
 import java.util.List;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -40,7 +40,7 @@ public class Framework5Fix {
             } catch (JsonProcessingException ex) {
                 throw new RuntimeException(ex.getMessage(), ex);
             }
-            return defaultJsonEnvelopeProvider.envelopeFrom(e.metadata(), Json.createReader(new StringReader(jsonString)).readObject());
+            return defaultJsonEnvelopeProvider.envelopeFrom(e.metadata(), JsonObjects.createReader(new StringReader(jsonString)).readObject());
         } else {
             throw new IllegalArgumentException("don't know how to convert this");
         }

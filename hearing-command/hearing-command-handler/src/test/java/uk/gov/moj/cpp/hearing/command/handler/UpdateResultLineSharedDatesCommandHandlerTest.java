@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -79,10 +79,10 @@ public class UpdateResultLineSharedDatesCommandHandlerTest {
         final UUID resultLineId1 = UUID.randomUUID();
         final String sharedDate = "2020-02-05";
 
-        final JsonObject payload = Json.createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
-                .add("resultLinesToBeUpdated", Json.createArrayBuilder()
-                        .add(Json.createObjectBuilder()
+                .add("resultLinesToBeUpdated", JsonObjects.createArrayBuilder()
+                        .add(JsonObjects.createObjectBuilder()
                                 .add("resultLineId", resultLineId1.toString())
                                 .add("sharedDate", sharedDate)
                         )).build();

@@ -29,7 +29,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.core.Context;
@@ -67,7 +67,7 @@ public class DefaultQueryApiHearingsEventLogExtractResource implements QueryApiH
     @Override
     public Response getHearingsEventLogExtract(final String caseId, final String hearingId, final String applicationId, final String hearingDate, final UUID userId) throws IOException {
 
-        final JsonObjectBuilder payloadBuilder = Json.createObjectBuilder();
+        final JsonObjectBuilder payloadBuilder = JsonObjects.createObjectBuilder();
 
         if (nonNull(hearingId)) {
             payloadBuilder.add("hearingId", hearingId);

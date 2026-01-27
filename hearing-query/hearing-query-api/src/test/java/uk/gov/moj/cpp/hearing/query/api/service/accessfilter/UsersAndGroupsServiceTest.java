@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,7 +81,7 @@ public class UsersAndGroupsServiceTest{
         final Metadata metadata = metadataBuilder().withName("usersgroups.get-logged-in-user-permissions")
                 .withId(randomUUID()).withUserId(userId).build();
 
-        final Envelope envelope = Envelope.envelopeFrom(metadata, Json.createObjectBuilder().build());
+        final Envelope envelope = Envelope.envelopeFrom(metadata, JsonObjects.createObjectBuilder().build());
         when(requester.request(any(), any())).thenReturn(envelope);
         when(groupsMapper.mapGroups(envelope)).thenReturn(groups());
         when(switchableRolesMapper.switchableRoles(envelope)).thenReturn(switchableRoles());
@@ -100,7 +100,7 @@ public class UsersAndGroupsServiceTest{
         final Metadata metadata = metadataBuilder().withName("usersgroups.get-roles-for-user")
                 .withId(randomUUID()).withUserId(userId).build();
 
-        final Envelope envelope = Envelope.envelopeFrom(metadata, Json.createObjectBuilder().add("userId", userId).build());
+        final Envelope envelope = Envelope.envelopeFrom(metadata, JsonObjects.createObjectBuilder().add("userId", userId).build());
         when(requester.request(any(), any())).thenReturn(envelope);
         when(switchableRolesMapper.mapRoles(envelope)).thenReturn(switchableRoles());
         final List<UserRole> userRoles = usersAndGroupsService.userRoles(userId);

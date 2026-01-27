@@ -33,7 +33,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -111,9 +111,9 @@ public class ReusableInfoServiceTest {
         final UUID masterDefendantId = UUID.randomUUID();
         Defendant defendant = new Defendant.Builder()
                 .withMasterDefendantId(masterDefendantId).build();
-        final JsonObject jsonObj = Json.createObjectBuilder()
-                .add("reusablePrompts",Json.createArrayBuilder().add("reusablePrompts1").add("reusablePrompts2").build())
-                .add("reusableResults",Json.createArrayBuilder().add("reusableResults1").add("reusableResults2").build())
+        final JsonObject jsonObj = JsonObjects.createObjectBuilder()
+                .add("reusablePrompts",JsonObjects.createArrayBuilder().add("reusablePrompts1").add("reusablePrompts2").build())
+                .add("reusableResults",JsonObjects.createArrayBuilder().add("reusableResults1").add("reusableResults2").build())
                 .build();
         final ReusableInfo reusableInfo = ReusableInfo.builder()
                 .withId(masterDefendantId)
@@ -121,8 +121,8 @@ public class ReusableInfoServiceTest {
         when(reusableInfoRepository.findReusableInfoByMasterDefendantIds(Stream.of(masterDefendantId).collect(toList())))
                 .thenReturn(Stream.of(reusableInfo).collect(toList()));
         when(mapper.treeToValue(getJsonNode(jsonObj), JsonObject.class))
-                .thenReturn(Json.createObjectBuilder().build());
-        reusableInfoService.getViewStoreReusableInformation(Stream.of(defendant).collect(toList()), Stream.of(Json.createObjectBuilder().build()).collect(toList()));
+                .thenReturn(JsonObjects.createObjectBuilder().build());
+        reusableInfoService.getViewStoreReusableInformation(Stream.of(defendant).collect(toList()), Stream.of(JsonObjects.createObjectBuilder().build()).collect(toList()));
     }
 
     private JsonNode getJsonNode(final JsonObject jsonObj) throws IOException {

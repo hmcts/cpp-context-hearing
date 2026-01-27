@@ -16,7 +16,7 @@ import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 import java.util.List;
 import java.util.UUID;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 
@@ -44,9 +44,9 @@ public class YouthCourtDefendantsUpdatedIT extends AbstractIT {
 
         try (EventListener eventListener = listenFor("public.hearing.defendants-in-youthcourt-updated")
                 .withFilter(isJson(withJsonPath("$.hearingId", Is.is(hearingId.toString()))))) {
-            final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
+            final JsonObjectBuilder jsonObjectBuilder = JsonObjects.createObjectBuilder();
 
-            final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+            final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
             defendantsInYouthCourt.stream().forEach(d -> arrayBuilder.add(d.toString()));
             jsonObjectBuilder.add("youthCourtDefendantIds", arrayBuilder.build());
             makeCommand(requestSpec, "hearing.youth-court-defendants")

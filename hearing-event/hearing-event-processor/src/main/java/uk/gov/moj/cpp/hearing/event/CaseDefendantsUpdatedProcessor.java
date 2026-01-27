@@ -9,7 +9,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
@@ -44,7 +44,7 @@ public class CaseDefendantsUpdatedProcessor {
         final JsonObject eventPayload = envelop.payloadAsJsonObject();
         final JsonArray hearingIds = eventPayload.getJsonArray("hearingIds");
         hearingIds.stream().forEach(hearingId -> {
-            final JsonObject commandPayload = Json.createObjectBuilder()
+            final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                     .add(HEARING_ID, hearingId)
                     .add(PROSECUTION_CASE, eventPayload.getJsonObject(PROSECUTION_CASE))
                     .build();
@@ -62,7 +62,7 @@ public class CaseDefendantsUpdatedProcessor {
         final JsonObject eventPayload = envelop.payloadAsJsonObject();
         final JsonArray hearingIds = eventPayload.getJsonArray("hearingIds");
         hearingIds.stream().forEach(hearingId -> {
-            final JsonObject commandPayload = Json.createObjectBuilder()
+            final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                     .add(HEARING_ID, hearingId)
                     .add(COURT_APPLICATION, eventPayload.getJsonObject(COURT_APPLICATION))
                     .build();

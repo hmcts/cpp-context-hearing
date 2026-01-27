@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view.service.userdata;
 
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createReader;
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;

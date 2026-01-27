@@ -9,7 +9,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.json.Json;
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +39,7 @@ public class ProsecutionCounselEventProcessorTest {
     public void publishPublicDefenceCounselAddedEvent()
     {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.hearing.prosecution-counsel-added"),
-                Json.createObjectBuilder().build());
+                JsonObjects.createObjectBuilder().build());
 
         processor.publishPublicProsecutionCounselAddedEvent(event);
 
