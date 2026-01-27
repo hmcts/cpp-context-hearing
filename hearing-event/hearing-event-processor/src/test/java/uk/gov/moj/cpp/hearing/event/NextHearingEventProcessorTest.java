@@ -28,7 +28,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 
 @ExtendWith(MockitoExtension.class)

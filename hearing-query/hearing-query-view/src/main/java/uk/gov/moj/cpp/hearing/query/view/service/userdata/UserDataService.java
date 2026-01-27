@@ -11,7 +11,7 @@ import uk.gov.moj.cpp.hearing.query.view.model.Permission;
 import uk.gov.moj.cpp.hearing.query.view.model.PermissionList;
 
 import javax.inject.Inject;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;

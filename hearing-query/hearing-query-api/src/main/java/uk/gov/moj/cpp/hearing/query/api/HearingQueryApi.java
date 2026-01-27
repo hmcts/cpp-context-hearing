@@ -56,7 +56,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.ws.rs.BadRequestException;

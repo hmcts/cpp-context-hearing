@@ -44,7 +44,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;

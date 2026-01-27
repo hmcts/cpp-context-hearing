@@ -22,7 +22,7 @@ import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationHearingDeleted;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;

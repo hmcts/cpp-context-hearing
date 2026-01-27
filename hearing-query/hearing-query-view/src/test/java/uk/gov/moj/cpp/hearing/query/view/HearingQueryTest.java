@@ -110,7 +110,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.persistence.NoResultException;

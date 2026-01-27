@@ -30,7 +30,7 @@ import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesQueried;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeEach;

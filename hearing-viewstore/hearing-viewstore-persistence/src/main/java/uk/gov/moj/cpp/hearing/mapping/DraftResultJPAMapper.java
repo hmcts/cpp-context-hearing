@@ -8,13 +8,15 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import javax.enterprise.context.ApplicationScoped;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 
 @ApplicationScoped
 public class DraftResultJPAMapper {
@@ -40,7 +42,7 @@ public class DraftResultJPAMapper {
 
     private JsonObject jsonFromString(String jsonObjectStr) {
         JsonObject object;
-        try (JsonReader jsonReader = JsonObjects.createReader(new StringReader(jsonObjectStr))) {
+        try (JsonReader jsonReader = createReader(new StringReader(jsonObjectStr))) {
             object = jsonReader.readObject();
         }
 

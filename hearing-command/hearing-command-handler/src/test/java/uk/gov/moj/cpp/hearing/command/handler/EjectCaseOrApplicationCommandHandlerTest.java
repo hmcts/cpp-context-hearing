@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;

@@ -13,7 +13,7 @@ import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
 import javax.inject.Inject;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;

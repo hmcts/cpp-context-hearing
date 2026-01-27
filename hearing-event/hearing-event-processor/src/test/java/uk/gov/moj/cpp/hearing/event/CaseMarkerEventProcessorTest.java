@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 
 @ExtendWith(MockitoExtension.class)
 public class CaseMarkerEventProcessorTest {

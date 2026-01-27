@@ -2,8 +2,9 @@ package uk.gov.moj.cpp.hearing.mapping;
 
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
-import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;;
 
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.NoteType;
@@ -23,7 +24,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -110,7 +111,7 @@ public class HearingCaseNoteJPAMapper {
     private JsonObject jsonFromString(String jsonObjectStr) {
 
         JsonObject object;
-        try (JsonReader jsonReader = JsonObjects.createReader(new StringReader(jsonObjectStr))) {
+        try (JsonReader jsonReader = createReader(new StringReader(jsonObjectStr))) {
             object = jsonReader.readObject();
         }
 

@@ -9,7 +9,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 

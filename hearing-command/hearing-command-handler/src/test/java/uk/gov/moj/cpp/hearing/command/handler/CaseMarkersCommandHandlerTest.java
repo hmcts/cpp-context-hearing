@@ -28,7 +28,6 @@ import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.hamcrest.Matchers;

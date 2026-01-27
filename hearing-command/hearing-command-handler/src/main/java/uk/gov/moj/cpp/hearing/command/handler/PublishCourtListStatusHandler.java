@@ -25,7 +25,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonString;
 import javax.json.JsonValue;
 

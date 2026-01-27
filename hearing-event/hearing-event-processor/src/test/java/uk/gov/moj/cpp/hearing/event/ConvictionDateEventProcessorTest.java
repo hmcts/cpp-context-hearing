@@ -31,7 +31,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import java.io.IOException;
 import java.util.Set;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -17,7 +17,7 @@ import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.UserRole;
 import java.util.List;
 
 import javax.inject.Inject;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 
 public class UsersAndGroupsService {

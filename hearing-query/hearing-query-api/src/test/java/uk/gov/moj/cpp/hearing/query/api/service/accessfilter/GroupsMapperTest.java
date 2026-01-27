@@ -14,7 +14,7 @@ import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.Group;
 import java.util.List;
 import java.util.UUID;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 

@@ -20,7 +20,7 @@ import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFact
 
 import java.util.UUID;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

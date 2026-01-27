@@ -19,7 +19,7 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 
 import java.util.ArrayList;
 import java.util.Collections;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.ProsecutionCase;

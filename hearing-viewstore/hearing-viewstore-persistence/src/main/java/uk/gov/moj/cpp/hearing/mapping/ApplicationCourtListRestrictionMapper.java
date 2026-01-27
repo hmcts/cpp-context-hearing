@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.mapping;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.hearing.courts.ApplicationCourtListRestriction;
@@ -16,7 +17,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
@@ -29,7 +30,7 @@ public class ApplicationCourtListRestrictionMapper {
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     private JsonObject jsonFromString(String jsonObjectStr) {
-        try (JsonReader jsonReader = JsonObjects.createReader(new StringReader(jsonObjectStr))) {
+        try (JsonReader jsonReader = createReader(new StringReader(jsonObjectStr))) {
             return jsonReader.readObject();
         }
     }

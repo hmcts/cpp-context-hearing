@@ -33,7 +33,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHear
 
 import java.util.UUID;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeEach;

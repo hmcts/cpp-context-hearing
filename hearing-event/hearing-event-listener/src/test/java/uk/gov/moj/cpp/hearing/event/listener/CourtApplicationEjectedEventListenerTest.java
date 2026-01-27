@@ -20,7 +20,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.util.UUID;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeEach;

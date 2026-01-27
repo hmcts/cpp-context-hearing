@@ -19,7 +19,7 @@ import uk.gov.moj.cpp.hearing.query.view.SessionTimeQueryView;
 
 import java.util.function.Function;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;

@@ -18,7 +18,7 @@ import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 import java.util.List;
 import java.util.UUID;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 

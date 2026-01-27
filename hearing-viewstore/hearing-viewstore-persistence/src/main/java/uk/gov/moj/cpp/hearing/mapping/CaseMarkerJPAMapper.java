@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -17,7 +18,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
@@ -86,7 +87,7 @@ public class CaseMarkerJPAMapper {
 
     private JsonObject jsonFromString(String jsonObjectStr) {
         JsonObject object;
-        try (JsonReader jsonReader = JsonObjects.createReader(new StringReader(jsonObjectStr))) {
+        try (JsonReader jsonReader = createReader(new StringReader(jsonObjectStr))) {
             object = jsonReader.readObject();
         }
         return object;

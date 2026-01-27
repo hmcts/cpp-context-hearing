@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
@@ -71,7 +72,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -1148,7 +1149,7 @@ public class InitiateHearingEventListenerTest {
         } catch (final JsonProcessingException jpe) {
             throw new RuntimeException("failed ot serialise " + document, jpe);
         }
-        final JsonObject jsonObject = JsonObjects.createReader(new StringReader(strJsonDocument)).readObject();
+        final JsonObject jsonObject = createReader(new StringReader(strJsonDocument)).readObject();
 
         return envelopeFrom((Metadata) null, jsonObject);
     }

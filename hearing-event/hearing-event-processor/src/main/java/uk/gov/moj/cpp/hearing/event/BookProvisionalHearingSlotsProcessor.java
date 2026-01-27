@@ -14,7 +14,7 @@ import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingServiceResponse;
 import uk.gov.moj.cpp.hearing.event.service.ProvisionalBookingService;
 
 import javax.inject.Inject;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 

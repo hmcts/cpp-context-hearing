@@ -24,7 +24,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import java.util.List;
 import java.util.UUID;
 
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
