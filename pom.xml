@@ -77,14 +77,14 @@
             **/uk/gov/moj/cpp/hearing/command/witness/**/*,
             **/uk/gov/moj/cpp/hearing/nces/**/*,
             **/query/view/service/ctl/model/**/*,
-            **/uk.gov.moj.cpp.hearing.mapping/ApplicationCourtListRestrictionMapper.java,
-            **/uk.gov.moj.cpp.hearing.mapping/CaseMarkerJPAMapper.java,
-            **/uk.gov.moj.cpp.hearing.mapping/HearingApplicantCounselJPAMapper.java,
-            **/uk.gov.moj.cpp.hearing.mapping/HearingCompanyRepresentativeJPAMapper.java,
-            **/uk.gov.moj.cpp.hearing.mapping/HearingDefenceCounselJPAMapper.java,
-            **/uk.gov.moj.cpp.hearing.mapping/HearingInterpreterIntermediaryJPAMapper.java,
-            **/uk.gov.moj.cpp.hearing.mapping/HearingProsecutionCounselJPAMapper.java,
-            **/uk.gov.moj.cpp.hearing.mapping/HearingRespondentCounselJPAMapper.java
+            **/uk/gov/moj/cpp/hearing/mapping/ApplicationCourtListRestrictionMapper.java,
+            **/uk/gov/moj/cpp/hearing/mapping/CaseMarkerJPAMapper.java,
+            **/uk/gov/moj/cpp/hearing/mapping/HearingApplicantCounselJPAMapper.java,
+            **/uk/gov/moj/cpp/hearing/mapping/HearingCompanyRepresentativeJPAMapper.java,
+            **/uk/gov/moj/cpp/hearing/mapping/HearingDefenceCounselJPAMapper.java,
+            **/uk/gov/moj/cpp/hearing/mapping/HearingInterpreterIntermediaryJPAMapper.java,
+            **/uk/gov/moj/cpp/hearing/mapping/HearingProsecutionCounselJPAMapper.java,
+            **/uk/gov/moj/cpp/hearing/mapping/HearingRespondentCounselJPAMapper.java
         </sonar.coverage.exclusions>
     </properties>
 
