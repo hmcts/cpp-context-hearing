@@ -6,6 +6,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
@@ -28,7 +30,7 @@ import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesQueried;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 
-import javax.json.Json;
+
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -98,9 +100,9 @@ public class ComputeOutstandingFinesCommandHandlerTest {
     }
 
     private JsonObject createCourtRoomsOutstandingFInesQuery() {
-        return Json.createObjectBuilder()
+        return createObjectBuilder()
                 .add("courtCentreId", "88abd281-8c52-4171-aca1-740f734b43d7")
-                .add("courtRoomIds", Json.createArrayBuilder()
+                .add("courtRoomIds", createArrayBuilder()
                         .add(COURT_ROOM_ID1)
                         .add(COURT_ROOM_ID2)
                         .add(COURT_ROOM_ID3))

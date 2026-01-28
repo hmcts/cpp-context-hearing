@@ -19,7 +19,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.json.Json;
+
 import javax.json.JsonObject;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +30,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
@@ -68,8 +70,8 @@ public class CaseDefendantsUpdatedProcessorTest {
                         .withProceedingsConcluded(true).build()))
                 .build();
 
-        final JsonObject eventPayload = Json.createObjectBuilder()
-                .add("hearingIds", Json.createArrayBuilder().add(hearingId.toString()).build())
+        final JsonObject eventPayload = createObjectBuilder()
+                .add("hearingIds", createArrayBuilder().add(hearingId.toString()).build())
                 .add("prosecutionCase",objectToJsonObjectConverter.convert(prosecutionCase))
                 .build();
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.case-defendants-updated"),
@@ -103,8 +105,8 @@ public class CaseDefendantsUpdatedProcessorTest {
                         .build())
                 .build();
 
-        final JsonObject eventPayload = Json.createObjectBuilder()
-                .add("hearingIds", Json.createArrayBuilder().add(hearingId.toString()).build())
+        final JsonObject eventPayload = createObjectBuilder()
+                .add("hearingIds", createArrayBuilder().add(hearingId.toString()).build())
                 .add("courtApplication",objectToJsonObjectConverter.convert(courtApplication))
                 .build();
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.application-defendants-updated"),

@@ -17,6 +17,8 @@ import static org.hamcrest.core.AllOf.allOf;
 import static uk.gov.justice.hearing.courts.referencedata.EnforcementAreaBacs.enforcementAreaBacs;
 import static uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit.organisationalUnit;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
@@ -87,7 +89,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import javax.json.Json;
+
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
@@ -599,16 +601,16 @@ public class HearingEventsIT extends AbstractIT {
     private JsonObject updateHearingEvents(final RequestSpecification requestSpec,
                                            final UUID hearingId, final List<HearingEvent> hearingEvents,
                                            final String updateEventsEndpoint, final Header headers) {
-        final JsonArrayBuilder hearingEventsArray = Json.createArrayBuilder();
+        final JsonArrayBuilder hearingEventsArray = createArrayBuilder();
         hearingEvents.stream().forEach(event -> {
-            final JsonObject hearingEvent = Json.createObjectBuilder()
+            final JsonObject hearingEvent = createObjectBuilder()
                     .add("hearingEventId", event.getHearingEventId().toString())
                     .add("recordedLabel", event.getRecordedLabel())
                     .build();
             hearingEventsArray.add(hearingEvent);
         });
         final JsonObject payload =
-                Json.createObjectBuilder()
+                createObjectBuilder()
                         .add("hearingEvents", hearingEventsArray).build();
         final Utilities.EventListener publicEventTopic =
                 listenFor("public.hearing.events-updated")

@@ -10,7 +10,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
 
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 @ServiceComponent(EVENT_PROCESSOR)

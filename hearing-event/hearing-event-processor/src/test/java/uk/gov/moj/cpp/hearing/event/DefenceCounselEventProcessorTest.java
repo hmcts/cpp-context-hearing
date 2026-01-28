@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.event;
 
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
@@ -9,7 +10,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.json.Json;
+
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +40,7 @@ public class DefenceCounselEventProcessorTest {
     public void publishPublicDefenceCounselAddedEvent()
     {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.hearing.defence-counsel-added"),
-                Json.createObjectBuilder().build());
+                createObjectBuilder().build());
 
         processor.publishPublicDefenceCounselAddedEvent(event);
 

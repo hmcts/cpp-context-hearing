@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
@@ -23,7 +24,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.json.Json;
+
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -61,7 +62,7 @@ class UpdateTargetCommandHandlerTest {
         final UUID hearingId = UUID.randomUUID();
         final UUID targetId = UUID.randomUUID();
         final LocalDate hearingDay = LocalDate.now();
-        final JsonObject payload = Json.createObjectBuilder()
+        final JsonObject payload = createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("targetId", targetId.toString())
                 .add("hearingDay", hearingDay.toString())

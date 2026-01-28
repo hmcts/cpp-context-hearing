@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.query.view.service.ctl;
 
 import static java.time.LocalDate.now;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createReader;
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

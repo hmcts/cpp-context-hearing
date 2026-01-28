@@ -1,8 +1,8 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
 import static java.util.UUID.fromString;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
@@ -56,7 +56,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
-import javax.json.Json;
+
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.ws.rs.BadRequestException;
@@ -340,7 +340,7 @@ public class HearingQueryApi {
             return requestStagingEnforcementToGetOutstandingFines(query, viewResponseEnvelopePayload);
         }
         return envelopeFrom(query.metadata(),
-                Json.createObjectBuilder()
+                createObjectBuilder()
                         .add("outstandingFines",
                                 createArrayBuilder()).build());
     }

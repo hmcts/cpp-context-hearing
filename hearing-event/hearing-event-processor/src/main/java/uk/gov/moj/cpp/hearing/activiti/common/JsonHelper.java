@@ -6,15 +6,17 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 import static uk.gov.justice.services.messaging.JsonMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonMetadata.USER_ID;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.getString;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.json.Json;
+
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
@@ -29,18 +31,18 @@ public class JsonHelper {
     }
 
     public static Metadata createMetadataWithProcessIdAndUserId(final String id, final String name, final String processId, final String userId) {
-        return metadataFrom(Json.createObjectBuilder()
+        return metadataFrom(createObjectBuilder()
                 .add(ID, id)
                 .add(NAME, name)
                 .add(PROCESS_ID, processId)
                 .add(ORIGINATOR, ORIGINATOR_VALUE)
-                .add(CONTEXT, Json.createObjectBuilder()
+                .add(CONTEXT, createObjectBuilder()
                         .add(USER_ID, userId))
                 .build()).build();
     }
 
     public static Optional<String> getOriginatorValueFromJsonMetadata(final JsonObject jsonMetadata) {
-        return JsonObjects.getString(jsonMetadata, ORIGINATOR);
+        return getString(jsonMetadata, ORIGINATOR);
     }
 
     public static JsonEnvelope assembleEnvelopeWithPayloadAndMetaDetails(final JsonObject payload, final String contentType, final String processId, final String userId) {
@@ -50,7 +52,7 @@ public class JsonHelper {
     }
 
     private static JsonObject addMetadataToPayload(final JsonObject load, final Metadata metadata) {
-        final JsonObjectBuilder job = Json.createObjectBuilder();
+        final JsonObjectBuilder job = createObjectBuilder();
         load.entrySet().forEach(entry -> job.add(entry.getKey(), entry.getValue()));
         job.add(JsonEnvelope.METADATA, metadata.asJsonObject());
         return job.build();

@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
@@ -20,7 +21,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
 
-import javax.json.Json;
+
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +54,7 @@ public class HearingStatesEventProcessorTest {
         final String USER_ID = UUID.randomUUID().toString();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(HEARING_EVENT_APPROVAL_REJECTED),
-                Json.createObjectBuilder()
+                createObjectBuilder()
                         .add("hearingId", HEARING_ID)
                         .add("userId", USER_ID)
                         .build());
@@ -78,7 +79,7 @@ public class HearingStatesEventProcessorTest {
         final String USER_ID = UUID.randomUUID().toString();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(HEARING_HEARING_LOCKED),
-                Json.createObjectBuilder()
+                createObjectBuilder()
                         .add("hearingId", HEARING_ID)
                         .build());
 
@@ -101,7 +102,7 @@ public class HearingStatesEventProcessorTest {
         final String USER_ID = UUID.randomUUID().toString();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(PUBLIC_HEARING_HEARING_LOCKED_BY_OTHER_USER),
-                Json.createObjectBuilder()
+                createObjectBuilder()
                         .add("hearingId", HEARING_ID)
                         .build());
 
@@ -124,7 +125,7 @@ public class HearingStatesEventProcessorTest {
         final String USER_ID = UUID.randomUUID().toString();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(HEARING_EVENT_HEARING_UNLOCK_FAILED),
-                Json.createObjectBuilder()
+                createObjectBuilder()
                         .add("hearingId", HEARING_ID)
                         .build());
 
@@ -145,7 +146,7 @@ public class HearingStatesEventProcessorTest {
         final String USER_ID = UUID.randomUUID().toString();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(HEARING_EVENT_HEARING_UNLOCKED),
-                Json.createObjectBuilder()
+                createObjectBuilder()
                         .add("hearingId", HEARING_ID)
                         .add("userId", USER_ID)
                         .build());

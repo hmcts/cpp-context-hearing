@@ -4,15 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
+
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.json.Json;
+
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -119,7 +121,7 @@ public class HearingDefenceCounselJPAMapper {
     private JsonObject jsonFromString(String jsonObjectStr) {
 
         JsonObject object;
-        try (JsonReader jsonReader = Json.createReader(new StringReader(jsonObjectStr))) {
+        try (JsonReader jsonReader = createReader(new StringReader(jsonObjectStr))) {
             object = jsonReader.readObject();
         }
 

@@ -11,8 +11,8 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
@@ -110,7 +110,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.json.Json;
+
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.persistence.NoResultException;
@@ -599,7 +599,7 @@ public class HearingQueryTest {
                 createObjectBuilder()
                         .add("q", "q")
                         .build());
-        when(hearingService.getNowsRepository(envelope.payloadAsJsonObject().getString("q"))).thenReturn(Json.createObjectBuilder().build());
+        when(hearingService.getNowsRepository(envelope.payloadAsJsonObject().getString("q"))).thenReturn(createObjectBuilder().build());
         final JsonEnvelope jsonEnvelope = target.searchByMaterialId(envelope);
         verify(hearingService, times(1)).getNowsRepository("q");
         assertThat(jsonEnvelope.metadata().name(), is("hearing.query.search-by-material-id"));
@@ -1051,7 +1051,7 @@ public class HearingQueryTest {
 
         final JsonEnvelope envelope = envelopeFrom(metadataBuilder().withId(randomUUID())
                         .withName("hearing.get.hearings"),
-                Json.createObjectBuilder()
+                createObjectBuilder()
                         .add("date", date.toString())
                         .add("courtCentreId", courtCentreId.toString())
                         .add("roomId", roomId.toString())
@@ -1069,7 +1069,7 @@ public class HearingQueryTest {
         JsonEnvelope envelope = envelopeFrom(metadataBuilder().withUserId(userId)
                         .withId(randomUUID())
                         .withName("hearing.get.hearings-for-today"),
-                Json.createObjectBuilder().build());
+                createObjectBuilder().build());
         final Envelope<GetHearings> hearings = target.findHearingsForToday(envelope);
         assertThat(hearings.payload().getHearingSummaries().size(), is(2));
         assertThat(hearings.metadata().name(), is("hearing.get.hearings-for-today"));
@@ -1084,7 +1084,7 @@ public class HearingQueryTest {
         JsonEnvelope envelope = envelopeFrom(metadataBuilder().withUserId(userId)
                         .withId(randomUUID())
                         .withName("hearing.get.hearings-for-future"),
-                Json.createObjectBuilder().add("defendantId", defendantId).build());
+                createObjectBuilder().add("defendantId", defendantId).build());
         final Envelope<GetHearings> hearings = target.findHearingsForFuture(envelope, hearingTypes);
         assertThat(hearings.payload().getHearingSummaries().size(), is(2));
         assertThat(hearings.metadata().name(), is("hearing.get.hearings-for-future"));
@@ -1094,9 +1094,9 @@ public class HearingQueryTest {
     public void shouldRetrieveSubscriptions() {
         final JsonEnvelope envelope = envelopeFrom(
                 metadataWithRandomUUID("hearing.retrieve-subscriptions"),
-                Json.createObjectBuilder().add("referenceDate", "referenceDate")
+                createObjectBuilder().add("referenceDate", "referenceDate")
                         .add("nowTypeId", "nowTypeId").build());
-        when(hearingService.getSubscriptions("referenceDate", "nowTypeId")).thenReturn(Json.createObjectBuilder().build());
+        when(hearingService.getSubscriptions("referenceDate", "nowTypeId")).thenReturn(createObjectBuilder().build());
         final JsonEnvelope jsonEnvelope = target.retrieveSubscriptions(envelope);
         verify(hearingService, times(1)).getSubscriptions("referenceDate", "nowTypeId");
         assertThat(jsonEnvelope.metadata().name(), is("hearing.retrieve-subscriptions"));
@@ -1108,7 +1108,7 @@ public class HearingQueryTest {
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = getCrackedIneffectiveVacatedTrialTypes();
         final JsonEnvelope envelope = envelopeFrom(
                 metadataWithRandomUUID("hearing.get-cracked-ineffective-reason"),
-                Json.createObjectBuilder().add("trialTypeId", typeTrialId.toString()).build());
+                createObjectBuilder().add("trialTypeId", typeTrialId.toString()).build());
         when(hearingService.fetchCrackedIneffectiveTrial(typeTrialId, crackedIneffectiveVacatedTrialTypes))
                 .thenReturn(mockCrackedIneffectiveTrial);
         final Envelope<CrackedIneffectiveTrial> crackedIneffectiveTrialReason = target.getCrackedIneffectiveTrialReason(envelope, crackedIneffectiveVacatedTrialTypes);
@@ -1119,12 +1119,12 @@ public class HearingQueryTest {
     @Test
     public void shouldGetTimeline() {
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = getCrackedIneffectiveVacatedTrialTypes();
-        final JsonObject allCourtRooms = Json.createObjectBuilder().build();
+        final JsonObject allCourtRooms = createObjectBuilder().build();
         final UUID fieldId = randomUUID();
         final UUID hearingId = randomUUID();
         final JsonEnvelope envelope = envelopeFrom(
                 metadataWithRandomUUID("hearing.timeline"),
-                Json.createObjectBuilder().add("id", fieldId.toString()).build());
+                createObjectBuilder().add("id", fieldId.toString()).build());
         when(hearingService.getTimeLineByCaseId(fieldId, crackedIneffectiveVacatedTrialTypes, allCourtRooms)).thenReturn(getTimeLineHearingSummary(hearingId));
         final Envelope<Timeline> timeline = target.getTimeline(envelope, crackedIneffectiveVacatedTrialTypes, allCourtRooms);
 
@@ -1138,7 +1138,7 @@ public class HearingQueryTest {
     @Test
     public void shouldGetTimelineByApplicationId() {
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = getCrackedIneffectiveVacatedTrialTypes();
-        final JsonObject allCourtRooms = Json.createObjectBuilder().build();
+        final JsonObject allCourtRooms = createObjectBuilder().build();
 
         final UUID fieldId = randomUUID();
 
@@ -1151,7 +1151,7 @@ public class HearingQueryTest {
 
         final JsonEnvelope envelope = envelopeFrom(
                 metadataWithRandomUUID("hearing.timeline"),
-                Json.createObjectBuilder().add("id", fieldId.toString()).build());
+                createObjectBuilder().add("id", fieldId.toString()).build());
 
         final JsonObject courtApplicationPayload = createObjectBuilder()
                 .add("courtApplications", createArrayBuilder()
@@ -1183,7 +1183,7 @@ public class HearingQueryTest {
         final String dateOfHearing = "2023-12-31";
         final JsonEnvelope envelope = envelopeFrom(
                 metadataWithRandomUUID("hearing.hearings-court-centres-for-date"),
-                Json.createObjectBuilder().add("courtCentreIds", courtCentreId)
+                createObjectBuilder().add("courtCentreIds", courtCentreId)
                         .add("dateOfHearing", dateOfHearing).build());
         final Set<UUID> cppHearingEventIds = Stream.of(randomUUID(), randomUUID()).collect(Collectors.toSet());
         when(hearingService.getHearingsByDate(Stream.of(UUID.fromString(courtCentreId)).collect(Collectors.toList()), LocalDate.parse(dateOfHearing), cppHearingEventIds)).thenReturn(Optional.empty());

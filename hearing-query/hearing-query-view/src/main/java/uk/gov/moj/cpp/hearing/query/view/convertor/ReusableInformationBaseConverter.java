@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view.convertor;
 
 import static java.util.Optional.ofNullable;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
 import uk.gov.moj.cpp.hearing.common.ReusableInformation;
 import uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType;

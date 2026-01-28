@@ -8,7 +8,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -172,7 +172,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.json.Json;
+
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
@@ -1959,7 +1959,7 @@ public class HearingServiceTest {
                         .withType(CourtApplicationType.courtApplicationType()
                                 .withCode("PL302487").build())
                         .build()));
-        final JsonObject responsePayload = Json.createObjectBuilder()
+        final JsonObject responsePayload = createObjectBuilder()
                 .add("hasPermission", false)
                 .build();
         when(requester.request(any(), any())).thenReturn(Envelope.envelopeFrom(Envelope.metadataBuilder()
@@ -1986,7 +1986,7 @@ public class HearingServiceTest {
                         .withType(CourtApplicationType.courtApplicationType()
                                 .withCode("PL302487").build())
                         .build()));
-        final JsonObject responsePayload = Json.createObjectBuilder()
+        final JsonObject responsePayload = createObjectBuilder()
                 .add("hasPermission", true)
                 .build();
         when(requester.request(any(), any())).thenReturn(Envelope.envelopeFrom(Envelope.metadataBuilder()

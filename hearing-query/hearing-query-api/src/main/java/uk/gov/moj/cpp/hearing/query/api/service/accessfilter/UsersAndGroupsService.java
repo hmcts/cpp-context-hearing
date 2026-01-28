@@ -4,6 +4,7 @@ import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.messaging.Envelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.Envelope.metadataBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -16,7 +17,7 @@ import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.UserRole;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.json.Json;
+
 import javax.json.JsonObject;
 
 public class UsersAndGroupsService {
@@ -44,7 +45,7 @@ public class UsersAndGroupsService {
 
         final Metadata metadata = metadataBuilder().withName(GET_LOGGED_IN_USER_PERMISSIONS)
                 .withId(randomUUID()).withUserId(userId).build();
-        final Envelope envelope = envelopeFrom(metadata, Json.createObjectBuilder().build());
+        final Envelope envelope = envelopeFrom(metadata, createObjectBuilder().build());
         final Envelope<JsonObject> response = requester.request(envelope, JsonObject.class);
 
         return new Permissions.Builder()
@@ -61,7 +62,7 @@ public class UsersAndGroupsService {
                 .withId(randomUUID())
                 .withUserId(userId).build();
 
-        final JsonObject build = Json.createObjectBuilder().add(USER_ID, userId).build();
+        final JsonObject build = createObjectBuilder().add(USER_ID, userId).build();
         final Envelope envelope = envelopeFrom(metadata, build);
         final Envelope<JsonObject> response = requester.request(envelope, JsonObject.class);
 

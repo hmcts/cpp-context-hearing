@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.event;
 
 import static java.util.UUID.fromString;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 import uk.gov.justice.services.core.annotation.Handles;

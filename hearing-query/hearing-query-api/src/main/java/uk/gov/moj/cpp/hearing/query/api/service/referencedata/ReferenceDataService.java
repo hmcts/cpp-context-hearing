@@ -4,7 +4,7 @@ import static com.google.common.cache.CacheBuilder.newBuilder;
 import static java.time.LocalDate.now;
 import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.common.converter.LocalDates.from;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;

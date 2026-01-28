@@ -9,9 +9,11 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.json.Json;
+
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 
 @SuppressWarnings({"squid:S2384"})
 public class CourtApplicationsSerializer {
@@ -28,7 +30,7 @@ public class CourtApplicationsSerializer {
     }
 
     private static JsonObject jsonFromString(String jsonObjectStr) {
-        try (JsonReader jsonReader = Json.createReader(new StringReader(jsonObjectStr))) {
+        try (JsonReader jsonReader = createReader(new StringReader(jsonObjectStr))) {
             return jsonReader.readObject();
         }
     }
