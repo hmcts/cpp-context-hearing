@@ -134,7 +134,7 @@
         </elementProp>
       </SetupThreadGroup>
       <hashTree>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockReset">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockReset" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -155,7 +155,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnit">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnit" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -193,7 +193,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubEnforcementArea">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubEnforcementArea" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -230,7 +230,39 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubUserPermissions">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubLoggedInUserPermissions" enabled="true">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+import java.util.UUID
+
+try {
+    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
+    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
+    
+    WireMock.configureFor(wiremockHost, wiremockPort)
+    
+    // stubUsersAndGroupsGetLoggedInPermissionsWithoutCases
+    String permissionsUrl = &quot;/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions&quot;
+    String permissionsJson = &quot;{\&quot;groups\&quot;:[{\&quot;groupId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;groupName\&quot;:\&quot;groupName1\&quot;,\&quot;prosecutingAuthority\&quot;:\&quot;TFL\&quot;},{\&quot;groupId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;,\&quot;groupName\&quot;:\&quot;groupName2\&quot;,\&quot;prosecutingAuthority\&quot;:\&quot;TVL\&quot;}],\&quot;permissions\&quot;:[{\&quot;action\&quot;:\&quot;groupName1\&quot;,\&quot;object\&quot;:\&quot;TFL\&quot;,\&quot;source\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;target\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;},{\&quot;action\&quot;:\&quot;groupName2\&quot;,\&quot;object\&quot;:\&quot;TVL\&quot;,\&quot;source\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;target\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;}],\&quot;switchableRoles\&quot;:[{\&quot;roleId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;description\&quot;:\&quot;description1\&quot;,\&quot;label\&quot;:\&quot;label1\&quot;,\&quot;selectable\&quot;:true},{\&quot;roleId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;,\&quot;description\&quot;:\&quot;description2\&quot;,\&quot;label\&quot;:\&quot;label2\&quot;,\&quot;selectable\&quot;:false}]}&quot;
+    
+    stubFor(get(urlPathEqualTo(permissionsUrl))
+            .willReturn(aResponse()
+                    .withStatus(200)
+                    .withHeader(&quot;CPPID&quot;, UUID.randomUUID().toString())
+                    .withHeader(&quot;Content-Type&quot;, &quot;application/json&quot;)
+                    .withBody(permissionsJson)))
+    
+    log.info(&quot;WireMock stub for logged-in user permissions configured successfully&quot;)
+} catch (Exception e) {
+    log.warn(&quot;Failed to configure WireMock stub for logged-in user permissions: &quot; + e.getMessage())
+}</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubUserRoles" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -250,17 +282,6 @@ try {
         userId = &quot;7a04cabb-102a-4737-9ae1-a703dcf62cff&quot;
     }
     
-    // stubUsersAndGroupsGetLoggedInPermissionsWithoutCases
-    String permissionsUrl = &quot;/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions&quot;
-    String permissionsJson = &quot;{\&quot;groups\&quot;:[{\&quot;groupId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;groupName\&quot;:\&quot;groupName1\&quot;,\&quot;prosecutingAuthority\&quot;:\&quot;TFL\&quot;},{\&quot;groupId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;,\&quot;groupName\&quot;:\&quot;groupName2\&quot;,\&quot;prosecutingAuthority\&quot;:\&quot;TVL\&quot;}],\&quot;permissions\&quot;:[{\&quot;action\&quot;:\&quot;groupName1\&quot;,\&quot;object\&quot;:\&quot;TFL\&quot;,\&quot;source\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;target\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;},{\&quot;action\&quot;:\&quot;groupName2\&quot;,\&quot;object\&quot;:\&quot;TVL\&quot;,\&quot;source\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;target\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;}],\&quot;switchableRoles\&quot;:[{\&quot;roleId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;description\&quot;:\&quot;description1\&quot;,\&quot;label\&quot;:\&quot;label1\&quot;,\&quot;selectable\&quot;:true},{\&quot;roleId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;,\&quot;description\&quot;:\&quot;description2\&quot;,\&quot;label\&quot;:\&quot;label2\&quot;,\&quot;selectable\&quot;:false}]}&quot;
-    
-    stubFor(get(urlPathEqualTo(permissionsUrl))
-            .willReturn(aResponse()
-                    .withStatus(200)
-                    .withHeader(&quot;CPPID&quot;, UUID.randomUUID().toString())
-                    .withHeader(&quot;Content-Type&quot;, &quot;application/json&quot;)
-                    .withBody(permissionsJson)))
-    
     // stubUsersAndGroupsUserRoles
     String rolesUrl = &quot;/usersgroups-service/query/api/rest/usersgroups/users/&quot; + userId + &quot;/roles&quot;
     String rolesJson = &quot;{\&quot;groups\&quot;:[{\&quot;groupId\&quot;:\&quot;1e2f843e-d639-40b3-8611-8015f3a18958\&quot;},{\&quot;groupId\&quot;:\&quot;1e2f843e-d639-40b3-8211-8015f3a18958\&quot;}],\&quot;allRoles\&quot;:[{\&quot;roleId\&quot;:\&quot;1e2f843e-d649-40b3-8611-8015f3a18952\&quot;,\&quot;label\&quot;:\&quot;role label\&quot;,\&quot;description\&quot;:\&quot;role description\&quot;,\&quot;selectable\&quot;:true,\&quot;startDate\&quot;:null,\&quot;endDate\&quot;:null}]}&quot;
@@ -272,18 +293,66 @@ try {
                     .withHeader(&quot;Content-Type&quot;, &quot;application/json&quot;)
                     .withBody(rolesJson)))
     
-    // setupAsAuthorisedUser and setupAsSystemUser
+    log.info(&quot;WireMock stub for user roles configured successfully&quot;)
+} catch (Exception e) {
+    log.warn(&quot;Failed to configure WireMock stub for user roles: &quot; + e.getMessage())
+}</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubUserGroups" enabled="true">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+import java.util.UUID
+
+try {
+    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
+    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
+    
+    WireMock.configureFor(wiremockHost, wiremockPort)
+    
+    // Get userId from JMeter variables (defaults to the one from user defined variables)
+    String userId = vars.get(&quot;userId&quot;)
+    if (userId == null || userId.isEmpty()) {
+        userId = &quot;7a04cabb-102a-4737-9ae1-a703dcf62cff&quot;
+    }
+    
+    // setupAsAuthorisedUser
     String groupsUrl = &quot;/usersgroups-service/query/api/rest/usersgroups/users/&quot; + userId + &quot;/groups&quot;
     String groupsJson = &quot;{\&quot;groups\&quot;:[{\&quot;groupId\&quot;:\&quot;7e2f143e-d619-40b3-8611-8015f3a18957\&quot;,\&quot;groupName\&quot;:\&quot;Court Clerks\&quot;}, {\&quot;groupId\&quot;:\&quot;14986cb7-eefa-48b3-b7e2-34431c3265e5\&quot;,\&quot;groupName\&quot;:\&quot;System Users\&quot;}]}&quot;
     
-
     stubFor(get(urlPathEqualTo(groupsUrl))
             .willReturn(aResponse()
                     .withStatus(200)
                     .withHeader(&quot;CPPID&quot;, userId)
                     .withHeader(&quot;Content-Type&quot;, &quot;application/json&quot;)
                     .withBody(groupsJson)))
-                    
+    
+    log.info(&quot;WireMock stub for user groups configured successfully&quot;)
+} catch (Exception e) {
+    log.warn(&quot;Failed to configure WireMock stub for user groups: &quot; + e.getMessage())
+}</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubSystemUserGroups" enabled="true">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+import java.util.UUID
+
+try {
+    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
+    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
+    
+    WireMock.configureFor(wiremockHost, wiremockPort)
+    
+    // setupAsSystemUser
     String groupsUrl2 = &quot;/usersgroups-service/query/api/rest/usersgroups/users/46986cb7-eefa-48b3-b7e2-34431c3265e5/groups&quot;
     String groupsJson2 = &quot;{\&quot;groups\&quot;:[{\&quot;groupId\&quot;:\&quot;14986cb7-eefa-48b3-b7e2-34431c3265e5\&quot;,\&quot;groupName\&quot;:\&quot;System Users\&quot;}]}&quot;
    
@@ -293,7 +362,27 @@ try {
                     .withHeader(&quot;CPPID&quot;, &quot;46986cb7-eefa-48b3-b7e2-34431c3265e5&quot;)
                     .withHeader(&quot;Content-Type&quot;, &quot;application/json&quot;)
                     .withBody(groupsJson2)))
+    
+    log.info(&quot;WireMock stub for system user groups configured successfully&quot;)
+} catch (Exception e) {
+    log.warn(&quot;Failed to configure WireMock stub for system user groups: &quot; + e.getMessage())
+}</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPermissionForObject" enabled="true">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+import java.util.UUID
 
+try {
+    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
+    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
+    
+    WireMock.configureFor(wiremockHost, wiremockPort)
     
     // stubUserGroupLoggedInUserHasPermissionForObject
     stubFor(get(urlMatching(&quot;/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions.*&quot;))
@@ -305,6 +394,27 @@ try {
                     .withHeader(&quot;Content-Type&quot;, &quot;application/json&quot;)
                     .withBody(&quot;{\&quot;hasPermission\&quot;:true}&quot;)))
     
+    log.info(&quot;WireMock stub for permission for object configured successfully&quot;)
+} catch (Exception e) {
+    log.warn(&quot;Failed to configure WireMock stub for permission for object: &quot; + e.getMessage())
+}</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPermissionForAction" enabled="true">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+import java.util.UUID
+
+try {
+    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
+    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
+    
+    WireMock.configureFor(wiremockHost, wiremockPort)
+    
     // stubUserGroupLoggedInUserHasPermissionForAction
     stubFor(get(urlMatching(&quot;/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions.*&quot;))
             .atPriority(1)
@@ -315,9 +425,9 @@ try {
                     .withHeader(&quot;Content-Type&quot;, &quot;application/json&quot;)
                     .withBody(&quot;{\&quot;permissions\&quot;:[]}&quot;)))
     
-    log.info(&quot;WireMock stubs for user permissions, roles, groups, and permission checks configured successfully&quot;)
+    log.info(&quot;WireMock stub for permission for action configured successfully&quot;)
 } catch (Exception e) {
-    log.warn(&quot;Failed to configure WireMock stubs: &quot; + e.getMessage())
+    log.warn(&quot;Failed to configure WireMock stub for permission for action: &quot; + e.getMessage())
 }</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
@@ -355,7 +465,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubProsecutor">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubProsecutor" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -424,7 +534,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubNowsMetadata">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubNowsMetadata" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -561,7 +671,11 @@ try {
     // Minimal result definitions response - includes the result definition IDs used in the test
     String resultDefId1 = &quot;969f150c-cd05-46b0-9dd9-30891efcc766&quot;
     String resultDefId2 = &quot;1f3c83cc-53eb-4861-8cb8-2289b4a08307&quot;
-    String resultDefinitionsJson = &quot;{\&quot;resultDefinitions\&quot;:[{\&quot;id\&quot;:\&quot;&quot; + resultDefId1 + &quot;\&quot;,\&quot;version\&quot;:\&quot;2021-12-10T10:23:51.677Z\&quot;,\&quot;startDate\&quot;:\&quot;2021-12-11\&quot;,\&quot;label\&quot;:\&quot;Fine\&quot;,\&quot;shortCode\&quot;:\&quot;FINE\&quot;,\&quot;level\&quot;:\&quot;OFFENCE\&quot;,\&quot;rank\&quot;:100,\&quot;wordGroups\&quot;:[{\&quot;wordGroup\&quot;:[\&quot;FINE\&quot;]}],\&quot;prompts\&quot;:[{\&quot;id\&quot;:\&quot;&quot; + resultDefId1 + &quot;\&quot;,\&quot;label\&quot;:\&quot;promptLabel\&quot;,\&quot;resultPromptRule\&quot;:\&quot;mandatory\&quot;,\&quot;type\&quot;:\&quot;FIXL\&quot;,\&quot;sequence\&quot;:100,\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;reference\&quot;:\&quot;bailConditionReason\&quot;,\&quot;fixedListCode\&quot;:\&quot;fixedListCode\&quot;,\&quot;userGroups\&quot;:[],\&quot;courtExtract\&quot;:\&quot;N\&quot;,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;hidden\&quot;:false,\&quot;referenceDataKey\&quot;:\&quot;bailConditionReason\&quot;,\&quot;nameEmail\&quot;:false,\&quot;associatedWithReferenceData\&quot;:true}],\&quot;financial\&quot;:\&quot;Y\&quot;,\&quot;unscheduled\&quot;:false,\&quot;adjournment\&quot;:\&quot;N\&quot;,\&quot;category\&quot;:\&quot;I\&quot;,\&quot;urgent\&quot;:false,\&quot;convicted\&quot;:\&quot;N\&quot;,\&quot;d20\&quot;:false,\&quot;postHearingCustodyStatus\&quot;:\&quot;A\&quot;,\&quot;terminatesOffenceProceedings\&quot;:false,\&quot;lifeDuration\&quot;:false,\&quot;rollUpPrompts\&quot;:false,\&quot;publishedForNows\&quot;:false,\&quot;publishedAsAPrompt\&quot;:false,\&quot;excludedFromResults\&quot;:false,\&quot;alwaysPublished\&quot;:false,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;canBeSubjectOfBreach\&quot;:false,\&quot;canBeSubjectOfVariation\&quot;:false,\&quot;isAvailableForCourtExtract\&quot;:true,\&quot;isBooleanResult\&quot;:false},{\&quot;id\&quot;:\&quot;&quot; + resultDefId2 + &quot;\&quot;,\&quot;version\&quot;:\&quot;2021-12-10T10:23:51.677Z\&quot;,\&quot;startDate\&quot;:\&quot;2021-12-11\&quot;,\&quot;label\&quot;:\&quot;Result Definition\&quot;,\&quot;shortCode\&quot;:\&quot;RD\&quot;,\&quot;level\&quot;:\&quot;OFFENCE\&quot;,\&quot;rank\&quot;:200,\&quot;wordGroups\&quot;:[{\&quot;wordGroup\&quot;:[\&quot;RD\&quot;]}],\&quot;prompts\&quot;:[{\&quot;id\&quot;:\&quot;&quot; + resultDefId2 + &quot;\&quot;,\&quot;label\&quot;:\&quot;promptLabel\&quot;,\&quot;resultPromptRule\&quot;:\&quot;mandatory\&quot;,\&quot;type\&quot;:\&quot;FIXL\&quot;,\&quot;sequence\&quot;:100,\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;reference\&quot;:\&quot;bailConditionReason\&quot;,\&quot;fixedListCode\&quot;:\&quot;fixedListCode\&quot;,\&quot;userGroups\&quot;:[],\&quot;courtExtract\&quot;:\&quot;N\&quot;,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;hidden\&quot;:false,\&quot;referenceDataKey\&quot;:\&quot;bailConditionReason\&quot;,\&quot;nameEmail\&quot;:false,\&quot;associatedWithReferenceData\&quot;:true}],\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;unscheduled\&quot;:false,\&quot;adjournment\&quot;:\&quot;N\&quot;,\&quot;category\&quot;:\&quot;I\&quot;,\&quot;urgent\&quot;:false,\&quot;convicted\&quot;:\&quot;N\&quot;,\&quot;d20\&quot;:false,\&quot;postHearingCustodyStatus\&quot;:\&quot;A\&quot;,\&quot;terminatesOffenceProceedings\&quot;:false,\&quot;lifeDuration\&quot;:false,\&quot;rollUpPrompts\&quot;:false,\&quot;publishedForNows\&quot;:false,\&quot;publishedAsAPrompt\&quot;:false,\&quot;excludedFromResults\&quot;:false,\&quot;alwaysPublished\&quot;:false,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;canBeSubjectOfBreach\&quot;:false,\&quot;canBeSubjectOfVariation\&quot;:false,\&quot;isAvailableForCourtExtract\&quot;:true,\&quot;isBooleanResult\&quot;:false}]}&quot;
+    String resultDefId3 = &quot;ebed169e-5e22-46b2-af32-8e5fb0461f05&quot;
+    String resultDefId4 = &quot;b8cd526c-4ca1-43ae-93bd-fc5a8f03c0d5&quot;
+    String resultDefId5 = &quot;de946ddc-ad77-44b1-8480-8bbc251cdcfb&quot;
+    
+    String resultDefinitionsJson = &quot;{\&quot;resultDefinitions\&quot;:[{\&quot;id\&quot;:\&quot;&quot; + resultDefId1 + &quot;\&quot;,\&quot;version\&quot;:\&quot;2021-12-10T10:23:51.677Z\&quot;,\&quot;startDate\&quot;:\&quot;2021-12-11\&quot;,\&quot;label\&quot;:\&quot;Fine\&quot;,\&quot;shortCode\&quot;:\&quot;FINE\&quot;,\&quot;level\&quot;:\&quot;OFFENCE\&quot;,\&quot;rank\&quot;:100,\&quot;wordGroups\&quot;:[{\&quot;wordGroup\&quot;:[\&quot;FINE\&quot;]}],\&quot;prompts\&quot;:[{\&quot;id\&quot;:\&quot;&quot; + resultDefId1 + &quot;\&quot;,\&quot;label\&quot;:\&quot;promptLabel\&quot;,\&quot;resultPromptRule\&quot;:\&quot;mandatory\&quot;,\&quot;type\&quot;:\&quot;FIXL\&quot;,\&quot;sequence\&quot;:100,\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;reference\&quot;:\&quot;bailConditionReason\&quot;,\&quot;fixedListCode\&quot;:\&quot;fixedListCode\&quot;,\&quot;userGroups\&quot;:[],\&quot;courtExtract\&quot;:\&quot;N\&quot;,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;hidden\&quot;:false,\&quot;referenceDataKey\&quot;:\&quot;bailConditionReason\&quot;,\&quot;nameEmail\&quot;:false,\&quot;associatedWithReferenceData\&quot;:true}],\&quot;financial\&quot;:\&quot;Y\&quot;,\&quot;unscheduled\&quot;:false,\&quot;adjournment\&quot;:\&quot;N\&quot;,\&quot;category\&quot;:\&quot;I\&quot;,\&quot;urgent\&quot;:false,\&quot;convicted\&quot;:\&quot;N\&quot;,\&quot;d20\&quot;:false,\&quot;postHearingCustodyStatus\&quot;:\&quot;A\&quot;,\&quot;terminatesOffenceProceedings\&quot;:false,\&quot;lifeDuration\&quot;:false,\&quot;rollUpPrompts\&quot;:false,\&quot;publishedForNows\&quot;:false,\&quot;publishedAsAPrompt\&quot;:false,\&quot;excludedFromResults\&quot;:false,\&quot;alwaysPublished\&quot;:false,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;canBeSubjectOfBreach\&quot;:false,\&quot;canBeSubjectOfVariation\&quot;:false,\&quot;isAvailableForCourtExtract\&quot;:true,\&quot;isBooleanResult\&quot;:false},{\&quot;id\&quot;:\&quot;&quot; + resultDefId2 + &quot;\&quot;,\&quot;version\&quot;:\&quot;2021-12-10T10:23:51.677Z\&quot;,\&quot;startDate\&quot;:\&quot;2021-12-11\&quot;,\&quot;label\&quot;:\&quot;Result Definition\&quot;,\&quot;shortCode\&quot;:\&quot;RD\&quot;,\&quot;level\&quot;:\&quot;OFFENCE\&quot;,\&quot;rank\&quot;:200,\&quot;wordGroups\&quot;:[{\&quot;wordGroup\&quot;:[\&quot;RD\&quot;]}],\&quot;prompts\&quot;:[{\&quot;id\&quot;:\&quot;&quot; + resultDefId2 + &quot;\&quot;,\&quot;label\&quot;:\&quot;promptLabel\&quot;,\&quot;resultPromptRule\&quot;:\&quot;mandatory\&quot;,\&quot;type\&quot;:\&quot;FIXL\&quot;,\&quot;sequence\&quot;:100,\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;reference\&quot;:\&quot;bailConditionReason\&quot;,\&quot;fixedListCode\&quot;:\&quot;fixedListCode\&quot;,\&quot;userGroups\&quot;:[],\&quot;courtExtract\&quot;:\&quot;N\&quot;,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;hidden\&quot;:false,\&quot;referenceDataKey\&quot;:\&quot;bailConditionReason\&quot;,\&quot;nameEmail\&quot;:false,\&quot;associatedWithReferenceData\&quot;:true}],\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;unscheduled\&quot;:false,\&quot;adjournment\&quot;:\&quot;N\&quot;,\&quot;category\&quot;:\&quot;I\&quot;,\&quot;urgent\&quot;:false,\&quot;convicted\&quot;:\&quot;N\&quot;,\&quot;d20\&quot;:false,\&quot;postHearingCustodyStatus\&quot;:\&quot;A\&quot;,\&quot;terminatesOffenceProceedings\&quot;:false,\&quot;lifeDuration\&quot;:false,\&quot;rollUpPrompts\&quot;:false,\&quot;publishedForNows\&quot;:false,\&quot;publishedAsAPrompt\&quot;:false,\&quot;excludedFromResults\&quot;:false,\&quot;alwaysPublished\&quot;:false,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;canBeSubjectOfBreach\&quot;:false,\&quot;canBeSubjectOfVariation\&quot;:false,\&quot;isAvailableForCourtExtract\&quot;:true,\&quot;isBooleanResult\&quot;:false},{\&quot;id\&quot;:\&quot;&quot; + resultDefId3 + &quot;\&quot;,\&quot;version\&quot;:\&quot;2021-12-10T10:23:51.677Z\&quot;,\&quot;startDate\&quot;:\&quot;2021-12-11\&quot;,\&quot;label\&quot;:\&quot;Result Definition\&quot;,\&quot;shortCode\&quot;:\&quot;RD\&quot;,\&quot;level\&quot;:\&quot;OFFENCE\&quot;,\&quot;rank\&quot;:300,\&quot;wordGroups\&quot;:[{\&quot;wordGroup\&quot;:[\&quot;RD\&quot;]}],\&quot;prompts\&quot;:[{\&quot;id\&quot;:\&quot;&quot; + resultDefId3 + &quot;\&quot;,\&quot;label\&quot;:\&quot;promptLabel\&quot;,\&quot;resultPromptRule\&quot;:\&quot;mandatory\&quot;,\&quot;type\&quot;:\&quot;FIXL\&quot;,\&quot;sequence\&quot;:100,\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;reference\&quot;:\&quot;bailConditionReason\&quot;,\&quot;fixedListCode\&quot;:\&quot;fixedListCode\&quot;,\&quot;userGroups\&quot;:[],\&quot;courtExtract\&quot;:\&quot;N\&quot;,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;hidden\&quot;:false,\&quot;referenceDataKey\&quot;:\&quot;bailConditionReason\&quot;,\&quot;nameEmail\&quot;:false,\&quot;associatedWithReferenceData\&quot;:true}],\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;unscheduled\&quot;:false,\&quot;adjournment\&quot;:\&quot;N\&quot;,\&quot;category\&quot;:\&quot;I\&quot;,\&quot;urgent\&quot;:false,\&quot;convicted\&quot;:\&quot;N\&quot;,\&quot;d20\&quot;:false,\&quot;postHearingCustodyStatus\&quot;:\&quot;A\&quot;,\&quot;terminatesOffenceProceedings\&quot;:false,\&quot;lifeDuration\&quot;:false,\&quot;rollUpPrompts\&quot;:false,\&quot;publishedForNows\&quot;:false,\&quot;publishedAsAPrompt\&quot;:false,\&quot;excludedFromResults\&quot;:false,\&quot;alwaysPublished\&quot;:false,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;canBeSubjectOfBreach\&quot;:false,\&quot;canBeSubjectOfVariation\&quot;:false,\&quot;isAvailableForCourtExtract\&quot;:true,\&quot;isBooleanResult\&quot;:false},{\&quot;id\&quot;:\&quot;&quot; + resultDefId4 + &quot;\&quot;,\&quot;version\&quot;:\&quot;2021-12-10T10:23:51.677Z\&quot;,\&quot;startDate\&quot;:\&quot;2021-12-11\&quot;,\&quot;label\&quot;:\&quot;Result Definition\&quot;,\&quot;shortCode\&quot;:\&quot;RD\&quot;,\&quot;level\&quot;:\&quot;OFFENCE\&quot;,\&quot;rank\&quot;:400,\&quot;wordGroups\&quot;:[{\&quot;wordGroup\&quot;:[\&quot;RD\&quot;]}],\&quot;prompts\&quot;:[{\&quot;id\&quot;:\&quot;&quot; + resultDefId4 + &quot;\&quot;,\&quot;label\&quot;:\&quot;promptLabel\&quot;,\&quot;resultPromptRule\&quot;:\&quot;mandatory\&quot;,\&quot;type\&quot;:\&quot;FIXL\&quot;,\&quot;sequence\&quot;:100,\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;reference\&quot;:\&quot;bailConditionReason\&quot;,\&quot;fixedListCode\&quot;:\&quot;fixedListCode\&quot;,\&quot;userGroups\&quot;:[],\&quot;courtExtract\&quot;:\&quot;N\&quot;,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;hidden\&quot;:false,\&quot;referenceDataKey\&quot;:\&quot;bailConditionReason\&quot;,\&quot;nameEmail\&quot;:false,\&quot;associatedWithReferenceData\&quot;:true}],\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;unscheduled\&quot;:false,\&quot;adjournment\&quot;:\&quot;N\&quot;,\&quot;category\&quot;:\&quot;I\&quot;,\&quot;urgent\&quot;:false,\&quot;convicted\&quot;:\&quot;N\&quot;,\&quot;d20\&quot;:false,\&quot;postHearingCustodyStatus\&quot;:\&quot;A\&quot;,\&quot;terminatesOffenceProceedings\&quot;:false,\&quot;lifeDuration\&quot;:false,\&quot;rollUpPrompts\&quot;:false,\&quot;publishedForNows\&quot;:false,\&quot;publishedAsAPrompt\&quot;:false,\&quot;excludedFromResults\&quot;:false,\&quot;alwaysPublished\&quot;:false,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;canBeSubjectOfBreach\&quot;:false,\&quot;canBeSubjectOfVariation\&quot;:false,\&quot;isAvailableForCourtExtract\&quot;:true,\&quot;isBooleanResult\&quot;:false},{\&quot;id\&quot;:\&quot;&quot; + resultDefId5 + &quot;\&quot;,\&quot;version\&quot;:\&quot;2021-12-10T10:23:51.677Z\&quot;,\&quot;startDate\&quot;:\&quot;2021-12-11\&quot;,\&quot;label\&quot;:\&quot;Result Definition\&quot;,\&quot;shortCode\&quot;:\&quot;RD\&quot;,\&quot;level\&quot;:\&quot;OFFENCE\&quot;,\&quot;rank\&quot;:500,\&quot;wordGroups\&quot;:[{\&quot;wordGroup\&quot;:[\&quot;RD\&quot;]}],\&quot;prompts\&quot;:[{\&quot;id\&quot;:\&quot;&quot; + resultDefId5 + &quot;\&quot;,\&quot;label\&quot;:\&quot;promptLabel\&quot;,\&quot;resultPromptRule\&quot;:\&quot;mandatory\&quot;,\&quot;type\&quot;:\&quot;FIXL\&quot;,\&quot;sequence\&quot;:100,\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;reference\&quot;:\&quot;bailConditionReason\&quot;,\&quot;fixedListCode\&quot;:\&quot;fixedListCode\&quot;,\&quot;userGroups\&quot;:[],\&quot;courtExtract\&quot;:\&quot;N\&quot;,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;hidden\&quot;:false,\&quot;referenceDataKey\&quot;:\&quot;bailConditionReason\&quot;,\&quot;nameEmail\&quot;:false,\&quot;associatedWithReferenceData\&quot;:true}],\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;unscheduled\&quot;:false,\&quot;adjournment\&quot;:\&quot;N\&quot;,\&quot;category\&quot;:\&quot;I\&quot;,\&quot;urgent\&quot;:false,\&quot;convicted\&quot;:\&quot;N\&quot;,\&quot;d20\&quot;:false,\&quot;postHearingCustodyStatus\&quot;:\&quot;A\&quot;,\&quot;terminatesOffenceProceedings\&quot;:false,\&quot;lifeDuration\&quot;:false,\&quot;rollUpPrompts\&quot;:false,\&quot;publishedForNows\&quot;:false,\&quot;publishedAsAPrompt\&quot;:false,\&quot;excludedFromResults\&quot;:false,\&quot;alwaysPublished\&quot;:false,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;canBeSubjectOfBreach\&quot;:false,\&quot;canBeSubjectOfVariation\&quot;:false,\&quot;isAvailableForCourtExtract\&quot;:true,\&quot;isBooleanResult\&quot;:false}]}&quot;
     
     // Stub for any date query parameter
     stubFor(get(urlPathEqualTo(resultDefinitionsUrl))
@@ -765,7 +879,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubHearingTypes">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubHearingTypes" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -800,6 +914,76 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitHearingEventMappings" enabled="true">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+import java.util.UUID
+
+try {
+    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
+    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
+    
+    WireMock.configureFor(wiremockHost, wiremockPort)
+    
+    // Stub cp-xhibit-hearing-event-mappings
+    String xhibitHearingEventMappingsUrl = &quot;/referencedata-service/query/api/rest/referencedata/cp-xhibit-hearing-event-mappings&quot;
+    String xhibitHearingEventMappingsMediaType = &quot;application/vnd.referencedata.query.cp-xhibit-hearing-event-mappings+json&quot;
+    
+    // CP Xhibit hearing event mappings response matching the structure from integration tests
+    String xhibitHearingEventMappingsJson = &quot; {  \&quot;cpXhibitHearingEventMappings\&quot;: [    {      \&quot;cpHearingEventId\&quot;: \&quot;b71e7d2a-d3b3-4a55-a393-6d451767fc05\&quot;,      \&quot;xhibitHearingEventCode\&quot;: \&quot;10200\&quot;,      \&quot;xhibitHearingEventDescription\&quot;: \&quot;Start Hearing\&quot;,      \&quot;validFrom\&quot;: \&quot;2016-04-08\&quot;    },    {      \&quot;cpHearingEventId\&quot;: \&quot;50fb4a64-943d-4a2a-afe6-4b5c9e99e043\&quot;,      \&quot;xhibitHearingEventCode\&quot;: \&quot;20606\&quot;,      \&quot;xhibitHearingEventDescription\&quot;: \&quot;Appellant opens\&quot;,      \&quot;validFrom\&quot;: \&quot;2016-04-08\&quot;    },    {      \&quot;cpHearingEventId\&quot;: \&quot;e9060336-4821-4f46-969c-e08b33b48071\&quot;,      \&quot;xhibitHearingEventCode\&quot;: \&quot;20903\&quot;,      \&quot;xhibitHearingEventDescription\&quot;: \&quot;Open case prosecution\&quot;,      \&quot;validFrom\&quot;: \&quot;2016-04-08\&quot;    },    {      \&quot;cpHearingEventId\&quot;: \&quot;a3a9fe0c-a9a7-4e17-b0cd-42606722bbb0\&quot;,      \&quot;xhibitHearingEventCode\&quot;: \&quot;20906\&quot;,      \&quot;xhibitHearingEventDescription\&quot;: \&quot;Defence counsel.name opens case regarding defendant defendant.name\&quot;,      \&quot;validFrom\&quot;: \&quot;2016-04-08\&quot;    },    {      \&quot;cpHearingEventId\&quot;: \&quot;cc00cca8-39ba-431c-b08f-8c6f9be185d1\&quot;,      \&quot;xhibitHearingEventCode\&quot;: \&quot;20910\&quot;,      \&quot;xhibitHearingEventDescription\&quot;: \&quot;Defence counsel.name closes case regarding defendant defendant.name\&quot;,      \&quot;validFrom\&quot;: \&quot;2016-04-08\&quot;    },    {      \&quot;cpHearingEventId\&quot;: \&quot;b335327a-7f58-4f26-a2ef-7e07134ba60b\&quot;,      \&quot;xhibitHearingEventCode\&quot;: \&quot;20916\&quot;,      \&quot;xhibitHearingEventDescription\&quot;: \&quot;Point of law discussion prosecution\&quot;,      \&quot;validFrom\&quot;: \&quot;2016-04-08\&quot;    }  ]}&quot;
+    
+    stubFor(get(urlPathEqualTo(xhibitHearingEventMappingsUrl))
+            .willReturn(aResponse()
+                    .withStatus(200)
+                    .withHeader(&quot;CPPID&quot;, UUID.randomUUID().toString())
+                    .withHeader(&quot;Content-Type&quot;, xhibitHearingEventMappingsMediaType)
+                    .withBody(xhibitHearingEventMappingsJson)))
+    
+    log.info(&quot;WireMock stub for cp-xhibit-hearing-event-mappings configured successfully&quot;)
+} catch (Exception e) {
+    log.warn(&quot;Failed to configure WireMock stub for cp-xhibit-hearing-event-mappings: &quot; + e.getMessage())
+}</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitCourtMappings">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+import java.util.UUID
+
+try {
+    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
+    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
+    
+    WireMock.configureFor(wiremockHost, wiremockPort)
+    
+    // Stub cp-xhibit-court-mappings
+    String xhibitCourtMappingsUrl = &quot;/referencedata-service/query/api/rest/referencedata/cp-xhibit-court-mappings&quot;
+    String xhibitCourtMappingsMediaType = &quot;application/vnd.referencedata.query.cp-xhibit-court-mappings+json&quot;
+    
+    // CP Xhibit court mappings response matching the structure from integration tests
+    String xhibitCourtMappingsJson = &quot;   {  \&quot;cpXhibitCourtMappings\&quot;: [{ \&quot;id\&quot;: \&quot;0a43a1dd-9ba7-33d9-a306-554784e5b116\&quot;, \&quot;oucode\&quot;: \&quot;C04PR00\&quot;, \&quot;crestCourtId\&quot;: \&quot;448\&quot;, \&quot;crestCourtSiteId\&quot;: \&quot;751\&quot;, \&quot;crestCourtSiteName\&quot;: \&quot;BARROW-IN-FURNESS\&quot;, \&quot;crestCourtName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtShortName\&quot;: \&quot;PREST\&quot;, \&quot;crestCourtFullName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtSiteCode\&quot;: \&quot;C\&quot;, \&quot;courtType\&quot;: \&quot;CROWN_COURT\&quot;},{ \&quot;id\&quot;: \&quot;26767ef5-5441-32d1-bf5e-baf746936b37\&quot;, \&quot;oucode\&quot;: \&quot;C04PR00\&quot;, \&quot;crestCourtId\&quot;: \&quot;448\&quot;, \&quot;crestCourtSiteId\&quot;: \&quot;448\&quot;, \&quot;crestCourtSiteName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtShortName\&quot;: \&quot;PREST\&quot;, \&quot;crestCourtFullName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtSiteCode\&quot;: \&quot;A\&quot;, \&quot;courtType\&quot;: \&quot;CROWN_COURT\&quot;},{ \&quot;id\&quot;: \&quot;e2afcfff-48f3-3647-9ead-a06dcba4bb47\&quot;, \&quot;oucode\&quot;: \&quot;C04PR00\&quot;, \&quot;crestCourtId\&quot;: \&quot;448\&quot;, \&quot;crestCourtSiteId\&quot;: \&quot;448\&quot;, \&quot;crestCourtSiteName\&quot;: \&quot;PRESTON [THE SESSIONS HOUSE]\&quot;, \&quot;crestCourtName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtShortName\&quot;: \&quot;PREST\&quot;, \&quot;crestCourtFullName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtSiteCode\&quot;: \&quot;B\&quot;, \&quot;courtType\&quot;: \&quot;CROWN_COURT\&quot;},{ \&quot;id\&quot;: \&quot;cadfb7e2-f293-36a6-b466-3875d88ba6e4\&quot;, \&quot;oucode\&quot;: \&quot;C04PR00\&quot;, \&quot;crestCourtId\&quot;: \&quot;448\&quot;, \&quot;crestCourtSiteId\&quot;: \&quot;768\&quot;, \&quot;crestCourtSiteName\&quot;: \&quot;LANCASTER\&quot;, \&quot;crestCourtName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtShortName\&quot;: \&quot;PREST\&quot;, \&quot;crestCourtFullName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtSiteCode\&quot;: \&quot;D\&quot;, \&quot;courtType\&quot;: \&quot;CROWN_COURT\&quot;}  ]}&quot;
+    
+    stubFor(get(urlPathEqualTo(xhibitCourtMappingsUrl))
+            .willReturn(aResponse()
+                    .withStatus(200)
+                    .withHeader(&quot;CPPID&quot;, UUID.randomUUID().toString())
+                    .withHeader(&quot;Content-Type&quot;, xhibitCourtMappingsMediaType)
+                    .withBody(xhibitCourtMappingsJson)))
+    
+    log.info(&quot;WireMock stub for cp-xhibit-court-mappings configured successfully&quot;)
+} catch (Exception e) {
+    log.warn(&quot;Failed to configure WireMock stub for cp-xhibit-court-mappings: &quot; + e.getMessage())
+}</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
         <TestAction guiclass="TestActionGui" testclass="TestAction" testname="Flow Control Action" enabled="true">
           <intProp name="ActionProcessor.action">1</intProp>
           <intProp name="ActionProcessor.target">0</intProp>
@@ -830,7 +1014,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict" enabled="false">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -1171,7 +1355,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Verdict 2" enabled="false">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Verdict 2" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -1227,7 +1411,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Shared Results 2" enabled="false">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Shared Results 2" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}/${hearingDay}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -1335,7 +1519,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults">
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
           <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
@@ -1345,7 +1529,40 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="HTTPSampler.implementation"></stringProp>
         </ConfigTestElement>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubSetup">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Hearing Event Definitions" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/event-definitions</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;id&quot;:&quot;96ff13bf-0aac-43ba-877d-c7da67b1e30d&quot;,&quot;eventDefinitions&quot;:[{&quot;id&quot;:&quot;67b75d91-085f-4c75-b941-09c80bee6df6&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Hearing ended&quot;,&quot;actionSequence&quot;:882929325,&quot;groupLabel&quot;:&quot;wKkH7am4zz&quot;,&quot;groupSequence&quot;:2095509888,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;Hearing ended&quot;},{&quot;id&quot;:&quot;b71e7d2a-d3b3-4a55-a393-6d451767fc05&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Start Hearing&quot;,&quot;actionSequence&quot;:936967479,&quot;groupLabel&quot;:&quot;4428rcyPcN&quot;,&quot;groupSequence&quot;:1603353170,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;YOxCjRZgyK&quot;},{&quot;id&quot;:&quot;699a2d2e-56f3-4952-90ab-e22870b2196d&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Identify defendant&quot;,&quot;actionSequence&quot;:1359865467,&quot;groupLabel&quot;:&quot;y6x4DdKgv9&quot;,&quot;groupSequence&quot;:685479997,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;6Zs6zndse1&quot;},{&quot;id&quot;:&quot;a66576ab-b966-4480-988f-3f17f019897e&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Take Plea&quot;,&quot;actionSequence&quot;:1593556401,&quot;groupLabel&quot;:&quot;zLiKB6nUV3&quot;,&quot;groupSequence&quot;:606936825,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;ZrWfdKkZkn&quot;},{&quot;id&quot;:&quot;be59557a-d89d-47d3-a6f1-a4db67986616&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Prosecution Opening&quot;,&quot;actionSequence&quot;:1559526053,&quot;groupLabel&quot;:&quot;hWAX5qq2Aw&quot;,&quot;groupSequence&quot;:970603096,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;IQ5Mkrdk13&quot;},{&quot;id&quot;:&quot;9d3eaaef-1f67-47ab-8b8f-18877110fa34&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;&lt;counsel.name&gt;&quot;,&quot;actionSequence&quot;:2072444200,&quot;groupLabel&quot;:&quot;mm4jEfVemq&quot;,&quot;groupSequence&quot;:54208119,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;R8g9vE0tVD&quot;},{&quot;id&quot;:&quot;b21b4aea-e372-4448-99cc-577b9e8c6ab4&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Sentencing&quot;,&quot;actionSequence&quot;:325334225,&quot;groupLabel&quot;:&quot;trk2y8UF4X&quot;,&quot;groupSequence&quot;:1904954095,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;M7O5kYljzS&quot;},{&quot;id&quot;:&quot;0df93f18-0a21-40f5-9fb3-da4749cd70fe&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;End Hearing&quot;,&quot;actionSequence&quot;:229112933,&quot;groupLabel&quot;:&quot;LWtWrTepQf&quot;,&quot;groupSequence&quot;:1106999235,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;n9qjPfrIQQ&quot;},{&quot;id&quot;:&quot;160ecb51-29ee-4954-bbbf-daab18a24fbb&quot;,&quot;caseAttribute&quot;:&quot;PAUSE_RESUME&quot;,&quot;actionLabel&quot;:&quot;Pause&quot;,&quot;actionSequence&quot;:809187934,&quot;groupLabel&quot;:&quot;W8267kGIM8&quot;,&quot;groupSequence&quot;:837036653,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;tD4x6oPzpO&quot;},{&quot;id&quot;:&quot;64476e43-2138-46d5-b58b-848582cf9b07&quot;,&quot;caseAttribute&quot;:&quot;PAUSE_RESUME&quot;,&quot;actionLabel&quot;:&quot;Resume&quot;,&quot;actionSequence&quot;:1777760034,&quot;groupLabel&quot;:&quot;DfxVnClQRk&quot;,&quot;groupSequence&quot;:257720856,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;Ek3fJ90eXr&quot;},{&quot;id&quot;:&quot;50fb4a64-943d-4a2a-afe6-4b5c9e99e043&quot;,&quot;caseAttribute&quot;:&quot;APPEAL&quot;,&quot;actionLabel&quot;:&quot;Appellant opens&quot;,&quot;actionSequence&quot;:1165860257,&quot;groupLabel&quot;:&quot;UJko9uPUfy&quot;,&quot;groupSequence&quot;:1583647649,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;oVVmNi7sgT&quot;},{&quot;id&quot;:&quot;e9060336-4821-4f46-969c-e08b33b48071&quot;,&quot;caseAttribute&quot;:&quot;OPEN_CASE&quot;,&quot;actionLabel&quot;:&quot;Open case prosecution&quot;,&quot;actionSequence&quot;:157682722,&quot;groupLabel&quot;:&quot;dYRCaSpAB0&quot;,&quot;groupSequence&quot;:2111600802,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;fsGrkq8Kko&quot;},{&quot;id&quot;:&quot;a3a9fe0c-a9a7-4e17-b0cd-42606722bbb0&quot;,&quot;caseAttribute&quot;:&quot;OPEN_CASE&quot;,&quot;actionLabel&quot;:&quot;Defence counsel.name opens case regarding defendant defendant.name&quot;,&quot;actionSequence&quot;:573161802,&quot;groupLabel&quot;:&quot;L2SMODumuq&quot;,&quot;groupSequence&quot;:270979194,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;UCMuuYkd3I&quot;},{&quot;id&quot;:&quot;cc00cca8-39ba-431c-b08f-8c6f9be185d1&quot;,&quot;caseAttribute&quot;:&quot;CLOSE_CASE&quot;,&quot;actionLabel&quot;:&quot;Defence counsel.name closes case regarding defendant defendant.name&quot;,&quot;actionSequence&quot;:788845658,&quot;groupLabel&quot;:&quot;v15wqkRiYq&quot;,&quot;groupSequence&quot;:262053570,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;yUPzPboGjk&quot;},{&quot;id&quot;:&quot;b335327a-7f58-4f26-a2ef-7e07134ba60b&quot;,&quot;caseAttribute&quot;:&quot;DISCUSSION&quot;,&quot;actionLabel&quot;:&quot;Point of law discussion prosecution&quot;,&quot;actionSequence&quot;:437014501,&quot;groupLabel&quot;:&quot;vizhheLRn2&quot;,&quot;groupSequence&quot;:56047713,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;xf7NtBpO3B&quot;},{&quot;id&quot;:&quot;c3edf650-13c4-4ecb-9f85-6100ad8e4ffc&quot;,&quot;caseAttribute&quot;:&quot;DISCUSSION&quot;,&quot;actionLabel&quot;:&quot;Arraign defendant.name&quot;,&quot;actionSequence&quot;:1582758733,&quot;groupLabel&quot;:&quot;aaJa2BpROG&quot;,&quot;groupSequence&quot;:1843187454,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;rpEKxA3iAu&quot;}]}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.hearing.create-hearing-event-definitions+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+        </hashTree>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubSetup" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -1373,17 +1590,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="false">
-          <collectionProp name="Arguments.arguments">
-            <elementProp name="courtCentreId" elementType="Argument">
-              <stringProp name="Argument.name">courtCentreId</stringProp>
-              <stringProp name="Argument.value">${__UUID}</stringProp>
-              <stringProp name="Argument.metadata">=</stringProp>
-            </elementProp>
-          </collectionProp>
-        </Arguments>
-        <hashTree/>
-        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <stringProp name="LoopController.loops">3</stringProp>
         </LoopController>
         <hashTree>
@@ -1466,7 +1673,15 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
               <stringProp name="scriptLanguage">groovy</stringProp>
             </JSR223PreProcessor>
             <hashTree/>
+            <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+              <stringProp name="ConstantTimer.delay">1000</stringProp>
+            </ConstantTimer>
+            <hashTree/>
           </hashTree>
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+            <stringProp name="ConstantTimer.delay">1000</stringProp>
+          </ConstantTimer>
+          <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Log Hearing Event 1" enabled="true">
             <intProp name="HTTPSampler.concurrentPool">6</intProp>
             <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId1}/event</stringProp>
@@ -1637,7 +1852,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             <hashTree/>
           </hashTree>
         </hashTree>
-        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer">
+        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -1675,7 +1890,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CancelRemainingHearingDaysWhenMultidayHearingIsCracked" enabled="false">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CancelRemainingHearingDaysWhenMultidayHearingIsCracked" enabled="true">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -1695,44 +1910,6 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </elementProp>
           <stringProp name="HTTPSampler.implementation"></stringProp>
         </ConfigTestElement>
-        <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubResultDefinitions" enabled="false">
-          <stringProp name="cacheKey">true</stringProp>
-          <stringProp name="filename"></stringProp>
-          <stringProp name="parameters"></stringProp>
-          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
-import static com.github.tomakehurst.wiremock.client.WireMock.*
-import java.util.UUID
-
-try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    String resultDefinitionsUrl = &quot;/referencedata-service/query/api/rest/referencedata/result-definitions&quot;
-    String mediaType = &quot;application/vnd.referencedata.get-all-result-definitions+json&quot;
-    
-    // Minimal result definitions response with the required result definition ID
-    // This matches the structure expected by NowsReferenceCache
-    String resultDefinitionsJson = &quot;{\&quot;resultDefinitions\&quot;:[{\&quot;id\&quot;:\&quot;1f3c83cc-53eb-4861-8cb8-2289b4a08307\&quot;,\&quot;version\&quot;:\&quot;2021-12-10T10:23:51.677Z\&quot;,\&quot;startDate\&quot;:\&quot;2021-12-11\&quot;,\&quot;label\&quot;:\&quot;imprisonment\&quot;,\&quot;shortCode\&quot;:\&quot;IMP\&quot;,\&quot;level\&quot;:\&quot;OFFENCE\&quot;,\&quot;rank\&quot;:100,\&quot;category\&quot;:\&quot;I\&quot;,\&quot;postHearingCustodyStatus\&quot;:\&quot;C\&quot;,\&quot;lifeDuration\&quot;:true,\&quot;publishedAsAPrompt\&quot;:false,\&quot;excludedFromResults\&quot;:false,\&quot;alwaysPublished\&quot;:true,\&quot;urgent\&quot;:false,\&quot;d20\&quot;:false,\&quot;terminatesOffenceProceedings\&quot;:false,\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;unscheduled\&quot;:false,\&quot;adjournment\&quot;:\&quot;N\&quot;,\&quot;convicted\&quot;:\&quot;Y\&quot;,\&quot;rollUpPrompts\&quot;:false,\&quot;publishedForNows\&quot;:false,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;canBeSubjectOfBreach\&quot;:false,\&quot;canBeSubjectOfVariation\&quot;:false,\&quot;isAvailableForCourtExtract\&quot;:true,\&quot;isBooleanResult\&quot;:false,\&quot;prompts\&quot;:[{\&quot;id\&quot;:\&quot;1f3c83cc-53eb-4861-8cb8-2289b4a08307\&quot;,\&quot;label\&quot;:\&quot;promptLabel\&quot;,\&quot;resultPromptRule\&quot;:\&quot;optional\&quot;,\&quot;type\&quot;:\&quot;FIXL\&quot;,\&quot;sequence\&quot;:5,\&quot;financial\&quot;:\&quot;N\&quot;,\&quot;reference\&quot;:\&quot;bailConditionReason\&quot;,\&quot;courtExtract\&quot;:\&quot;N\&quot;,\&quot;jurisdiction\&quot;:\&quot;B\&quot;,\&quot;hidden\&quot;:false,\&quot;nameEmail\&quot;:false}]}]}&quot;
-    
-    // Stub for any date parameter - matches any query param &quot;on&quot;
-    stubFor(get(urlPathEqualTo(resultDefinitionsUrl))
-            .withQueryParam(&quot;on&quot;, matching(&quot;.*&quot;))
-            .withHeader(&quot;Accept&quot;, equalTo(mediaType))
-            .willReturn(aResponse()
-                    .withStatus(200)
-                    .withHeader(&quot;CPPID&quot;, UUID.randomUUID().toString())
-                    .withHeader(&quot;Content-Type&quot;, mediaType)
-                    .withBody(resultDefinitionsJson)))
-    
-    log.info(&quot;WireMock stub for result definitions configured successfully&quot;)
-} catch (Exception e) {
-    log.warn(&quot;Failed to configure WireMock stub for result definitions: &quot; + e.getMessage())
-}</stringProp>
-          <stringProp name="scriptLanguage">groovy</stringProp>
-        </JSR223PreProcessor>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
@@ -1821,7 +1998,15 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+            <stringProp name="ConstantTimer.delay">1000</stringProp>
+          </ConstantTimer>
+          <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <stringProp name="ConstantTimer.delay">1000</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
@@ -2141,7 +2326,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ResultShouldPublishDDCHResultsOnInitialShareAndNotForAmendAndReshare" enabled="false">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ResultShouldPublishDDCHResultsOnInitialShareAndNotForAmendAndReshare">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -2250,6 +2435,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <stringProp name="ConstantTimer.delay">1000</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
