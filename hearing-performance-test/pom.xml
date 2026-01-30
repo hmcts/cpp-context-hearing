@@ -71,6 +71,7 @@
                                         <artifact>org.postgresql:postgresql:42.3.2</artifact>
                                         <artifact>org.apache.activemq:activemq-client:5.18.3</artifact>
                                         <artifact>javax.jms:javax.jms-api:2.0.1</artifact>
+                                        <artifact>org.wiremock:wiremock:3.0.1</artifact>
                                     </testPlanLibraries>
                                     <ignoredArtifacts>org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1</ignoredArtifacts>
                                     <propertiesJMeter>

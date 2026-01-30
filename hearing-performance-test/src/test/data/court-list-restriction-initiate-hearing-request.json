@@ -1,0 +1,353 @@
+{
+  "hearing": {
+    "courtCentre": {
+      "id": "b52f805c-2821-4904-a0e0-26f7fda6dd08",
+      "name": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+      "roomId": "5d5d7b5e-7833-4dc1-b94a-d1a5c635c623",
+      "roomName": "CourtRoom 1",
+      "welshName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+      "welshRoomName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+    },
+    "defenceCounsels": [
+      {
+        "attendanceDays": ["2026-01-23"],
+        "defendants": ["${defendantId}"],
+        "firstName": "John",
+        "id": "${defenceCounselId}",
+        "lastName": "Jones",
+        "status": "OPEN",
+        "title": "Mr"
+      }
+    ],
+    "defendantReferralReasons": [
+      {
+        "defendantId": "${defendantId}",
+        "description": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "id": "${defendantReferralReasonId}",
+        "welshDescription": "welshDescription"
+      }
+    ],
+    "hearingDays": [
+      {
+        "listedDurationMinutes": 227266322,
+        "listingSequence": 4,
+        "sittingDay": "2026-01-24T11:00:11.297Z"
+      },
+      {
+        "listedDurationMinutes": 497344717,
+        "listingSequence": 3,
+        "sittingDay": "2026-01-23T11:00:11.297Z"
+      },
+      {
+        "listedDurationMinutes": 571297702,
+        "listingSequence": 5,
+        "sittingDay": "2026-01-22T11:00:11.297Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "${hearingId}",
+    "judiciary": [
+      {
+        "firstName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "isBenchChairman": true,
+        "isDeputy": true,
+        "judicialId": "${__UUID}",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "${__UUID}",
+          "judiciaryType": "CIRCUIT_JUDGE"
+        },
+        "lastName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "middleName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "title": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "userId": "${__UUID}"
+      }
+    ],
+    "jurisdictionType": "CROWN",
+    "prosecutionCases": [
+      {
+        "caseMarkers": [
+          {
+            "id": "${__UUID}",
+            "markerTypeCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+            "markerTypeDescription": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+            "markerTypeid": "${__UUID}"
+          }
+        ],
+        "caseStatus": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "classOfCase": "Class 1",
+        "defendants": [
+          {
+            "associatedPersons": [
+              {
+                "person": {
+                  "additionalNationalityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "additionalNationalityId": "${__UUID}",
+                  "address": {
+                    "address1": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                    "address2": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                    "address3": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                    "address4": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                    "address5": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                    "postcode": "YK2 6QU",
+                    "welshAddress1": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                    "welshAddress2": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                    "welshAddress3": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                    "welshAddress4": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                    "welshAddress5": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+                  },
+                  "contact": {
+                    "fax": "${__Random(1000000000,9999999999,)}",
+                    "home": "${__Random(1000000000,9999999999,)}",
+                    "mobile": "${__Random(1000000000,9999999999,)}",
+                    "primaryEmail": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}@${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}.${__RandomString(3,abcdefghijklmnoprqstvwxyz,)}",
+                    "secondaryEmail": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}@${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}.${__RandomString(3,abcdefghijklmnoprqstvwxyz,)}",
+                    "work": "${__Random(1000000000,9999999999,)}"
+                  },
+                  "dateOfBirth": "2024-06-07",
+                  "disabilityStatus": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "documentationLanguageNeeds": "ENGLISH",
+                  "ethnicity": {
+                    "observedEthnicityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+                  },
+                  "firstName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "gender": "MALE",
+                  "interpreterLanguageNeeds": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "lastName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "middleName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "nationalInsuranceNumber": "LB201184A",
+                  "nationalityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "nationalityDescription": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "nationalityId": "${__UUID}",
+                  "occupation": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "occupationCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "specificRequirements": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "title": "Lieutanant"
+                },
+                "role": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+              }
+            ],
+            "courtProceedingsInitiated": "2026-01-23T15:40:51.859Z",
+            "defenceOrganisation": {
+              "address": {
+                "address1": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "address2": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "address3": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "address4": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "address5": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "postcode": "YK2 6QU",
+                "welshAddress1": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "welshAddress2": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "welshAddress3": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "welshAddress4": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "welshAddress5": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+              },
+              "contact": {
+                "fax": "${__Random(1000000000,9999999999,)}",
+                "home": "${__Random(1000000000,9999999999,)}",
+                "mobile": "${__Random(1000000000,9999999999,)}",
+                "primaryEmail": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}@${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}.${__RandomString(3,abcdefghijklmnoprqstvwxyz,)}",
+                "secondaryEmail": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}@${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}.${__RandomString(3,abcdefghijklmnoprqstvwxyz,)}",
+                "work": "${__Random(1000000000,9999999999,)}"
+              },
+              "incorporationNumber": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+              "name": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+              "registeredCharityNumber": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+            },
+            "id": "${defendantId}",
+            "isYouth": true,
+            "masterDefendantId": "${defendantId}",
+            "numberOfPreviousConvictionsCited": 2025639425,
+            "offences": [
+              {
+                "allocationDecision": {
+                  "allocationDecisionDate": "2026-01-23",
+                  "courtIndicatedSentence": {
+                    "courtIndicatedSentenceDescription": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                    "courtIndicatedSentenceTypeId": "${__UUID}"
+                  },
+                  "motReasonCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "motReasonDescription": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "motReasonId": "${__UUID}",
+                  "offenceId": "${offenceId}",
+                  "originatingHearingId": "${__UUID}",
+                  "sequenceNumber": 690293944
+                },
+                "arrestDate": "2024-03-13",
+                "chargeDate": "2022-06-28",
+                "count": 1734848576,
+                "custodyTimeLimit": {
+                  "daysSpent": 920092848,
+                  "isCtlExtended": false,
+                  "timeLimit": "2024-10-23"
+                },
+                "endDate": "2022-02-28",
+                "endorsableFlag": true,
+                "id": "${offenceId}",
+                "indicatedPlea": {
+                  "indicatedPleaDate": "2023-09-14",
+                  "indicatedPleaValue": "INDICATED_GUILTY",
+                  "offenceId": "${offenceId}",
+                  "source": "IN_COURT"
+                },
+                "introducedAfterInitialProceedings": true,
+                "isDiscontinued": true,
+                "laidDate": "2024-10-11",
+                "listingNumber": 846956288,
+                "modeOfTrial": "Either Way",
+                "notifiedPlea": {
+                  "notifiedPleaDate": "2022-08-11",
+                  "notifiedPleaValue": "NOTIFIED_NOT_GUILTY",
+                  "offenceId": "${offenceId}"
+                },
+                "offenceCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "offenceDefinitionId": "${__UUID}",
+                "offenceFacts": {
+                  "alcoholReadingAmount": 361089850,
+                  "alcoholReadingMethodCode": "B",
+                  "vehicleMake": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "vehicleRegistration": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+                },
+                "offenceLegislation": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "offenceLegislationWelsh": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "offenceTitle": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "offenceTitleWelsh": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "orderIndex": 188666691,
+                "proceedingsConcluded": true,
+                "reportingRestrictions": [
+                  {
+                    "id": "${__UUID}",
+                    "judicialResultId": "${__UUID}",
+                    "label": "Yes",
+                    "orderedDate": "2026-01-23"
+                  }
+                ],
+                "startDate": "2021-09-28",
+                "wording": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "wordingWelsh": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+              }
+            ],
+            "personDefendant": {
+              "arrestSummonsNumber": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+              "bailStatus": {
+                "code": "C",
+                "description": "Remanded into Custody",
+                "id": "ee3993f1-c047-41ab-8b30-3d842c6529e4"
+              },
+              "custodialEstablishment": {
+                "custody": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "id": "${__UUID}",
+                "name": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+              },
+              "custodyTimeLimit": "2021-03-30",
+              "driverNumber": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+              "employerOrganisation": {
+                "address": {
+                  "address1": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "address2": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "address3": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "address4": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "address5": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "postcode": "YK2 6QU",
+                  "welshAddress1": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "welshAddress2": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "welshAddress3": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "welshAddress4": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "welshAddress5": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+                },
+                "contact": {
+                  "fax": "${__Random(1000000000,9999999999,)}",
+                  "home": "${__Random(1000000000,9999999999,)}",
+                  "mobile": "${__Random(1000000000,9999999999,)}",
+                  "primaryEmail": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}@${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}.${__RandomString(3,abcdefghijklmnoprqstvwxyz,)}",
+                  "secondaryEmail": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}@${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}.${__RandomString(3,abcdefghijklmnoprqstvwxyz,)}",
+                  "work": "${__Random(1000000000,9999999999,)}"
+                },
+                "incorporationNumber": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "name": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "registeredCharityNumber": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+              },
+              "employerPayrollReference": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+              "perceivedBirthYear": 1973824563,
+              "personDetails": {
+                "additionalNationalityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "additionalNationalityId": "${__UUID}",
+                "address": {
+                  "address1": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "address2": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "address3": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "address4": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "address5": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "postcode": "YK2 6QU",
+                  "welshAddress1": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "welshAddress2": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "welshAddress3": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "welshAddress4": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                  "welshAddress5": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+                },
+                "contact": {
+                  "fax": "${__Random(1000000000,9999999999,)}",
+                  "home": "${__Random(1000000000,9999999999,)}",
+                  "mobile": "${__Random(1000000000,9999999999,)}",
+                  "primaryEmail": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}@${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}.${__RandomString(3,abcdefghijklmnoprqstvwxyz,)}",
+                  "secondaryEmail": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}@${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}.${__RandomString(3,abcdefghijklmnoprqstvwxyz,)}",
+                  "work": "${__Random(1000000000,9999999999,)}"
+                },
+                "dateOfBirth": "2024-02-16",
+                "disabilityStatus": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+                  "observedEthnicityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+                },
+                "firstName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "gender": "MALE",
+                "interpreterLanguageNeeds": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "lastName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "middleName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "nationalInsuranceNumber": "LB201184A",
+                "nationalityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "nationalityDescription": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "nationalityId": "${__UUID}",
+                "occupation": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "occupationCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "specificRequirements": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "title": "Lieutanant"
+              }
+            },
+            "prosecutionCaseId": "${caseId}"
+          }
+        ],
+        "id": "${caseId}",
+        "initiationCode": "J",
+        "isGroupMaster": false,
+        "originatingOrganisation": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "prosecutionCaseIdentifier": {
+          "address": {
+            "address1": "line 1",
+            "address2": "line 2",
+            "address3": "line 3",
+            "address4": "line 4",
+            "address5": "line 5",
+            "postcode": "E14 4EX"
+          },
+          "contact": {
+            "primaryEmail": "contact@cpp.co.uk"
+          },
+          "prosecutionAuthorityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+          "prosecutionAuthorityId": "${__UUID}",
+          "prosecutionAuthorityName": "ProsecutionAuthorityName",
+          "prosecutorCategory": "Charity",
+          "caseURN": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+        },
+        "statementOfFacts": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "statementOfFactsWelsh": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+      }
+    ],
+    "reportingRestrictionReason": "",
+    "type": {
+      "description": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+      "id": "9cc41e45-b594-4ba6-906e-1a4626b08fed",
+      "welshDescription": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+    }
+  }
+}
+

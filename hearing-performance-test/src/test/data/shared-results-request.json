@@ -16,22 +16,15 @@
       "sharedDate": "${hearingDay}",
       "resultLineId": "${resultLineId}",
       "offenceId": "${offenceId}",
-      "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+      "resultDefinitionId": "1f3c83cc-53eb-4861-8cb8-2289b4a08307",
       "prompts": [
         {
-          "id": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "id": "1f3c83cc-53eb-4861-8cb8-2289b4a08307",
           "label": "promptLabel",
           "fixedListCode": "fixedListCode",
           "value": "value1",
           "welshValue": "wvalue1",
           "promptRef": "bailConditionReason"
-        },
-        {
-          "id": "969f150c-cd05-46b0-9dd9-30891efcc766",
-          "label": "promptLabel",
-          "value": "false",
-          "welshValue": "false",
-          "promptRef": "PARENT_GAURDIAN_TO_PAY"
         }
       ],
       "resultLabel": "imprisonment",

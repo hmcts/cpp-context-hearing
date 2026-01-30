@@ -1,0 +1,39 @@
+{
+  "courtClerk": {
+    "firstName": "Andrew",
+    "lastName": "Eldritch",
+    "userId": "${__UUID}"
+  },
+  "resultLines": [
+    {
+      "delegatedPowers": {
+        "firstName": "David",
+        "lastName": "Bowie",
+        "userId": "${__UUID}"
+      },
+      "orderedDate": "2022-07-21",
+      "sharedDate": "2026-01-27",
+      "resultLineId": "${resultLineId1}",
+      "offenceId": "${offenceId}",
+      "defendantId": "${defendantId}",
+      "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+      "prompts": [
+        {
+          "id": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "label": "promptLabel",
+          "fixedListCode": "fixedListCode",
+          "value": "value1",
+          "welshValue": "wvalue1"
+        }
+      ],
+      "resultLabel": "imprisonment",
+      "level": "OFFENCE",
+      "isModified": true,
+      "isComplete": true,
+      "isDeleted": false,
+      "shadowListed": false,
+      "draftResult": "{}"
+    }
+  ]
+}
+

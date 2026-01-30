@@ -1,0 +1,39 @@
+{
+  "courtClerk": {
+    "firstName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+    "lastName": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+    "userId": "${__UUID}"
+  },
+  "resultLines": [
+    {
+      "delegatedPowers": {
+        "firstName": "David",
+        "lastName": "Bowie",
+        "userId": "${__UUID}"
+      },
+      "orderedDate": "2025-09-15",
+      "sharedDate": "2026-01-26",
+      "resultLineId": "${resultLineId}",
+      "offenceId": "${offenceId}",
+      "defendantId": "${defendantId}",
+      "resultDefinitionId": "1f3c83cc-53eb-4861-8cb8-2289b4a08307",
+      "prompts": [
+        {
+          "id": "1f3c83cc-53eb-4861-8cb8-2289b4a08307",
+          "label": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+          "fixedListCode": "fixedListCode",
+          "value": "value1",
+          "welshValue": "wvalue1"
+        }
+      ],
+      "resultLabel": "imprisonment",
+      "level": "OFFENCE",
+      "isModified": true,
+      "isComplete": true,
+      "isDeleted": false,
+      "shadowListed": false,
+      "draftResult": "{}"
+    }
+  ]
+}
+
