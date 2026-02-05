@@ -737,6 +737,14 @@ public class HearingAggregate implements Aggregate {
                     hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
         }
 
+        // User should not be allowed to share a hearing in future date if it is not a boxwork
+        final Boolean isBoxHearing = momento.getHearing().getIsBoxHearing();
+        if (!Boolean.TRUE.equals(isBoxHearing) && hearingDay.isAfter(LocalDate.now())) {
+            return apply(resultsSharedDelegate.manageResultsFailed(hearingId, this.hearingState,
+                    SHARE_NOT_PERMITTED.toError(String.format("Share results not permitted! Cannot share results for future hearing date %s for non-box hearing", hearingDay)),
+                    hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
+        }
+
         if (isResultVersionMismatch(hearingDay, version)) {
             return apply(resultsSharedDelegate.manageResultsFailed(hearingId, this.hearingState, VERSION_MISMATCH.toError(String.format("Share results failed for version: %s, lastUpdatedVersion: %s", version, this.amendedResultHearingDayVersionMap.get(hearingDay))),
                     hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));

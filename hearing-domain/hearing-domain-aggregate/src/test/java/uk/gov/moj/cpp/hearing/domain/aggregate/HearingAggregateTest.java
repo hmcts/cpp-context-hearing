@@ -3425,6 +3425,213 @@ public class HearingAggregateTest {
     }
 
     @Test
+    void shouldNotAllowShareResultsForNonBoxHearingWithFutureDate() {
+        // Given: A non-box hearing with a future hearing date
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearing.setIsBoxHearing(false);
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers()
+                .withFirstName("John").withLastName("Doe")
+                .withUserId(randomUUID()).build();
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), LocalDate.now());
+        final Target targetDraft = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
+        targetDraft.setResultLines(null);
+        final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine = getSharedResultsCommandResultLineV2(resultLineIn, targetDraft, "I", false);
+
+        // When: Attempting to share results for a future date
+        final LocalDate futureHearingDay = LocalDate.now().plusDays(1);
+        final List<Object> events = hearingAggregate.shareResultForDay(
+                hearing.getId(),
+                courtClerk,
+                ZonedDateTime.now(),
+                newArrayList(sharedResultsCommandResultLine),
+                emptyList(),
+                HearingState.SHARED,
+                null,
+                futureHearingDay,
+                USER_ID,
+                1
+        ).collect(Collectors.toList());
+
+        // Then: Should fail with ManageResultsFailed
+        assertThat(events, hasSize(1));
+        final ManageResultsFailed manageResultsFailed = (ManageResultsFailed) events.get(0);
+        assertEquals(hearing.getId(), manageResultsFailed.getHearingId());
+        assertEquals(ResultsError.ErrorType.STATE, manageResultsFailed.getResultsError().getType());
+        assertEquals("202", manageResultsFailed.getResultsError().getCode());
+        assertThat(manageResultsFailed.getResultsError().getReason(),
+                is(String.format("Share results not permitted! Cannot share results for future hearing date %s for non-box hearing", futureHearingDay)));
+    }
+
+    @Test
+    void shouldAllowShareResultsForBoxHearingWithFutureDate() {
+        // Given: A box hearing with a future hearing date
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithIsBoxHearing(true);
+        final Hearing hearing = initiateHearingCommand.getHearing();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers()
+                .withFirstName("John").withLastName("Doe")
+                .withUserId(randomUUID()).build();
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), LocalDate.now());
+        final Target targetDraft = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
+        targetDraft.setResultLines(null);
+        final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine = getSharedResultsCommandResultLineV2(resultLineIn, targetDraft, "I", false);
+
+        // When: Attempting to share results for a future date
+        final LocalDate futureHearingDay = LocalDate.now().plusDays(1);
+        final List<Object> events = hearingAggregate.shareResultForDay(
+                hearing.getId(),
+                courtClerk,
+                ZonedDateTime.now(),
+                newArrayList(sharedResultsCommandResultLine),
+                emptyList(),
+                HearingState.SHARED,
+                null,
+                futureHearingDay,
+                USER_ID,
+                1
+        ).collect(Collectors.toList());
+
+        // Then: Should succeed with ResultsSharedSuccess
+        assertThat(events, hasSize(greaterThanOrEqualTo(1)));
+        final ResultsSharedSuccess resultsSharedSuccess = (ResultsSharedSuccess) events.get(0);
+        assertEquals(hearing.getId(), resultsSharedSuccess.getHearingId());
+    }
+
+    @Test
+    void shouldAllowShareResultsForNonBoxHearingWithPastDate() {
+        // Given: A non-box hearing with a past hearing date
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearing.setIsBoxHearing(false);
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers()
+                .withFirstName("John").withLastName("Doe")
+                .withUserId(randomUUID()).build();
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), LocalDate.now());
+        final Target targetDraft = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
+        targetDraft.setResultLines(null);
+        final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine = getSharedResultsCommandResultLineV2(resultLineIn, targetDraft, "I", false);
+
+        // When: Attempting to share results for a past date
+        final LocalDate pastHearingDay = LocalDate.now().minusDays(1);
+        final List<Object> events = hearingAggregate.shareResultForDay(
+                hearing.getId(),
+                courtClerk,
+                ZonedDateTime.now(),
+                newArrayList(sharedResultsCommandResultLine),
+                emptyList(),
+                HearingState.SHARED,
+                null,
+                pastHearingDay,
+                USER_ID,
+                1
+        ).collect(Collectors.toList());
+
+        // Then: Should succeed with ResultsSharedSuccess
+        assertThat(events, hasSize(greaterThanOrEqualTo(1)));
+        final ResultsSharedSuccess resultsSharedSuccess = (ResultsSharedSuccess) events.get(0);
+        assertEquals(hearing.getId(), resultsSharedSuccess.getHearingId());
+    }
+
+    @Test
+    void shouldAllowShareResultsForNonBoxHearingWithTodayDate() {
+        // Given: A non-box hearing with today's hearing date
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearing.setIsBoxHearing(false);
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers()
+                .withFirstName("John").withLastName("Doe")
+                .withUserId(randomUUID()).build();
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), LocalDate.now());
+        final Target targetDraft = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
+        targetDraft.setResultLines(null);
+        final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine = getSharedResultsCommandResultLineV2(resultLineIn, targetDraft, "I", false);
+
+        // When: Attempting to share results for today's date
+        final LocalDate todayHearingDay = LocalDate.now();
+        final List<Object> events = hearingAggregate.shareResultForDay(
+                hearing.getId(),
+                courtClerk,
+                ZonedDateTime.now(),
+                newArrayList(sharedResultsCommandResultLine),
+                emptyList(),
+                HearingState.SHARED,
+                null,
+                todayHearingDay,
+                USER_ID,
+                1
+        ).collect(Collectors.toList());
+
+        // Then: Should succeed with ResultsSharedSuccess
+        assertThat(events, hasSize(greaterThanOrEqualTo(1)));
+        final ResultsSharedSuccess resultsSharedSuccess = (ResultsSharedSuccess) events.get(0);
+        assertEquals(hearing.getId(), resultsSharedSuccess.getHearingId());
+    }
+
+    @Test
+    void shouldAllowShareResultsForBoxHearingWithPastDate() {
+        // Given: A box hearing with a past hearing date
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithIsBoxHearing(true);
+        final Hearing hearing = initiateHearingCommand.getHearing();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers()
+                .withFirstName("John").withLastName("Doe")
+                .withUserId(randomUUID()).build();
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), LocalDate.now());
+        final Target targetDraft = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
+        targetDraft.setResultLines(null);
+        final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine = getSharedResultsCommandResultLineV2(resultLineIn, targetDraft, "I", false);
+
+        // When: Attempting to share results for a past date
+        final LocalDate pastHearingDay = LocalDate.now().minusDays(1);
+        final List<Object> events = hearingAggregate.shareResultForDay(
+                hearing.getId(),
+                courtClerk,
+                ZonedDateTime.now(),
+                newArrayList(sharedResultsCommandResultLine),
+                emptyList(),
+                HearingState.SHARED,
+                null,
+                pastHearingDay,
+                USER_ID,
+                1
+        ).collect(Collectors.toList());
+
+        // Then: Should succeed with ResultsSharedSuccess
+        assertThat(events, hasSize(greaterThanOrEqualTo(1)));
+        final ResultsSharedSuccess resultsSharedSuccess = (ResultsSharedSuccess) events.get(0);
+        assertEquals(hearing.getId(), resultsSharedSuccess.getHearingId());
+    }
+
+    @Test
     void shouldRaiseHearingIgnoredForAddOffenceIfNoHearingExist() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
