@@ -25,20 +25,20 @@
         <datafactory.version>0.8</datafactory.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
         <authorisation.service.version>0.1.96</authorisation.service.version>
-        <coredomain.version>17.103.10</coredomain.version>
-        <referencedata.version>17.0.120</referencedata.version>
-        <material.version>17.0.57</material.version>
-        <results.version>17.0.57</results.version>
+        <coredomain.version>17.102.17-DLRM7-SNAPSHOT</coredomain.version>
+        <referencedata.version>17.103.122</referencedata.version>
+        <material.version>17.0.75</material.version>
+        <results.version>17.103.95</results.version>
         <notification.notify.version>17.0.1</notification.notify.version>
         <stagingenforcement.version>17.0.64</stagingenforcement.version>
-        <progression.version>17.0.215</progression.version>
+        <progression.version>17.0.219</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
-        <usersgroups.version>17.0.40</usersgroups.version>
-        <listing.version>17.0.116</listing.version>
+        <usersgroups.version>17.104.44</usersgroups.version>
+        <listing.version>17.103.137</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>17.0.96</systemdocgenerator.version>
 
