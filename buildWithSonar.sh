@@ -14,5 +14,8 @@ set -e
 
 . functions.sh
 
+
+
+####
 buildWithSonar
 
