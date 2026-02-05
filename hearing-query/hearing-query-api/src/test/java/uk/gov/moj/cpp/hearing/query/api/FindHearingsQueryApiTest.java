@@ -151,7 +151,7 @@ public class FindHearingsQueryApiTest {
     public void findHearingById_should_throw_bad_request_when_user_id_is_missing() {
         when(jsonInputEnvelope.metadata()).thenReturn(metadata);
         when(metadata.userId()).thenReturn(Optional.empty());
-        assertThrows(BadRequestException.class, () -> hearingQueryApi.findHearingById(jsonInputEnvelope));
+        assertThrows(BadRequestException.class, () -> hearingQueryApi.findHearings(jsonInputEnvelope));
     }
 
     @Test
@@ -165,7 +165,7 @@ public class FindHearingsQueryApiTest {
         when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(getAccessibleCaseList());
         when(accessibleApplications.findApplications(permissions, userId.toString())).thenReturn(new ArrayList<>());
 
-        hearingQueryApi.findHearingById(jsonInputEnvelope);
+        hearingQueryApi.findHearings(jsonInputEnvelope);
         verify(ddjChecker, times(1)).isDDJ(permissions);
         verify(accessibleCases, times(1)).findCases(permissions, userId.toString());
         verify(accessibleApplications, times(1)).findApplications(permissions, userId.toString());
@@ -183,7 +183,7 @@ public class FindHearingsQueryApiTest {
         when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(getAccessibleCaseList());
         when(accessibleApplications.findApplications(permissions, userId.toString())).thenReturn(new ArrayList<>());
 
-        hearingQueryApi.findHearingById(jsonInputEnvelope);
+        hearingQueryApi.findHearings(jsonInputEnvelope);
         verify(ddjChecker, times(1)).isDDJ(permissions);
         verify(accessibleCases, times(1)).findCases(permissions, userId.toString());
         verify(accessibleApplications, times(1)).findApplications(permissions, userId.toString());
@@ -199,7 +199,7 @@ public class FindHearingsQueryApiTest {
         when(ddjChecker.isDDJ(permissions)).thenReturn(false);
         when(recorderChecker.isRecorder(permissions)).thenReturn(false);
 
-        hearingQueryApi.findHearingById(jsonInputEnvelope);
+        hearingQueryApi.findHearings(jsonInputEnvelope);
         verify(accessibleCases, times(0)).findCases(permissions, userId.toString());
         verify(accessibleApplications, times(0)).findApplications(permissions, userId.toString());
         verify(usersAndGroupsService, times(1)).permissions(userId.toString());
