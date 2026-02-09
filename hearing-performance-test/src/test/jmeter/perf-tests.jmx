@@ -6,83 +6,81 @@
         <collectionProp name="Arguments.arguments">
           <elementProp name="numberOfThreads" elementType="Argument">
             <stringProp name="Argument.name">numberOfThreads</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.numberOfThreads, 1)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.numberOfThreads, 1)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="loopCount" elementType="Argument">
             <stringProp name="Argument.name">loopCount</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.loopCount, 1)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.loopCount, 1)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="rampUpPeriod" elementType="Argument">
             <stringProp name="Argument.name">rampUpPeriod</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.rampUpPeriod, 1)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.rampUpPeriod, 1)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="protocol" elementType="Argument">
             <stringProp name="Argument.name">protocol</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.protocol, http)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.protocol, http)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="hostName" elementType="Argument">
             <stringProp name="Argument.name">hostName</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.hostName, localhost)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.hostName, localhost)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="port" elementType="Argument">
             <stringProp name="Argument.name">port</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.port, 8080)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.port, 8080)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="userId" elementType="Argument">
             <stringProp name="Argument.name">userId</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.userId, 7a04cabb-102a-4737-9ae1-a703dcf62cff)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.userId, 7a04cabb-102a-4737-9ae1-a703dcf62cff)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="dbHost" elementType="Argument">
             <stringProp name="Argument.name">dbHost</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.dbHost, localhost)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.dbHost, localhost)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="dbPort" elementType="Argument">
             <stringProp name="Argument.name">dbPort</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.dbPort, 5432)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.dbPort, 5432)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="dbUserName" elementType="Argument">
             <stringProp name="Argument.name">dbUserName</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.dbUserName, postgres)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.dbUserName, postgres)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="dbPassword" elementType="Argument">
             <stringProp name="Argument.name">dbPassword</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.dbPassword, postgres)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.dbPassword, postgres)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="metricsIntervalInMs" elementType="Argument">
             <stringProp name="Argument.name">metricsIntervalInMs</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.metricsIntervalInMs, 10000)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.metricsIntervalInMs, 10000)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="resultDir" elementType="Argument">
             <stringProp name="Argument.name">resultDir</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.resultDir)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.resultDir)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="pollerTimeout" elementType="Argument">
             <stringProp name="Argument.name">pollerTimeout</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.pollerTimeout, 10000)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.pollerTimeout, 10000)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="pollInterval" elementType="Argument">
             <stringProp name="Argument.name">pollInterval</stringProp>
-            <stringProp name="Argument.value">${__P(jmeter.usersgroups.pollInterval, 100)}</stringProp>
+            <stringProp name="Argument.value">${__P(jmeter.hearing.pollInterval, 100)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
       </elementProp>
-      <boolProp name="TestPlan.functional_mode">false</boolProp>
-      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="ViewStoreJDBCConfig">
@@ -91,7 +89,7 @@
         <stringProp name="connectionAge">5000</stringProp>
         <stringProp name="connectionProperties"></stringProp>
         <stringProp name="dataSource">hearingviewstore</stringProp>
-        <stringProp name="dbUrl">jdbc:postgresql://${dbHost}:${dbPort}/usersgroupsviewstore</stringProp>
+        <stringProp name="dbUrl">jdbc:postgresql://${dbHost}:${dbPort}/hearingviewstore</stringProp>
         <stringProp name="driver">org.postgresql.Driver</stringProp>
         <stringProp name="initQuery"></stringProp>
         <boolProp name="keepAlive">true</boolProp>
@@ -104,13 +102,13 @@
         <stringProp name="username">${dbUserName}</stringProp>
       </JDBCDataSource>
       <hashTree/>
-      <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="EventStoreJDBCConfig" enabled="true">
+      <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="EventStoreJDBCConfig">
         <boolProp name="autocommit">true</boolProp>
         <stringProp name="checkQuery"></stringProp>
         <stringProp name="connectionAge">5000</stringProp>
         <stringProp name="connectionProperties"></stringProp>
-        <stringProp name="dataSource">hearingseventstore</stringProp>
-        <stringProp name="dbUrl">jdbc:postgresql://${dbHost}:${dbPort}/usersgroupseventstore</stringProp>
+        <stringProp name="dataSource">hearingeventstore</stringProp>
+        <stringProp name="dbUrl">jdbc:postgresql://${dbHost}:${dbPort}/hearingeventstore</stringProp>
         <stringProp name="driver">org.postgresql.Driver</stringProp>
         <stringProp name="initQuery"></stringProp>
         <boolProp name="keepAlive">true</boolProp>
@@ -123,7 +121,7 @@
         <stringProp name="username">${dbUserName}</stringProp>
       </JDBCDataSource>
       <hashTree/>
-      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group">
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group" enabled="true">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -189,6 +187,41 @@ try {
     log.info(&quot;WireMock stub for organisation unit configured successfully&quot;)
 } catch (Exception e) {
     log.warn(&quot;Failed to configure WireMock stub for organisation unit: &quot; + e.getMessage())
+}</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnits" enabled="true">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+import java.util.UUID
+
+try {
+    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
+    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
+    
+    WireMock.configureFor(wiremockHost, wiremockPort)
+    
+    // Stub organisationunits
+    String organisationUnitsUrl = &quot;/referencedata-service/query/api/rest/referencedata/organisationunits&quot;
+    String organisationUnitsMediaType = &quot;application/vnd.referencedata.query.organisationunits+json&quot;
+    
+    // Organisation units response matching the structure provided
+    String organisationUnitsJson = &quot;{\&quot;organisationunits\&quot;:[{\&quot;id\&quot;:\&quot;b52f805c-2821-4904-a0e0-26f7fda6dd08\&quot;,\&quot;oucode\&quot;:\&quot;B01BH00\&quot;,\&quot;oucodeL3Code\&quot;:\&quot;BH\&quot;,\&quot;oucodeL3Name\&quot;:\&quot;Bexley Magistrates&apos; Court\&quot;,\&quot;oucodeL1Code\&quot;:\&quot;B\&quot;,\&quot;oucodeL1Name\&quot;:\&quot;Magistrates&apos; Courts\&quot;,\&quot;oucodeL2Code\&quot;:\&quot;1\&quot;,\&quot;oucodeL2Name\&quot;:\&quot;London\&quot;,\&quot;region\&quot;:\&quot;London\&quot;,\&quot;lja\&quot;:\&quot;2575\&quot;,\&quot;oucodeEffectiveFromDate\&quot;:\&quot;1899-12-31\&quot;,\&quot;address1\&quot;:\&quot;Norwich Place\&quot;,\&quot;address2\&quot;:\&quot;Bexleyheath\&quot;,\&quot;address3\&quot;:\&quot;Kent\&quot;,\&quot;postcode\&quot;:\&quot;DA6 7ND\&quot;,\&quot;oucodeL3WelshName\&quot;:\&quot;Llys Ynadon Bexley\&quot;,\&quot;defaultStartTime\&quot;:\&quot;10:00:00\&quot;,\&quot;defaultDurationHrs\&quot;:\&quot;07:00:00\&quot;,\&quot;lastModified\&quot;:\&quot;2020-03-19T15:51:45.242Z\&quot;,\&quot;cpsEmailAddress\&quot;:\&quot;London.magistrates@cps.gov.uk\&quot;},{\&quot;id\&quot;:\&quot;a25848d6-d96e-4a52-8c54-de55b6542afc\&quot;,\&quot;oucode\&quot;:\&quot;B01CE00\&quot;,\&quot;oucodeL3Code\&quot;:\&quot;CE\&quot;,\&quot;oucodeL3Name\&quot;:\&quot;Willesden Magistrates&apos; Court\&quot;,\&quot;oucodeL1Code\&quot;:\&quot;B\&quot;,\&quot;oucodeL1Name\&quot;:\&quot;Magistrates&apos; Courts\&quot;,\&quot;oucodeL2Code\&quot;:\&quot;1\&quot;,\&quot;oucodeL2Name\&quot;:\&quot;London\&quot;,\&quot;region\&quot;:\&quot;London\&quot;,\&quot;lja\&quot;:\&quot;2571\&quot;,\&quot;oucodeEffectiveFromDate\&quot;:\&quot;1899-12-31\&quot;,\&quot;address1\&quot;:\&quot;448 High Road\&quot;,\&quot;address2\&quot;:\&quot;London\&quot;,\&quot;postcode\&quot;:\&quot;NW10 2DZ\&quot;,\&quot;oucodeL3WelshName\&quot;:\&quot;Llys Ynadon Willesden\&quot;,\&quot;defaultStartTime\&quot;:\&quot;10:00:00\&quot;,\&quot;defaultDurationHrs\&quot;:\&quot;07:00:00\&quot;,\&quot;lastModified\&quot;:\&quot;2020-03-19T15:51:55.025Z\&quot;,\&quot;cpsEmailAddress\&quot;:\&quot;London.magistrates@cps.gov.uk\&quot;,\&quot;pecsContractorEmail\&quot;:\&quot;PECSBrentMags@serco.com\&quot;}]}&quot;
+    
+    stubFor(get(urlPathEqualTo(organisationUnitsUrl))
+            .willReturn(aResponse()
+                    .withStatus(200)
+                    .withHeader(&quot;CPPID&quot;, UUID.randomUUID().toString())
+                    .withHeader(&quot;Content-Type&quot;, organisationUnitsMediaType)
+                    .withBody(organisationUnitsJson)))
+    
+    log.info(&quot;WireMock stub for organisationunits configured successfully&quot;)
+} catch (Exception e) {
+    log.warn(&quot;Failed to configure WireMock stub for organisationunits: &quot; + e.getMessage())
 }</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
@@ -949,7 +982,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitCourtMappings">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitCourtMappings" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -969,6 +1002,41 @@ try {
     
     // CP Xhibit court mappings response matching the structure from integration tests
     String xhibitCourtMappingsJson = &quot;   {  \&quot;cpXhibitCourtMappings\&quot;: [{ \&quot;id\&quot;: \&quot;0a43a1dd-9ba7-33d9-a306-554784e5b116\&quot;, \&quot;oucode\&quot;: \&quot;C04PR00\&quot;, \&quot;crestCourtId\&quot;: \&quot;448\&quot;, \&quot;crestCourtSiteId\&quot;: \&quot;751\&quot;, \&quot;crestCourtSiteName\&quot;: \&quot;BARROW-IN-FURNESS\&quot;, \&quot;crestCourtName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtShortName\&quot;: \&quot;PREST\&quot;, \&quot;crestCourtFullName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtSiteCode\&quot;: \&quot;C\&quot;, \&quot;courtType\&quot;: \&quot;CROWN_COURT\&quot;},{ \&quot;id\&quot;: \&quot;26767ef5-5441-32d1-bf5e-baf746936b37\&quot;, \&quot;oucode\&quot;: \&quot;C04PR00\&quot;, \&quot;crestCourtId\&quot;: \&quot;448\&quot;, \&quot;crestCourtSiteId\&quot;: \&quot;448\&quot;, \&quot;crestCourtSiteName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtShortName\&quot;: \&quot;PREST\&quot;, \&quot;crestCourtFullName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtSiteCode\&quot;: \&quot;A\&quot;, \&quot;courtType\&quot;: \&quot;CROWN_COURT\&quot;},{ \&quot;id\&quot;: \&quot;e2afcfff-48f3-3647-9ead-a06dcba4bb47\&quot;, \&quot;oucode\&quot;: \&quot;C04PR00\&quot;, \&quot;crestCourtId\&quot;: \&quot;448\&quot;, \&quot;crestCourtSiteId\&quot;: \&quot;448\&quot;, \&quot;crestCourtSiteName\&quot;: \&quot;PRESTON [THE SESSIONS HOUSE]\&quot;, \&quot;crestCourtName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtShortName\&quot;: \&quot;PREST\&quot;, \&quot;crestCourtFullName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtSiteCode\&quot;: \&quot;B\&quot;, \&quot;courtType\&quot;: \&quot;CROWN_COURT\&quot;},{ \&quot;id\&quot;: \&quot;cadfb7e2-f293-36a6-b466-3875d88ba6e4\&quot;, \&quot;oucode\&quot;: \&quot;C04PR00\&quot;, \&quot;crestCourtId\&quot;: \&quot;448\&quot;, \&quot;crestCourtSiteId\&quot;: \&quot;768\&quot;, \&quot;crestCourtSiteName\&quot;: \&quot;LANCASTER\&quot;, \&quot;crestCourtName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtShortName\&quot;: \&quot;PREST\&quot;, \&quot;crestCourtFullName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtSiteCode\&quot;: \&quot;D\&quot;, \&quot;courtType\&quot;: \&quot;CROWN_COURT\&quot;}  ]}&quot;
+    
+    stubFor(get(urlPathEqualTo(xhibitCourtMappingsUrl))
+            .willReturn(aResponse()
+                    .withStatus(200)
+                    .withHeader(&quot;CPPID&quot;, UUID.randomUUID().toString())
+                    .withHeader(&quot;Content-Type&quot;, xhibitCourtMappingsMediaType)
+                    .withBody(xhibitCourtMappingsJson)))
+    
+    log.info(&quot;WireMock stub for cp-xhibit-court-mappings configured successfully&quot;)
+} catch (Exception e) {
+    log.warn(&quot;Failed to configure WireMock stub for cp-xhibit-court-mappings: &quot; + e.getMessage())
+}</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitMagCourtMappings" enabled="true">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+import java.util.UUID
+
+try {
+    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
+    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
+    
+    WireMock.configureFor(wiremockHost, wiremockPort)
+    
+    // Stub cp-xhibit-court-mappings
+    String xhibitCourtMappingsUrl = &quot;/referencedata-service/query/api/rest/referencedata/cp-xhibit-mags-court-mapping&quot;
+    String xhibitCourtMappingsMediaType = &quot;application/vnd.referencedata.query.cp-xhibit-mags-court-mapping+json&quot;
+    
+    // CP Xhibit court mappings response matching the structure from integration tests
+    String xhibitCourtMappingsJson = &quot;   { \&quot;id\&quot;: \&quot;b52f805c-2821-4904-a0e0-26f7fda6dd08\&quot;, \&quot;oucode\&quot;: \&quot;B01BH00\&quot;, \&quot;crestCourtId\&quot;: \&quot;448\&quot;, \&quot;crestCourtSiteId\&quot;: \&quot;751\&quot;, \&quot;crestCourtSiteName\&quot;: \&quot;BARROW-IN-FURNESS\&quot;, \&quot;crestCourtName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtShortName\&quot;: \&quot;PREST\&quot;, \&quot;crestCourtFullName\&quot;: \&quot;PRESTON\&quot;, \&quot;crestCourtSiteCode\&quot;: \&quot;C\&quot;, \&quot;courtType\&quot;: \&quot;CROWN_COURT\&quot;}}&quot;
     
     stubFor(get(urlPathEqualTo(xhibitCourtMappingsUrl))
             .willReturn(aResponse()
@@ -1014,7 +1082,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict" enabled="true">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -1508,7 +1576,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CourtListRestriction">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CourtListRestriction" enabled="true">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -1678,7 +1746,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             </ConstantTimer>
             <hashTree/>
           </hashTree>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
             <stringProp name="ConstantTimer.delay">1000</stringProp>
           </ConstantTimer>
           <hashTree/>
@@ -2003,7 +2071,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </ConstantTimer>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">1000</stringProp>
         </ConstantTimer>
         <hashTree/>
@@ -2326,7 +2394,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ResultShouldPublishDDCHResultsOnInitialShareAndNotForAmendAndReshare">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ResultShouldPublishDDCHResultsOnInitialShareAndNotForAmendAndReshare" enabled="true">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -2435,7 +2503,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">1000</stringProp>
         </ConstantTimer>
         <hashTree/>
@@ -2909,37 +2977,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Processed Event Count" enabled="true">
-          <stringProp name="dataSource">hearingviewstore</stringProp>
-          <stringProp name="query">select count(1) as processed_event_count from processed_event;</stringProp>
-          <stringProp name="queryArguments"></stringProp>
-          <stringProp name="queryArgumentsTypes"></stringProp>
-          <stringProp name="queryTimeout"></stringProp>
-          <stringProp name="queryType">Select Statement</stringProp>
-          <stringProp name="resultSetHandler">Store as String</stringProp>
-          <stringProp name="resultSetMaxRows"></stringProp>
-          <stringProp name="resultVariable">processedEventCountResultSet</stringProp>
-          <stringProp name="variableNames"></stringProp>
-        </JDBCSampler>
-        <hashTree>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
-            <stringProp name="BeanShellAssertion.query">vars.put(&quot;prevProcessedEventCount&quot;, org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().get(&quot;processedEventCount&quot;));
-org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().put(&quot;processedEventCount&quot;, vars.getObject(&quot;processedEventCountResultSet&quot;).get(0).get(&quot;processed_event_count&quot;).toString())</stringProp>
-            <stringProp name="BeanShellAssertion.filename"></stringProp>
-            <stringProp name="BeanShellAssertion.parameters"></stringProp>
-            <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
-          </BeanShellAssertion>
-          <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="filename"></stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="script">prev.setIgnore();</stringProp>
-            <stringProp name="scriptLanguage">groovy</stringProp>
-          </JSR223PostProcessor>
-          <hashTree/>
-        </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Event Log Count" enabled="true">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Event Log Count">
           <stringProp name="dataSource">hearingeventstore</stringProp>
           <stringProp name="query">select count(1) as event_log_count from event_log;</stringProp>
           <stringProp name="queryArguments"></stringProp>
@@ -2952,15 +2990,55 @@ org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().put(&
           <stringProp name="variableNames"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
-            <stringProp name="BeanShellAssertion.query">vars.put(&quot;prevEventLogCount&quot;, org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().get(&quot;eventLogCount&quot;));
-org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().put(&quot;eventLogCount&quot;, vars.getObject(&quot;eventLogCountResultSet&quot;).get(0).get(&quot;event_log_count&quot;).toString())</stringProp>
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
+            <stringProp name="BeanShellAssertion.query">if (vars.get(&quot;eventLogCount&quot;) != null) {
+    vars.put(&quot;prevEventLogCount&quot;, vars.get(&quot;eventLogCount&quot;));
+}
+
+// Try to get as object first
+Object rsObj = vars.getObject(&quot;eventLogCountResultSet&quot;);
+
+// default value
+vars.put(&quot;eventLogCount&quot;, &quot;0&quot;);
+
+// exit early if result set object is missing
+if (rsObj == null) {
+     return;
+}
+
+// must be a List
+if (!(rsObj instanceof java.util.List)) {
+    return;
+}
+
+java.util.List rs = (java.util.List) rsObj;
+
+// must have at least one row
+if (rs.isEmpty()) {
+    return;
+}
+
+Object rowObj = rs.get(0);
+
+// first row must be a Map
+if (!(rowObj instanceof java.util.Map)) {
+    return;
+}
+java.util.Map row = (java.util.Map) rowObj;
+
+// must contain the column
+if (!row.containsKey(&quot;event_log_count&quot;)) {
+    return;
+}
+
+vars.put(&quot;eventLogCount&quot;, row.get(&quot;event_log_count&quot;).toString());
+</stringProp>
             <stringProp name="BeanShellAssertion.filename"></stringProp>
             <stringProp name="BeanShellAssertion.parameters"></stringProp>
             <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
           </BeanShellAssertion>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -2969,7 +3047,7 @@ org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().put(&
           </JSR223PostProcessor>
           <hashTree/>
         </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Published Event Count" enabled="true">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Published Event Count">
           <stringProp name="dataSource">hearingeventstore</stringProp>
           <stringProp name="query">select count(1) as published_event_count from published_event;</stringProp>
           <stringProp name="queryArguments"></stringProp>
@@ -2982,16 +3060,54 @@ org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().put(&
           <stringProp name="variableNames"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
-            <stringProp name="BeanShellAssertion.query">vars.put(&quot;prevPublishedEventCount&quot;, org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().get(&quot;publishedEventCount&quot;));
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
+            <stringProp name="BeanShellAssertion.query">if (vars.get(&quot;publishedEventCount&quot;) != null) {
+    vars.put(&quot;prevPublishedEventCount&quot;, vars.get(&quot;publishedEventCount&quot;));
+}
 
-org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().put(&quot;publishedEventCount&quot;, vars.getObject(&quot;publishedEventCountResultSet&quot;).get(0).get(&quot;published_event_count&quot;).toString())</stringProp>
+Object rsObj = vars.getObject(&quot;publishedEventCountResultSet&quot;);
+
+// default value
+vars.put(&quot;publishedEventCount&quot;, &quot;0&quot;);
+
+// exit early if result set object is missing
+if (rsObj == null) {
+    return;
+}
+
+// must be a List
+if (!(rsObj instanceof java.util.List)) {
+    return;
+}
+
+java.util.List rs = (java.util.List) rsObj;
+
+// must have at least one row
+if (rs.isEmpty()) {
+    return;
+}
+
+Object rowObj = rs.get(0);
+
+// first row must be a Map
+if (!(rowObj instanceof java.util.Map)) {
+    return;
+}
+
+java.util.Map row = (java.util.Map) rowObj;
+
+// must contain the column
+if (!row.containsKey(&quot;published_event_count&quot;)) {
+    return;
+}
+
+vars.put(&quot;publishedEventCount&quot;, row.get(&quot;published_event_count&quot;).toString());</stringProp>
             <stringProp name="BeanShellAssertion.filename"></stringProp>
             <stringProp name="BeanShellAssertion.parameters"></stringProp>
             <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
           </BeanShellAssertion>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3000,32 +3116,117 @@ org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().put(&
           </JSR223PostProcessor>
           <hashTree/>
         </hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get stream_status sums">
+          <stringProp name="dataSource">hearingviewstore</stringProp>
+          <stringProp name="query">select component, sum(position) as sum_position, sum(latest_known_position) as sum_latest_known_position  from stream_status
+group by component;</stringProp>
+          <stringProp name="queryArguments"></stringProp>
+          <stringProp name="queryArgumentsTypes"></stringProp>
+          <stringProp name="queryTimeout"></stringProp>
+          <stringProp name="queryType">Select Statement</stringProp>
+          <stringProp name="resultSetHandler">Store as String</stringProp>
+          <stringProp name="resultSetMaxRows"></stringProp>
+          <stringProp name="resultVariable">streamStatusResultSet</stringProp>
+          <stringProp name="variableNames"></stringProp>
+        </JDBCSampler>
+        <hashTree>
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
+            <stringProp name="BeanShellAssertion.query">import java.util.List;
+import java.util.Map;
+
+// Get the result set
+Object resultSetObj = vars.getObject(&quot;streamStatusResultSet&quot;);
+
+if (resultSetObj != null &amp;&amp; resultSetObj instanceof List) {
+    List resultSet = (List) resultSetObj;
+    
+    // Initialize variables
+    String sumPositionsEventListener = &quot;0&quot;;
+    String sumPositionsEventIndexer = &quot;0&quot;;
+    String sumLatestKnownPositionEventListener = &quot;0&quot;;
+    String sumLatestKnownPositionEventIndexer = &quot;0&quot;;
+
+    
+    // Iterate through results
+    for (int i = 0; i &lt; resultSet.size(); i++) {
+    	
+        Object rowObj = resultSet.get(i);
+        if (rowObj instanceof Map) {
+            Map row = (Map) rowObj;
+            String component = row.get(&quot;component&quot;) != null ? row.get(&quot;component&quot;).toString() : &quot;&quot;;
+
+            System.out.println(&quot;DEBUG component: &quot; + component);
+            if (&quot;EVENT_LISTENER&quot;.equals(component)) {
+                sumPositionsEventListener = row.get(&quot;sum_position&quot;) != null ? row.get(&quot;sum_position&quot;).toString() : &quot;0&quot;;
+                sumLatestKnownPositionEventListener = row.get(&quot;sum_latest_known_position&quot;) != null ? row.get(&quot;sum_latest_known_position&quot;).toString() : &quot;0&quot;;
+            } else if (&quot;EVENT_INDEXER&quot;.equals(component)) {
+                sumPositionsEventIndexer = row.get(&quot;sum_position&quot;) != null ? row.get(&quot;sum_position&quot;).toString() : &quot;0&quot;;
+                sumLatestKnownPositionEventIndexer = row.get(&quot;sum_latest_known_position&quot;) != null ? row.get(&quot;sum_latest_known_position&quot;).toString() : &quot;0&quot;;
+            }
+        }
+    }
+    
+    // Store variables
+    vars.put(&quot;sumPositionsEventListener&quot;, sumPositionsEventListener);
+    vars.put(&quot;sumPositionsEventIndexer&quot;, sumPositionsEventIndexer);
+    vars.put(&quot;sumLatestKnownPositionEventListener&quot;, sumLatestKnownPositionEventListener);
+    vars.put(&quot;sumLatestKnownPositionEventIndexer&quot;, sumLatestKnownPositionEventIndexer);
+}</stringProp>
+            <stringProp name="BeanShellAssertion.filename"></stringProp>
+            <stringProp name="BeanShellAssertion.parameters"></stringProp>
+            <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
+          </BeanShellAssertion>
+          <hashTree/>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">prev.setIgnore();</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
+        </hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="cacheKey">true</stringProp>
-          <stringProp name="script">def processedEventCount = org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().get(&quot;processedEventCount&quot;) as long
-def eventLogCount = org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().get(&quot;eventLogCount&quot;) as long
-def publishedEventCount = org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().get(&quot;publishedEventCount&quot;) as long
-
-if (vars.get(&quot;lastMetricsCollectionTime&quot;) != null) {
-	def lastMetricsCollectionTime = vars.get(&quot;lastMetricsCollectionTime&quot;) as long;
-	def timeDiff = (System.currentTimeMillis() - lastMetricsCollectionTime)/1000;
-	def prevProcessedEventCount = vars.get(&quot;prevProcessedEventCount&quot;) as long;
-	def prevEventLogCount = vars.get(&quot;prevEventLogCount&quot;) as long;
-	def prevPublishedEventCount = vars.get(&quot;prevPublishedEventCount&quot;) as long;
-
-	def processedEventTps = (processedEventCount - prevProcessedEventCount) / timeDiff;
-	def eventLogTps = (eventLogCount - prevEventLogCount) / timeDiff;
-	def publishedEventTps = (publishedEventCount - prevPublishedEventCount)/timeDiff;
-	println(&quot;processedEventTps: &quot; +  String.format(&quot;%.2f&quot;, processedEventTps) + &quot;, eventLogTps: &quot; +  String.format(&quot;%.2f&quot;, eventLogTps) + &quot;, publishedEventTps: &quot; +  String.format(&quot;%.2f&quot;, publishedEventTps));
-
+          <stringProp name="script">def getLongValue = { varName -&gt;
+    def value = org.apache.jmeter.threads.JMeterContextService.getContext().getVariables().get(varName)
+    if (value == null) {
+        return 0L
+    }
+    try {
+        return Long.valueOf(value.toString())
+    } catch (Exception e) {
+        return 0L
+    }
 }
 
+def eventLogCount = getLongValue(&quot;eventLogCount&quot;)
+def publishedEventCount = getLongValue(&quot;publishedEventCount&quot;)
+def sumPositionsEventListener = getLongValue(&quot;sumPositionsEventListener&quot;)
+def sumPositionsEventIndexer = getLongValue(&quot;sumPositionsEventIndexer&quot;)
+def sumLatestKnownPositionEventListener = getLongValue(&quot;sumLatestKnownPositionEventListener&quot;)
+def sumLatestKnownPositionEventIndexer = getLongValue(&quot;sumLatestKnownPositionEventIndexer&quot;)
+
+if (vars.get(&quot;lastMetricsCollectionTime&quot;) != null) {
+	def lastMetricsCollectionTime = getLongValue(&quot;lastMetricsCollectionTime&quot;)
+	def timeDiff = (System.currentTimeMillis() - lastMetricsCollectionTime) / 1000
+	def prevEventLogCount = getLongValue(&quot;prevEventLogCount&quot;)
+	def prevPublishedEventCount = getLongValue(&quot;prevPublishedEventCount&quot;)
+
+	if (timeDiff &gt; 0) {
+		def eventLogTps = (eventLogCount - prevEventLogCount) / timeDiff
+		def publishedEventTps = (publishedEventCount - prevPublishedEventCount) / timeDiff
+		log.info(&quot;eventLogTps: &quot; + String.format(&quot;%.2f&quot;, eventLogTps) + &quot;, publishedEventTps: &quot; + String.format(&quot;%.2f&quot;, publishedEventTps))
+	}
+}
 
 vars.put(&quot;lastMetricsCollectionTime&quot;, System.currentTimeMillis().toString())
-println(&quot;processedEventCount: &quot; + processedEventCount + &quot;, eventLogCount: &quot; + eventLogCount + &quot;, publishedEventCount: &quot; + publishedEventCount);</stringProp>
+println(&quot;eventLogCount: &quot; + eventLogCount + &quot;, publishedEventCount: &quot; + publishedEventCount)
+println(&quot;sumPositionsEventListener: &quot; + sumPositionsEventListener + &quot;, sumLatestKnownPositionEventListener: &quot; + sumLatestKnownPositionEventListener)
+println(&quot;sumPositionsEventIndexer: &quot; + sumPositionsEventIndexer + &quot;, sumLatestKnownPositionEventIndexer: &quot; + sumLatestKnownPositionEventIndexer)</stringProp>
         </JSR223Sampler>
         <hashTree>
           <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
