@@ -82,11 +82,11 @@ public class HearingQueryView {
     private static final String FIELD_BAIL_STATUS_CODE = "bailStatusCode";
     private static final String FIELD_DEFENDANT_ID = "defendantId";
     private static final String FIELD_DATE = "date";
-    private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
+    public static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
     private static final String FIELD_COURT_CENTRE_IDS = "courtCentreIds";
     private static final String DATE_OF_HEARING = "dateOfHearing";
-    private static final String FIELD_COURT_ROOM_IDS = "courtRoomIds";
-    private static final String FIELD_HEARING_DATE = "hearingDate";
+    public static final String FIELD_COURT_ROOM_IDS = "courtRoomIds";
+    public static final String FIELD_HEARING_DATE = "hearingDate";
     private static final String FIELD_ROOM_ID = "roomId";
     private static final String FIELD_START_TIME = "startTime";
     private static final String FIELD_END_TIME = "endTime";

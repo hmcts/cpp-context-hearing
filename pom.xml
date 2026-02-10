@@ -28,9 +28,9 @@
         <coredomain.version>17.103.11</coredomain.version>
         <referencedata.version>17.0.120</referencedata.version>
         <material.version>17.0.57</material.version>
-        <results.version>17.0.57</results.version>
+        <results.version>17.0.58</results.version>
         <notification.notify.version>17.0.1</notification.notify.version>
-        <stagingenforcement.version>17.0.64</stagingenforcement.version>
+        <stagingenforcement.version>17.103.73</stagingenforcement.version>
         <progression.version>17.0.215</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>

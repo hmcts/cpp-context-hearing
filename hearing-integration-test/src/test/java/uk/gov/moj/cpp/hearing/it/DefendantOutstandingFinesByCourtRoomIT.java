@@ -1,38 +1,40 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.containing;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static java.util.List.of;
-import static java.util.UUID.randomUUID;
-import static org.awaitility.Awaitility.waitAtMost;
+import static com.google.common.collect.ImmutableList.of;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
+import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
-import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubStagingenforcementCourtRoomsOutstandingFines;
 
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.Person;
-import uk.gov.justice.services.common.http.HeaderConstants;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.test.utils.core.rest.ResteasyClientBuilderFactory;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.OutstandingFinesQuery;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
-import java.time.Duration;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
-import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.restassured.path.json.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unchecked")
 public class DefendantOutstandingFinesByCourtRoomIT extends AbstractIT {
+
+    final StringToJsonObjectConverter stringToJsonObjectConverter = new StringToJsonObjectConverter();
 
     @BeforeEach
     public void setUp() {
@@ -41,44 +43,40 @@ public class DefendantOutstandingFinesByCourtRoomIT extends AbstractIT {
     }
 
     @Test
-    public void shouldPostComputeOutstandingFines() {
+    public void shouldPostComputeOutstandingFines() throws JsonProcessingException {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final CourtCentre courtCentre = initiateHearingCommand.getHearing().getCourtCentre();
         final HearingDay hearingDay = initiateHearingCommand.getHearing().getHearingDays().get(0);
         hearingDay.setSittingDay(ZonedDateTime.now().plusDays(1));
-        final InitiateHearingCommandHelper initiate = h(initiateHearing(getRequestSpec(), initiateHearingCommand));
+        h(initiateHearing(getRequestSpec(), initiateHearingCommand));
 
-        final UUID correlationId = randomUUID();
-        getRequestSpec().header(HeaderConstants.CLIENT_CORRELATION_ID, correlationId);
-        makeCommand(getRequestSpec(), "hearing.compute-outstanding-fines")
-                .ofType("application/vnd.hearing.compute-outstanding-fines+json")
-                .withPayload(
-                        OutstandingFinesQuery.newBuilder()
-                                .withCourtCentreId(courtCentre.getId())
-                                .withCourtRoomIds(of(courtCentre.getRoomId()))
-                                .withHearingDate(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate())
-                                .build()
-                )
-                .executeSuccessfully();
-        final Person personDetails = initiate.getFirstDefendantForFirstCase().getPersonDefendant().getPersonDetails();
+        final OutstandingFinesQuery payload = OutstandingFinesQuery.newBuilder()
+                .withCourtCentreId(courtCentre.getId())
+                .withCourtRoomIds(of(courtCentre.getRoomId()))
+                .withHearingDate(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate())
+                .build();
 
-        waitAtMost(Duration.ofSeconds(30))
-                .untilAsserted(() -> verifyStagingEnforcementCourtRoomsOutstandingFines(Arrays.asList(
-                                personDetails.getFirstName(),
-                                personDetails.getLastName(),
-                                personDetails.getNationalInsuranceNumber()
-                        ))
-                );
+        try (Response response = query(getBaseUri() + "/hearing-query-api/query/api/rest/hearing/outstanding-fines",
+                "application/vnd.hearing.query.outstanding-fines+json",
+                Utilities.JsonUtil.toJsonString(payload),
+                headers())) {
 
+            final JsonPath jsonPath =  new JsonPath(response.readEntity(String.class));
+
+            assertThat(jsonPath.getString("courtRooms[0].courtRoomName"), is("room1"));
+            assertThat(jsonPath.getString("courtRooms[0].outstandingFines[0].defendantName"), is("Abbie ARMSTRONG"));
+        }
     }
 
-    private void verifyStagingEnforcementCourtRoomsOutstandingFines(final List<String> expectedValues) {
+    private static MultivaluedMap<String, Object> headers() {
+        final MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
+        headers.putSingle(USER_ID, UUID.randomUUID());
+        return headers;
+    }
 
-        final RequestPatternBuilder requestPatternBuilder = postRequestedFor(urlPathMatching("/stagingenforcement-service/command/api/rest/stagingenforcement/court/rooms/outstanding-fines"));
-        expectedValues.forEach(
-                expectedValue -> requestPatternBuilder.withRequestBody(containing(expectedValue))
-        );
-        verify(requestPatternBuilder);
+    public Response query(final String url, final String contentType, final String requestPayload, final MultivaluedMap<String, Object> headers) {
+        Entity<String> entity = Entity.entity(requestPayload, MediaType.valueOf(contentType));
+        return ResteasyClientBuilderFactory.clientBuilder().build().target(url).request().headers(headers).post(entity);
     }
 
 
