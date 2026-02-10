@@ -5,11 +5,13 @@ import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -20,10 +22,10 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.domain.OutstandingFinesQuery;
 import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
-import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleApplications;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleCases;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.DDJChecker;
@@ -54,6 +56,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.json.Json;
@@ -127,6 +130,9 @@ public class HearingQueryApi {
 
     @Inject
     private ProgressionService progressionService;
+
+    @Inject
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     @Inject
     private HearingService hearingService;
@@ -418,4 +424,27 @@ public class HearingQueryApi {
         }
         return query;
     }
+
+    @Handles("hearing.query.outstanding-fines")
+    public JsonEnvelope getHearingOutstandingFines(final JsonEnvelope queryEnvelope) {
+
+        final OutstandingFinesQuery outstandingFinesQuery = jsonObjectToObjectConverter.convert(queryEnvelope.payloadAsJsonObject(), OutstandingFinesQuery.class);
+        final JsonEnvelope envelopeWithReStructuredPayload = envelopeFrom(queryEnvelope.metadata(), createObjectBuilder()
+                .add("courtCentreId", outstandingFinesQuery.getCourtCentreId().toString())
+                .add("courtRoomIds", outstandingFinesQuery.getCourtRoomIds().stream().map(UUID::toString).collect(Collectors.joining(",")))
+                .add("hearingDate", outstandingFinesQuery.getHearingDate().toString())
+                .build());
+
+        final JsonEnvelope envelope = this.hearingQueryView.getDefendantInfoFromCourtHouseId(envelopeWithReStructuredPayload);
+
+        final JsonEnvelope jsonEnvelope = envelopeFrom(
+                metadataFrom(queryEnvelope.metadata()).withName("stagingenforcement.query.court-rooms-outstanding-fines"),
+                envelope.payload());
+
+        final Envelope<JsonObject> outStandingFinesEnvelope = requester.requestAsAdmin(jsonEnvelope, JsonObject.class);
+
+        return envelopeFrom(queryEnvelope.metadata(), outStandingFinesEnvelope.payload());
+
+    }
+
 }

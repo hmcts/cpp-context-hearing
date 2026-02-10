@@ -9,6 +9,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static java.text.MessageFormat.format;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
@@ -247,10 +248,14 @@ public class WireMockStubUtils {
     }
 
     public static void stubStagingenforcementCourtRoomsOutstandingFines() {
-        stubFor(post(urlPathEqualTo("/stagingenforcement-service/command/api/rest/stagingenforcement/court/rooms/outstanding-fines"))
-                .withHeader(CONTENT_TYPE, equalTo("application/vnd.stagingenforcement.court.rooms.outstanding-fines+json"))
-                .willReturn(aResponse().withStatus(SC_ACCEPTED)));
-
+        stubFor(post(urlPathMatching("/stagingenforcement-service/query/api/rest/stagingenforcement/court/rooms/outstanding-fines"))
+                .withHeader(CONTENT_TYPE, containing("stagingenforcement.query.court-rooms-outstanding-fines"))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader(ID, randomUUID().toString())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(
+                                getPayload("stub-data/stagingenforcement.query.court-rooms-outstanding-fines-response.json")
+                        )));
     }
 
     public static final void mockMaterialUpload() {
