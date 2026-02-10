@@ -4,12 +4,15 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedV3Template;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.resultLine2;
 
+import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -104,6 +107,27 @@ public class PublishResultsV3EventProcessorTest {
         verify(updateResultLineStatusDelegate).updateDaysResultLineStatus(sender, event, resultsSharedV3);
         verify(publishResultsDelegate).shareResults(any(), any(), any(), any());
 
+    }
+
+    @Test
+    public void shouldHandleShareResultWithDeletedResultLines() {
+        final ResultsSharedV3 resultsSharedV3 = resultsSharedV3Template();
+        final ResultLine2 deletedResultLine = resultLine2(randomUUID());
+        deletedResultLine.setIsDeleted(Boolean.TRUE);
+        resultsSharedV3.getTargets().get(0).getResultLines().add(deletedResultLine);
+        final TreeNode<ResultDefinition> resultDefinitionTreeNode = new TreeNode<>(randomUUID(), new ResultDefinition());
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.results-shared-v3"), objectToJsonObjectConverter.convert(resultsSharedV3));
+
+        when(referenceDataLoader.getOrganisationUnitById(eq(resultsSharedV3.getHearing().getCourtCentre().getId()))).thenReturn(buildOrganisationalUnit());
+        when(newTargetToLegacyTargetConverter.convert(any())).thenReturn((resultsSharedV3.getTargets()));
+        when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsSharedV3.class)).thenReturn(resultsSharedV3);
+        when(referenceDataService.getResultDefinitionTreeNodeById(any(), any(), any())).thenReturn(resultDefinitionTreeNode);
+
+        publishResultsEventProcessor.resultsShared(event);
+
+        verify(referenceDataService, times(2)).getResultDefinitionTreeNodeById(any(), any(), any());
+        verify(publishResultsDelegate).shareResults(any(), any(), any(), any());
     }
 
     @Test
