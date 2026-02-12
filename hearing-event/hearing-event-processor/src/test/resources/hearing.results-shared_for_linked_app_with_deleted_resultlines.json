@@ -1,0 +1,1345 @@
+{
+  "hearingId": "3d57bc97-5ed6-4cde-aac0-d3284d074b58",
+  "sharedTime": "2025-09-19T16:02:11.893Z",
+  "courtClerk": {
+    "firstName": "Emma",
+    "lastName": "Cleaner",
+    "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+  },
+  "hearing": {
+    "courtApplications": [
+      {
+        "applicant": {
+          "id": "31bbd5fd-d058-421b-a090-1e58a9c78d19",
+          "masterDefendant": {
+            "defendantCase": [
+              {
+                "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+                "caseReference": "28DI6500116",
+                "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d"
+              }
+            ],
+            "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+            "personDefendant": {
+              "arrestSummonsNumber": "D28GC01126500116",
+              "bailStatus": {
+                "code": "A",
+                "description": "Not applicable",
+                "id": "86009c70-759d-3308-8de4-194886ff9a77"
+              },
+              "driverNumber": "VANFL002222OW9PH",
+              "personDetails": {
+                "address": {
+                  "address1": "9999A9899AAAA",
+                  "address2": "Woodlane4",
+                  "address3": "addressline 3",
+                  "address4": "Bristol",
+                  "address5": "Avon",
+                  "postcode": "BS1 1JQ"
+                },
+                "contact": {
+                  "home": "0206500116",
+                  "mobile": "07776500116",
+                  "primaryEmail": "firstName.lastName6500116@gmail.com"
+                },
+                "dateOfBirth": "1972-11-01",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+                  "observedEthnicityCode": "1",
+                  "observedEthnicityDescription": "White",
+                  "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                  "selfDefinedEthnicityCode": "W1",
+                  "selfDefinedEthnicityDescription": "British",
+                  "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                },
+                "firstName": "Angus",
+                "gender": "MALE",
+                "hearingLanguageNeeds": "ENGLISH",
+                "lastName": "Lindgren",
+                "title": "Mr"
+              },
+              "policeBailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              }
+            }
+          },
+          "notificationRequired": true,
+          "summonsRequired": false
+        },
+        "applicationReceivedDate": "2025-09-19",
+        "applicationReference": "28DI6500116",
+        "applicationStatus": "LISTED",
+        "commissionerOfOath": false,
+        "courtApplicationCases": [
+          {
+            "caseStatus": "INACTIVE",
+            "isSJP": false,
+            "offences": [
+              {
+                "arrestDate": "2021-01-01",
+                "chargeDate": "2020-12-28",
+                "count": 0,
+                "endorsableFlag": false,
+                "id": "56693136-f544-4083-bd55-df22eff8d021",
+                "isDisposed": true,
+                "listingNumber": 1,
+                "maxPenalty": "EW:6M &/or Ultd Fine",
+                "modeOfTrial": "Either Way",
+                "offenceCode": "TH68010",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "38873d2b-4f99-35ae-9d8f-41da07abb6d5",
+                "offenceLegislation": "Contrary to section 1(1) and 7 of the Theft Act 1968.",
+                "offenceLegislationWelsh": "Yn groes i adran 1(1) a 7 Deddf Dwyn 1968.",
+                "offenceTitle": "Theft from a shop",
+                "offenceTitleWelsh": "Dwyn o siop - siop-ladrad",
+                "orderIndex": 1,
+                "proceedingsConcluded": true,
+                "startDate": "2019-11-28",
+                "wording": "Theft of pedal cycle."
+              }
+            ],
+            "prosecutionCaseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+            "prosecutionCaseIdentifier": {
+              "address": {
+                "address1": "Finance Operations",
+                "address2": "C3 East",
+                "address3": "DVLA",
+                "address4": "Longview Road",
+                "address5": "Swansea",
+                "postcode": "SA6 7JL"
+              },
+              "contact": {
+                "primaryEmail": "sjp@dvla.gov.uk"
+              },
+              "majorCreditorCode": "DVL2",
+              "prosecutionAuthorityCode": "DVLA",
+              "prosecutionAuthorityId": "6ae4b163-658b-3ae2-a66d-43401cac2f96",
+              "prosecutionAuthorityName": "Driver and Vehicle Licensing Agency",
+              "prosecutionAuthorityOUCode": "G94DV00",
+              "caseURN": "28DI6500116"
+            }
+          }
+        ],
+        "id": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+        "subject": {
+          "id": "31bbd5fd-d058-421b-a090-1e58a9c78d19",
+          "masterDefendant": {
+            "defendantCase": [
+              {
+                "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+                "caseReference": "28DI6500116",
+                "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d"
+              }
+            ],
+            "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+            "personDefendant": {
+              "arrestSummonsNumber": "D28GC01126500116",
+              "bailStatus": {
+                "code": "A",
+                "description": "Not applicable",
+                "id": "86009c70-759d-3308-8de4-194886ff9a77"
+              },
+              "driverNumber": "VANFL002222OW9PH",
+              "personDetails": {
+                "address": {
+                  "address1": "9999A9899AAAA",
+                  "address2": "Woodlane4",
+                  "address3": "addressline 3",
+                  "address4": "Bristol",
+                  "address5": "Avon",
+                  "postcode": "BS1 1JQ"
+                },
+                "contact": {
+                  "home": "0206500116",
+                  "mobile": "07776500116",
+                  "primaryEmail": "firstName.lastName6500116@gmail.com"
+                },
+                "dateOfBirth": "1972-11-01",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+                  "observedEthnicityCode": "1",
+                  "observedEthnicityDescription": "White",
+                  "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                  "selfDefinedEthnicityCode": "W1",
+                  "selfDefinedEthnicityDescription": "British",
+                  "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                },
+                "firstName": "Angus",
+                "gender": "MALE",
+                "hearingLanguageNeeds": "ENGLISH",
+                "lastName": "Lindgren",
+                "title": "Mr"
+              },
+              "policeBailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              }
+            }
+          },
+          "notificationRequired": true,
+          "summonsRequired": false
+        },
+        "thirdParties": [
+          {
+            "id": "977beebc-2e85-47cb-9d3f-f7038153a196",
+            "notificationRequired": true,
+            "prosecutingAuthority": {
+              "address": {
+                "address1": "Finance Operations",
+                "address2": "C3 East",
+                "address3": "DVLA",
+                "address4": "Longview Road",
+                "address5": "Swansea",
+                "postcode": "SA6 7JL"
+              },
+              "contact": {
+                "primaryEmail": "sjp@dvla.gov.uk"
+              },
+              "majorCreditorCode": "DVL2",
+              "name": "Driver and Vehicle Licensing Agency",
+              "prosecutionAuthorityCode": "DVLA",
+              "prosecutionAuthorityId": "6ae4b163-658b-3ae2-a66d-43401cac2f96",
+              "prosecutionAuthorityOUCode": "G94DV00"
+            },
+            "summonsRequired": true
+          }
+        ],
+        "type": {
+          "appealFlag": false,
+          "applicantAppellantFlag": false,
+          "applicationWording": "Appears before the court in order to make a statutory declaration following conviction {1} by {2} on {3}. Original case number: {4}",
+          "applicationWordingWelsh": "Yn ymddangos gerbron y llys er mwyn gwneud datganiad statudol yn dilyn euogfarn <[am y trosedd <Original Offence>][am y troseddau <Original Offences>]> gan <Court name> ar <Date of hearing>. Rhif yr Achos Gwreiddiol: <Original case number>",
+          "boxworkNotifTemplate": "NOT_APPLICABLE",
+          "breachType": "NOT_APPLICABLE",
+          "categoryCode": "CR",
+          "changeDate": "2025-03-17T10:29:09",
+          "code": "MC80527",
+          "commrOfOathFlag": true,
+          "contestedFeeApplicable": false,
+          "courtExtractAvlFlag": true,
+          "courtOfAppealFlag": false,
+          "exParte": false,
+          "hearingCode": "APN",
+          "id": "a6663f2a-c900-4bb4-a7d7-4be34cb2f1f7",
+          "initialFeeApplicable": false,
+          "jurisdiction": "MAGISTRATES",
+          "lastModified": "2025-03-17T14:00:40.437Z",
+          "legislation": "In accordance with section 14 of the Magistrates' Courts Act 1980.",
+          "legislationWelsh": "Yn unol ag adran 14 Deddf Llysoedd Ynadon 1980.",
+          "linkType": "LINKED",
+          "listingNotifTemplate": "POSTAL_NOTIFICATION",
+          "offenceActiveOrder": "OFFENCE",
+          "pleaApplicableFlag": true,
+          "prosecutorThirdPartyFlag": true,
+          "pssId": 601795,
+          "sowRef": "APPS",
+          "spiOutApplicableFlag": true,
+          "summonsTemplateType": "NOT_APPLICABLE",
+          "type": "Appearance to make statutory declaration (other than SJP)",
+          "typeWelsh": "Ymddangosiad i wneud datganiad statudol",
+          "validFrom": "2000-01-05"
+        }
+      }
+    ],
+    "courtCentre": {
+      "address": {
+        "address1": "Norwich Place",
+        "address2": "Bexleyheath",
+        "address3": "Kent",
+        "address4": "",
+        "address5": "",
+        "postcode": "DA6 7ND"
+      },
+      "code": "B01BH00",
+      "courtHearingLocation": "B01BH01",
+      "id": "7e967376-eacf-4fca-9b30-21b0c5aad427",
+      "lja": {
+        "ljaCode": "2575",
+        "ljaName": "South East London Magistrates' Court"
+      },
+      "name": "Bexley Magistrates' Court",
+      "roomId": "8e912353-3b5d-36c3-953e-ad3b94b19de3",
+      "roomName": "Courtroom 01"
+    },
+    "defendantAttendance": [
+      {
+        "attendanceDays": [
+          {
+            "attendanceType": "IN_PERSON",
+            "day": "2025-09-19"
+          }
+        ],
+        "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d"
+      }
+    ],
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "courtCentreId": "7e967376-eacf-4fca-9b30-21b0c5aad427",
+        "courtRoomId": "8e912353-3b5d-36c3-953e-ad3b94b19de3",
+        "hasSharedResults": true,
+        "isCancelled": false,
+        "listedDurationMinutes": 20,
+        "listingSequence": 0,
+        "sittingDay": "2025-09-19T09:00:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "3d57bc97-5ed6-4cde-aac0-d3284d074b58",
+    "jurisdictionType": "MAGISTRATES",
+    "shadowListedOffences": [],
+    "type": {
+      "description": "Application",
+      "id": "3449743b-95d6-4836-8941-57f588b52068"
+    }
+  },
+  "variantDirectory": [],
+  "completedResultLinesStatus": {
+    "c3f54f8b-bae1-4141-bdf9-7dc38aee602a": {
+      "id": "c3f54f8b-bae1-4141-bdf9-7dc38aee602a",
+      "lastSharedDateTime": "2025-09-19T16:00:56.563Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "4b4dbc9f-7889-4433-9eab-5f631c103b81": {
+      "id": "4b4dbc9f-7889-4433-9eab-5f631c103b81",
+      "lastSharedDateTime": "2025-09-19T16:00:56.563Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "67c5877f-bcb0-430f-974c-334e4d565f05": {
+      "id": "67c5877f-bcb0-430f-974c-334e4d565f05",
+      "lastSharedDateTime": "2025-09-19T16:00:56.563Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "626a1980-77be-4612-9afc-55f3c85d7381": {
+      "id": "626a1980-77be-4612-9afc-55f3c85d7381",
+      "lastSharedDateTime": "2025-09-19T16:00:56.563Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "11593003-7af6-4d2a-aa08-82281a4df15c": {
+      "id": "11593003-7af6-4d2a-aa08-82281a4df15c",
+      "lastSharedDateTime": "2025-09-19T16:00:56.563Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "d6986f75-2404-4e8c-8250-d50b7d8e865c": {
+      "id": "d6986f75-2404-4e8c-8250-d50b7d8e865c",
+      "lastSharedDateTime": "2025-09-19T16:00:56.563Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "45b6b6d7-ce6f-425c-a2c6-bdae1db71690": {
+      "id": "45b6b6d7-ce6f-425c-a2c6-bdae1db71690",
+      "lastSharedDateTime": "2025-09-19T16:00:56.563Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "18ccf48c-c76a-4e20-a777-4d37d4645003": {
+      "id": "18ccf48c-c76a-4e20-a777-4d37d4645003",
+      "lastSharedDateTime": "2025-09-19T16:00:56.563Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "25082695-3304-4d5d-8176-b2e77fbd1236": {
+      "id": "25082695-3304-4d5d-8176-b2e77fbd1236",
+      "lastSharedDateTime": "2025-09-19T16:00:56.563Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "352c8174-5140-4717-bc12-cb9ce554d68a": {
+      "id": "352c8174-5140-4717-bc12-cb9ce554d68a",
+      "lastSharedDateTime": "2025-09-19T16:00:56.563Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    }
+  },
+  "targets": [
+    {
+      "applicationFinalised": true,
+      "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+      "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+      "draftResult": "{}",
+      "hearingDay": "2025-09-19",
+      "hearingId": "3d57bc97-5ed6-4cde-aac0-d3284d074b58",
+      "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+      "resultLines": [
+        {
+          "amendmentDate": "2025-09-19T16:01:21.012Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-09-19T16:01:21.012Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-09-19T16:02:09.589Z\"}]}",
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "I",
+          "childResultLineIds": [],
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "orderedDate": "2025-09-19",
+          "prompts": [
+            {
+              "id": "150a22a8-05d0-4be1-ada7-a0d512a63b5d",
+              "label": "Defendant excused attendance at next hearing",
+              "promptRef": "defendantExcusedAttendanceAtNextHearing",
+              "value": "true"
+            }
+          ],
+          "resultDefinitionId": "d278650c-e429-11e8-9f32-f2801f1b9fd1",
+          "resultLabel": "Adjournment",
+          "resultLineId": "25082695-3304-4d5d-8176-b2e77fbd1236",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "a"
+        },
+        {
+          "amendmentDate": "2025-09-19T16:01:21.012Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-09-19T16:01:21.012Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-09-19T16:02:09.589Z\"}]}",
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [],
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "orderedDate": "2025-09-19",
+          "prompts": [],
+          "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "resultLabel": "Next hearing",
+          "resultLineId": "d6986f75-2404-4e8c-8250-d50b7d8e865c",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "nexh"
+        },
+        {
+          "amendmentDate": "2025-09-19T16:01:21.012Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-09-19T16:01:21.012Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-09-19T16:02:09.589Z\"}]}",
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [],
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "orderedDate": "2025-09-19",
+          "prompts": [
+            {
+              "id": "d27a5d86-d51f-4c6e-914b-cb4b0abc4283",
+              "label": "Date of hearing",
+              "promptRef": "HDATE",
+              "value": "2025-09-19"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "10:00"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "Lavender Hill Magistrates' Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "176A Lavender Hill"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "London"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "SW11 1JU"
+            },
+            {
+              "id": "49ec9b26-dd63-4637-b2e9-55ba9948a90f",
+              "label": "Courtroom",
+              "promptRef": "HCROOM",
+              "value": "Courtroom 03"
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "promptRef": "HTYPE",
+              "value": "Bail Application"
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "promptRef": "HEST",
+              "value": "20 MINUTES"
+            },
+            {
+              "id": "e73e6ab8-9bfe-4135-9fe6-f526544584d6",
+              "label": "Booking reference",
+              "promptRef": "bookingReference",
+              "value": "959c2bb7-d7cf-40ca-994d-f26fbe4be4d5"
+            }
+          ],
+          "resultDefinitionId": "70c98fa6-804d-11e8-adc0-fa7ae01bbebc",
+          "resultLabel": "Next hearing in magistrates' court",
+          "resultLineId": "18ccf48c-c76a-4e20-a777-4d37d4645003",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "nhmc"
+        },
+        {
+          "amendmentDate": "2025-09-19T16:01:21.012Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-09-19T16:01:21.012Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-09-19T16:02:09.589Z\"}]}",
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [],
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "orderedDate": "2025-09-19",
+          "prompts": [],
+          "resultDefinitionId": "7fc17a01-2f5a-4433-aae9-28e0c959f73b",
+          "resultLabel": "Adjournment reasons",
+          "resultLineId": "352c8174-5140-4717-bc12-cb9ce554d68a",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "adjr"
+        },
+        {
+          "amendmentDate": "2025-09-19T16:01:32.983Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-09-19T16:01:21.012Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-09-19T16:02:09.589Z\"}]}",
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "56693136-f544-4083-bd55-df22eff8d021",
+          "orderedDate": "2025-09-19",
+          "prompts": [],
+          "resultDefinitionId": "69ff04d5-84e8-4a61-8478-82c2999c1969",
+          "resultLabel": "To attend or a warrant to issue",
+          "resultLineId": "67c5877f-bcb0-430f-974c-334e4d565f05",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "awi"
+        },
+        {
+          "amendmentDate": "2025-09-19T16:01:21.012Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-09-19T16:01:21.012Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-09-19T16:02:09.589Z\"}]}",
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [],
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "orderedDate": "2025-09-19",
+          "prompts": [],
+          "resultDefinitionId": "dbf9f59c-eee5-4285-8a1c-4fefe4508581",
+          "resultLabel": "To produce motor insurance documents or test certificates (not driving licence)",
+          "resultLineId": "c3f54f8b-bae1-4141-bdf9-7dc38aee602a",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "doc"
+        },
+        {
+          "amendmentDate": "2025-09-19T16:01:32.983Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[]}",
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "I",
+          "childResultLineIds": [
+            "4b4dbc9f-7889-4433-9eab-5f631c103b81",
+            "45b6b6d7-ce6f-425c-a2c6-bdae1db71690"
+          ],
+          "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "56693136-f544-4083-bd55-df22eff8d021",
+          "orderedDate": "2025-09-19",
+          "prompts": [
+            {
+              "id": "150a22a8-05d0-4be1-ada7-a0d512a63b5d",
+              "label": "Defendant excused attendance at next hearing",
+              "promptRef": "defendantExcusedAttendanceAtNextHearing",
+              "value": "true"
+            }
+          ],
+          "resultDefinitionId": "d278650c-e429-11e8-9f32-f2801f1b9fd1",
+          "resultLabel": "Adjournment",
+          "resultLineId": "626a1980-77be-4612-9afc-55f3c85d7381",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "a"
+        },
+        {
+          "amendmentDate": "2025-09-19T16:01:32.983Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[]}",
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [
+            "11593003-7af6-4d2a-aa08-82281a4df15c"
+          ],
+          "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "56693136-f544-4083-bd55-df22eff8d021",
+          "orderedDate": "2025-09-19",
+          "parentResultLineIds": [
+            "626a1980-77be-4612-9afc-55f3c85d7381"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "resultLabel": "Next hearing",
+          "resultLineId": "4b4dbc9f-7889-4433-9eab-5f631c103b81",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "nexh"
+        },
+        {
+          "amendmentDate": "2025-09-19T16:01:32.983Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[]}",
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "56693136-f544-4083-bd55-df22eff8d021",
+          "orderedDate": "2025-09-19",
+          "parentResultLineIds": [
+            "4b4dbc9f-7889-4433-9eab-5f631c103b81"
+          ],
+          "prompts": [
+            {
+              "id": "d27a5d86-d51f-4c6e-914b-cb4b0abc4283",
+              "label": "Date of hearing",
+              "promptRef": "HDATE",
+              "value": "2025-09-19"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "10:00"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "Lavender Hill Magistrates' Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "176A Lavender Hill"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "London"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "SW11 1JU"
+            },
+            {
+              "id": "49ec9b26-dd63-4637-b2e9-55ba9948a90f",
+              "label": "Courtroom",
+              "promptRef": "HCROOM",
+              "value": "Courtroom 03"
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "promptRef": "HTYPE",
+              "value": "Bail Application"
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "promptRef": "HEST",
+              "value": "20 MINUTES"
+            },
+            {
+              "id": "e73e6ab8-9bfe-4135-9fe6-f526544584d6",
+              "label": "Booking reference",
+              "promptRef": "bookingReference",
+              "value": "959c2bb7-d7cf-40ca-994d-f26fbe4be4d5"
+            }
+          ],
+          "resultDefinitionId": "70c98fa6-804d-11e8-adc0-fa7ae01bbebc",
+          "resultLabel": "Next hearing in magistrates' court",
+          "resultLineId": "11593003-7af6-4d2a-aa08-82281a4df15c",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "nhmc"
+        },
+        {
+          "amendmentDate": "2025-09-19T16:01:32.983Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[]}",
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [
+            "92df62ca-9311-4894-8bfa-61c4e4ad5f1a"
+          ],
+          "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "56693136-f544-4083-bd55-df22eff8d021",
+          "orderedDate": "2025-09-19",
+          "parentResultLineIds": [
+            "626a1980-77be-4612-9afc-55f3c85d7381"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "7fc17a01-2f5a-4433-aae9-28e0c959f73b",
+          "resultLabel": "Adjournment reasons",
+          "resultLineId": "45b6b6d7-ce6f-425c-a2c6-bdae1db71690",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "adjr"
+        },
+        {
+          "amendmentDate": "2025-09-19T16:01:32.983Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-09-19T16:01:21.012Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-09-19T16:02:09.589Z\"}]}",
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "56693136-f544-4083-bd55-df22eff8d021",
+          "orderedDate": "2025-09-19",
+          "prompts": [],
+          "resultDefinitionId": "69ff04d5-84e8-4a61-8478-82c2999c1969",
+          "resultLabel": "To attend or a warrant to issue",
+          "resultLineId": "67c5877f-bcb0-430f-974c-334e4d565f05",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "awi"
+        },
+        {
+          "amendmentDate": "2025-09-19T16:01:25.148Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-09-19T16:01:25.148Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-09-19T16:02:09.589Z\"}]}",
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "F",
+          "childResultLineIds": [],
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "orderedDate": "2025-09-19",
+          "prompts": [],
+          "resultDefinitionId": "2b3f7c20-8fc1-4fad-9076-df196c24b27e",
+          "resultLabel": "Granted",
+          "resultLineId": "e548f1a1-fee8-46c0-bc47-201a26de69f6",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "g"
+        },
+        {
+          "amendmentDate": "2025-09-19T16:01:32.983Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-09-19T16:01:32.983Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-09-19T16:02:09.589Z\"}]}",
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "56693136-f544-4083-bd55-df22eff8d021",
+          "orderedDate": "2025-09-19",
+          "parentResultLineIds": [
+            "45b6b6d7-ce6f-425c-a2c6-bdae1db71690"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "69ff04d5-84e8-4a61-8478-82c2999c1969",
+          "resultLabel": "To attend or a warrant to issue",
+          "resultLineId": "92df62ca-9311-4894-8bfa-61c4e4ad5f1a",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "awi"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53"
+    }
+  ],
+  "savedTargets": [
+    {
+      "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+      "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+      "draftResult": "{}",
+      "hearingDay": "2025-09-19",
+      "hearingId": "3d57bc97-5ed6-4cde-aac0-d3284d074b58",
+      "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+      "resultLines": [
+        {
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "I",
+          "childResultLineIds": [
+            "d6986f75-2404-4e8c-8250-d50b7d8e865c",
+            "352c8174-5140-4717-bc12-cb9ce554d68a"
+          ],
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "orderedDate": "2025-09-19",
+          "prompts": [
+            {
+              "id": "150a22a8-05d0-4be1-ada7-a0d512a63b5d",
+              "label": "Defendant excused attendance at next hearing",
+              "promptRef": "defendantExcusedAttendanceAtNextHearing",
+              "value": "true"
+            }
+          ],
+          "resultDefinitionId": "d278650c-e429-11e8-9f32-f2801f1b9fd1",
+          "resultLabel": "Adjournment",
+          "resultLineId": "25082695-3304-4d5d-8176-b2e77fbd1236",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "a"
+        },
+        {
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [
+            "18ccf48c-c76a-4e20-a777-4d37d4645003"
+          ],
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "orderedDate": "2025-09-19",
+          "parentResultLineIds": [
+            "25082695-3304-4d5d-8176-b2e77fbd1236"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "resultLabel": "Next hearing",
+          "resultLineId": "d6986f75-2404-4e8c-8250-d50b7d8e865c",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "nexh"
+        },
+        {
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [
+            "67c5877f-bcb0-430f-974c-334e4d565f05",
+            "c3f54f8b-bae1-4141-bdf9-7dc38aee602a"
+          ],
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "orderedDate": "2025-09-19",
+          "parentResultLineIds": [
+            "25082695-3304-4d5d-8176-b2e77fbd1236"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "7fc17a01-2f5a-4433-aae9-28e0c959f73b",
+          "resultLabel": "Adjournment reasons",
+          "resultLineId": "352c8174-5140-4717-bc12-cb9ce554d68a",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "adjr"
+        },
+        {
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [],
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "orderedDate": "2025-09-19",
+          "parentResultLineIds": [
+            "d6986f75-2404-4e8c-8250-d50b7d8e865c"
+          ],
+          "prompts": [
+            {
+              "id": "d27a5d86-d51f-4c6e-914b-cb4b0abc4283",
+              "label": "Date of hearing",
+              "promptRef": "HDATE",
+              "value": "2025-09-19"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "10:00"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "Lavender Hill Magistrates' Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "176A Lavender Hill"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "London"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "SW11 1JU"
+            },
+            {
+              "id": "49ec9b26-dd63-4637-b2e9-55ba9948a90f",
+              "label": "Courtroom",
+              "promptRef": "HCROOM",
+              "value": "Courtroom 03"
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "promptRef": "HTYPE",
+              "value": "Bail Application"
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "promptRef": "HEST",
+              "value": "20 MINUTES"
+            },
+            {
+              "id": "e73e6ab8-9bfe-4135-9fe6-f526544584d6",
+              "label": "Booking reference",
+              "promptRef": "bookingReference",
+              "value": "959c2bb7-d7cf-40ca-994d-f26fbe4be4d5"
+            }
+          ],
+          "resultDefinitionId": "70c98fa6-804d-11e8-adc0-fa7ae01bbebc",
+          "resultLabel": "Next hearing in magistrates' court",
+          "resultLineId": "18ccf48c-c76a-4e20-a777-4d37d4645003",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "nhmc"
+        },
+        {
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "I",
+          "childResultLineIds": [
+            "4b4dbc9f-7889-4433-9eab-5f631c103b81",
+            "45b6b6d7-ce6f-425c-a2c6-bdae1db71690"
+          ],
+          "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "56693136-f544-4083-bd55-df22eff8d021",
+          "orderedDate": "2025-09-19",
+          "prompts": [
+            {
+              "id": "150a22a8-05d0-4be1-ada7-a0d512a63b5d",
+              "label": "Defendant excused attendance at next hearing",
+              "promptRef": "defendantExcusedAttendanceAtNextHearing",
+              "value": "true"
+            }
+          ],
+          "resultDefinitionId": "d278650c-e429-11e8-9f32-f2801f1b9fd1",
+          "resultLabel": "Adjournment",
+          "resultLineId": "626a1980-77be-4612-9afc-55f3c85d7381",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "a"
+        },
+        {
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [
+            "11593003-7af6-4d2a-aa08-82281a4df15c"
+          ],
+          "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "56693136-f544-4083-bd55-df22eff8d021",
+          "orderedDate": "2025-09-19",
+          "parentResultLineIds": [
+            "626a1980-77be-4612-9afc-55f3c85d7381"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "resultLabel": "Next hearing",
+          "resultLineId": "4b4dbc9f-7889-4433-9eab-5f631c103b81",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "nexh"
+        },
+        {
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "56693136-f544-4083-bd55-df22eff8d021",
+          "orderedDate": "2025-09-19",
+          "parentResultLineIds": [
+            "4b4dbc9f-7889-4433-9eab-5f631c103b81"
+          ],
+          "prompts": [
+            {
+              "id": "d27a5d86-d51f-4c6e-914b-cb4b0abc4283",
+              "label": "Date of hearing",
+              "promptRef": "HDATE",
+              "value": "2025-09-19"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "10:00"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "Lavender Hill Magistrates' Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "176A Lavender Hill"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "London"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "SW11 1JU"
+            },
+            {
+              "id": "49ec9b26-dd63-4637-b2e9-55ba9948a90f",
+              "label": "Courtroom",
+              "promptRef": "HCROOM",
+              "value": "Courtroom 03"
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "promptRef": "HTYPE",
+              "value": "Bail Application"
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "promptRef": "HEST",
+              "value": "20 MINUTES"
+            },
+            {
+              "id": "e73e6ab8-9bfe-4135-9fe6-f526544584d6",
+              "label": "Booking reference",
+              "promptRef": "bookingReference",
+              "value": "959c2bb7-d7cf-40ca-994d-f26fbe4be4d5"
+            }
+          ],
+          "resultDefinitionId": "70c98fa6-804d-11e8-adc0-fa7ae01bbebc",
+          "resultLabel": "Next hearing in magistrates' court",
+          "resultLineId": "11593003-7af6-4d2a-aa08-82281a4df15c",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "nhmc"
+        },
+        {
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [
+            "67c5877f-bcb0-430f-974c-334e4d565f05"
+          ],
+          "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "56693136-f544-4083-bd55-df22eff8d021",
+          "orderedDate": "2025-09-19",
+          "parentResultLineIds": [
+            "626a1980-77be-4612-9afc-55f3c85d7381"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "7fc17a01-2f5a-4433-aae9-28e0c959f73b",
+          "resultLabel": "Adjournment reasons",
+          "resultLineId": "45b6b6d7-ce6f-425c-a2c6-bdae1db71690",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "adjr"
+        },
+        {
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "56693136-f544-4083-bd55-df22eff8d021",
+          "orderedDate": "2025-09-19",
+          "parentResultLineIds": [
+            "45b6b6d7-ce6f-425c-a2c6-bdae1db71690"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "69ff04d5-84e8-4a61-8478-82c2999c1969",
+          "resultLabel": "To attend or a warrant to issue",
+          "resultLineId": "67c5877f-bcb0-430f-974c-334e4d565f05",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "awi"
+        },
+        {
+          "applicationId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53",
+          "caseId": "aaf1035b-9a0e-41d3-9501-5c8d53ab6f12",
+          "category": "A",
+          "childResultLineIds": [],
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "9191ae81-c7c2-4a7f-a168-befba0dad65d",
+          "nonStandaloneAncillaryResult": false,
+          "orderedDate": "2025-09-19",
+          "parentResultLineIds": [
+            "352c8174-5140-4717-bc12-cb9ce554d68a"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "dbf9f59c-eee5-4285-8a1c-4fefe4508581",
+          "resultLabel": "To produce motor insurance documents or test certificates (not driving licence)",
+          "resultLineId": "c3f54f8b-bae1-4141-bdf9-7dc38aee602a",
+          "shadowListed": false,
+          "sharedDate": "2025-09-19",
+          "shortCode": "doc"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "c67b935d-6f26-4b8e-a31f-582b5ae52a53"
+    }
+  ],
+  "defendantDetailsChanged": [],
+  "isReshare": true,
+  "newAmendmentResults": [
+    {
+      "id": "25082695-3304-4d5d-8176-b2e77fbd1236",
+      "amendmentDateTime": "2025-09-19T16:01:21.012Z"
+    },
+    {
+      "id": "d6986f75-2404-4e8c-8250-d50b7d8e865c",
+      "amendmentDateTime": "2025-09-19T16:01:21.012Z"
+    },
+    {
+      "id": "18ccf48c-c76a-4e20-a777-4d37d4645003",
+      "amendmentDateTime": "2025-09-19T16:01:21.012Z"
+    },
+    {
+      "id": "352c8174-5140-4717-bc12-cb9ce554d68a",
+      "amendmentDateTime": "2025-09-19T16:01:21.012Z"
+    },
+    {
+      "id": "67c5877f-bcb0-430f-974c-334e4d565f05",
+      "amendmentDateTime": "2025-09-19T16:01:32.983Z"
+    },
+    {
+      "id": "c3f54f8b-bae1-4141-bdf9-7dc38aee602a",
+      "amendmentDateTime": "2025-09-19T16:01:21.012Z"
+    },
+    {
+      "id": "626a1980-77be-4612-9afc-55f3c85d7381",
+      "amendmentDateTime": "2025-09-19T16:01:32.983Z"
+    },
+    {
+      "id": "4b4dbc9f-7889-4433-9eab-5f631c103b81",
+      "amendmentDateTime": "2025-09-19T16:01:32.983Z"
+    },
+    {
+      "id": "11593003-7af6-4d2a-aa08-82281a4df15c",
+      "amendmentDateTime": "2025-09-19T16:01:32.983Z"
+    },
+    {
+      "id": "45b6b6d7-ce6f-425c-a2c6-bdae1db71690",
+      "amendmentDateTime": "2025-09-19T16:01:32.983Z"
+    },
+    {
+      "id": "67c5877f-bcb0-430f-974c-334e4d565f05",
+      "amendmentDateTime": "2025-09-19T16:01:32.983Z"
+    },
+    {
+      "id": "e548f1a1-fee8-46c0-bc47-201a26de69f6",
+      "amendmentDateTime": "2025-09-19T16:01:25.148Z"
+    },
+    {
+      "id": "92df62ca-9311-4894-8bfa-61c4e4ad5f1a",
+      "amendmentDateTime": "2025-09-19T16:01:32.983Z"
+    }
+  ],
+  "hearingDay": "2025-09-19",
+  "version": 14
+}

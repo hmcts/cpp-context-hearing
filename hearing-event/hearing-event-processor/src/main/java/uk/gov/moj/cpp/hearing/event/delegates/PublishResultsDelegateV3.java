@@ -18,6 +18,7 @@ import static uk.gov.justice.core.courts.Level.DEFENDANT;
 import static uk.gov.justice.core.courts.Level.OFFENCE;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.DeletedJudicialResultTransformer.toDeletedResults;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.CategoryEnumUtils.getCategory;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
 import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromHearing;
@@ -26,10 +27,8 @@ import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupReportingRestr
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DefendantJudicialResult;
-import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultCategory;
-import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -79,13 +78,6 @@ public class PublishResultsDelegateV3 {
     private static final Logger LOGGER = LoggerFactory.getLogger(PublishResultsDelegateV3.class.getName());
     private static final String DDCH = "DDCH";
     private static final String PRESS_ON = "PressOn";
-    public static final String FIRST_HEARING_JUDICIAL_RESULT_TYPE_ID = "b3ed14c1-d921-459c-90fd-400a5d8d0076";
-    public static final String CUSTODIAL_PERIOD_JUDICIAL_RESULT_TYPE_ID = "b65fb5f1-b11d-4a95-a198-3b81333c7cf9";
-    public static final String SUSPENDED_SENTENCE_ORDER = "a78b50cc-0777-403d-8e51-5458e1ee3513, 8b1cff00-a456-40da-9ce4-f11c20959084";
-    public static final String DRUG_REHABILITATION_RESIDENTIAL_WITH_REVIEW = "61ea03c9-c113-446b-a392-402144fcd9e8";
-    public static final String DRUG_REHABILITATION_NON_RESIDENTIAL_WITH_REVIEW = "cc2cbb94-b75a-4a8c-9840-31c5f8007724";
-    public static final String COMMUNITY_REQUIREMENT = "b2dab2b7-3edd-4223-b1be-3819173ec54d";
-    public static final String COMMUNITY_ORDER = "418b3aa7-65ab-4a4a-bab9-2f96b698118c";
 
     private final Enveloper enveloper;
 
@@ -156,12 +148,18 @@ public class PublishResultsDelegateV3 {
             mapDefendantLevelDDCHJudicialResults(resultsShared, relistReferenceDataService.getResults(context, DDCH), orderedDate);
         }
 
+
         final PublicHearingResultedV2 hearingResulted = PublicHearingResultedV2.publicHearingResultedV2()
                 .setIsReshare(resultsShared.getIsReshare())
                 .setHearing(resultsShared.getHearing())
                 .setSharedTime(resultsShared.getSharedTime())
                 .setHearingDay(resultsShared.getHearingDay())
                 .setShadowListedOffences(getOffenceShadowListedForMagistratesNextHearing(resultsShared));
+
+        final List<TreeNode<ResultLine2>> restructuredDeletedResults = this.restructuringHelper.getDeletedResults(context, resultsShared, treeNodes);
+        if (isNotEmpty(restructuredDeletedResults)) {
+            hearingResulted.getHearing().setDeletedJudicialResults(toDeletedResults(restructuredDeletedResults, resultsShared.getHearing()));
+        }
 
         final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingResulted);
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted"), jsonObject);
@@ -170,53 +168,6 @@ public class PublishResultsDelegateV3 {
         }
         sender.send(jsonEnvelope);
 
-    }
-
-
-    private List<JudicialResult> getOffenceLevelJudicialResults(final Hearing hearing) {
-        return hearing.getProsecutionCases().stream()
-                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                .flatMap(defendant -> ofNullable(defendant.getOffences()).map(Collection::stream).orElseGet(Stream::empty))
-                .filter(offence -> offence.getJudicialResults() != null)
-                .flatMap(offence -> ofNullable(offence.getJudicialResults()).map(Collection::stream).orElseGet(Stream::empty)).collect(toList());
-    }
-
-
-    private String getResultValueFromPrompt(Hearing hearing, JudicialResult judicialResult, String promptRef) {
-        final Optional<JudicialResultPrompt> promptFromJudicialResult = judicialResult.getJudicialResultPrompts().stream().filter(jrPrompt -> promptRef.equals(jrPrompt.getPromptReference()) || jrPrompt.getLabel().equals(promptRef)).findFirst();
-        if (promptFromJudicialResult.isPresent()) {
-            return promptFromJudicialResult.get().getValue();
-        } else {
-            final JudicialResult parentJudicialResult = getRootParentResult(hearing.getProsecutionCases(), judicialResult);
-            if (parentJudicialResult != null) {
-                final Optional<JudicialResultPrompt> judicialResultPrompt = parentJudicialResult.getJudicialResultPrompts().stream().filter(jrPrompt -> promptRef.equals(jrPrompt.getPromptReference()) || jrPrompt.getLabel().equals(promptRef)).findFirst();
-                if (judicialResultPrompt.isPresent()) {
-                    return judicialResultPrompt.get().getValue();
-                } else if (!parentJudicialResult.getJudicialResultId().equals(parentJudicialResult.getRootJudicialResultId())) {
-                    getResultValueFromPrompt(hearing, parentJudicialResult, promptRef);
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private JudicialResult getRootParentResult(List<ProsecutionCase> prosecutionCases, JudicialResult judicialResult) {
-        if (judicialResult == null) {
-            return null;
-        } else {
-            if (judicialResult.getJudicialResultId().equals(judicialResult.getRootJudicialResultId())) {
-                return judicialResult;
-            }
-
-            final Optional<JudicialResult> judicialResultOptional = prosecutionCases.stream()
-                    .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                    .flatMap(defendant -> ofNullable(defendant.getOffences()).map(Collection::stream).orElseGet(Stream::empty))
-                    .filter(offence -> offence.getJudicialResults() != null)
-                    .flatMap(offence -> ofNullable(offence.getJudicialResults()).map(Collection::stream).orElseGet(Stream::empty))
-                    .filter(judicialResult1 -> judicialResult1.getJudicialResultId().equals(judicialResult.getRootJudicialResultId())).findFirst();
-            return judicialResultOptional.orElse(null);
-        }
     }
 
     private List<UUID> getOffenceShadowListedForMagistratesNextHearing(final ResultsSharedV3 resultsShared) {

@@ -19,7 +19,6 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.Restruct
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RollUpPromptsHelperV3.filterNodesWithRollUpPrompts;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EXCLUDED_PROMPT_REFERENCE;
 
-
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -47,9 +46,18 @@ public class RestructuringHelperV3 {
         this.resultTextConfHelper = resultTextConfHelper;
     }
 
+    public List<TreeNode<ResultLine2>> getDeletedResults(final JsonEnvelope context, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> treeNodesResultDefinition) {
+        final List<TreeNode<ResultLine2>> treeNodesOrg = resultTreeBuilder.buildDeleted(context, resultsShared, treeNodesResultDefinition);
+        return updatePublishForNows(treeNodesOrg);
+    }
+
     public List<TreeNode<ResultLine2>> restructure(final JsonEnvelope context, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> treeNodesResultDefinition) {
 
         final List<TreeNode<ResultLine2>> treeNodesOrg = resultTreeBuilder.build(context, resultsShared, treeNodesResultDefinition);
+        return updatePublishForNows(treeNodesOrg);
+    }
+
+    private List<TreeNode<ResultLine2>> updatePublishForNows(final List<TreeNode<ResultLine2>> treeNodesOrg) {
 
         final List<TreeNode<ResultLine2>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodesOrg);
 
@@ -70,7 +78,7 @@ public class RestructuringHelperV3 {
     }
 
     private List<TreeNode<ResultLine2>> prepareTreeNodes(final List<TreeNode<ResultLine2>> treeNodes) {
-        if(resultTextConfHelper.isOldResultDefinitionV2(treeNodes)){
+        if (resultTextConfHelper.isOldResultDefinitionV2(treeNodes)) {
             updateResultText(
                     removeNonPublishableResults(
                             restructureNextHearing(
@@ -107,6 +115,7 @@ public class RestructuringHelperV3 {
 
     /**
      * If the results is publish for NOWs then no nextHearing object should be set
+     *
      * @param treeNodes
      */
     private void removeNextHearingObject(List<TreeNode<ResultLine2>> treeNodes) {
@@ -129,7 +138,7 @@ public class RestructuringHelperV3 {
         });
     }
 
-    private  List<TreeNode<ResultLine2>>  updateResultTextWithNewLogic(final List<TreeNode<ResultLine2>> treeNodeList) {
+    private List<TreeNode<ResultLine2>> updateResultTextWithNewLogic(final List<TreeNode<ResultLine2>> treeNodeList) {
 
         ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
         return treeNodeList;

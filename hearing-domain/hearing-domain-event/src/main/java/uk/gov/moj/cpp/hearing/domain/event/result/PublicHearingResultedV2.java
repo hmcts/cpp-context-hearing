@@ -67,4 +67,5 @@ public class PublicHearingResultedV2 {
         this.hearingDay = hearingDay;
         return this;
     }
+
 }

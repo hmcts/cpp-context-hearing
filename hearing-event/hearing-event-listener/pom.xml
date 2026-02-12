@@ -118,7 +118,7 @@
                                 <artifactItem>
                                     <groupId>uk.gov.moj.cpp.mi.reportdata</groupId>
                                     <artifactId>mireportdata-hearing-event-listener</artifactId>
-                                    <version>17.0.67-SNAPSHOT</version>
+                                    <version>RELEASE</version>
                                     <classifier>tests</classifier>
                                     <type>test-jar</type>
                                     <outputDirectory>${project.build.directory}/test-classes</outputDirectory>

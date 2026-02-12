@@ -290,3 +290,13 @@ rule "Query - API - hearing.get-hearing-event-log-count"
   then
     $outcome.setSuccess(true);
 end
+
+
+rule "Query - API - Action - hearing.query.outstanding-fines"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.query.outstanding-fines");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Court Clerks", "Legal Advisers", "Court Associate", "NCES", "Court Administrators"));
+  then
+    $outcome.setSuccess(true);
+end

@@ -9,6 +9,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@Deprecated
 @Event("hearing.compute-outstanding-fines-requested")
 public class OutstandingFinesQueried {
 

@@ -475,6 +475,27 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.defendant.outstanding-fines.json
                     schema:  !include  json/schema/hearing.defendant.outstanding-fines.json
 
+/outstanding-fines:
+  post:
+    description: |
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.query.outstanding-fines+json
+        responseType: application/vnd.hearing.query.outstanding-fines-response+json
+        name: hearing.query.outstanding-fines
+      ...
+    body:
+      application/vnd.hearing.query.outstanding-fines+json:
+        example: !include json/hearing.query.outstanding-fines.json
+        schema: !include json/schema/hearing.query.outstanding-fines.json
+    responses:
+      200:
+        description: OK
+        body:
+          application/vnd.hearing.outstanding-fines-response+json:
+            example: !include json/hearing.query.outstanding-fines-response.json
+            schema: !include  json/schema/hearing.query.outstanding-fines-response.json
+
 
 /session-time/{courtHouseId}/{courtRoomId}:
   uriParameters:
