@@ -66,6 +66,10 @@
             <artifactId>hearing-healthchecks</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.event-store</groupId>
+            <artifactId>event-tracking-discovery</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

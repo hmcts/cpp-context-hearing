@@ -84,6 +84,8 @@ public class AbstractIT {
     protected static String ouId4 = "7e967376-eacf-4fca-9b30-21b0c5aad429";
     private static String baseUri;
 
+    private static DatabaseCleaner databaseCleaner = new DatabaseCleaner();
+
     /**
      * In case of Single Test executions, initiation of Stubs Per Execution
      */
@@ -157,6 +159,7 @@ public class AbstractIT {
      */
     public static void setUpJvm() {
         truncateViewStoreTables("heda_hearing_event_definition", "ha_hearing", "ha_hearing_event", "court_list_publish_status");
+        databaseCleaner.resetEventSubscriptionStatusTable(CONTEXT_NAME);
         readConfig();
         setRequestSpecification();
         stubHearingEventDefinitions();

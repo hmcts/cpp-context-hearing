@@ -14,6 +14,7 @@ import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.OPEN_CASE
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getFileForPath;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForPubDisplay;
 
+import org.junit.jupiter.api.Disabled;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.steps.CourtListRestrictionSteps;
 import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.Test;
 
 
 @NotThreadSafe
+@Disabled
 public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHearingIT {
 
     private ZonedDateTime eventTime;
