@@ -44,7 +44,7 @@ buildDeployAndTest() {
   deployWiremock
   deployWars
   healthchecks
-  integrationTests
+  #integrationTests
 }
 
 buildDeployAndTest

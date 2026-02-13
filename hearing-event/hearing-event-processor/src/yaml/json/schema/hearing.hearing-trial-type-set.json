@@ -17,6 +17,9 @@
     },
     "description": {
       "type": "string"
+    },
+    "crackedIneffectiveSubReasonId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
     }
   },
   "required": [
@@ -24,7 +27,8 @@
     "trialTypeId",
     "code",
     "type",
-    "description"
+    "description",
+    "crackedIneffectiveSubReasonId"
   ],
   "additionalProperties": false
 }

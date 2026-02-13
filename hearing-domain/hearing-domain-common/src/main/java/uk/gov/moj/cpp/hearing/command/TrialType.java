@@ -11,6 +11,7 @@ public class TrialType {
     private UUID trialTypeId;
     private Boolean isEffectiveTrial;
     private UUID vacatedTrialReasonId;
+    private UUID crackedIneffectiveSubReasonId;
 
     public TrialType() {
     }
@@ -19,11 +20,13 @@ public class TrialType {
     public TrialType(@JsonProperty("hearingId") final UUID hearingId,
                      @JsonProperty("trialTypeId") final UUID trialTypeId,
                      @JsonProperty("isEffectiveTrial") final Boolean isEffectiveTrial,
-                         @JsonProperty("vacatedTrialReasonId") final UUID vacatedTrialReasonId) {
+                     @JsonProperty("vacatedTrialReasonId") final UUID vacatedTrialReasonId,
+                     @JsonProperty("crackedIneffectiveSubReasonId") final UUID crackedIneffectiveSubReasonId) {
         this.hearingId = hearingId;
         this.trialTypeId = trialTypeId;
         this.isEffectiveTrial = isEffectiveTrial;
         this.vacatedTrialReasonId = vacatedTrialReasonId;
+        this.crackedIneffectiveSubReasonId = crackedIneffectiveSubReasonId;
     }
 
     @JsonIgnore
@@ -32,6 +35,7 @@ public class TrialType {
         this.trialTypeId = builder.trialTypeId;
         this.isEffectiveTrial = builder.isEffectiveTrial;
         this.vacatedTrialReasonId = builder.vacatedTrialReasonId;
+        this.crackedIneffectiveSubReasonId = builder.crackedIneffectiveSubReasonId;
     }
 
     public UUID getHearingId() {
@@ -50,6 +54,10 @@ public class TrialType {
         return vacatedTrialReasonId;
     }
 
+    public UUID getCrackedIneffectiveSubReasonId(){
+        return crackedIneffectiveSubReasonId;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -60,6 +68,7 @@ public class TrialType {
         private UUID trialTypeId;
         private Boolean isEffectiveTrial;
         private UUID vacatedTrialReasonId;
+        private UUID crackedIneffectiveSubReasonId;
 
         public Builder withHearingId(final UUID hearingId) {
             this.hearingId = hearingId;
@@ -81,6 +90,10 @@ public class TrialType {
             return this;
         }
 
+        public Builder withCrackedIneffectiveSubReasonId(final UUID crackedIneffectiveSubReasonId){
+            this.crackedIneffectiveSubReasonId = crackedIneffectiveSubReasonId;
+            return this;
+        }
 
         public TrialType build() {
             return new TrialType(this);
