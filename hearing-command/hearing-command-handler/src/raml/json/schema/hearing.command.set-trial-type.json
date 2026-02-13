@@ -14,13 +14,17 @@
     },
     "vacatedTrialReasonId": {
       "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "crackedIneffectiveSubReasonId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
     }
   },
   "oneOf": [
     {
       "required": [
         "hearingId",
-        "trialTypeId"
+        "trialTypeId",
+        "crackedIneffectiveSubReasonId"
       ]
     },
     {

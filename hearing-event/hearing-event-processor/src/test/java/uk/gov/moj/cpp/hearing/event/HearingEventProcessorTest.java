@@ -460,8 +460,9 @@ public class HearingEventProcessorTest {
     public void shouldTriggerPublicHearingTrialVacatedEventForCrackedTrial() {
         final UUID hearingId = randomUUID();
         final UUID trialTypeId = randomUUID();
+        final UUID crackedIneffectiveSubReasonId = randomUUID();
 
-        final HearingTrialType hearingTrialType = new HearingTrialType(hearingId, trialTypeId, "code", "cracked", "desc");
+        final HearingTrialType hearingTrialType = new HearingTrialType(hearingId, trialTypeId, "code", "cracked", "desc",crackedIneffectiveSubReasonId);
         final JsonEnvelope eventIn = createJsonEnvelope(hearingTrialType);
 
         this.hearingEventProcessor.publicHearingEventTrialTypeSetPublicEvent(eventIn);

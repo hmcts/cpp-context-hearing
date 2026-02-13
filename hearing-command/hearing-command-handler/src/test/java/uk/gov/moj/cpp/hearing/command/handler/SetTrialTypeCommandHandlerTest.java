@@ -100,9 +100,9 @@ public class SetTrialTypeCommandHandlerTest {
 
         CommandHelpers.InitiateHearingCommandHelper hearingObject = CommandHelpers.h(standardInitiateHearingTemplate());
         final UUID hearingId = hearingObject.getHearingId();
+        final UUID crackedIneffectiveSubReasonId = randomUUID();
 
-
-        HearingTrialType trialType = new HearingTrialType(hearingId, trialTypeId, "A", "Effective", "Some Description");
+        HearingTrialType trialType = new HearingTrialType(hearingId, trialTypeId, "A", "Effective", "Some Description",crackedIneffectiveSubReasonId);
         final HearingAggregate hearingAggregate = new HearingAggregate() {{
             apply(new HearingInitiated(hearingObject.getHearing()));
         }};
@@ -123,6 +123,7 @@ public class SetTrialTypeCommandHandlerTest {
         assertThat(asPojo(events.get(0), HearingTrialType.class), isBean(HearingTrialType.class)
                 .with(HearingTrialType::getHearingId, Matchers.is(hearingId))
                 .with(HearingTrialType::getTrialTypeId, Matchers.is(trialTypeId))
+                .with(HearingTrialType::getCrackedIneffectiveSubReasonId, Matchers.is(crackedIneffectiveSubReasonId))
         );
     }
 
