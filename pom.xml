@@ -75,6 +75,7 @@
             **/uk/gov/moj/cpp/hearing/command/updateEvent/**/*,
             **/uk/gov/moj/cpp/hearing/command/verdict/**/*,
             **/uk/gov/moj/cpp/hearing/command/witness/**/*,
+            **/uk/gov/moj/cpp/hearing/command/TrialType.java,
             **/uk/gov/moj/cpp/hearing/nces/**/*,
             **/query/view/service/ctl/model/**/*
         </sonar.coverage.exclusions>
