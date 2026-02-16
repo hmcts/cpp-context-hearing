@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.compute-outstanding-fines-requested.json",
+  "id": "http://justice.gov.uk/hearing/courts/hearing.query.outstanding-fines.json",
   "type": "object",
   "properties": {
     "courtCentreId": {
