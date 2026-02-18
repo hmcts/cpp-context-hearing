@@ -71,7 +71,7 @@ public class HearingOutstandingFinesQueryApiTest {
         final JsonEnvelope result = hearingQueryApi.getHearingOutstandingFines(queryEnvelope);
 
         verify(requester, never()).requestAsAdmin(any(), eq(JsonObject.class));
-        assertThat(result.payloadAsJsonObject().isEmpty(), is(true));
+        assertThat(result.payloadAsJsonObject().getJsonArray("courtRooms").isEmpty(), is(true));
     }
 
     @Test
