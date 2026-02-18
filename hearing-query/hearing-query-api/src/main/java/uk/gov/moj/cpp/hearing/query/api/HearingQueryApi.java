@@ -440,7 +440,9 @@ public class HearingQueryApi {
 
         if (defendantInfoPayload.isEmpty()) {
             LOGGER.info("hearing.defendant.info response information is empty");
-            return envelopeFrom(queryEnvelope.metadata(), createObjectBuilder().build());
+            return envelopeFrom(queryEnvelope.metadata(), createObjectBuilder()
+                    .add("courtRooms", createArrayBuilder())
+                    .build());
         }
 
         final JsonEnvelope jsonEnvelope = envelopeFrom(
