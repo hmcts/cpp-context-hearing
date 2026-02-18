@@ -436,10 +436,16 @@ public class HearingQueryApi {
                 .build());
 
         final JsonEnvelope envelope = this.hearingQueryView.getDefendantInfoFromCourtHouseId(envelopeWithReStructuredPayload);
+        final JsonObject defendantInfoPayload = envelope.payloadAsJsonObject();
+
+        if (defendantInfoPayload.isEmpty()) {
+            LOGGER.info("hearing.defendant.info response information is empty");
+            return envelopeFrom(queryEnvelope.metadata(), createObjectBuilder().build());
+        }
 
         final JsonEnvelope jsonEnvelope = envelopeFrom(
                 metadataFrom(queryEnvelope.metadata()).withName("stagingenforcement.query.court-rooms-outstanding-fines"),
-                envelope.payload());
+                defendantInfoPayload);
 
         final Envelope<JsonObject> outStandingFinesEnvelope = requester.requestAsAdmin(jsonEnvelope, JsonObject.class);
 
