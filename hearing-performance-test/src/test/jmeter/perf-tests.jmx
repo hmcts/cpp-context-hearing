@@ -81,6 +81,8 @@
           </elementProp>
         </collectionProp>
       </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="ViewStoreJDBCConfig">
@@ -102,7 +104,7 @@
         <stringProp name="username">${dbUserName}</stringProp>
       </JDBCDataSource>
       <hashTree/>
-      <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="EventStoreJDBCConfig">
+      <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="EventStoreJDBCConfig" enabled="true">
         <boolProp name="autocommit">true</boolProp>
         <stringProp name="checkQuery"></stringProp>
         <stringProp name="connectionAge">5000</stringProp>
@@ -121,7 +123,7 @@
         <stringProp name="username">${dbUserName}</stringProp>
       </JDBCDataSource>
       <hashTree/>
-      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group" enabled="true">
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -132,7 +134,7 @@
         </elementProp>
       </SetupThreadGroup>
       <hashTree>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockReset" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockReset">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -153,7 +155,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnit" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnit">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -191,7 +193,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnits" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnits">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -1052,6 +1054,16 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Init Custom Metrics File">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">def customMetricsFile = new File(vars.get(&quot;resultDir&quot;) + &quot;/custom-metrics.csv&quot;)
+customMetricsFile.append(&quot;timestamp,eventLogCount,publishedEventCount,notLinked,sumPositionsEventListener,sumLatestKnownPositionEventListener,sumPositionsEventIndexer,sumLatestKnownPositionEventIndexer\n&quot;)
+</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
         <TestAction guiclass="TestActionGui" testclass="TestAction" testname="Flow Control Action" enabled="true">
           <intProp name="ActionProcessor.action">1</intProp>
           <intProp name="ActionProcessor.target">0</intProp>
@@ -1187,7 +1199,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <hashTree/>
         </hashTree>
         <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-          <stringProp name="ConstantTimer.delay">1000</stringProp>
+          <stringProp name="ConstantTimer.delay">2000</stringProp>
         </ConstantTimer>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
@@ -1539,7 +1551,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <hashTree/>
         </hashTree>
         <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <boolProp name="ResultCollector.error_logging">true</boolProp>
           <objProp>
             <name>saveConfig</name>
             <value class="SampleSaveConfiguration">
@@ -1572,7 +1584,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">${resultDir}/ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict.csv</stringProp>
+          <stringProp name="filename">${resultDir}/errors.csv</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
@@ -1747,7 +1759,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             <hashTree/>
           </hashTree>
           <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-            <stringProp name="ConstantTimer.delay">1000</stringProp>
+            <stringProp name="ConstantTimer.delay">2000</stringProp>
           </ConstantTimer>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Log Hearing Event 1" enabled="true">
@@ -1921,7 +1933,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </hashTree>
         </hashTree>
         <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <boolProp name="ResultCollector.error_logging">true</boolProp>
           <objProp>
             <name>saveConfig</name>
             <value class="SampleSaveConfiguration">
@@ -1954,7 +1966,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">${resultDir}/CourtListRestriction.csv</stringProp>
+          <stringProp name="filename">${resultDir}/errors.csv</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
@@ -2072,7 +2084,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <hashTree/>
         </hashTree>
         <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-          <stringProp name="ConstantTimer.delay">1000</stringProp>
+          <stringProp name="ConstantTimer.delay">2000</stringProp>
         </ConstantTimer>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
@@ -2357,7 +2369,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <hashTree/>
         </hashTree>
         <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <boolProp name="ResultCollector.error_logging">true</boolProp>
           <objProp>
             <name>saveConfig</name>
             <value class="SampleSaveConfiguration">
@@ -2390,7 +2402,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">${resultDir}/CancelRemainingHearingDaysWhenMultidayHearingIsCracked.csv</stringProp>
+          <stringProp name="filename">${resultDir}/errors.csv</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
@@ -2504,7 +2516,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <hashTree/>
         </hashTree>
         <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-          <stringProp name="ConstantTimer.delay">1000</stringProp>
+          <stringProp name="ConstantTimer.delay">2000</stringProp>
         </ConstantTimer>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
@@ -2929,7 +2941,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <hashTree/>
         </hashTree>
         <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <boolProp name="ResultCollector.error_logging">true</boolProp>
           <objProp>
             <name>saveConfig</name>
             <value class="SampleSaveConfiguration">
@@ -2962,11 +2974,11 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">${resultDir}/ResultShouldPublishDDCHResultsOnInitialShareAndNotForAmendAndReshare.csv</stringProp>
+          <stringProp name="filename">${resultDir}/errors.csv</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Metrics Collection Thread Group" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Metrics Collection Thread Group">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -2979,7 +2991,9 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
       <hashTree>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Event Log Count">
           <stringProp name="dataSource">hearingeventstore</stringProp>
-          <stringProp name="query">select count(1) as event_log_count from event_log;</stringProp>
+          <stringProp name="query">select count(*) as event_log_count,
+  count(*) filter (where is_published is true) as published_events,
+  count(*) filter (where event_number is null) as not_linked from event_log;</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="queryTimeout"></stringProp>
@@ -2991,15 +3005,12 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </JDBCSampler>
         <hashTree>
           <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
-            <stringProp name="BeanShellAssertion.query">if (vars.get(&quot;eventLogCount&quot;) != null) {
-    vars.put(&quot;prevEventLogCount&quot;, vars.get(&quot;eventLogCount&quot;));
-}
-
-// Try to get as object first
-Object rsObj = vars.getObject(&quot;eventLogCountResultSet&quot;);
+            <stringProp name="BeanShellAssertion.query">Object rsObj = vars.getObject(&quot;eventLogCountResultSet&quot;);
 
 // default value
 vars.put(&quot;eventLogCount&quot;, &quot;0&quot;);
+vars.put(&quot;published_events&quot;, &quot;0&quot;);
+vars.put(&quot;not_linked&quot;, &quot;0&quot;);
 
 // exit early if result set object is missing
 if (rsObj == null) {
@@ -3032,6 +3043,10 @@ if (!row.containsKey(&quot;event_log_count&quot;)) {
 }
 
 vars.put(&quot;eventLogCount&quot;, row.get(&quot;event_log_count&quot;).toString());
+
+vars.put(&quot;publishedEvents&quot;, row.get(&quot;published_events&quot;).toString());
+
+vars.put(&quot;notLinked&quot;, row.get(&quot;not_linked&quot;).toString());
 </stringProp>
             <stringProp name="BeanShellAssertion.filename"></stringProp>
             <stringProp name="BeanShellAssertion.parameters"></stringProp>
@@ -3047,7 +3062,7 @@ vars.put(&quot;eventLogCount&quot;, row.get(&quot;event_log_count&quot;).toStrin
           </JSR223PostProcessor>
           <hashTree/>
         </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Published Event Count">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Published Event Count" enabled="false">
           <stringProp name="dataSource">hearingeventstore</stringProp>
           <stringProp name="query">select count(1) as published_event_count from published_event;</stringProp>
           <stringProp name="queryArguments"></stringProp>
@@ -3061,7 +3076,8 @@ vars.put(&quot;eventLogCount&quot;, row.get(&quot;event_log_count&quot;).toStrin
         </JDBCSampler>
         <hashTree>
           <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
-            <stringProp name="BeanShellAssertion.query">if (vars.get(&quot;publishedEventCount&quot;) != null) {
+            <stringProp name="BeanShellAssertion.query">
+if (vars.get(&quot;publishedEventCount&quot;) != null) {
     vars.put(&quot;prevPublishedEventCount&quot;, vars.get(&quot;publishedEventCount&quot;));
 }
 
@@ -3204,7 +3220,8 @@ if (resultSetObj != null &amp;&amp; resultSetObj instanceof List) {
 }
 
 def eventLogCount = getLongValue(&quot;eventLogCount&quot;)
-def publishedEventCount = getLongValue(&quot;publishedEventCount&quot;)
+def publishedEventCount = getLongValue(&quot;publishedEvents&quot;)
+def notLinked = getLongValue(&quot;notLinked&quot;)
 def sumPositionsEventListener = getLongValue(&quot;sumPositionsEventListener&quot;)
 def sumPositionsEventIndexer = getLongValue(&quot;sumPositionsEventIndexer&quot;)
 def sumLatestKnownPositionEventListener = getLongValue(&quot;sumLatestKnownPositionEventListener&quot;)
@@ -3223,13 +3240,16 @@ if (vars.get(&quot;lastMetricsCollectionTime&quot;) != null) {
 	}
 }
 
+def customMetricsFile = new File(vars.get(&quot;resultDir&quot;) + &quot;/custom-metrics.csv&quot;)
+customMetricsFile.append(System.currentTimeMillis() + &quot;,&quot; + eventLogCount + &quot;,&quot; + publishedEventCount + &quot;,&quot; + notLinked + &quot;,&quot; + sumPositionsEventListener + &quot;,&quot; + sumLatestKnownPositionEventListener + &quot;,&quot; + sumPositionsEventIndexer + &quot;,&quot; + sumLatestKnownPositionEventIndexer + &quot;\n&quot;)
+
 vars.put(&quot;lastMetricsCollectionTime&quot;, System.currentTimeMillis().toString())
 println(&quot;eventLogCount: &quot; + eventLogCount + &quot;, publishedEventCount: &quot; + publishedEventCount)
 println(&quot;sumPositionsEventListener: &quot; + sumPositionsEventListener + &quot;, sumLatestKnownPositionEventListener: &quot; + sumLatestKnownPositionEventListener)
 println(&quot;sumPositionsEventIndexer: &quot; + sumPositionsEventIndexer + &quot;, sumLatestKnownPositionEventIndexer: &quot; + sumLatestKnownPositionEventIndexer)</stringProp>
         </JSR223Sampler>
         <hashTree>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3237,12 +3257,12 @@ println(&quot;sumPositionsEventIndexer: &quot; + sumPositionsEventIndexer + &quo
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223PostProcessor>
           <hashTree/>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
             <stringProp name="ConstantTimer.delay">${metricsIntervalInMs}</stringProp>
           </ConstantTimer>
           <hashTree/>
         </hashTree>
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Check if the test is completed" enabled="true">
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Check if the test is completed">
           <stringProp name="IfController.condition">${__groovy((org.apache.jmeter.threads.JMeterContextService.getThreadCounts().activeThreads == 1 &amp;&amp; vars.getIteration() &gt; 1),)}</stringProp>
           <boolProp name="IfController.evaluateAll">false</boolProp>
           <boolProp name="IfController.useExpression">true</boolProp>
@@ -3255,43 +3275,6 @@ println(&quot;sumPositionsEventIndexer: &quot; + sumPositionsEventIndexer + &quo
           </TestAction>
           <hashTree/>
         </hashTree>
-        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
-          <objProp>
-            <name>saveConfig</name>
-            <value class="SampleSaveConfiguration">
-              <time>true</time>
-              <latency>true</latency>
-              <timestamp>true</timestamp>
-              <success>true</success>
-              <label>true</label>
-              <code>true</code>
-              <message>true</message>
-              <threadName>true</threadName>
-              <dataType>true</dataType>
-              <encoding>false</encoding>
-              <assertions>true</assertions>
-              <subresults>true</subresults>
-              <responseData>false</responseData>
-              <samplerData>false</samplerData>
-              <xml>false</xml>
-              <fieldNames>true</fieldNames>
-              <responseHeaders>false</responseHeaders>
-              <requestHeaders>false</requestHeaders>
-              <responseDataOnError>false</responseDataOnError>
-              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
-              <assertionsResultsToSave>0</assertionsResultsToSave>
-              <bytes>true</bytes>
-              <sentBytes>true</sentBytes>
-              <url>true</url>
-              <threadCounts>true</threadCounts>
-              <idleTime>true</idleTime>
-              <connectTime>true</connectTime>
-            </value>
-          </objProp>
-          <stringProp name="filename">${resultDir}/custom-metrics.csv</stringProp>
-        </ResultCollector>
-        <hashTree/>
       </hashTree>
     </hashTree>
   </hashTree>
