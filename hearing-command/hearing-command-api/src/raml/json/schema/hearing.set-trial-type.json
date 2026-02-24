@@ -19,8 +19,7 @@
   "oneOf": [
   {
       "required": [
-        "trialTypeId",
-        "crackedIneffectiveSubReasonId"
+        "trialTypeId"
       ]
     },
     {
