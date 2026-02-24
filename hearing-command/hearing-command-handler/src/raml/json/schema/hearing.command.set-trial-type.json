@@ -23,8 +23,7 @@
     {
       "required": [
         "hearingId",
-        "trialTypeId",
-        "crackedIneffectiveSubReasonId"
+        "trialTypeId"
       ]
     },
     {

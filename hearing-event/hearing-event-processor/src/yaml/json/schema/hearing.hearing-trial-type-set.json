@@ -27,8 +27,7 @@
     "trialTypeId",
     "code",
     "type",
-    "description",
-    "crackedIneffectiveSubReasonId"
+    "description"
   ],
   "additionalProperties": false
 }
