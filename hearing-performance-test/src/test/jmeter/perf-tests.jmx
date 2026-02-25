@@ -81,8 +81,6 @@
           </elementProp>
         </collectionProp>
       </elementProp>
-      <boolProp name="TestPlan.functional_mode">false</boolProp>
-      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="ViewStoreJDBCConfig">
@@ -123,7 +121,7 @@
         <stringProp name="username">${dbUserName}</stringProp>
       </JDBCDataSource>
       <hashTree/>
-      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group">
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group" enabled="true">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -134,7 +132,7 @@
         </elementProp>
       </SetupThreadGroup>
       <hashTree>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockReset">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockReset" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -155,7 +153,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnit">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnit" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -193,7 +191,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnits">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnits" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -1054,7 +1052,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Init Custom Metrics File">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Init Custom Metrics File" enabled="true">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -1094,7 +1092,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -1105,7 +1103,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults">
           <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
@@ -1115,7 +1113,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
           <stringProp name="HTTPSampler.implementation"></stringProp>
         </ConfigTestElement>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -1198,11 +1196,53 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-          <stringProp name="ConstantTimer.delay">2000</stringProp>
-        </ConstantTimer>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import org.apache.jmeter.protocol.jdbc.config.DataSourceElement
+
+def hearingId = vars.get(&quot;hearingId&quot;)
+def pollerTimeout = Long.parseLong(vars.get(&quot;pollerTimeout&quot;))
+def pollInterval = Long.parseLong(vars.get(&quot;pollInterval&quot;))
+def startTime = System.currentTimeMillis()
+
+log.info(&quot;Polling for hearing &quot; + hearingId + &quot; with timeout &quot; + pollerTimeout + &quot;ms and interval &quot; + pollInterval + &quot;ms&quot;)
+
+def found = false
+while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTimeout) {
+    def conn = null
+    try {
+        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;hearingviewstore&quot;)
+        def ps = conn.prepareStatement(&quot;SELECT count(*) FROM ha_hearing WHERE id = ?::uuid&quot;)
+        ps.setString(1, hearingId)
+        def rs = ps.executeQuery()
+        if (rs.next() &amp;&amp; rs.getInt(1) &gt; 0) {
+            found = true
+        }
+        rs.close()
+        ps.close()
+    } finally {
+        if (conn != null) conn.close()
+    }
+    if (!found) {
+        Thread.sleep(pollInterval)
+    }
+}
+
+def elapsed = System.currentTimeMillis() - startTime
+if (found) {
+    log.info(&quot;Hearing &quot; + hearingId + &quot; found after &quot; + elapsed + &quot;ms&quot;)
+    SampleResult.setResponseMessage(&quot;Hearing found after &quot; + elapsed + &quot;ms&quot;)
+} else {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+    log.error(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+}</stringProp>
+        </JSR223Sampler>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -1758,9 +1798,51 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             </ConstantTimer>
             <hashTree/>
           </hashTree>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-            <stringProp name="ConstantTimer.delay">2000</stringProp>
-          </ConstantTimer>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import org.apache.jmeter.protocol.jdbc.config.DataSourceElement
+
+def hearingId = vars.get("hearingId")
+def pollerTimeout = Long.parseLong(vars.get("pollerTimeout"))
+def pollInterval = Long.parseLong(vars.get("pollInterval"))
+def startTime = System.currentTimeMillis()
+
+log.info("Polling for hearing " + hearingId + " with timeout " + pollerTimeout + "ms and interval " + pollInterval + "ms")
+
+def found = false
+while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTimeout) {
+    def conn = null
+    try {
+        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection("hearingviewstore")
+        def ps = conn.prepareStatement("SELECT count(*) FROM ha_hearing WHERE id = ?::uuid")
+        ps.setString(1, hearingId)
+        def rs = ps.executeQuery()
+        if (rs.next() &amp;&amp; rs.getInt(1) &gt; 0) {
+            found = true
+        }
+        rs.close()
+        ps.close()
+    } finally {
+        if (conn != null) conn.close()
+    }
+    if (!found) {
+        Thread.sleep(pollInterval)
+    }
+}
+
+def elapsed = System.currentTimeMillis() - startTime
+if (found) {
+    log.info("Hearing " + hearingId + " found after " + elapsed + "ms")
+    SampleResult.setResponseMessage("Hearing found after " + elapsed + "ms")
+} else {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage("Hearing " + hearingId + " not found within " + pollerTimeout + "ms timeout")
+    log.error("Hearing " + hearingId + " not found within " + pollerTimeout + "ms timeout")
+}</stringProp>
+          </JSR223Sampler>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Log Hearing Event 1" enabled="true">
             <intProp name="HTTPSampler.concurrentPool">6</intProp>
@@ -2083,9 +2165,51 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </ConstantTimer>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-          <stringProp name="ConstantTimer.delay">2000</stringProp>
-        </ConstantTimer>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import org.apache.jmeter.protocol.jdbc.config.DataSourceElement
+
+def hearingId = vars.get("hearingId")
+def pollerTimeout = Long.parseLong(vars.get("pollerTimeout"))
+def pollInterval = Long.parseLong(vars.get("pollInterval"))
+def startTime = System.currentTimeMillis()
+
+log.info("Polling for hearing " + hearingId + " with timeout " + pollerTimeout + "ms and interval " + pollInterval + "ms")
+
+def found = false
+while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTimeout) {
+    def conn = null
+    try {
+        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection("hearingviewstore")
+        def ps = conn.prepareStatement("SELECT count(*) FROM ha_hearing WHERE id = ?::uuid")
+        ps.setString(1, hearingId)
+        def rs = ps.executeQuery()
+        if (rs.next() &amp;&amp; rs.getInt(1) &gt; 0) {
+            found = true
+        }
+        rs.close()
+        ps.close()
+    } finally {
+        if (conn != null) conn.close()
+    }
+    if (!found) {
+        Thread.sleep(pollInterval)
+    }
+}
+
+def elapsed = System.currentTimeMillis() - startTime
+if (found) {
+    log.info("Hearing " + hearingId + " found after " + elapsed + "ms")
+    SampleResult.setResponseMessage("Hearing found after " + elapsed + "ms")
+} else {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage("Hearing " + hearingId + " not found within " + pollerTimeout + "ms timeout")
+    log.error("Hearing " + hearingId + " not found within " + pollerTimeout + "ms timeout")
+}</stringProp>
+        </JSR223Sampler>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
@@ -2515,9 +2639,51 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-          <stringProp name="ConstantTimer.delay">2000</stringProp>
-        </ConstantTimer>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import org.apache.jmeter.protocol.jdbc.config.DataSourceElement
+
+def hearingId = vars.get("hearingId")
+def pollerTimeout = Long.parseLong(vars.get("pollerTimeout"))
+def pollInterval = Long.parseLong(vars.get("pollInterval"))
+def startTime = System.currentTimeMillis()
+
+log.info("Polling for hearing " + hearingId + " with timeout " + pollerTimeout + "ms and interval " + pollInterval + "ms")
+
+def found = false
+while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTimeout) {
+    def conn = null
+    try {
+        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection("hearingviewstore")
+        def ps = conn.prepareStatement("SELECT count(*) FROM ha_hearing WHERE id = ?::uuid")
+        ps.setString(1, hearingId)
+        def rs = ps.executeQuery()
+        if (rs.next() &amp;&amp; rs.getInt(1) &gt; 0) {
+            found = true
+        }
+        rs.close()
+        ps.close()
+    } finally {
+        if (conn != null) conn.close()
+    }
+    if (!found) {
+        Thread.sleep(pollInterval)
+    }
+}
+
+def elapsed = System.currentTimeMillis() - startTime
+if (found) {
+    log.info("Hearing " + hearingId + " found after " + elapsed + "ms")
+    SampleResult.setResponseMessage("Hearing found after " + elapsed + "ms")
+} else {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage("Hearing " + hearingId + " not found within " + pollerTimeout + "ms timeout")
+    log.error("Hearing " + hearingId + " not found within " + pollerTimeout + "ms timeout")
+}</stringProp>
+        </JSR223Sampler>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
@@ -2978,7 +3144,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Metrics Collection Thread Group">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Metrics Collection Thread Group" enabled="true">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -2989,7 +3155,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Event Log Count">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Event Log Count" enabled="true">
           <stringProp name="dataSource">hearingeventstore</stringProp>
           <stringProp name="query">select count(*) as event_log_count,
   count(*) filter (where is_published is true) as published_events,
@@ -3004,7 +3170,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="variableNames"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
             <stringProp name="BeanShellAssertion.query">Object rsObj = vars.getObject(&quot;eventLogCountResultSet&quot;);
 
 // default value
@@ -3053,7 +3219,7 @@ vars.put(&quot;notLinked&quot;, row.get(&quot;not_linked&quot;).toString());
             <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
           </BeanShellAssertion>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3075,7 +3241,7 @@ vars.put(&quot;notLinked&quot;, row.get(&quot;not_linked&quot;).toString());
           <stringProp name="variableNames"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
             <stringProp name="BeanShellAssertion.query">
 if (vars.get(&quot;publishedEventCount&quot;) != null) {
     vars.put(&quot;prevPublishedEventCount&quot;, vars.get(&quot;publishedEventCount&quot;));
@@ -3123,7 +3289,7 @@ vars.put(&quot;publishedEventCount&quot;, row.get(&quot;published_event_count&qu
             <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
           </BeanShellAssertion>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3132,7 +3298,7 @@ vars.put(&quot;publishedEventCount&quot;, row.get(&quot;published_event_count&qu
           </JSR223PostProcessor>
           <hashTree/>
         </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get stream_status sums">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get stream_status sums" enabled="true">
           <stringProp name="dataSource">hearingviewstore</stringProp>
           <stringProp name="query">select component, sum(position) as sum_position, sum(latest_known_position) as sum_latest_known_position  from stream_status
 group by component;</stringProp>
@@ -3146,7 +3312,7 @@ group by component;</stringProp>
           <stringProp name="variableNames"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
             <stringProp name="BeanShellAssertion.query">import java.util.List;
 import java.util.Map;
 
@@ -3193,7 +3359,7 @@ if (resultSetObj != null &amp;&amp; resultSetObj instanceof List) {
             <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
           </BeanShellAssertion>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3202,7 +3368,7 @@ if (resultSetObj != null &amp;&amp; resultSetObj instanceof List) {
           </JSR223PostProcessor>
           <hashTree/>
         </hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -3249,7 +3415,7 @@ println(&quot;sumPositionsEventListener: &quot; + sumPositionsEventListener + &q
 println(&quot;sumPositionsEventIndexer: &quot; + sumPositionsEventIndexer + &quot;, sumLatestKnownPositionEventIndexer: &quot; + sumLatestKnownPositionEventIndexer)</stringProp>
         </JSR223Sampler>
         <hashTree>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3257,12 +3423,12 @@ println(&quot;sumPositionsEventIndexer: &quot; + sumPositionsEventIndexer + &quo
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223PostProcessor>
           <hashTree/>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
             <stringProp name="ConstantTimer.delay">${metricsIntervalInMs}</stringProp>
           </ConstantTimer>
           <hashTree/>
         </hashTree>
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Check if the test is completed">
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Check if the test is completed" enabled="true">
           <stringProp name="IfController.condition">${__groovy((org.apache.jmeter.threads.JMeterContextService.getThreadCounts().activeThreads == 1 &amp;&amp; vars.getIteration() &gt; 1),)}</stringProp>
           <boolProp name="IfController.evaluateAll">false</boolProp>
           <boolProp name="IfController.useExpression">true</boolProp>
