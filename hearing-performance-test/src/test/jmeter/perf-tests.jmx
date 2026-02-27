@@ -81,6 +81,8 @@
           </elementProp>
         </collectionProp>
       </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="ViewStoreJDBCConfig">
@@ -132,7 +134,7 @@
         </elementProp>
       </SetupThreadGroup>
       <hashTree>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockReset" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockReset">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -145,15 +147,24 @@ try {
     
     WireMock.configureFor(wiremockHost, wiremockPort)
     WireMock.reset()
-    
-    log.info(&quot;WireMock reset completed successfully&quot;)
+
+    // Disable request journal to prevent memory exhaustion under load
+    def http = new URL(&quot;http://${wiremockHost}:${wiremockPort}/__admin/settings&quot;).openConnection()
+    http.setRequestMethod(&quot;POST&quot;)
+    http.setDoOutput(true)
+    http.setRequestProperty(&quot;Content-Type&quot;, &quot;application/json&quot;)
+    http.outputStream.write(&apos;{&quot;requestJournalDisabled&quot;: true}&apos;.getBytes())
+    http.getResponseCode()
+    http.disconnect()
+
+    log.info(&quot;WireMock reset completed and request journal disabled&quot;)
 } catch (Exception e) {
     log.warn(&quot;Failed to reset WireMock: &quot; + e.getMessage())
 }</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnit" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnit">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -162,12 +173,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    String courtCentreId = &quot;b52f805c-2821-4904-a0e0-26f7fda6dd08&quot;
+String courtCentreId = &quot;b52f805c-2821-4904-a0e0-26f7fda6dd08&quot;
     String organisationUnitUrl = &quot;/referencedata-service/query/api/rest/referencedata/organisation-units/&quot; + courtCentreId
     String mediaType = &quot;application/vnd.referencedata.query.organisation-unit.v2+json&quot;
     
@@ -191,7 +197,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnits" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnits">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -200,12 +206,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub organisationunits
+// Stub organisationunits
     String organisationUnitsUrl = &quot;/referencedata-service/query/api/rest/referencedata/organisationunits&quot;
     String organisationUnitsMediaType = &quot;application/vnd.referencedata.query.organisationunits+json&quot;
     
@@ -226,7 +227,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubEnforcementArea" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubEnforcementArea">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -235,12 +236,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    String enforcementAreaUrl = &quot;/referencedata-service/query/api/rest/referencedata/enforcement-area&quot;
+String enforcementAreaUrl = &quot;/referencedata-service/query/api/rest/referencedata/enforcement-area&quot;
     String mediaType = &quot;application/vnd.referencedata.query.enforcement-area+json&quot;
     
     // Enforcement area response matching the structure from integration tests
@@ -263,7 +259,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubLoggedInUserPermissions" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubLoggedInUserPermissions">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -272,12 +268,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // stubUsersAndGroupsGetLoggedInPermissionsWithoutCases
+// stubUsersAndGroupsGetLoggedInPermissionsWithoutCases
     String permissionsUrl = &quot;/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions&quot;
     String permissionsJson = &quot;{\&quot;groups\&quot;:[{\&quot;groupId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;groupName\&quot;:\&quot;groupName1\&quot;,\&quot;prosecutingAuthority\&quot;:\&quot;TFL\&quot;},{\&quot;groupId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;,\&quot;groupName\&quot;:\&quot;groupName2\&quot;,\&quot;prosecutingAuthority\&quot;:\&quot;TVL\&quot;}],\&quot;permissions\&quot;:[{\&quot;action\&quot;:\&quot;groupName1\&quot;,\&quot;object\&quot;:\&quot;TFL\&quot;,\&quot;source\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;target\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;},{\&quot;action\&quot;:\&quot;groupName2\&quot;,\&quot;object\&quot;:\&quot;TVL\&quot;,\&quot;source\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;target\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;}],\&quot;switchableRoles\&quot;:[{\&quot;roleId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;description\&quot;:\&quot;description1\&quot;,\&quot;label\&quot;:\&quot;label1\&quot;,\&quot;selectable\&quot;:true},{\&quot;roleId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;,\&quot;description\&quot;:\&quot;description2\&quot;,\&quot;label\&quot;:\&quot;label2\&quot;,\&quot;selectable\&quot;:false}]}&quot;
     
@@ -295,7 +286,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubUserRoles" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubUserRoles">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -304,12 +295,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Get userId from JMeter variables (defaults to the one from user defined variables)
+// Get userId from JMeter variables (defaults to the one from user defined variables)
     String userId = vars.get(&quot;userId&quot;)
     if (userId == null || userId.isEmpty()) {
         userId = &quot;7a04cabb-102a-4737-9ae1-a703dcf62cff&quot;
@@ -333,7 +319,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubUserGroups" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubUserGroups">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -342,12 +328,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Get userId from JMeter variables (defaults to the one from user defined variables)
+// Get userId from JMeter variables (defaults to the one from user defined variables)
     String userId = vars.get(&quot;userId&quot;)
     if (userId == null || userId.isEmpty()) {
         userId = &quot;7a04cabb-102a-4737-9ae1-a703dcf62cff&quot;
@@ -371,7 +352,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubSystemUserGroups" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubSystemUserGroups">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -380,12 +361,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // setupAsSystemUser
+// setupAsSystemUser
     String groupsUrl2 = &quot;/usersgroups-service/query/api/rest/usersgroups/users/46986cb7-eefa-48b3-b7e2-34431c3265e5/groups&quot;
     String groupsJson2 = &quot;{\&quot;groups\&quot;:[{\&quot;groupId\&quot;:\&quot;14986cb7-eefa-48b3-b7e2-34431c3265e5\&quot;,\&quot;groupName\&quot;:\&quot;System Users\&quot;}]}&quot;
    
@@ -403,7 +379,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPermissionForObject" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPermissionForObject">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -412,12 +388,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // stubUserGroupLoggedInUserHasPermissionForObject
+// stubUserGroupLoggedInUserHasPermissionForObject
     stubFor(get(urlMatching(&quot;/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions.*&quot;))
             .atPriority(1)
             .withHeader(&quot;Accept&quot;, containing(&quot;application/vnd.usersgroups.is-logged-in-user-has-permission-for-object+json&quot;))
@@ -434,7 +405,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPermissionForAction" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPermissionForAction">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -443,12 +414,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // stubUserGroupLoggedInUserHasPermissionForAction
+// stubUserGroupLoggedInUserHasPermissionForAction
     stubFor(get(urlMatching(&quot;/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions.*&quot;))
             .atPriority(1)
             .withHeader(&quot;Accept&quot;, containing(&quot;application/vnd.usersgroups.is-logged-in-user-has-permission-for-action+json&quot;))
@@ -465,7 +431,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPleaTypes" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPleaTypes">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -474,12 +440,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // stubPleaTypeGuiltyFlags
+// stubPleaTypeGuiltyFlags
     String pleaTypesUrl = &quot;/referencedata-service/query/api/rest/referencedata/plea-types&quot;
     String pleaTypesMediaType = &quot;application/vnd.referencedata.plea-types+json&quot;
     String pleaTypesJson = &quot;{\&quot;pleaStatusTypes\&quot;:[{\&quot;sequence\&quot;:20,\&quot;pleaTypeCode\&quot;:\&quot;G\&quot;,\&quot;pleaTypeUIFlag\&quot;:true,\&quot;pleaTypeDescription\&quot;:\&quot;Guilty\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;Yes\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;No\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;1\&quot;,\&quot;pleaValue\&quot;:\&quot;GUILTY\&quot;,\&quot;jurisdiction\&quot;:\&quot;EITHER\&quot;},{\&quot;sequence\&quot;:40,\&quot;pleaTypeCode\&quot;:\&quot;GSJP\&quot;,\&quot;pleaTypeUIFlag\&quot;:true,\&quot;pleaTypeDescription\&quot;:\&quot;Guilty Single Justice Procedure\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;Yes\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;No\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;6\&quot;,\&quot;pleaValue\&quot;:\&quot;GUILTY_SINGLE_JUSTICE_PROCEDURE\&quot;,\&quot;jurisdiction\&quot;:\&quot;MAGISTRATES\&quot;},{\&quot;sequence\&quot;:50,\&quot;pleaTypeCode\&quot;:\&quot;IG\&quot;,\&quot;pleaTypeUIFlag\&quot;:true,\&quot;pleaTypeDescription\&quot;:\&quot;Indicated plea of Guilty\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;Yes\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;No\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;1\&quot;,\&quot;pleaValue\&quot;:\&quot;INDICATED_GUILTY\&quot;,\&quot;jurisdiction\&quot;:\&quot;MAGISTRATES\&quot;},{\&quot;sequence\&quot;:60,\&quot;pleaTypeCode\&quot;:\&quot;ADB\&quot;,\&quot;pleaTypeUIFlag\&quot;:false,\&quot;pleaTypeDescription\&quot;:\&quot;Admits Breach\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;Yes\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;No\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;1\&quot;,\&quot;pleaValue\&quot;:\&quot;ADMITS_BREACH\&quot;,\&quot;jurisdiction\&quot;:\&quot;MAGISTRATES\&quot;},{\&quot;sequence\&quot;:70,\&quot;pleaTypeCode\&quot;:\&quot;NG\&quot;,\&quot;pleaTypeUIFlag\&quot;:true,\&quot;pleaTypeDescription\&quot;:\&quot;Not Guilty\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;No\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;No\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;2\&quot;,\&quot;pleaValue\&quot;:\&quot;NOT_GUILTY\&quot;,\&quot;jurisdiction\&quot;:\&quot;EITHER\&quot;},{\&quot;sequence\&quot;:80,\&quot;pleaTypeCode\&quot;:\&quot;UNFIT\&quot;,\&quot;pleaTypeUIFlag\&quot;:true,\&quot;pleaTypeDescription\&quot;:\&quot;Unfit to Plead\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;No\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;No\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;3\&quot;,\&quot;pleaValue\&quot;:\&quot;UNFIT_TO_PLEAD\&quot;,\&quot;jurisdiction\&quot;:\&quot;MAGISTRATES\&quot;},{\&quot;sequence\&quot;:130,\&quot;pleaTypeCode\&quot;:\&quot;CON\&quot;,\&quot;pleaTypeUIFlag\&quot;:false,\&quot;pleaTypeDescription\&quot;:\&quot;Consents\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;Yes\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;Yes\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;7\&quot;,\&quot;pleaValue\&quot;:\&quot;CONSENTS\&quot;,\&quot;jurisdiction\&quot;:\&quot;MAGISTRATES\&quot;}]}&quot;
@@ -498,7 +459,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubProsecutor" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubProsecutor">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -507,12 +468,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub prosecutor for any prosecutionAuthorityId
+// Stub prosecutor for any prosecutionAuthorityId
     // The prosecutor ID comes from prosecutionAuthorityId in the test data
     String prosecutorMediaType = &quot;application/vnd.referencedata.query.get-prosecutor+json&quot;
     
@@ -531,7 +487,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubLocalJusticeAreas" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubLocalJusticeAreas">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -540,12 +496,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub local justice areas
+// Stub local justice areas
     String localJusticeAreasUrl = &quot;/referencedata-service/query/api/rest/referencedata/local-justice-areas&quot;
     String localJusticeAreasMediaType = &quot;application/vnd.referencedata.query.local-justice-areas+json&quot;
     String localJusticeAreasJson = &quot;{\&quot;localJusticeAreas\&quot;:[{\&quot;nationalCourtCode\&quot;:\&quot;123\&quot;,\&quot;name\&quot;:\&quot;Test LJA\&quot;,\&quot;welshName\&quot;:\&quot;testetestetes\&quot;}]}&quot;
@@ -567,7 +518,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubNowsMetadata" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubNowsMetadata">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -577,12 +528,7 @@ import java.util.UUID
 import java.time.LocalDate
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub nows metadata
+// Stub nows metadata
     String nowsMetadataUrl = &quot;/referencedata-service/query/api/rest/referencedata/nows-metadata&quot;
     String nowsMetadataMediaType = &quot;application/vnd.referencedata.get-all-now-metadata+json&quot;
     
@@ -611,7 +557,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCourtrooms" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCourtrooms">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -620,12 +566,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub courtrooms
+// Stub courtrooms
     String courtroomsUrl = &quot;/referencedata-service/query/api/rest/referencedata/courtrooms&quot;
     String courtroomsMediaType = &quot;application/vnd.referencedata.ou-courtrooms+json&quot;
     
@@ -648,7 +589,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCrackedIneffectiveVacatedTrialTypes" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCrackedIneffectiveVacatedTrialTypes">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -657,12 +598,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub cracked-ineffective-vacated-trial-types
+// Stub cracked-ineffective-vacated-trial-types
     String trialTypesUrl = &quot;/referencedata-service/query/api/rest/referencedata/cracked-ineffective-vacated-trial-types&quot;
     String trialTypesMediaType = &quot;application/vnd.referencedata.cracked-ineffective-vacated-trial-types+json&quot;
     
@@ -683,7 +619,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubResultDefinitions" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubResultDefinitions">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -692,12 +628,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub result definitions
+// Stub result definitions
     String resultDefinitionsUrl = &quot;/referencedata-service/query/api/rest/referencedata/result-definitions&quot;
     String resultDefinitionsMediaType = &quot;application/vnd.referencedata.get-all-result-definitions+json&quot;
     
@@ -727,7 +658,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubFixedList" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubFixedList">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -736,12 +667,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub fixed list
+// Stub fixed list
     String fixedListUrl = &quot;/referencedata-service/query/api/rest/referencedata/fixed-list&quot;
     String fixedListMediaType = &quot;application/vnd.referencedata.get-all-fixed-list+json&quot;
     
@@ -765,7 +691,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubVerdictTypes" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubVerdictTypes">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -774,12 +700,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub verdict types
+// Stub verdict types
     String verdictTypesUrl = &quot;/referencedata-service/query/api/rest/referencedata/verdict-types&quot;
     String verdictTypesMediaType = &quot;application/vnd.reference-data.verdict-types+json&quot;
     
@@ -800,7 +721,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubAlcoholLevelMethods" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubAlcoholLevelMethods">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -809,12 +730,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub alcohol level methods
+// Stub alcohol level methods
     String alcoholLevelMethodsUrl = &quot;/referencedata-service/query/api/rest/referencedata/alcohol-level-methods&quot;
     String alcoholLevelMethodsMediaType = &quot;application/vnd.referencedata.alcohol-level-methods+json&quot;
     
@@ -837,7 +753,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubBailStatuses" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubBailStatuses">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -846,12 +762,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub bail statuses
+// Stub bail statuses
     String bailStatusesUrl = &quot;/referencedata-service/query/api/rest/referencedata/bail-statuses&quot;
     String bailStatusesMediaType = &quot;application/vnd.referencedata.bail-statuses+json&quot;
     
@@ -873,7 +784,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubResultDefinitionsWithCategory" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubResultDefinitionsWithCategory">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -882,12 +793,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub result definitions with category
+// Stub result definitions with category
     String resultDefinitionsWithCategoryUrl = &quot;/referencedata-service/query/api/rest/referencedata/result-definitions&quot;
     String resultDefinitionsWithCategoryMediaType = &quot;application/vnd.referencedata.query-result-definitions-with-category+json&quot;
     
@@ -912,7 +818,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubHearingTypes" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubHearingTypes">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -921,12 +827,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub hearing types
+// Stub hearing types
     String hearingTypesUrl = &quot;/referencedata-service/query/api/rest/referencedata/hearing-types&quot;
     String hearingTypesMediaType = &quot;application/vnd.referencedata.query.hearing-types+json&quot;
     
@@ -947,7 +848,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitHearingEventMappings" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitHearingEventMappings">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -956,12 +857,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub cp-xhibit-hearing-event-mappings
+// Stub cp-xhibit-hearing-event-mappings
     String xhibitHearingEventMappingsUrl = &quot;/referencedata-service/query/api/rest/referencedata/cp-xhibit-hearing-event-mappings&quot;
     String xhibitHearingEventMappingsMediaType = &quot;application/vnd.referencedata.query.cp-xhibit-hearing-event-mappings+json&quot;
     
@@ -982,7 +878,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitCourtMappings" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitCourtMappings">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -991,12 +887,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub cp-xhibit-court-mappings
+// Stub cp-xhibit-court-mappings
     String xhibitCourtMappingsUrl = &quot;/referencedata-service/query/api/rest/referencedata/cp-xhibit-court-mappings&quot;
     String xhibitCourtMappingsMediaType = &quot;application/vnd.referencedata.query.cp-xhibit-court-mappings+json&quot;
     
@@ -1017,7 +908,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitMagCourtMappings" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitMagCourtMappings">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -1026,12 +917,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub cp-xhibit-court-mappings
+// Stub cp-xhibit-court-mappings
     String xhibitCourtMappingsUrl = &quot;/referencedata-service/query/api/rest/referencedata/cp-xhibit-mags-court-mapping&quot;
     String xhibitCourtMappingsMediaType = &quot;application/vnd.referencedata.query.cp-xhibit-mags-court-mapping+json&quot;
     
@@ -1052,7 +938,30 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Init Custom Metrics File" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubSentToXhibit">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+import java.util.UUID
+
+try {
+String xhibitGatewayPathRegex = &quot;/xhibit-gateway/send-to-xhibit/.*\\.xml&quot;
+    
+    stubFor(put(urlPathMatching(xhibitGatewayPathRegex))
+            .willReturn(aResponse()
+                    .withStatus(200)
+                    .withHeader(&quot;CPPID&quot;, UUID.randomUUID().toString())))
+    
+    log.info(&quot;WireMock stub for Xhibit gateway file upload configured successfully&quot;)
+} catch (Exception e) {
+    log.warn(&quot;Failed to configure WireMock stub: &quot; + e.getMessage())
+}</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Init Custom Metrics File">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -1092,7 +1001,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict" enabled="true">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -1103,7 +1012,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults">
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
           <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
@@ -1113,7 +1022,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
           <stringProp name="HTTPSampler.implementation"></stringProp>
         </ConfigTestElement>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -1242,7 +1151,7 @@ if (found) {
 }</stringProp>
         </JSR223Sampler>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -1639,7 +1548,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults">
           <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
@@ -1649,7 +1558,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="HTTPSampler.implementation"></stringProp>
         </ConfigTestElement>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Hearing Event Definitions" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Hearing Event Definitions">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/event-definitions</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -1682,34 +1591,6 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </HeaderManager>
           <hashTree/>
         </hashTree>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubSetup" enabled="true">
-          <stringProp name="cacheKey">true</stringProp>
-          <stringProp name="filename"></stringProp>
-          <stringProp name="parameters"></stringProp>
-          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
-import static com.github.tomakehurst.wiremock.client.WireMock.*
-import java.util.UUID
-
-try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    String xhibitGatewayPathRegex = &quot;/xhibit-gateway/send-to-xhibit/.*\\.xml&quot;
-    
-    stubFor(put(urlPathMatching(xhibitGatewayPathRegex))
-            .willReturn(aResponse()
-                    .withStatus(200)
-                    .withHeader(&quot;CPPID&quot;, UUID.randomUUID().toString())))
-    
-    log.info(&quot;WireMock stub for Xhibit gateway file upload configured successfully&quot;)
-} catch (Exception e) {
-    log.warn(&quot;Failed to configure WireMock stub: &quot; + e.getMessage())
-}</stringProp>
-          <stringProp name="scriptLanguage">groovy</stringProp>
-        </JSR223PreProcessor>
-        <hashTree/>
         <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <stringProp name="LoopController.loops">3</stringProp>
         </LoopController>
@@ -1805,19 +1686,19 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script">import org.apache.jmeter.protocol.jdbc.config.DataSourceElement
 
-def hearingId = vars.get("hearingId")
-def pollerTimeout = Long.parseLong(vars.get("pollerTimeout"))
-def pollInterval = Long.parseLong(vars.get("pollInterval"))
+def hearingId = vars.get(&quot;hearingId&quot;)
+def pollerTimeout = Long.parseLong(vars.get(&quot;pollerTimeout&quot;))
+def pollInterval = Long.parseLong(vars.get(&quot;pollInterval&quot;))
 def startTime = System.currentTimeMillis()
 
-log.info("Polling for hearing " + hearingId + " with timeout " + pollerTimeout + "ms and interval " + pollInterval + "ms")
+log.info(&quot;Polling for hearing &quot; + hearingId + &quot; with timeout &quot; + pollerTimeout + &quot;ms and interval &quot; + pollInterval + &quot;ms&quot;)
 
 def found = false
 while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTimeout) {
     def conn = null
     try {
-        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection("hearingviewstore")
-        def ps = conn.prepareStatement("SELECT count(*) FROM ha_hearing WHERE id = ?::uuid")
+        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;hearingviewstore&quot;)
+        def ps = conn.prepareStatement(&quot;SELECT count(*) FROM ha_hearing WHERE id = ?::uuid&quot;)
         ps.setString(1, hearingId)
         def rs = ps.executeQuery()
         if (rs.next() &amp;&amp; rs.getInt(1) &gt; 0) {
@@ -1835,12 +1716,12 @@ while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTim
 
 def elapsed = System.currentTimeMillis() - startTime
 if (found) {
-    log.info("Hearing " + hearingId + " found after " + elapsed + "ms")
-    SampleResult.setResponseMessage("Hearing found after " + elapsed + "ms")
+    log.info(&quot;Hearing &quot; + hearingId + &quot; found after &quot; + elapsed + &quot;ms&quot;)
+    SampleResult.setResponseMessage(&quot;Hearing found after &quot; + elapsed + &quot;ms&quot;)
 } else {
     SampleResult.setSuccessful(false)
-    SampleResult.setResponseMessage("Hearing " + hearingId + " not found within " + pollerTimeout + "ms timeout")
-    log.error("Hearing " + hearingId + " not found within " + pollerTimeout + "ms timeout")
+    SampleResult.setResponseMessage(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+    log.error(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
 }</stringProp>
           </JSR223Sampler>
           <hashTree/>
@@ -2172,19 +2053,19 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="script">import org.apache.jmeter.protocol.jdbc.config.DataSourceElement
 
-def hearingId = vars.get("hearingId")
-def pollerTimeout = Long.parseLong(vars.get("pollerTimeout"))
-def pollInterval = Long.parseLong(vars.get("pollInterval"))
+def hearingId = vars.get(&quot;hearingId&quot;)
+def pollerTimeout = Long.parseLong(vars.get(&quot;pollerTimeout&quot;))
+def pollInterval = Long.parseLong(vars.get(&quot;pollInterval&quot;))
 def startTime = System.currentTimeMillis()
 
-log.info("Polling for hearing " + hearingId + " with timeout " + pollerTimeout + "ms and interval " + pollInterval + "ms")
+log.info(&quot;Polling for hearing &quot; + hearingId + &quot; with timeout &quot; + pollerTimeout + &quot;ms and interval &quot; + pollInterval + &quot;ms&quot;)
 
 def found = false
 while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTimeout) {
     def conn = null
     try {
-        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection("hearingviewstore")
-        def ps = conn.prepareStatement("SELECT count(*) FROM ha_hearing WHERE id = ?::uuid")
+        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;hearingviewstore&quot;)
+        def ps = conn.prepareStatement(&quot;SELECT count(*) FROM ha_hearing WHERE id = ?::uuid&quot;)
         ps.setString(1, hearingId)
         def rs = ps.executeQuery()
         if (rs.next() &amp;&amp; rs.getInt(1) &gt; 0) {
@@ -2202,12 +2083,12 @@ while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTim
 
 def elapsed = System.currentTimeMillis() - startTime
 if (found) {
-    log.info("Hearing " + hearingId + " found after " + elapsed + "ms")
-    SampleResult.setResponseMessage("Hearing found after " + elapsed + "ms")
+    log.info(&quot;Hearing &quot; + hearingId + &quot; found after &quot; + elapsed + &quot;ms&quot;)
+    SampleResult.setResponseMessage(&quot;Hearing found after &quot; + elapsed + &quot;ms&quot;)
 } else {
     SampleResult.setSuccessful(false)
-    SampleResult.setResponseMessage("Hearing " + hearingId + " not found within " + pollerTimeout + "ms timeout")
-    log.error("Hearing " + hearingId + " not found within " + pollerTimeout + "ms timeout")
+    SampleResult.setResponseMessage(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+    log.error(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
 }</stringProp>
         </JSR223Sampler>
         <hashTree/>
@@ -2646,19 +2527,19 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="script">import org.apache.jmeter.protocol.jdbc.config.DataSourceElement
 
-def hearingId = vars.get("hearingId")
-def pollerTimeout = Long.parseLong(vars.get("pollerTimeout"))
-def pollInterval = Long.parseLong(vars.get("pollInterval"))
+def hearingId = vars.get(&quot;hearingId&quot;)
+def pollerTimeout = Long.parseLong(vars.get(&quot;pollerTimeout&quot;))
+def pollInterval = Long.parseLong(vars.get(&quot;pollInterval&quot;))
 def startTime = System.currentTimeMillis()
 
-log.info("Polling for hearing " + hearingId + " with timeout " + pollerTimeout + "ms and interval " + pollInterval + "ms")
+log.info(&quot;Polling for hearing &quot; + hearingId + &quot; with timeout &quot; + pollerTimeout + &quot;ms and interval &quot; + pollInterval + &quot;ms&quot;)
 
 def found = false
 while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTimeout) {
     def conn = null
     try {
-        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection("hearingviewstore")
-        def ps = conn.prepareStatement("SELECT count(*) FROM ha_hearing WHERE id = ?::uuid")
+        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;hearingviewstore&quot;)
+        def ps = conn.prepareStatement(&quot;SELECT count(*) FROM ha_hearing WHERE id = ?::uuid&quot;)
         ps.setString(1, hearingId)
         def rs = ps.executeQuery()
         if (rs.next() &amp;&amp; rs.getInt(1) &gt; 0) {
@@ -2676,12 +2557,12 @@ while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTim
 
 def elapsed = System.currentTimeMillis() - startTime
 if (found) {
-    log.info("Hearing " + hearingId + " found after " + elapsed + "ms")
-    SampleResult.setResponseMessage("Hearing found after " + elapsed + "ms")
+    log.info(&quot;Hearing &quot; + hearingId + &quot; found after &quot; + elapsed + &quot;ms&quot;)
+    SampleResult.setResponseMessage(&quot;Hearing found after &quot; + elapsed + &quot;ms&quot;)
 } else {
     SampleResult.setSuccessful(false)
-    SampleResult.setResponseMessage("Hearing " + hearingId + " not found within " + pollerTimeout + "ms timeout")
-    log.error("Hearing " + hearingId + " not found within " + pollerTimeout + "ms timeout")
+    SampleResult.setResponseMessage(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+    log.error(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
 }</stringProp>
         </JSR223Sampler>
         <hashTree/>
