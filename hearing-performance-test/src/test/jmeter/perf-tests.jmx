@@ -1971,7 +1971,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CancelRemainingHearingDaysWhenMultidayHearingIsCracked" enabled="false">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CancelRemainingHearingDaysWhenMultidayHearingIsCracked">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -2186,6 +2186,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <stringProp name="ConstantTimer.delay">100</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add Prosecution Counsel">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
@@ -2244,6 +2248,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <stringProp name="ConstantTimer.delay">100</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Verdict" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
@@ -2299,6 +2307,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <stringProp name="ConstantTimer.delay">100</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set Trial Type" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
@@ -2354,6 +2366,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <stringProp name="ConstantTimer.delay">100</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Share Results">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}/share-results</stringProp>
@@ -2412,6 +2428,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <stringProp name="ConstantTimer.delay">100</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
           <boolProp name="ResultCollector.error_logging">true</boolProp>
           <objProp>
@@ -3102,7 +3122,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Event Log Count" enabled="true">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Event Log Count">
           <stringProp name="dataSource">hearingeventstore</stringProp>
           <stringProp name="query">select count(*) as event_log_count,
   count(*) filter (where is_published is true) as published_events,
@@ -3117,7 +3137,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="variableNames"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
             <stringProp name="BeanShellAssertion.query">Object rsObj = vars.getObject(&quot;eventLogCountResultSet&quot;);
 
 // default value
@@ -3166,7 +3186,7 @@ vars.put(&quot;notLinked&quot;, row.get(&quot;not_linked&quot;).toString());
             <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
           </BeanShellAssertion>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3175,7 +3195,7 @@ vars.put(&quot;notLinked&quot;, row.get(&quot;not_linked&quot;).toString());
           </JSR223PostProcessor>
           <hashTree/>
         </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get stream_status sums" enabled="true">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get stream_status sums">
           <stringProp name="dataSource">hearingviewstore</stringProp>
           <stringProp name="query">select component, sum(position) as sum_position, sum(latest_known_position) as sum_latest_known_position  from stream_status
 group by component;</stringProp>
@@ -3189,7 +3209,7 @@ group by component;</stringProp>
           <stringProp name="variableNames"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
             <stringProp name="BeanShellAssertion.query">import java.util.List;
 import java.util.Map;
 
@@ -3214,7 +3234,6 @@ if (resultSetObj != null &amp;&amp; resultSetObj instanceof List) {
             Map row = (Map) rowObj;
             String component = row.get(&quot;component&quot;) != null ? row.get(&quot;component&quot;).toString() : &quot;&quot;;
 
-            System.out.println(&quot;DEBUG component: &quot; + component);
             if (&quot;EVENT_LISTENER&quot;.equals(component)) {
                 sumPositionsEventListener = row.get(&quot;sum_position&quot;) != null ? row.get(&quot;sum_position&quot;).toString() : &quot;0&quot;;
                 sumLatestKnownPositionEventListener = row.get(&quot;sum_latest_known_position&quot;) != null ? row.get(&quot;sum_latest_known_position&quot;).toString() : &quot;0&quot;;
@@ -3236,7 +3255,7 @@ if (resultSetObj != null &amp;&amp; resultSetObj instanceof List) {
             <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
           </BeanShellAssertion>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3292,7 +3311,7 @@ println(&quot;sumPositionsEventListener: &quot; + sumPositionsEventListener + &q
 println(&quot;sumPositionsEventIndexer: &quot; + sumPositionsEventIndexer + &quot;, sumLatestKnownPositionEventIndexer: &quot; + sumLatestKnownPositionEventIndexer)</stringProp>
         </JSR223Sampler>
         <hashTree>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3300,12 +3319,12 @@ println(&quot;sumPositionsEventIndexer: &quot; + sumPositionsEventIndexer + &quo
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223PostProcessor>
           <hashTree/>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
             <stringProp name="ConstantTimer.delay">${metricsIntervalInMs}</stringProp>
           </ConstantTimer>
           <hashTree/>
         </hashTree>
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Check if the test is completed" enabled="true">
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Check if the test is completed">
           <stringProp name="IfController.condition">${__groovy((org.apache.jmeter.threads.JMeterContextService.getThreadCounts().activeThreads == 1 &amp;&amp; vars.getIteration() &gt; 1),)}</stringProp>
           <boolProp name="IfController.evaluateAll">false</boolProp>
           <boolProp name="IfController.useExpression">true</boolProp>
