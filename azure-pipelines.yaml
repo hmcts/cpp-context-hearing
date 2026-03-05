@@ -1,5 +1,4 @@
 name: CPP Context Verify & Validation
-
 # Need to update this for actual migration
 trigger:
   branches:
