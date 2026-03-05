@@ -86,6 +86,8 @@
           </elementProp>
         </collectionProp>
       </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="ViewStoreJDBCConfig">
@@ -126,7 +128,7 @@
         <stringProp name="username">${dbUserName}</stringProp>
       </JDBCDataSource>
       <hashTree/>
-      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group">
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group" enabled="true">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -137,7 +139,7 @@
         </elementProp>
       </SetupThreadGroup>
       <hashTree>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockReset">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockReset" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -157,7 +159,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnit">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnit" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -190,7 +192,7 @@ String courtCentreId = &quot;b52f805c-2821-4904-a0e0-26f7fda6dd08&quot;
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnits">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubOrganisationUnits" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -220,7 +222,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubEnforcementArea">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubEnforcementArea" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -252,7 +254,7 @@ String enforcementAreaUrl = &quot;/referencedata-service/query/api/rest/referenc
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubLoggedInUserPermissions">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubLoggedInUserPermissions" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -279,7 +281,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubUserRoles">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubUserRoles" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -312,7 +314,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubUserGroups">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubUserGroups" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -345,7 +347,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubSystemUserGroups">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubSystemUserGroups" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -372,7 +374,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPermissionForObject">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPermissionForObject" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -398,7 +400,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPermissionForAction">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPermissionForAction" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -424,7 +426,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPleaTypes">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubPleaTypes" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -452,7 +454,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubProsecutor">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubProsecutor" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -480,7 +482,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubLocalJusticeAreas">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubLocalJusticeAreas" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -511,7 +513,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubNowsMetadata">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubNowsMetadata" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -550,7 +552,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCourtrooms">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCourtrooms" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -582,7 +584,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCrackedIneffectiveVacatedTrialTypes">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCrackedIneffectiveVacatedTrialTypes" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -612,7 +614,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubResultDefinitions">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubResultDefinitions" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -651,7 +653,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubFixedList">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubFixedList" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -684,7 +686,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubVerdictTypes">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubVerdictTypes" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -714,7 +716,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubAlcoholLevelMethods">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubAlcoholLevelMethods" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -746,7 +748,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubBailStatuses">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubBailStatuses" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -777,7 +779,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubResultDefinitionsWithCategory">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubResultDefinitionsWithCategory" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -811,7 +813,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubHearingTypes">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubHearingTypes" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -841,7 +843,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitHearingEventMappings">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitHearingEventMappings" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -871,7 +873,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitCourtMappings">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitCourtMappings" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -901,7 +903,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitMagCourtMappings">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubCpXhibitMagCourtMappings" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -931,7 +933,7 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubSentToXhibit">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubSentToXhibit" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -954,7 +956,7 @@ String xhibitGatewayPathRegex = &quot;/xhibit-gateway/send-to-xhibit/.*\\.xml&qu
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Init Custom Metrics File">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Init Custom Metrics File" enabled="true">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -964,7 +966,7 @@ customMetricsFile.append(&quot;timestamp,eventLogCount,publishedEventCount,notLi
 </stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Hearing Event Definitions">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Hearing Event Definitions" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/event-definitions</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -983,7 +985,7 @@ customMetricsFile.append(&quot;timestamp,eventLogCount,publishedEventCount,notLi
           <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">CJSCPPUID</stringProp>
@@ -1027,7 +1029,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict" enabled="true">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -1038,7 +1040,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults">
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
           <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
@@ -1048,7 +1050,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
           <stringProp name="HTTPSampler.implementation"></stringProp>
         </ConfigTestElement>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -1067,7 +1069,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
           <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">CJSCPPUID</stringProp>
@@ -1080,7 +1082,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="InitiateHearingPreProcessor">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="InitiateHearingPreProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -1131,7 +1133,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created" enabled="true">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -1179,7 +1181,7 @@ if (found) {
 }</stringProp>
         </JSR223Sampler>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -1235,11 +1237,11 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add Prosecution Counsel">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add Prosecution Counsel" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -1258,7 +1260,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">CJSCPPUID</stringProp>
@@ -1271,7 +1273,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="AddProsecutionCounselPreProcessor">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="AddProsecutionCounselPreProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -1298,7 +1300,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
@@ -1358,7 +1360,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
@@ -1424,11 +1426,11 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Verdict 2">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Verdict 2" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -1484,7 +1486,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
@@ -1547,7 +1549,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
@@ -1589,7 +1591,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CourtListRestriction">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CourtListRestriction" enabled="true">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -1600,7 +1602,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults">
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
           <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
@@ -1610,7 +1612,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="HTTPSampler.implementation"></stringProp>
         </ConfigTestElement>
         <hashTree/>
-        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <stringProp name="LoopController.loops">3</stringProp>
         </LoopController>
         <hashTree>
@@ -1633,7 +1635,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
               <collectionProp name="HeaderManager.headers">
                 <elementProp name="" elementType="Header">
                   <stringProp name="Header.name">CJSCPPUID</stringProp>
@@ -1646,7 +1648,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CourtListRestrictionInitiateHearing1PreProcessor">
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CourtListRestrictionInitiateHearing1PreProcessor" enabled="true">
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="filename"></stringProp>
               <stringProp name="parameters"></stringProp>
@@ -1687,7 +1689,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
               <stringProp name="scriptLanguage">groovy</stringProp>
             </JSR223PreProcessor>
             <hashTree/>
-            <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+            <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
               <stringProp name="ConstantTimer.delay">1000</stringProp>
             </ConstantTimer>
             <hashTree/>
@@ -1758,7 +1760,7 @@ if (found) {
             <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
               <collectionProp name="HeaderManager.headers">
                 <elementProp name="" elementType="Header">
                   <stringProp name="Header.name">CJSCPPUID</stringProp>
@@ -1788,8 +1790,6 @@ if (!file.exists()) {
 def rawJson = file.text
 
 vars.put(&quot;hearingEventId&quot;, UUID.randomUUID().toString())
-vars.put(&quot;hearingId&quot;, vars.get(&quot;hearingId&quot;))
-vars.put(&quot;defenceCounselId&quot;, vars.get(&quot;defenceCounselId&quot;))
 
 def evaluatedJson = new CompoundVariable(rawJson).execute()
 
@@ -1798,7 +1798,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             </JSR223PreProcessor>
             <hashTree/>
           </hashTree>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
             <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
           </ConstantTimer>
           <hashTree/>
@@ -1834,7 +1834,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="PublishCourtList1PreProcessor">
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="PublishCourtList1PreProcessor" enabled="true">
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="filename"></stringProp>
               <stringProp name="parameters"></stringProp>
@@ -1856,7 +1856,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
               <stringProp name="scriptLanguage">groovy</stringProp>
             </JSR223PreProcessor>
             <hashTree/>
-            <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+            <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
               <stringProp name="ConstantTimer.delay">100</stringProp>
             </ConstantTimer>
             <hashTree/>
@@ -1865,7 +1865,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
           </ConstantTimer>
           <hashTree/>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Publish Court List 2">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Publish Court List 2" enabled="false">
             <intProp name="HTTPSampler.concurrentPool">6</intProp>
             <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/publish-court-list</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -1897,7 +1897,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="PublishCourtList2PreProcessor">
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="PublishCourtList2PreProcessor" enabled="true">
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="filename"></stringProp>
               <stringProp name="parameters"></stringProp>
@@ -1920,12 +1920,12 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             </JSR223PreProcessor>
             <hashTree/>
           </hashTree>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="false">
             <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
           </ConstantTimer>
           <hashTree/>
         </hashTree>
-        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer">
+        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
           <boolProp name="ResultCollector.error_logging">true</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -1963,7 +1963,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CancelRemainingHearingDaysWhenMultidayHearingIsCracked">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CancelRemainingHearingDaysWhenMultidayHearingIsCracked" enabled="true">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -1974,7 +1974,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults">
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
           <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
@@ -1984,7 +1984,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="HTTPSampler.implementation"></stringProp>
         </ConfigTestElement>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -2003,7 +2003,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">CJSCPPUID</stringProp>
@@ -2016,7 +2016,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CancelRemainingHearingDaysInitiateHearingPreProcessor">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CancelRemainingHearingDaysInitiateHearingPreProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -2071,12 +2071,12 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
             <stringProp name="ConstantTimer.delay">1000</stringProp>
           </ConstantTimer>
           <hashTree/>
         </hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created" enabled="true">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -2123,7 +2123,7 @@ if (found) {
 }</stringProp>
         </JSR223Sampler>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -2155,7 +2155,7 @@ if (found) {
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CancelRemainingHearingDaysUpdateDefendantAttendancePreProcessor">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CancelRemainingHearingDaysUpdateDefendantAttendancePreProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -2178,11 +2178,11 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add Prosecution Counsel">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add Prosecution Counsel" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -2214,7 +2214,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CancelRemainingHearingDaysAddProsecutionCounselPreProcessor">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CancelRemainingHearingDaysAddProsecutionCounselPreProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -2240,11 +2240,11 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Verdict">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Verdict" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -2299,11 +2299,11 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set Trial Type">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set Trial Type" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -2358,11 +2358,11 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Share Results">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Share Results" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}/share-results</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -2420,7 +2420,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
@@ -2486,7 +2486,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults">
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
           <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
@@ -2496,7 +2496,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="HTTPSampler.implementation"></stringProp>
         </ConfigTestElement>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -2528,7 +2528,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="ResultShouldPublishDDCHInitiateHearingPreProcessor">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="ResultShouldPublishDDCHInitiateHearingPreProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -2584,7 +2584,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created" enabled="true">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -2631,7 +2631,7 @@ if (found) {
 }</stringProp>
         </JSR223Sampler>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -2650,7 +2650,7 @@ if (found) {
           <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">CJSCPPUID</stringProp>
@@ -2663,7 +2663,7 @@ if (found) {
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="ResultShouldPublishDDCHUpdateDefendantAttendancePreProcessor">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="ResultShouldPublishDDCHUpdateDefendantAttendancePreProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -2686,7 +2686,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
@@ -2748,7 +2748,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
@@ -2807,7 +2807,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
@@ -2843,7 +2843,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="ResultShouldPublishDDCHSetTrialTypePreProcessor">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="ResultShouldPublishDDCHSetTrialTypePreProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -2866,7 +2866,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
@@ -2928,11 +2928,11 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Share Results Amend">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Share Results Amend" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}/share-results</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -2964,7 +2964,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="ResultShouldPublishDDCHShareResultsAmendPreProcessor">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="ResultShouldPublishDDCHShareResultsAmendPreProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3005,7 +3005,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
@@ -3076,11 +3076,11 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
-        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer">
+        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
           <boolProp name="ResultCollector.error_logging">true</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -3118,7 +3118,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Metrics Collection Thread Group">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Metrics Collection Thread Group" enabled="true">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -3129,7 +3129,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="WireMock: Delete all request journal">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="WireMock: Delete all request journal" enabled="true">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">8080</stringProp>
           <stringProp name="HTTPSampler.path">/__admin/requests</stringProp>
@@ -3142,7 +3142,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Event Log Count">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Event Log Count" enabled="true">
           <stringProp name="dataSource">hearingeventstore</stringProp>
           <stringProp name="query">select count(*) as event_log_count,
   count(*) filter (where is_published is true) as published_events,
@@ -3157,7 +3157,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="variableNames"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
             <stringProp name="BeanShellAssertion.query">Object rsObj = vars.getObject(&quot;eventLogCountResultSet&quot;);
 
 // default value
@@ -3206,7 +3206,7 @@ vars.put(&quot;notLinked&quot;, row.get(&quot;not_linked&quot;).toString());
             <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
           </BeanShellAssertion>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3215,7 +3215,7 @@ vars.put(&quot;notLinked&quot;, row.get(&quot;not_linked&quot;).toString());
           </JSR223PostProcessor>
           <hashTree/>
         </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get stream_status sums">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get stream_status sums" enabled="true">
           <stringProp name="dataSource">hearingviewstore</stringProp>
           <stringProp name="query">select component, sum(position) as sum_position, sum(latest_known_position) as sum_latest_known_position  from stream_status
 group by component;</stringProp>
@@ -3229,7 +3229,7 @@ group by component;</stringProp>
           <stringProp name="variableNames"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
             <stringProp name="BeanShellAssertion.query">import java.util.List;
 import java.util.Map;
 
@@ -3275,7 +3275,7 @@ if (resultSetObj != null &amp;&amp; resultSetObj instanceof List) {
             <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
           </BeanShellAssertion>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3284,7 +3284,7 @@ if (resultSetObj != null &amp;&amp; resultSetObj instanceof List) {
           </JSR223PostProcessor>
           <hashTree/>
         </hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -3331,7 +3331,7 @@ println(&quot;sumPositionsEventListener: &quot; + sumPositionsEventListener + &q
 println(&quot;sumPositionsEventIndexer: &quot; + sumPositionsEventIndexer + &quot;, sumLatestKnownPositionEventIndexer: &quot; + sumLatestKnownPositionEventIndexer)</stringProp>
         </JSR223Sampler>
         <hashTree>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3339,12 +3339,12 @@ println(&quot;sumPositionsEventIndexer: &quot; + sumPositionsEventIndexer + &quo
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223PostProcessor>
           <hashTree/>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
             <stringProp name="ConstantTimer.delay">${metricsIntervalInMs}</stringProp>
           </ConstantTimer>
           <hashTree/>
         </hashTree>
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Check if the test is completed">
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Check if the test is completed" enabled="true">
           <stringProp name="IfController.condition">${__groovy((org.apache.jmeter.threads.JMeterContextService.getThreadCounts().activeThreads == 1 &amp;&amp; vars.getIteration() &gt; 1),)}</stringProp>
           <boolProp name="IfController.evaluateAll">false</boolProp>
           <boolProp name="IfController.useExpression">true</boolProp>
