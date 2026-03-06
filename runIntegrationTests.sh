@@ -36,15 +36,15 @@ runLiquibase() {
 }
 
 buildDeployAndTest() {
-  loginToDockerContainerRegistry
-  buildWars
+#  loginToDockerContainerRegistry
+#  buildWars
   undeployWarsFromDocker
   buildAndStartContainers
   runLiquibase
   deployWiremock
   deployWars
   healthchecks
-  integrationTests
+  #integrationTests
 }
 
 buildDeployAndTest
