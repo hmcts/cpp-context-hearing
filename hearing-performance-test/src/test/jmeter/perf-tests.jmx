@@ -3092,7 +3092,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Event Log Count" enabled="true">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Event Log Count">
           <stringProp name="dataSource">hearingeventstore</stringProp>
           <stringProp name="query">select count(*) as event_log_count,
   count(*) filter (where is_published is true) as published_events,
@@ -3234,7 +3234,7 @@ if (resultSetObj != null &amp;&amp; resultSetObj instanceof List) {
           </JSR223PostProcessor>
           <hashTree/>
         </hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -3276,7 +3276,7 @@ def customMetricsFile = new File(vars.get(&quot;resultDir&quot;) + &quot;/custom
 customMetricsFile.append(System.currentTimeMillis() + &quot;,&quot; + eventLogCount + &quot;,&quot; + publishedEventCount + &quot;,&quot; + notLinked + &quot;,&quot; + sumPositionsEventListener + &quot;,&quot; + sumLatestKnownPositionEventListener + &quot;,&quot; + sumPositionsEventIndexer + &quot;,&quot; + sumLatestKnownPositionEventIndexer + &quot;\n&quot;)
 
 vars.put(&quot;lastMetricsCollectionTime&quot;, System.currentTimeMillis().toString())
-println(&quot;eventLogCount: &quot; + eventLogCount + &quot;, publishedEventCount: &quot; + publishedEventCount)
+println(&quot;eventLogCount: &quot; + eventLogCount + &quot;, publishedEventCount: &quot; + publishedEventCount + &quot;, notLinked:&quot; + notLinked)
 println(&quot;sumPositionsEventListener: &quot; + sumPositionsEventListener + &quot;, sumLatestKnownPositionEventListener: &quot; + sumLatestKnownPositionEventListener)
 println(&quot;sumPositionsEventIndexer: &quot; + sumPositionsEventIndexer + &quot;, sumLatestKnownPositionEventIndexer: &quot; + sumLatestKnownPositionEventIndexer)</stringProp>
         </JSR223Sampler>
