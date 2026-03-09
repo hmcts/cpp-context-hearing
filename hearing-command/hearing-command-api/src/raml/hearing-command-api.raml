@@ -551,22 +551,6 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
       202:
         description: Request accepted
 
-/outstanding-fines:
-  post:
-      description: |
-        ...
-        (mapping):
-            requestType: application/vnd.hearing.compute-outstanding-fines+json
-            name: hearing.compute-outstanding-fines
-        ...
-      body:
-        application/vnd.hearing.compute-outstanding-fines+json:
-            example: !include json/hearing.compute-outstanding-fines.json
-            schema: !include json/schema/hearing.compute-outstanding-fines.json
-      responses:
-            202:
-                description: OK
-
 /record-session-time:
   post:
     description: |
