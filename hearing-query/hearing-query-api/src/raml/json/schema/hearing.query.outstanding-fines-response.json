@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.query.outstanding-fines-response.json",
+  "type": "object",
+  "properties": {
+    "courtRooms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/courtRoom"
+      }
+    }
+  },
+  "additionalItems": false,
+  "required": [
+    "courtRooms"
+  ],
+  "definitions": {
+    "courtRoom": {
+      "type": "object",
+      "properties": {
+        "courtRoomName": {
+          "description": "The first name of court room.",
+          "type": "string"
+        },
+        "outstandingFines": {
+          "description": "the outstanding fines for defendants",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/outstandingFines"
+          }
+        }
+      },
+      "required": [
+        "courtRoomName",
+        "outstandingFines"
+      ],
+      "additionalProperties": false
+    },
+    "outstandingFines": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "defendantName": {
+          "type": "string"
+        },
+        "dateOfBirth": {
+          "description": "The DOB of Defendant",
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/date"
+        },
+        "accountNumber": {
+          "description": "The Account Number",
+          "type": "string"
+        },
+        "address": {
+          "description": "The Address of Defendant",
+          "type": "string"
+        },
+        "lastEnforcementAction": {
+          "description": "The Last Enforcement Action",
+          "type": "string"
+        },
+        "outstandingBalance": {
+          "description": "Balance Outstanding",
+          "$ref": "#/definitions/money"
+        },
+        "isCollectionOrderMade": {
+          "description": "Collection Order Made",
+          "type": "boolean"
+        },
+        "paymentRate": {
+          "description": "Payment Rate",
+          "type": "string"
+        },
+        "amountImposed": {
+          "description": "Amount Imposed",
+          "$ref": "#/definitions/money"
+        },
+        "amountPaid": {
+          "description": "Amount Paid",
+          "$ref": "#/definitions/money"
+        },
+        "defaultDays": {
+          "description": "Days in default",
+          "type": "integer"
+        },
+        "isConsolidated": {
+          "description": "Consolidation flag",
+          "type": "boolean"
+        },
+        "accountLocation": {
+          "description": "Account Location",
+          "type": "string"
+        },
+        "parentGuardianToPay": {
+          "description": "Parent / Guardian Flag",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "defendantName",
+        "accountNumber"
+      ]
+    },
+    "money": {
+      "type": "number",
+      "multipleOf": 0.01
+    }
+  }
+}
