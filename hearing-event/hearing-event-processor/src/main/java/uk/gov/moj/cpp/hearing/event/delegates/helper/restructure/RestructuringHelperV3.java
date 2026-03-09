@@ -74,6 +74,26 @@ public class RestructuringHelperV3 {
         return treeNodes;
     }
 
+    private List<TreeNode<ResultLine2>> updatePublishForNows(final List<TreeNode<ResultLine2>> treeNodesOrg) {
+
+        final List<TreeNode<ResultLine2>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodesOrg);
+
+        final List<TreeNode<ResultLine2>> treeNodes = treeNodesOrg.stream().collect(groupingBy(resultLine2TreeNode -> resultTextConfHelper.isOldResultDefinition(resultLine2TreeNode.getJudicialResult().getOrderedDate())))
+                .values().stream()
+                .map(this::prepareTreeNodes)
+                .flatMap(List::stream)
+                .collect(toList());
+
+        setDurationElements(treeNodes);
+        treeNodes.forEach(treeNode -> treeNode.getJudicialResult().setPublishedForNows(FALSE));
+        final List<TreeNode<ResultLine2>> publishedForNowsNodesNotInRollup = publishedForNowsNodes.stream()
+                .filter(node -> treeNodes.stream().noneMatch(tn -> tn.getId().equals(node.getId())))
+                .collect(toList());
+        removeNextHearingObject(publishedForNowsNodesNotInRollup);
+        treeNodes.addAll(publishedForNowsNodesNotInRollup);
+        return treeNodes;
+    }    
+
     private List<TreeNode<ResultLine2>> prepareTreeNodes(final List<TreeNode<ResultLine2>> treeNodes) {
         if(resultTextConfHelper.isOldResultDefinitionV2(treeNodes)){
             updateResultText(
