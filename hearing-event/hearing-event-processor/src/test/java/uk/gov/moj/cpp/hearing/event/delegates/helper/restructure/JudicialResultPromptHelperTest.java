@@ -81,22 +81,22 @@ public class JudicialResultPromptHelperTest {
     //     assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
     // }
 
-    // private JudicialResultPrompt createJudicialResultPrompt(final String s, final String s2, final String type) {
-    //     return judicialResultPrompt()
-    //             .withLabel(s)
-    //             .withValue(s2)
-    //             .withType(type)
-    //             .build();
-    // }
+    private JudicialResultPrompt createJudicialResultPrompt(final String s, final String s2, final String type) {
+        return judicialResultPrompt()
+                .withLabel(s)
+                .withValue(s2)
+                .withType(type)
+                .build();
+    }
 
-    // private JudicialResultPrompt createJudicialResultPromptwithHmiSlotReference(final String s, final String s2, final String type, String reference) {
-    //     return judicialResultPrompt()
-    //             .withLabel(s)
-    //             .withValue(s2)
-    //             .withType(type)
-    //             .withPromptReference(reference)
-    //             .build();
-    // }
+    private JudicialResultPrompt createJudicialResultPromptwithHmiSlotReference(final String s, final String s2, final String type, String reference) {
+        return judicialResultPrompt()
+                .withLabel(s)
+                .withValue(s2)
+                .withType(type)
+                .withPromptReference(reference)
+                .build();
+    }
 
     // @Test
     // public void shouldMakePrompt_resultAvailableForCourtExtractIsFalse() {
