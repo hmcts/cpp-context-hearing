@@ -1,20 +1,15 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaVerdictUtil.isGuiltyVerdict;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded.convictionDateAdded;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved.convictionDateRemoved;
 
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtOrderOffence;
-import uk.gov.justice.core.courts.IndicatedPlea;
-import uk.gov.justice.core.courts.Offence;
-import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.PleaModel;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.Verdict;
+import uk.gov.justice.core.courts.*;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
@@ -132,28 +127,33 @@ public class PleaDelegate implements Serializable {
         }
         setOriginatingHearingId(hearingId, pleaModel);
 
+        final boolean isCivil = isCivilCase();
+        final PleaModel pleaToUpdate = isCivil ? pleaModel.setAllocationDecision(null) : pleaModel;
+
+        final Plea plea = pleaToUpdate.getPlea();
         final List<Object> events = new ArrayList<>();
-        final Plea plea = pleaModel.getPlea();
         events.add(PleaUpsert.pleaUpsert()
                 .setHearingId(hearingId)
-                .setPleaModel(pleaModel));
+                .setPleaModel(pleaToUpdate));
 
-        if (nonNull(plea)) {
-            addConvictionDateEventForPlea(hearingId, guiltyPleaTypes, offenceId, prosecutionCaseId, courtApplicationId, events, plea);
-        } else if (nonNull(pleaModel.getIndicatedPlea()) ) {
-            // indicated plea logic for updating conviction dates is not changing as it is out of scope for DD-2825
-            // and will be covered under a separate CR
-            addConvictionDateEventForIndicatedPlea(hearingId, pleaModel, offenceId, prosecutionCaseId, courtApplicationId, events);
-        } else if (canRemoveConvictionDate(offenceId, courtApplicationId)){
-            events.add(
-                    convictionDateRemoved()
-                            .setCaseId(prosecutionCaseId)
-                            .setHearingId(hearingId)
-                            .setOffenceId(offenceId)
-                            .setCourtApplicationId(courtApplicationId));
+        if (!isCivil) {
+            if (nonNull(plea)) {
+                addConvictionDateEventForPlea(hearingId, guiltyPleaTypes, offenceId, prosecutionCaseId, courtApplicationId, events, plea);
+            } else if (nonNull(pleaToUpdate.getIndicatedPlea()) ) {
+                // indicated plea logic for updating conviction dates is not changing as it is out of scope for DD-2825
+                // and will be covered under a separate CR
+                addConvictionDateEventForIndicatedPlea(hearingId, pleaToUpdate, offenceId, prosecutionCaseId, courtApplicationId, events);
+            } else if (canRemoveConvictionDate(offenceId, courtApplicationId)) {
+                events.add(
+                        convictionDateRemoved()
+                                .setCaseId(prosecutionCaseId)
+                                .setHearingId(hearingId)
+                                .setOffenceId(offenceId)
+                                .setCourtApplicationId(courtApplicationId));
+            }
         }
 
-            return events.stream();
+        return events.stream();
     }
 
     private void addConvictionDateEventForIndicatedPlea(final UUID hearingId, final PleaModel pleaModel, final UUID offenceId, final UUID prosecutionCaseId, final UUID courtApplicationId, final List<Object> events) {
@@ -243,5 +243,17 @@ public class PleaDelegate implements Serializable {
 
     private void setApplicationPlea(final CourtApplication courtApplication) {
         courtApplication.setPlea(this.momento.getPleas().get(courtApplication.getId()));
+    }
+
+    private boolean isCivilCase() {
+        final Hearing hearing = momento.getHearing();
+        if (isNull(hearing)) {
+            return false;
+        }
+
+        return isNotEmpty(hearing.getProsecutionCases())
+                && hearing.getProsecutionCases().stream()
+                .filter(Objects::nonNull)
+                .anyMatch(prosecutionCase -> Boolean.TRUE.equals(prosecutionCase.getIsCivil()));
     }
 }
