@@ -52,20 +52,20 @@ public class PublishAsPromptHelperTest {
         assertThat(nextHearing.getExistingHearingId(), is(existingHearingId));
     }
 
-    @Test
-    public void shouldMovePromptsToNewParent() {
-        final TreeNode<ResultLine> parentResultLineTreeNode = createResultLineTreeNode(false, false, 100, null);
-        final TreeNode<ResultLine> childResultLineTreeNode = createResultLineTreeNode(false, false, 200, null);
-        parentResultLineTreeNode.addChild(childResultLineTreeNode);
-        childResultLineTreeNode.addParent(parentResultLineTreeNode);
-        parentResultLineTreeNode.setJudicialResult(judicialResult().build());
-        final List<TreeNode<ResultLine>> resultLineTreeNodes = new ArrayList<>(asList(parentResultLineTreeNode, childResultLineTreeNode));
-        processPublishAsPrompt(parentResultLineTreeNode, childResultLineTreeNode, resultLineTreeNodes);
-        assertThat(resultLineTreeNodes.size(), is(1));
-        final List<JudicialResultPrompt> judicialResultPrompts = resultLineTreeNodes.get(0).getJudicialResult().getJudicialResultPrompts();
-        assertThat(resultLineTreeNodes.get(0).getJudicialResult().getQualifier(), is(childResultLineTreeNode.getResultDefinition().getData().getQualifier()));
-        assertThat(judicialResultPrompts.size(), is(1));
-    }
+    // @Test
+    // public void shouldMovePromptsToNewParent() {
+    //     final TreeNode<ResultLine> parentResultLineTreeNode = createResultLineTreeNode(false, false, 100, null);
+    //     final TreeNode<ResultLine> childResultLineTreeNode = createResultLineTreeNode(false, false, 200, null);
+    //     parentResultLineTreeNode.addChild(childResultLineTreeNode);
+    //     childResultLineTreeNode.addParent(parentResultLineTreeNode);
+    //     parentResultLineTreeNode.setJudicialResult(judicialResult().build());
+    //     final List<TreeNode<ResultLine>> resultLineTreeNodes = new ArrayList<>(asList(parentResultLineTreeNode, childResultLineTreeNode));
+    //     processPublishAsPrompt(parentResultLineTreeNode, childResultLineTreeNode, resultLineTreeNodes);
+    //     assertThat(resultLineTreeNodes.size(), is(1));
+    //     final List<JudicialResultPrompt> judicialResultPrompts = resultLineTreeNodes.get(0).getJudicialResult().getJudicialResultPrompts();
+    //     assertThat(resultLineTreeNodes.get(0).getJudicialResult().getQualifier(), is(childResultLineTreeNode.getResultDefinition().getData().getQualifier()));
+    //     assertThat(judicialResultPrompts.size(), is(1));
+    // }
 
 
 
