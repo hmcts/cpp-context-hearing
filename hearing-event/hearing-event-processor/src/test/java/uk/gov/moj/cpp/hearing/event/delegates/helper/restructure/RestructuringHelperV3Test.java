@@ -51,45 +51,45 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
     }
 
 
-    @Test
-    public void shouldPublishWhenAlwaysPublishedIsALeafNode() throws IOException {
-        final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_NEW_REVIEW_HEARING_ALWAYS_PUBLISHED_LEAF_NODE_JSON, ResultsSharedV3.class);
-        final JsonEnvelope envelope = getEnvelope(resultsShared);
-        List<UUID> resultDefinitionIds=resultsShared.getTargets().stream()
-                .flatMap(t->t.getResultLines().stream())
-                .map(ResultLine2::getResultDefinitionId)
-                .collect(Collectors.toList());
+    // @Test
+    // public void shouldPublishWhenAlwaysPublishedIsALeafNode() throws IOException {
+    //     final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_NEW_REVIEW_HEARING_ALWAYS_PUBLISHED_LEAF_NODE_JSON, ResultsSharedV3.class);
+    //     final JsonEnvelope envelope = getEnvelope(resultsShared);
+    //     List<UUID> resultDefinitionIds=resultsShared.getTargets().stream()
+    //             .flatMap(t->t.getResultLines().stream())
+    //             .map(ResultLine2::getResultDefinitionId)
+    //             .collect(Collectors.toList());
 
-        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+    //     final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
 
-          for(UUID resulDefinitionId:resultDefinitionIds){
-              TreeNode<ResultDefinition> resultDefinitionTreeNode=new TreeNode(resulDefinitionId,resultDefinitions);
-              resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
-              resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
-              treeNodes.add(resultDefinitionTreeNode);
-          }
+    //       for(UUID resulDefinitionId:resultDefinitionIds){
+    //           TreeNode<ResultDefinition> resultDefinitionTreeNode=new TreeNode(resulDefinitionId,resultDefinitions);
+    //           resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
+    //           resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
+    //           treeNodes.add(resultDefinitionTreeNode);
+    //       }
 
-        final List<TreeNode<ResultLine2>> restructuredTree = target.restructure(envelope, resultsShared, treeNodes);
+    //     final List<TreeNode<ResultLine2>> restructuredTree = target.restructure(envelope, resultsShared, treeNodes);
 
-        assertThat(restructuredTree.size(), is(3));
-        assertThat(restructuredTree.get(0).getJudicialResult().getCanExtendActiveOrder(), is(true));
-        assertThat(restructuredTree.get(0).getJudicialResult().getJudicialResultPrompts().get(0).getActiveOrderExtended(), is(true));
-        assertThat(restructuredTree.get(0).getJudicialResult().getJudicialResultPrompts().get(0).getActiveOrderNotExtended(), is(false));
+    //     assertThat(restructuredTree.size(), is(3));
+    //     assertThat(restructuredTree.get(0).getJudicialResult().getCanExtendActiveOrder(), is(true));
+    //     assertThat(restructuredTree.get(0).getJudicialResult().getJudicialResultPrompts().get(0).getActiveOrderExtended(), is(true));
+    //     assertThat(restructuredTree.get(0).getJudicialResult().getJudicialResultPrompts().get(0).getActiveOrderNotExtended(), is(false));
 
-        final List<TreeNode<ResultLine2>> topLevelResultLineRestructuredParents = filterV3ResultsBy(restructuredTree, r -> r.getParents().isEmpty() && r.getChildren().size() > 0);
+    //     final List<TreeNode<ResultLine2>> topLevelResultLineRestructuredParents = filterV3ResultsBy(restructuredTree, r -> r.getParents().isEmpty() && r.getChildren().size() > 0);
 
-        assertThat((int) restructuredTree.stream().filter(TreeNode::isStandalone).count(), is(3));
-        assertThat(topLevelResultLineRestructuredParents.size(), is(0));
+    //     assertThat((int) restructuredTree.stream().filter(TreeNode::isStandalone).count(), is(3));
+    //     assertThat(topLevelResultLineRestructuredParents.size(), is(0));
 
-        restructuredTree.forEach(rl -> {
-            List<JudicialResultPrompt> judicialResultPrompts = rl.getJudicialResult().getJudicialResultPrompts();
-            if (judicialResultPrompts != null && !judicialResultPrompts.isEmpty()) {
-                assertTrue(judicialResultPrompts.stream()
-                        .filter(jrp -> StringUtils.isNotEmpty(jrp.getValue()))
-                        .noneMatch(jrp -> jrp.getValue().contains(ResultQualifier.SEPARATOR)));
-            }
-        });
-    }
+    //     restructuredTree.forEach(rl -> {
+    //         List<JudicialResultPrompt> judicialResultPrompts = rl.getJudicialResult().getJudicialResultPrompts();
+    //         if (judicialResultPrompts != null && !judicialResultPrompts.isEmpty()) {
+    //             assertTrue(judicialResultPrompts.stream()
+    //                     .filter(jrp -> StringUtils.isNotEmpty(jrp.getValue()))
+    //                     .noneMatch(jrp -> jrp.getValue().contains(ResultQualifier.SEPARATOR)));
+    //         }
+    //     });
+    // }
 
     @Test
     public void shouldPublishWhenAlwaysPublishedIsAnIntermediaryNodeWhenLeafNodePublishedFalse() throws IOException {

@@ -31,4 +31,3 @@ regexes = [
   '''(?i).*vnd\.referencedata\.query\.local.*''',
   '''(?i).*referencedata\.local.*'''
 ]
-

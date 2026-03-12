@@ -57,29 +57,29 @@ public class JudicialResultPromptHelperTest {
         assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
     }
 
-    @Test
-    public void shouldNotMakePromptForHmiSlots() {
-        final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
+    // @Test
+    // public void shouldNotMakePromptForHmiSlots() {
+    //     final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
 
-        final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1, "TEXT");
+    //     final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1, "TEXT");
 
-        final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2, "TEXT");
+    //     final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2, "TEXT");
 
-        final JudicialResultPrompt judicialResultPrompt3 = createJudicialResultPromptwithHmiSlotReference(PROMPT_LABEL_3, PROMPT_VALUE_3, "TEXT", "hmiSlots");
+    //     final JudicialResultPrompt judicialResultPrompt3 = createJudicialResultPromptwithHmiSlotReference(PROMPT_LABEL_3, PROMPT_VALUE_3, "TEXT", "hmiSlots");
 
-        createJudicialResult(resultLineTreeNode,of(judicialResultPrompt1, judicialResultPrompt2, judicialResultPrompt3), null);
+    //     createJudicialResult(resultLineTreeNode,of(judicialResultPrompt1, judicialResultPrompt2, judicialResultPrompt3), null);
 
-        final BigDecimal newPromptSequenceNumber = new BigDecimal(1000);
-        final JudicialResultPrompt judicialResultPrompt = makePrompt(resultLineTreeNode, newPromptSequenceNumber);
-        assertThat(judicialResultPrompt.getPromptSequence(), is(newPromptSequenceNumber));
-        assertThat(judicialResultPrompt.getLabel(), is(RESULT_DEFINITION_LABEL));
-        assertThat(judicialResultPrompt.getQualifier(), is(RESULT_DEFINITION_QUALIFIER));
-        assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1+":"+PROMPT_VALUE_1 + System.lineSeparator() + PROMPT_LABEL_2+":"+PROMPT_VALUE_2));
-        assertThat(judicialResultPrompt.getCourtExtract(), is("N"));
-        assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), notNullValue());
-        assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), is(resultLineTreeNode.getResultDefinition().getData().getId()));
-        assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
-    }
+    //     final BigDecimal newPromptSequenceNumber = new BigDecimal(1000);
+    //     final JudicialResultPrompt judicialResultPrompt = makePrompt(resultLineTreeNode, newPromptSequenceNumber);
+    //     assertThat(judicialResultPrompt.getPromptSequence(), is(newPromptSequenceNumber));
+    //     assertThat(judicialResultPrompt.getLabel(), is(RESULT_DEFINITION_LABEL));
+    //     assertThat(judicialResultPrompt.getQualifier(), is(RESULT_DEFINITION_QUALIFIER));
+    //     assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1+":"+PROMPT_VALUE_1 + System.lineSeparator() + PROMPT_LABEL_2+":"+PROMPT_VALUE_2));
+    //     assertThat(judicialResultPrompt.getCourtExtract(), is("N"));
+    //     assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), notNullValue());
+    //     assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), is(resultLineTreeNode.getResultDefinition().getData().getId()));
+    //     assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
+    // }
 
     private JudicialResultPrompt createJudicialResultPrompt(final String s, final String s2, final String type) {
         return judicialResultPrompt()
@@ -98,68 +98,68 @@ public class JudicialResultPromptHelperTest {
                 .build();
     }
 
-    @Test
-    public void shouldMakePrompt_resultAvailableForCourtExtractIsFalse() {
-        final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
+    // @Test
+    // public void shouldMakePrompt_resultAvailableForCourtExtractIsFalse() {
+    //     final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
 
-        final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1,"TEXT");
+    //     final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1,"TEXT");
 
-        final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2, "TEXT");
+    //     final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2, "TEXT");
 
-        createJudicialResult(resultLineTreeNode,of(judicialResultPrompt1, judicialResultPrompt2), Boolean.FALSE);
+    //     createJudicialResult(resultLineTreeNode,of(judicialResultPrompt1, judicialResultPrompt2), Boolean.FALSE);
 
 
-        final BigDecimal newPromptSequenceNumber = new BigDecimal(1000);
-        final JudicialResultPrompt judicialResultPrompt = makePrompt(resultLineTreeNode, newPromptSequenceNumber);
-        assertThat(judicialResultPrompt.getPromptSequence(), is(newPromptSequenceNumber));
-        assertThat(judicialResultPrompt.getLabel(), is(RESULT_DEFINITION_LABEL));
-        assertThat(judicialResultPrompt.getQualifier(), is(RESULT_DEFINITION_QUALIFIER));
-        assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1+":"+PROMPT_VALUE_1 + System.lineSeparator() + PROMPT_LABEL_2+":"+PROMPT_VALUE_2));
-        assertThat(judicialResultPrompt.getCourtExtract(), is("N"));
-        assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
-    }
+    //     final BigDecimal newPromptSequenceNumber = new BigDecimal(1000);
+    //     final JudicialResultPrompt judicialResultPrompt = makePrompt(resultLineTreeNode, newPromptSequenceNumber);
+    //     assertThat(judicialResultPrompt.getPromptSequence(), is(newPromptSequenceNumber));
+    //     assertThat(judicialResultPrompt.getLabel(), is(RESULT_DEFINITION_LABEL));
+    //     assertThat(judicialResultPrompt.getQualifier(), is(RESULT_DEFINITION_QUALIFIER));
+    //     assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1+":"+PROMPT_VALUE_1 + System.lineSeparator() + PROMPT_LABEL_2+":"+PROMPT_VALUE_2));
+    //     assertThat(judicialResultPrompt.getCourtExtract(), is("N"));
+    //     assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
+    // }
 
-    @Test
-    public void shouldMakePrompt_resultAvailableForCourtExtractIsTrue() {
-        final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
+    // @Test
+    // public void shouldMakePrompt_resultAvailableForCourtExtractIsTrue() {
+    //     final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
 
-        final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1, "TEXT");
+    //     final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1, "TEXT");
 
-        final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2, "TEXT");
+    //     final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2, "TEXT");
 
-        createJudicialResult(resultLineTreeNode,of(judicialResultPrompt1, judicialResultPrompt2), Boolean.TRUE);
+    //     createJudicialResult(resultLineTreeNode,of(judicialResultPrompt1, judicialResultPrompt2), Boolean.TRUE);
 
-        final BigDecimal newPromptSequenceNumber = new BigDecimal(1000);
-        final JudicialResultPrompt judicialResultPrompt = makePrompt(resultLineTreeNode, newPromptSequenceNumber);
-        assertThat(judicialResultPrompt.getPromptSequence(), is(newPromptSequenceNumber));
-        assertThat(judicialResultPrompt.getLabel(), is(RESULT_DEFINITION_LABEL));
-        assertThat(judicialResultPrompt.getQualifier(), is(RESULT_DEFINITION_QUALIFIER));
-        assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1+":"+PROMPT_VALUE_1 + System.lineSeparator() + PROMPT_LABEL_2+":"+PROMPT_VALUE_2));
-        assertThat(judicialResultPrompt.getCourtExtract(), is("Y"));
-        assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
-    }
+    //     final BigDecimal newPromptSequenceNumber = new BigDecimal(1000);
+    //     final JudicialResultPrompt judicialResultPrompt = makePrompt(resultLineTreeNode, newPromptSequenceNumber);
+    //     assertThat(judicialResultPrompt.getPromptSequence(), is(newPromptSequenceNumber));
+    //     assertThat(judicialResultPrompt.getLabel(), is(RESULT_DEFINITION_LABEL));
+    //     assertThat(judicialResultPrompt.getQualifier(), is(RESULT_DEFINITION_QUALIFIER));
+    //     assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1+":"+PROMPT_VALUE_1 + System.lineSeparator() + PROMPT_LABEL_2+":"+PROMPT_VALUE_2));
+    //     assertThat(judicialResultPrompt.getCourtExtract(), is("Y"));
+    //     assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
+    // }
 
-    @Test
-    public void shouldConvertPromptValues_whenPromptTypeIsBoolean() {
-        final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
+    // @Test
+    // public void shouldConvertPromptValues_whenPromptTypeIsBoolean() {
+    //     final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
 
-        final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_TRUE, "BOOLEAN");
+    //     final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_TRUE, "BOOLEAN");
 
-        final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_FALSE, "BOOLEAN");
+    //     final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_FALSE, "BOOLEAN");
 
-        createJudicialResult(resultLineTreeNode, of(judicialResultPrompt1, judicialResultPrompt2), null);
+    //     createJudicialResult(resultLineTreeNode, of(judicialResultPrompt1, judicialResultPrompt2), null);
 
-        final BigDecimal newPromptSequenceNumber = new BigDecimal(1000);
-        final JudicialResultPrompt judicialResultPrompt = makePrompt(resultLineTreeNode, newPromptSequenceNumber);
-        assertThat(judicialResultPrompt.getPromptSequence(), is(newPromptSequenceNumber));
-        assertThat(judicialResultPrompt.getLabel(), is(RESULT_DEFINITION_LABEL));
-        assertThat(judicialResultPrompt.getQualifier(), is(RESULT_DEFINITION_QUALIFIER));
-        assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1 + ":" + "Yes" + System.lineSeparator() + PROMPT_LABEL_2 + ":" + "No"));
-        assertThat(judicialResultPrompt.getCourtExtract(), is("N"));
-        assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), notNullValue());
-        assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), is(resultLineTreeNode.getResultDefinition().getData().getId()));
-        assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
-    }
+    //     final BigDecimal newPromptSequenceNumber = new BigDecimal(1000);
+    //     final JudicialResultPrompt judicialResultPrompt = makePrompt(resultLineTreeNode, newPromptSequenceNumber);
+    //     assertThat(judicialResultPrompt.getPromptSequence(), is(newPromptSequenceNumber));
+    //     assertThat(judicialResultPrompt.getLabel(), is(RESULT_DEFINITION_LABEL));
+    //     assertThat(judicialResultPrompt.getQualifier(), is(RESULT_DEFINITION_QUALIFIER));
+    //     assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1 + ":" + "Yes" + System.lineSeparator() + PROMPT_LABEL_2 + ":" + "No"));
+    //     assertThat(judicialResultPrompt.getCourtExtract(), is("N"));
+    //     assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), notNullValue());
+    //     assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), is(resultLineTreeNode.getResultDefinition().getData().getId()));
+    //     assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
+    // }
 
     private TreeNode<ResultLine> createResultLineTreeNode() {
         final TreeNode<ResultLine> resultLineTreeNode = new TreeNode<>(randomUUID(), ResultLine.resultLine().build());

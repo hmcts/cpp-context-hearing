@@ -209,10 +209,26 @@ public class ResultTreeBuilderV3 {
                 .withDvlaCode(resultDefinition.getDvlaCode())
                 .withLevel(resultDefinition.getLevel())
                 .withPoliceSubjectLineTitle(resultDefinition.getPoliceSubjectLineTitle())
-                .withPreserveActiveOrder(getBooleanValue(resultDefinition.getPreserveActiveOrder(), false))
-                .withCanExtendActiveOrder(getBooleanValue(resultDefinition.getCanExtendActiveOrder(), false))
-                .withCommittedToCC(getBooleanValue(resultDefinition.getCommittedToCC(), false))
-                .withSentToCC(getBooleanValue(resultDefinition.getSentToCC(), false));
+                .withPreserveActiveOrder(getBooleanValue(resultDefinition.getPreserveActiveOrder(), false));
+
+        if (Boolean.TRUE.equals(resultDefinition.getCanExtendActiveOrder()) && Boolean.TRUE.equals(resultDefinition.getSentToCC())) {
+            judicialResult.withCommittedToCC(resultDefinition.getCommittedToCC());
+        } else {
+            judicialResult.withIsDeemedServed(false);
+        }
+
+        if (Boolean.TRUE.equals(resultDefinition.getAlwaysPublished()) ) {
+            judicialResult.withSentToCC(resultDefinition.getSentToCC());
+        } else {
+            judicialResult.withSentToCC(false);
+        }
+
+        if (Boolean.TRUE.equals(resultDefinition.getCanBeSubjectOfBreach()) ) {
+            judicialResult.withCanExtendActiveOrder(resultDefinition.getCanExtendActiveOrder());
+        } else {
+            judicialResult.withSentToCC(true);
+        }
+
         if(resultTextConfHelper.isOldResultDefinition(resultLine.getOrderedDate())) {
             judicialResult.withResultText(ResultTextHelperV3.getResultText(resultDefinition, resultLine));
         }
