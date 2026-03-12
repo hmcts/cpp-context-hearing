@@ -79,8 +79,15 @@
             <stringProp name="Argument.value">${__P(jmeter.hearing.pollInterval, 100)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="waitAfterEachCommand" elementType="Argument">
+            <stringProp name="Argument.name">waitAfterEachCommand</stringProp>
+            <stringProp name="Argument.value">200</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
         </collectionProp>
       </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="ViewStoreJDBCConfig">
@@ -102,7 +109,7 @@
         <stringProp name="username">${dbUserName}</stringProp>
       </JDBCDataSource>
       <hashTree/>
-      <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="EventStoreJDBCConfig">
+      <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="EventStoreJDBCConfig" enabled="true">
         <boolProp name="autocommit">true</boolProp>
         <stringProp name="checkQuery"></stringProp>
         <stringProp name="connectionAge">5000</stringProp>
@@ -145,8 +152,7 @@ try {
     
     WireMock.configureFor(wiremockHost, wiremockPort)
     WireMock.reset()
-    
-    log.info(&quot;WireMock reset completed successfully&quot;)
+    log.info(&quot;WireMock reset completed and request journal disabled&quot;)
 } catch (Exception e) {
     log.warn(&quot;Failed to reset WireMock: &quot; + e.getMessage())
 }</stringProp>
@@ -162,12 +168,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    String courtCentreId = &quot;b52f805c-2821-4904-a0e0-26f7fda6dd08&quot;
+String courtCentreId = &quot;b52f805c-2821-4904-a0e0-26f7fda6dd08&quot;
     String organisationUnitUrl = &quot;/referencedata-service/query/api/rest/referencedata/organisation-units/&quot; + courtCentreId
     String mediaType = &quot;application/vnd.referencedata.query.organisation-unit.v2+json&quot;
     
@@ -200,12 +201,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub organisationunits
+// Stub organisationunits
     String organisationUnitsUrl = &quot;/referencedata-service/query/api/rest/referencedata/organisationunits&quot;
     String organisationUnitsMediaType = &quot;application/vnd.referencedata.query.organisationunits+json&quot;
     
@@ -235,12 +231,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    String enforcementAreaUrl = &quot;/referencedata-service/query/api/rest/referencedata/enforcement-area&quot;
+String enforcementAreaUrl = &quot;/referencedata-service/query/api/rest/referencedata/enforcement-area&quot;
     String mediaType = &quot;application/vnd.referencedata.query.enforcement-area+json&quot;
     
     // Enforcement area response matching the structure from integration tests
@@ -272,12 +263,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // stubUsersAndGroupsGetLoggedInPermissionsWithoutCases
+// stubUsersAndGroupsGetLoggedInPermissionsWithoutCases
     String permissionsUrl = &quot;/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions&quot;
     String permissionsJson = &quot;{\&quot;groups\&quot;:[{\&quot;groupId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;groupName\&quot;:\&quot;groupName1\&quot;,\&quot;prosecutingAuthority\&quot;:\&quot;TFL\&quot;},{\&quot;groupId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;,\&quot;groupName\&quot;:\&quot;groupName2\&quot;,\&quot;prosecutingAuthority\&quot;:\&quot;TVL\&quot;}],\&quot;permissions\&quot;:[{\&quot;action\&quot;:\&quot;groupName1\&quot;,\&quot;object\&quot;:\&quot;TFL\&quot;,\&quot;source\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;target\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;},{\&quot;action\&quot;:\&quot;groupName2\&quot;,\&quot;object\&quot;:\&quot;TVL\&quot;,\&quot;source\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;target\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;}],\&quot;switchableRoles\&quot;:[{\&quot;roleId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13333\&quot;,\&quot;description\&quot;:\&quot;description1\&quot;,\&quot;label\&quot;:\&quot;label1\&quot;,\&quot;selectable\&quot;:true},{\&quot;roleId\&quot;:\&quot;7e2f843e-d639-40b3-8611-8015f3a13334\&quot;,\&quot;description\&quot;:\&quot;description2\&quot;,\&quot;label\&quot;:\&quot;label2\&quot;,\&quot;selectable\&quot;:false}]}&quot;
     
@@ -304,12 +290,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Get userId from JMeter variables (defaults to the one from user defined variables)
+// Get userId from JMeter variables (defaults to the one from user defined variables)
     String userId = vars.get(&quot;userId&quot;)
     if (userId == null || userId.isEmpty()) {
         userId = &quot;7a04cabb-102a-4737-9ae1-a703dcf62cff&quot;
@@ -342,12 +323,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Get userId from JMeter variables (defaults to the one from user defined variables)
+// Get userId from JMeter variables (defaults to the one from user defined variables)
     String userId = vars.get(&quot;userId&quot;)
     if (userId == null || userId.isEmpty()) {
         userId = &quot;7a04cabb-102a-4737-9ae1-a703dcf62cff&quot;
@@ -380,12 +356,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // setupAsSystemUser
+// setupAsSystemUser
     String groupsUrl2 = &quot;/usersgroups-service/query/api/rest/usersgroups/users/46986cb7-eefa-48b3-b7e2-34431c3265e5/groups&quot;
     String groupsJson2 = &quot;{\&quot;groups\&quot;:[{\&quot;groupId\&quot;:\&quot;14986cb7-eefa-48b3-b7e2-34431c3265e5\&quot;,\&quot;groupName\&quot;:\&quot;System Users\&quot;}]}&quot;
    
@@ -412,12 +383,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // stubUserGroupLoggedInUserHasPermissionForObject
+// stubUserGroupLoggedInUserHasPermissionForObject
     stubFor(get(urlMatching(&quot;/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions.*&quot;))
             .atPriority(1)
             .withHeader(&quot;Accept&quot;, containing(&quot;application/vnd.usersgroups.is-logged-in-user-has-permission-for-object+json&quot;))
@@ -443,12 +409,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // stubUserGroupLoggedInUserHasPermissionForAction
+// stubUserGroupLoggedInUserHasPermissionForAction
     stubFor(get(urlMatching(&quot;/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions.*&quot;))
             .atPriority(1)
             .withHeader(&quot;Accept&quot;, containing(&quot;application/vnd.usersgroups.is-logged-in-user-has-permission-for-action+json&quot;))
@@ -474,12 +435,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // stubPleaTypeGuiltyFlags
+// stubPleaTypeGuiltyFlags
     String pleaTypesUrl = &quot;/referencedata-service/query/api/rest/referencedata/plea-types&quot;
     String pleaTypesMediaType = &quot;application/vnd.referencedata.plea-types+json&quot;
     String pleaTypesJson = &quot;{\&quot;pleaStatusTypes\&quot;:[{\&quot;sequence\&quot;:20,\&quot;pleaTypeCode\&quot;:\&quot;G\&quot;,\&quot;pleaTypeUIFlag\&quot;:true,\&quot;pleaTypeDescription\&quot;:\&quot;Guilty\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;Yes\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;No\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;1\&quot;,\&quot;pleaValue\&quot;:\&quot;GUILTY\&quot;,\&quot;jurisdiction\&quot;:\&quot;EITHER\&quot;},{\&quot;sequence\&quot;:40,\&quot;pleaTypeCode\&quot;:\&quot;GSJP\&quot;,\&quot;pleaTypeUIFlag\&quot;:true,\&quot;pleaTypeDescription\&quot;:\&quot;Guilty Single Justice Procedure\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;Yes\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;No\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;6\&quot;,\&quot;pleaValue\&quot;:\&quot;GUILTY_SINGLE_JUSTICE_PROCEDURE\&quot;,\&quot;jurisdiction\&quot;:\&quot;MAGISTRATES\&quot;},{\&quot;sequence\&quot;:50,\&quot;pleaTypeCode\&quot;:\&quot;IG\&quot;,\&quot;pleaTypeUIFlag\&quot;:true,\&quot;pleaTypeDescription\&quot;:\&quot;Indicated plea of Guilty\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;Yes\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;No\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;1\&quot;,\&quot;pleaValue\&quot;:\&quot;INDICATED_GUILTY\&quot;,\&quot;jurisdiction\&quot;:\&quot;MAGISTRATES\&quot;},{\&quot;sequence\&quot;:60,\&quot;pleaTypeCode\&quot;:\&quot;ADB\&quot;,\&quot;pleaTypeUIFlag\&quot;:false,\&quot;pleaTypeDescription\&quot;:\&quot;Admits Breach\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;Yes\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;No\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;1\&quot;,\&quot;pleaValue\&quot;:\&quot;ADMITS_BREACH\&quot;,\&quot;jurisdiction\&quot;:\&quot;MAGISTRATES\&quot;},{\&quot;sequence\&quot;:70,\&quot;pleaTypeCode\&quot;:\&quot;NG\&quot;,\&quot;pleaTypeUIFlag\&quot;:true,\&quot;pleaTypeDescription\&quot;:\&quot;Not Guilty\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;No\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;No\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;2\&quot;,\&quot;pleaValue\&quot;:\&quot;NOT_GUILTY\&quot;,\&quot;jurisdiction\&quot;:\&quot;EITHER\&quot;},{\&quot;sequence\&quot;:80,\&quot;pleaTypeCode\&quot;:\&quot;UNFIT\&quot;,\&quot;pleaTypeUIFlag\&quot;:true,\&quot;pleaTypeDescription\&quot;:\&quot;Unfit to Plead\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;No\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;No\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;3\&quot;,\&quot;pleaValue\&quot;:\&quot;UNFIT_TO_PLEAD\&quot;,\&quot;jurisdiction\&quot;:\&quot;MAGISTRATES\&quot;},{\&quot;sequence\&quot;:130,\&quot;pleaTypeCode\&quot;:\&quot;CON\&quot;,\&quot;pleaTypeUIFlag\&quot;:false,\&quot;pleaTypeDescription\&quot;:\&quot;Consents\&quot;,\&quot;pleaTypeGuiltyFlag\&quot;:\&quot;Yes\&quot;,\&quot;pleaTypeCivilFlag\&quot;:\&quot;Yes\&quot;,\&quot;pleaStatusCode\&quot;:\&quot;7\&quot;,\&quot;pleaValue\&quot;:\&quot;CONSENTS\&quot;,\&quot;jurisdiction\&quot;:\&quot;MAGISTRATES\&quot;}]}&quot;
@@ -507,12 +463,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub prosecutor for any prosecutionAuthorityId
+// Stub prosecutor for any prosecutionAuthorityId
     // The prosecutor ID comes from prosecutionAuthorityId in the test data
     String prosecutorMediaType = &quot;application/vnd.referencedata.query.get-prosecutor+json&quot;
     
@@ -540,12 +491,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub local justice areas
+// Stub local justice areas
     String localJusticeAreasUrl = &quot;/referencedata-service/query/api/rest/referencedata/local-justice-areas&quot;
     String localJusticeAreasMediaType = &quot;application/vnd.referencedata.query.local-justice-areas+json&quot;
     String localJusticeAreasJson = &quot;{\&quot;localJusticeAreas\&quot;:[{\&quot;nationalCourtCode\&quot;:\&quot;123\&quot;,\&quot;name\&quot;:\&quot;Test LJA\&quot;,\&quot;welshName\&quot;:\&quot;testetestetes\&quot;}]}&quot;
@@ -577,12 +523,7 @@ import java.util.UUID
 import java.time.LocalDate
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub nows metadata
+// Stub nows metadata
     String nowsMetadataUrl = &quot;/referencedata-service/query/api/rest/referencedata/nows-metadata&quot;
     String nowsMetadataMediaType = &quot;application/vnd.referencedata.get-all-now-metadata+json&quot;
     
@@ -620,12 +561,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub courtrooms
+// Stub courtrooms
     String courtroomsUrl = &quot;/referencedata-service/query/api/rest/referencedata/courtrooms&quot;
     String courtroomsMediaType = &quot;application/vnd.referencedata.ou-courtrooms+json&quot;
     
@@ -657,12 +593,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub cracked-ineffective-vacated-trial-types
+// Stub cracked-ineffective-vacated-trial-types
     String trialTypesUrl = &quot;/referencedata-service/query/api/rest/referencedata/cracked-ineffective-vacated-trial-types&quot;
     String trialTypesMediaType = &quot;application/vnd.referencedata.cracked-ineffective-vacated-trial-types+json&quot;
     
@@ -692,12 +623,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub result definitions
+// Stub result definitions
     String resultDefinitionsUrl = &quot;/referencedata-service/query/api/rest/referencedata/result-definitions&quot;
     String resultDefinitionsMediaType = &quot;application/vnd.referencedata.get-all-result-definitions+json&quot;
     
@@ -736,12 +662,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub fixed list
+// Stub fixed list
     String fixedListUrl = &quot;/referencedata-service/query/api/rest/referencedata/fixed-list&quot;
     String fixedListMediaType = &quot;application/vnd.referencedata.get-all-fixed-list+json&quot;
     
@@ -774,12 +695,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub verdict types
+// Stub verdict types
     String verdictTypesUrl = &quot;/referencedata-service/query/api/rest/referencedata/verdict-types&quot;
     String verdictTypesMediaType = &quot;application/vnd.reference-data.verdict-types+json&quot;
     
@@ -809,12 +725,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub alcohol level methods
+// Stub alcohol level methods
     String alcoholLevelMethodsUrl = &quot;/referencedata-service/query/api/rest/referencedata/alcohol-level-methods&quot;
     String alcoholLevelMethodsMediaType = &quot;application/vnd.referencedata.alcohol-level-methods+json&quot;
     
@@ -846,12 +757,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub bail statuses
+// Stub bail statuses
     String bailStatusesUrl = &quot;/referencedata-service/query/api/rest/referencedata/bail-statuses&quot;
     String bailStatusesMediaType = &quot;application/vnd.referencedata.bail-statuses+json&quot;
     
@@ -882,12 +788,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub result definitions with category
+// Stub result definitions with category
     String resultDefinitionsWithCategoryUrl = &quot;/referencedata-service/query/api/rest/referencedata/result-definitions&quot;
     String resultDefinitionsWithCategoryMediaType = &quot;application/vnd.referencedata.query-result-definitions-with-category+json&quot;
     
@@ -921,12 +822,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub hearing types
+// Stub hearing types
     String hearingTypesUrl = &quot;/referencedata-service/query/api/rest/referencedata/hearing-types&quot;
     String hearingTypesMediaType = &quot;application/vnd.referencedata.query.hearing-types+json&quot;
     
@@ -956,12 +852,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub cp-xhibit-hearing-event-mappings
+// Stub cp-xhibit-hearing-event-mappings
     String xhibitHearingEventMappingsUrl = &quot;/referencedata-service/query/api/rest/referencedata/cp-xhibit-hearing-event-mappings&quot;
     String xhibitHearingEventMappingsMediaType = &quot;application/vnd.referencedata.query.cp-xhibit-hearing-event-mappings+json&quot;
     
@@ -991,12 +882,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub cp-xhibit-court-mappings
+// Stub cp-xhibit-court-mappings
     String xhibitCourtMappingsUrl = &quot;/referencedata-service/query/api/rest/referencedata/cp-xhibit-court-mappings&quot;
     String xhibitCourtMappingsMediaType = &quot;application/vnd.referencedata.query.cp-xhibit-court-mappings+json&quot;
     
@@ -1026,12 +912,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import java.util.UUID
 
 try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    // Stub cp-xhibit-court-mappings
+// Stub cp-xhibit-court-mappings
     String xhibitCourtMappingsUrl = &quot;/referencedata-service/query/api/rest/referencedata/cp-xhibit-mags-court-mapping&quot;
     String xhibitCourtMappingsMediaType = &quot;application/vnd.referencedata.query.cp-xhibit-mags-court-mapping+json&quot;
     
@@ -1052,6 +933,75 @@ try {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubSentToXhibit" enabled="true">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+import java.util.UUID
+
+try {
+String xhibitGatewayPathRegex = &quot;/xhibit-gateway/send-to-xhibit/.*\\.xml&quot;
+    
+    stubFor(put(urlPathMatching(xhibitGatewayPathRegex))
+            .willReturn(aResponse()
+                    .withStatus(200)
+                    .withHeader(&quot;CPPID&quot;, UUID.randomUUID().toString())))
+    
+    log.info(&quot;WireMock stub for Xhibit gateway file upload configured successfully&quot;)
+} catch (Exception e) {
+    log.warn(&quot;Failed to configure WireMock stub: &quot; + e.getMessage())
+}</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Init Custom Metrics File" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">def customMetricsFile = new File(vars.get(&quot;resultDir&quot;) + &quot;/custom-metrics.csv&quot;)
+customMetricsFile.append(&quot;timestamp,eventLogCount,publishedEventCount,notLinked,sumPositionsEventListener,sumLatestKnownPositionEventListener,sumPositionsEventIndexer,sumLatestKnownPositionEventIndexer\n&quot;)
+</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Hearing Event Definitions" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
+          <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/event-definitions</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;id&quot;:&quot;96ff13bf-0aac-43ba-877d-c7da67b1e30d&quot;,&quot;eventDefinitions&quot;:[{&quot;id&quot;:&quot;67b75d91-085f-4c75-b941-09c80bee6df6&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Hearing ended&quot;,&quot;actionSequence&quot;:882929325,&quot;groupLabel&quot;:&quot;wKkH7am4zz&quot;,&quot;groupSequence&quot;:2095509888,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;Hearing ended&quot;},{&quot;id&quot;:&quot;b71e7d2a-d3b3-4a55-a393-6d451767fc05&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Start Hearing&quot;,&quot;actionSequence&quot;:936967479,&quot;groupLabel&quot;:&quot;4428rcyPcN&quot;,&quot;groupSequence&quot;:1603353170,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;YOxCjRZgyK&quot;},{&quot;id&quot;:&quot;699a2d2e-56f3-4952-90ab-e22870b2196d&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Identify defendant&quot;,&quot;actionSequence&quot;:1359865467,&quot;groupLabel&quot;:&quot;y6x4DdKgv9&quot;,&quot;groupSequence&quot;:685479997,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;6Zs6zndse1&quot;},{&quot;id&quot;:&quot;a66576ab-b966-4480-988f-3f17f019897e&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Take Plea&quot;,&quot;actionSequence&quot;:1593556401,&quot;groupLabel&quot;:&quot;zLiKB6nUV3&quot;,&quot;groupSequence&quot;:606936825,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;ZrWfdKkZkn&quot;},{&quot;id&quot;:&quot;be59557a-d89d-47d3-a6f1-a4db67986616&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Prosecution Opening&quot;,&quot;actionSequence&quot;:1559526053,&quot;groupLabel&quot;:&quot;hWAX5qq2Aw&quot;,&quot;groupSequence&quot;:970603096,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;IQ5Mkrdk13&quot;},{&quot;id&quot;:&quot;9d3eaaef-1f67-47ab-8b8f-18877110fa34&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;&lt;counsel.name&gt;&quot;,&quot;actionSequence&quot;:2072444200,&quot;groupLabel&quot;:&quot;mm4jEfVemq&quot;,&quot;groupSequence&quot;:54208119,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;R8g9vE0tVD&quot;},{&quot;id&quot;:&quot;b21b4aea-e372-4448-99cc-577b9e8c6ab4&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Sentencing&quot;,&quot;actionSequence&quot;:325334225,&quot;groupLabel&quot;:&quot;trk2y8UF4X&quot;,&quot;groupSequence&quot;:1904954095,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;M7O5kYljzS&quot;},{&quot;id&quot;:&quot;0df93f18-0a21-40f5-9fb3-da4749cd70fe&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;End Hearing&quot;,&quot;actionSequence&quot;:229112933,&quot;groupLabel&quot;:&quot;LWtWrTepQf&quot;,&quot;groupSequence&quot;:1106999235,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;n9qjPfrIQQ&quot;},{&quot;id&quot;:&quot;160ecb51-29ee-4954-bbbf-daab18a24fbb&quot;,&quot;caseAttribute&quot;:&quot;PAUSE_RESUME&quot;,&quot;actionLabel&quot;:&quot;Pause&quot;,&quot;actionSequence&quot;:809187934,&quot;groupLabel&quot;:&quot;W8267kGIM8&quot;,&quot;groupSequence&quot;:837036653,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;tD4x6oPzpO&quot;},{&quot;id&quot;:&quot;64476e43-2138-46d5-b58b-848582cf9b07&quot;,&quot;caseAttribute&quot;:&quot;PAUSE_RESUME&quot;,&quot;actionLabel&quot;:&quot;Resume&quot;,&quot;actionSequence&quot;:1777760034,&quot;groupLabel&quot;:&quot;DfxVnClQRk&quot;,&quot;groupSequence&quot;:257720856,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;Ek3fJ90eXr&quot;},{&quot;id&quot;:&quot;50fb4a64-943d-4a2a-afe6-4b5c9e99e043&quot;,&quot;caseAttribute&quot;:&quot;APPEAL&quot;,&quot;actionLabel&quot;:&quot;Appellant opens&quot;,&quot;actionSequence&quot;:1165860257,&quot;groupLabel&quot;:&quot;UJko9uPUfy&quot;,&quot;groupSequence&quot;:1583647649,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;oVVmNi7sgT&quot;},{&quot;id&quot;:&quot;e9060336-4821-4f46-969c-e08b33b48071&quot;,&quot;caseAttribute&quot;:&quot;OPEN_CASE&quot;,&quot;actionLabel&quot;:&quot;Open case prosecution&quot;,&quot;actionSequence&quot;:157682722,&quot;groupLabel&quot;:&quot;dYRCaSpAB0&quot;,&quot;groupSequence&quot;:2111600802,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;fsGrkq8Kko&quot;},{&quot;id&quot;:&quot;a3a9fe0c-a9a7-4e17-b0cd-42606722bbb0&quot;,&quot;caseAttribute&quot;:&quot;OPEN_CASE&quot;,&quot;actionLabel&quot;:&quot;Defence counsel.name opens case regarding defendant defendant.name&quot;,&quot;actionSequence&quot;:573161802,&quot;groupLabel&quot;:&quot;L2SMODumuq&quot;,&quot;groupSequence&quot;:270979194,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;UCMuuYkd3I&quot;},{&quot;id&quot;:&quot;cc00cca8-39ba-431c-b08f-8c6f9be185d1&quot;,&quot;caseAttribute&quot;:&quot;CLOSE_CASE&quot;,&quot;actionLabel&quot;:&quot;Defence counsel.name closes case regarding defendant defendant.name&quot;,&quot;actionSequence&quot;:788845658,&quot;groupLabel&quot;:&quot;v15wqkRiYq&quot;,&quot;groupSequence&quot;:262053570,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;yUPzPboGjk&quot;},{&quot;id&quot;:&quot;b335327a-7f58-4f26-a2ef-7e07134ba60b&quot;,&quot;caseAttribute&quot;:&quot;DISCUSSION&quot;,&quot;actionLabel&quot;:&quot;Point of law discussion prosecution&quot;,&quot;actionSequence&quot;:437014501,&quot;groupLabel&quot;:&quot;vizhheLRn2&quot;,&quot;groupSequence&quot;:56047713,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;xf7NtBpO3B&quot;},{&quot;id&quot;:&quot;c3edf650-13c4-4ecb-9f85-6100ad8e4ffc&quot;,&quot;caseAttribute&quot;:&quot;DISCUSSION&quot;,&quot;actionLabel&quot;:&quot;Arraign defendant.name&quot;,&quot;actionSequence&quot;:1582758733,&quot;groupLabel&quot;:&quot;aaJa2BpROG&quot;,&quot;groupSequence&quot;:1843187454,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;rpEKxA3iAu&quot;}]}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.hearing.create-hearing-event-definitions+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+        </hashTree>
         <TestAction guiclass="TestActionGui" testclass="TestAction" testname="Flow Control Action" enabled="true">
           <intProp name="ActionProcessor.action">1</intProp>
           <intProp name="ActionProcessor.target">0</intProp>
@@ -1082,7 +1032,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -1186,9 +1136,55 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-          <stringProp name="ConstantTimer.delay">1000</stringProp>
-        </ConstantTimer>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import org.apache.jmeter.protocol.jdbc.config.DataSourceElement
+
+def hearingId = vars.get(&quot;hearingId&quot;)
+def pollerTimeout = Long.parseLong(vars.get(&quot;pollerTimeout&quot;))
+def pollInterval = Long.parseLong(vars.get(&quot;pollInterval&quot;))
+def startTime = System.currentTimeMillis()
+
+log.info(&quot;Polling for hearing &quot; + hearingId + &quot; with timeout &quot; + pollerTimeout + &quot;ms and interval &quot; + pollInterval + &quot;ms&quot;)
+println(&quot;Polling for hearing &quot; + hearingId + &quot; with timeout &quot; + pollerTimeout + &quot;ms and interval &quot; + pollInterval + &quot;ms&quot;)
+def found = false
+ def conn = null
+    try {
+        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;hearingviewstore&quot;)
+	   while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTimeout) {
+	        def ps = conn.prepareStatement(&quot;SELECT count(*) FROM ha_hearing WHERE id = ?::uuid&quot;)
+	        ps.setString(1, hearingId)
+	        def rs = ps.executeQuery()
+	        if (rs.next() &amp;&amp; rs.getInt(1) &gt; 0) {
+	            found = true
+	        }
+	        rs.close()
+	        ps.close()
+	   
+  		    if (!found) {
+		        Thread.sleep(pollInterval)
+		    }
+	    }
+     } finally {
+        if (conn != null) conn.close()
+    }
+
+
+def elapsed = System.currentTimeMillis() - startTime
+if (found) {
+    log.info(&quot;Hearing &quot; + hearingId + &quot; found after &quot; + elapsed + &quot;ms&quot;)
+    println(&quot;Hearing &quot; + hearingId + &quot; found after &quot; + elapsed + &quot;ms&quot;)
+    SampleResult.setResponseMessage(&quot;Hearing found after &quot; + elapsed + &quot;ms&quot;)
+} else {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+    log.error(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+    println(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+}</stringProp>
+        </JSR223Sampler>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
@@ -1246,6 +1242,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add Prosecution Counsel" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
@@ -1305,6 +1305,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Verdict" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
@@ -1361,6 +1365,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Shared Results" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}/${hearingDay}</stringProp>
@@ -1423,6 +1431,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Verdict 2" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
@@ -1479,6 +1491,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Shared Results 2" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}/${hearingDay}</stringProp>
@@ -1538,8 +1554,12 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <boolProp name="ResultCollector.error_logging">true</boolProp>
           <objProp>
             <name>saveConfig</name>
             <value class="SampleSaveConfiguration">
@@ -1572,393 +1592,11 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">${resultDir}/ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict.csv</stringProp>
+          <stringProp name="filename">${resultDir}/errors.csv</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CourtListRestriction" enabled="true">
-        <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
-        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
-        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
-        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
-          <stringProp name="LoopController.loops">${loopCount}</stringProp>
-          <boolProp name="LoopController.continue_forever">false</boolProp>
-        </elementProp>
-      </ThreadGroup>
-      <hashTree>
-        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
-          <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
-          <stringProp name="HTTPSampler.port">${port}</stringProp>
-          <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.implementation"></stringProp>
-        </ConfigTestElement>
-        <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Hearing Event Definitions" enabled="true">
-          <intProp name="HTTPSampler.concurrentPool">6</intProp>
-          <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/event-definitions</stringProp>
-          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
-          <stringProp name="HTTPSampler.method">POST</stringProp>
-          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-            <collectionProp name="Arguments.arguments">
-              <elementProp name="" elementType="HTTPArgument">
-                <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&quot;id&quot;:&quot;96ff13bf-0aac-43ba-877d-c7da67b1e30d&quot;,&quot;eventDefinitions&quot;:[{&quot;id&quot;:&quot;67b75d91-085f-4c75-b941-09c80bee6df6&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Hearing ended&quot;,&quot;actionSequence&quot;:882929325,&quot;groupLabel&quot;:&quot;wKkH7am4zz&quot;,&quot;groupSequence&quot;:2095509888,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;Hearing ended&quot;},{&quot;id&quot;:&quot;b71e7d2a-d3b3-4a55-a393-6d451767fc05&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Start Hearing&quot;,&quot;actionSequence&quot;:936967479,&quot;groupLabel&quot;:&quot;4428rcyPcN&quot;,&quot;groupSequence&quot;:1603353170,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;YOxCjRZgyK&quot;},{&quot;id&quot;:&quot;699a2d2e-56f3-4952-90ab-e22870b2196d&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Identify defendant&quot;,&quot;actionSequence&quot;:1359865467,&quot;groupLabel&quot;:&quot;y6x4DdKgv9&quot;,&quot;groupSequence&quot;:685479997,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;6Zs6zndse1&quot;},{&quot;id&quot;:&quot;a66576ab-b966-4480-988f-3f17f019897e&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Take Plea&quot;,&quot;actionSequence&quot;:1593556401,&quot;groupLabel&quot;:&quot;zLiKB6nUV3&quot;,&quot;groupSequence&quot;:606936825,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;ZrWfdKkZkn&quot;},{&quot;id&quot;:&quot;be59557a-d89d-47d3-a6f1-a4db67986616&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Prosecution Opening&quot;,&quot;actionSequence&quot;:1559526053,&quot;groupLabel&quot;:&quot;hWAX5qq2Aw&quot;,&quot;groupSequence&quot;:970603096,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;IQ5Mkrdk13&quot;},{&quot;id&quot;:&quot;9d3eaaef-1f67-47ab-8b8f-18877110fa34&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;&lt;counsel.name&gt;&quot;,&quot;actionSequence&quot;:2072444200,&quot;groupLabel&quot;:&quot;mm4jEfVemq&quot;,&quot;groupSequence&quot;:54208119,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;R8g9vE0tVD&quot;},{&quot;id&quot;:&quot;b21b4aea-e372-4448-99cc-577b9e8c6ab4&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;Sentencing&quot;,&quot;actionSequence&quot;:325334225,&quot;groupLabel&quot;:&quot;trk2y8UF4X&quot;,&quot;groupSequence&quot;:1904954095,&quot;alterable&quot;:true,&quot;recordedLabel&quot;:&quot;M7O5kYljzS&quot;},{&quot;id&quot;:&quot;0df93f18-0a21-40f5-9fb3-da4749cd70fe&quot;,&quot;caseAttribute&quot;:&quot;SENTENCING&quot;,&quot;actionLabel&quot;:&quot;End Hearing&quot;,&quot;actionSequence&quot;:229112933,&quot;groupLabel&quot;:&quot;LWtWrTepQf&quot;,&quot;groupSequence&quot;:1106999235,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;n9qjPfrIQQ&quot;},{&quot;id&quot;:&quot;160ecb51-29ee-4954-bbbf-daab18a24fbb&quot;,&quot;caseAttribute&quot;:&quot;PAUSE_RESUME&quot;,&quot;actionLabel&quot;:&quot;Pause&quot;,&quot;actionSequence&quot;:809187934,&quot;groupLabel&quot;:&quot;W8267kGIM8&quot;,&quot;groupSequence&quot;:837036653,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;tD4x6oPzpO&quot;},{&quot;id&quot;:&quot;64476e43-2138-46d5-b58b-848582cf9b07&quot;,&quot;caseAttribute&quot;:&quot;PAUSE_RESUME&quot;,&quot;actionLabel&quot;:&quot;Resume&quot;,&quot;actionSequence&quot;:1777760034,&quot;groupLabel&quot;:&quot;DfxVnClQRk&quot;,&quot;groupSequence&quot;:257720856,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;Ek3fJ90eXr&quot;},{&quot;id&quot;:&quot;50fb4a64-943d-4a2a-afe6-4b5c9e99e043&quot;,&quot;caseAttribute&quot;:&quot;APPEAL&quot;,&quot;actionLabel&quot;:&quot;Appellant opens&quot;,&quot;actionSequence&quot;:1165860257,&quot;groupLabel&quot;:&quot;UJko9uPUfy&quot;,&quot;groupSequence&quot;:1583647649,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;oVVmNi7sgT&quot;},{&quot;id&quot;:&quot;e9060336-4821-4f46-969c-e08b33b48071&quot;,&quot;caseAttribute&quot;:&quot;OPEN_CASE&quot;,&quot;actionLabel&quot;:&quot;Open case prosecution&quot;,&quot;actionSequence&quot;:157682722,&quot;groupLabel&quot;:&quot;dYRCaSpAB0&quot;,&quot;groupSequence&quot;:2111600802,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;fsGrkq8Kko&quot;},{&quot;id&quot;:&quot;a3a9fe0c-a9a7-4e17-b0cd-42606722bbb0&quot;,&quot;caseAttribute&quot;:&quot;OPEN_CASE&quot;,&quot;actionLabel&quot;:&quot;Defence counsel.name opens case regarding defendant defendant.name&quot;,&quot;actionSequence&quot;:573161802,&quot;groupLabel&quot;:&quot;L2SMODumuq&quot;,&quot;groupSequence&quot;:270979194,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;UCMuuYkd3I&quot;},{&quot;id&quot;:&quot;cc00cca8-39ba-431c-b08f-8c6f9be185d1&quot;,&quot;caseAttribute&quot;:&quot;CLOSE_CASE&quot;,&quot;actionLabel&quot;:&quot;Defence counsel.name closes case regarding defendant defendant.name&quot;,&quot;actionSequence&quot;:788845658,&quot;groupLabel&quot;:&quot;v15wqkRiYq&quot;,&quot;groupSequence&quot;:262053570,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;yUPzPboGjk&quot;},{&quot;id&quot;:&quot;b335327a-7f58-4f26-a2ef-7e07134ba60b&quot;,&quot;caseAttribute&quot;:&quot;DISCUSSION&quot;,&quot;actionLabel&quot;:&quot;Point of law discussion prosecution&quot;,&quot;actionSequence&quot;:437014501,&quot;groupLabel&quot;:&quot;vizhheLRn2&quot;,&quot;groupSequence&quot;:56047713,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;xf7NtBpO3B&quot;},{&quot;id&quot;:&quot;c3edf650-13c4-4ecb-9f85-6100ad8e4ffc&quot;,&quot;caseAttribute&quot;:&quot;DISCUSSION&quot;,&quot;actionLabel&quot;:&quot;Arraign defendant.name&quot;,&quot;actionSequence&quot;:1582758733,&quot;groupLabel&quot;:&quot;aaJa2BpROG&quot;,&quot;groupSequence&quot;:1843187454,&quot;alterable&quot;:false,&quot;recordedLabel&quot;:&quot;rpEKxA3iAu&quot;}]}</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-            </collectionProp>
-          </elementProp>
-          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
-        </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">CJSCPPUID</stringProp>
-                <stringProp name="Header.value">${userId}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/vnd.hearing.create-hearing-event-definitions+json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-        </hashTree>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="WireMockStubSetup" enabled="true">
-          <stringProp name="cacheKey">true</stringProp>
-          <stringProp name="filename"></stringProp>
-          <stringProp name="parameters"></stringProp>
-          <stringProp name="script">import com.github.tomakehurst.wiremock.client.WireMock
-import static com.github.tomakehurst.wiremock.client.WireMock.*
-import java.util.UUID
-
-try {
-    String wiremockHost = System.getProperty(&quot;WIREMOCK_HOST&quot;, &quot;localhost&quot;)
-    int wiremockPort = Integer.parseInt(System.getProperty(&quot;WIREMOCK_PORT&quot;, &quot;8080&quot;))
-    
-    WireMock.configureFor(wiremockHost, wiremockPort)
-    
-    String xhibitGatewayPathRegex = &quot;/xhibit-gateway/send-to-xhibit/.*\\.xml&quot;
-    
-    stubFor(put(urlPathMatching(xhibitGatewayPathRegex))
-            .willReturn(aResponse()
-                    .withStatus(200)
-                    .withHeader(&quot;CPPID&quot;, UUID.randomUUID().toString())))
-    
-    log.info(&quot;WireMock stub for Xhibit gateway file upload configured successfully&quot;)
-} catch (Exception e) {
-    log.warn(&quot;Failed to configure WireMock stub: &quot; + e.getMessage())
-}</stringProp>
-          <stringProp name="scriptLanguage">groovy</stringProp>
-        </JSR223PreProcessor>
-        <hashTree/>
-        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
-          <stringProp name="LoopController.loops">3</stringProp>
-        </LoopController>
-        <hashTree>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing 1" enabled="true">
-            <intProp name="HTTPSampler.concurrentPool">6</intProp>
-            <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
-            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
-            <stringProp name="HTTPSampler.method">POST</stringProp>
-            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-              <collectionProp name="Arguments.arguments">
-                <elementProp name="" elementType="HTTPArgument">
-                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">${jsonMessage}</stringProp>
-                  <stringProp name="Argument.metadata">=</stringProp>
-                </elementProp>
-              </collectionProp>
-            </elementProp>
-            <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
-          </HTTPSamplerProxy>
-          <hashTree>
-            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-              <collectionProp name="HeaderManager.headers">
-                <elementProp name="" elementType="Header">
-                  <stringProp name="Header.name">CJSCPPUID</stringProp>
-                  <stringProp name="Header.value">${userId}</stringProp>
-                </elementProp>
-                <elementProp name="" elementType="Header">
-                  <stringProp name="Header.name">Content-Type</stringProp>
-                  <stringProp name="Header.value">application/vnd.hearing.initiate+json</stringProp>
-                </elementProp>
-              </collectionProp>
-            </HeaderManager>
-            <hashTree/>
-            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CourtListRestrictionInitiateHearing1PreProcessor" enabled="true">
-              <stringProp name="cacheKey">true</stringProp>
-              <stringProp name="filename"></stringProp>
-              <stringProp name="parameters"></stringProp>
-              <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
-import org.apache.jmeter.util.JMeterUtils;
-
-def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
-
-def file = new File(dataDir, &quot;court-list-restriction-initiate-hearing-request.json&quot;)
-if (!file.exists()) {
-   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
-}
-
-def rawJson = file.text
-
-vars.put(&quot;hearingId1&quot;, UUID.randomUUID().toString())
-log.info(&quot;hearingId1-&gt; &quot; + vars.get(&quot;hearingId1&quot;))
-
-vars.put(&quot;defendantId1&quot;, UUID.randomUUID().toString())
-log.info(&quot;defendantId1-&gt; &quot; + vars.get(&quot;defendantId1&quot;))
-
-vars.put(&quot;defenceCounselId1&quot;, UUID.randomUUID().toString())
-log.info(&quot;defenceCounselId1-&gt; &quot; + vars.get(&quot;defenceCounselId1&quot;))
-
-vars.put(&quot;defendantReferralReasonId1&quot;, UUID.randomUUID().toString())
-log.info(&quot;defendantReferralReasonId1-&gt; &quot; + vars.get(&quot;defendantReferralReasonId1&quot;))
-
-vars.put(&quot;caseId1&quot;, UUID.randomUUID().toString())
-log.info(&quot;caseId1-&gt; &quot; + vars.get(&quot;caseId1&quot;))
-
-vars.put(&quot;offenceId1&quot;, UUID.randomUUID().toString())
-log.info(&quot;offenceId1-&gt; &quot; + vars.get(&quot;offenceId1&quot;))
-
-vars.put(&quot;hearingId&quot;, vars.get(&quot;hearingId1&quot;))
-vars.put(&quot;defendantId&quot;, vars.get(&quot;defendantId1&quot;))
-vars.put(&quot;defenceCounselId&quot;, vars.get(&quot;defenceCounselId1&quot;))
-vars.put(&quot;defendantReferralReasonId&quot;, vars.get(&quot;defendantReferralReasonId1&quot;))
-vars.put(&quot;caseId&quot;, vars.get(&quot;caseId1&quot;))
-vars.put(&quot;offenceId&quot;, vars.get(&quot;offenceId1&quot;))
-
-def evaluatedJson = new CompoundVariable(rawJson).execute()
-
-vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
-              <stringProp name="scriptLanguage">groovy</stringProp>
-            </JSR223PreProcessor>
-            <hashTree/>
-            <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-              <stringProp name="ConstantTimer.delay">1000</stringProp>
-            </ConstantTimer>
-            <hashTree/>
-          </hashTree>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-            <stringProp name="ConstantTimer.delay">1000</stringProp>
-          </ConstantTimer>
-          <hashTree/>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Log Hearing Event 1" enabled="true">
-            <intProp name="HTTPSampler.concurrentPool">6</intProp>
-            <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId1}/event</stringProp>
-            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
-            <stringProp name="HTTPSampler.method">POST</stringProp>
-            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-              <collectionProp name="Arguments.arguments">
-                <elementProp name="" elementType="HTTPArgument">
-                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">${jsonMessage}</stringProp>
-                  <stringProp name="Argument.metadata">=</stringProp>
-                </elementProp>
-              </collectionProp>
-            </elementProp>
-            <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
-          </HTTPSamplerProxy>
-          <hashTree>
-            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-              <collectionProp name="HeaderManager.headers">
-                <elementProp name="" elementType="Header">
-                  <stringProp name="Header.name">CJSCPPUID</stringProp>
-                  <stringProp name="Header.value">${userId}</stringProp>
-                </elementProp>
-                <elementProp name="" elementType="Header">
-                  <stringProp name="Header.name">Content-Type</stringProp>
-                  <stringProp name="Header.value">application/vnd.hearing.log-hearing-event+json</stringProp>
-                </elementProp>
-              </collectionProp>
-            </HeaderManager>
-            <hashTree/>
-            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="LogHearingEvent1PreProcessor" enabled="true">
-              <stringProp name="cacheKey">true</stringProp>
-              <stringProp name="filename"></stringProp>
-              <stringProp name="parameters"></stringProp>
-              <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
-import org.apache.jmeter.util.JMeterUtils;
-
-def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
-
-def file = new File(dataDir, &quot;log-hearing-event-request.json&quot;)
-if (!file.exists()) {
-   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
-}
-
-def rawJson = file.text
-
-vars.put(&quot;hearingEventId&quot;, UUID.randomUUID().toString())
-vars.put(&quot;hearingId&quot;, vars.get(&quot;hearingId1&quot;))
-vars.put(&quot;defenceCounselId&quot;, vars.get(&quot;defenceCounselId1&quot;))
-
-def evaluatedJson = new CompoundVariable(rawJson).execute()
-
-vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
-              <stringProp name="scriptLanguage">groovy</stringProp>
-            </JSR223PreProcessor>
-            <hashTree/>
-          </hashTree>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Publish Court List 1" enabled="true">
-            <intProp name="HTTPSampler.concurrentPool">6</intProp>
-            <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/publish-court-list</stringProp>
-            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
-            <stringProp name="HTTPSampler.method">POST</stringProp>
-            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-              <collectionProp name="Arguments.arguments">
-                <elementProp name="" elementType="HTTPArgument">
-                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">${jsonMessage}</stringProp>
-                  <stringProp name="Argument.metadata">=</stringProp>
-                </elementProp>
-              </collectionProp>
-            </elementProp>
-            <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
-          </HTTPSamplerProxy>
-          <hashTree>
-            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-              <collectionProp name="HeaderManager.headers">
-                <elementProp name="" elementType="Header">
-                  <stringProp name="Header.name">CJSCPPUID</stringProp>
-                  <stringProp name="Header.value">${userId}</stringProp>
-                </elementProp>
-                <elementProp name="" elementType="Header">
-                  <stringProp name="Header.name">Content-Type</stringProp>
-                  <stringProp name="Header.value">application/vnd.hearing.publish-court-list+json</stringProp>
-                </elementProp>
-              </collectionProp>
-            </HeaderManager>
-            <hashTree/>
-            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="PublishCourtList1PreProcessor" enabled="true">
-              <stringProp name="cacheKey">true</stringProp>
-              <stringProp name="filename"></stringProp>
-              <stringProp name="parameters"></stringProp>
-              <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
-import org.apache.jmeter.util.JMeterUtils;
-
-def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
-
-def file = new File(dataDir, &quot;publish-court-list-request.json&quot;)
-if (!file.exists()) {
-   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
-}
-
-def rawJson = file.text
-
-def evaluatedJson = new CompoundVariable(rawJson).execute()
-
-vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
-              <stringProp name="scriptLanguage">groovy</stringProp>
-            </JSR223PreProcessor>
-            <hashTree/>
-          </hashTree>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Publish Court List 2" enabled="true">
-            <intProp name="HTTPSampler.concurrentPool">6</intProp>
-            <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/publish-court-list</stringProp>
-            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
-            <stringProp name="HTTPSampler.method">POST</stringProp>
-            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-              <collectionProp name="Arguments.arguments">
-                <elementProp name="" elementType="HTTPArgument">
-                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">${jsonMessage}</stringProp>
-                  <stringProp name="Argument.metadata">=</stringProp>
-                </elementProp>
-              </collectionProp>
-            </elementProp>
-            <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
-          </HTTPSamplerProxy>
-          <hashTree>
-            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-              <collectionProp name="HeaderManager.headers">
-                <elementProp name="" elementType="Header">
-                  <stringProp name="Header.name">CJSCPPUID</stringProp>
-                  <stringProp name="Header.value">${userId}</stringProp>
-                </elementProp>
-                <elementProp name="" elementType="Header">
-                  <stringProp name="Header.name">Content-Type</stringProp>
-                  <stringProp name="Header.value">application/vnd.hearing.publish-court-list+json</stringProp>
-                </elementProp>
-              </collectionProp>
-            </HeaderManager>
-            <hashTree/>
-            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="PublishCourtList2PreProcessor" enabled="true">
-              <stringProp name="cacheKey">true</stringProp>
-              <stringProp name="filename"></stringProp>
-              <stringProp name="parameters"></stringProp>
-              <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
-import org.apache.jmeter.util.JMeterUtils;
-
-def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
-
-def file = new File(dataDir, &quot;publish-court-list-request.json&quot;)
-if (!file.exists()) {
-   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
-}
-
-def rawJson = file.text
-
-def evaluatedJson = new CompoundVariable(rawJson).execute()
-
-vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
-              <stringProp name="scriptLanguage">groovy</stringProp>
-            </JSR223PreProcessor>
-            <hashTree/>
-          </hashTree>
-        </hashTree>
-        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
-          <objProp>
-            <name>saveConfig</name>
-            <value class="SampleSaveConfiguration">
-              <time>true</time>
-              <latency>true</latency>
-              <timestamp>true</timestamp>
-              <success>true</success>
-              <label>true</label>
-              <code>true</code>
-              <message>true</message>
-              <threadName>true</threadName>
-              <dataType>true</dataType>
-              <encoding>false</encoding>
-              <assertions>true</assertions>
-              <subresults>true</subresults>
-              <responseData>false</responseData>
-              <samplerData>false</samplerData>
-              <xml>false</xml>
-              <fieldNames>true</fieldNames>
-              <responseHeaders>false</responseHeaders>
-              <requestHeaders>false</requestHeaders>
-              <responseDataOnError>false</responseDataOnError>
-              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
-              <assertionsResultsToSave>0</assertionsResultsToSave>
-              <bytes>true</bytes>
-              <sentBytes>true</sentBytes>
-              <url>true</url>
-              <threadCounts>true</threadCounts>
-              <idleTime>true</idleTime>
-              <connectTime>true</connectTime>
-            </value>
-          </objProp>
-          <stringProp name="filename">${resultDir}/CourtListRestriction.csv</stringProp>
-        </ResultCollector>
-        <hashTree/>
-      </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CancelRemainingHearingDaysWhenMultidayHearingIsCracked" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CourtListRestriction" enabled="false">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -1980,6 +1618,317 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </ConfigTestElement>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.hearing.initiate+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CourtListRestrictionInitiateHearing1PreProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;court-list-restriction-initiate-hearing-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+vars.put(&quot;hearingId&quot;, UUID.randomUUID().toString())
+log.info(&quot;hearingId-&gt; &quot; + vars.get(&quot;hearingId&quot;))
+
+vars.put(&quot;defendantId&quot;, UUID.randomUUID().toString())
+log.info(&quot;defendantId-&gt; &quot; + vars.get(&quot;defendantId&quot;))
+
+vars.put(&quot;defenceCounselId&quot;, UUID.randomUUID().toString())
+log.info(&quot;defenceCounselId-&gt; &quot; + vars.get(&quot;defenceCounselId&quot;))
+
+vars.put(&quot;defendantReferralReasonId&quot;, UUID.randomUUID().toString())
+log.info(&quot;defendantReferralReasonId-&gt; &quot; + vars.get(&quot;defendantReferralReasonId&quot;))
+
+vars.put(&quot;caseId&quot;, UUID.randomUUID().toString())
+log.info(&quot;caseId-&gt; &quot; + vars.get(&quot;caseId&quot;))
+
+vars.put(&quot;offenceId&quot;, UUID.randomUUID().toString())
+log.info(&quot;offenceId-&gt; &quot; + vars.get(&quot;offenceId&quot;))
+
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+            <stringProp name="ConstantTimer.delay">1000</stringProp>
+          </ConstantTimer>
+          <hashTree/>
+        </hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import org.apache.jmeter.protocol.jdbc.config.DataSourceElement
+
+def hearingId = vars.get(&quot;hearingId&quot;)
+def pollerTimeout = Long.parseLong(vars.get(&quot;pollerTimeout&quot;))
+def pollInterval = Long.parseLong(vars.get(&quot;pollInterval&quot;))
+def startTime = System.currentTimeMillis()
+
+log.info(&quot;Polling for hearing &quot; + hearingId + &quot; with timeout &quot; + pollerTimeout + &quot;ms and interval &quot; + pollInterval + &quot;ms&quot;)
+println(&quot;Polling for hearing &quot; + hearingId + &quot; with timeout &quot; + pollerTimeout + &quot;ms and interval &quot; + pollInterval + &quot;ms&quot;)
+def found = false
+ def conn = null
+    try {
+        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;hearingviewstore&quot;)
+	   while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTimeout) {
+	        def ps = conn.prepareStatement(&quot;SELECT count(*) FROM ha_hearing WHERE id = ?::uuid&quot;)
+	        ps.setString(1, hearingId)
+	        def rs = ps.executeQuery()
+	        if (rs.next() &amp;&amp; rs.getInt(1) &gt; 0) {
+	            found = true
+	        }
+	        rs.close()
+	        ps.close()
+	   
+  		    if (!found) {
+		        Thread.sleep(pollInterval)
+		    }
+	    }
+     } finally {
+        if (conn != null) conn.close()
+    }
+
+
+def elapsed = System.currentTimeMillis() - startTime
+if (found) {
+    log.info(&quot;Hearing &quot; + hearingId + &quot; found after &quot; + elapsed + &quot;ms&quot;)
+    println(&quot;Hearing &quot; + hearingId + &quot; found after &quot; + elapsed + &quot;ms&quot;)
+    SampleResult.setResponseMessage(&quot;Hearing found after &quot; + elapsed + &quot;ms&quot;)
+} else {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+    log.error(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+    println(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+}</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Log Hearing Event" enabled="true">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}/event</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.hearing.log-hearing-event+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="LogHearingEvent1PreProcessor" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;log-hearing-event-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+vars.put(&quot;hearingEventId&quot;, UUID.randomUUID().toString())
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <stringProp name="ConstantTimer.delay">1000</stringProp>
+        </ConstantTimer>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Publish Court List">
+          <intProp name="HTTPSampler.concurrentPool">6</intProp>
+          <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/publish-court-list</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${jsonMessage}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">CJSCPPUID</stringProp>
+                <stringProp name="Header.value">${userId}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/vnd.hearing.publish-court-list+json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="PublishCourtList1PreProcessor">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.jmeter.engine.util.CompoundVariable
+import org.apache.jmeter.util.JMeterUtils;
+
+def dataDir = JMeterUtils.getProperty(&quot;DATA_DIR&quot;)
+
+def file = new File(dataDir, &quot;publish-court-list-request.json&quot;)
+if (!file.exists()) {
+   throw new FileNotFoundException(&quot;File not found: ${file.absolutePath}&quot;)
+}
+
+def rawJson = file.text
+
+def evaluatedJson = new CompoundVariable(rawJson).execute()
+
+vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+            <stringProp name="ConstantTimer.delay">100</stringProp>
+          </ConstantTimer>
+          <hashTree/>
+        </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+          <stringProp name="ConstantTimer.delay">200</stringProp>
+        </ConstantTimer>
+        <hashTree/>
+        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
+          <boolProp name="ResultCollector.error_logging">true</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">${resultDir}/errors.csv</stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="CancelRemainingHearingDaysWhenMultidayHearingIsCracked">
+        <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">${loopCount}</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+          <stringProp name="HTTPSampler.domain">${hostName}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.implementation"></stringProp>
+        </ConfigTestElement>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -2071,9 +2020,55 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </ConstantTimer>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-          <stringProp name="ConstantTimer.delay">1000</stringProp>
-        </ConstantTimer>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import org.apache.jmeter.protocol.jdbc.config.DataSourceElement
+
+def hearingId = vars.get(&quot;hearingId&quot;)
+def pollerTimeout = Long.parseLong(vars.get(&quot;pollerTimeout&quot;))
+def pollInterval = Long.parseLong(vars.get(&quot;pollInterval&quot;))
+def startTime = System.currentTimeMillis()
+
+log.info(&quot;Polling for hearing &quot; + hearingId + &quot; with timeout &quot; + pollerTimeout + &quot;ms and interval &quot; + pollInterval + &quot;ms&quot;)
+println(&quot;Polling for hearing &quot; + hearingId + &quot; with timeout &quot; + pollerTimeout + &quot;ms and interval &quot; + pollInterval + &quot;ms&quot;)
+def found = false
+ def conn = null
+    try {
+        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;hearingviewstore&quot;)
+	   while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTimeout) {
+	        def ps = conn.prepareStatement(&quot;SELECT count(*) FROM ha_hearing WHERE id = ?::uuid&quot;)
+	        ps.setString(1, hearingId)
+	        def rs = ps.executeQuery()
+	        if (rs.next() &amp;&amp; rs.getInt(1) &gt; 0) {
+	            found = true
+	        }
+	        rs.close()
+	        ps.close()
+	   
+  		    if (!found) {
+		        Thread.sleep(pollInterval)
+		    }
+	    }
+     } finally {
+        if (conn != null) conn.close()
+    }
+
+
+def elapsed = System.currentTimeMillis() - startTime
+if (found) {
+    log.info(&quot;Hearing &quot; + hearingId + &quot; found after &quot; + elapsed + &quot;ms&quot;)
+    println(&quot;Hearing &quot; + hearingId + &quot; found after &quot; + elapsed + &quot;ms&quot;)
+    SampleResult.setResponseMessage(&quot;Hearing found after &quot; + elapsed + &quot;ms&quot;)
+} else {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+    log.error(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+    println(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+}</stringProp>
+        </JSR223Sampler>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
@@ -2130,6 +2125,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add Prosecution Counsel" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
@@ -2188,6 +2187,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Verdict" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
@@ -2243,6 +2246,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set Trial Type" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
@@ -2298,6 +2305,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Share Results" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}/share-results</stringProp>
@@ -2356,8 +2367,12 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <boolProp name="ResultCollector.error_logging">true</boolProp>
           <objProp>
             <name>saveConfig</name>
             <value class="SampleSaveConfiguration">
@@ -2390,11 +2405,24 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">${resultDir}/CancelRemainingHearingDaysWhenMultidayHearingIsCracked.csv</stringProp>
+          <stringProp name="filename">${resultDir}/errors.csv</stringProp>
         </ResultCollector>
         <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="WireMock: Delete all request journal" enabled="false">
+          <stringProp name="HTTPSampler.domain">localhost</stringProp>
+          <stringProp name="HTTPSampler.port">8080</stringProp>
+          <stringProp name="HTTPSampler.path">/__admin/requests</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">DELETE</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ResultShouldPublishDDCHResultsOnInitialShareAndNotForAmendAndReshare" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ResultShouldPublishDDCHResultsOnInitialShareAndNotForAmendAndReshare">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -2415,7 +2443,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="HTTPSampler.implementation"></stringProp>
         </ConfigTestElement>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Hearing">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -2503,9 +2531,55 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-          <stringProp name="ConstantTimer.delay">1000</stringProp>
-        </ConstantTimer>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Poll Hearing Created">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import org.apache.jmeter.protocol.jdbc.config.DataSourceElement
+
+def hearingId = vars.get(&quot;hearingId&quot;)
+def pollerTimeout = Long.parseLong(vars.get(&quot;pollerTimeout&quot;))
+def pollInterval = Long.parseLong(vars.get(&quot;pollInterval&quot;))
+def startTime = System.currentTimeMillis()
+
+log.info(&quot;Polling for hearing &quot; + hearingId + &quot; with timeout &quot; + pollerTimeout + &quot;ms and interval &quot; + pollInterval + &quot;ms&quot;)
+println(&quot;Polling for hearing &quot; + hearingId + &quot; with timeout &quot; + pollerTimeout + &quot;ms and interval &quot; + pollInterval + &quot;ms&quot;)
+def found = false
+ def conn = null
+    try {
+        conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;hearingviewstore&quot;)
+	   while (!found &amp;&amp; (System.currentTimeMillis() - startTime) &lt; pollerTimeout) {
+	        def ps = conn.prepareStatement(&quot;SELECT count(*) FROM ha_hearing WHERE id = ?::uuid&quot;)
+	        ps.setString(1, hearingId)
+	        def rs = ps.executeQuery()
+	        if (rs.next() &amp;&amp; rs.getInt(1) &gt; 0) {
+	            found = true
+	        }
+	        rs.close()
+	        ps.close()
+	   
+  		    if (!found) {
+		        Thread.sleep(pollInterval)
+		    }
+	    }
+     } finally {
+        if (conn != null) conn.close()
+    }
+
+
+def elapsed = System.currentTimeMillis() - startTime
+if (found) {
+    log.info(&quot;Hearing &quot; + hearingId + &quot; found after &quot; + elapsed + &quot;ms&quot;)
+    println(&quot;Hearing &quot; + hearingId + &quot; found after &quot; + elapsed + &quot;ms&quot;)
+    SampleResult.setResponseMessage(&quot;Hearing found after &quot; + elapsed + &quot;ms&quot;)
+} else {
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+    log.error(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+    println(&quot;Hearing &quot; + hearingId + &quot; not found within &quot; + pollerTimeout + &quot;ms timeout&quot;)
+}</stringProp>
+        </JSR223Sampler>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Defendant Attendance" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
@@ -2562,6 +2636,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add Prosecution Counsel" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
@@ -2620,6 +2698,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Plea" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
@@ -2675,6 +2757,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set Trial Type" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}</stringProp>
@@ -2730,6 +2816,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Share Results Initial" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}/share-results</stringProp>
@@ -2788,6 +2878,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Share Results Amend" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}/share-results</stringProp>
@@ -2861,6 +2955,10 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Share Results Reshare" enabled="true">
           <intProp name="HTTPSampler.concurrentPool">6</intProp>
           <stringProp name="HTTPSampler.path">/hearing-service/command/api/rest/hearing/hearings/${hearingId}/share-results</stringProp>
@@ -2928,8 +3026,12 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <boolProp name="ResultCollector.error_logging">true</boolProp>
           <objProp>
             <name>saveConfig</name>
             <value class="SampleSaveConfiguration">
@@ -2962,7 +3064,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">${resultDir}/ResultShouldPublishDDCHResultsOnInitialShareAndNotForAmendAndReshare.csv</stringProp>
+          <stringProp name="filename">${resultDir}/errors.csv</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
@@ -2977,9 +3079,24 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="WireMock: Delete all request journal" enabled="true">
+          <stringProp name="HTTPSampler.domain">localhost</stringProp>
+          <stringProp name="HTTPSampler.port">8080</stringProp>
+          <stringProp name="HTTPSampler.path">/__admin/requests</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">DELETE</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Event Log Count">
           <stringProp name="dataSource">hearingeventstore</stringProp>
-          <stringProp name="query">select count(1) as event_log_count from event_log;</stringProp>
+          <stringProp name="query">select count(*) as event_log_count,
+  count(*) filter (where is_published is true) as published_events,
+  count(*) filter (where event_number is null) as not_linked from event_log;</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="queryTimeout"></stringProp>
@@ -2990,16 +3107,13 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           <stringProp name="variableNames"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
-            <stringProp name="BeanShellAssertion.query">if (vars.get(&quot;eventLogCount&quot;) != null) {
-    vars.put(&quot;prevEventLogCount&quot;, vars.get(&quot;eventLogCount&quot;));
-}
-
-// Try to get as object first
-Object rsObj = vars.getObject(&quot;eventLogCountResultSet&quot;);
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
+            <stringProp name="BeanShellAssertion.query">Object rsObj = vars.getObject(&quot;eventLogCountResultSet&quot;);
 
 // default value
 vars.put(&quot;eventLogCount&quot;, &quot;0&quot;);
+vars.put(&quot;published_events&quot;, &quot;0&quot;);
+vars.put(&quot;not_linked&quot;, &quot;0&quot;);
 
 // exit early if result set object is missing
 if (rsObj == null) {
@@ -3032,13 +3146,17 @@ if (!row.containsKey(&quot;event_log_count&quot;)) {
 }
 
 vars.put(&quot;eventLogCount&quot;, row.get(&quot;event_log_count&quot;).toString());
+
+vars.put(&quot;publishedEvents&quot;, row.get(&quot;published_events&quot;).toString());
+
+vars.put(&quot;notLinked&quot;, row.get(&quot;not_linked&quot;).toString());
 </stringProp>
             <stringProp name="BeanShellAssertion.filename"></stringProp>
             <stringProp name="BeanShellAssertion.parameters"></stringProp>
             <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
           </BeanShellAssertion>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3047,76 +3165,7 @@ vars.put(&quot;eventLogCount&quot;, row.get(&quot;event_log_count&quot;).toStrin
           </JSR223PostProcessor>
           <hashTree/>
         </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Published Event Count">
-          <stringProp name="dataSource">hearingeventstore</stringProp>
-          <stringProp name="query">select count(1) as published_event_count from published_event;</stringProp>
-          <stringProp name="queryArguments"></stringProp>
-          <stringProp name="queryArgumentsTypes"></stringProp>
-          <stringProp name="queryTimeout"></stringProp>
-          <stringProp name="queryType">Select Statement</stringProp>
-          <stringProp name="resultSetHandler">Store as String</stringProp>
-          <stringProp name="resultSetMaxRows"></stringProp>
-          <stringProp name="resultVariable">publishedEventCountResultSet</stringProp>
-          <stringProp name="variableNames"></stringProp>
-        </JDBCSampler>
-        <hashTree>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
-            <stringProp name="BeanShellAssertion.query">if (vars.get(&quot;publishedEventCount&quot;) != null) {
-    vars.put(&quot;prevPublishedEventCount&quot;, vars.get(&quot;publishedEventCount&quot;));
-}
-
-Object rsObj = vars.getObject(&quot;publishedEventCountResultSet&quot;);
-
-// default value
-vars.put(&quot;publishedEventCount&quot;, &quot;0&quot;);
-
-// exit early if result set object is missing
-if (rsObj == null) {
-    return;
-}
-
-// must be a List
-if (!(rsObj instanceof java.util.List)) {
-    return;
-}
-
-java.util.List rs = (java.util.List) rsObj;
-
-// must have at least one row
-if (rs.isEmpty()) {
-    return;
-}
-
-Object rowObj = rs.get(0);
-
-// first row must be a Map
-if (!(rowObj instanceof java.util.Map)) {
-    return;
-}
-
-java.util.Map row = (java.util.Map) rowObj;
-
-// must contain the column
-if (!row.containsKey(&quot;published_event_count&quot;)) {
-    return;
-}
-
-vars.put(&quot;publishedEventCount&quot;, row.get(&quot;published_event_count&quot;).toString());</stringProp>
-            <stringProp name="BeanShellAssertion.filename"></stringProp>
-            <stringProp name="BeanShellAssertion.parameters"></stringProp>
-            <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
-          </BeanShellAssertion>
-          <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="filename"></stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="script">prev.setIgnore();</stringProp>
-            <stringProp name="scriptLanguage">groovy</stringProp>
-          </JSR223PostProcessor>
-          <hashTree/>
-        </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get stream_status sums">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get stream_status sums" enabled="true">
           <stringProp name="dataSource">hearingviewstore</stringProp>
           <stringProp name="query">select component, sum(position) as sum_position, sum(latest_known_position) as sum_latest_known_position  from stream_status
 group by component;</stringProp>
@@ -3130,7 +3179,7 @@ group by component;</stringProp>
           <stringProp name="variableNames"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion">
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
             <stringProp name="BeanShellAssertion.query">import java.util.List;
 import java.util.Map;
 
@@ -3155,7 +3204,6 @@ if (resultSetObj != null &amp;&amp; resultSetObj instanceof List) {
             Map row = (Map) rowObj;
             String component = row.get(&quot;component&quot;) != null ? row.get(&quot;component&quot;).toString() : &quot;&quot;;
 
-            System.out.println(&quot;DEBUG component: &quot; + component);
             if (&quot;EVENT_LISTENER&quot;.equals(component)) {
                 sumPositionsEventListener = row.get(&quot;sum_position&quot;) != null ? row.get(&quot;sum_position&quot;).toString() : &quot;0&quot;;
                 sumLatestKnownPositionEventListener = row.get(&quot;sum_latest_known_position&quot;) != null ? row.get(&quot;sum_latest_known_position&quot;).toString() : &quot;0&quot;;
@@ -3177,7 +3225,7 @@ if (resultSetObj != null &amp;&amp; resultSetObj instanceof List) {
             <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
           </BeanShellAssertion>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -3204,7 +3252,8 @@ if (resultSetObj != null &amp;&amp; resultSetObj instanceof List) {
 }
 
 def eventLogCount = getLongValue(&quot;eventLogCount&quot;)
-def publishedEventCount = getLongValue(&quot;publishedEventCount&quot;)
+def publishedEventCount = getLongValue(&quot;publishedEvents&quot;)
+def notLinked = getLongValue(&quot;notLinked&quot;)
 def sumPositionsEventListener = getLongValue(&quot;sumPositionsEventListener&quot;)
 def sumPositionsEventIndexer = getLongValue(&quot;sumPositionsEventIndexer&quot;)
 def sumLatestKnownPositionEventListener = getLongValue(&quot;sumLatestKnownPositionEventListener&quot;)
@@ -3223,8 +3272,11 @@ if (vars.get(&quot;lastMetricsCollectionTime&quot;) != null) {
 	}
 }
 
+def customMetricsFile = new File(vars.get(&quot;resultDir&quot;) + &quot;/custom-metrics.csv&quot;)
+customMetricsFile.append(System.currentTimeMillis() + &quot;,&quot; + eventLogCount + &quot;,&quot; + publishedEventCount + &quot;,&quot; + notLinked + &quot;,&quot; + sumPositionsEventListener + &quot;,&quot; + sumLatestKnownPositionEventListener + &quot;,&quot; + sumPositionsEventIndexer + &quot;,&quot; + sumLatestKnownPositionEventIndexer + &quot;\n&quot;)
+
 vars.put(&quot;lastMetricsCollectionTime&quot;, System.currentTimeMillis().toString())
-println(&quot;eventLogCount: &quot; + eventLogCount + &quot;, publishedEventCount: &quot; + publishedEventCount)
+println(&quot;eventLogCount: &quot; + eventLogCount + &quot;, publishedEventCount: &quot; + publishedEventCount + &quot;, notLinked:&quot; + notLinked)
 println(&quot;sumPositionsEventListener: &quot; + sumPositionsEventListener + &quot;, sumLatestKnownPositionEventListener: &quot; + sumLatestKnownPositionEventListener)
 println(&quot;sumPositionsEventIndexer: &quot; + sumPositionsEventIndexer + &quot;, sumLatestKnownPositionEventIndexer: &quot; + sumLatestKnownPositionEventIndexer)</stringProp>
         </JSR223Sampler>
@@ -3255,43 +3307,6 @@ println(&quot;sumPositionsEventIndexer: &quot; + sumPositionsEventIndexer + &quo
           </TestAction>
           <hashTree/>
         </hashTree>
-        <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
-          <objProp>
-            <name>saveConfig</name>
-            <value class="SampleSaveConfiguration">
-              <time>true</time>
-              <latency>true</latency>
-              <timestamp>true</timestamp>
-              <success>true</success>
-              <label>true</label>
-              <code>true</code>
-              <message>true</message>
-              <threadName>true</threadName>
-              <dataType>true</dataType>
-              <encoding>false</encoding>
-              <assertions>true</assertions>
-              <subresults>true</subresults>
-              <responseData>false</responseData>
-              <samplerData>false</samplerData>
-              <xml>false</xml>
-              <fieldNames>true</fieldNames>
-              <responseHeaders>false</responseHeaders>
-              <requestHeaders>false</requestHeaders>
-              <responseDataOnError>false</responseDataOnError>
-              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
-              <assertionsResultsToSave>0</assertionsResultsToSave>
-              <bytes>true</bytes>
-              <sentBytes>true</sentBytes>
-              <url>true</url>
-              <threadCounts>true</threadCounts>
-              <idleTime>true</idleTime>
-              <connectTime>true</connectTime>
-            </value>
-          </objProp>
-          <stringProp name="filename">${resultDir}/custom-metrics.csv</stringProp>
-        </ResultCollector>
-        <hashTree/>
       </hashTree>
     </hashTree>
   </hashTree>
