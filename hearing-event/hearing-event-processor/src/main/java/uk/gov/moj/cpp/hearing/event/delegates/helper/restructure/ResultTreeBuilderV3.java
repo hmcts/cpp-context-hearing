@@ -213,6 +213,7 @@ public class ResultTreeBuilderV3 {
 
         if (Boolean.TRUE.equals(resultDefinition.getCanExtendActiveOrder()) && Boolean.TRUE.equals(resultDefinition.getSentToCC())) {
             judicialResult.withCommittedToCC(resultDefinition.getCommittedToCC());
+            judicialResult.withD20(true);
         } else {
             judicialResult.withIsDeemedServed(false);
         }
@@ -225,12 +226,18 @@ public class ResultTreeBuilderV3 {
 
         if (Boolean.TRUE.equals(resultDefinition.getCanBeSubjectOfBreach()) ) {
             judicialResult.withCanExtendActiveOrder(resultDefinition.getCanExtendActiveOrder());
+            judicialResult.withD20(true);
         } else {
             judicialResult.withSentToCC(true);
+            judicialResult.withD20(true);
         }
 
         if(resultTextConfHelper.isOldResultDefinition(resultLine.getOrderedDate())) {
             judicialResult.withResultText(ResultTextHelperV3.getResultText(resultDefinition, resultLine));
+        }
+
+        if(Boolean.TRUE.equals(resultLine.getIsDeleted())) {
+              judicialResult.withAlwaysPublished(true);
         }
         return judicialResult;
     }
