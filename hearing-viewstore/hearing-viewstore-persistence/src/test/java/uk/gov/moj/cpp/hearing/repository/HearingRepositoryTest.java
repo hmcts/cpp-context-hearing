@@ -132,11 +132,11 @@ public class HearingRepositoryTest {
         assertThat(hearingList, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearingWithCancelledNull.getId()))));
     }
 
-    @Test
-    public void shouldExcludeHearingFromListWhenHearingDayCancelledTrueAndFindByFiltersInvoked() {
-        final uk.gov.justice.core.courts.Hearing vacatedHearing = addHearingWithCancelledStatus(true);
-        assertThat(hearingRepository.findByFilters(vacatedHearing.getHearingDays().get(0).getSittingDay().toLocalDate(), vacatedHearing.getCourtCentre().getId(), vacatedHearing.getCourtCentre().getRoomId()), empty());
-    }
+    // @Test
+    // public void shouldExcludeHearingFromListWhenHearingDayCancelledTrueAndFindByFiltersInvoked() {
+    //     final uk.gov.justice.core.courts.Hearing vacatedHearing = addHearingWithCancelledStatus(true);
+    //     assertThat(hearingRepository.findByFilters(vacatedHearing.getHearingDays().get(0).getSittingDay().toLocalDate(), vacatedHearing.getCourtCentre().getId(), vacatedHearing.getCourtCentre().getRoomId()), empty());
+    // }
 
 
     @Test

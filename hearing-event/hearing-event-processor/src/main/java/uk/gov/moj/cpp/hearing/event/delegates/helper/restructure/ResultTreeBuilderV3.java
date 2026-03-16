@@ -209,12 +209,35 @@ public class ResultTreeBuilderV3 {
                 .withDvlaCode(resultDefinition.getDvlaCode())
                 .withLevel(resultDefinition.getLevel())
                 .withPoliceSubjectLineTitle(resultDefinition.getPoliceSubjectLineTitle())
-                .withPreserveActiveOrder(getBooleanValue(resultDefinition.getPreserveActiveOrder(), false))
-                .withCanExtendActiveOrder(getBooleanValue(resultDefinition.getCanExtendActiveOrder(), false))
-                .withCommittedToCC(getBooleanValue(resultDefinition.getCommittedToCC(), false))
-                .withSentToCC(getBooleanValue(resultDefinition.getSentToCC(), false));
+                .withPreserveActiveOrder(getBooleanValue(resultDefinition.getPreserveActiveOrder(), false));
+
+        if (Boolean.TRUE.equals(resultDefinition.getCanExtendActiveOrder()) && Boolean.TRUE.equals(resultDefinition.getSentToCC())) {
+            judicialResult.withCommittedToCC(resultDefinition.getCommittedToCC());
+            judicialResult.withD20(true);
+        } else {
+            judicialResult.withIsDeemedServed(false);
+        }
+
+        if (Boolean.TRUE.equals(resultDefinition.getAlwaysPublished()) ) {
+            judicialResult.withSentToCC(resultDefinition.getSentToCC());
+        } else {
+            judicialResult.withSentToCC(false);
+        }
+
+        if (Boolean.TRUE.equals(resultDefinition.getCanBeSubjectOfBreach()) ) {
+            judicialResult.withCanExtendActiveOrder(resultDefinition.getCanExtendActiveOrder());
+            judicialResult.withD20(true);
+        } else {
+            judicialResult.withSentToCC(true);
+            judicialResult.withD20(true);
+        }
+
         if(resultTextConfHelper.isOldResultDefinition(resultLine.getOrderedDate())) {
             judicialResult.withResultText(ResultTextHelperV3.getResultText(resultDefinition, resultLine));
+        }
+
+        if(Boolean.TRUE.equals(resultLine.getIsDeleted())) {
+              judicialResult.withAlwaysPublished(true);
         }
         return judicialResult;
     }
