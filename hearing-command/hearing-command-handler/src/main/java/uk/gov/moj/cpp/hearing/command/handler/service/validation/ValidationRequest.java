@@ -147,13 +147,19 @@ public class ValidationRequest {
     public static class DefendantDto {
 
         private final String id;
+        private final String masterDefendantId;
 
-        public DefendantDto(final String id) {
+        public DefendantDto(final String id, final String masterDefendantId) {
             this.id = id;
+            this.masterDefendantId = masterDefendantId;
         }
 
         public String getId() {
             return id;
+        }
+
+        public String getMasterDefendantId() {
+            return masterDefendantId;
         }
     }
 }

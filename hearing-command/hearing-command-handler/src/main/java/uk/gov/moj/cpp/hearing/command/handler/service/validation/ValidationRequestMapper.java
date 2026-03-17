@@ -30,7 +30,9 @@ public class ValidationRequestMapper {
             for (final ProsecutionCase prosecutionCase : hearing.getProsecutionCases()) {
                 if (prosecutionCase.getDefendants() != null) {
                     for (final Defendant defendant : prosecutionCase.getDefendants()) {
-                        defendants.add(new ValidationRequest.DefendantDto(uuidToString(defendant.getId())));
+                        defendants.add(new ValidationRequest.DefendantDto(
+                                uuidToString(defendant.getId()),
+                                uuidToString(defendant.getMasterDefendantId())));
 
                         if (defendant.getOffences() != null) {
                             for (final Offence offence : defendant.getOffences()) {
