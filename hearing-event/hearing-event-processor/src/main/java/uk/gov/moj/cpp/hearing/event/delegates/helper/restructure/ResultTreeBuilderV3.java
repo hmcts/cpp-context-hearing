@@ -53,7 +53,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -64,8 +63,6 @@ public class ResultTreeBuilderV3 {
     private final NextHearingHelperV3 nextHearingHelper;
     private final ResultLineHelperV3 resultLineHelper;
     private ResultTextConfHelper resultTextConfHelper;
-    private final Predicate<ResultLine2> resultLinesNotDeletedPredicate = resultLine -> !getBooleanValue(resultLine.getIsDeleted(), false);
-    private final Predicate<ResultLine2> resultLinesDeletedPredicate = resultLine -> getBooleanValue(resultLine.getIsDeleted(), false);
 
 
     @Inject
@@ -77,13 +74,7 @@ public class ResultTreeBuilderV3 {
     }
 
     public List<TreeNode<ResultLine2>> build(final JsonEnvelope envelope, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> resultDefinitionTreeNods ) {
-        final Map<UUID, TreeNode<ResultLine2>> resultLinesMap = getTreeNodeMap(envelope, resultsShared,resultDefinitionTreeNods, resultLinesNotDeletedPredicate);
-        final Map<UUID, TreeNode<ResultLine2>> resultLinesMapWithRelations = mapTreeNodeRelations(resultLinesMap);
-        return new ArrayList<>(orderResult(resultLinesMapWithRelations));
-    }
-
-    public List<TreeNode<ResultLine2>> buildDeleted(final JsonEnvelope envelope, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> resultDefinitionTreeNods ) {
-        final Map<UUID, TreeNode<ResultLine2>> resultLinesMap = getTreeNodeMap(envelope, resultsShared,resultDefinitionTreeNods, resultLinesDeletedPredicate);
+        final Map<UUID, TreeNode<ResultLine2>> resultLinesMap = getTreeNodeMap(envelope, resultsShared,resultDefinitionTreeNods);
         final Map<UUID, TreeNode<ResultLine2>> resultLinesMapWithRelations = mapTreeNodeRelations(resultLinesMap);
         return new ArrayList<>(orderResult(resultLinesMapWithRelations));
     }
@@ -105,8 +96,7 @@ public class ResultTreeBuilderV3 {
         return resultLinesMap;
     }
 
-    private Map<UUID, TreeNode<ResultLine2>> getTreeNodeMap(final JsonEnvelope context, final ResultsSharedV3 resultsShared,
-                                                            final List<TreeNode<ResultDefinition>> resultDefinitionNodes, final Predicate<ResultLine2> resultLinesPredicate) {
+    private Map<UUID, TreeNode<ResultLine2>> getTreeNodeMap(final JsonEnvelope context, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> resultDefinitionNodes) {
         final Map<UUID, TreeNode<ResultLine2>> result = new HashMap<>();
         final List<ResultLine2> allResultLines = resultsShared.getTargets().stream()
                 .flatMap(t -> t.getResultLines().stream())
@@ -119,7 +109,7 @@ public class ResultTreeBuilderV3 {
             final List<ResultLine2> resultLines = target.getResultLines();
             resultLines
                     .stream()
-                    .filter(resultLinesPredicate)
+                    .filter(resultLine -> !getBooleanValue(resultLine.getIsDeleted(), false))
                     .forEach(resultLine -> {
                         final TreeNode<ResultDefinition> resultDefinitionNode = resultDefinitionNodes.stream()
                                 .filter(rdt -> rdt.getData().getId().equals(resultLine.getResultDefinitionId()))
@@ -222,8 +212,7 @@ public class ResultTreeBuilderV3 {
                 .withPreserveActiveOrder(getBooleanValue(resultDefinition.getPreserveActiveOrder(), false))
                 .withCanExtendActiveOrder(getBooleanValue(resultDefinition.getCanExtendActiveOrder(), false))
                 .withCommittedToCC(getBooleanValue(resultDefinition.getCommittedToCC(), false))
-                .withSentToCC(getBooleanValue(resultDefinition.getSentToCC(), false))
-                .withIsDeemedServed(resultDefinition.getIsDeemedServed());
+                .withSentToCC(getBooleanValue(resultDefinition.getSentToCC(), false));
         if(resultTextConfHelper.isOldResultDefinition(resultLine.getOrderedDate())) {
             judicialResult.withResultText(ResultTextHelperV3.getResultText(resultDefinition, resultLine));
         }
