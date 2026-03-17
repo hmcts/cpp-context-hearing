@@ -14,6 +14,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ public class ResultsValidationClient implements ResultsValidator {
     private static final String CJSCPPUID = "CJSCPPUID";
 
     @Inject
-    @Value(key = "resultsvalidator.base.url", defaultValue = "http://localhost:8080/results-validator/api/validation/validate")
+    @Value(key = "resultsvalidator.base.url", defaultValue = "http://localhost:8082/api/validation/validate")
     protected String validationUrl;
 
     @Inject

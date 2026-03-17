@@ -59,4 +59,101 @@ public class ValidationRequest {
     public List<DefendantDto> getDefendants() {
         return defendants;
     }
+
+    public static class ResultLineDto {
+
+        private final String id;
+        private final String shortCode;
+        private final String label;
+        private final String defendantId;
+        private final String offenceId;
+        @JsonProperty("isConcurrent")
+        private final Boolean isConcurrent;
+        private final String consecutiveToOffence;
+
+        public ResultLineDto(final String id, final String shortCode, final String label,
+                             final String defendantId, final String offenceId,
+                             final Boolean isConcurrent, final String consecutiveToOffence) {
+            this.id = id;
+            this.shortCode = shortCode;
+            this.label = label;
+            this.defendantId = defendantId;
+            this.offenceId = offenceId;
+            this.isConcurrent = isConcurrent;
+            this.consecutiveToOffence = consecutiveToOffence;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getShortCode() {
+            return shortCode;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public String getDefendantId() {
+            return defendantId;
+        }
+
+        public String getOffenceId() {
+            return offenceId;
+        }
+
+        public Boolean getIsConcurrent() {
+            return isConcurrent;
+        }
+
+        public String getConsecutiveToOffence() {
+            return consecutiveToOffence;
+        }
+    }
+
+    public static class OffenceDto {
+
+        private final String id;
+        private final String offenceCode;
+        private final String offenceTitle;
+        private final Integer orderIndex;
+
+        public OffenceDto(final String id, final String offenceCode,
+                          final String offenceTitle, final Integer orderIndex) {
+            this.id = id;
+            this.offenceCode = offenceCode;
+            this.offenceTitle = offenceTitle;
+            this.orderIndex = orderIndex;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getOffenceCode() {
+            return offenceCode;
+        }
+
+        public String getOffenceTitle() {
+            return offenceTitle;
+        }
+
+        public Integer getOrderIndex() {
+            return orderIndex;
+        }
+    }
+
+    public static class DefendantDto {
+
+        private final String id;
+
+        public DefendantDto(final String id) {
+            this.id = id;
+        }
+
+        public String getId() {
+            return id;
+        }
+    }
 }

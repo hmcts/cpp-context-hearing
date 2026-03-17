@@ -3,12 +3,8 @@ package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Offence;
-import uk.gov.justice.core.courts.Person;
-import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
-import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 
 import java.util.ArrayList;
@@ -26,56 +22,44 @@ public class ValidationRequestMapper {
                 ? hearing.getJurisdictionType().name()
                 : null;
 
-        final List<DefendantDto> defendants = new ArrayList<>();
-        final List<OffenceDto> offences = new ArrayList<>();
+        final List<ValidationRequest.DefendantDto> defendants = new ArrayList<>();
+        final List<ValidationRequest.OffenceDto> offences = new ArrayList<>();
         String caseId = null;
 
-        if (hearing != null && hearing.getProsecutionCases() != null) {
-            hearing.getProsecutionCases()
-                    .stream()
-                    .forEach(prosecutionCase -> {
-                        final String caseUrn = extractCaseUrn(prosecutionCase);
+        if (hearing.getProsecutionCases() != null) {
+            for (final ProsecutionCase prosecutionCase : hearing.getProsecutionCases()) {
+                if (prosecutionCase.getDefendants() != null) {
+                    for (final Defendant defendant : prosecutionCase.getDefendants()) {
+                        defendants.add(new ValidationRequest.DefendantDto(uuidToString(defendant.getId())));
 
-                        prosecutionCase.getDefendants()
-                                .stream()
-                                .forEach(defendant -> {
-                                    final Person personDetails = extractPersonDetails(defendant);
-                                    defendants.add(DefendantDto.builder()
-                                            .withId(uuidToString(defendant.getId()))
-                                            .withFirstName(personDetails != null ? personDetails.getFirstName() : null)
-                                            .withLastName(personDetails != null ? personDetails.getLastName() : null)
-                                            .withMasterDefendantId(uuidToString(defendant.getMasterDefendantId()))
-                                            .build());
-
-                                    if (defendant != null && defendant.getOffences()!= null) {
-                                        defendant.getOffences()
-                                                .stream()
-                                                .forEach(offence -> offences.add(new OffenceDto.Builder()
-                                                        .id(uuidToString(offence.getId()))
-                                                        .offenceCode(offence.getOffenceCode())
-                                                        .offenceTitle(offence.getOffenceTitle())
-                                                        .orderIndex(offence.getOrderIndex())
-                                                        .caseUrn(caseUrn)
-                                                        .build()));
-                                    }
-                                });
-                    });
+                        if (defendant.getOffences() != null) {
+                            for (final Offence offence : defendant.getOffences()) {
+                                offences.add(new ValidationRequest.OffenceDto(
+                                        uuidToString(offence.getId()),
+                                        offence.getOffenceCode(),
+                                        offence.getOffenceTitle(),
+                                        offence.getOrderIndex()));
+                            }
+                        }
+                    }
+                }
+            }
         }
-        final List<ResultLineDto> resultLines = new ArrayList<>();
+
+        final List<ValidationRequest.ResultLineDto> resultLines = new ArrayList<>();
         if (command.getResultLines() != null) {
             for (final SharedResultsCommandResultLineV2 line : command.getResultLines()) {
                 if (caseId == null && line.getCaseId() != null) {
                     caseId = line.getCaseId().toString();
                 }
-                resultLines.add(new ResultLineDto.Builder()
-                        .id(uuidToString(line.getResultLineId()))
-                        .shortCode(line.getShortCode())
-                        .label(line.getResultLabel())
-                        .defendantId(uuidToString(line.getDefendantId()))
-                        .offenceId(uuidToString(line.getOffenceId()))
-                        .consecutiveToOffence(extractConsecutiveToOffence(line.getPrompts()))
-                        .isConcurrent(extractIsConcurrent(line.getPrompts()))
-                        .build());
+                resultLines.add(new ValidationRequest.ResultLineDto(
+                        uuidToString(line.getResultLineId()),
+                        line.getShortCode(),
+                        line.getResultLabel(),
+                        uuidToString(line.getDefendantId()),
+                        uuidToString(line.getOffenceId()),
+                        null,
+                        null));
             }
         }
 
@@ -89,40 +73,7 @@ public class ValidationRequestMapper {
                 defendants);
     }
 
-    private Person extractPersonDetails(final Defendant defendant) {
-        final PersonDefendant personDefendant = defendant.getPersonDefendant();
-        return personDefendant != null ? personDefendant.getPersonDetails() : null;
-    }
-
-    private String extractCaseUrn(final ProsecutionCase prosecutionCase) {
-        final ProsecutionCaseIdentifier identifier = prosecutionCase.getProsecutionCaseIdentifier();
-        return identifier != null ? identifier.getCaseURN() : null;
-    }
-
     private String uuidToString(final UUID uuid) {
         return uuid != null ? uuid.toString() : null;
-    }
-
-    private Boolean extractIsConcurrent(final List<SharedResultsCommandPrompt> prompts) {
-        if (prompts == null) {
-            return null;
-        }
-        return prompts.stream()
-                .filter(p -> "concurrent".equals(p.getPromptRef()))
-                .findFirst()
-                .map(p -> "true".equalsIgnoreCase(p.getValue()))
-                .orElse(null);
-    }
-
-    private String extractConsecutiveToOffence(final List<SharedResultsCommandPrompt> prompts) {
-        if (prompts == null) {
-            return null;
-        }
-        return prompts.stream()
-                .filter(p -> "consecutiveToOffenceNumber".equals(p.getPromptRef()))
-                .findFirst()
-                .map(SharedResultsCommandPrompt::getValue)
-                .filter(v -> v != null && !v.isBlank())
-                .orElse(null);
     }
 }
