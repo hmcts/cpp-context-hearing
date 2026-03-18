@@ -1,0 +1,741 @@
+{
+  "hearingId": "12d9fea9-686f-4bc3-a7c5-35e22bc80225",
+  "sharedTime": "2025-08-27T17:07:44.238Z",
+  "courtClerk": {
+    "firstName": "Emma",
+    "lastName": "Cleaner",
+    "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+  },
+  "hearing": {
+    "courtCentre": {
+      "address": {
+        "address1": "176A Lavender Hill",
+        "address2": "London",
+        "address3": "",
+        "address4": "",
+        "address5": "",
+        "postcode": "SW11 1JU"
+      },
+      "code": "B01LY00",
+      "courtHearingLocation": "B01LY01",
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "lja": {
+        "ljaCode": "2577",
+        "ljaName": "South West London Magistrates' Court"
+      },
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01"
+    },
+    "defendantAttendance": [
+      {
+        "attendanceDays": [
+          {
+            "attendanceType": "IN_PERSON",
+            "day": "2025-08-27"
+          }
+        ],
+        "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a"
+      }
+    ],
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "courtCentreId": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+        "courtRoomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+        "hasSharedResults": true,
+        "isCancelled": false,
+        "listedDurationMinutes": 20,
+        "listingSequence": 0,
+        "sittingDay": "2025-08-27T20:30:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "12d9fea9-686f-4bc3-a7c5-35e22bc80225",
+    "isGroupProceedings": false,
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [
+      {
+        "caseStatus": "ACTIVE",
+        "cpsOrganisation": "A30AB00",
+        "defendants": [
+          {
+            "courtProceedingsInitiated": "2025-08-27T17:02:47.341Z",
+            "id": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+            "isYouth": false,
+            "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+            "offences": [
+              {
+                "arrestDate": "2020-12-01",
+                "chargeDate": "2020-12-02",
+                "count": 0,
+                "endorsableFlag": false,
+                "id": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+                "listingNumber": 1,
+                "modeOfTrial": "Either Way",
+                "offenceCode": "MD71521",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "734ad209-e52b-4df1-aca0-3b1c90e58ef7",
+                "offenceLegislation": "Contrary to section 5(2) of and Schedule 4 to the Misuse of Drugs Act 1971.",
+                "offenceTitle": "Possess a controlled drug of Class B - cannabis resin",
+                "orderIndex": 1,
+                "startDate": "2019-11-28",
+                "wording": "From 13th November 2018, an aggravated version of this offence applies where the offence is committed against an emergency worker acting in the exercise of his / her functions as such a worker, as per section 1 of the Assaults on emergency Workers (Offences) Act 2018; see offence wording document H19568."
+              }
+            ],
+            "personDefendant": {
+              "arrestSummonsNumber": "E28GC19102022001",
+              "bailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              },
+              "driverNumber": "CRIME709136TC8GZ",
+              "personDetails": {
+                "address": {
+                  "address1": "c",
+                  "address2": "Hugh Parkway",
+                  "address3": "Hermannside",
+                  "address4": "Avon",
+                  "postcode": "DA6 7ND"
+                },
+                "contact": {
+                  "home": "873-655-0683"
+                },
+                "dateOfBirth": "2000-07-20",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+                  "observedEthnicityCode": "1",
+                  "observedEthnicityDescription": "White",
+                  "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                  "selfDefinedEthnicityCode": "W1",
+                  "selfDefinedEthnicityDescription": "British",
+                  "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                },
+                "firstName": "Casper",
+                "gender": "FEMALE",
+                "hearingLanguageNeeds": "ENGLISH",
+                "lastName": "Daugherty",
+                "title": "Mr"
+              },
+              "policeBailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              }
+            },
+            "prosecutionAuthorityReference": "E28GC19102022001",
+            "prosecutionCaseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23"
+          }
+        ],
+        "id": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+        "initiationCode": "C",
+        "originatingOrganisation": "0300000",
+        "prosecutionCaseIdentifier": {
+          "address": {
+            "address1": "Criminal Justice Department",
+            "address2": "Derbyshire Constabulary",
+            "address3": "Butterley Hall",
+            "address4": "Ripley",
+            "address5": "Derby",
+            "postcode": "DE5 3RS"
+          },
+          "contact": {
+            "primaryEmail": "criminaldataderbyshire@derbyshire.police.uk"
+          },
+          "majorCreditorCode": "PO30",
+          "prosecutionAuthorityCode": "DERPF",
+          "prosecutionAuthorityId": "bdc190e7-c939-37ca-be4b-9f615d6ef40e",
+          "prosecutionAuthorityName": "Derbyshire Police",
+          "prosecutionAuthorityOUCode": "0300000",
+          "caseURN": "70FF1811171"
+        }
+      }
+    ],
+    "type": {
+      "description": "First hearing",
+      "id": "4a0e892d-c0c5-3c51-95b8-704d8c781776"
+    }
+  },
+  "variantDirectory": [],
+  "completedResultLinesStatus": {
+    "54498bd6-5474-4103-a9c3-b13a3371d338": {
+      "id": "54498bd6-5474-4103-a9c3-b13a3371d338",
+      "lastSharedDateTime": "2025-08-27T17:05:19.980Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "2f459f7c-5217-4cf7-8899-95e94c38b0fb": {
+      "id": "2f459f7c-5217-4cf7-8899-95e94c38b0fb",
+      "lastSharedDateTime": "2025-08-27T17:05:19.980Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "38cfc32c-31bb-4bd3-b22e-35d2b829a1d3": {
+      "id": "38cfc32c-31bb-4bd3-b22e-35d2b829a1d3",
+      "lastSharedDateTime": "2025-08-27T17:05:19.980Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "24936f69-8fcd-492c-8a34-fb3bff18e8a2": {
+      "id": "24936f69-8fcd-492c-8a34-fb3bff18e8a2",
+      "lastSharedDateTime": "2025-08-27T17:05:19.980Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "97bc9ae8-69f3-4271-82e1-02a5c402b15f": {
+      "id": "97bc9ae8-69f3-4271-82e1-02a5c402b15f",
+      "lastSharedDateTime": "2025-08-27T17:05:19.980Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    }
+  },
+  "targets": [
+    {
+      "caseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+      "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+      "draftResult": "{}",
+      "hearingDay": "2025-08-27",
+      "hearingId": "12d9fea9-686f-4bc3-a7c5-35e22bc80225",
+      "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+      "offenceId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+      "resultLines": [
+        {
+          "amendmentDate": "2025-08-27T17:06:57.511Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[]}",
+          "caseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+          "category": "F",
+          "childResultLineIds": [
+            "38cfc32c-31bb-4bd3-b22e-35d2b829a1d3",
+            "97bc9ae8-69f3-4271-82e1-02a5c402b15f"
+          ],
+          "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
+              "label": "End Date",
+              "promptRef": "endDate",
+              "value": "2025-12-12"
+            },
+            {
+              "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
+              "label": "Responsible officer",
+              "promptRef": "responsibleOfficer",
+              "value": "an officer of a provider of probation services"
+            },
+            {
+              "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+              "label": "Supervising Court",
+              "promptRef": "supervisingCourt",
+              "value": "Aberystwyth Magistrates' Court"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "Midlands Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "midlandsnps.court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "418b3aa7-65ab-4a4a-bab9-2f96b698118c",
+          "resultLabel": "Community order England / Wales",
+          "resultLineId": "24936f69-8fcd-492c-8a34-fb3bff18e8a2",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "coew"
+        },
+        {
+          "amendmentDate": "2025-08-27T17:06:57.511Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[]}",
+          "caseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+          "category": "A",
+          "childResultLineIds": [
+            "2f459f7c-5217-4cf7-8899-95e94c38b0fb",
+            "bd01656f-b7f7-4c8b-9b5e-84c6d4794e5c"
+          ],
+          "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "24936f69-8fcd-492c-8a34-fb3bff18e8a2"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "resultLabel": "Community requirements",
+          "resultLineId": "97bc9ae8-69f3-4271-82e1-02a5c402b15f",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "crs"
+        },
+        {
+          "amendmentDate": "2025-08-27T17:06:57.511Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[]}",
+          "caseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "97bc9ae8-69f3-4271-82e1-02a5c402b15f"
+          ],
+          "prompts": [
+            {
+              "id": "a31e61d6-f5bc-4327-821a-ff1f9fc5050d",
+              "label": "Medical practitioner / Psychologist",
+              "promptRef": "medicalPractitionerPsychologist",
+              "value": "test"
+            },
+            {
+              "id": "fb580537-9d36-4139-811b-77af09547b0d",
+              "label": "Care home / Hospital",
+              "promptRef": "careHomeHospital",
+              "value": "test"
+            },
+            {
+              "id": "5e636c8d-c742-4cd4-a873-5d002ef36f5d",
+              "label": "Period of treatment",
+              "promptRef": "periodOfTreatment",
+              "value": "2 Months"
+            }
+          ],
+          "resultDefinitionId": "5473390c-dbe2-4026-a95f-8bb99d2e011d",
+          "resultLabel": "Mental health treatment non-residential patient",
+          "resultLineId": "2f459f7c-5217-4cf7-8899-95e94c38b0fb",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "mhtrnr"
+        },
+        {
+          "amendmentDate": "2025-08-27T17:06:57.511Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[]}",
+          "caseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+          "category": "I",
+          "childResultLineIds": [],
+          "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "24936f69-8fcd-492c-8a34-fb3bff18e8a2"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "d38d9766-c141-4d6b-bb4a-249a9bb88636",
+          "resultLabel": "Is electronic monitoring required",
+          "resultLineId": "38cfc32c-31bb-4bd3-b22e-35d2b829a1d3",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "emreq"
+        },
+        {
+          "amendmentDate": "2025-08-27T17:06:57.511Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-08-27T17:06:57.511Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-08-27T17:07:41.900Z\"}]}",
+          "caseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+              "label": "Electronic monitoring contractor organisation name",
+              "promptRef": "electronicmonitoringcontractorOrganisationName",
+              "value": "G4S Scotland Monitoring Technologies & Services"
+            },
+            {
+              "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+              "label": "Electronic monitoring contractor email address 1",
+              "promptRef": "electronicmonitoringcontractorEmailAddress1",
+              "value": "EM.Scotland.Notifications@uk.g4s.com.cjsm.net"
+            },
+            {
+              "id": "a7cc84b3-0c62-440d-b2d3-f4b40ef13c99",
+              "label": "Continuation of electronic monitoring",
+              "promptRef": "continuationOfElectronicMonitoring",
+              "value": "true"
+            },
+            {
+              "id": "f6ca6307-bdab-42d3-968b-44485824b535",
+              "label": "Are there any additional requirements as well?",
+              "promptRef": "areThereAnyAdditionalRequirementsAsWell",
+              "value": "false"
+            },
+            {
+              "id": "cdc4f47c-612d-4f81-b321-a2b5861d6e19",
+              "label": "Was an interpreter used?",
+              "promptRef": "wasAnInterpreterUsed",
+              "value": "false"
+            },
+            {
+              "id": "5a386999-b2d9-45f4-9b68-57000ba2d6ef",
+              "label": "Does the offender have any special needs?",
+              "promptRef": "doesTheOffenderHaveAnySpecialNeeds",
+              "value": "false"
+            }
+          ],
+          "resultDefinitionId": "dada120c-160a-49a9-b040-e8b6b7128d67",
+          "resultLabel": "Notification of electronic monitoring order (requirement)",
+          "resultLineId": "54498bd6-5474-4103-a9c3-b13a3371d338",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "nordrc"
+        },
+        {
+          "amendmentDate": "2025-08-27T17:06:57.511Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-08-27T17:06:57.511Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-08-27T17:07:41.900Z\"}]}",
+          "caseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "97bc9ae8-69f3-4271-82e1-02a5c402b15f"
+          ],
+          "prompts": [
+            {
+              "id": "72413aef-ecb9-4e9b-a143-31d1e9c11584",
+              "label": "Number of hours",
+              "promptRef": "numberOfHours",
+              "value": "10 Hours"
+            }
+          ],
+          "resultDefinitionId": "9bec5977-1796-4645-9b9e-687d4f23d37d",
+          "resultLabel": "Unpaid work. Requirement to be completed within 12 months.",
+          "resultLineId": "bd01656f-b7f7-4c8b-9b5e-84c6d4794e5c",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "upwr"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82"
+    }
+  ],
+  "savedTargets": [
+    {
+      "caseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+      "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+      "draftResult": "{}",
+      "hearingDay": "2025-08-27",
+      "hearingId": "12d9fea9-686f-4bc3-a7c5-35e22bc80225",
+      "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+      "offenceId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+      "resultLines": [
+        {
+          "caseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+          "category": "F",
+          "childResultLineIds": [
+            "38cfc32c-31bb-4bd3-b22e-35d2b829a1d3",
+            "97bc9ae8-69f3-4271-82e1-02a5c402b15f"
+          ],
+          "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
+              "label": "End Date",
+              "promptRef": "endDate",
+              "value": "2025-12-12"
+            },
+            {
+              "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
+              "label": "Responsible officer",
+              "promptRef": "responsibleOfficer",
+              "value": "an officer of a provider of probation services"
+            },
+            {
+              "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+              "label": "Supervising Court",
+              "promptRef": "supervisingCourt",
+              "value": "Aberystwyth Magistrates' Court"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "Midlands Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "midlandsnps.court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "418b3aa7-65ab-4a4a-bab9-2f96b698118c",
+          "resultLabel": "Community order England / Wales",
+          "resultLineId": "24936f69-8fcd-492c-8a34-fb3bff18e8a2",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "coew"
+        },
+        {
+          "caseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+          "category": "I",
+          "childResultLineIds": [
+            "54498bd6-5474-4103-a9c3-b13a3371d338"
+          ],
+          "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "24936f69-8fcd-492c-8a34-fb3bff18e8a2"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "d38d9766-c141-4d6b-bb4a-249a9bb88636",
+          "resultLabel": "Is electronic monitoring required",
+          "resultLineId": "38cfc32c-31bb-4bd3-b22e-35d2b829a1d3",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "emreq"
+        },
+        {
+          "caseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+          "category": "A",
+          "childResultLineIds": [
+            "2f459f7c-5217-4cf7-8899-95e94c38b0fb"
+          ],
+          "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "24936f69-8fcd-492c-8a34-fb3bff18e8a2"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "resultLabel": "Community requirements",
+          "resultLineId": "97bc9ae8-69f3-4271-82e1-02a5c402b15f",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "crs"
+        },
+        {
+          "caseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "38cfc32c-31bb-4bd3-b22e-35d2b829a1d3"
+          ],
+          "prompts": [
+            {
+              "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+              "label": "Electronic monitoring contractor organisation name",
+              "promptRef": "electronicmonitoringcontractorOrganisationName",
+              "value": "G4S Scotland Monitoring Technologies & Services"
+            },
+            {
+              "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+              "label": "Electronic monitoring contractor email address 1",
+              "promptRef": "electronicmonitoringcontractorEmailAddress1",
+              "value": "EM.Scotland.Notifications@uk.g4s.com.cjsm.net"
+            },
+            {
+              "id": "a7cc84b3-0c62-440d-b2d3-f4b40ef13c99",
+              "label": "Continuation of electronic monitoring",
+              "promptRef": "continuationOfElectronicMonitoring",
+              "value": "true"
+            },
+            {
+              "id": "f6ca6307-bdab-42d3-968b-44485824b535",
+              "label": "Are there any additional requirements as well?",
+              "promptRef": "areThereAnyAdditionalRequirementsAsWell",
+              "value": "false"
+            },
+            {
+              "id": "cdc4f47c-612d-4f81-b321-a2b5861d6e19",
+              "label": "Was an interpreter used?",
+              "promptRef": "wasAnInterpreterUsed",
+              "value": "false"
+            },
+            {
+              "id": "5a386999-b2d9-45f4-9b68-57000ba2d6ef",
+              "label": "Does the offender have any special needs?",
+              "promptRef": "doesTheOffenderHaveAnySpecialNeeds",
+              "value": "false"
+            }
+          ],
+          "resultDefinitionId": "dada120c-160a-49a9-b040-e8b6b7128d67",
+          "resultLabel": "Notification of electronic monitoring order (requirement)",
+          "resultLineId": "54498bd6-5474-4103-a9c3-b13a3371d338",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "nordrc"
+        },
+        {
+          "caseId": "7e4afa2e-b190-4b57-92d0-346f8e4a9e23",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "8fc95b5e-5e20-4672-a56b-470cfdd9586a",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "97bc9ae8-69f3-4271-82e1-02a5c402b15f"
+          ],
+          "prompts": [
+            {
+              "id": "a31e61d6-f5bc-4327-821a-ff1f9fc5050d",
+              "label": "Medical practitioner / Psychologist",
+              "promptRef": "medicalPractitionerPsychologist",
+              "value": "test"
+            },
+            {
+              "id": "fb580537-9d36-4139-811b-77af09547b0d",
+              "label": "Care home / Hospital",
+              "promptRef": "careHomeHospital",
+              "value": "test"
+            },
+            {
+              "id": "5e636c8d-c742-4cd4-a873-5d002ef36f5d",
+              "label": "Period of treatment",
+              "promptRef": "periodOfTreatment",
+              "value": "2 Months"
+            }
+          ],
+          "resultDefinitionId": "5473390c-dbe2-4026-a95f-8bb99d2e011d",
+          "resultLabel": "Mental health treatment non-residential patient",
+          "resultLineId": "2f459f7c-5217-4cf7-8899-95e94c38b0fb",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "mhtrnr"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "f3c6b5d8-a76e-44c3-8cff-fc093075ae82"
+    }
+  ],
+  "defendantDetailsChanged": [],
+  "isReshare": true,
+  "newAmendmentResults": [
+    {
+      "id": "24936f69-8fcd-492c-8a34-fb3bff18e8a2",
+      "amendmentDateTime": "2025-08-27T17:06:57.511Z"
+    },
+    {
+      "id": "97bc9ae8-69f3-4271-82e1-02a5c402b15f",
+      "amendmentDateTime": "2025-08-27T17:06:57.511Z"
+    },
+    {
+      "id": "2f459f7c-5217-4cf7-8899-95e94c38b0fb",
+      "amendmentDateTime": "2025-08-27T17:06:57.511Z"
+    },
+    {
+      "id": "38cfc32c-31bb-4bd3-b22e-35d2b829a1d3",
+      "amendmentDateTime": "2025-08-27T17:06:57.511Z"
+    },
+    {
+      "id": "54498bd6-5474-4103-a9c3-b13a3371d338",
+      "amendmentDateTime": "2025-08-27T17:06:57.511Z"
+    },
+    {
+      "id": "bd01656f-b7f7-4c8b-9b5e-84c6d4794e5c",
+      "amendmentDateTime": "2025-08-27T17:06:57.511Z"
+    }
+  ],
+  "hearingDay": "2025-08-27",
+  "version": 13
+}

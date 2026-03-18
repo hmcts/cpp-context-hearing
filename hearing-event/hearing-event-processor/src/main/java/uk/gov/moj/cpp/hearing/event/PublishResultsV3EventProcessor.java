@@ -14,10 +14,6 @@ import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
-import static javax.json.Json.createObjectBuilder;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
@@ -422,16 +418,14 @@ public class PublishResultsV3EventProcessor {
                 .collect(toList());
 
         for (final ResultLine2 resultLine : allResultLines) {
-            if (Boolean.FALSE.equals(getBooleanValue(resultLine.getIsDeleted(), false))) {
-                final TreeNode<ResultDefinition> resultDefinitionNode = referenceDataService.getResultDefinitionTreeNodeById(context, resultLine.getOrderedDate(), resultLine.getResultDefinitionId());
+            final TreeNode<ResultDefinition> resultDefinitionNode = referenceDataService.getResultDefinitionTreeNodeById(context, resultLine.getOrderedDate(), resultLine.getResultDefinitionId());
 
-                if (isNull(resultDefinitionNode)) {
-                    throw new ResultDefinitionNotFoundException(format(RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT,
-                            resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsSharedV3.getHearingId(), resultLine.getOrderedDate()));
-                }
-
-                treeNodes.add(resultDefinitionNode);
+            if (isNull(resultDefinitionNode)) {
+                throw new ResultDefinitionNotFoundException(format(RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT,
+                        resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsSharedV3.getHearingId(), resultLine.getOrderedDate()));
             }
+
+            treeNodes.add(resultDefinitionNode);
         }
         return treeNodes;
     }
