@@ -13,6 +13,7 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 
@@ -111,6 +112,42 @@ class ValidationRequestMapperTest {
         assertThat(request.getOffences().get(0).getOffenceCode(), is("TH68001"));
         assertThat(request.getOffences().get(0).getOffenceTitle(), is("Theft"));
         assertThat(request.getOffences().get(0).getOrderIndex(), is(1));
+    }
+
+    @Test
+    void shouldMapCaseUrnFromProsecutionCaseIdentifier() {
+        final UUID offenceId = randomUUID();
+        final String caseUrn = "32AH9105826";
+
+        final Offence offence = Offence.offence()
+                .withId(offenceId)
+                .withOffenceCode("TH68001")
+                .withOffenceTitle("Theft")
+                .withOrderIndex(1)
+                .build();
+
+        final Defendant defendant = Defendant.defendant()
+                .withId(randomUUID())
+                .withOffences(List.of(offence))
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                        .withCaseURN(caseUrn)
+                        .build())
+                .withDefendants(List.of(defendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withProsecutionCases(List.of(prosecutionCase))
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), emptyList());
+
+        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+
+        assertThat(request.getOffences(), hasSize(1));
+        assertThat(request.getOffences().get(0).getCaseUrn(), is(caseUrn));
     }
 
     @Test

@@ -118,13 +118,16 @@ public class ValidationRequest {
         private final String offenceCode;
         private final String offenceTitle;
         private final Integer orderIndex;
+        private final String caseUrn;
 
         public OffenceDto(final String id, final String offenceCode,
-                          final String offenceTitle, final Integer orderIndex) {
+                          final String offenceTitle, final Integer orderIndex,
+                          final String caseUrn) {
             this.id = id;
             this.offenceCode = offenceCode;
             this.offenceTitle = offenceTitle;
             this.orderIndex = orderIndex;
+            this.caseUrn = caseUrn;
         }
 
         public String getId() {
@@ -141,6 +144,10 @@ public class ValidationRequest {
 
         public Integer getOrderIndex() {
             return orderIndex;
+        }
+
+        public String getCaseUrn() {
+            return caseUrn;
         }
     }
 
