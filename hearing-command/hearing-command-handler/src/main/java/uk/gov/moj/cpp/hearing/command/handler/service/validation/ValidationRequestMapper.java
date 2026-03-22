@@ -4,6 +4,7 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 
@@ -28,6 +29,8 @@ public class ValidationRequestMapper {
 
         if (hearing.getProsecutionCases() != null) {
             for (final ProsecutionCase prosecutionCase : hearing.getProsecutionCases()) {
+                final String caseUrn = extractCaseUrn(prosecutionCase);
+
                 if (prosecutionCase.getDefendants() != null) {
                     for (final Defendant defendant : prosecutionCase.getDefendants()) {
                         defendants.add(new ValidationRequest.DefendantDto(
@@ -40,7 +43,8 @@ public class ValidationRequestMapper {
                                         uuidToString(offence.getId()),
                                         offence.getOffenceCode(),
                                         offence.getOffenceTitle(),
-                                        offence.getOrderIndex()));
+                                        offence.getOrderIndex(),
+                                        caseUrn));
                             }
                         }
                     }
@@ -73,6 +77,11 @@ public class ValidationRequestMapper {
                 resultLines,
                 offences,
                 defendants);
+    }
+
+    private String extractCaseUrn(final ProsecutionCase prosecutionCase) {
+        final ProsecutionCaseIdentifier identifier = prosecutionCase.getProsecutionCaseIdentifier();
+        return identifier != null ? identifier.getCaseURN() : null;
     }
 
     private String uuidToString(final UUID uuid) {
