@@ -4,6 +4,7 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -20,7 +21,7 @@ public class HttpClientProducer {
 
     @Produces
     @ApplicationScoped
-    public CloseableHttpClient createHttpClient() {
+    public HttpClient createHttpClient() {
         final RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectTimeout(DEFAULT_TIMEOUT_MS)
                 .setSocketTimeout(DEFAULT_TIMEOUT_MS)
