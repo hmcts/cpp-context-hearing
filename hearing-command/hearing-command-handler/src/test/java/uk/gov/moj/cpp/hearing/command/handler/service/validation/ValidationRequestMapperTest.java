@@ -15,6 +15,7 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 
 import java.time.LocalDate;
@@ -200,6 +201,108 @@ class ValidationRequestMapperTest {
         final ValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getCourtType(), is(nullValue()));
+    }
+
+    @Test
+    void shouldMapIsConcurrentFromPrompts() {
+        final SharedResultsCommandPrompt concurrentPrompt = new SharedResultsCommandPrompt(
+                randomUUID(), "Concurrent", null, "true", null, null, "concurrent");
+
+        final SharedResultsCommandResultLineV2 resultLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(randomUUID())
+                .withShortCode("IMP")
+                .withDefendantId(randomUUID())
+                .withOffenceId(randomUUID())
+                .withPrompts(List.of(concurrentPrompt))
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
+        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+
+        assertThat(request.getResultLines().get(0).getIsConcurrent(), is(true));
+        assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(nullValue()));
+    }
+
+    @Test
+    void shouldMapConsecutiveToOffenceFromPrompts() {
+        final String consecutiveOffenceId = randomUUID().toString();
+        final SharedResultsCommandPrompt consecutivePrompt = new SharedResultsCommandPrompt(
+                randomUUID(), "Consecutive to", null, consecutiveOffenceId, null, null, "consecutiveToOffenceNumber");
+
+        final SharedResultsCommandResultLineV2 resultLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(randomUUID())
+                .withShortCode("IMP")
+                .withDefendantId(randomUUID())
+                .withOffenceId(randomUUID())
+                .withPrompts(List.of(consecutivePrompt))
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
+        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+
+        assertThat(request.getResultLines().get(0).getIsConcurrent(), is(nullValue()));
+        assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(consecutiveOffenceId));
+    }
+
+    @Test
+    void shouldMapBothConcurrentAndConsecutiveFromPrompts() {
+        final String consecutiveOffenceId = randomUUID().toString();
+        final SharedResultsCommandPrompt concurrentPrompt = new SharedResultsCommandPrompt(
+                randomUUID(), "Concurrent", null, "false", null, null, "concurrent");
+        final SharedResultsCommandPrompt consecutivePrompt = new SharedResultsCommandPrompt(
+                randomUUID(), "Consecutive to", null, consecutiveOffenceId, null, null, "consecutiveToOffenceNumber");
+
+        final SharedResultsCommandResultLineV2 resultLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(randomUUID())
+                .withShortCode("IMP")
+                .withDefendantId(randomUUID())
+                .withOffenceId(randomUUID())
+                .withPrompts(List.of(concurrentPrompt, consecutivePrompt))
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
+        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+
+        assertThat(request.getResultLines().get(0).getIsConcurrent(), is(false));
+        assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(consecutiveOffenceId));
+    }
+
+    @Test
+    void shouldHandleNullPromptsGracefully() {
+        final SharedResultsCommandResultLineV2 resultLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(randomUUID())
+                .withShortCode("IMP")
+                .withDefendantId(randomUUID())
+                .withOffenceId(randomUUID())
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
+        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+
+        assertThat(request.getResultLines().get(0).getIsConcurrent(), is(nullValue()));
+        assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(nullValue()));
+    }
+
+    @Test
+    void shouldHandleEmptyPromptsGracefully() {
+        final SharedResultsCommandResultLineV2 resultLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(randomUUID())
+                .withShortCode("IMP")
+                .withDefendantId(randomUUID())
+                .withOffenceId(randomUUID())
+                .withPrompts(emptyList())
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
+        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+
+        assertThat(request.getResultLines().get(0).getIsConcurrent(), is(nullValue()));
+        assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(nullValue()));
     }
 
     private ShareDaysResultsCommand buildCommand(final UUID hearingId, final LocalDate hearingDay,
