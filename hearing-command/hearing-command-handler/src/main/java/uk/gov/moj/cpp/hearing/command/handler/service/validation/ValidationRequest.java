@@ -154,15 +154,28 @@ public class ValidationRequest {
     public static class DefendantDto {
 
         private final String id;
+        private final String firstName;
+        private final String lastName;
         private final String masterDefendantId;
 
-        public DefendantDto(final String id, final String masterDefendantId) {
+        public DefendantDto(final String id, final String firstName, final String lastName,
+                            final String masterDefendantId) {
             this.id = id;
+            this.firstName = firstName;
+            this.lastName = lastName;
             this.masterDefendantId = masterDefendantId;
         }
 
         public String getId() {
             return id;
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public String getLastName() {
+            return lastName;
         }
 
         public String getMasterDefendantId() {
