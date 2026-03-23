@@ -3,6 +3,8 @@ package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
@@ -34,8 +36,11 @@ public class ValidationRequestMapper {
 
                 if (prosecutionCase.getDefendants() != null) {
                     for (final Defendant defendant : prosecutionCase.getDefendants()) {
+                        final Person personDetails = extractPersonDetails(defendant);
                         defendants.add(new ValidationRequest.DefendantDto(
                                 uuidToString(defendant.getId()),
+                                personDetails != null ? personDetails.getFirstName() : null,
+                                personDetails != null ? personDetails.getLastName() : null,
                                 uuidToString(defendant.getMasterDefendantId())));
 
                         if (defendant.getOffences() != null) {
@@ -78,6 +83,11 @@ public class ValidationRequestMapper {
                 resultLines,
                 offences,
                 defendants);
+    }
+
+    private Person extractPersonDetails(final Defendant defendant) {
+        final PersonDefendant personDefendant = defendant.getPersonDefendant();
+        return personDefendant != null ? personDefendant.getPersonDetails() : null;
     }
 
     private String extractCaseUrn(final ProsecutionCase prosecutionCase) {
