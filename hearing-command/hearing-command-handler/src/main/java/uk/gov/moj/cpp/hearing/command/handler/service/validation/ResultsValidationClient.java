@@ -24,7 +24,7 @@ public class ResultsValidationClient implements ResultsValidator {
     private static final String CJSCPPUID = "CJSCPPUID";
 
     @Inject
-    @Value(key = "resultsvalidator.base.url", defaultValue = "http://localhost:8082/api/validation/validate")
+    @Value(key = "resultsvalidator.base.url", defaultValue = "http://localhost:8080/results-validator/api/validation/validate")
     protected String validationUrl;
 
     @Inject

@@ -6,6 +6,7 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 
 import java.util.ArrayList;
@@ -64,8 +65,8 @@ public class ValidationRequestMapper {
                         line.getResultLabel(),
                         uuidToString(line.getDefendantId()),
                         uuidToString(line.getOffenceId()),
-                        null,
-                        null));
+                        extractIsConcurrent(line.getPrompts()),
+                        extractConsecutiveToOffence(line.getPrompts())));
             }
         }
 
@@ -86,5 +87,28 @@ public class ValidationRequestMapper {
 
     private String uuidToString(final UUID uuid) {
         return uuid != null ? uuid.toString() : null;
+    }
+
+    private Boolean extractIsConcurrent(final List<SharedResultsCommandPrompt> prompts) {
+        if (prompts == null) {
+            return null;
+        }
+        return prompts.stream()
+                .filter(p -> "concurrent".equals(p.getPromptRef()))
+                .findFirst()
+                .map(p -> "true".equalsIgnoreCase(p.getValue()))
+                .orElse(null);
+    }
+
+    private String extractConsecutiveToOffence(final List<SharedResultsCommandPrompt> prompts) {
+        if (prompts == null) {
+            return null;
+        }
+        return prompts.stream()
+                .filter(p -> "consecutiveToOffenceNumber".equals(p.getPromptRef()))
+                .findFirst()
+                .map(SharedResultsCommandPrompt::getValue)
+                .filter(v -> v != null && !v.isBlank())
+                .orElse(null);
     }
 }
