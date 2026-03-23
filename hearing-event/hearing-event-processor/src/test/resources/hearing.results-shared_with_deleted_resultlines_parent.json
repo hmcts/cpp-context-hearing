@@ -1,0 +1,1633 @@
+{
+  "hearingId": "e7471522-d1e4-4293-bddf-bb96c38c92ef",
+  "sharedTime": "2025-08-27T16:01:59.115Z",
+  "courtClerk": {
+    "firstName": "Emma",
+    "lastName": "Cleaner",
+    "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+  },
+  "hearing": {
+    "courtCentre": {
+      "address": {
+        "address1": "176A Lavender Hill",
+        "address2": "London",
+        "address3": "",
+        "address4": "",
+        "address5": "",
+        "postcode": "SW11 1JU"
+      },
+      "code": "B01LY00",
+      "courtHearingLocation": "B01LY01",
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "lja": {
+        "ljaCode": "2577",
+        "ljaName": "South West London Magistrates' Court"
+      },
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01"
+    },
+    "defendantAttendance": [
+      {
+        "attendanceDays": [
+          {
+            "attendanceType": "IN_PERSON",
+            "day": "2025-08-27"
+          }
+        ],
+        "defendantId": "686e785b-105e-41a5-b22a-a689843d051f"
+      }
+    ],
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "courtCentreId": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+        "courtRoomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+        "hasSharedResults": true,
+        "isCancelled": false,
+        "listedDurationMinutes": 20,
+        "listingSequence": 0,
+        "sittingDay": "2025-08-27T20:30:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "e7471522-d1e4-4293-bddf-bb96c38c92ef",
+    "isGroupProceedings": false,
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [
+      {
+        "caseStatus": "ACTIVE",
+        "cpsOrganisation": "A30AB00",
+        "defendants": [
+          {
+            "courtProceedingsInitiated": "2025-08-27T15:17:34.427Z",
+            "id": "686e785b-105e-41a5-b22a-a689843d051f",
+            "isYouth": false,
+            "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+            "offences": [
+              {
+                "arrestDate": "2020-12-01",
+                "chargeDate": "2020-12-02",
+                "count": 0,
+                "endorsableFlag": false,
+                "id": "6910c878-e945-4177-b15f-f619b2bc7dae",
+                "listingNumber": 1,
+                "modeOfTrial": "Either Way",
+                "offenceCode": "MD71521",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "734ad209-e52b-4df1-aca0-3b1c90e58ef7",
+                "offenceLegislation": "Contrary to section 5(2) of and Schedule 4 to the Misuse of Drugs Act 1971.",
+                "offenceTitle": "Possess a controlled drug of Class B - cannabis resin",
+                "orderIndex": 1,
+                "startDate": "2019-11-28",
+                "wording": "From 13th November 2018, an aggravated version of this offence applies where the offence is committed against an emergency worker acting in the exercise of his / her functions as such a worker, as per section 1 of the Assaults on emergency Workers (Offences) Act 2018; see offence wording document H19568."
+              }
+            ],
+            "personDefendant": {
+              "arrestSummonsNumber": "E28GC19102022001",
+              "bailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              },
+              "driverNumber": "CRIME709136TC8GZ",
+              "personDetails": {
+                "address": {
+                  "address1": "c",
+                  "address2": "Hugh Parkway",
+                  "address3": "Hermannside",
+                  "address4": "Avon",
+                  "postcode": "DA6 7ND"
+                },
+                "contact": {
+                  "home": "873-655-0683"
+                },
+                "dateOfBirth": "2000-07-20",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+                  "observedEthnicityCode": "1",
+                  "observedEthnicityDescription": "White",
+                  "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                  "selfDefinedEthnicityCode": "W1",
+                  "selfDefinedEthnicityDescription": "British",
+                  "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                },
+                "firstName": "Casper",
+                "gender": "FEMALE",
+                "hearingLanguageNeeds": "ENGLISH",
+                "lastName": "Daugherty",
+                "title": "Mr"
+              },
+              "policeBailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              }
+            },
+            "prosecutionAuthorityReference": "E28GC19102022001",
+            "prosecutionCaseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2"
+          }
+        ],
+        "id": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+        "initiationCode": "C",
+        "originatingOrganisation": "0300000",
+        "prosecutionCaseIdentifier": {
+          "address": {
+            "address1": "Criminal Justice Department",
+            "address2": "Derbyshire Constabulary",
+            "address3": "Butterley Hall",
+            "address4": "Ripley",
+            "address5": "Derby",
+            "postcode": "DE5 3RS"
+          },
+          "contact": {
+            "primaryEmail": "criminaldataderbyshire@derbyshire.police.uk"
+          },
+          "majorCreditorCode": "PO30",
+          "prosecutionAuthorityCode": "DERPF",
+          "prosecutionAuthorityId": "bdc190e7-c939-37ca-be4b-9f615d6ef40e",
+          "prosecutionAuthorityName": "Derbyshire Police",
+          "prosecutionAuthorityOUCode": "0300000",
+          "caseURN": "70FF1811170"
+        }
+      }
+    ],
+    "type": {
+      "description": "First hearing",
+      "id": "4a0e892d-c0c5-3c51-95b8-704d8c781776"
+    }
+  },
+  "variantDirectory": [],
+  "completedResultLinesStatus": {
+    "e7d94ff6-0217-4e3f-8e2a-0248f929ab2d": {
+      "id": "e7d94ff6-0217-4e3f-8e2a-0248f929ab2d",
+      "lastSharedDateTime": "2025-08-27T15:20:01.219Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "3430f158-2e5f-4ebf-8f1e-9570f6f35270": {
+      "id": "3430f158-2e5f-4ebf-8f1e-9570f6f35270",
+      "lastSharedDateTime": "2025-08-27T15:20:01.219Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "b249a83e-e309-4bf0-96cd-7d3535bae70b": {
+      "id": "b249a83e-e309-4bf0-96cd-7d3535bae70b",
+      "lastSharedDateTime": "2025-08-27T15:20:01.219Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "30f1573b-0dfb-4eea-a6b2-33ce0b1a1057": {
+      "id": "30f1573b-0dfb-4eea-a6b2-33ce0b1a1057",
+      "lastSharedDateTime": "2025-08-27T15:45:16.622Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    },
+    "bb58dbef-c2a1-4473-a34c-eb5570a188b1": {
+      "id": "bb58dbef-c2a1-4473-a34c-eb5570a188b1",
+      "lastSharedDateTime": "2025-08-27T15:47:40.318Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    },
+    "42cbc2f3-7366-4ad3-af1a-f399e1c7c0c6": {
+      "id": "42cbc2f3-7366-4ad3-af1a-f399e1c7c0c6",
+      "lastSharedDateTime": "2025-08-27T15:47:40.318Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    },
+    "0a9fd761-8dfd-4ea2-8bdd-35974021dc45": {
+      "id": "0a9fd761-8dfd-4ea2-8bdd-35974021dc45",
+      "lastSharedDateTime": "2025-08-27T15:45:16.622Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    },
+    "f0de2b6b-ffb8-4e55-914e-47e6c3a80fd7": {
+      "id": "f0de2b6b-ffb8-4e55-914e-47e6c3a80fd7",
+      "lastSharedDateTime": "2025-08-27T15:20:01.219Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "bb477cfe-abbb-418c-b148-0ca9edfffc41": {
+      "id": "bb477cfe-abbb-418c-b148-0ca9edfffc41",
+      "lastSharedDateTime": "2025-08-27T15:47:40.318Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    },
+    "cffb881f-9c55-423e-99f4-683d6da08a14": {
+      "id": "cffb881f-9c55-423e-99f4-683d6da08a14",
+      "lastSharedDateTime": "2025-08-27T15:45:16.622Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    },
+    "32ae2771-7103-4558-aaec-2ca575dc74a7": {
+      "id": "32ae2771-7103-4558-aaec-2ca575dc74a7",
+      "lastSharedDateTime": "2025-08-27T15:45:16.622Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    },
+    "294f8c31-e2d5-4f18-9e4e-6f4b072ebe80": {
+      "id": "294f8c31-e2d5-4f18-9e4e-6f4b072ebe80",
+      "lastSharedDateTime": "2025-08-27T15:45:16.622Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    },
+    "bb4630e7-73a3-4763-b8ce-d4c90b75a8eb": {
+      "id": "bb4630e7-73a3-4763-b8ce-d4c90b75a8eb",
+      "lastSharedDateTime": "2025-08-27T15:20:01.219Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "220f8b93-1add-4de7-89d0-e505801a10d7": {
+      "id": "220f8b93-1add-4de7-89d0-e505801a10d7",
+      "lastSharedDateTime": "2025-08-27T15:45:16.622Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    },
+    "8ac5068c-dc0c-4a28-a3ca-9365dd349f49": {
+      "id": "8ac5068c-dc0c-4a28-a3ca-9365dd349f49",
+      "lastSharedDateTime": "2025-08-27T15:47:40.318Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    }
+  },
+  "targets": [
+    {
+      "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+      "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+      "draftResult": "{}",
+      "hearingDay": "2025-08-27",
+      "hearingId": "e7471522-d1e4-4293-bddf-bb96c38c92ef",
+      "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+      "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+      "resultLines": [
+        {
+          "amendmentDate": "2025-08-27T15:20:43.907Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:20:43.907Z\",\"validationDate\":\"2025-08-27T15:39:14.882Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "F",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
+              "label": "End Date",
+              "promptRef": "endDate",
+              "value": "2025-12-12"
+            },
+            {
+              "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
+              "label": "Responsible officer",
+              "promptRef": "responsibleOfficer",
+              "value": "a probation officer"
+            },
+            {
+              "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+              "label": "Supervising Court",
+              "promptRef": "supervisingCourt",
+              "value": "Aberystwyth Magistrates' Court"
+            },
+            {
+              "id": "73833869-1d5e-47d3-a2f5-dac8a39466b0",
+              "label": "The defendant is a persistent offender previously fined, it is in the interests of justice to make a community order instead of imposing a fine for this offence because",
+              "promptRef": "persistentOffenderPreviouslyFined",
+              "value": "test"
+            },
+            {
+              "id": "5dbfe1ce-0da9-47ab-9677-66c82ff079a7",
+              "label": "Judge reserves breach proceedings",
+              "promptRef": "judgeReservesBreachProceedings",
+              "value": "false"
+            },
+            {
+              "id": "e61aa161-8eb6-42c2-ac85-89682ba79b1f",
+              "label": "Direction that a failure to comply be dealt with by magistrates' court",
+              "promptRef": "directionThatAFailureToComplyBeDealtWithByMagistratesCourt",
+              "value": "false"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "Midlands Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "midlandsnps.court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "418b3aa7-65ab-4a4a-bab9-2f96b698118c",
+          "resultLabel": "Community order England / Wales",
+          "resultLineId": "f0de2b6b-ffb8-4e55-914e-47e6c3a80fd7",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "coew"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:20:43.907Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:20:43.907Z\",\"validationDate\":\"2025-08-27T15:39:14.882Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [],
+          "resultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "resultLabel": "Community requirements",
+          "resultLineId": "b249a83e-e309-4bf0-96cd-7d3535bae70b",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "crs"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:20:43.907Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:20:43.907Z\",\"validationDate\":\"2025-08-27T15:39:14.882Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "206a8658-96da-42cb-80a7-ae1c0e440e11",
+              "label": "Start date",
+              "promptRef": "startDate",
+              "value": "2025-08-10"
+            },
+            {
+              "id": "6dd7348a-29e8-4487-a956-ae07d7fe7668",
+              "label": "End date",
+              "promptRef": "endDate",
+              "value": "2025-12-12"
+            },
+            {
+              "id": "51f96065-e622-4f72-b7dc-0c11c17d1983",
+              "label": "Defendant to remain at",
+              "promptRef": "curfewAddressDetailsAndTimings",
+              "value": "test1"
+            },
+            {
+              "id": "e5b96ed6-7ec0-464d-a698-62bc94a7f52f",
+              "label": "Details and timings",
+              "promptRef": "detailsAndTimings",
+              "value": "test2"
+            }
+          ],
+          "resultDefinitionId": "2a9f9e63-c76a-4728-bc7f-025fed59b741",
+          "resultLabel": "Further curfew requirement made",
+          "resultLineId": "bb4630e7-73a3-4763-b8ce-d4c90b75a8eb",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "cura"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:20:43.907Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:20:43.907Z\",\"validationDate\":\"2025-08-27T15:39:14.882Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "I",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [],
+          "resultDefinitionId": "d38d9766-c141-4d6b-bb4a-249a9bb88636",
+          "resultLabel": "Is electronic monitoring required",
+          "resultLineId": "3430f158-2e5f-4ebf-8f1e-9570f6f35270",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "emreq"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:20:43.907Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:20:43.907Z\",\"validationDate\":\"2025-08-27T15:39:14.882Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+              "label": "Electronic monitoring contractor organisation name",
+              "promptRef": "electronicmonitoringcontractorOrganisationName",
+              "value": "G4S Scotland Monitoring Technologies & Services"
+            },
+            {
+              "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+              "label": "Electronic monitoring contractor email address 1",
+              "promptRef": "electronicmonitoringcontractorEmailAddress1",
+              "value": "EM.Scotland.Notifications@uk.g4s.com.cjsm.net"
+            },
+            {
+              "id": "5ce30920-b300-471c-8fd7-67f3a193476a",
+              "label": "First notification of electronic monitoring",
+              "promptRef": "firstNotificationOfElectronicMonitoring",
+              "value": "true"
+            },
+            {
+              "id": "f6ca6307-bdab-42d3-968b-44485824b535",
+              "label": "Are there any additional requirements as well?",
+              "promptRef": "areThereAnyAdditionalRequirementsAsWell",
+              "value": "false"
+            },
+            {
+              "id": "cdc4f47c-612d-4f81-b321-a2b5861d6e19",
+              "label": "Was an interpreter used?",
+              "promptRef": "wasAnInterpreterUsed",
+              "value": "false"
+            },
+            {
+              "id": "5a386999-b2d9-45f4-9b68-57000ba2d6ef",
+              "label": "Does the offender have any special needs?",
+              "promptRef": "doesTheOffenderHaveAnySpecialNeeds",
+              "value": "false"
+            }
+          ],
+          "resultDefinitionId": "dada120c-160a-49a9-b040-e8b6b7128d67",
+          "resultLabel": "Notification of electronic monitoring order (requirement)",
+          "resultLineId": "e7d94ff6-0217-4e3f-8e2a-0248f929ab2d",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "nordrc"
+        },
+        {
+          "amendmentDate": "2025-08-27T16:00:26.502Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:44:07.122Z\",\"validationDate\":\"2025-08-27T15:45:14.395Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "F",
+          "childResultLineIds": [
+            "cffb881f-9c55-423e-99f4-683d6da08a14",
+            "294f8c31-e2d5-4f18-9e4e-6f4b072ebe80",
+            "32ae2771-7103-4558-aaec-2ca575dc74a7"
+          ],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
+              "label": "Amount of fine",
+              "promptRef": "AOF",
+              "value": "200.00"
+            }
+          ],
+          "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "resultLabel": "Fine",
+          "resultLineId": "30f1573b-0dfb-4eea-a6b2-33ce0b1a1057",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "fo"
+        },
+        {
+          "amendmentDate": "2025-08-27T16:00:26.502Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:44:07.122Z\",\"validationDate\":\"2025-08-27T15:45:14.395Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "F",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "30f1573b-0dfb-4eea-a6b2-33ce0b1a1057"
+          ],
+          "prompts": [
+            {
+              "id": "de27ffb3-b7ef-4308-b8c7-ca51ab0c1136",
+              "label": "Reason for no collection order",
+              "promptRef": "reasonForNoCollectionOrder",
+              "value": "impracticable"
+            }
+          ],
+          "resultDefinitionId": "615313b5-0647-4d61-b7b8-6b36265d8929",
+          "resultLabel": "No collection order reason",
+          "resultLineId": "cffb881f-9c55-423e-99f4-683d6da08a14",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "nocollo"
+        },
+        {
+          "amendmentDate": "2025-08-27T16:00:26.502Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:44:07.122Z\",\"validationDate\":\"2025-08-27T15:45:14.395Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "30f1573b-0dfb-4eea-a6b2-33ce0b1a1057"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "cfa66730-f81c-4768-a36e-581791cb0270",
+          "resultLabel": "Has a collection order been made?",
+          "resultLineId": "294f8c31-e2d5-4f18-9e4e-6f4b072ebe80",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "collom"
+        },
+        {
+          "amendmentDate": "2025-08-27T16:00:26.502Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:44:07.122Z\",\"validationDate\":\"2025-08-27T15:45:14.395Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [
+            "065c3bb0-94e4-453a-acf4-240c514c126c"
+          ],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "30f1573b-0dfb-4eea-a6b2-33ce0b1a1057"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "3d742a7e-37a6-453c-bb6f-5e023bb19453",
+          "resultLabel": "Payment Method",
+          "resultLineId": "32ae2771-7103-4558-aaec-2ca575dc74a7",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "pm"
+        },
+        {
+          "amendmentDate": "2025-08-27T16:00:26.502Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-08-27T16:00:26.502Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-08-27T16:01:55.316Z\"},{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:44:07.122Z\",\"validationDate\":\"2025-08-27T15:45:14.395Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [],
+          "resultDefinitionId": "4fdd9548-c521-48c9-baa3-1bd2f13a4fcc",
+          "resultLabel": "Payment terms",
+          "resultLineId": "0a9fd761-8dfd-4ea2-8bdd-35974021dc45",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "payt"
+        },
+        {
+          "amendmentDate": "2025-08-27T16:00:26.502Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-08-27T16:00:26.502Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-08-27T16:01:55.316Z\"},{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:44:07.122Z\",\"validationDate\":\"2025-08-27T15:45:14.395Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "F",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "ee7d253a-c629-11e8-a355-529269fb1459",
+              "label": "Date to pay in full by",
+              "promptRef": "PBD",
+              "value": "2025-12-12"
+            }
+          ],
+          "resultDefinitionId": "bcb5a496-f7cf-11e8-8eb2-f2801f1b9fd1",
+          "resultLabel": "Pay by date",
+          "resultLineId": "220f8b93-1add-4de7-89d0-e505801a10d7",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "pdate"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:45:56.846Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:45:56.846Z\",\"validationDate\":\"2025-08-27T15:47:35.184Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[{\"type\":\"DATE\",\"label\":\"End Date\",\"value\":\"2025-11-11\",\"promptId\":\"d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9\",\"promptRef\":\"endDate\"},{\"type\":\"FIXL\",\"label\":\"Responsible officer\",\"value\":\"the officer in charge of the Attendance Centre\",\"promptId\":\"29f5b3c7-8d15-4606-9dcf-23f32a21b5ef\",\"promptRef\":\"responsibleOfficer\"}]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "F",
+          "childResultLineIds": [
+            "bb58dbef-c2a1-4473-a34c-eb5570a188b1",
+            "bb477cfe-abbb-418c-b148-0ca9edfffc41"
+          ],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
+              "label": "End Date",
+              "promptRef": "endDate",
+              "value": "2025-11-11"
+            },
+            {
+              "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
+              "label": "Responsible officer",
+              "promptRef": "responsibleOfficer",
+              "value": "the officer in charge of the Attendance Centre"
+            },
+            {
+              "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+              "label": "Supervising Court",
+              "promptRef": "supervisingCourt",
+              "value": "Aberystwyth Magistrates' Court"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "Midlands Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "midlandsnps.court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "418b3aa7-65ab-4a4a-bab9-2f96b698118c",
+          "resultLabel": "Community order England / Wales",
+          "resultLineId": "8ac5068c-dc0c-4a28-a3ca-9365dd349f49",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "coew"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:45:56.846Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:45:56.846Z\",\"validationDate\":\"2025-08-27T15:47:35.184Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [
+            "42cbc2f3-7366-4ad3-af1a-f399e1c7c0c6"
+          ],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "8ac5068c-dc0c-4a28-a3ca-9365dd349f49"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "resultLabel": "Community requirements",
+          "resultLineId": "bb58dbef-c2a1-4473-a34c-eb5570a188b1",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "crs"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:45:56.846Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:45:56.846Z\",\"validationDate\":\"2025-08-27T15:47:35.184Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "I",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "8ac5068c-dc0c-4a28-a3ca-9365dd349f49"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "d38d9766-c141-4d6b-bb4a-249a9bb88636",
+          "resultLabel": "Is electronic monitoring required",
+          "resultLineId": "bb477cfe-abbb-418c-b148-0ca9edfffc41",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "emreq"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:45:56.846Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:45:56.846Z\",\"validationDate\":\"2025-08-27T15:47:35.184Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "bb58dbef-c2a1-4473-a34c-eb5570a188b1"
+          ],
+          "prompts": [
+            {
+              "id": "f092fe58-2297-4d10-818a-8b303692ac39",
+              "label": "Under direction of",
+              "promptRef": "underDirectionOf",
+              "value": "test"
+            },
+            {
+              "id": "5e636c8d-c742-4cd4-a873-5d002ef36f5d",
+              "label": "Period of treatment",
+              "promptRef": "periodOfTreatment",
+              "value": "2 Months"
+            }
+          ],
+          "resultDefinitionId": "9941e3d0-0e80-46c6-95c6-5b4f1a88c83d",
+          "resultLabel": "Alcohol treatment",
+          "resultLineId": "42cbc2f3-7366-4ad3-af1a-f399e1c7c0c6",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "atr"
+        },
+        {
+          "amendmentDate": "2025-08-27T16:00:26.502Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-08-27T16:00:26.502Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-08-27T16:01:55.316Z\"}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "F",
+          "childResultLineIds": [
+            "886f3820-ce92-4e35-8222-b13ee2849a83"
+          ],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "32ae2771-7103-4558-aaec-2ca575dc74a7"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "f7dfefd2-64c6-11e8-adc0-fa7ae01bbebc",
+          "resultLabel": "Application made for benefit deductions",
+          "resultLineId": "065c3bb0-94e4-453a-acf4-240c514c126c",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "abdc"
+        },
+        {
+          "amendmentDate": "2025-08-27T16:00:26.502Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-08-27T16:00:26.502Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-08-27T16:01:55.316Z\"}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "I",
+          "childResultLineIds": [
+            "ace3472e-e554-419d-833d-58e475369166"
+          ],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "065c3bb0-94e4-453a-acf4-240c514c126c"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "4871697d-6dd1-4da2-8894-707e6b13c361",
+          "resultLabel": "Reserve Terms",
+          "resultLineId": "886f3820-ce92-4e35-8222-b13ee2849a83",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "rt"
+        },
+        {
+          "amendmentDate": "2025-08-27T16:00:26.502Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-08-27T16:00:26.502Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-08-27T16:01:55.316Z\"}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "F",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "886f3820-ce92-4e35-8222-b13ee2849a83"
+          ],
+          "prompts": [
+            {
+              "id": "c131cab0-5dd6-11e8-9c2d-fa7ae01bbebc",
+              "label": "Pay lump sum in full within",
+              "promptRef": "LSPW",
+              "value": "28 days"
+            }
+          ],
+          "resultDefinitionId": "a09bbfa0-5dd5-11e8-9c2d-fa7ae01bbebc",
+          "resultLabel": "Reserve Terms Lump sum",
+          "resultLineId": "ace3472e-e554-419d-833d-58e475369166",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "rlsum"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "6910c878-e945-4177-b15f-f619b2bc7dae"
+    }
+  ],
+  "savedTargets": [
+    {
+      "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+      "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+      "draftResult": "{}",
+      "hearingDay": "2025-08-27",
+      "hearingId": "e7471522-d1e4-4293-bddf-bb96c38c92ef",
+      "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+      "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+      "resultLines": [
+        {
+          "amendmentDate": "2025-08-27T15:20:43.907Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:20:43.907Z\",\"validationDate\":\"2025-08-27T15:39:14.882Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "F",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
+              "label": "End Date",
+              "promptRef": "endDate",
+              "value": "2025-12-12"
+            },
+            {
+              "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
+              "label": "Responsible officer",
+              "promptRef": "responsibleOfficer",
+              "value": "a probation officer"
+            },
+            {
+              "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+              "label": "Supervising Court",
+              "promptRef": "supervisingCourt",
+              "value": "Aberystwyth Magistrates' Court"
+            },
+            {
+              "id": "73833869-1d5e-47d3-a2f5-dac8a39466b0",
+              "label": "The defendant is a persistent offender previously fined, it is in the interests of justice to make a community order instead of imposing a fine for this offence because",
+              "promptRef": "persistentOffenderPreviouslyFined",
+              "value": "test"
+            },
+            {
+              "id": "5dbfe1ce-0da9-47ab-9677-66c82ff079a7",
+              "label": "Judge reserves breach proceedings",
+              "promptRef": "judgeReservesBreachProceedings",
+              "value": "false"
+            },
+            {
+              "id": "e61aa161-8eb6-42c2-ac85-89682ba79b1f",
+              "label": "Direction that a failure to comply be dealt with by magistrates' court",
+              "promptRef": "directionThatAFailureToComplyBeDealtWithByMagistratesCourt",
+              "value": "false"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "Midlands Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "midlandsnps.court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "418b3aa7-65ab-4a4a-bab9-2f96b698118c",
+          "resultLabel": "Community order England / Wales",
+          "resultLineId": "f0de2b6b-ffb8-4e55-914e-47e6c3a80fd7",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "coew"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:20:43.907Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:20:43.907Z\",\"validationDate\":\"2025-08-27T15:39:14.882Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [],
+          "resultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "resultLabel": "Community requirements",
+          "resultLineId": "b249a83e-e309-4bf0-96cd-7d3535bae70b",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "crs"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:20:43.907Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:20:43.907Z\",\"validationDate\":\"2025-08-27T15:39:14.882Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "206a8658-96da-42cb-80a7-ae1c0e440e11",
+              "label": "Start date",
+              "promptRef": "startDate",
+              "value": "2025-08-10"
+            },
+            {
+              "id": "6dd7348a-29e8-4487-a956-ae07d7fe7668",
+              "label": "End date",
+              "promptRef": "endDate",
+              "value": "2025-12-12"
+            },
+            {
+              "id": "51f96065-e622-4f72-b7dc-0c11c17d1983",
+              "label": "Defendant to remain at",
+              "promptRef": "curfewAddressDetailsAndTimings",
+              "value": "test1"
+            },
+            {
+              "id": "e5b96ed6-7ec0-464d-a698-62bc94a7f52f",
+              "label": "Details and timings",
+              "promptRef": "detailsAndTimings",
+              "value": "test2"
+            }
+          ],
+          "resultDefinitionId": "2a9f9e63-c76a-4728-bc7f-025fed59b741",
+          "resultLabel": "Further curfew requirement made",
+          "resultLineId": "bb4630e7-73a3-4763-b8ce-d4c90b75a8eb",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "cura"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:20:43.907Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:20:43.907Z\",\"validationDate\":\"2025-08-27T15:39:14.882Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "I",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [],
+          "resultDefinitionId": "d38d9766-c141-4d6b-bb4a-249a9bb88636",
+          "resultLabel": "Is electronic monitoring required",
+          "resultLineId": "3430f158-2e5f-4ebf-8f1e-9570f6f35270",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "emreq"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:20:43.907Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:20:43.907Z\",\"validationDate\":\"2025-08-27T15:39:14.882Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+              "label": "Electronic monitoring contractor organisation name",
+              "promptRef": "electronicmonitoringcontractorOrganisationName",
+              "value": "G4S Scotland Monitoring Technologies & Services"
+            },
+            {
+              "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+              "label": "Electronic monitoring contractor email address 1",
+              "promptRef": "electronicmonitoringcontractorEmailAddress1",
+              "value": "EM.Scotland.Notifications@uk.g4s.com.cjsm.net"
+            },
+            {
+              "id": "5ce30920-b300-471c-8fd7-67f3a193476a",
+              "label": "First notification of electronic monitoring",
+              "promptRef": "firstNotificationOfElectronicMonitoring",
+              "value": "true"
+            },
+            {
+              "id": "f6ca6307-bdab-42d3-968b-44485824b535",
+              "label": "Are there any additional requirements as well?",
+              "promptRef": "areThereAnyAdditionalRequirementsAsWell",
+              "value": "false"
+            },
+            {
+              "id": "cdc4f47c-612d-4f81-b321-a2b5861d6e19",
+              "label": "Was an interpreter used?",
+              "promptRef": "wasAnInterpreterUsed",
+              "value": "false"
+            },
+            {
+              "id": "5a386999-b2d9-45f4-9b68-57000ba2d6ef",
+              "label": "Does the offender have any special needs?",
+              "promptRef": "doesTheOffenderHaveAnySpecialNeeds",
+              "value": "false"
+            }
+          ],
+          "resultDefinitionId": "dada120c-160a-49a9-b040-e8b6b7128d67",
+          "resultLabel": "Notification of electronic monitoring order (requirement)",
+          "resultLineId": "e7d94ff6-0217-4e3f-8e2a-0248f929ab2d",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "nordrc"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:44:07.122Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:44:07.122Z\",\"validationDate\":\"2025-08-27T15:45:14.395Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "F",
+          "childResultLineIds": [
+            "cffb881f-9c55-423e-99f4-683d6da08a14",
+            "294f8c31-e2d5-4f18-9e4e-6f4b072ebe80",
+            "32ae2771-7103-4558-aaec-2ca575dc74a7"
+          ],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
+              "label": "Amount of fine",
+              "promptRef": "AOF",
+              "value": "200.00"
+            }
+          ],
+          "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "resultLabel": "Fine",
+          "resultLineId": "30f1573b-0dfb-4eea-a6b2-33ce0b1a1057",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "fo"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:44:07.122Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:44:07.122Z\",\"validationDate\":\"2025-08-27T15:45:14.395Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "F",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "DEFENDANT",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "30f1573b-0dfb-4eea-a6b2-33ce0b1a1057"
+          ],
+          "prompts": [
+            {
+              "id": "de27ffb3-b7ef-4308-b8c7-ca51ab0c1136",
+              "label": "Reason for no collection order",
+              "promptRef": "reasonForNoCollectionOrder",
+              "value": "impracticable"
+            }
+          ],
+          "resultDefinitionId": "615313b5-0647-4d61-b7b8-6b36265d8929",
+          "resultLabel": "No collection order reason",
+          "resultLineId": "cffb881f-9c55-423e-99f4-683d6da08a14",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "nocollo"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:44:07.122Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:44:07.122Z\",\"validationDate\":\"2025-08-27T15:45:14.395Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "DEFENDANT",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "30f1573b-0dfb-4eea-a6b2-33ce0b1a1057"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "cfa66730-f81c-4768-a36e-581791cb0270",
+          "resultLabel": "Has a collection order been made?",
+          "resultLineId": "294f8c31-e2d5-4f18-9e4e-6f4b072ebe80",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "collom"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:44:07.122Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:44:07.122Z\",\"validationDate\":\"2025-08-27T15:45:14.395Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [
+            "0a9fd761-8dfd-4ea2-8bdd-35974021dc45"
+          ],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "DEFENDANT",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "30f1573b-0dfb-4eea-a6b2-33ce0b1a1057"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "3d742a7e-37a6-453c-bb6f-5e023bb19453",
+          "resultLabel": "Payment Method",
+          "resultLineId": "32ae2771-7103-4558-aaec-2ca575dc74a7",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "pm"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:44:07.122Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:44:07.122Z\",\"validationDate\":\"2025-08-27T15:45:14.395Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [
+            "220f8b93-1add-4de7-89d0-e505801a10d7"
+          ],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "DEFENDANT",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "32ae2771-7103-4558-aaec-2ca575dc74a7"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "4fdd9548-c521-48c9-baa3-1bd2f13a4fcc",
+          "resultLabel": "Payment terms",
+          "resultLineId": "0a9fd761-8dfd-4ea2-8bdd-35974021dc45",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "payt"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:44:07.122Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"validatedBy\":\"Emma Cleaner\",\"amendmentDate\":\"2025-08-27T15:44:07.122Z\",\"validationDate\":\"2025-08-27T15:45:14.395Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[]}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "F",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "DEFENDANT",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "0a9fd761-8dfd-4ea2-8bdd-35974021dc45"
+          ],
+          "prompts": [
+            {
+              "id": "ee7d253a-c629-11e8-a355-529269fb1459",
+              "label": "Date to pay in full by",
+              "promptRef": "PBD",
+              "value": "2025-12-12"
+            }
+          ],
+          "resultDefinitionId": "bcb5a496-f7cf-11e8-8eb2-f2801f1b9fd1",
+          "resultLabel": "Pay by date",
+          "resultLineId": "220f8b93-1add-4de7-89d0-e505801a10d7",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "pdate"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:45:56.846Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-08-27T15:45:56.846Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[{\"type\":\"DATE\",\"label\":\"End Date\",\"value\":\"2025-11-11\",\"promptId\":\"d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9\",\"promptRef\":\"endDate\"},{\"type\":\"FIXL\",\"label\":\"Responsible officer\",\"value\":\"the officer in charge of the Attendance Centre\",\"promptId\":\"29f5b3c7-8d15-4606-9dcf-23f32a21b5ef\",\"promptRef\":\"responsibleOfficer\"}],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-08-27T15:47:35.184Z\"}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "F",
+          "childResultLineIds": [
+            "bb58dbef-c2a1-4473-a34c-eb5570a188b1",
+            "bb477cfe-abbb-418c-b148-0ca9edfffc41"
+          ],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "prompts": [
+            {
+              "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
+              "label": "End Date",
+              "promptRef": "endDate",
+              "value": "2025-11-11"
+            },
+            {
+              "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
+              "label": "Responsible officer",
+              "promptRef": "responsibleOfficer",
+              "value": "the officer in charge of the Attendance Centre"
+            },
+            {
+              "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+              "label": "Supervising Court",
+              "promptRef": "supervisingCourt",
+              "value": "Aberystwyth Magistrates' Court"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "Midlands Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "midlandsnps.court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "418b3aa7-65ab-4a4a-bab9-2f96b698118c",
+          "resultLabel": "Community order England / Wales",
+          "resultLineId": "8ac5068c-dc0c-4a28-a3ca-9365dd349f49",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "coew"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:45:56.846Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-08-27T15:45:56.846Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-08-27T15:47:35.184Z\"}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [
+            "42cbc2f3-7366-4ad3-af1a-f399e1c7c0c6"
+          ],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "8ac5068c-dc0c-4a28-a3ca-9365dd349f49"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "resultLabel": "Community requirements",
+          "resultLineId": "bb58dbef-c2a1-4473-a34c-eb5570a188b1",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "crs"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:45:56.846Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-08-27T15:45:56.846Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-08-27T15:47:35.184Z\"}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "I",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "8ac5068c-dc0c-4a28-a3ca-9365dd349f49"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "d38d9766-c141-4d6b-bb4a-249a9bb88636",
+          "resultLabel": "Is electronic monitoring required",
+          "resultLineId": "bb477cfe-abbb-418c-b148-0ca9edfffc41",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "emreq"
+        },
+        {
+          "amendmentDate": "2025-08-27T15:45:56.846Z",
+          "amendmentReason": "Admin error on shared result (a result recorded incorrectly)",
+          "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+          "amendmentsLog": "{\"isAmended\":true,\"amendmentsRecord\":[{\"amendedBy\":\"Erica Wilson\",\"amendmentDate\":\"2025-08-27T15:45:56.846Z\",\"amendmentReason\":{\"id\":\"ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0\",\"seqNo\":10,\"reasonCode\":\"AE\",\"reasonDescription\":\"Admin error on shared result (a result recorded incorrectly)\"},\"resultPromptsRecord\":[],\"validatedBy\":\"Emma Cleaner\",\"validationDate\":\"2025-08-27T15:47:35.184Z\"}]}",
+          "caseId": "b7dfc84a-6dae-4525-87bd-2bad90ce0dc2",
+          "category": "A",
+          "childResultLineIds": [],
+          "defendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "686e785b-105e-41a5-b22a-a689843d051f",
+          "nonStandaloneAncillaryResult": false,
+          "offenceId": "6910c878-e945-4177-b15f-f619b2bc7dae",
+          "orderedDate": "2025-08-27",
+          "parentResultLineIds": [
+            "bb58dbef-c2a1-4473-a34c-eb5570a188b1"
+          ],
+          "prompts": [
+            {
+              "id": "f092fe58-2297-4d10-818a-8b303692ac39",
+              "label": "Under direction of",
+              "promptRef": "underDirectionOf",
+              "value": "test"
+            },
+            {
+              "id": "5e636c8d-c742-4cd4-a873-5d002ef36f5d",
+              "label": "Period of treatment",
+              "promptRef": "periodOfTreatment",
+              "value": "2 Months"
+            }
+          ],
+          "resultDefinitionId": "9941e3d0-0e80-46c6-95c6-5b4f1a88c83d",
+          "resultLabel": "Alcohol treatment",
+          "resultLineId": "42cbc2f3-7366-4ad3-af1a-f399e1c7c0c6",
+          "shadowListed": false,
+          "sharedDate": "2025-08-27",
+          "shortCode": "atr"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "6910c878-e945-4177-b15f-f619b2bc7dae"
+    }
+  ],
+  "defendantDetailsChanged": [],
+  "isReshare": true,
+  "newAmendmentResults": [
+    {
+      "id": "30f1573b-0dfb-4eea-a6b2-33ce0b1a1057",
+      "amendmentDateTime": "2025-08-27T16:00:26.502Z"
+    },
+    {
+      "id": "cffb881f-9c55-423e-99f4-683d6da08a14",
+      "amendmentDateTime": "2025-08-27T16:00:26.502Z"
+    },
+    {
+      "id": "294f8c31-e2d5-4f18-9e4e-6f4b072ebe80",
+      "amendmentDateTime": "2025-08-27T16:00:26.502Z"
+    },
+    {
+      "id": "32ae2771-7103-4558-aaec-2ca575dc74a7",
+      "amendmentDateTime": "2025-08-27T16:00:26.502Z"
+    },
+    {
+      "id": "0a9fd761-8dfd-4ea2-8bdd-35974021dc45",
+      "amendmentDateTime": "2025-08-27T16:00:26.502Z"
+    },
+    {
+      "id": "220f8b93-1add-4de7-89d0-e505801a10d7",
+      "amendmentDateTime": "2025-08-27T16:00:26.502Z"
+    },
+    {
+      "id": "065c3bb0-94e4-453a-acf4-240c514c126c",
+      "amendmentDateTime": "2025-08-27T16:00:26.502Z"
+    },
+    {
+      "id": "886f3820-ce92-4e35-8222-b13ee2849a83",
+      "amendmentDateTime": "2025-08-27T16:00:26.502Z"
+    },
+    {
+      "id": "ace3472e-e554-419d-833d-58e475369166",
+      "amendmentDateTime": "2025-08-27T16:00:26.502Z"
+    }
+  ],
+  "hearingDay": "2025-08-27",
+  "version": 37
+}
