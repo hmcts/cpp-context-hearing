@@ -12,6 +12,8 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
@@ -78,6 +80,66 @@ class ValidationRequestMapperTest {
 
         assertThat(request.getDefendants(), hasSize(1));
         assertThat(request.getDefendants().get(0).getId(), is(defendantId.toString()));
+    }
+
+    @Test
+    void shouldMapDefendantFirstNameAndLastNameFromPersonDetails() {
+        final UUID defendantId = randomUUID();
+
+        final Person person = Person.person()
+                .withFirstName("John")
+                .withLastName("Smith")
+                .build();
+
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withPersonDetails(person)
+                .build();
+
+        final Defendant defendant = Defendant.defendant()
+                .withId(defendantId)
+                .withPersonDefendant(personDefendant)
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withDefendants(List.of(defendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withProsecutionCases(List.of(prosecutionCase))
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), emptyList());
+
+        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+
+        assertThat(request.getDefendants(), hasSize(1));
+        assertThat(request.getDefendants().get(0).getFirstName(), is("John"));
+        assertThat(request.getDefendants().get(0).getLastName(), is("Smith"));
+    }
+
+    @Test
+    void shouldHandleNullPersonDefendantGracefully() {
+        final UUID defendantId = randomUUID();
+
+        final Defendant defendant = Defendant.defendant()
+                .withId(defendantId)
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withDefendants(List.of(defendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withProsecutionCases(List.of(prosecutionCase))
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), emptyList());
+
+        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+
+        assertThat(request.getDefendants(), hasSize(1));
+        assertThat(request.getDefendants().get(0).getFirstName(), is(nullValue()));
+        assertThat(request.getDefendants().get(0).getLastName(), is(nullValue()));
     }
 
     @Test
