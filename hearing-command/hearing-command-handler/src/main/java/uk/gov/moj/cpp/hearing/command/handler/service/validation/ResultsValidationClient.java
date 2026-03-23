@@ -10,10 +10,10 @@ import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +39,7 @@ public class ResultsValidationClient implements ResultsValidator {
     private ObjectMapper objectMapper;
 
     @Inject
-    private CloseableHttpClient httpClient;
+    private HttpClient httpClient;
 
     public ResultsValidationClient() {
     }
