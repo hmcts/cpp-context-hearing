@@ -26,52 +26,56 @@ public class ValidationRequestMapper {
                 ? hearing.getJurisdictionType().name()
                 : null;
 
-        final List<ValidationRequest.DefendantDto> defendants = new ArrayList<>();
-        final List<ValidationRequest.OffenceDto> offences = new ArrayList<>();
+        final List<DefendantDto> defendants = new ArrayList<>();
+        final List<OffenceDto> offences = new ArrayList<>();
         String caseId = null;
 
-        if (hearing.getProsecutionCases() != null) {
-            for (final ProsecutionCase prosecutionCase : hearing.getProsecutionCases()) {
-                final String caseUrn = extractCaseUrn(prosecutionCase);
+        if (hearing != null && hearing.getProsecutionCases() != null) {
+            hearing.getProsecutionCases()
+                    .stream()
+                    .forEach(prosecutionCase -> {
+                        final String caseUrn = extractCaseUrn(prosecutionCase);
 
-                if (prosecutionCase.getDefendants() != null) {
-                    for (final Defendant defendant : prosecutionCase.getDefendants()) {
-                        final Person personDetails = extractPersonDetails(defendant);
-                        defendants.add(new ValidationRequest.DefendantDto(
-                                uuidToString(defendant.getId()),
-                                personDetails != null ? personDetails.getFirstName() : null,
-                                personDetails != null ? personDetails.getLastName() : null,
-                                uuidToString(defendant.getMasterDefendantId())));
+                        prosecutionCase.getDefendants()
+                                .stream()
+                                .forEach(defendant -> {
+                                    final Person personDetails = extractPersonDetails(defendant);
+                                    defendants.add(DefendantDto.builder()
+                                            .withId(uuidToString(defendant.getId()))
+                                            .withFirstName(personDetails != null ? personDetails.getFirstName() : null)
+                                            .withLastName(personDetails != null ? personDetails.getLastName() : null)
+                                            .withMasterDefendantId(uuidToString(defendant.getMasterDefendantId()))
+                                            .build());
 
-                        if (defendant.getOffences() != null) {
-                            for (final Offence offence : defendant.getOffences()) {
-                                offences.add(new ValidationRequest.OffenceDto(
-                                        uuidToString(offence.getId()),
-                                        offence.getOffenceCode(),
-                                        offence.getOffenceTitle(),
-                                        offence.getOrderIndex(),
-                                        caseUrn));
-                            }
-                        }
-                    }
-                }
-            }
+                                    if (defendant != null && defendant.getOffences()!= null) {
+                                        defendant.getOffences()
+                                                .stream()
+                                                .forEach(offence -> offences.add(new OffenceDto.Builder()
+                                                        .id(uuidToString(offence.getId()))
+                                                        .offenceCode(offence.getOffenceCode())
+                                                        .offenceTitle(offence.getOffenceTitle())
+                                                        .orderIndex(offence.getOrderIndex())
+                                                        .caseUrn(caseUrn)
+                                                        .build()));
+                                    }
+                                });
+                    });
         }
-
-        final List<ValidationRequest.ResultLineDto> resultLines = new ArrayList<>();
+        final List<ResultLineDto> resultLines = new ArrayList<>();
         if (command.getResultLines() != null) {
             for (final SharedResultsCommandResultLineV2 line : command.getResultLines()) {
                 if (caseId == null && line.getCaseId() != null) {
                     caseId = line.getCaseId().toString();
                 }
-                resultLines.add(new ValidationRequest.ResultLineDto(
-                        uuidToString(line.getResultLineId()),
-                        line.getShortCode(),
-                        line.getResultLabel(),
-                        uuidToString(line.getDefendantId()),
-                        uuidToString(line.getOffenceId()),
-                        extractIsConcurrent(line.getPrompts()),
-                        extractConsecutiveToOffence(line.getPrompts())));
+                resultLines.add(new ResultLineDto.Builder()
+                        .id(uuidToString(line.getResultLineId()))
+                        .shortCode(line.getShortCode())
+                        .label(line.getResultLabel())
+                        .defendantId(uuidToString(line.getDefendantId()))
+                        .offenceId(uuidToString(line.getOffenceId()))
+                        .consecutiveToOffence(extractConsecutiveToOffence(line.getPrompts()))
+                        .isConcurrent(extractIsConcurrent(line.getPrompts()))
+                        .build());
             }
         }
 
