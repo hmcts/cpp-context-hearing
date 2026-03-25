@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-command</artifactId>
-        <version>17.0.146</version>
+        <version>17.0.147-RESULTS-VALIDATOR-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-command-handler</artifactId>
     <packaging>war</packaging>
@@ -90,6 +90,11 @@
             <groupId>uk.gov.moj.cpp.hearing</groupId>
             <artifactId>hearing-common</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
         </dependency>
 
         <!-- Test Dependencies -->

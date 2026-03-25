@@ -58,8 +58,12 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.command.handler.service.validation.ResultsValidator;
+import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationRequestMapper;
+import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationResponse;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsValidationFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
@@ -96,7 +100,7 @@ public class ShareResultsCommandHandlerTest {
     private static UUID metadataId;
     private static ZonedDateTime sharedTime;
     @Spy
-    private final Enveloper enveloper = createEnveloperWithEvents(ResultsShared.class, SaveDraftResultFailed.class);
+    private final Enveloper enveloper = createEnveloperWithEvents(ResultsShared.class, SaveDraftResultFailed.class, ResultsValidationFailed.class);
     private DefendantDetailsUpdated defendantDetailsUpdated;
     @InjectMocks
     private ShareResultsCommandHandler shareResultsCommandHandler;
@@ -110,6 +114,10 @@ public class ShareResultsCommandHandlerTest {
     private AggregateService aggregateService;
     @Mock
     private Clock clock;
+    @Mock
+    private ResultsValidator resultsValidationClient;
+    @Mock
+    private ValidationRequestMapper validationRequestMapper;
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
     @Spy
