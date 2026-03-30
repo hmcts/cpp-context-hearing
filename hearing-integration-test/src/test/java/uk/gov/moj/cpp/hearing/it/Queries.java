@@ -68,6 +68,14 @@ public class Queries {
         pollQueryEndpoint(jsonPayloadMatchesBean(HearingDetailsResponse.class, resultMatcher), timeout, requestParams);
     }
 
+    public static void getHearingForManageHearingPollForMatch(final UUID hearingId, final long timeout, final BeanMatcher<HearingDetailsResponse> resultMatcher) {
+        final RequestParams requestParams = requestParams(getURL("hearing.get.hearing-for-manage-hearing", hearingId), "application/vnd.hearing.get.hearing-for-manage-hearing+json")
+                .withHeader(HeaderConstants.USER_ID, getLoggedInUser())
+                .build();
+
+        pollQueryEndpoint(jsonPayloadMatchesBean(HearingDetailsResponse.class, resultMatcher), timeout, requestParams);
+    }
+
     public static void getHearingsByDatePollForMatch(final UUID courtCentreId, final UUID roomId, final String date, final String startTime, final String endTime, final BeanMatcher<GetHearings> resultMatcher) {
 
         final RequestParams requestParams = requestParams(getURL("hearing.get.hearings", date, startTime, endTime, courtCentreId, roomId), "application/vnd.hearing.get.hearings+json")

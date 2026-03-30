@@ -5,7 +5,6 @@ import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -15,6 +14,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createObjectBuilder;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
@@ -30,7 +30,6 @@ import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.exception.ForbiddenRequestException;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -48,7 +47,6 @@ import uk.gov.moj.cpp.hearing.domain.referencedata.HearingType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
-import uk.gov.moj.cpp.hearing.mapping.DraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ResultLineJPAMapper;
@@ -67,7 +65,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Witness;
 import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
@@ -143,9 +140,6 @@ public class HearingService {
     private static final ZoneId ZONE_ID = ZoneId.of(ZoneOffset.UTC.getId());
     private static final UtcClock UTC_CLOCK = new UtcClock();
 
-    static final String COURT_APPLICATIONS = "courtApplications";
-    static final String ID = "id";
-    static final String APPLICATION_STATUS = "applicationStatus";
     @Inject
     private HearingRepository hearingRepository;
 
@@ -164,8 +158,6 @@ public class HearingService {
     @Inject
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
     @Inject
-    private StringToJsonObjectConverter stringToJsonObjectConverter;
-    @Inject
     private HearingJPAMapper hearingJPAMapper;
     @Inject
     private ProsecutionCaseJPAMapper prosecutionCaseJPAMapper;
@@ -173,8 +165,6 @@ public class HearingService {
     private TargetJPAMapper targetJPAMapper;
     @Inject
     private ResultLineJPAMapper resultLineJPAMapper;
-    @Inject
-    private DraftResultJPAMapper draftResultJPAMapper;
     @Inject
     private GetHearingsTransformer getHearingTransformer;
     @Inject
@@ -318,7 +308,7 @@ public class HearingService {
                                                           final LocalDate localDate,
                                                           final Set<UUID> cppHearingEventIds) {
         LOGGER.info("courtCentreList: {}, localDate: {}, cppHearingEventIds: {}", courtCentreList, localDate, cppHearingEventIds);
-        if(courtCentreList.isEmpty()){
+        if (courtCentreList.isEmpty()) {
             return empty();
         }
         final List<Object[]> results = hearingEventRepository.findLatestHearingsForThatDayByCourts(courtCentreList, localDate, cppHearingEventIds);
@@ -675,7 +665,7 @@ public class HearingService {
                 hearingDetailsResponse.getHearing().getCourtApplications().stream()
                         .filter(ca -> !EJECTED.equals(ca.getApplicationStatus()))
                         .forEach(courtApplication -> {
-                            final List<HearingApplication> applicationHearings = hearingApplicationRepository.findByApplicationId(courtApplication.getId());
+                                    final List<HearingApplication> applicationHearings = hearingApplicationRepository.findByApplicationId(courtApplication.getId());
                                     hearingDetailsResponse.getCourtApplicationAdditionalFields()
                                             .put(courtApplication.getId(), new CourtApplicationAdditionalFields(isAmendmentAllowed(finalHearingEntity.getId(), applicationHearings)));
                                 }
@@ -1135,5 +1125,61 @@ public class HearingService {
             return true;
         }
         return response.payload().getBoolean("hasPermission");
+    }
+
+    public HearingDetailsResponse filterOutOffences(final HearingDetailsResponse payload) {
+        if (isNotApplicationHearing(payload.getHearing())) {
+            return payload;
+        }
+
+        payload.setHearing(buildHearingWithFilteredOffences(payload.getHearing()));
+
+        return payload;
+    }
+
+    private uk.gov.justice.core.courts.Hearing buildHearingWithFilteredOffences(final uk.gov.justice.core.courts.Hearing hearing) {
+        return uk.gov.justice.core.courts.Hearing.hearing()
+                .withValuesFrom(hearing)
+                .withProsecutionCases(buildProsecutionCasesWithFilteredOffences(hearing))
+                .build();
+    }
+
+    private List<uk.gov.justice.core.courts.ProsecutionCase> buildProsecutionCasesWithFilteredOffences(final uk.gov.justice.core.courts.Hearing hearing) {
+        if (isNull(hearing.getProsecutionCases())) {
+            return null;
+        }
+
+        return hearing.getProsecutionCases().stream()
+                .map(pc -> uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase()
+                        .withValuesFrom(pc)
+                        .withDefendants(pc.getDefendants().stream()
+                                .map(defendant -> uk.gov.justice.core.courts.Defendant.defendant()
+                                        .withValuesFrom(defendant)
+                                        .withOffences(buildFilteredOffenceList(hearing, defendant))
+                                        .build())
+                                .collect(toList()))
+                        .build())
+                .collect(toList());
+
+    }
+
+    private List<uk.gov.justice.core.courts.Offence> buildFilteredOffenceList(final uk.gov.justice.core.courts.Hearing hearing, final uk.gov.justice.core.courts.Defendant defendant) {
+        if (isApplicationHasOffences(hearing)) { // if application has offenses, then remove offenses from case level
+            return null;
+        }
+        return defendant.getOffences();
+    }
+
+    private boolean isApplicationHasOffences(final uk.gov.justice.core.courts.Hearing hearing) {
+        if (Objects.isNull(hearing.getCourtApplications())) {
+            return false;
+        }
+        return hearing.getCourtApplications().stream()
+                .anyMatch(application -> !Objects.isNull(application.getCourtApplicationCases()) && application.getCourtApplicationCases().stream()
+                        .anyMatch(courtApplicationCase -> isNotEmpty(courtApplicationCase.getOffences())));
+    }
+
+    private boolean isNotApplicationHearing(final uk.gov.justice.core.courts.Hearing hearing) {
+        return isEmpty(hearing.getCourtApplications());
     }
 }
