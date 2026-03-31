@@ -257,6 +257,10 @@ public class HearingJPAMapper {
         if (courtApplications == null) {
             courtApplications = emptyList();
         }
+        courtApplications.stream()
+                .filter(ca -> ofNullable(ca.getCourtApplicationCases()).orElse(emptyList()).stream()
+                        .anyMatch(cac -> prosecutionCaseId.equals(cac.getProsecutionCaseId())))
+                .forEach(ca -> ca.setApplicationStatus(status));
         return courtApplicationsSerializer.json(courtApplications);
     }
 
