@@ -30,8 +30,8 @@
         <material.version>17.0.57</material.version>
         <results.version>17.0.58</results.version>
         <notification.notify.version>17.0.1</notification.notify.version>
-        <stagingenforcement.version>17.103.73</stagingenforcement.version>
-        <progression.version>17.0.240</progression.version>
+        <stagingenforcement.version>17.103.76</stagingenforcement.version>
+        <progression.version>17.0.246</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
