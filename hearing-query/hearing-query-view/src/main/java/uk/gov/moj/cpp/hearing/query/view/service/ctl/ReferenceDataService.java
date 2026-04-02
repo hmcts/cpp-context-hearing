@@ -33,6 +33,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.empty;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
@@ -78,14 +79,22 @@ public class ReferenceDataService {
 
     public Boolean isOffenceActiveOrder(final UUID applicationTypeId) {
         final CourtApplicationType applicationType = getApplicationType(applicationTypeId);
-        return applicationType.getOffenceActiveOrder() == OffenceActiveOrder.OFFENCE
-                || applicationType.getOffenceActiveOrder() == OffenceActiveOrder.COURT_ORDER ;
+        if(nonNull(applicationType)) {
+            return applicationType.getOffenceActiveOrder() == OffenceActiveOrder.OFFENCE
+                    || applicationType.getOffenceActiveOrder() == OffenceActiveOrder.COURT_ORDER;
+        }else{
+            return false;
+        }
     }
 
 
     private CourtApplicationType getApplicationType(final UUID applicationTypeId) {
         final JsonObject jsonObject = getRefData(REFERENCEDATA_QUERY_APPLICATION_TYPE, createObjectBuilder().add("id", applicationTypeId.toString()));
-        return asApplicationTypeRefData().apply(jsonObject);
+        if(nonNull(jsonObject) && !jsonObject.isEmpty()) {
+            return asApplicationTypeRefData().apply(jsonObject);
+        }else{
+            return null;
+        }
     }
 
     private JsonObject getRefData(final String queryName, final JsonObjectBuilder jsonObjectBuilder) {

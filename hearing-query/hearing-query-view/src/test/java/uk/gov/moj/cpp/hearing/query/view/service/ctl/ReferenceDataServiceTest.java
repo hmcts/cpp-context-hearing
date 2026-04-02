@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.query.view.service.ctl;
 
 import static java.time.LocalDate.now;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static javax.json.Json.createReader;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -111,6 +112,20 @@ public class ReferenceDataServiceTest {
     public void shouldReturnTrueIfTypeOffenceActiveOrderIsNonOffence() {
         final JsonEnvelope value = getCourtApplicationType("court-application-type-non-offence.json");
         when(requester.requestAsAdmin(any(), any(Class.class))).thenReturn(value);
+
+        boolean results = referenceDataService.isOffenceActiveOrder(UUID.fromString("72fab61d-e166-4e44-9a4e-046866511993"));
+
+        assertFalse(results);
+
+    }
+
+    @Test
+    public void shouldReturnNullIfApplicationTypeIsNotFound() {
+
+        when(requester.requestAsAdmin(any(), any(Class.class))).thenReturn(envelopeFrom(
+                metadataBuilder().
+                        withName("referencedata.query.application-type").
+                        withId(randomUUID()),createObjectBuilder().build()));
 
         boolean results = referenceDataService.isOffenceActiveOrder(UUID.fromString("72fab61d-e166-4e44-9a4e-046866511993"));
 
