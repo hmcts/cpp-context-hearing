@@ -1419,7 +1419,8 @@ public class HearingEventListenerTest {
         final UUID trialTypeId = randomUUID();
         final Hearing hearingEntity = new Hearing()
                 .setId(hearingId);
-        final HearingTrialType hearingTrialType = new HearingTrialType(hearingId, trialTypeId, "A", "Effective", "full description");
+        final UUID crackedIneffectiveSubReasonId = randomUUID();
+        final HearingTrialType hearingTrialType = new HearingTrialType(hearingId, trialTypeId, "A", "Effective", "full description",crackedIneffectiveSubReasonId);
         when(hearingRepository.findBy(hearingId)).thenReturn(hearingEntity);
 
         hearingEventListener.setHearingTrialType(envelopeFrom(metadataWithRandomUUID("hearing.hearing-trial-type-set"),
@@ -1431,6 +1432,7 @@ public class HearingEventListenerTest {
         assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
                 .with(Hearing::getId, is(hearingId))
                 .with(Hearing::getTrialTypeId, is(trialTypeId))
+                .with(Hearing::getCrackedIneffectiveSubReasonId, is(crackedIneffectiveSubReasonId))
         );
     }
 

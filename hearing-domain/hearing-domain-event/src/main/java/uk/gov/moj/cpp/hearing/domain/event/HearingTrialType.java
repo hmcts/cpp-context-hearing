@@ -15,18 +15,21 @@ public class HearingTrialType {
     private String code;
     private String description;
     private String type;
+    private UUID crackedIneffectiveSubReasonId;
 
     @JsonCreator
     public HearingTrialType(@JsonProperty("hearingId") final UUID hearingId,
                             @JsonProperty("trialTypeId") final UUID trialTypeId,
                             @JsonProperty("code") final String code,
                             @JsonProperty("type") final String type,
-                            @JsonProperty("description") final String description) {
+                            @JsonProperty("description") final String description,
+                            @JsonProperty("crackedIneffectiveSubReasonId") final UUID crackedIneffectiveSubReasonId) {
         this.hearingId = hearingId;
         this.trialTypeId = trialTypeId;
         this.code = code;
         this.description = description;
         this.type = type;
+        this.crackedIneffectiveSubReasonId = crackedIneffectiveSubReasonId;
     }
 
     public UUID getHearingId() {
@@ -48,4 +51,6 @@ public class HearingTrialType {
     public String getType() {
         return type;
     }
+
+    public UUID getCrackedIneffectiveSubReasonId() {return crackedIneffectiveSubReasonId;}
 }

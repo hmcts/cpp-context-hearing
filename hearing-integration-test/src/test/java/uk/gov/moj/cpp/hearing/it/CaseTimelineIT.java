@@ -137,6 +137,7 @@ public class CaseTimelineIT extends AbstractIT {
 
     private void setUpHearing(final ZonedDateTime sittingDay, final Boolean isBoxHearing) {
         final InitiateHearingCommand initiateHearingCommand = isBoxHearing == null ? standardInitiateHearingTemplate() : standardInitiateHearingTemplateWithIsBoxHearing(isBoxHearing);
+        final UUID crackedIneffectiveSubReasonId = randomUUID();
         hearing = initiateHearingCommand.getHearing();
         hearingDay = hearing.getHearingDays().get(0);
         hearingDay.setSittingDay(sittingDay);
@@ -146,6 +147,7 @@ public class CaseTimelineIT extends AbstractIT {
         final TrialType addTrialType = builder()
                 .withHearingId(hearing.getId())
                 .withTrialTypeId(INEFFECTIVE_TRIAL_TYPE_ID)
+                .withCrackedIneffectiveSubReasonId(crackedIneffectiveSubReasonId)
                 .build();
 
         setTrialType(getRequestSpec(), hearing.getId(), addTrialType);

@@ -1174,8 +1174,9 @@ public class HearingServiceTest {
         entity.setTrialTypeId(trialTypeId);
 
         when(hearingRepository.findBy(hearingId)).thenReturn(entity);
-
+        when(entity.getTrialTypeId()).thenReturn(trialTypeId);
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+
         when(pojo.getCourtApplications()).thenReturn(null);
 
         final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(null, hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), prosecutionCasesIdsWithAccess, false);

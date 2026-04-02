@@ -148,6 +148,9 @@ public class Hearing {
     @Column(name = "first_shared_date")
     private ZonedDateTime firstSharedDate;
 
+    @Column(name = "cracked_ineffective_sub_reason_id")
+    private UUID crackedIneffectiveSubReasonId;
+
     public Hearing() {
         //For JPA
     }
@@ -486,6 +489,10 @@ public class Hearing {
     public void setFirstSharedDate(ZonedDateTime firstSharedDate) {
         this.firstSharedDate = firstSharedDate;
     }
+
+    public UUID getCrackedIneffectiveSubReasonId() {return crackedIneffectiveSubReasonId;}
+
+    public void setCrackedIneffectiveSubReasonId(UUID crackedIneffectiveSubReasonId) {this.crackedIneffectiveSubReasonId = crackedIneffectiveSubReasonId;}
 
     @Override
     public boolean equals(final Object o) {

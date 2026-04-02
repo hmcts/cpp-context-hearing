@@ -436,6 +436,7 @@ public class HearingEventListener {
         final Hearing hearing = hearingRepository.findBy(hearingTrialType.getHearingId());
         if (nonNull(hearing)) {
             hearing.setTrialTypeId(hearingTrialType.getTrialTypeId());
+            hearing.setCrackedIneffectiveSubReasonId(hearingTrialType.getCrackedIneffectiveSubReasonId());
             hearing.setIsEffectiveTrial(null);
             hearing.setIsVacatedTrial(false);
             hearing.setvacatedTrialReasonId(null);
