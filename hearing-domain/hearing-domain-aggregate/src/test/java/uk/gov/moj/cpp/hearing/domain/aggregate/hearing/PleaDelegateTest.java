@@ -475,6 +475,9 @@ public class PleaDelegateTest {
                 .withProsecutionCaseId(CASE_ID)
                 .withDefendantId(DEFENDANT_ID)
                 .withOffenceId(OFFENCE_ID)
+                .withAllocationDecision(AllocationDecision.allocationDecision()
+                        .withOffenceId(OFFENCE_ID)
+                        .build())
                 .withIndicatedPlea(IndicatedPlea.indicatedPlea()
                         .withOffenceId(OFFENCE_ID)
                         .withIndicatedPleaDate(indicatedPleaDate)
@@ -487,6 +490,7 @@ public class PleaDelegateTest {
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
         assertThat(pleaUpsert.getHearingId(), is(HEARING_ID));
+        assertThat(pleaUpsert.getPleaModel().getAllocationDecision(), is(notNullValue()));
 
         final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) events.get(1);
         assertThat(convictionDateAdded, is(notNullValue()));
@@ -588,6 +592,64 @@ public class PleaDelegateTest {
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
         assertThat(pleaUpsert.getHearingId(), is(HEARING_ID));
+    }
+
+    @Test
+    public void shouldNotAddConvictionDateIfCaseIsCivil() {
+        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
+        hearing.getProsecutionCases().get(0).setIsCivil(true);
+
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withProsecutionCaseId(CASE_ID)
+                .withDefendantId(DEFENDANT_ID)
+                .withOffenceId(OFFENCE_ID)
+                .withPlea(Plea.plea()
+                        .withOffenceId(OFFENCE_ID)
+                        .withPleaDate(PAST_LOCAL_DATE.next())
+                        .withPleaValue(GUILTY)
+                        .build())
+                .build();
+
+        final List<Object> events = pleaDelegate.updatePlea(HEARING_ID, pleaModel, guiltyPleaTypes()).toList();
+
+        assertThat(events.size(), is(1));
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertThat(pleaUpsert.getHearingId(), is(HEARING_ID));
+
+        assertThat(events.stream().filter(ConvictionDateAdded.class::isInstance).count(), is(0L));
+    }
+
+    @Test
+    public void shouldRemoveAllocationDecisionValuesWhenCaseIsCivil() {
+        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
+        hearing.getProsecutionCases().get(0).setIsCivil(true);
+
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withProsecutionCaseId(CASE_ID)
+                .withDefendantId(DEFENDANT_ID)
+                .withOffenceId(OFFENCE_ID)
+                .withAllocationDecision(AllocationDecision.allocationDecision()
+                        .withOffenceId(OFFENCE_ID)
+                        .build())
+                .withPlea(Plea.plea()
+                        .withOffenceId(OFFENCE_ID)
+                        .withPleaDate(PAST_LOCAL_DATE.next())
+                        .withPleaValue(GUILTY)
+                        .build())
+                .build();
+
+        final List<Object> events = pleaDelegate.updatePlea(HEARING_ID, pleaModel, guiltyPleaTypes()).toList();
+
+        assertThat(events.size(), is(1));
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertThat(pleaUpsert.getHearingId(), is(HEARING_ID));
+        assertThat(pleaUpsert.getPleaModel().getAllocationDecision(), is(nullValue()));
     }
 
     @Test
