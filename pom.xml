@@ -4,11 +4,11 @@
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>17.105.0-M11-SNAPSHOT</version>
+        <version>17.105.0-M13-SNAPSHOT</version>
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
-    <version>17.105.147-PEG-2910-SNAPSHOT</version>
+    <version>17.105.148-PEG-2910-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Hearing Context - Parent Module</name>
