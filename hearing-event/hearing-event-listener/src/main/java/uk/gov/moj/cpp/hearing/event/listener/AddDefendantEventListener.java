@@ -45,7 +45,9 @@ public class AddDefendantEventListener {
             return;
         }
 
-        hearingEntity.getProsecutionCases().forEach(prosecutionCase -> prosecutionCase.getDefendants().add(defendantJPAMapper.toJPA(hearingEntity, prosecutionCase, defendantIn)));
+        hearingEntity.getProsecutionCases()
+                .stream().filter(pCase -> pCase.getId().getId().equals(caseDefendantAdded.getDefendant().getProsecutionCaseId()))
+                .forEach(prosecutionCase -> prosecutionCase.getDefendants().add(defendantJPAMapper.toJPA(hearingEntity, prosecutionCase, defendantIn)));
 
         hearingRepository.save(hearingEntity);
     }

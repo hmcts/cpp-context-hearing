@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static java.util.Arrays.asList;
 import static org.apache.deltaspike.core.util.ArraysUtils.asSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -56,6 +57,20 @@ public class DefendantJPAMapperTest {
         final Defendant defendantPojo = defendantJPAMapper.fromJPA(defendantEntity);
 
         assertThat(defendantJPAMapper.toJPA(hearingEntity, prosecutionCaseEntity, defendantPojo), whenDefendant(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant.class), defendantPojo));
+    }
+
+    @Test
+    void testToJPAWithMultipleCaseAndDefendants() {
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearingEntity = aNewHearingJPADataTemplate(2).getHearing();
+        final List<ProsecutionCase> prosecutionCaseList = hearingEntity.getProsecutionCases().stream().toList();
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity = prosecutionCaseList.get(0).getDefendants().iterator().next();
+        final Defendant defendantPojo = defendantJPAMapper.fromJPA(defendantEntity);
+        final Defendant defendant2 = Defendant.defendant().withValuesFrom(defendantPojo).withId(UUID.randomUUID()).withProsecutionCaseId(prosecutionCaseList.get(1).getId().getId()).build();
+
+        final List<uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant> defendants = defendantJPAMapper.toJPA(hearingEntity, prosecutionCaseList.get(1), asList(defendantPojo, defendant2)).stream().toList();
+
+        assertThat(defendants.size(), is(1));
+        assertThat(defendants.get(0).getProsecutionCaseId(), is(prosecutionCaseList.get(1).getId().getId()));
     }
 
     @SuppressWarnings("unchecked")

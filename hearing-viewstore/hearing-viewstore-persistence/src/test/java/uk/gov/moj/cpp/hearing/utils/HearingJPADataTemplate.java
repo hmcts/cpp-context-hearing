@@ -35,6 +35,10 @@ public final class HearingJPADataTemplate {
     }
 
     private HearingJPADataTemplate(final boolean sysoutPrint) {
+        this(sysoutPrint, 1);
+    }
+
+    private HearingJPADataTemplate(final boolean sysoutPrint, final int cases) {
         //
         final uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearingEntity = aNewEnhancedRandom().nextObject(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing.class);
         hearingEntity.setHearingLanguage(RandomGenerator.values(HearingLanguage.values()).next());
@@ -55,7 +59,7 @@ public final class HearingJPADataTemplate {
                 });
 
         //
-        randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase.class)
+        randomStreamOf(cases, uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase.class)
                 .forEach(prosecutionCase -> {
                     prosecutionCase.setId(aNewHearingSnapshotKey(hearingEntity.getId()));
                     prosecutionCase.setHearing(hearingEntity);
@@ -194,6 +198,10 @@ public final class HearingJPADataTemplate {
 
     public static HearingJPADataTemplate aNewHearingJPADataTemplate() {
         return new HearingJPADataTemplate();
+    }
+
+    public static HearingJPADataTemplate aNewHearingJPADataTemplate(final int cases) {
+        return new HearingJPADataTemplate(false, cases);
     }
 
     public static HearingJPADataTemplate aNewHearingJPADataTemplate(final boolean sysoutPrint) {
