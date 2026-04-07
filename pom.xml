@@ -25,13 +25,13 @@
         <datafactory.version>0.8</datafactory.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
         <authorisation.service.version>0.1.96</authorisation.service.version>
-        <coredomain.version>17.102.17-DLRM7-SNAPSHOT</coredomain.version>
-        <referencedata.version>17.103.129</referencedata.version>
+        <coredomain.version>17.102.20-DLRM7-SNAPSHOT</coredomain.version>
+        <referencedata.version>17.103.131</referencedata.version>
         <material.version>17.0.75</material.version>
         <results.version>17.103.95</results.version>
         <notification.notify.version>17.0.1</notification.notify.version>
-        <stagingenforcement.version>17.103.73</stagingenforcement.version>
-        <progression.version>17.0.219</progression.version>
+        <stagingenforcement.version>17.103.77</stagingenforcement.version>
+        <progression.version>17.0.248</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
@@ -160,3 +160,4 @@
         </site>
     </distributionManagement>
 </project>
+

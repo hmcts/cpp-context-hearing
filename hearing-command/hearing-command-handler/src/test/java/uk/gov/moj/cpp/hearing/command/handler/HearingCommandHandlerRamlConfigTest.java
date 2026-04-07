@@ -61,7 +61,6 @@ public class HearingCommandHandlerRamlConfigTest {
                 UpdateDefendantLegalAidStatusCommandHandler.class,
                 UpdateCaseDefendantsHandler.class,
                 PublishCourtListStatusHandler.class,
-                ComputeOutstandingFinesCommandHandler.class,
                 SessionTimeCommandHandler.class,
                 BookProvisionalHearingSlotsCommandHandler.class,
                 ClearVacatedReasonCommandHandler.class,
