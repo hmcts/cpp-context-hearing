@@ -81,7 +81,7 @@
           </elementProp>
           <elementProp name="waitAfterEachCommand" elementType="Argument">
             <stringProp name="Argument.name">waitAfterEachCommand</stringProp>
-            <stringProp name="Argument.value">1000</stringProp>
+            <stringProp name="Argument.value">500</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -1030,7 +1030,7 @@ log.info(&quot;thread count -&gt; &quot; + vars.get(&quot;numberOfThreads&quot;)
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ShareResultsForHearingWithMultipleCasesWithApplicationClearVerdict" enabled="true">
         <stringProp name="ThreadGroup.num_threads">${numberOfThreads}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${rampUpPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -1429,7 +1429,7 @@ vars.put(&quot;jsonMessage&quot;, evaluatedJson)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
           <stringProp name="ConstantTimer.delay">${waitAfterEachCommand}</stringProp>
         </ConstantTimer>
         <hashTree/>
