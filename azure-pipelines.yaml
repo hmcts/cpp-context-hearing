@@ -6,7 +6,6 @@ trigger:
     include:
       - main
       - 'team/*'
-      - 'dev/PEG-3047'
     exclude:
       - 'dev/release-*'
   paths:
