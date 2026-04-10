@@ -60,9 +60,8 @@ public class HearingDeletedEventListener {
 
         if(!prosecutionCases.isEmpty()) {
             prosecutionCases.forEach(pcRepository::remove);
+            pcRepository.flush();
         }
-
-        pcRepository.flush();
 
         final Hearing hearing = hearingRepository.findBy(hearingId);
 
