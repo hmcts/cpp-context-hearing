@@ -19,6 +19,7 @@ import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUserGroupLogged
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithoutCases;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CourtOrder;
 import uk.gov.justice.core.courts.Hearing;
@@ -63,6 +64,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ExtendWith(DatabaseResetExtension.class)
 public class AbstractIT {
     public static final String CONTEXT_NAME = "hearing";
     public static final Properties ENDPOINT_PROPERTIES = new Properties();
