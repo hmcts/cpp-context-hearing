@@ -237,15 +237,6 @@ public class HearingCommandApiTest {
     }
 
     @Test
-    public void shouldPassThroughComputeOutstandingFinesRequestToCommandHandler() {
-        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.compute-outstanding-fines");
-
-        hearingCommandApi.computeOutstandingFines(jsonRequestEnvelope);
-
-        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.compute-outstanding-fines");
-    }
-
-    @Test
     public void shouldPassThroughBookProvisionalHearingSlotsRequestToCommandHandler() {
         final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.book-provisional-hearing-slots");
 

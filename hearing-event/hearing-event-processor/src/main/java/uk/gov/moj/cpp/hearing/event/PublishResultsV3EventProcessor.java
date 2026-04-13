@@ -419,16 +419,14 @@ public class PublishResultsV3EventProcessor {
                 .collect(toList());
 
         for (final ResultLine2 resultLine : allResultLines) {
-            if (Boolean.FALSE.equals(getBooleanValue(resultLine.getIsDeleted(), false))) {
-                final TreeNode<ResultDefinition> resultDefinitionNode = referenceDataService.getResultDefinitionTreeNodeById(context, resultLine.getOrderedDate(), resultLine.getResultDefinitionId());
+            final TreeNode<ResultDefinition> resultDefinitionNode = referenceDataService.getResultDefinitionTreeNodeById(context, resultLine.getOrderedDate(), resultLine.getResultDefinitionId());
 
-                if (isNull(resultDefinitionNode)) {
-                    throw new ResultDefinitionNotFoundException(format(RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT,
-                            resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsSharedV3.getHearingId(), resultLine.getOrderedDate()));
-                }
-
-                treeNodes.add(resultDefinitionNode);
+            if (isNull(resultDefinitionNode)) {
+                throw new ResultDefinitionNotFoundException(format(RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT,
+                        resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsSharedV3.getHearingId(), resultLine.getOrderedDate()));
             }
+
+            treeNodes.add(resultDefinitionNode);
         }
         return treeNodes;
     }

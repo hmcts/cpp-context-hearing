@@ -273,10 +273,6 @@ subscriptions_descriptor:
         - name: hearing.application-defendants-updated
           schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.application-defendants-updated.json
 
-        # Outstanding Fines Queried
-        - name: hearing.compute-outstanding-fines-requested
-          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.compute-outstanding-fines-requested.json
-
         # Set Trial Type
         - name: hearing.hearing-trial-type-set
           schema_uri: http://justice.gov.uk/hearing/courts/hearing.hearing-trial-type-set.json

@@ -43,17 +43,17 @@ class SetHearingTrialTypeIT extends AbstractIT {
 
         final Hearing hearing = initiateHearingCommand.getHearing();
         h(initiateHearing(getRequestSpec(), initiateHearingCommand));
-
+        final UUID crackedIneffectiveSubReasonId = randomUUID();
         final TrialType addTrialType = builder()
                 .withHearingId(hearing.getId())
                 .withTrialTypeId(INEFFECTIVE_TRIAL_TYPE_ID)
+                .withCrackedIneffectiveSubReasonId(crackedIneffectiveSubReasonId)
                 .build();
 
         setTrialType(getRequestSpec(), hearing.getId(), addTrialType);
 
         final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = INEFFECTIVE_TRIAL_TYPE;
-
-        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getDate(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
+        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveSubReasonId, crackedIneffectiveVacatedTrialType.getDate(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
 
         getHearingPollForMatch(hearing.getId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -97,7 +97,7 @@ class SetHearingTrialTypeIT extends AbstractIT {
 
         final CrackedIneffectiveVacatedTrialType trialType = VACATED_TRIAL_TYPE;
 
-        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(trialType.getReasonCode(), trialType.getDate(), trialType.getReasonFullDescription(), trialType.getId(), trialType.getTrialType());
+        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(trialType.getReasonCode(), null, trialType.getDate(), trialType.getReasonFullDescription(), trialType.getId(), trialType.getTrialType());
 
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
