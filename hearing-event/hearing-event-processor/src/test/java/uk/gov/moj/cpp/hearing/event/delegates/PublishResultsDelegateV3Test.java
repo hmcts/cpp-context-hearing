@@ -21,11 +21,13 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantJudicialResult;
+import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.NextHearing;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ResultLine2;
+import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
 import uk.gov.justice.services.core.sender.Sender;
@@ -46,7 +48,10 @@ import uk.gov.moj.cpp.hearing.event.relist.RelistReferenceDataService;
 import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -325,6 +330,61 @@ public class PublishResultsDelegateV3Test  extends AbstractRestructuringTest {
 
 
         assertEquals("DVL1234", resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getDriverNumber());
+    }
+
+    @Test
+    public void shouldGetIsDeemedFromResultDefinitionAndAddToResultsSharedV3() throws Exception {
+        final ResultDefinition resultDefinitionWithDeemedServed = resultDefinitions.stream()
+                .filter(rd -> rd.getId().toString().equals("de946ddc-ad77-44b1-8480-8bbc251cdcfb"))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Result definition with isDeemedServed not found"));
+        assertTrue(resultDefinitionWithDeemedServed.getIsDeemedServed());
+
+        final ResultsSharedV3 resultsShared = resultsSharedWithDeemedServed();
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+        TreeNode<ResultDefinition> resultDefinitionTreeNode = new TreeNode(resultDefinitionWithDeemedServed.getId(), resultDefinitions);
+        resultDefinitionTreeNode.setResultDefinitionId(resultDefinitionWithDeemedServed.getId());
+        resultDefinitionTreeNode.setData(resultDefinitionWithDeemedServed);
+        treeNodes.add(resultDefinitionTreeNode);
+        final List<TreeNode<ResultLine2>> resultTree = resultTreeBuilder.build(envelope, resultsShared, treeNodes);
+        assertTrue(resultTree.stream().anyMatch(node ->
+                        node.getData().getResultDefinitionId().equals(resultDefinitionWithDeemedServed.getId())));
+        final TreeNode<ResultLine2> treeNode = resultTree.get(0);
+        final JudicialResult judicialResult = treeNode.getJudicialResult();
+        assertTrue(judicialResult.getIsDeemedServed());
+    }
+    
+    private ResultsSharedV3 resultsSharedWithDeemedServed() {
+        final ResultLine2 resultLine = ResultLine2.resultLine2()
+                .withResultLineId(UUID.randomUUID())
+                .withResultDefinitionId(UUID.fromString("de946ddc-ad77-44b1-8480-8bbc251cdcfb"))
+                .withOrderedDate(LocalDate.now())
+                .withPrompts(new ArrayList<>())
+                .build();
+        
+        final Target2 target = Target2.target2()
+                .withResultLines(Collections.singletonList(resultLine))
+                .build();
+        
+        final Hearing hearing = Hearing.hearing()
+                .withId(UUID.randomUUID())
+                .withProsecutionCases(Collections.emptyList())
+                .build();
+        
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers()
+                .withUserId(UUID.randomUUID())
+                .withFirstName("Test")
+                .withLastName("Clerk")
+                .build();
+        
+        return ResultsSharedV3.builder()
+                .withHearing(hearing)
+                .withCourtClerk(courtClerk)
+                .withTargets(Collections.singletonList(target))
+                .withCompletedResultLinesStatus(new HashMap<>())
+                .withNewAmendmentResults(new ArrayList<>())
+                .build();
     }
 
     @Test

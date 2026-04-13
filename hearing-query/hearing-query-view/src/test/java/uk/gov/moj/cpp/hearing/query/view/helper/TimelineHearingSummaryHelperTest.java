@@ -139,7 +139,7 @@ public class TimelineHearingSummaryHelperTest {
         prosecutionCase.setId(hearingSnapshotKey1);
         prosecutionCase.setDefendants(defendants);
         hearing.setProsecutionCases(of(prosecutionCase));
-        crackedIneffectiveTrial = new CrackedIneffectiveTrial(STRING.next(), LocalDate.now(), STRING.next(), randomUUID(), STRING.next());
+        crackedIneffectiveTrial = new CrackedIneffectiveTrial(STRING.next(),randomUUID(), LocalDate.now(), STRING.next(), randomUUID(), STRING.next());
         applicationId = UUID.randomUUID();
         allCourtRooms = buildCourtRoomsJson();
         HearingYouthCourDefendantsKey hearingYouthCourDefendantsKey = new HearingYouthCourDefendantsKey(UUID.randomUUID(), UUID.randomUUID());
@@ -352,7 +352,7 @@ public class TimelineHearingSummaryHelperTest {
 
     @Test
     public void shouldHandleEmptyFields() {
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(new HearingDay(), new Hearing(), new CrackedIneffectiveTrial(null, null,  null,null, null),createObjectBuilder().build(), hearingYouthCourtDefendantList, caseId);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(new HearingDay(), new Hearing(), new CrackedIneffectiveTrial(null, null,null,  null,null, null),createObjectBuilder().build(), hearingYouthCourtDefendantList, caseId);
         assertThat(timeLineHearingSummary, is(notNullValue()));
     }
 

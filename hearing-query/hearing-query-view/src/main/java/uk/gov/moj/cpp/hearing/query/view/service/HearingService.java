@@ -699,6 +699,7 @@ public class HearingService {
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
             crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                             trialType.getReasonCode(),
+                            hearing.getCrackedIneffectiveSubReasonId(),
                             trialType.getDate(),
                             trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
                             trialType.getId(),
@@ -713,6 +714,7 @@ public class HearingService {
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getVacatedTrialReasonId(), crackedIneffectiveVacatedTrialTypes);
             crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                             trialType.getReasonCode(),
+                            null,
                             trialType.getDate(),
                             trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
                             trialType.getId(),
@@ -785,6 +787,7 @@ public class HearingService {
 
             return crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                             trialType.getReasonCode(),
+                            null,
                             trialType.getDate(),
                             trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
                             trialType.getId(),
