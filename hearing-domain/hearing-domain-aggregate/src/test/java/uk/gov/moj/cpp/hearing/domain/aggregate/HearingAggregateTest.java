@@ -1447,6 +1447,165 @@ public class HearingAggregateTest {
 
     }
 
+    @Test
+    void shouldEmitCourtListRestrictedWhenDefendantDetailsUpdatedAndDefendantIsUnderEighteen() {
+        final LocalDate hearingDate = LocalDate.of(2024, 6, 1);
+        final ZonedDateTime sittingDay = hearingDate.atStartOfDay(ZoneOffset.UTC);
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final LocalDate underAgeDob = LocalDate.of(2010, 6, 2);
+
+        final Defendant hearingDefendant = Defendant.defendant()
+                .withId(defendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName("John")
+                                .withLastName("Doe")
+                                .build())
+                        .build())
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withHearingDays(singletonList(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(prosecutionCaseId)
+                        .withDefendants(singletonList(hearingDefendant))
+                        .build()))
+                .withHasSharedResults(false)
+                .build();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant commandDefendant = new uk.gov.moj.cpp.hearing.command.defendant.Defendant();
+        commandDefendant.setId(defendantId);
+        commandDefendant.setProsecutionCaseId(prosecutionCaseId);
+        commandDefendant.setPersonDefendant(PersonDefendant.personDefendant()
+                .withPersonDetails(Person.person()
+                        .withFirstName("Young")
+                        .withLastName("Minor")
+                        .withDateOfBirth(underAgeDob)
+                        .build())
+                .build());
+
+        final List<Object> events = hearingAggregate.updateDefendantDetails(hearingId, commandDefendant)
+                .collect(Collectors.toList());
+
+        assertThat(events, hasSize(2));
+        assertThat(events.get(0), instanceOf(DefendantDetailsUpdated.class));
+        assertThat(events.get(1), instanceOf(uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted.class));
+
+        final uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted restrictedEvent =
+                (uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted) events.get(1);
+        assertThat(restrictedEvent.getHearingId(), is(hearingId));
+        assertThat(restrictedEvent.getDefendantIds(), hasSize(1));
+        assertThat(restrictedEvent.getDefendantIds().get(0), is(defendantId));
+        assertThat(restrictedEvent.getRestrictCourtList(), is(true));
+    }
+
+    @Test
+    void shouldNotEmitCourtListRestrictedWhenDefendantDetailsUpdatedAndDefendantIsOverEighteen() {
+        final LocalDate hearingDate = LocalDate.of(2024, 6, 1);
+        final ZonedDateTime sittingDay = hearingDate.atStartOfDay(ZoneOffset.UTC);
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final LocalDate adultDob = LocalDate.of(2000, 1, 1);
+
+        final Defendant hearingDefendant = Defendant.defendant()
+                .withId(defendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName("Adult")
+                                .withLastName("Defendant")
+                                .build())
+                        .build())
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withHearingDays(singletonList(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(prosecutionCaseId)
+                        .withDefendants(singletonList(hearingDefendant))
+                        .build()))
+                .withHasSharedResults(false)
+                .build();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant commandDefendant = new uk.gov.moj.cpp.hearing.command.defendant.Defendant();
+        commandDefendant.setId(defendantId);
+        commandDefendant.setProsecutionCaseId(prosecutionCaseId);
+        commandDefendant.setPersonDefendant(PersonDefendant.personDefendant()
+                .withPersonDetails(Person.person()
+                        .withFirstName("Updated")
+                        .withLastName("Adult")
+                        .withDateOfBirth(adultDob)
+                        .build())
+                .build());
+
+        final List<Object> events = hearingAggregate.updateDefendantDetails(hearingId, commandDefendant)
+                .collect(Collectors.toList());
+
+        assertThat(events, hasSize(1));
+        assertThat(events.get(0), instanceOf(DefendantDetailsUpdated.class));
+    }
+
+    @Test
+    void shouldNotEmitCourtListRestrictedWhenDefendantDetailsUpdatedAndDefendantHasNoDob() {
+        final LocalDate hearingDate = LocalDate.of(2024, 6, 1);
+        final ZonedDateTime sittingDay = hearingDate.atStartOfDay(ZoneOffset.UTC);
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+
+        final Defendant hearingDefendant = Defendant.defendant()
+                .withId(defendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName("John")
+                                .withLastName("Doe")
+                                .build()) // no dateOfBirth
+                        .build())
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withHearingDays(singletonList(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(prosecutionCaseId)
+                        .withDefendants(singletonList(hearingDefendant))
+                        .build()))
+                .withHasSharedResults(false)
+                .build();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant commandDefendant = new uk.gov.moj.cpp.hearing.command.defendant.Defendant();
+        commandDefendant.setId(defendantId);
+        commandDefendant.setProsecutionCaseId(prosecutionCaseId);
+        commandDefendant.setPersonDefendant(PersonDefendant.personDefendant()
+                .withPersonDetails(Person.person()
+                        .withFirstName("John")
+                        .withLastName("Doe")
+                        .build()) // no dateOfBirth
+                .build());
+
+        final List<Object> events = hearingAggregate.updateDefendantDetails(hearingId, commandDefendant)
+                .collect(Collectors.toList());
+
+        assertThat(events, hasSize(1));
+        assertThat(events.get(0), instanceOf(DefendantDetailsUpdated.class));
+    }
+
 
     @Test
     void shouldUpdateHearingEvents() {

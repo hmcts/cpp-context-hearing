@@ -52,6 +52,7 @@ import uk.gov.justice.core.courts.LaaReference;
 import uk.gov.justice.core.courts.ListHearingRequest;
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -1018,7 +1019,24 @@ public class HearingAggregate implements Aggregate {
             return warnEventIgnored(hearingId, "updateDefendantDetails");
         }
 
-        return apply(this.defendantDelegate.updateDefendantDetails(hearingId, defendant));
+        final List<Object> updateEvents = this.defendantDelegate.updateDefendantDetails(hearingId, defendant)
+                .collect(toList());
+
+        if (updateEvents.isEmpty()) {
+            return Stream.empty();
+        }
+
+        if (isUnderEighteenAtHearingDate(defendant)) {
+            return apply(Stream.concat(
+                    updateEvents.stream(),
+                    Stream.of(CourtListRestricted.courtListRestricted()
+                            .withHearingId(hearingId)
+                            .withDefendantIds(List.of(defendant.getId()))
+                            .withRestrictCourtList(true)
+                            .build())));
+        }
+
+        return apply(updateEvents.stream());
     }
 
     public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId, final Offence offence) {
@@ -1589,20 +1607,40 @@ public class HearingAggregate implements Aggregate {
                 .collect(toList());
     }
 
+    private boolean isUnderEighteenAtHearingDate(final Defendant defendant) {
+        final Hearing hearing = momento.getHearing();
+        if (isNull(hearing) || isNull(hearing.getHearingDays()) || hearing.getHearingDays().isEmpty()) {
+            return false;
+        }
+
+        final LocalDate startDate = hearing.getHearingDays().stream()
+                .filter(Objects::nonNull)
+                .filter(hearingDay -> nonNull(hearingDay.getSittingDay()))
+                .map(hearingDay -> hearingDay.getSittingDay().toLocalDate())
+                .min(LocalDate::compareTo)
+                .orElse(null);
+
+        return isUnderEighteenAtDate(defendant.getPersonDefendant(), startDate);
+    }
+
     private boolean isUnderEighteenAtDate(final uk.gov.justice.core.courts.Defendant defendant, final LocalDate startDate) {
         try {
-            if (isNull(defendant.getPersonDefendant())
-                    || isNull(defendant.getPersonDefendant().getPersonDetails())
-                    || isNull(defendant.getPersonDefendant().getPersonDetails().getDateOfBirth())) {
-                return false;
-            }
-            final LocalDate dateOfBirth = defendant.getPersonDefendant().getPersonDetails().getDateOfBirth();
-            final LocalDate eighteenthBirthday = dateOfBirth.plusYears(18);
-            return startDate.isBefore(eighteenthBirthday);
+            return isUnderEighteenAtDate(defendant.getPersonDefendant(), startDate);
         } catch (final Exception e) {
             LOGGER.warn("Failed to determine age for defendant {}: {}", defendant.getId(), e.getMessage());
             return false;
         }
+    }
+
+    private boolean isUnderEighteenAtDate(final uk.gov.justice.core.courts.PersonDefendant personDefendant, final LocalDate startDate) {
+        if (isNull(startDate) || isNull(personDefendant)
+                || isNull(personDefendant.getPersonDetails())
+                || isNull(personDefendant.getPersonDetails().getDateOfBirth())) {
+            return false;
+        }
+        final LocalDate dateOfBirth = personDefendant.getPersonDetails().getDateOfBirth();
+        final LocalDate eighteenthBirthday = dateOfBirth.plusYears(18);
+        return startDate.isBefore(eighteenthBirthday);
     }
 
     private Stream<Object> warnEventIgnored(final UUID hearingId, final String methodName) {
