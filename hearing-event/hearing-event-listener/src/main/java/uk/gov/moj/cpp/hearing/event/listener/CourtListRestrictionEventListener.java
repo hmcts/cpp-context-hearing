@@ -4,6 +4,8 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.hearing.courts.ApplicationCourtListRestriction;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -17,6 +19,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +28,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +60,85 @@ public class CourtListRestrictionEventListener {
             applyProsecutionCaseRestrictions(hearing.getProsecutionCases(), courtListRestricted, courtListRestricted.getRestrictCourtList());
         }
 
+        if (isNotEmpty(courtListRestricted.getDefendantIds()) && nonNull(hearing.getCourtApplicationsJson())) {
+            final Set<UUID> masterDefendantIds = collectMasterDefendantIds(
+                    hearing.getProsecutionCases(), toSet(courtListRestricted.getDefendantIds()));
+            if (!masterDefendantIds.isEmpty()) {
+                applyApplicationRestrictionsForMatchingParties(masterDefendantIds, courtListRestricted.getRestrictCourtList(), hearing);
+            }
+        }
+
         hearingRepository.save(hearing);
+    }
+
+    private Set<UUID> collectMasterDefendantIds(final Set<ProsecutionCase> prosecutionCases, final Set<UUID> restrictedDefendantIds) {
+        final Set<UUID> masterDefendantIds = new HashSet<>();
+        for (final ProsecutionCase prosecutionCase : prosecutionCases) {
+            for (final Defendant defendant : prosecutionCase.getDefendants()) {
+                if (restrictedDefendantIds.contains(defendant.getId().getId()) && nonNull(defendant.getMasterDefendantId())) {
+                    masterDefendantIds.add(defendant.getMasterDefendantId());
+                }
+            }
+        }
+        return masterDefendantIds;
+    }
+
+    private void applyApplicationRestrictionsForMatchingParties(
+            final Set<UUID> masterDefendantIds,
+            final Boolean restrictCourtList,
+            final Hearing hearing) throws IOException {
+
+        final List<CourtApplication> applications = parseCourtApplications(hearing.getCourtApplicationsJson());
+        final List<UUID> matchingApplicantAndSubjectIds = new ArrayList<>();
+        final List<UUID> matchingRespondentIds = new ArrayList<>();
+
+        for (final CourtApplication application : applications) {
+            collectMatchingPartyId(application.getSubject(), masterDefendantIds, matchingApplicantAndSubjectIds);
+            collectMatchingPartyId(application.getApplicant(), masterDefendantIds, matchingApplicantAndSubjectIds);
+            if (isNotEmpty(application.getRespondents())) {
+                application.getRespondents().forEach(respondent ->
+                        collectMatchingPartyId(respondent, masterDefendantIds, matchingRespondentIds));
+            }
+        }
+
+        if (!matchingApplicantAndSubjectIds.isEmpty() || !matchingRespondentIds.isEmpty()) {
+            final ApplicationCourtListRestriction existing = readExistingCourtApplicationRestriction(hearing);
+            final ApplicationCourtListRestriction updated;
+            if (restrictCourtList) {
+                updated = ApplicationCourtListRestriction.applicationCourtListRestriction()
+                        .withCourtApplicationIds(existing.getCourtApplicationIds())
+                        .withCourtApplicationApplicantIds(combineLists(existing.getCourtApplicationApplicantIds(), matchingApplicantAndSubjectIds))
+                        .withCourtApplicationRespondentIds(combineLists(existing.getCourtApplicationRespondentIds(), matchingRespondentIds))
+                        .build();
+            } else {
+                updated = ApplicationCourtListRestriction.applicationCourtListRestriction()
+                        .withCourtApplicationIds(existing.getCourtApplicationIds())
+                        .withCourtApplicationApplicantIds(removeFromList(existing.getCourtApplicationApplicantIds(), matchingApplicantAndSubjectIds))
+                        .withCourtApplicationRespondentIds(removeFromList(existing.getCourtApplicationRespondentIds(), matchingRespondentIds))
+                        .build();
+            }
+            hearing.setRestrictCourtListJson(mapper.writeValueAsString(updated));
+        }
+    }
+
+    private void collectMatchingPartyId(final CourtApplicationParty party, final Set<UUID> masterDefendantIds, final List<UUID> collector) {
+        if (nonNull(party) && nonNull(party.getMasterDefendant())
+                && masterDefendantIds.contains(party.getMasterDefendant().getMasterDefendantId())) {
+            collector.add(party.getId());
+        }
+    }
+
+    private List<CourtApplication> parseCourtApplications(final String json) throws IOException {
+        if (json == null || json.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        final CourtApplicationsHolder holder = mapper.readValue(json, CourtApplicationsHolder.class);
+        return holder.courtApplications != null ? holder.courtApplications : Collections.emptyList();
+    }
+
+    private static class CourtApplicationsHolder {
+        @JsonProperty("courtApplications")
+        public List<CourtApplication> courtApplications;
     }
 
     private void applyCourtApplicationRestrictions(final CourtListRestricted courtListRestricted, final Hearing hearing) throws IOException {

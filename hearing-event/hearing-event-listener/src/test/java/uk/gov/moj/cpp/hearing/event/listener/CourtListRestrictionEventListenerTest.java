@@ -268,4 +268,127 @@ public class CourtListRestrictionEventListenerTest {
         return prosecutionCase;
     }
 
+    @Test
+    public void shouldApplyApplicationRestrictionsToMatchingPartiesFromDefendantMasterDefendantId() throws IOException {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID caseId = UUID.randomUUID();
+        final UUID defendantId = UUID.randomUUID();
+        final UUID masterDefendantId = UUID.randomUUID();
+        final UUID applicantId = UUID.randomUUID();
+        final UUID subjectId = UUID.randomUUID();
+        final UUID respondentId = UUID.randomUUID();
+
+        final CourtListRestricted courtListRestricted = new CourtListRestricted(null, null, null, null, null, singletonList(defendantId), hearingId, null, true);
+
+        final Hearing hearing = hearingEntityWithMasterDefendant(hearingId, caseId, defendantId, masterDefendantId,
+                courtApplicationsJson(masterDefendantId, applicantId, subjectId, respondentId));
+
+        when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.of(hearing));
+        final Envelope<CourtListRestricted> event = envelopeFrom(
+                metadataBuilder().withId(UUID.randomUUID()).withName("hearing.event.court-list-restricted").build(),
+                courtListRestricted);
+
+        courtListRestrictionEventListener.processCourtListRestrictions(event);
+        verify(hearingRepository, times(1)).save(hearingArgumentCaptor.capture());
+
+        final Hearing saved = hearingArgumentCaptor.getValue();
+        assertThat(saved.getRestrictCourtListJson(), is(notNullValue()));
+
+        final ApplicationCourtListRestriction restriction = mapper.readValue(saved.getRestrictCourtListJson(), ApplicationCourtListRestriction.class);
+        assertThat(restriction.getCourtApplicationApplicantIds(), is(notNullValue()));
+        assertThat(restriction.getCourtApplicationApplicantIds().contains(applicantId), is(true));
+        assertThat(restriction.getCourtApplicationApplicantIds().contains(subjectId), is(true));
+        assertThat(restriction.getCourtApplicationRespondentIds(), is(notNullValue()));
+        assertThat(restriction.getCourtApplicationRespondentIds().contains(respondentId), is(true));
+    }
+
+    @Test
+    public void shouldRemoveApplicationRestrictionsFromMatchingPartiesWhenUnrestricting() throws IOException {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID caseId = UUID.randomUUID();
+        final UUID defendantId = UUID.randomUUID();
+        final UUID masterDefendantId = UUID.randomUUID();
+        final UUID applicantId = UUID.randomUUID();
+        final UUID subjectId = UUID.randomUUID();
+        final UUID respondentId = UUID.randomUUID();
+        final UUID otherApplicantId = UUID.randomUUID();
+
+        final CourtListRestricted courtListRestricted = new CourtListRestricted(null, null, null, null, null, singletonList(defendantId), hearingId, null, false);
+
+        final Hearing hearing = hearingEntityWithMasterDefendant(hearingId, caseId, defendantId, masterDefendantId,
+                courtApplicationsJson(masterDefendantId, applicantId, subjectId, respondentId));
+        hearing.setRestrictCourtListJson(mapper.writeValueAsString(
+                ApplicationCourtListRestriction.applicationCourtListRestriction()
+                        .withCourtApplicationApplicantIds(asList(applicantId, subjectId, otherApplicantId))
+                        .withCourtApplicationRespondentIds(singletonList(respondentId))
+                        .build()));
+
+        when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.of(hearing));
+        final Envelope<CourtListRestricted> event = envelopeFrom(
+                metadataBuilder().withId(UUID.randomUUID()).withName("hearing.event.court-list-restricted").build(),
+                courtListRestricted);
+
+        courtListRestrictionEventListener.processCourtListRestrictions(event);
+        verify(hearingRepository, times(1)).save(hearingArgumentCaptor.capture());
+
+        final Hearing saved = hearingArgumentCaptor.getValue();
+        final ApplicationCourtListRestriction restriction = mapper.readValue(saved.getRestrictCourtListJson(), ApplicationCourtListRestriction.class);
+        assertThat(restriction.getCourtApplicationApplicantIds().contains(applicantId), is(false));
+        assertThat(restriction.getCourtApplicationApplicantIds().contains(subjectId), is(false));
+        assertThat(restriction.getCourtApplicationApplicantIds().contains(otherApplicantId), is(true));
+        assertThat(restriction.getCourtApplicationRespondentIds().contains(respondentId), is(false));
+    }
+
+    @Test
+    public void shouldNotApplyApplicationRestrictionsWhenDefendantHasNoMasterDefendantId() throws IOException {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID caseId = UUID.randomUUID();
+        final UUID defendantId = UUID.randomUUID();
+        final UUID applicantId = UUID.randomUUID();
+
+        final CourtListRestricted courtListRestricted = new CourtListRestricted(null, null, null, null, null, singletonList(defendantId), hearingId, null, true);
+
+        final Hearing hearing = hearingEntityWithMasterDefendant(hearingId, caseId, defendantId, null,
+                "{\"courtApplications\":[{\"id\":\"" + UUID.randomUUID() + "\",\"applicant\":{\"id\":\"" + applicantId + "\"}}]}");
+
+        when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.of(hearing));
+        final Envelope<CourtListRestricted> event = envelopeFrom(
+                metadataBuilder().withId(UUID.randomUUID()).withName("hearing.event.court-list-restricted").build(),
+                courtListRestricted);
+
+        courtListRestrictionEventListener.processCourtListRestrictions(event);
+        verify(hearingRepository, times(1)).save(hearingArgumentCaptor.capture());
+
+        final Hearing saved = hearingArgumentCaptor.getValue();
+        assertThat(saved.getRestrictCourtListJson(), is(not(notNullValue())));
+    }
+
+    private Hearing hearingEntityWithMasterDefendant(final UUID hearingId, final UUID caseId, final UUID defendantId,
+                                                      final UUID masterDefendantId, final String courtApplicationsJson) {
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+
+        final Defendant defendant = new Defendant();
+        defendant.setId(new HearingSnapshotKey(defendantId, hearingId));
+        defendant.setMasterDefendantId(masterDefendantId);
+
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
+        prosecutionCase.setId(new HearingSnapshotKey(caseId, hearingId));
+        prosecutionCase.setDefendants(new HashSet<>(singletonList(defendant)));
+
+        hearing.setProsecutionCases(new HashSet<>(singletonList(prosecutionCase)));
+        hearing.setCourtApplicationsJson(courtApplicationsJson);
+        return hearing;
+    }
+
+    private String courtApplicationsJson(final UUID masterDefendantId, final UUID applicantId,
+                                          final UUID subjectId, final UUID respondentId) {
+        return "{\"courtApplications\":[{" +
+                "\"id\":\"" + UUID.randomUUID() + "\"," +
+                "\"applicant\":{\"id\":\"" + applicantId + "\",\"masterDefendant\":{\"masterDefendantId\":\"" + masterDefendantId + "\"}}," +
+                "\"subject\":{\"id\":\"" + subjectId + "\",\"masterDefendant\":{\"masterDefendantId\":\"" + masterDefendantId + "\"}}," +
+                "\"respondents\":[{\"id\":\"" + respondentId + "\",\"masterDefendant\":{\"masterDefendantId\":\"" + masterDefendantId + "\"}}]" +
+                "}]}";
+    }
+
 }
