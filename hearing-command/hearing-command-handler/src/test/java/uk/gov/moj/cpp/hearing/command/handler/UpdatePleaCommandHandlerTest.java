@@ -21,6 +21,7 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandH
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithMultidayHearing;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.core.courts.AllocationDecision;
@@ -504,7 +505,7 @@ public class UpdatePleaCommandHandlerTest {
     public void enrichAssociatedHearingsWithIndicatedPleaInformation() throws Throwable {
 
         final HearingAggregate hearingAggregate = new HearingAggregate() {{
-            apply(new HearingInitiated(hearing.getHearing()));
+            apply(new HearingInitiated(h(standardInitiateHearingTemplateWithMultidayHearing()).getHearing()));
         }};
 
         final LocalDate pleaDate = PAST_LOCAL_DATE.next();
