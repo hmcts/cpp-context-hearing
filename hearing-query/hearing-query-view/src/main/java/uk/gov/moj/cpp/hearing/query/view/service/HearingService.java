@@ -132,7 +132,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("squid:S1612")
+@SuppressWarnings({"squid:S1612", "squid:S1168"})
 public class HearingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingService.class);
@@ -1160,9 +1160,9 @@ public class HearingService {
                                         .withValuesFrom(defendant)
                                         .withOffences(buildFilteredOffenceList(hearing, defendant))
                                         .build())
-                                .collect(toList()))
+                                .toList())
                         .build())
-                .collect(toList());
+                .toList();
 
     }
 
