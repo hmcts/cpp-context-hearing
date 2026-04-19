@@ -63,8 +63,9 @@ public class SetTrialTypeCommandHandler extends AbstractCommandHandler {
             final String description = crackedIneffectiveReason.getString("description");
             final String type = crackedIneffectiveReason.getString("type");
             final Optional<UUID> id = getUUID(crackedIneffectiveReason, "id");
+            final UUID crackedIneffectiveSubReasonId = trialType.getCrackedIneffectiveSubReasonId();
 
-            aggregate(HearingAggregate.class, trialType.getHearingId(), envelope, a -> a.setTrialType(new HearingTrialType(trialType.getHearingId(), id.get(), code, type, description)));
+            aggregate(HearingAggregate.class, trialType.getHearingId(), envelope, a -> a.setTrialType(new HearingTrialType(trialType.getHearingId(), id.get(), code, type, description,crackedIneffectiveSubReasonId)));
         }
 
         if (nonNull(trialType.getIsEffectiveTrial()) && trialType.getIsEffectiveTrial()) {

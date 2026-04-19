@@ -132,7 +132,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("squid:S1612")
+@SuppressWarnings({"squid:S1612", "squid:S1168"})
 public class HearingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingService.class);
@@ -691,6 +691,7 @@ public class HearingService {
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
             crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                             trialType.getReasonCode(),
+                            hearing.getCrackedIneffectiveSubReasonId(),
                             trialType.getDate(),
                             trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
                             trialType.getId(),
@@ -705,6 +706,7 @@ public class HearingService {
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getVacatedTrialReasonId(), crackedIneffectiveVacatedTrialTypes);
             crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                             trialType.getReasonCode(),
+                            null,
                             trialType.getDate(),
                             trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
                             trialType.getId(),
@@ -777,6 +779,7 @@ public class HearingService {
 
             return crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                             trialType.getReasonCode(),
+                            null,
                             trialType.getDate(),
                             trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
                             trialType.getId(),
@@ -1157,9 +1160,9 @@ public class HearingService {
                                         .withValuesFrom(defendant)
                                         .withOffences(buildFilteredOffenceList(hearing, defendant))
                                         .build())
-                                .collect(toList()))
+                                .toList())
                         .build())
-                .collect(toList());
+                .toList();
 
     }
 
