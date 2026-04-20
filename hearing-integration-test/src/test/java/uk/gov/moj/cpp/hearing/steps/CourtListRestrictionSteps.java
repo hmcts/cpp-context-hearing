@@ -140,4 +140,13 @@ public class CourtListRestrictionSteps extends AbstractIT {
                 .build();
         sendListingPublicEvent((JsonObject) objectToJsonValueConverter.convert(restrictCourtListData));
     }
+
+    public void hideApplicationRespondentFromXhibit(final Hearing hearing, final boolean restrictCourtList) {
+        final CourtListRestricted restrictCourtListData = courtListRestricted()
+                .withCourtApplicationRespondentIds(newArrayList(hearing.getCourtApplications().get(0).getRespondents().get(0).getId()))
+                .withHearingId(hearing.getId())
+                .withRestrictCourtList(restrictCourtList)
+                .build();
+        sendListingPublicEvent((JsonObject) objectToJsonValueConverter.convert(restrictCourtListData));
+    }
 }
