@@ -2269,16 +2269,14 @@ public class HearingServiceTest {
         final HearingDetailsResponse payload = new HearingDetailsResponse();
         payload.setHearing(hearing);
 
-        final HearingDetailsResponse result = hearingService.filterOutOffences(payload);
+        final HearingDetailsResponse result = hearingService.filterOutProsecutionCases(payload);
 
         assertThat(result, is(payload));
         assertThat(result.getHearing(), is(hearing));
     }
 
     @Test
-    public void shouldFilterOutCaseLevelOffencesWhenApplicationHasOffences() {
-
-
+    public void shouldFilterOutProsecutionCasesWhenApplicationHasOffences() {
         final uk.gov.justice.core.courts.Hearing hearing = hearing()
                 .withCourtApplications(singletonList(CourtApplication.courtApplication()
                         .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
@@ -2300,16 +2298,14 @@ public class HearingServiceTest {
         final HearingDetailsResponse payload = new HearingDetailsResponse();
         payload.setHearing(hearing);
 
-        final HearingDetailsResponse result = hearingService.filterOutOffences(payload);
+        final HearingDetailsResponse result = hearingService.filterOutProsecutionCases(payload);
 
         assertThat(result, is(payload));
-        assertThat(result.getHearing().getProsecutionCases(), notNullValue());
-        assertThat(result.getHearing().getProsecutionCases(), hasSize(1));
-        assertThat(result.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences(), nullValue());
+        assertThat(result.getHearing().getProsecutionCases(), nullValue());
     }
 
     @Test
-    public void shouldKeepOffencesWhenApplicationHasNoOffences() {
+    public void shouldKeepProsecutionCasesWhenApplicationHasNoOffences() {
         final uk.gov.justice.core.courts.Hearing hearing = hearing()
                 .withCourtApplications(singletonList(CourtApplication.courtApplication()
                         .withId(randomUUID())
@@ -2327,11 +2323,11 @@ public class HearingServiceTest {
         final HearingDetailsResponse payload = new HearingDetailsResponse();
         payload.setHearing(hearing);
 
-        final HearingDetailsResponse result = hearingService.filterOutOffences(payload);
+        final HearingDetailsResponse result = hearingService.filterOutProsecutionCases(payload);
 
         assertThat(result, is(payload));
-        assertThat(isNull(result.getHearing().getProsecutionCases()), is(false));
+        assertThat(result.getHearing().getProsecutionCases(), notNullValue());
         assertThat(result.getHearing().getProsecutionCases(), hasSize(1));
-        assertThat(result.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().size(), is(1));
+        assertThat(result.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences(), hasSize(1));
     }
 }

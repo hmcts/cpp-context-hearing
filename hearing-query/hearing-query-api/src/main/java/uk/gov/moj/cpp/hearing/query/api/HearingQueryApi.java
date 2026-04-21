@@ -193,7 +193,7 @@ public class HearingQueryApi {
 
         final HearingDetailsResponse hearingDetailsResponse = jsonObjectToObjectConverter.convert(jsonEnvelope.payloadAsJsonObject(), HearingDetailsResponse.class);
 
-        return envelopeFrom(metadataFrom(jsonEnvelope.metadata()),objectToJsonObjectConverter.convert(hearingService.filterOutOffences(hearingDetailsResponse)));
+        return envelopeFrom(metadataFrom(jsonEnvelope.metadata()),objectToJsonObjectConverter.convert(hearingService.filterOutProsecutionCases(hearingDetailsResponse)));
     }
 
 
