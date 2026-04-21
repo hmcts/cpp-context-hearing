@@ -1130,55 +1130,33 @@ public class HearingService {
         return response.payload().getBoolean("hasPermission");
     }
 
-    public HearingDetailsResponse filterOutOffences(final HearingDetailsResponse payload) {
+    public HearingDetailsResponse filterOutProsecutionCases(final HearingDetailsResponse payload) {
         if (isNotApplicationHearing(payload.getHearing())) {
             return payload;
         }
 
-        payload.setHearing(buildHearingWithFilteredOffences(payload.getHearing()));
+        if (isApplicationHasNoOffences(payload.getHearing())) {
+            return payload;
+        }
+
+        payload.setHearing(buildHearingWithoutProsecutionCases(payload.getHearing()));
 
         return payload;
     }
 
-    private uk.gov.justice.core.courts.Hearing buildHearingWithFilteredOffences(final uk.gov.justice.core.courts.Hearing hearing) {
+    private uk.gov.justice.core.courts.Hearing buildHearingWithoutProsecutionCases(final uk.gov.justice.core.courts.Hearing hearing) {
         return uk.gov.justice.core.courts.Hearing.hearing()
                 .withValuesFrom(hearing)
-                .withProsecutionCases(buildProsecutionCasesWithFilteredOffences(hearing))
+                .withProsecutionCases(null)
                 .build();
     }
 
-    private List<uk.gov.justice.core.courts.ProsecutionCase> buildProsecutionCasesWithFilteredOffences(final uk.gov.justice.core.courts.Hearing hearing) {
-        if (isNull(hearing.getProsecutionCases())) {
-            return null;
-        }
-
-        return hearing.getProsecutionCases().stream()
-                .map(pc -> uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase()
-                        .withValuesFrom(pc)
-                        .withDefendants(pc.getDefendants().stream()
-                                .map(defendant -> uk.gov.justice.core.courts.Defendant.defendant()
-                                        .withValuesFrom(defendant)
-                                        .withOffences(buildFilteredOffenceList(hearing, defendant))
-                                        .build())
-                                .toList())
-                        .build())
-                .toList();
-
-    }
-
-    private List<uk.gov.justice.core.courts.Offence> buildFilteredOffenceList(final uk.gov.justice.core.courts.Hearing hearing, final uk.gov.justice.core.courts.Defendant defendant) {
-        if (isApplicationHasOffences(hearing)) { // if application has offenses, then remove offenses from case level
-            return null;
-        }
-        return defendant.getOffences();
-    }
-
-    private boolean isApplicationHasOffences(final uk.gov.justice.core.courts.Hearing hearing) {
+    private boolean isApplicationHasNoOffences(final uk.gov.justice.core.courts.Hearing hearing) {
         if (Objects.isNull(hearing.getCourtApplications())) {
-            return false;
+            return true;
         }
         return hearing.getCourtApplications().stream()
-                .anyMatch(application -> !Objects.isNull(application.getCourtApplicationCases()) && application.getCourtApplicationCases().stream()
+                .noneMatch(application -> !Objects.isNull(application.getCourtApplicationCases()) && application.getCourtApplicationCases().stream()
                         .anyMatch(courtApplicationCase -> isNotEmpty(courtApplicationCase.getOffences())));
     }
 
