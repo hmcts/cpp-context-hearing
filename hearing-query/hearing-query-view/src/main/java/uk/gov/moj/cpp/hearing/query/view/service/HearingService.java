@@ -1131,11 +1131,7 @@ public class HearingService {
     }
 
     public HearingDetailsResponse filterOutProsecutionCases(final HearingDetailsResponse payload) {
-        if (isNotApplicationHearing(payload.getHearing())) {
-            return payload;
-        }
-
-        if (isApplicationHasNoOffences(payload.getHearing())) {
+        if (isNotApplicationHearing(payload.getHearing()) || isApplicationHasNoOffences(payload.getHearing())) {
             return payload;
         }
 
@@ -1152,11 +1148,11 @@ public class HearingService {
     }
 
     private boolean isApplicationHasNoOffences(final uk.gov.justice.core.courts.Hearing hearing) {
-        if (Objects.isNull(hearing.getCourtApplications())) {
+        if (isNull(hearing.getCourtApplications())) {
             return true;
         }
         return hearing.getCourtApplications().stream()
-                .noneMatch(application -> !Objects.isNull(application.getCourtApplicationCases()) && application.getCourtApplicationCases().stream()
+                .noneMatch(application -> nonNull(application.getCourtApplicationCases()) && application.getCourtApplicationCases().stream()
                         .anyMatch(courtApplicationCase -> isNotEmpty(courtApplicationCase.getOffences())));
     }
 
