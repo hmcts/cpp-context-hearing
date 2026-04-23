@@ -93,7 +93,7 @@ public class HearingDelegate implements Serializable {
         if (nonNull(hearing.getProsecutionCases())) {
             this.momento.getHearing().getProsecutionCases().forEach(
                     prosecutionCase -> prosecutionCase.getDefendants().forEach(
-                            defendant -> defendant.getOffences().forEach(this::keepOffence)));
+                            defendant -> ofNullable(defendant.getOffences()).ifPresent(offences -> offences.forEach(this::keepOffence))));
 
             if (nonNull(hearing.getIsGroupProceedings()) && hearing.getIsGroupProceedings()) {
                 final List<ProsecutionCase> groupMasters = hearing.getProsecutionCases().stream()

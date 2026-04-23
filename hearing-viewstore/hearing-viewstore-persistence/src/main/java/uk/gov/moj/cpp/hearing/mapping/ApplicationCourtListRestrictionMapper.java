@@ -50,14 +50,21 @@ public class ApplicationCourtListRestrictionMapper {
         return isNotEmpty(applicationCourtListRestriction.getCourtApplicationApplicantIds()) && applicationCourtListRestriction.getCourtApplicationApplicantIds().contains(applicantId);
     }
 
+    public boolean isSubjectRestricted(final ApplicationCourtListRestriction applicationCourtListRestriction, final UUID subjectId) {
+        return isNotEmpty(applicationCourtListRestriction.getCourtApplicationSubjectIds()) && applicationCourtListRestriction.getCourtApplicationSubjectIds().contains(subjectId);
+    }
+
     public List<CourtApplication> getCourtApplications(final List<CourtApplication> courtApplications, final ApplicationCourtListRestriction restrictions) {
         return courtApplications.stream()
                 .filter(ca -> !isApplicationRestricted(restrictions, ca.getId()))
                 .map(ca -> {
-                    if (isApplicantRestricted(restrictions, ca.getApplicant().getId())) {
+                    final boolean applicantRestricted = isApplicantRestricted(restrictions, ca.getApplicant().getId());
+                    final boolean subjectRestricted = ca.getSubject() != null && isSubjectRestricted(restrictions, ca.getSubject().getId());
+                    if (applicantRestricted || subjectRestricted) {
                         return (CourtApplication.courtApplication()
                                 .withValuesFrom(ca)
-                                .withApplicant(null)
+                                .withApplicant(applicantRestricted ? null : ca.getApplicant())
+                                .withSubject(subjectRestricted ? null : ca.getSubject())
                                 .build());
                     }
                     return ca;

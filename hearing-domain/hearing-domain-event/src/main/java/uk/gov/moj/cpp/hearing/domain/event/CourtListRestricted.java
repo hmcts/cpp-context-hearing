@@ -19,6 +19,8 @@ public class CourtListRestricted implements Serializable {
 
     private List<UUID> courtApplicationRespondentIds;
 
+    private List<UUID> courtApplicationSubjectIds;
+
     private String courtApplicationType;
 
     private List<UUID> defendantIds;
@@ -29,11 +31,12 @@ public class CourtListRestricted implements Serializable {
 
     private Boolean restrictCourtList;
 
-    public CourtListRestricted(final List<UUID> caseIds, final List<UUID> courtApplicationApplicantIds, final List<UUID> courtApplicationIds, final List<UUID> courtApplicationRespondentIds, final String courtApplicationType, final List<UUID> defendantIds, final UUID hearingId, final List<UUID> offenceIds, final Boolean restrictCourtList) {
+    public CourtListRestricted(final List<UUID> caseIds, final List<UUID> courtApplicationApplicantIds, final List<UUID> courtApplicationIds, final List<UUID> courtApplicationRespondentIds, final List<UUID> courtApplicationSubjectIds, final String courtApplicationType, final List<UUID> defendantIds, final UUID hearingId, final List<UUID> offenceIds, final Boolean restrictCourtList) {
         this.caseIds = caseIds;
         this.courtApplicationApplicantIds = courtApplicationApplicantIds;
         this.courtApplicationIds = courtApplicationIds;
         this.courtApplicationRespondentIds = courtApplicationRespondentIds;
+        this.courtApplicationSubjectIds = courtApplicationSubjectIds;
         this.courtApplicationType = courtApplicationType;
         this.defendantIds = defendantIds;
         this.hearingId = hearingId;
@@ -55,6 +58,10 @@ public class CourtListRestricted implements Serializable {
 
     public List<UUID> getCourtApplicationRespondentIds() {
         return courtApplicationRespondentIds;
+    }
+
+    public List<UUID> getCourtApplicationSubjectIds() {
+        return courtApplicationSubjectIds;
     }
 
     public String getCourtApplicationType() {
@@ -88,6 +95,7 @@ public class CourtListRestricted implements Serializable {
                 "courtApplicationApplicantIds='" + courtApplicationApplicantIds + "'," +
                 "courtApplicationIds='" + courtApplicationIds + "'," +
                 "courtApplicationRespondentIds='" + courtApplicationRespondentIds + "'," +
+                "courtApplicationSubjectIds='" + courtApplicationSubjectIds + "'," +
                 "courtApplicationType='" + courtApplicationType + "'," +
                 "defendantIds='" + defendantIds + "'," +
                 "hearingId='" + hearingId + "'," +
@@ -113,6 +121,11 @@ public class CourtListRestricted implements Serializable {
 
     public CourtListRestricted setCourtApplicationRespondentIds(List<UUID> courtApplicationRespondentIds) {
         this.courtApplicationRespondentIds = courtApplicationRespondentIds;
+        return this;
+    }
+
+    public CourtListRestricted setCourtApplicationSubjectIds(List<UUID> courtApplicationSubjectIds) {
+        this.courtApplicationSubjectIds = courtApplicationSubjectIds;
         return this;
     }
 
@@ -150,6 +163,8 @@ public class CourtListRestricted implements Serializable {
 
         private List<UUID> courtApplicationRespondentIds;
 
+        private List<UUID> courtApplicationSubjectIds;
+
         private String courtApplicationType;
 
         private List<UUID> defendantIds;
@@ -177,6 +192,11 @@ public class CourtListRestricted implements Serializable {
 
         public Builder withCourtApplicationRespondentIds(final List<UUID> courtApplicationRespondentIds) {
             this.courtApplicationRespondentIds = courtApplicationRespondentIds;
+            return this;
+        }
+
+        public Builder withCourtApplicationSubjectIds(final List<UUID> courtApplicationSubjectIds) {
+            this.courtApplicationSubjectIds = courtApplicationSubjectIds;
             return this;
         }
 
@@ -210,6 +230,7 @@ public class CourtListRestricted implements Serializable {
             this.courtApplicationApplicantIds = courtListRestricted.getCourtApplicationApplicantIds();
             this.courtApplicationIds = courtListRestricted.getCourtApplicationIds();
             this.courtApplicationRespondentIds = courtListRestricted.getCourtApplicationRespondentIds();
+            this.courtApplicationSubjectIds = courtListRestricted.getCourtApplicationSubjectIds();
             this.courtApplicationType = courtListRestricted.getCourtApplicationType();
             this.defendantIds = courtListRestricted.getDefendantIds();
             this.hearingId = courtListRestricted.getHearingId();
@@ -219,7 +240,7 @@ public class CourtListRestricted implements Serializable {
         }
 
         public CourtListRestricted build() {
-            return new CourtListRestricted(caseIds, courtApplicationApplicantIds, courtApplicationIds, courtApplicationRespondentIds, courtApplicationType, defendantIds, hearingId, offenceIds, restrictCourtList);
+            return new CourtListRestricted(caseIds, courtApplicationApplicantIds, courtApplicationIds, courtApplicationRespondentIds, courtApplicationSubjectIds, courtApplicationType, defendantIds, hearingId, offenceIds, restrictCourtList);
         }
     }
 }
