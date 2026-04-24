@@ -6,6 +6,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.ADDRESS;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIXL;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIXLM;
@@ -33,7 +35,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.json.Json;
+
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -111,9 +113,9 @@ public class ReusableInfoServiceTest {
         final UUID masterDefendantId = UUID.randomUUID();
         Defendant defendant = new Defendant.Builder()
                 .withMasterDefendantId(masterDefendantId).build();
-        final JsonObject jsonObj = Json.createObjectBuilder()
-                .add("reusablePrompts",Json.createArrayBuilder().add("reusablePrompts1").add("reusablePrompts2").build())
-                .add("reusableResults",Json.createArrayBuilder().add("reusableResults1").add("reusableResults2").build())
+        final JsonObject jsonObj = createObjectBuilder()
+                .add("reusablePrompts",createArrayBuilder().add("reusablePrompts1").add("reusablePrompts2").build())
+                .add("reusableResults",createArrayBuilder().add("reusableResults1").add("reusableResults2").build())
                 .build();
         final ReusableInfo reusableInfo = ReusableInfo.builder()
                 .withId(masterDefendantId)
@@ -121,8 +123,8 @@ public class ReusableInfoServiceTest {
         when(reusableInfoRepository.findReusableInfoByMasterDefendantIds(Stream.of(masterDefendantId).collect(toList())))
                 .thenReturn(Stream.of(reusableInfo).collect(toList()));
         when(mapper.treeToValue(getJsonNode(jsonObj), JsonObject.class))
-                .thenReturn(Json.createObjectBuilder().build());
-        reusableInfoService.getViewStoreReusableInformation(Stream.of(defendant).collect(toList()), Stream.of(Json.createObjectBuilder().build()).collect(toList()));
+                .thenReturn(createObjectBuilder().build());
+        reusableInfoService.getViewStoreReusableInformation(Stream.of(defendant).collect(toList()), Stream.of(createObjectBuilder().build()).collect(toList()));
     }
 
     private JsonNode getJsonNode(final JsonObject jsonObj) throws IOException {

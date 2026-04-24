@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.util;
 
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2.sharedResultsCommandResultLine;
