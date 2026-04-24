@@ -10,8 +10,8 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -194,7 +194,7 @@ import java.util.stream.IntStream;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.jms.MessageConsumer;
-import javax.json.Json;
+
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
@@ -1691,7 +1691,7 @@ public class ShareResultsIT extends AbstractIT {
                 .replaceAll("OFFENCE_ID", randomUUID().toString());
 
         final JsonObject saveDraftResultJson = new StringToJsonObjectConverter().convert(eventPayloadString);
-        JsonObjectBuilder builder = Json.createObjectBuilder();
+        JsonObjectBuilder builder = createObjectBuilder();
         saveDraftResultJson.forEach(builder::add);
         builder.add("version", version);
         final JsonObject draftResultWithVersionJson = builder.build();

@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -19,7 +19,7 @@ import uk.gov.moj.cpp.hearing.query.view.SessionTimeQueryView;
 
 import java.util.function.Function;
 
-import javax.json.Json;
+
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -90,7 +90,7 @@ public class DefendantOutstandingFinesQueryApiTest {
     @Test
     public void should_return_NO_outstanding_fines_when_defendant_id_is_unknown() {
         when(hearingQueryView.getOutstandingFinesQueryFromDefendantId(any())).thenReturn(jsonEnvelopeFromHearing);
-        JsonObject emptyResponseFromHearingQueryView = Json.createObjectBuilder().build();
+        JsonObject emptyResponseFromHearingQueryView = createObjectBuilder().build();
 
         setUp(emptyResponseFromHearingQueryView);
 
