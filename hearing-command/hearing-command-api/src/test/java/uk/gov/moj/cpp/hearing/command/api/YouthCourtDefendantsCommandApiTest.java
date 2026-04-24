@@ -12,7 +12,7 @@ import uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory;
 
 import javax.json.JsonObject;
 
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.verify;
