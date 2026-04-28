@@ -195,7 +195,7 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         long start = System.currentTimeMillis();
         final ValidationResponse validationResponse = resultsValidationClient.validate(validationRequest, userIdString);
         long end = System.currentTimeMillis();
-        LOGGER.info("Validation API call took {} ms for userId={}", end - start, userIdString);
+        LOGGER.error("Validation API call took {} ms for userId={} and for hearingId={}", end - start, userIdString, validationRequest.getHearingId());
 
         if (validationResponse.hasErrors()) {
             LOGGER.info("Share blocked by validation errors for hearing {}", command.getHearingId());
