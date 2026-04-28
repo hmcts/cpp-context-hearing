@@ -185,6 +185,7 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         }
         final ShareDaysResultsCommand command = convertToObject(envelope, ShareDaysResultsCommand.class);
         final UUID userId = envelope.metadata().userId().map(UUID::fromString).orElse(null);
+        long start = System.currentTimeMillis();
 
         final EventStream eventStream = eventSource.getStreamById(command.getHearingId());
         final HearingAggregate hearingAggregate = aggregateService.get(eventStream, HearingAggregate.class);
@@ -192,7 +193,6 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final ValidationRequest validationRequest = validationRequestMapper.toValidationRequest(command, hearingAggregate.getHearing());
         final String userIdString = userId != null ? userId.toString() : "";
 
-        long start = System.currentTimeMillis();
         final ValidationResponse validationResponse = resultsValidationClient.validate(validationRequest, userIdString);
         long end = System.currentTimeMillis();
         LOGGER.error("Validation API call took {} ms for userId={} and for hearingId={}", end - start, userIdString, validationRequest.getHearingId());
