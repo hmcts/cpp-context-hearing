@@ -1,0 +1,31 @@
+{
+  "verdicts": [
+    {
+      "jurors": {
+        "numberOfJurors": 11,
+        "numberOfSplitJurors": 0,
+        "unanimous": true
+      },
+      "lesserOrAlternativeOffence": {
+        "offenceCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "offenceDefinitionId": "cae4f04d-3f59-403c-93ee-47944507f391",
+        "offenceLegislation": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "offenceLegislationWelsh": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "offenceTitle": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "offenceTitleWelsh": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+      },
+      "offenceId": "${offenceId}",
+      "originatingHearingId": "${hearingId}",
+      "verdictDate": "2024-10-30",
+      "verdictType": {
+        "category": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "categoryType": "GUILTY",
+        "description": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "id": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+        "sequence": 96481693,
+        "verdictCode": "VC01"
+      }
+    }
+  ]
+}
+

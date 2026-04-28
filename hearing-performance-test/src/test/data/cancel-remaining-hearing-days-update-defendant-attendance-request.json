@@ -1,0 +1,9 @@
+{
+  "hearingId": "${hearingId}",
+  "defendantId": "${defendantId}",
+  "attendanceDay": {
+    "attendanceType": "IN_PERSON",
+    "day": "2025-12-14"
+  }
+}
+

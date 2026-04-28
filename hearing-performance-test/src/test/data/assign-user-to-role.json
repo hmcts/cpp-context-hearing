@@ -1,0 +1,13 @@
+{
+  "roleId": "${roleIdParam}",
+  "startDate": "2025-09-03",
+  "endDate": "2035-09-05",
+  "userId": "${userIdParam}",
+  "_metadata": {
+    "name": "usersgroups.command.assign-role-to-user",
+    "context": {
+      "user": "${userId}"
+    },
+    "id": "${__UUID}"
+  }
+}
