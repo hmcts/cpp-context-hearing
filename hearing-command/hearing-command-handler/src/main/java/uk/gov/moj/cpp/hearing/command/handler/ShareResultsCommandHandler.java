@@ -192,12 +192,16 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
         final ValidationRequest validationRequest = validationRequestMapper.toValidationRequest(command, hearingAggregate.getHearing());
         final String userIdString = userId != null ? userId.toString() : "";
+
+        long start = System.currentTimeMillis();
         final ValidationResponse validationResponse = resultsValidationClient.validate(validationRequest, userIdString);
+        long end = System.currentTimeMillis();
+        LOGGER.info("Validation API call took {} ms for userId={}", end - start, userIdString);
 
         if (validationResponse.hasErrors()) {
             LOGGER.info("Share blocked by validation errors for hearing {}", command.getHearingId());
             final ResultsValidationFailed failedEvent = buildValidationFailedEvent(command, userIdString, validationResponse);
-            eventStream.append(Stream.of(failedEvent).map(enveloper.withMetadataFrom(envelope)));
+                eventStream.append(Stream.of(failedEvent).map(enveloper.withMetadataFrom(envelope)));
             return;
         }
 
