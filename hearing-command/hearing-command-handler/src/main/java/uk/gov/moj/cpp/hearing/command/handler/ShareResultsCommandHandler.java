@@ -30,7 +30,6 @@ import uk.gov.moj.cpp.hearing.command.handler.service.validation.ResultsValidato
 import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationRequest;
 import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationRequestMapper;
 import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationResponse;
-import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationIssue;
 import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsValidationFailed;
@@ -192,7 +191,11 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
         final ValidationRequest validationRequest = validationRequestMapper.toValidationRequest(command, hearingAggregate.getHearing());
         final String userIdString = userId != null ? userId.toString() : "";
+
+        long start = System.currentTimeMillis();
         final ValidationResponse validationResponse = resultsValidationClient.validate(validationRequest, userIdString);
+        long end = System.currentTimeMillis();
+        LOGGER.info("Validation API call took {} ms for userId={}", end - start, userIdString);
 
         if (validationResponse.hasErrors()) {
             LOGGER.info("Share blocked by validation errors for hearing {}", command.getHearingId());
@@ -253,15 +256,15 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
                                 e.getRuleId(), e.getSeverity(), e.getMessage(),
                                 e.getAffectedOffences().stream()
                                         .map(o -> o.getId())
-                                        .collect(Collectors.toList())))
-                        .collect(Collectors.toList()))
+                                        .toList()))
+                        .toList())
                 .withWarnings(validationResponse.getWarnings().stream()
                         .map(w -> new ResultsValidationFailed.ValidationError(
                                 w.getRuleId(), w.getSeverity(), w.getMessage(),
                                 w.getAffectedOffences().stream()
                                         .map(o -> o.getId())
-                                        .collect(Collectors.toList())))
-                        .collect(Collectors.toList()))
+                                        .toList()))
+                        .toList())
                 .build();
     }
 
@@ -328,7 +331,7 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
                     return null;
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 }
