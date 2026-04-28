@@ -8,7 +8,7 @@
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
-    <version>17.104.158-SNAPSHOT</version>
+    <version>17.104.158-JMETER-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Hearing Context - Parent Module</name>
@@ -37,7 +37,7 @@
         <sardine.version>5.7</sardine.version>
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
-        <usersgroups.version>17.104.46</usersgroups.version>
+        <usersgroups.version>17.104.48</usersgroups.version>
         <listing.version>17.0.116</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>17.0.96</systemdocgenerator.version>
