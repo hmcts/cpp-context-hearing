@@ -7,6 +7,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
@@ -24,6 +28,16 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationIssue;
+import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationRequest;
+import uk.gov.moj.cpp.hearing.command.result.DeleteDraftResultV2Command;
+import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultV2Command;
+import uk.gov.moj.cpp.hearing.command.result.SaveMultipleResultsCommand;
+import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
+import uk.gov.moj.cpp.hearing.command.result.UpdateDaysResultLinesStatusCommand;
+import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
+import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.Prompt;
@@ -72,9 +86,12 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.json.Json;
 
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeAll;
@@ -191,7 +208,7 @@ public class ShareResultsCommandHandlerTest {
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
-        when(this.eventSource.getStreamById(initiateHearingCommand.getHearing().getId())).thenReturn(this.hearingEventStream);
+        lenient().when(this.eventSource.getStreamById(initiateHearingCommand.getHearing().getId())).thenReturn(this.hearingEventStream);
         defendantDetailsUpdated = new DefendantDetailsUpdated(initiateHearingCommand.getHearing().getId(), convert(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0), "Test"));
     }
 
@@ -417,5 +434,292 @@ public class ShareResultsCommandHandlerTest {
                 .withTargetId(randomUUID())
                 .withHearingDay(targetToCopyFrom.getHearingDay())
                 .build();
+    }
+
+    @Test
+    public void shouldSaveDraftResult() throws Exception {
+        final Target target = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), LocalDate.now()).getTarget();
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.saveDraftResults(any(), any())).thenReturn(Stream.empty());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.save-draft-result").withUserId(randomUUID().toString()),
+                objectToJsonObjectConverter.convert(target));
+
+        shareResultsCommandHandler.saveDraftResult(envelope);
+
+        verify(hearingEventStream).append(any());
+    }
+
+    @Test
+    public void shouldSaveDraftResultV2() throws Exception {
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        final SaveDraftResultV2Command command = SaveDraftResultV2Command.saveDraftResultCommand()
+                .setHearingId(hearingId)
+                .setHearingDay(LocalDate.now())
+                .setVersion(1);
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.saveDraftResultV2(any(), any(), any(), any(), any(), any(), any())).thenReturn(Stream.empty());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.save-draft-result-v2").withUserId(randomUUID().toString()),
+                objectToJsonObjectConverter.convert(command));
+
+        shareResultsCommandHandler.saveDraftResultV2(envelope);
+
+        verify(hearingEventStream).append(any());
+    }
+
+    @Test
+    public void shouldDeleteDraftResultV2() throws Exception {
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        final DeleteDraftResultV2Command command = DeleteDraftResultV2Command.deleteDraftResultCommand()
+                .setHearingId(hearingId)
+                .setHearingDay(LocalDate.now());
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.deleteDraftResultV2(any(), any(), any())).thenReturn(Stream.empty());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.delete-draft-result-v2").withUserId(randomUUID().toString()),
+                objectToJsonObjectConverter.convert(command));
+
+        shareResultsCommandHandler.deleteDraftResultV2(envelope);
+
+        verify(hearingEventStream).append(any());
+    }
+
+    @Test
+    public void shouldSaveDraftResultForHearingDay() throws Exception {
+        final Target target = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), LocalDate.now()).getTarget();
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.saveDraftResultForHearingDay(any(), any())).thenReturn(Stream.empty());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.save-days-draft-result").withUserId(randomUUID().toString()),
+                objectToJsonObjectConverter.convert(target));
+
+        shareResultsCommandHandler.saveDraftResultForHearingDay(envelope);
+
+        verify(hearingEventStream).append(any());
+    }
+
+    @Test
+    public void shouldSaveMultipleDraftResult() throws Exception {
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        final Target target = Target.target()
+                .withHearingId(hearingId)
+                .withDefendantId(randomUUID())
+                .withOffenceId(randomUUID())
+                .withTargetId(randomUUID())
+                .build();
+        final SaveMultipleResultsCommand command = new SaveMultipleResultsCommand(hearingId, List.of(target));
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.saveAllDraftResults(any(), any())).thenReturn(Stream.empty());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.save-multiple-draft-results").withUserId(randomUUID().toString()),
+                objectToJsonObjectConverter.convert(command));
+
+        shareResultsCommandHandler.saveMultipleDraftResult(envelope);
+
+        verify(hearingEventStream).append(any());
+    }
+
+    @Test
+    public void shouldShareResultV2() throws Exception {
+        final ShareDaysResultsCommand command = TestTemplates.ShareResultsCommandTemplates
+                .standardShareResultsPerDaysCommandTemplate(initiateHearingCommand.getHearing().getId())
+                .setResultLines(List.of());
+        command.setHearingDay(LocalDate.now());
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.shareResultsV2(any(), any(), any(), any(), any())).thenReturn(Stream.empty());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+        when(clock.now()).thenReturn(sharedTime);
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.share-results-v2"),
+                objectToJsonObjectConverter.convert(command));
+
+        shareResultsCommandHandler.shareResultV2(envelope);
+
+        verify(hearingEventStream).append(any());
+    }
+
+    @Test
+    public void shouldShareDaysResultsWhenValidationPasses() throws Exception {
+        final ShareDaysResultsCommand command = TestTemplates.ShareResultsCommandTemplates
+                .standardShareResultsPerDaysCommandTemplate(initiateHearingCommand.getHearing().getId())
+                .setResultLines(List.of());
+        command.setHearingDay(LocalDate.now());
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.getHearing()).thenReturn(hearing);
+        when(mockAggregate.shareResultForDay(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(Stream.empty());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+        final ValidationRequest validationRequest = new ValidationRequest(
+                command.getHearingId().toString(), command.getHearingDay(), "MAGISTRATE", null, List.of(), List.of(), List.of());
+        when(validationRequestMapper.toValidationRequest(any(), any())).thenReturn(validationRequest);
+        when(resultsValidationClient.validate(any(), any())).thenReturn(ValidationResponse.passThrough());
+        when(clock.now()).thenReturn(sharedTime);
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.share-days-results").withUserId(randomUUID().toString()),
+                objectToJsonObjectConverter.convert(command));
+
+        shareResultsCommandHandler.shareResultForDay(envelope);
+
+        verify(hearingEventStream).append(any());
+    }
+
+    @Test
+    public void shouldRaiseValidationFailedEventWhenShareDaysResultsHasErrors() throws Exception {
+        final ShareDaysResultsCommand command = TestTemplates.ShareResultsCommandTemplates
+                .standardShareResultsPerDaysCommandTemplate(initiateHearingCommand.getHearing().getId())
+                .setResultLines(List.of());
+        command.setHearingDay(LocalDate.now());
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.getHearing()).thenReturn(hearing);
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+        final ValidationRequest validationRequest = new ValidationRequest(
+                command.getHearingId().toString(), command.getHearingDay(), "MAGISTRATE", null, List.of(), List.of(), List.of());
+        when(validationRequestMapper.toValidationRequest(any(), any())).thenReturn(validationRequest);
+        final ValidationIssue error = new ValidationIssue("RULE1", "ERROR", "Validation error", List.of());
+        when(resultsValidationClient.validate(any(), any())).thenReturn(new ValidationResponse(false, List.of(error), List.of()));
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.share-days-results").withUserId(randomUUID().toString()),
+                objectToJsonObjectConverter.convert(command));
+
+        shareResultsCommandHandler.shareResultForDay(envelope);
+
+        final Stream<JsonEnvelope> appended = verifyAppendAndGetArgumentFrom(hearingEventStream);
+        final Optional<JsonEnvelope> validationFailed = appended
+                .filter(e -> "hearing.events.results-validation-failed".equals(e.metadata().name()))
+                .findFirst();
+        assertThat(validationFailed.isPresent(), is(true));
+    }
+
+    @Test
+    public void shouldUpdateResultLinesStatus() throws Exception {
+        final UpdateResultLinesStatusCommand command = UpdateResultLinesStatusCommand.builder()
+                .withHearingId(initiateHearingCommand.getHearing().getId())
+                .withCourtClerk(DelegatedPowers.delegatedPowers().withUserId(randomUUID()).withFirstName("test").withLastName("test").build())
+                .withLastSharedDateTime(ZonedDateTime.now())
+                .withSharedResultLines(List.of())
+                .build();
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.updateResultLinesStatus(any(), any(), any(), any())).thenReturn(Stream.empty());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.update-result-lines-status"),
+                objectToJsonObjectConverter.convert(command));
+
+        shareResultsCommandHandler.updateResultLinesStatus(envelope);
+
+        verify(hearingEventStream).append(any());
+    }
+
+    @Test
+    public void shouldUpdateDaysResultLinesStatus() throws Exception {
+        final UpdateDaysResultLinesStatusCommand command = UpdateDaysResultLinesStatusCommand.builder()
+                .withHearingId(initiateHearingCommand.getHearing().getId())
+                .withCourtClerk(DelegatedPowers.delegatedPowers().withUserId(randomUUID()).withFirstName("test").withLastName("test").build())
+                .withLastSharedDateTime(ZonedDateTime.now())
+                .withSharedResultLines(List.of())
+                .withHearingDay(LocalDate.now())
+                .build();
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.updateDaysResultLinesStatus(any(), any(), any(), any(), any())).thenReturn(Stream.empty());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.update-days-result-lines-status"),
+                objectToJsonObjectConverter.convert(command));
+
+        shareResultsCommandHandler.updateDaysResultLinesStatus(envelope);
+
+        verify(hearingEventStream).append(any());
+    }
+
+    @Test
+    public void shouldReplicateSharedResultsForHearing() throws Exception {
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.replicateSharedResultsForHearing(any())).thenReturn(Stream.empty());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.replicate-results"),
+                Json.createObjectBuilder().add("hearingId", hearingId.toString()).build());
+
+        shareResultsCommandHandler.replicateAllSharedResultsForHearing(envelope);
+
+        verify(hearingEventStream).append(any());
+    }
+
+    @Test
+    public void shouldGetDistinctApplicationIdsFromResultLines() {
+        final UUID appId1 = randomUUID();
+        final UUID appId2 = randomUUID();
+
+        final SharedResultsCommandResultLineV2 line1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withApplicationIds(appId1).build();
+        final SharedResultsCommandResultLineV2 line2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withApplicationIds(appId2).build();
+        final SharedResultsCommandResultLineV2 lineDuplicate = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withApplicationIds(appId1).build();
+        final SharedResultsCommandResultLineV2 lineNullApp = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withApplicationIds(null).build();
+
+        final Set<UUID> result = ShareResultsCommandHandler.getDistinctApplicationIdsFromResultLines(
+                List.of(line1, line2, lineDuplicate, lineNullApp));
+
+        assertThat(result.size(), is(2));
+        assertThat(result.contains(appId1), is(true));
+        assertThat(result.contains(appId2), is(true));
+    }
+
+    @Test
+    public void shouldReturnEmptyListFromGetAdditionalApplicationsWhenNoIds() {
+        final List<CourtApplication> result = shareResultsCommandHandler.getAdditionalApplications(Set.of(), randomUUID());
+
+        assertThat(result.isEmpty(), is(true));
+    }
+
+    @Test
+    public void shouldReturnApplicationFromGetAdditionalApplicationsWhenLatestHearingDiffers() {
+        final UUID applicationId = randomUUID();
+        final UUID resultedHearingId = initiateHearingCommand.getHearing().getId();
+        final UUID latestHearingId = randomUUID();
+
+        final uk.gov.justice.services.eventsourcing.source.core.EventStream applicationStream = mock(uk.gov.justice.services.eventsourcing.source.core.EventStream.class);
+        final uk.gov.justice.services.eventsourcing.source.core.EventStream latestHearingStream = mock(uk.gov.justice.services.eventsourcing.source.core.EventStream.class);
+
+        final ApplicationAggregate appAggregate = mock(ApplicationAggregate.class);
+        when(appAggregate.getHearingIds()).thenReturn(List.of(latestHearingId));
+
+        final CourtApplication expectedApp = CourtApplication.courtApplication().withId(applicationId).build();
+        final Hearing latestHearing = mock(Hearing.class);
+        when(latestHearing.getCourtApplications()).thenReturn(List.of(expectedApp));
+        final HearingAggregate latestHearingAggregate = mock(HearingAggregate.class);
+        when(latestHearingAggregate.getHearing()).thenReturn(latestHearing);
+
+        when(eventSource.getStreamById(applicationId)).thenReturn(applicationStream);
+        when(eventSource.getStreamById(latestHearingId)).thenReturn(latestHearingStream);
+        when(aggregateService.get(applicationStream, ApplicationAggregate.class)).thenReturn(appAggregate);
+        when(aggregateService.get(latestHearingStream, HearingAggregate.class)).thenReturn(latestHearingAggregate);
+
+        final List<CourtApplication> result = shareResultsCommandHandler.getAdditionalApplications(
+                Set.of(applicationId), resultedHearingId);
+
+        assertThat(result.size(), is(1));
+        assertThat(result.get(0).getId(), is(applicationId));
     }
 }
