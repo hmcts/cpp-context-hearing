@@ -1,0 +1,14 @@
+{
+  "prosecutionCounsel": {
+    "attendanceDays": ["2026-01-20"],
+    "firstName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+    "id": "${prosecutionCounselId}",
+    "lastName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+    "middleName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+    "prosecutionCases": ["${caseId}"],
+    "status": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+    "title": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+    "userId": "${__UUID}"
+  }
+}
+

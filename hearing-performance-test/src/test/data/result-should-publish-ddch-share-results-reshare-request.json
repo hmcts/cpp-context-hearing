@@ -1,0 +1,249 @@
+{
+  "courtClerk": {
+    "firstName": "Siouxsie",
+    "lastName": "Sioux",
+    "userId": "${__UUID}"
+  },
+  "resultLines": [
+    {
+      "delegatedPowers": {
+        "firstName": "David",
+        "lastName": "Bowie",
+        "userId": "${__UUID}"
+      },
+      "orderedDate": "2022-07-21",
+      "sharedDate": "2026-01-27",
+      "resultLineId": "${resultLineId1}",
+      "offenceId": "${offenceId}",
+      "defendantId": "${defendantId}",
+      "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+      "prompts": [
+        {
+          "id": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "label": "promptLabel",
+          "fixedListCode": "fixedListCode",
+          "value": "value1",
+          "welshValue": "wvalue1"
+        }
+      ],
+      "resultLabel": "imprisonment",
+      "level": "OFFENCE",
+      "isModified": true,
+      "isComplete": true,
+      "isDeleted": false,
+      "shadowListed": false,
+      "draftResult": "{}"
+    },
+    {
+      "delegatedPowers": {
+        "firstName": "David",
+        "lastName": "Bowie",
+        "userId": "${__UUID}"
+      },
+      "orderedDate": "2025-04-04",
+      "sharedDate": "2026-01-27",
+      "resultLineId": "${resultLineId2}",
+      "offenceId": "${offenceId}",
+      "defendantId": "${defendantId}",
+      "resultDefinitionId": "ebed169e-5e22-46b2-af32-8e5fb0461f05",
+      "prompts": [
+        {
+          "id": "ebed169e-5e22-46b2-af32-8e5fb0461f05",
+          "label": "promptLabel",
+          "fixedListCode": "fixedList0",
+          "value": "val0",
+          "welshValue": "wval0"
+        }
+      ],
+      "resultLabel": "imprisonment",
+      "level": "OFFENCE",
+      "isModified": true,
+      "isComplete": true,
+      "amendmentReasonId": "${amendmentReasonId1}",
+      "amendmentReason": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+      "amendmentDate": "2026-01-27",
+      "fourEyesApproval": {
+        "firstName": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+        "lastName": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+        "userId": "${__UUID}"
+      },
+      "approvedDate": "2021-06-05",
+      "isDeleted": false,
+      "shadowListed": false,
+      "draftResult": "{}"
+    },
+    {
+      "delegatedPowers": {
+        "firstName": "David",
+        "lastName": "Bowie",
+        "userId": "${__UUID}"
+      },
+      "orderedDate": "2025-04-04",
+      "sharedDate": "2026-01-27",
+      "resultLineId": "${resultLineId3}",
+      "offenceId": "${offenceId}",
+      "defendantId": "${defendantId}",
+      "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+      "prompts": [
+        {
+          "id": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "label": "promptLabel",
+          "fixedListCode": "fixedList0",
+          "value": "val0",
+          "welshValue": "wval0"
+        }
+      ],
+      "resultLabel": "imprisonment",
+      "level": "OFFENCE",
+      "isModified": true,
+      "isComplete": true,
+      "amendmentReasonId": "${amendmentReasonId2}",
+      "amendmentReason": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+      "amendmentDate": "2026-01-27",
+      "fourEyesApproval": {
+        "firstName": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+        "lastName": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+        "userId": "${__UUID}"
+      },
+      "approvedDate": "2021-08-24",
+      "isDeleted": false,
+      "shadowListed": false,
+      "draftResult": "{}"
+    },
+    {
+      "delegatedPowers": {
+        "firstName": "David",
+        "lastName": "Bowie",
+        "userId": "${__UUID}"
+      },
+      "orderedDate": "2025-09-17",
+      "sharedDate": "2026-01-27",
+      "resultLineId": "${resultLineId4}",
+      "offenceId": "${offenceId}",
+      "defendantId": "${defendantId}",
+      "resultDefinitionId": "b8cd526c-4ca1-43ae-93bd-fc5a8f03c0d5",
+      "prompts": [
+        {
+          "id": "b8cd526c-4ca1-43ae-93bd-fc5a8f03c0d5",
+          "label": "promptLabel",
+          "fixedListCode": "fixedList0",
+          "value": "val0",
+          "welshValue": "wval0"
+        }
+      ],
+      "resultLabel": "imprisonment",
+      "level": "OFFENCE",
+      "isModified": true,
+      "isComplete": true,
+      "isDeleted": false,
+      "shadowListed": false,
+      "draftResult": "{}"
+    },
+    {
+      "delegatedPowers": {
+        "firstName": "David",
+        "lastName": "Bowie",
+        "userId": "${__UUID}"
+      },
+      "orderedDate": "2025-09-17",
+      "sharedDate": "2026-01-27",
+      "resultLineId": "${resultLineId5}",
+      "offenceId": "${offenceId}",
+      "defendantId": "${defendantId}",
+      "resultDefinitionId": "de946ddc-ad77-44b1-8480-8bbc251cdcfb",
+      "prompts": [
+        {
+          "id": "de946ddc-ad77-44b1-8480-8bbc251cdcfb",
+          "label": "promptLabel",
+          "fixedListCode": "fixedList1",
+          "value": "val1",
+          "welshValue": "wval1"
+        }
+      ],
+      "resultLabel": "imprisonment",
+      "level": "OFFENCE",
+      "isModified": true,
+      "isComplete": true,
+      "isDeleted": false,
+      "shadowListed": false,
+      "draftResult": "{}"
+    },
+    {
+      "delegatedPowers": {
+        "firstName": "David",
+        "lastName": "Bowie",
+        "userId": "${__UUID}"
+      },
+      "orderedDate": "2025-04-04",
+      "sharedDate": "2026-01-27",
+      "resultLineId": "${resultLineId6}",
+      "offenceId": "${offenceId}",
+      "defendantId": "${defendantId}",
+      "resultDefinitionId": "ebed169e-5e22-46b2-af32-8e5fb0461f05",
+      "prompts": [
+        {
+          "id": "ebed169e-5e22-46b2-af32-8e5fb0461f05",
+          "label": "promptLabel",
+          "fixedListCode": "fixedList0",
+          "value": "val0",
+          "welshValue": "wval0"
+        }
+      ],
+      "resultLabel": "imprisonment",
+      "level": "OFFENCE",
+      "isModified": true,
+      "isComplete": true,
+      "amendmentReasonId": "${amendmentReasonId3}",
+      "amendmentReason": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+      "amendmentDate": "2026-01-27",
+      "fourEyesApproval": {
+        "firstName": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+        "lastName": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+        "userId": "${__UUID}"
+      },
+      "approvedDate": "2022-10-06",
+      "isDeleted": false,
+      "shadowListed": false,
+      "draftResult": "{}"
+    },
+    {
+      "delegatedPowers": {
+        "firstName": "David",
+        "lastName": "Bowie",
+        "userId": "${__UUID}"
+      },
+      "orderedDate": "2025-04-04",
+      "sharedDate": "2026-01-27",
+      "resultLineId": "${resultLineId7}",
+      "offenceId": "${offenceId}",
+      "defendantId": "${defendantId}",
+      "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+      "prompts": [
+        {
+          "id": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "label": "promptLabel",
+          "fixedListCode": "fixedList0",
+          "value": "val0",
+          "welshValue": "wval0"
+        }
+      ],
+      "resultLabel": "imprisonment",
+      "level": "OFFENCE",
+      "isModified": true,
+      "isComplete": true,
+      "amendmentReasonId": "${amendmentReasonId4}",
+      "amendmentReason": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+      "amendmentDate": "2026-01-27",
+      "fourEyesApproval": {
+        "firstName": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+        "lastName": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+        "userId": "${__UUID}"
+      },
+      "approvedDate": "2022-12-30",
+      "isDeleted": false,
+      "shadowListed": false,
+      "draftResult": "{}"
+    }
+  ]
+}
+

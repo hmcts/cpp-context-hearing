@@ -1,0 +1,13 @@
+{
+  "name": "${groupName}",
+  "source": "CPP",
+  "category": "AREA",
+  "organisationId": "${organisationId}",
+  "_metadata": {
+    "name": "usersgroups.command.create-group",
+    "context": {
+      "user": "${userId}"
+    },
+    "id": "${__UUID}"
+  }
+}
