@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import java.io.IOException;
@@ -109,7 +110,7 @@ class HttpClientProducerTest {
 
     @Test
     void close_whenClientIsNull_shouldNotThrow() {
-        httpClientProducer.close();
+        assertDoesNotThrow(() -> httpClientProducer.close());
     }
 
     @Test
