@@ -10,6 +10,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasKey;
 import static org.mockito.Mockito.verify;
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeListMatcher.listContaining;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
@@ -32,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.json.Json;
+
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
@@ -127,7 +128,7 @@ public class DefendantCaseWithdrawnOrDismissedEventProcessorTest {
     }
 
     public static JsonObject readJson(final String jsonString) {
-        try (final JsonReader jsonReader = Json.createReader(new StringReader(jsonString))) {
+        try (final JsonReader jsonReader = createReader(new StringReader(jsonString))) {
             return jsonReader.readObject();
         }
     }
