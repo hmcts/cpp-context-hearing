@@ -6,12 +6,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.json.Json;
+
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
@@ -37,7 +38,7 @@ public class CourtApplicationDeletedProcessorTest {
 
     @Test
     public void shouldHandleCourtApplicationDeletedPublicEvent(){
-        final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+        final JsonObjectBuilder objectBuilder = createObjectBuilder();
         final String hearingId = randomUUID().toString();
         final String applicationId = randomUUID().toString();
         objectBuilder
