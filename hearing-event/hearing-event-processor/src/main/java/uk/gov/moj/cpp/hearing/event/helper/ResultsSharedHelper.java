@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.event.helper;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static javax.json.Json.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
@@ -24,7 +24,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import java.util.List;
 import java.util.UUID;
 
-import javax.json.Json;
+
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
@@ -124,7 +124,7 @@ public class ResultsSharedHelper {
         for (final HearingDay hearingDay : hearingDaysList) {
             arrayBuilder.add(createObjectBuilder(objectToJsonObjectConverter.convert(hearingDay)).build());
         }
-        final JsonObject payload = Json.createObjectBuilder()
+        final JsonObject payload = createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("hearingDays", arrayBuilder)
                 .build();

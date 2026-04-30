@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static java.text.MessageFormat.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static javax.json.Json.createReader;
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.Status.fromStatusCode;
 import static org.hamcrest.MatcherAssert.assertThat;

@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.event.service;
 
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toMap;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;

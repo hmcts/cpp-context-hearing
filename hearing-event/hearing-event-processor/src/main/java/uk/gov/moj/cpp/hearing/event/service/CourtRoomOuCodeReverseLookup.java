@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.event.service;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Stream.concat;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
