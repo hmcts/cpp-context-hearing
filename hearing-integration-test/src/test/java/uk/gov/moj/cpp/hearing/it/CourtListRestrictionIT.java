@@ -283,4 +283,32 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
         assertThat(filePayloadForPubDisplay, containsString("lastname"));
     }
 
+    @Test
+    public void shouldRequestToPublishCourtListWhenYoungDefendantIsRestrictedOnInitiate() throws Exception {
+        final CourtListRestrictionSteps courtListRestrictionSteps = new CourtListRestrictionSteps();
+
+        final InitiateHearingCommandHelper initiateHearingCommandHelper = courtListRestrictionSteps.createHearingEventWithYoungDefendant(
+                caseId, randomUUID(), courtRoom2Id, randomUUID().toString(),
+                OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId, eventTime.toLocalDate());
+
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
+        final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
+
+        courtCentreId = sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId);
+        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+
+        final String filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
+        final String filePayloadForPubDisplay = getSentXmlForPubDisplay();
+
+        final String expectedCasesXMLValueForWeb = "<caseDetails>";
+        final String expectedDefendantXMLValueForWeb = "<defendants/>";
+
+        assertThat(filePayload, containsString(E20903_PCO_TYPE));
+        assertThat(filePayload, containsString(expectedCasesXMLValueForWeb));
+        assertThat(filePayload, containsString(expectedDefendantXMLValueForWeb));
+        assertThat(filePayloadForPubDisplay, containsString(E20903_PCO_TYPE));
+        assertThat(filePayloadForPubDisplay, containsString(expectedCasesXMLValueForWeb));
+        assertThat(filePayloadForPubDisplay, containsString(expectedDefendantXMLValueForWeb));
+    }
+
 }

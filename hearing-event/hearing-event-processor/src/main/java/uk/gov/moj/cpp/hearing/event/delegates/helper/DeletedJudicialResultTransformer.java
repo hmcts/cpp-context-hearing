@@ -158,6 +158,7 @@ public class DeletedJudicialResultTransformer {
                 .filter(ca -> ca.getId().equals(node.getApplicationId()))
                 .filter(ca -> isNotEmpty(ca.getCourtApplicationCases()))
                 .flatMap(ca -> ca.getCourtApplicationCases().stream())
+                .filter(cac -> isNotEmpty(cac.getOffences()))
                 .flatMap(cac -> cac.getOffences().stream())
                 .anyMatch(caco -> caco.getId().equals(node.getOffenceId()));
     }

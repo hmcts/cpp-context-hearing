@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 
 import uk.gov.justice.hearing.courts.referencedata.Prosecutor;

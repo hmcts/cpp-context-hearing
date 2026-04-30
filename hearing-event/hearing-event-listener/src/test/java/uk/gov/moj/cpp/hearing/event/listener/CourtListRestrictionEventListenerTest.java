@@ -68,7 +68,7 @@ public class CourtListRestrictionEventListenerTest {
         final List<UUID> defendantIds = singletonList(defendantId);
         final List<UUID> offenceIds = singletonList(offenceId);
 
-        final CourtListRestricted courtListRestricted = new CourtListRestricted(caseIds, null, null, null, null, defendantIds, hearingId, offenceIds, true);
+        final CourtListRestricted courtListRestricted = new CourtListRestricted(caseIds, null, null, null, null, null, defendantIds, hearingId, offenceIds, true);
         when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.of(hearingEntity(hearingId, caseId, defendantId, offenceId)));
         final Metadata metadata = metadataBuilder()
                 .withId(UUID.randomUUID())
@@ -122,7 +122,7 @@ public class CourtListRestrictionEventListenerTest {
         final List<UUID> applicantIds = singletonList(applicantId);
         final List<UUID> respondentIds = singletonList(respondentId);
 
-        final CourtListRestricted courtListRestricted = new CourtListRestricted(null, applicantIds, applicationIds, respondentIds, null, null, hearingId, null, true);
+        final CourtListRestricted courtListRestricted = new CourtListRestricted(null, applicantIds, applicationIds, respondentIds, null, null, null, hearingId, null, true);
         when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.of(hearingEntity(hearingId, asList(UUID.randomUUID()), emptyList(), null)));
         final Metadata metadata = metadataBuilder()
                 .withId(UUID.randomUUID())
@@ -154,7 +154,7 @@ public class CourtListRestrictionEventListenerTest {
         final UUID applicationId = UUID.randomUUID();
         final List<UUID> applicationIds = singletonList(applicationId);
 
-        final CourtListRestricted courtListRestricted = new CourtListRestricted(null, null, applicationIds, null, null, null, hearingId, null, true);
+        final CourtListRestricted courtListRestricted = new CourtListRestricted(null, null, applicationIds, null, null, null, null, hearingId, null, true);
         when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.of(hearingEntity(hearingId)));
         final Metadata metadata = metadataBuilder()
                 .withId(UUID.randomUUID())
@@ -183,7 +183,7 @@ public class CourtListRestrictionEventListenerTest {
 
         final List<UUID> applicationIds = singletonList(applicationId);
 
-        final CourtListRestricted courtListRestricted = new CourtListRestricted(null, singletonList(applicantId2), applicationIds, null, null, null, hearingId, null, false);
+        final CourtListRestricted courtListRestricted = new CourtListRestricted(null, singletonList(applicantId2), applicationIds, null, null, null, null, hearingId, null, false);
         when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.of(hearingEntity(hearingId, singletonList(applicationId), asList(applicantId1, applicantId2), emptyList())));
         final Metadata metadata = metadataBuilder()
                 .withId(UUID.randomUUID())
@@ -213,7 +213,7 @@ public class CourtListRestrictionEventListenerTest {
 
         final List<UUID> applicationIds = singletonList(applicationId);
 
-        final CourtListRestricted courtListRestricted = new CourtListRestricted(null, singletonList(applicantId2), applicationIds, null, null, null, hearingId, null, false);
+        final CourtListRestricted courtListRestricted = new CourtListRestricted(null, singletonList(applicantId2), applicationIds, null, null, null, null, hearingId, null, false);
         when(hearingRepository.findOptionalBy(any())).thenReturn(Optional.empty());
         final Metadata metadata = metadataBuilder()
                 .withId(UUID.randomUUID())

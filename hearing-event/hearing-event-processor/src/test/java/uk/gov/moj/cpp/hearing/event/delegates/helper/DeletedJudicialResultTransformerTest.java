@@ -231,4 +231,26 @@ public class DeletedJudicialResultTransformerTest {
         assertThat(deletedResults.getApplicationCourtOrderResults().get(0).getApplicationId(), is(applicationId));
         assertThat(deletedResults.getApplicationCourtOrderResults().get(0).getJudicialResult(), is(notNullValue()));
     }
+
+    @Test
+    public void givenDeletedApplicationCaseJrs_whenTransformedToDeletedJudicialResults_shouldReturnNullApplicationResults() {
+        final UUID applicationId = randomUUID();
+        final TreeNode mockNode = mock(TreeNode.class);
+        final UUID offenceId = randomUUID();
+        final UUID resultLineId = randomUUID();
+        final List<TreeNode<ResultLine2>> restructuredResults = List.of(mockNode);
+
+        final Hearing hearing = Hearing.hearing()
+                .withCourtApplications(List.of(courtApplication().withId(applicationId)
+                        .withCourtApplicationCases(List.of(CourtApplicationCase.courtApplicationCase()
+                                .build())).build()))
+                .build();
+        when(mockNode.getApplicationId()).thenReturn(applicationId);
+        when(mockNode.getOffenceId()).thenReturn(offenceId);
+        when(mockNode.getJudicialResult()).thenReturn(JudicialResult.judicialResult().withJudicialResultId(resultLineId).withIsNewAmendment(TRUE).build());
+
+        final DeletedJudicialResults deletedResults = toDeletedResults(restructuredResults, hearing);
+
+        assertThat(deletedResults.getApplicationCaseResults(), is(nullValue()));
+    }
 }
