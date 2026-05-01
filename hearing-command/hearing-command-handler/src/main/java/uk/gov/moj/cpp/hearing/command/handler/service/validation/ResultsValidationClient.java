@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 
 import uk.gov.justice.services.common.configuration.Value;
+import uk.gov.justice.services.core.featurecontrol.FeatureControlGuard;
 
 import java.io.InputStream;
 
@@ -41,10 +42,22 @@ public class ResultsValidationClient implements ResultsValidator {
     @Inject
     private HttpClient httpClient;
 
+    @Inject
+    private FeatureControlGuard featureControlGuard;
+
     public ResultsValidationClient() {
     }
 
     public ValidationResponse validate(final ValidationRequest request, final String userId) {
+        try {
+            if (!featureControlGuard.isFeatureEnabled("ResultsValidation")) {
+                LOGGER.debug("ResultsValidation feature toggle is OFF, skipping validation");
+                return ValidationResponse.passThrough();
+            }
+        } catch (final Exception ex) {
+            LOGGER.warn("ResultsValidation feature toggle lookup failed, proceeding with validation (fail-open)", ex);
+        }
+
         if (!"true".equalsIgnoreCase(enabled)) {
             LOGGER.debug("Results validation is disabled, proceeding with share");
             return ValidationResponse.passThrough();
