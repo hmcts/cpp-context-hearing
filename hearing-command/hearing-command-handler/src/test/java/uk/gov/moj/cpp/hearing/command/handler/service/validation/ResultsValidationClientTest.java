@@ -5,11 +5,14 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+
+import uk.gov.justice.services.core.featurecontrol.FeatureControlGuard;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -40,6 +43,9 @@ class ResultsValidationClientTest {
     @Mock
     private HttpClient httpClient;
 
+    @Mock
+    private FeatureControlGuard featureControlGuard;
+
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
 
     @BeforeEach
@@ -48,6 +54,7 @@ class ResultsValidationClientTest {
         setField(resultsValidationClient, "validationUrl", "http://localhost:8082/api/validation/validate");
         setField(resultsValidationClient, "enabled", "true");
         setField(resultsValidationClient, "timeoutMs", "5000");
+        lenient().when(featureControlGuard.isFeatureEnabled("ResultsValidation")).thenReturn(true);
     }
 
     @Test
@@ -118,6 +125,55 @@ class ResultsValidationClientTest {
 
     @Test
     void shouldReturnPassThroughWithoutHttpCallWhenDisabled() throws Exception {
+        setField(resultsValidationClient, "enabled", "false");
+
+        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+
+        assertThat(response.isValid(), is(true));
+        assertThat(response.hasErrors(), is(false));
+        verify(httpClient, never()).execute(any());
+    }
+
+    @Test
+    void toggle_off_returns_passThrough_without_http_call() throws Exception {
+        when(featureControlGuard.isFeatureEnabled("ResultsValidation")).thenReturn(false);
+
+        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+
+        assertThat(response.isValid(), is(true));
+        assertThat(response.hasErrors(), is(false));
+        verify(httpClient, never()).execute(any());
+    }
+
+    @Test
+    void toggle_on_invokes_http_client() throws Exception {
+        final String responseJson = """
+                {"validationId":"abc","isValid":true,"errors":[],"warnings":[],"rulesEvaluated":["DR-SENT-002"],"processingTimeMs":10}
+                """;
+        mockHttpResponse(200, responseJson);
+
+        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+
+        assertThat(response.isValid(), is(true));
+        verify(httpClient).execute(any(HttpPost.class));
+    }
+
+    @Test
+    void toggle_lookup_failure_falls_open_and_invokes_http_client() throws Exception {
+        when(featureControlGuard.isFeatureEnabled("ResultsValidation")).thenThrow(new RuntimeException("feature store unavailable"));
+        final String responseJson = """
+                {"validationId":"abc","isValid":true,"errors":[],"warnings":[],"rulesEvaluated":["DR-SENT-002"],"processingTimeMs":10}
+                """;
+        mockHttpResponse(200, responseJson);
+
+        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+
+        assertThat(response.isValid(), is(true));
+        verify(httpClient).execute(any(HttpPost.class));
+    }
+
+    @Test
+    void existing_static_disabled_path_still_short_circuits() throws Exception {
         setField(resultsValidationClient, "enabled", "false");
 
         final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
