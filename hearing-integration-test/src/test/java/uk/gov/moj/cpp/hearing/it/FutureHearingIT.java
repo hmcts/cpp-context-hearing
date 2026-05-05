@@ -77,16 +77,12 @@ public class FutureHearingIT extends AbstractIT {
                                 .with(hearingDay -> hearingDay.getSittingDay().toLocalDate(), is(NOW.toLocalDate().plusDays(2)))))
                         .with(HearingSummaries::getHearingDays, hasItem(isBean(HearingDay.class)
                                 .with(hearingDay -> hearingDay.getSittingDay().toLocalDate(), is(NOW.toLocalDate().plusDays(3)))))
-                        .with(this::getCourtCentreId, is(courtCentreId))
-                        .with(this::getCourtCentreName, is(COURT_CENTRE_NAME))
-                        .with(this::getCourtCentreRoomId, is(roomId))
                         .with(this::getHearingLanguage, is("ENGLISH"))
                         .with(this::getProsecutionCaseIdentifierCaseUrn, is(CASE_URN))
                         .with(this::getTypeDescription, is(TRIAL))
                         .with(this::getFirstName, is(DEFENDANT_FIRST_NAME))
                         .with(this::getLastName, is(DEFENDANT_LAST_NAME))
-                        .with(this::getOffenceTitle, is(OFFENCE_TITLE))
-                        .with(this::getOffenceWording, is(OFFENCE_WORDING))))
+                        .with(this::getOffenceTitle, is(OFFENCE_TITLE))))
         );
     }
 

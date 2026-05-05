@@ -42,10 +42,6 @@ public class GetHearingsTransformer {
     public HearingSummaries.Builder summary(final Hearing hearing) {
         return buildHearingSummary(hearing)
                 .withHearingDays(hearing.getHearingDays())
-                .withCourtApplicationSummaries(isEmpty(hearing.getCourtApplications()) ? emptyList() :
-                        hearing.getCourtApplications().stream().map(courtApplication -> summary(courtApplication).build())
-                                .collect(toList()))
-                .withIsGroupProceedings(hearing.getIsGroupProceedings())
                 .withNumberOfGroupCases(hearing.getNumberOfGroupCases())
                 .withProsecutionCaseSummaries(
                         isEmpty(hearing.getProsecutionCases()) ? emptyList() :
@@ -114,14 +110,20 @@ public class GetHearingsTransformer {
     }
 
     private List<HearingDay> getHearingDaysForToday(final List<HearingDay> hearingDays) {
-        return hearingDays.stream().filter(hearingDay ->
-                now().equals(hearingDay.getSittingDay().toLocalDate())
-        ).collect(toList());
+        return hearingDays.stream()
+                .filter(hearingDay ->
+                        now().equals(hearingDay.getSittingDay().toLocalDate()))
+                .peek(hearingDay -> {
+                    hearingDay.setCourtCentreId(null);
+                    hearingDay.setCourtRoomId(null);
+                    hearingDay.setIsCancelled(null);
+                    hearingDay.setListedDurationMinutes(null);
+                })
+                .collect(toList());
     }
 
     private Defendants.Builder summary(final Defendant defendant) {
         final Defendants.Builder result = Defendants.defendants();
-        result.withId(defendant.getId());
         result.withMasterDefendantId(defendant.getMasterDefendantId());
         result.withCourtProceedingsInitiated(defendant.getCourtProceedingsInitiated());
         if (defendant.getPersonDefendant() != null && defendant.getPersonDefendant().getPersonDetails() != null) {
@@ -132,7 +134,6 @@ public class GetHearingsTransformer {
         if (defendant.getLegalEntityDefendant() != null && defendant.getLegalEntityDefendant().getOrganisation() != null) {
             result.withOrganisationName(defendant.getLegalEntityDefendant().getOrganisation().getName());
         }
-        result.withSynonym("is this from aliases ?");
         if (defendant.getOffences() != null) {
             result.withOffences(defendant.getOffences().stream().map(o -> summaryWithReportingRestrictions(o).build())
                     .collect(toList()));
@@ -173,35 +174,13 @@ public class GetHearingsTransformer {
 
     private Offences.Builder summaryWithReportingRestrictions(final Offence offence) {
         final Offences.Builder result = Offences.offences();
-
-        result.withId(offence.getId());
         result.withOffenceTitle(offence.getOffenceTitle());
-        result.withOffenceTitleWelsh(offence.getOffenceTitleWelsh());
-        result.withWording(offence.getWording());
         result.withWordingWelsh(offence.getWordingWelsh());
-        if (offence.getReportingRestrictions() != null) {
-            result.withReportingRestrictions(offence.getReportingRestrictions().stream()
-                    .map(reportingRestriction -> summaryReportingRestriction(reportingRestriction).build())
-                    .collect(toList()));
-        }
-
         return result;
     }
-
-    private ReportingRestrictions.Builder summaryReportingRestriction(final ReportingRestriction reportingRestriction) {
-        final ReportingRestrictions.Builder result = ReportingRestrictions.reportingRestrictions();
-        result.withId(reportingRestriction.getId());
-        result.withJudicialResultId(reportingRestriction.getJudicialResultId());
-        result.withLabel(reportingRestriction.getLabel());
-        result.withOrderedDate(reportingRestriction.getOrderedDate());
-
-        return result;
-    }
-
 
     private ProsecutionCaseSummaries.Builder summary(final ProsecutionCase prosecutionCase) {
         return ProsecutionCaseSummaries.prosecutionCaseSummaries()
-                .withId(prosecutionCase.getId())
                 .withProsecutionCaseIdentifier(prosecutionCase.getProsecutionCaseIdentifier())
                 .withIsCivil(prosecutionCase.getIsCivil())
                 .withGroupId(prosecutionCase.getGroupId())

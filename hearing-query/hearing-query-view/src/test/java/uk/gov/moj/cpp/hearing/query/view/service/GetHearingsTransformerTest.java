@@ -29,29 +29,25 @@ import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
-import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.hearing.courts.Applicant;
 import uk.gov.justice.hearing.courts.CaseSummaries;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
 import uk.gov.justice.hearing.courts.Defendants;
 import uk.gov.justice.hearing.courts.HearingSummaries;
-import uk.gov.justice.hearing.courts.Offences;
 import uk.gov.justice.hearing.courts.ProsecutionCaseSummaries;
-import uk.gov.justice.hearing.courts.ReportingRestrictions;
 import uk.gov.justice.hearing.courts.Respondents;
 import uk.gov.justice.hearing.courts.Subject;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.mockito.junit.jupiter.MockitoExtension;
 
 
@@ -69,7 +65,6 @@ public class GetHearingsTransformerTest {
         final CourtApplicationParty applicant = courtApplication.getApplicant();
         final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
         final Defendant defendant = prosecutionCase.getDefendants().get(0);
-        final ReportingRestriction reportingRestriction = defendant.getOffences().get(0).getReportingRestrictions().get(0);
         final CourtApplicationParty courtApplicationRespondent = courtApplication.getRespondents().get(0);
         final Person respondentPerson = courtApplicationRespondent.getPersonDetails();
         final CourtApplicationParty courtApplicationParty = courtApplication.getRespondents().get(0);
@@ -78,7 +73,6 @@ public class GetHearingsTransformerTest {
         assertThat(hearingSummary, isBean(HearingSummaries.class)
                 .withValue(HearingSummaries::getId, hearing.getId())
                 .withValue(HearingSummaries::getHearingLanguage, hearing.getHearingLanguage().name())
-                .withValue(HearingSummaries::getIsGroupProceedings, hearing.getIsGroupProceedings())
                 .withValue(HearingSummaries::getNumberOfGroupCases, hearing.getNumberOfGroupCases())
                 .withValue(hs -> hs.getType().getId(), hearing.getType().getId())
                 .withValue(HearingSummaries::getHearingDays, hearing.getHearingDays())
@@ -107,19 +101,10 @@ public class GetHearingsTransformerTest {
                         ))
                 ))
                 .with(HearingSummaries::getProsecutionCaseSummaries, first(isBean(ProsecutionCaseSummaries.class)
-                        .withValue(ProsecutionCaseSummaries::getId, prosecutionCase.getId())
                         .withValue(ProsecutionCaseSummaries::getProsecutionCaseIdentifier, prosecutionCase.getProsecutionCaseIdentifier())
                         .with(ProsecutionCaseSummaries::getDefendants, first(isBean(Defendants.class)
-                                .withValue(Defendants::getId, defendant.getId())
                                 .withValue(Defendants::getMasterDefendantId, defendant.getMasterDefendantId())
                                 .withValue(Defendants::getCourtProceedingsInitiated, defendant.getCourtProceedingsInitiated())))
-                        .with(ProsecutionCaseSummaries::getDefendants, first(isBean(Defendants.class)
-                                .with(Defendants::getOffences, first(isBean(Offences.class)
-                                        .with(Offences::getReportingRestrictions, first(isBean(ReportingRestrictions.class)
-                                                .withValue(ReportingRestrictions::getId, reportingRestriction.getId())
-                                                .withValue(ReportingRestrictions::getJudicialResultId, reportingRestriction.getJudicialResultId())
-                                                .withValue(ReportingRestrictions::getLabel, reportingRestriction.getLabel())
-                                                .withValue(ReportingRestrictions::getOrderedDate, reportingRestriction.getOrderedDate())))))))
                 ))
         );
 
@@ -333,7 +318,6 @@ public class GetHearingsTransformerTest {
         final CourtApplicationParty applicant = courtApplication.getApplicant();
         final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
         final Defendant defendant = prosecutionCase.getDefendants().get(0);
-        final ReportingRestriction reportingRestriction = defendant.getOffences().get(0).getReportingRestrictions().get(0);
         final CourtApplicationParty courtApplicationRespondent = courtApplication.getRespondents().get(0);
         final Person respondentPerson = courtApplicationRespondent.getPersonDetails();
         final CourtApplicationParty courtApplicationParty = courtApplication.getRespondents().get(0);
@@ -385,7 +369,6 @@ public class GetHearingsTransformerTest {
         final CourtApplicationParty applicant = courtApplication.getApplicant();
         final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
         final Defendant defendant = prosecutionCase.getDefendants().get(0);
-        final ReportingRestriction reportingRestriction = defendant.getOffences().get(0).getReportingRestrictions().get(0);
         final CourtApplicationParty courtApplicationRespondent = courtApplication.getRespondents().get(0);
         final Person respondentPerson = courtApplicationRespondent.getPersonDetails();
         final CourtApplicationParty courtApplicationParty = courtApplication.getRespondents().get(0);
@@ -451,10 +434,8 @@ public class GetHearingsTransformerTest {
 
         assertThat(hearingSummary, isBean(HearingSummaries.class)
                 .with(HearingSummaries::getProsecutionCaseSummaries, first(isBean(ProsecutionCaseSummaries.class)
-                        .withValue(ProsecutionCaseSummaries::getId, prosecutionCase.getId())
                         .withValue(ProsecutionCaseSummaries::getProsecutionCaseIdentifier, prosecutionCase.getProsecutionCaseIdentifier())
                         .with(ProsecutionCaseSummaries::getDefendants, first(isBean(Defendants.class)
-                                .withValue(Defendants::getId, defendant.getId())
                                 .withValue(Defendants::getMasterDefendantId, defendant.getMasterDefendantId())
                                 .withValue(Defendants::getCourtProceedingsInitiated, defendant.getCourtProceedingsInitiated())))
                 ))
@@ -511,10 +492,8 @@ public class GetHearingsTransformerTest {
 
         assertThat(hearingSummary, isBean(HearingSummaries.class)
                 .with(HearingSummaries::getProsecutionCaseSummaries, first(isBean(ProsecutionCaseSummaries.class)
-                        .withValue(ProsecutionCaseSummaries::getId, prosecutionCase.getId())
                         .withValue(ProsecutionCaseSummaries::getProsecutionCaseIdentifier, prosecutionCase.getProsecutionCaseIdentifier())
                         .with(ProsecutionCaseSummaries::getDefendants, first(isBean(Defendants.class)
-                                .withValue(Defendants::getId, defendant.getId())
                                 .withValue(Defendants::getMasterDefendantId, defendant.getMasterDefendantId())
                                 .withValue(Defendants::getCourtProceedingsInitiated, defendant.getCourtProceedingsInitiated())))
                 ))
@@ -591,23 +570,16 @@ public class GetHearingsTransformerTest {
                 .withProsecutionCases(asList(prosecutionCase1, prosecutionCase2, prosecutionCase3, prosecutionCase4))
                 .build();
 
-        final List<UUID> filteredCases = asList(prosecutionCase1.getId(), prosecutionCase3.getId());
-
         final HearingSummaries hearingSummary = target.summary(hearing).build();
-        assertThat(hearingSummary.getIsGroupProceedings(), CoreMatchers.equalTo(TRUE));
         assertThat(hearingSummary.getNumberOfGroupCases().intValue(), CoreMatchers.equalTo(NUMBER_OF_GROUP_CASES));
         assertThat(hearingSummary.getProsecutionCaseSummaries().size(), equalTo(2));
         assertThat(hearingSummary.getProsecutionCaseSummaries().get(0).getIsCivil(), equalTo(true));
-        assertTrue(filteredCases.contains(hearingSummary.getProsecutionCaseSummaries().get(0).getId()));
-        assertTrue(filteredCases.contains(hearingSummary.getProsecutionCaseSummaries().get(1).getId()));
 
         final HearingSummaries hearingSummaryForToday = target.summaryForHearingsForToday(hearing).build();
         assertThat(hearingSummaryForToday.getIsGroupProceedings(), CoreMatchers.equalTo(TRUE));
         assertThat(hearingSummaryForToday.getNumberOfGroupCases().intValue(), CoreMatchers.equalTo(NUMBER_OF_GROUP_CASES));
         assertThat(hearingSummaryForToday.getProsecutionCaseSummaries().size(), equalTo(2));
         assertThat(hearingSummaryForToday.getProsecutionCaseSummaries().get(0).getIsCivil(), equalTo(true));
-        assertTrue(filteredCases.contains(hearingSummaryForToday.getProsecutionCaseSummaries().get(0).getId()));
-        assertTrue(filteredCases.contains(hearingSummaryForToday.getProsecutionCaseSummaries().get(1).getId()));
     }
 
     @Test
@@ -644,23 +616,14 @@ public class GetHearingsTransformerTest {
                 .withProsecutionCases(asList(prosecutionCase1, prosecutionCase2, prosecutionCase3))
                 .build();
 
-        final List<UUID> filteredCases = asList(prosecutionCase1.getId(), prosecutionCase2.getId(), prosecutionCase3.getId());
-
         final HearingSummaries hearingSummary = target.summary(hearing).build();
-        assertThat(hearingSummary.getIsGroupProceedings(), CoreMatchers.equalTo(TRUE));
         assertThat(hearingSummary.getNumberOfGroupCases().intValue(), CoreMatchers.equalTo(NUMBER_OF_GROUP_CASES));
         assertThat(hearingSummary.getProsecutionCaseSummaries().size(), equalTo(3));
         assertThat(hearingSummary.getProsecutionCaseSummaries().get(0).getIsCivil(), equalTo(true));
-        assertTrue(filteredCases.contains(hearingSummary.getProsecutionCaseSummaries().get(0).getId()));
-        assertTrue(filteredCases.contains(hearingSummary.getProsecutionCaseSummaries().get(1).getId()));
-        assertTrue(filteredCases.contains(hearingSummary.getProsecutionCaseSummaries().get(2).getId()));
 
         final HearingSummaries hearingSummaryForToday = target.summaryForHearingsForToday(hearing).build();
         assertThat(hearingSummaryForToday.getNumberOfGroupCases().intValue(), CoreMatchers.equalTo(NUMBER_OF_GROUP_CASES));
         assertThat(hearingSummaryForToday.getProsecutionCaseSummaries().size(), equalTo(3));
         assertThat(hearingSummaryForToday.getProsecutionCaseSummaries().get(0).getIsCivil(), equalTo(true));
-        assertTrue(filteredCases.contains(hearingSummaryForToday.getProsecutionCaseSummaries().get(0).getId()));
-        assertTrue(filteredCases.contains(hearingSummaryForToday.getProsecutionCaseSummaries().get(1).getId()));
-        assertTrue(filteredCases.contains(hearingSummaryForToday.getProsecutionCaseSummaries().get(2).getId()));
     }
 }
