@@ -41,6 +41,33 @@ class HttpClientProducerTest {
         setField(httpClientProducer, "evictIdleSeconds", "30");
     }
 
+    @Test
+    void createHttpClient_shouldReturnNonNullHttpClient() {
+        final HttpClient client = httpClientProducer.createHttpClient();
+
+        assertThat(client, is(notNullValue()));
+    }
+
+    @Test
+    void createHttpClient_shouldReturnCloseableHttpClient() {
+        final HttpClient client = httpClientProducer.createHttpClient();
+
+        assertThat(client, instanceOf(CloseableHttpClient.class));
+    }
+
+    @Test
+    void createHttpClient_shouldReturnHttpClient_withCustomValues() {
+        setField(httpClientProducer, "socketTimeoutMs", "3000");
+        setField(httpClientProducer, "connectTimeoutMs", "2000");
+        setField(httpClientProducer, "connectionRequestTimeoutMs", "750");
+        setField(httpClientProducer, "poolMaxTotal", "50");
+        setField(httpClientProducer, "poolMaxPerRoute", "25");
+        setField(httpClientProducer, "evictIdleSeconds", "60");
+
+        final HttpClient client = httpClientProducer.createHttpClient();
+
+        assertThat(client, is(notNullValue()));
+    }
 
     @Test
     void close_whenClientIsNotNull_shouldCloseClient() throws IOException {
