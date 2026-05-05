@@ -136,6 +136,16 @@ public class ReferenceDataService {
             return Optional.empty();
         }
 
+        final JsonArray organisationUnits = queryCourtCentresFor(courtCentreId);
+        if (organisationUnits == null || organisationUnits.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return findMatchingOrganisationUnit(organisationUnits, courtCentreId)
+                .flatMap(ou -> buildCourtCentreFromRoom(ou, courtCentreId, courtRoomId));
+    }
+
+    private JsonArray queryCourtCentresFor(final UUID courtCentreId) {
         final JsonObject payload = createObjectBuilder()
                 .add("courtCentreId", courtCentreId.toString())
                 .build();
@@ -147,47 +157,44 @@ public class ReferenceDataService {
                         .build(),
                 payload);
 
-        final JsonArray organisationUnits = requester.requestAsAdmin(requestEnvelope)
+        return requester.requestAsAdmin(requestEnvelope)
                 .payloadAsJsonObject()
                 .getJsonArray("organisationunits");
+    }
 
-        if (organisationUnits == null || organisationUnits.isEmpty()) {
-            return Optional.empty();
-        }
-
-        final Optional<JsonObject> matchingOu = organisationUnits.getValuesAs(JsonObject.class).stream()
-                .filter(unit -> unit.containsKey("id") && courtCentreId.toString().equals(unit.getString("id")))
+    private Optional<JsonObject> findMatchingOrganisationUnit(final JsonArray organisationUnits, final UUID courtCentreId) {
+        final String idAsString = courtCentreId.toString();
+        return organisationUnits.getValuesAs(JsonObject.class).stream()
+                .filter(unit -> idAsString.equals(getStringOrNull(unit, "id")))
                 .findFirst();
-        if (matchingOu.isEmpty()) {
-            return Optional.empty();
-        }
-        final JsonObject ou = matchingOu.get();
-        final String centreName = ou.containsKey("oucodeL3Name") ? ou.getString("oucodeL3Name") : null;
-        final String welshCentreName = ou.containsKey("oucodeL3WelshName") ? ou.getString("oucodeL3WelshName") : null;
+    }
 
+    private Optional<CourtCentre> buildCourtCentreFromRoom(final JsonObject ou, final UUID courtCentreId, final UUID courtRoomId) {
         final JsonArray courtrooms = ou.getJsonArray("courtrooms");
         if (courtrooms == null) {
             return Optional.empty();
         }
 
-        for (int i = 0; i < courtrooms.size(); i++) {
-            final JsonObject room = courtrooms.getJsonObject(i);
-            if (!room.containsKey("id")) {
-                continue;
-            }
-            final UUID roomId = UUID.fromString(room.getString("id"));
-            if (roomId.equals(courtRoomId)) {
-                return Optional.of(CourtCentre.courtCentre()
+        return courtrooms.getValuesAs(JsonObject.class).stream()
+                .filter(room -> roomIdMatches(room, courtRoomId))
+                .findFirst()
+                .map(room -> CourtCentre.courtCentre()
                         .withId(courtCentreId)
-                        .withName(centreName)
-                        .withWelshName(welshCentreName)
+                        .withName(getStringOrNull(ou, "oucodeL3Name"))
+                        .withWelshName(getStringOrNull(ou, "oucodeL3WelshName"))
                         .withRoomId(courtRoomId)
-                        .withRoomName(room.containsKey("courtroomName") ? room.getString("courtroomName") : null)
-                        .withWelshRoomName(room.containsKey("welshCourtroomName") ? room.getString("welshCourtroomName") : null)
+                        .withRoomName(getStringOrNull(room, "courtroomName"))
+                        .withWelshRoomName(getStringOrNull(room, "welshCourtroomName"))
                         .build());
-            }
-        }
-        return Optional.empty();
+    }
+
+    private static boolean roomIdMatches(final JsonObject room, final UUID courtRoomId) {
+        final String id = getStringOrNull(room, "id");
+        return id != null && courtRoomId.equals(UUID.fromString(id));
+    }
+
+    private static String getStringOrNull(final JsonObject json, final String key) {
+        return json.containsKey(key) ? json.getString(key) : null;
     }
 
     public Set<String> retrieveGuiltyPleaTypes() {
