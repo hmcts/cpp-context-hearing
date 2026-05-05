@@ -4,6 +4,9 @@ import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
@@ -44,7 +47,9 @@ import java.util.UUID;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.json.JsonObject;
 
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -180,7 +185,8 @@ public class OverrideCourtRoomActiveHearingsIT extends AbstractIT {
                     .withPayload(overridePayload.toString())
                     .executeSuccessfully();
 
-            pauseListener.waitFor();
+           final var path = pauseListener.waitFor();
+           assertThat(path, is(notNullValue()));
         }
     }
 }

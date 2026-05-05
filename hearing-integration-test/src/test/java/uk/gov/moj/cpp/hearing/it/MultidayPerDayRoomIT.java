@@ -4,6 +4,8 @@ import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
@@ -43,6 +45,7 @@ import java.util.UUID;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -144,7 +147,9 @@ public class MultidayPerDayRoomIT extends AbstractIT {
         try (final Utilities.EventListener publicEventTopic = listenFor("public.hearing.event-logged")
                 .withFilter(convertStringTo(PublicHearingEventLogged.class, matcher))) {
             postHearingLogEventCommand(getRequestSpec(), initiateCmd, logEvent);
-            publicEventTopic.waitFor();
+
+            final var path = publicEventTopic.waitFor();
+            assertThat(path, is(notNullValue()));
         }
     }
 }
