@@ -198,12 +198,11 @@ public class HearingEventDelegate implements Serializable {
 
     private CourtCentre resolveCourtCentre(final ZonedDateTime eventTime) {
         final uk.gov.justice.core.courts.CourtCentre topLevel = momento.getHearing().getCourtCentre();
-        final UUID dayRoomId = findHearingDayFor(eventTime).map(HearingDay::getCourtRoomId).orElse(null);
 
         return CourtCentre.courtCentre()
                 .withId(topLevel.getId())
                 .withName(topLevel.getName())
-                .withRoomId(nonNull(dayRoomId) ? dayRoomId : topLevel.getRoomId())
+                .withRoomId(topLevel.getRoomId())
                 .withRoomName(topLevel.getRoomName())
                 .withWelshName(topLevel.getWelshName())
                 .withWelshRoomName(topLevel.getWelshRoomName())
