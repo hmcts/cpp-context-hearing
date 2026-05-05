@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 
 import uk.gov.justice.services.common.configuration.Value;
 
+import java.io.Closeable;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
@@ -46,7 +47,7 @@ public class HttpClientProducer {
     @Value(key = "resultsvalidator.evict.idle.seconds", defaultValue = "30")
     private String evictIdleSeconds;
 
-    private CloseableHttpClient client;
+    private Closeable client;
 
     @Produces
     @ApplicationScoped
@@ -61,13 +62,14 @@ public class HttpClientProducer {
                 .setConnectionRequestTimeout(Integer.parseInt(connectionRequestTimeoutMs))
                 .build();
 
-        client = HttpClientBuilder.create()
+        final CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .setConnectionManager(connectionManager)
                 .setDefaultRequestConfig(requestConfig)
                 .evictIdleConnections(Long.parseLong(evictIdleSeconds), TimeUnit.SECONDS)
                 .evictExpiredConnections()
                 .build();
-        return client;
+        client = httpClient;
+        return httpClient;
     }
 
     @PreDestroy

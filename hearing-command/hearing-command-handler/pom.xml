@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-command</artifactId>
-        <version>17.104.161-SNAPSHOT</version>
+        <version>17.104.162-RV-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-command-handler</artifactId>
     <packaging>war</packaging>
@@ -92,19 +92,7 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-        </dependency>
-
         <!-- Test Dependencies -->
-
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
