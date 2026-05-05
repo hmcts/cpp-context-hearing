@@ -1511,7 +1511,7 @@ public class HearingServiceTest {
         when(hearingEventRepository.findLatestHearingsForThatDayByCourt(courtCentreIds.get(0), now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventResult);
         when(hearingRepository.findBy(hearingEvent.getHearingId())).thenReturn(hearing);
         when(hearingJPAMapper.fromJPAWithCourtListRestrictions(hearing)).thenReturn(hearinPojo);
-        when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(expectedCurrentCourtStatus);
+        when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class), any(LocalDate.class))).thenReturn(expectedCurrentCourtStatus);
 
         final Optional<CurrentCourtStatus> response = hearingService.getHearingsForWebPage(courtCentreIds, now, hearingEventRequiredDefinitionsIds);
 
@@ -1554,7 +1554,7 @@ public class HearingServiceTest {
         when(hearingEventRepository.findLatestHearingsForThatDayByCourts(courtCentreIds, now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventResult);
 
         final CurrentCourtStatus expectedCurrentCourtStatus = getCurrentCourtStatusWithMultipleCases(hearingEvent);
-        when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(expectedCurrentCourtStatus);
+        when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class), any(LocalDate.class))).thenReturn(expectedCurrentCourtStatus);
 
         final Optional<CurrentCourtStatus> response = hearingService.getHearingsByDate(courtCentreIds, now, hearingEventRequiredDefinitionsIds);
         assertCurrentCourtStatus(response.get(), expectedCurrentCourtStatus);
@@ -1665,6 +1665,29 @@ public class HearingServiceTest {
 
         verify(hearingRepository).findCourtCenterByHearingId(Mockito.any(UUID.class));
         assertThat(optionalCourtCentre.isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldGetHearingDayByHearingIdAndDate() {
+        final UUID hearingId = randomUUID();
+        final LocalDate date = LocalDate.now();
+        final HearingDay dayStub = new HearingDay();
+        when(hearingRepository.findHearingDayByHearingIdAndDate(hearingId, date)).thenReturn(dayStub);
+
+        final Optional<HearingDay> result = hearingService.getHearingDayByHearingIdAndDate(hearingId, date);
+
+        verify(hearingRepository).findHearingDayByHearingIdAndDate(hearingId, date);
+        assertTrue(result.isPresent());
+        assertThat(dayStub, is(result.get()));
+    }
+
+    @Test
+    public void shouldReturnEmpty_whenHearingDayNotFound() {
+        when(hearingRepository.findHearingDayByHearingIdAndDate(Mockito.any(UUID.class), Mockito.any(LocalDate.class))).thenReturn(null);
+
+        final Optional<HearingDay> result = hearingService.getHearingDayByHearingIdAndDate(randomUUID(), LocalDate.now());
+
+        assertThat(result.isPresent(), is(false));
     }
 
     @Test
