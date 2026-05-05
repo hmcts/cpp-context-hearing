@@ -38,13 +38,15 @@ public class HttpClientProducer {
                 .setConnectionRequestTimeout(connectTimeout)
                 .build();
 
-        final CloseableHttpClient httpClient = buildClient(connectionManager, requestConfig);
-        client = httpClient;
+        final HttpClient httpClient = buildClient(connectionManager, requestConfig);
+        if (httpClient instanceof Closeable) {
+            client = (Closeable) httpClient;
+        }
         return httpClient;
     }
 
-    protected CloseableHttpClient buildClient(final PoolingHttpClientConnectionManager connectionManager,
-                                              final RequestConfig requestConfig) {
+    protected HttpClient buildClient(final PoolingHttpClientConnectionManager connectionManager,
+                                     final RequestConfig requestConfig) {
         return HttpClientBuilder.create()
                 .setConnectionManager(connectionManager)
                 .setDefaultRequestConfig(requestConfig)

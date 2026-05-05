@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
@@ -16,7 +17,6 @@ import java.io.IOException;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,10 +34,7 @@ class HttpClientProducerTest {
     private HttpClientProducer httpClientProducer;
 
     @Mock
-    private CloseableHttpClient mockHttpClient;
-
-    @Mock
-    private Closeable closeableClient;
+    private HttpClient mockHttpClient;
 
     @BeforeEach
     void setUp() {
@@ -48,21 +45,24 @@ class HttpClientProducerTest {
         setField(httpClientProducer, "poolMaxTotal", "200");
         setField(httpClientProducer, "poolMaxPerRoute", "100");
         setField(httpClientProducer, "evictIdleSeconds", "30");
-        doReturn(mockHttpClient).when(httpClientProducer).buildClient(any(PoolingHttpClientConnectionManager.class), any(RequestConfig.class));
     }
 
     @Test
     void createHttpClient_shouldReturnNonNullHttpClient() {
+        doReturn(mockHttpClient).when(httpClientProducer).buildClient(any(PoolingHttpClientConnectionManager.class), any(RequestConfig.class));
+
         final HttpClient client = httpClientProducer.createHttpClient();
 
         assertThat(client, is(notNullValue()));
     }
 
     @Test
-    void createHttpClient_shouldReturnCloseableHttpClient() {
+    void createHttpClient_shouldReturnHttpClient() {
+        doReturn(mockHttpClient).when(httpClientProducer).buildClient(any(PoolingHttpClientConnectionManager.class), any(RequestConfig.class));
+
         final HttpClient client = httpClientProducer.createHttpClient();
 
-        assertThat(client, instanceOf(CloseableHttpClient.class));
+        assertThat(client, instanceOf(HttpClient.class));
     }
 
     @Test
@@ -73,6 +73,7 @@ class HttpClientProducerTest {
         setField(httpClientProducer, "poolMaxTotal", "50");
         setField(httpClientProducer, "poolMaxPerRoute", "25");
         setField(httpClientProducer, "evictIdleSeconds", "60");
+        doReturn(mockHttpClient).when(httpClientProducer).buildClient(any(PoolingHttpClientConnectionManager.class), any(RequestConfig.class));
 
         final HttpClient client = httpClientProducer.createHttpClient();
 
@@ -81,6 +82,7 @@ class HttpClientProducerTest {
 
     @Test
     void close_whenClientIsNotNull_shouldCloseClient() throws IOException {
+        final Closeable closeableClient = mock(Closeable.class);
         setField(httpClientProducer, "client", closeableClient);
 
         httpClientProducer.close();
@@ -95,6 +97,7 @@ class HttpClientProducerTest {
 
     @Test
     void close_whenClientThrowsException_shouldNotPropagate() throws IOException {
+        final Closeable closeableClient = mock(Closeable.class);
         setField(httpClientProducer, "client", closeableClient);
         doThrow(new IOException("connection reset")).when(closeableClient).close();
 
