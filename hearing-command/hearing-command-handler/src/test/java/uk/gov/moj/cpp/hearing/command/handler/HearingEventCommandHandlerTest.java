@@ -18,6 +18,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
+import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -29,6 +30,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
+import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CreateHearingEventDefinitionsCommand;
@@ -48,6 +50,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -75,6 +78,8 @@ public class HearingEventCommandHandlerTest {
     private EventSource eventSource;
     @Mock
     private AggregateService aggregateService;
+    @Mock
+    private ReferenceDataService referenceDataService;
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
     @Spy
@@ -153,6 +158,102 @@ public class HearingEventCommandHandlerTest {
                         .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getWelshName, is(initiateHearingCommand.getHearing().getCourtCentre().getWelshName()))
                         .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getWelshRoomName, is(initiateHearingCommand.getHearing().getCourtCentre().getWelshRoomName())))
                 .with(HearingEventLogged::getCaseURN, is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()))
+        );
+    }
+
+    @Test
+    public void logHearingEvent_shouldUseDayCourtCentreWithLookedUpNames_whenHearingDayHasDifferentRoomFromTopLevel() throws Exception {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+
+        final ZonedDateTime day1Time = new UtcClock().now().minusDays(2);
+        final ZonedDateTime day2Time = new UtcClock().now().minusDays(1);
+        final UUID day2CentreId = randomUUID();
+        final UUID day2RoomId = randomUUID();
+
+        initiateHearingCommand.getHearing().setHearingDays(Arrays.asList(
+                HearingDay.hearingDay()
+                        .withSittingDay(day1Time)
+                        .withCourtCentreId(randomUUID())
+                        .withCourtRoomId(randomUUID())
+                        .withListedDurationMinutes(60)
+                        .build(),
+                HearingDay.hearingDay()
+                        .withSittingDay(day2Time)
+                        .withCourtCentreId(day2CentreId)
+                        .withCourtRoomId(day2RoomId)
+                        .withListedDurationMinutes(60)
+                        .build()
+        ));
+
+        final CourtCentre lookedUp = CourtCentre.courtCentre()
+                .withId(day2CentreId)
+                .withName("Day 2 Centre")
+                .withWelshName("Welsh Day 2 Centre")
+                .withRoomId(day2RoomId)
+                .withRoomName("Day 2 Room")
+                .withWelshRoomName("Welsh Day 2 Room")
+                .build();
+        when(referenceDataService.resolveCourtCentre(day2CentreId, day2RoomId)).thenReturn(Optional.of(lookedUp));
+
+        final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId, randomUUID(), STRING.next(), STRING.next(),
+                day2Time, day2Time, false, randomUUID(), Arrays.asList(randomUUID()), randomUUID());
+
+        setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
+            a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        }));
+
+        final JsonEnvelope jsonEnvelopCommand = envelopeFrom(metadataWithRandomUUID("hearing.log-hearing-event"), objectToJsonObjectConverter.convert(logEventCommand));
+
+        hearingEventCommandHandler.logHearingEvent(jsonEnvelopCommand);
+
+        final JsonEnvelope jsonEnvelopeEvent = verifyAppendAndGetArgumentFrom(eventStream).findFirst().get();
+
+        assertThat(uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo(jsonEnvelopeEvent, HearingEventLogged.class), isBean(HearingEventLogged.class)
+                .with(HearingEventLogged::getCourtCentre, isBean(uk.gov.moj.cpp.hearing.domain.CourtCentre.class)
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getId, is(day2CentreId))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getRoomId, is(day2RoomId))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getName, is("Day 2 Centre"))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getRoomName, is("Day 2 Room"))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getWelshName, is("Welsh Day 2 Centre"))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getWelshRoomName, is("Welsh Day 2 Room")))
+        );
+    }
+
+    @Test
+    public void logHearingEvent_shouldFallBackToTopLevelCourtCentre_whenNoHearingDayMatchesEventDate() throws Exception {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+
+        // Single day on a date that won't match the event time
+        initiateHearingCommand.getHearing().setHearingDays(Arrays.asList(
+                HearingDay.hearingDay()
+                        .withSittingDay(new UtcClock().now().minusDays(30))
+                        .withCourtCentreId(randomUUID())
+                        .withCourtRoomId(randomUUID())
+                        .withListedDurationMinutes(60)
+                        .build()
+        ));
+
+        final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId, randomUUID(), STRING.next(), STRING.next(),
+                new UtcClock().now().minusDays(1), new UtcClock().now().minusDays(1), false, randomUUID(), Arrays.asList(randomUUID()), randomUUID());
+
+        setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
+            a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        }));
+
+        final JsonEnvelope jsonEnvelopCommand = envelopeFrom(metadataWithRandomUUID("hearing.log-hearing-event"), objectToJsonObjectConverter.convert(logEventCommand));
+
+        hearingEventCommandHandler.logHearingEvent(jsonEnvelopCommand);
+
+        final JsonEnvelope jsonEnvelopeEvent = verifyAppendAndGetArgumentFrom(eventStream).findFirst().get();
+
+        assertThat(uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo(jsonEnvelopeEvent, HearingEventLogged.class), isBean(HearingEventLogged.class)
+                .with(HearingEventLogged::getCourtCentre, isBean(uk.gov.moj.cpp.hearing.domain.CourtCentre.class)
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getId, is(initiateHearingCommand.getHearing().getCourtCentre().getId()))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getRoomId, is(initiateHearingCommand.getHearing().getCourtCentre().getRoomId())))
         );
     }
 

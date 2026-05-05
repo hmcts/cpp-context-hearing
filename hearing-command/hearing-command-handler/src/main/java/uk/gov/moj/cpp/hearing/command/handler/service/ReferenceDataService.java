@@ -8,11 +8,13 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.MetadataBuilder;
+import uk.gov.moj.cpp.hearing.domain.CourtCentre;
 
 import javax.inject.Inject;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -128,6 +130,65 @@ public class ReferenceDataService {
         }
     }
 
+
+    public Optional<CourtCentre> resolveCourtCentre(final UUID courtCentreId, final UUID courtRoomId) {
+        if (courtCentreId == null || courtRoomId == null) {
+            return Optional.empty();
+        }
+
+        final JsonObject payload = createObjectBuilder()
+                .add("courtCentreId", courtCentreId.toString())
+                .build();
+
+        final JsonEnvelope requestEnvelope = envelopeFrom(
+                metadataBuilder()
+                        .withName(REFERENCEDATA_QUERY_COURT_CENTRES)
+                        .withId(randomUUID())
+                        .build(),
+                payload);
+
+        final JsonArray organisationUnits = requester.requestAsAdmin(requestEnvelope)
+                .payloadAsJsonObject()
+                .getJsonArray("organisationunits");
+
+        if (organisationUnits == null || organisationUnits.isEmpty()) {
+            return Optional.empty();
+        }
+
+        final Optional<JsonObject> matchingOu = organisationUnits.getValuesAs(JsonObject.class).stream()
+                .filter(unit -> unit.containsKey("id") && courtCentreId.toString().equals(unit.getString("id")))
+                .findFirst();
+        if (matchingOu.isEmpty()) {
+            return Optional.empty();
+        }
+        final JsonObject ou = matchingOu.get();
+        final String centreName = ou.containsKey("oucodeL3Name") ? ou.getString("oucodeL3Name") : null;
+        final String welshCentreName = ou.containsKey("oucodeL3WelshName") ? ou.getString("oucodeL3WelshName") : null;
+
+        final JsonArray courtrooms = ou.getJsonArray("courtrooms");
+        if (courtrooms == null) {
+            return Optional.empty();
+        }
+
+        for (int i = 0; i < courtrooms.size(); i++) {
+            final JsonObject room = courtrooms.getJsonObject(i);
+            if (!room.containsKey("id")) {
+                continue;
+            }
+            final UUID roomId = UUID.fromString(room.getString("id"));
+            if (roomId.equals(courtRoomId)) {
+                return Optional.of(CourtCentre.courtCentre()
+                        .withId(courtCentreId)
+                        .withName(centreName)
+                        .withWelshName(welshCentreName)
+                        .withRoomId(courtRoomId)
+                        .withRoomName(room.containsKey("courtroomName") ? room.getString("courtroomName") : null)
+                        .withWelshRoomName(room.containsKey("welshCourtroomName") ? room.getString("welshCourtroomName") : null)
+                        .build());
+            }
+        }
+        return Optional.empty();
+    }
 
     public Set<String> retrieveGuiltyPleaTypes() {
         final MetadataBuilder metadataBuilder = metadataBuilder()

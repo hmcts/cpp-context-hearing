@@ -5,6 +5,7 @@ import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.domain.CourtCentre;
 import uk.gov.moj.cpp.hearing.domain.HearingType;
@@ -14,6 +15,8 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,6 +50,10 @@ public class HearingEventDelegate implements Serializable {
     }
 
     public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent, final UUID userId) {
+        return logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, userId, null);
+    }
+
+    public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent, final UUID userId, final CourtCentre suppliedCourtCentre) {
 
         Optional<String> ignoreReason = validateHearingEvent(hearingEvent.getHearingEventId());
         if (ignoreReason.isPresent()) {
@@ -61,14 +68,7 @@ public class HearingEventDelegate implements Serializable {
         }
 
 
-        final CourtCentre courtCentre = CourtCentre.courtCentre()
-                .withId(momento.getHearing().getCourtCentre().getId())
-                .withName(momento.getHearing().getCourtCentre().getName())
-                .withRoomId(momento.getHearing().getCourtCentre().getRoomId())
-                .withRoomName(momento.getHearing().getCourtCentre().getRoomName())
-                .withWelshName(momento.getHearing().getCourtCentre().getWelshName())
-                .withWelshRoomName(momento.getHearing().getCourtCentre().getWelshRoomName())
-                .build();
+        final CourtCentre courtCentre = chooseCourtCentre(suppliedCourtCentre, hearingEvent.getEventTime());
 
         final HearingType hearingType = HearingType.hearingType()
                 .withId(momento.getHearing().getType().getId())
@@ -108,6 +108,10 @@ public class HearingEventDelegate implements Serializable {
     }
 
     public Stream<Object> correctHearingEvent(final UUID latestHearingEventId, final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent, final UUID userId) {
+        return correctHearingEvent(latestHearingEventId, hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, userId, null);
+    }
+
+    public Stream<Object> correctHearingEvent(final UUID latestHearingEventId, final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent, final UUID userId, final CourtCentre suppliedCourtCentre) {
 
         final Optional<String> ignoreReason = validateHearingEventBeforeApplyCorrection(hearingEvent.getHearingEventId());
         if (ignoreReason.isPresent()) {
@@ -126,14 +130,7 @@ public class HearingEventDelegate implements Serializable {
                         hearingEvent.getEventTime(),
                         hearingEvent.getLastModifiedTime(),
                         alterable,
-                        CourtCentre.courtCentre()
-                                .withId(momento.getHearing().getCourtCentre().getId())
-                                .withName(momento.getHearing().getCourtCentre().getName())
-                                .withRoomId(momento.getHearing().getCourtCentre().getRoomId())
-                                .withRoomName(momento.getHearing().getCourtCentre().getRoomName())
-                                .withWelshName(momento.getHearing().getCourtCentre().getWelshName())
-                                .withWelshRoomName(momento.getHearing().getCourtCentre().getWelshRoomName())
-                                .build(),
+                        chooseCourtCentre(suppliedCourtCentre, hearingEvent.getEventTime()),
                         HearingType.hearingType()
                                 .withId(momento.getHearing().getType().getId())
                                 .withDescription(momento.getHearing().getType().getDescription())
@@ -190,6 +187,38 @@ public class HearingEventDelegate implements Serializable {
             return Optional.of(REASON_EVENT_LOG_NOT_ALLOWED_FOR_BOX_HEARING);
         }
         return Optional.empty();
+    }
+
+    private CourtCentre chooseCourtCentre(final CourtCentre suppliedCourtCentre, final ZonedDateTime eventTime) {
+        if (nonNull(suppliedCourtCentre) && nonNull(suppliedCourtCentre.getRoomId())) {
+            return suppliedCourtCentre;
+        }
+        return resolveCourtCentre(eventTime);
+    }
+
+    private CourtCentre resolveCourtCentre(final ZonedDateTime eventTime) {
+        final uk.gov.justice.core.courts.CourtCentre topLevel = momento.getHearing().getCourtCentre();
+        final UUID dayRoomId = findHearingDayFor(eventTime).map(HearingDay::getCourtRoomId).orElse(null);
+
+        return CourtCentre.courtCentre()
+                .withId(topLevel.getId())
+                .withName(topLevel.getName())
+                .withRoomId(nonNull(dayRoomId) ? dayRoomId : topLevel.getRoomId())
+                .withRoomName(topLevel.getRoomName())
+                .withWelshName(topLevel.getWelshName())
+                .withWelshRoomName(topLevel.getWelshRoomName())
+                .build();
+    }
+
+    public Optional<HearingDay> findHearingDayFor(final ZonedDateTime eventTime) {
+        if (isNull(eventTime) || isNull(momento.getHearing()) || isNull(momento.getHearing().getHearingDays())) {
+            return Optional.empty();
+        }
+        final LocalDate eventDate = eventTime.toLocalDate();
+        return momento.getHearing().getHearingDays().stream()
+                .filter(day -> nonNull(day.getSittingDay())
+                        && day.getSittingDay().toLocalDate().equals(eventDate))
+                .findFirst();
     }
 
     public static final class HearingEvent implements Serializable {
