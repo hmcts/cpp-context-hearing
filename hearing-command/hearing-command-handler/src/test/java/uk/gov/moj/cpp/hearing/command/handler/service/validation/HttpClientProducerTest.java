@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 import org.apache.http.client.HttpClient;
@@ -27,10 +28,11 @@ class HttpClientProducerTest {
     private HttpClientProducer httpClientProducer;
 
     @Mock
-    private CloseableHttpClient closeableHttpClient;
+    private Closeable closeableClient;
 
     @BeforeEach
     void setUp() {
+        setField(httpClientProducer, "client", null);
         setField(httpClientProducer, "socketTimeoutMs", "5000");
         setField(httpClientProducer, "connectTimeoutMs", "1000");
         setField(httpClientProducer, "connectionRequestTimeoutMs", "500");
@@ -69,11 +71,11 @@ class HttpClientProducerTest {
 
     @Test
     void close_whenClientIsNotNull_shouldCloseClient() throws IOException {
-        setField(httpClientProducer, "client", closeableHttpClient);
+        setField(httpClientProducer, "client", closeableClient);
 
         httpClientProducer.close();
 
-        verify(closeableHttpClient).close();
+        verify(closeableClient).close();
     }
 
     @Test
@@ -83,11 +85,11 @@ class HttpClientProducerTest {
 
     @Test
     void close_whenClientThrowsException_shouldNotPropagate() throws IOException {
-        setField(httpClientProducer, "client", closeableHttpClient);
-        doThrow(new IOException("connection reset")).when(closeableHttpClient).close();
+        setField(httpClientProducer, "client", closeableClient);
+        doThrow(new IOException("connection reset")).when(closeableClient).close();
 
         httpClientProducer.close();
 
-        verify(closeableHttpClient).close();
+        verify(closeableClient).close();
     }
 }

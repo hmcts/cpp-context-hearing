@@ -2,6 +2,9 @@ package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 
 import uk.gov.justice.services.common.configuration.Value;
 
+import java.io.Closeable;
+import java.util.concurrent.TimeUnit;
+
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -23,7 +26,7 @@ public class HttpClientProducer {
     @Value(key = "resultsvalidator.timeout.ms", defaultValue = "5000")
     private String DEFAULT_TIMEOUT_MS;
 
-    private CloseableHttpClient client;
+    private Closeable client;
 
     @Produces
     @ApplicationScoped
@@ -35,10 +38,12 @@ public class HttpClientProducer {
                 .setConnectionRequestTimeout(connectTimeout)
                 .build();
 
-        client = HttpClientBuilder.create()
+        final CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .setConnectionManager(connectionManager)
                 .setDefaultRequestConfig(requestConfig)
                 .build();
-        return client;
+        client = httpClient;
+        return httpClient;
     }
 
     @PreDestroy
