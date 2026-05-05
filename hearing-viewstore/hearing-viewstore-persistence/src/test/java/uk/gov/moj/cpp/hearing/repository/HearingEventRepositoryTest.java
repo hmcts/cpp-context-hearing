@@ -17,7 +17,9 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -245,6 +247,33 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
                         COURT_ROOM_ID,
                         EVENT_TIME.toLocalDate());
         assertThat(hearingEvents.size(), is(0));
+    }
+
+    @Test
+    public void shouldFindHearingEvents_byPerDayCourtRoom_whenHearingDayOverridesTopLevelRoom() {
+        final UUID dayRoomId = randomUUID();
+        givenHearingExistsWithCourtCentreAndDayOverride(EVENT_TIME.toLocalDate(), COURT_CENTRE_ID, dayRoomId);
+        givenSingleAlterableFalseHearingEvent(HEARING_EVENT_ID_1, HEARING_ID_1, EVENT_TIME);
+
+        final List<HearingEvent> matchedByDayRoom = hearingEventRepository
+                .findHearingEvents(COURT_CENTRE_ID, dayRoomId, EVENT_TIME.toLocalDate());
+        assertThat(matchedByDayRoom.size(), is(1));
+        assertThat(matchedByDayRoom.get(0).getHearingId(), is(HEARING_ID_1));
+
+        final List<HearingEvent> matchedByTopLevelRoom = hearingEventRepository
+                .findHearingEvents(COURT_CENTRE_ID, COURT_ROOM_ID, EVENT_TIME.toLocalDate());
+        assertThat(matchedByTopLevelRoom.size(), is(0));
+    }
+
+    @Test
+    public void shouldFindHearingEvents_byTopLevelRoom_whenHearingDayHasNullCourtRoomId() {
+        givenHearingExistsWithCourtCentreAndDayOverride(EVENT_TIME.toLocalDate(), COURT_CENTRE_ID, null);
+        givenSingleAlterableFalseHearingEvent(HEARING_EVENT_ID_1, HEARING_ID_1, EVENT_TIME);
+
+        final List<HearingEvent> hearingEvents = hearingEventRepository
+                .findHearingEvents(COURT_CENTRE_ID, COURT_ROOM_ID, EVENT_TIME.toLocalDate());
+        assertThat(hearingEvents.size(), is(1));
+        assertThat(hearingEvents.get(0).getHearingId(), is(HEARING_ID_1));
     }
 
     @Test
@@ -516,6 +545,39 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
         hearing.setId(HEARING_ID_1);
         hearing.setCourtCentre(courtCentre);
         hearingRepository.save(hearing);
+    }
+
+    private void givenHearingExistsWithCourtCentreAndDayOverride(final LocalDate date, final UUID dayCentreId, final UUID dayRoomId) {
+        final Hearing hearing = new Hearing();
+        final CourtCentre courtCentre = new CourtCentre();
+        courtCentre.setId(COURT_CENTRE_ID);
+        courtCentre.setRoomId(COURT_ROOM_ID);
+        hearing.setId(HEARING_ID_1);
+        hearing.setCourtCentre(courtCentre);
+
+        final HearingDay hearingDay = new HearingDay();
+        hearingDay.setId(new HearingSnapshotKey(randomUUID(), HEARING_ID_1));
+        hearingDay.setHearing(hearing);
+        hearingDay.setDate(date);
+        hearingDay.setCourtCentreId(dayCentreId);
+        hearingDay.setCourtRoomId(dayRoomId);
+        hearing.getHearingDays().add(hearingDay);
+
+        hearingRepository.save(hearing);
+    }
+
+    private void givenSingleAlterableFalseHearingEvent(final UUID hearingEventId, final UUID hearingId, final ZonedDateTime eventTime) {
+        hearingEventRepository.save(
+                HearingEvent.hearingEvent()
+                        .setId(hearingEventId)
+                        .setHearingId(hearingId)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_1)
+                        .setRecordedLabel(RECORDED_LABEL)
+                        .setEventDate(eventTime.toLocalDate())
+                        .setEventTime(eventTime)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME)
+                        .setDeleted(false)
+                        .setAlterable(false));
     }
 
     private void givenHearingEventsForDifferentHearings() {
