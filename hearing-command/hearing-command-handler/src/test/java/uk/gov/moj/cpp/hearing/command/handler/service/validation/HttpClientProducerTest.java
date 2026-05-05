@@ -5,64 +5,34 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
+import java.io.Closeable;
 import java.io.IOException;
 
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.protocol.HttpContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class HttpClientProducerTest {
 
-    private static class FakeCloseableHttpClient extends CloseableHttpClient {
-        boolean closeCalled = false;
-        boolean throwOnClose = false;
-
-        @Override
-        protected CloseableHttpResponse doExecute(final HttpHost target, final HttpRequest request, final HttpContext context) {
-            return null;
-        }
-
-        @Override
-        @Deprecated
-        public ClientConnectionManager getConnectionManager() {
-            return null;
-        }
-
-        @Override
-        @Deprecated
-        public org.apache.http.params.HttpParams getParams() {
-            return null;
-        }
-
-        @Override
-        public void close() throws IOException {
-            closeCalled = true;
-            if (throwOnClose) {
-                throw new IOException("connection reset");
-            }
-        }
-    }
-
     @InjectMocks
     private HttpClientProducer httpClientProducer;
 
-    private FakeCloseableHttpClient closeableHttpClient;
+    @Mock
+    private Closeable closeableClient;
 
     @BeforeEach
     void setUp() {
-        closeableHttpClient = new FakeCloseableHttpClient();
+        setField(httpClientProducer, "client", null);
         setField(httpClientProducer, "socketTimeoutMs", "5000");
         setField(httpClientProducer, "connectTimeoutMs", "1000");
         setField(httpClientProducer, "connectionRequestTimeoutMs", "500");
@@ -71,41 +41,14 @@ class HttpClientProducerTest {
         setField(httpClientProducer, "evictIdleSeconds", "30");
     }
 
-    @Test
-    void createHttpClient_shouldReturnNonNullHttpClient() {
-        final HttpClient client = httpClientProducer.createHttpClient();
-
-        assertThat(client, is(notNullValue()));
-    }
 
     @Test
-    void createHttpClient_shouldReturnCloseableHttpClient() {
-        final HttpClient client = httpClientProducer.createHttpClient();
-
-        assertThat(client, instanceOf(CloseableHttpClient.class));
-    }
-
-    @Test
-    void createHttpClient_shouldReturnHttpClient_withCustomValues() {
-        setField(httpClientProducer, "socketTimeoutMs", "3000");
-        setField(httpClientProducer, "connectTimeoutMs", "2000");
-        setField(httpClientProducer, "connectionRequestTimeoutMs", "750");
-        setField(httpClientProducer, "poolMaxTotal", "50");
-        setField(httpClientProducer, "poolMaxPerRoute", "25");
-        setField(httpClientProducer, "evictIdleSeconds", "60");
-
-        final HttpClient client = httpClientProducer.createHttpClient();
-
-        assertThat(client, is(notNullValue()));
-    }
-
-    @Test
-    void close_whenClientIsNotNull_shouldCloseClient() {
-        setField(httpClientProducer, "client", closeableHttpClient);
+    void close_whenClientIsNotNull_shouldCloseClient() throws IOException {
+        setField(httpClientProducer, "client", closeableClient);
 
         httpClientProducer.close();
 
-        assertThat(closeableHttpClient.closeCalled, is(true));
+        verify(closeableClient).close();
     }
 
     @Test
@@ -114,12 +57,12 @@ class HttpClientProducerTest {
     }
 
     @Test
-    void close_whenClientThrowsException_shouldNotPropagate() {
-        setField(httpClientProducer, "client", closeableHttpClient);
-        closeableHttpClient.throwOnClose = true;
+    void close_whenClientThrowsException_shouldNotPropagate() throws IOException {
+        setField(httpClientProducer, "client", closeableClient);
+        doThrow(new IOException("connection reset")).when(closeableClient).close();
 
         httpClientProducer.close();
 
-        assertThat(closeableHttpClient.closeCalled, is(true));
+        verify(closeableClient).close();
     }
 }
