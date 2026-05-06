@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static java.time.ZonedDateTime.now;
-import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static java.util.UUID.fromString;
@@ -30,6 +29,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import javax.annotation.concurrent.NotThreadSafe;
+import javax.json.Json;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -37,11 +37,21 @@ import org.junit.jupiter.api.Test;
 /**
  * Verifies the xhibit court list export honours per-day court room overrides.
  *
- * Hearing has two days, both within the same court centre but with different
- * court rooms — top-level/day 1 in courtRoom1Id ("CourtRoom 1"), day 2 in
+ * The hearing has two days within the same court centre but with different
+ * court rooms — top-level/day 1 in courtRoom4Id ("CourtRoom 4"), day 2 in
  * courtRoom2Id ("CourtRoom 2"). Logs an event on day 2, then publishes the
  * court list. Asserts the generated WebPage XML places the hearing under
- * "CourtRoom 2" (day 2's room) — not "CourtRoom 1" (the hearing's top-level).
+ * "CourtRoom 2" (day 2's room) — not "CourtRoom 1" (an unrelated room that
+ * must not appear in this hearing's bucket).
+ *
+ * <p>Uses {@code courtCentreId_2} rather than the default {@code courtCentreId}
+ * so the day-level room override here does not share a SQL bucket with
+ * {@code PublishLatestCourtCentreHearingEventsIT.shouldRequestToPublishCourtListOpenCaseProsecution}'s
+ * hearing — {@code findLatestHearingsForThatDayByCourt} groups by
+ * {@code coalesce(day.court_room_id, hearing.room_id)}, so both running in the
+ * same centre with overlapping rooms would collide. The OU cache populated by
+ * the abstract base's {@code @BeforeAll} ensures the publish flow's lookups for
+ * {@code courtCentreId_2} resolve correctly.
  */
 @NotThreadSafe
 public class PublishCourtListMultidayPerDayRoomIT extends AbstractPublishLatestCourtCentreHearingIT {
@@ -53,18 +63,21 @@ public class PublishCourtListMultidayPerDayRoomIT extends AbstractPublishLatestC
         final ZonedDateTime today = now(ZoneOffset.UTC);
         final ZonedDateTime yesterday = today.minusDays(1);
 
-        // Use a unique createdTime far in the future so the published file path is unique to this test
+        // Use a unique createdTime far in the future so the published file path is unique to this test.
         final String createdTime = "2099-12-31T23:59:59.999Z";
         final String fileNameDatePart = "20991231235959";
 
-        stubOrganisationalUnit(fromString(courtCentreId), "OUCODE");
+        stubOrganisationalUnit(fromString(courtCentreId_2), "OUCODE");
 
-        // Build a multi-day hearing where day 1 (yesterday) is in courtRoom1Id (top-level)
-        // and day 2 (today) is in courtRoom2Id — distinct rooms within the same centre.
+        // Build a multi-day hearing in courtCentreId_2.
+        // Top-level / day 1 (yesterday) sits in courtRoom4Id ("CourtRoom 4");
+        // day 2 (today) overrides to courtRoom2Id ("CourtRoom 2"). Avoids
+        // courtRoom1Id at top level so the not(containsString("CourtRoom 1"))
+        // assertion remains valid.
         final InitiateHearingCommand initCmd = initiateHearingTemplateWithParam(
-                fromString(courtCentreId),
-                fromString(courtRoom1Id),
-                "CourtRoom 1",
+                fromString(courtCentreId_2),
+                fromString(courtRoom4Id),
+                "CourtRoom 4",
                 today.toLocalDate(),
                 defenceCounselId,
                 caseId,
@@ -75,14 +88,14 @@ public class PublishCourtListMultidayPerDayRoomIT extends AbstractPublishLatestC
                 .withSittingDay(yesterday)
                 .withListingSequence(1)
                 .withListedDurationMinutes(60)
-                .withCourtCentreId(fromString(courtCentreId))
-                .withCourtRoomId(fromString(courtRoom1Id))
+                .withCourtCentreId(fromString(courtCentreId_2))
+                .withCourtRoomId(fromString(courtRoom4Id))
                 .build();
         final HearingDay day2 = HearingDay.hearingDay()
                 .withSittingDay(today)
                 .withListingSequence(2)
                 .withListedDurationMinutes(60)
-                .withCourtCentreId(fromString(courtCentreId))
+                .withCourtCentreId(fromString(courtCentreId_2))
                 .withCourtRoomId(fromString(courtRoom2Id))
                 .build();
         initCmd.getHearing().setHearingDays(asList(day1, day2));
@@ -90,29 +103,27 @@ public class PublishCourtListMultidayPerDayRoomIT extends AbstractPublishLatestC
         final InitiateHearingCommandHelper hearing = h(initiateHearing(getRequestSpec(), initCmd));
         givenAUserHasLoggedInAsACourtClerk(randomUUID());
 
-        // Log an event on today (day 2) so the publish picks up the hearing for today's date
+        // Log an event on today (day 2) so the publish picks up the hearing for today's date.
         logEvent(hearingEventId, getRequestSpec(), asDefault(), hearing.it(),
                 OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, false, defenceCounselId, today, null);
 
-        // Publish the court list for today
-        final JsonObject publishCourtListJson = javax.json.Json.createObjectBuilder()
-                .add("courtCentreId", courtCentreId)
+        final JsonObject publishCourtListJson = Json.createObjectBuilder()
+                .add("courtCentreId", courtCentreId_2)
                 .add("createdTime", createdTime)
                 .build();
 
-        sendPublishCourtListCommand(publishCourtListJson, courtCentreId);
+        sendPublishCourtListCommand(publishCourtListJson, courtCentreId_2);
 
-        // Wait for the publish flow to complete (status becomes EXPORT_SUCCESSFUL)
-        new PublishCourtListSteps().verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+        new PublishCourtListSteps().verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId_2);
 
-        // Filename format: WebPage_<crestCourtId>_<uuuuMMddHHmmss>.xml — use a wildcard for the crest part
+        // Filename format: WebPage_<crestCourtId>_<uuuuMMddHHmmss>.xml — wildcard the crest part.
         final String filePath = "/xhibit-gateway/send-to-xhibit/WebPage.*" + fileNameDatePart + ".*\\.xml";
         final String filePayload = getFileForPath(filePath);
 
-        // Day 2 is in CourtRoom 2 — the published XML must place the hearing under that room
+        // Day 2 is in CourtRoom 2 — the published XML must place the hearing under that room.
         assertThat(filePayload, containsString("CourtRoom 2"));
         // Without the fix, the hearing would have been grouped under CourtRoom 1 (top-level);
-        // with the fix, only CourtRoom 2 should appear as the hearing's room
+        // with the fix, only CourtRoom 2 should appear as the hearing's room.
         assertThat(filePayload, not(containsString("CourtRoom 1")));
     }
 }
