@@ -4,7 +4,7 @@ import static java.lang.Boolean.TRUE;
 import static java.time.ZonedDateTime.now;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
@@ -15,20 +15,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationCase;
-import uk.gov.justice.core.courts.CourtApplicationParty;
-import uk.gov.justice.core.courts.CourtOrder;
-import uk.gov.justice.core.courts.Defendant;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.LegalEntityDefendant;
-import uk.gov.justice.core.courts.MasterDefendant;
-import uk.gov.justice.core.courts.Organisation;
-import uk.gov.justice.core.courts.Person;
-import uk.gov.justice.core.courts.PersonDefendant;
-import uk.gov.justice.core.courts.ProsecutingAuthority;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
+import uk.gov.justice.core.courts.*;
 import uk.gov.justice.hearing.courts.Applicant;
 import uk.gov.justice.hearing.courts.CaseSummaries;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
@@ -625,5 +612,37 @@ public class GetHearingsTransformerTest {
         assertThat(hearingSummaryForToday.getNumberOfGroupCases().intValue(), CoreMatchers.equalTo(NUMBER_OF_GROUP_CASES));
         assertThat(hearingSummaryForToday.getProsecutionCaseSummaries().size(), equalTo(3));
         assertThat(hearingSummaryForToday.getProsecutionCaseSummaries().get(0).getIsCivil(), equalTo(true));
+    }
+
+    @Test
+    public void shouldRemoveHearingDaysVulnerableFields() {
+        final UUID groupId = randomUUID();
+
+        final ProsecutionCase prosecutionCase1 = ProsecutionCase.prosecutionCase()
+                .withId(randomUUID())
+                .withIsCivil(true)
+                .withGroupId(groupId)
+                .withIsGroupMember(false)
+                .withIsGroupMaster(false)
+                .build();
+
+        final Hearing hearing = CoreTestTemplates.hearing(defaultArguments())
+                .withIsGroupProceedings(TRUE)
+                .withNumberOfGroupCases(NUMBER_OF_GROUP_CASES)
+                .withProsecutionCases(asList(prosecutionCase1))
+                .withHearingDays(asList(HearingDay.hearingDay().withCourtCentreId(randomUUID())
+                        .withCourtRoomId(randomUUID()).withSittingDay(now())
+                        .withIsCancelled(false)
+                        .withListedDurationMinutes(3).build()))
+                .build();
+
+        final HearingSummaries hearingSummaryForToday = target.summaryForHearingsForToday(hearing).build();
+        assertThat(hearingSummaryForToday.getNumberOfGroupCases().intValue(), CoreMatchers.equalTo(NUMBER_OF_GROUP_CASES));
+        assertThat(hearingSummaryForToday.getProsecutionCaseSummaries().size(), equalTo(1));
+        assertThat(hearingSummaryForToday.getProsecutionCaseSummaries().get(0).getIsCivil(), equalTo(true));
+        assertThat(hearingSummaryForToday.getHearingDays().get(0).getCourtCentreId(),is(nullValue()));
+        assertThat(hearingSummaryForToday.getHearingDays().get(0).getCourtRoomId(),is(nullValue()));
+        assertThat(hearingSummaryForToday.getHearingDays().get(0).getIsCancelled(),is(nullValue()));
+        assertThat(hearingSummaryForToday.getHearingDays().get(0).getListedDurationMinutes(),is(nullValue()));
     }
 }

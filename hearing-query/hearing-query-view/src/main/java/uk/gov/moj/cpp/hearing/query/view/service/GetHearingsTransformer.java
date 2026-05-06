@@ -21,7 +21,6 @@ import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
-import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.hearing.courts.Applicant;
 import uk.gov.justice.hearing.courts.CaseSummaries;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
@@ -29,7 +28,6 @@ import uk.gov.justice.hearing.courts.Defendants;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.hearing.courts.Offences;
 import uk.gov.justice.hearing.courts.ProsecutionCaseSummaries;
-import uk.gov.justice.hearing.courts.ReportingRestrictions;
 import uk.gov.justice.hearing.courts.Respondents;
 import uk.gov.justice.hearing.courts.Subject;
 import uk.gov.justice.hearing.courts.Type;
@@ -113,11 +111,12 @@ public class GetHearingsTransformer {
         return hearingDays.stream()
                 .filter(hearingDay ->
                         now().equals(hearingDay.getSittingDay().toLocalDate()))
-                .peek(hearingDay -> {
+                .map(hearingDay -> {
                     hearingDay.setCourtCentreId(null);
                     hearingDay.setCourtRoomId(null);
                     hearingDay.setIsCancelled(null);
                     hearingDay.setListedDurationMinutes(null);
+                    return hearingDay;
                 })
                 .collect(toList());
     }
