@@ -32,15 +32,15 @@ public class HttpClientProducer {
     private String connectTimeoutMs;
 
     @Inject
-    @Value(key = "resultsvalidator.timeout.connection.request.ms", defaultValue = "500")
+    @Value(key = "resultsvalidator.timeout.connection.request.ms", defaultValue = "1000")
     private String connectionRequestTimeoutMs;
 
     @Inject
-    @Value(key = "resultsvalidator.pool.max.total", defaultValue = "200")
+    @Value(key = "resultsvalidator.pool.max.total", defaultValue = "400")
     private String poolMaxTotal;
 
     @Inject
-    @Value(key = "resultsvalidator.pool.max.per.route", defaultValue = "100")
+    @Value(key = "resultsvalidator.pool.max.per.route", defaultValue = "200")
     private String poolMaxPerRoute;
 
     @Inject
