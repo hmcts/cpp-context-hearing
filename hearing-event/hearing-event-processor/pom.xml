@@ -3,7 +3,7 @@
     <parent>
         <artifactId>hearing-event</artifactId>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
-        <version>17.104.1160-rel-3rd-line-2612-SNAPSHOT</version>
+        <version>17.104.1161-rel-3rd-line-2612-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>war</packaging>
