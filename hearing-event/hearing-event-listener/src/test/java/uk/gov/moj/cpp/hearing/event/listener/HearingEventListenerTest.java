@@ -8,8 +8,8 @@ import static java.time.ZoneOffset.UTC;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
@@ -102,7 +102,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.json.Json;
+
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
@@ -267,11 +267,11 @@ public class HearingEventListenerTest {
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final uk.gov.justice.core.courts.Target.Builder target = CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID());
-        final JsonObject result = Json.createObjectBuilder().add("resultCode", RILA_L_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = Json.createArrayBuilder()
+        final JsonObject result = createObjectBuilder().add("resultCode", RILA_L_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = createArrayBuilder()
                 .add(result)
                 .build();
-        target.withDraftResult(Json.createObjectBuilder().add("results", results).build().toString());
+        target.withDraftResult(createObjectBuilder().add("results", results).build().toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(target.build(), HearingState.INITIALISED, randomUUID());
 
@@ -983,8 +983,8 @@ public class HearingEventListenerTest {
                 );
 
         DraftResult draftResult = mock(DraftResult.class);
-        JsonObject draftResultJsonObject = Json.createObjectBuilder()
-                .add("__metadata__", Json.createObjectBuilder()
+        JsonObject draftResultJsonObject = createObjectBuilder()
+                .add("__metadata__", createObjectBuilder()
                         .add("version", "1")
                         .build())
                 .build();
@@ -1049,8 +1049,8 @@ public class HearingEventListenerTest {
                 .setId(resultsShared.getHearingId());
 
         DraftResult draftResult = mock(DraftResult.class);
-        JsonObject draftResultJsonObject = Json.createObjectBuilder()
-                .add("__metadata__", Json.createObjectBuilder()
+        JsonObject draftResultJsonObject = createObjectBuilder()
+                .add("__metadata__", createObjectBuilder()
                         .add("version", "1")
                         .build())
                 .build();
@@ -1122,8 +1122,8 @@ public class HearingEventListenerTest {
                 );
 
         DraftResult draftResult = mock(DraftResult.class);
-        JsonObject draftResultJsonObject = Json.createObjectBuilder()
-                .add("__metadata__", Json.createObjectBuilder()
+        JsonObject draftResultJsonObject = createObjectBuilder()
+                .add("__metadata__", createObjectBuilder()
                         .add("version", "1")
                         .build())
                 .build();

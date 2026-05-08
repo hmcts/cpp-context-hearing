@@ -702,7 +702,7 @@ public class CoreTestTemplates {
                 .withContact(contactNumber().build())
                 .withAdditionalNationalityCode(STRING.next())
                 .withAdditionalNationalityId(randomUUID())
-                .withDateOfBirth(PAST_LOCAL_DATE.next())
+                .withDateOfBirth(defendantDateOfBirth(args))
                 .withDisabilityStatus(STRING.next())
                 .withDocumentationLanguageNeeds(args.hearingLanguage == WELSH ? HearingLanguage.WELSH : HearingLanguage.ENGLISH)
                 .withEthnicity(Ethnicity.ethnicity().withObservedEthnicityCode(STRING.next()).build())
@@ -719,6 +719,13 @@ public class CoreTestTemplates {
                 .withNationalityId(randomUUID())
                 .withNationalityDescription(STRING.next())
                 .withNationalityCode(STRING.next());
+    }
+
+    private static LocalDate defendantDateOfBirth(final CoreTemplateArguments args) {
+        if (args.getDefendantDateOfBirth() != null) {
+            return args.getDefendantDateOfBirth();
+        }
+        return LocalDate.now(ZoneOffset.UTC).minusYears(25);
     }
 
     public static AssociatedPerson.Builder associatedPerson(final CoreTemplateArguments args) {
@@ -1695,6 +1702,8 @@ public class CoreTestTemplates {
 
         private Integer offenceDateCode;
 
+        private LocalDate defendantDateOfBirth;
+
         public static <T, U> Map<T, U> toMap(final T t, final U u) {
             final Map<T, U> map = new HashMap<>();
             map.put(t, u);
@@ -1832,6 +1841,15 @@ public class CoreTestTemplates {
 
         public CoreTemplateArguments setOffenceDateCode(final Integer offenceDateCode) {
             this.offenceDateCode = offenceDateCode;
+            return this;
+        }
+
+        public LocalDate getDefendantDateOfBirth() {
+            return defendantDateOfBirth;
+        }
+
+        public CoreTemplateArguments setDefendantDateOfBirth(final LocalDate defendantDateOfBirth) {
+            this.defendantDateOfBirth = defendantDateOfBirth;
             return this;
         }
 

@@ -1,9 +1,9 @@
 package uk.gov.moj.cpp.hearing.event;
 
 
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
-import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.json.Json;
+
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
@@ -57,7 +57,7 @@ public class NewTargetToLegacyTargetConverterTest {
 
     private static JsonObject givenPayload(final String filePath) {
         try (InputStream inputStream = NextHearingHelperTest.class.getResourceAsStream(filePath)) {
-            final JsonReader jsonReader = Json.createReader(inputStream);
+            final JsonReader jsonReader = createReader(inputStream);
             return jsonReader.readObject();
         } catch (Exception e) {
             throw new RuntimeException(e);

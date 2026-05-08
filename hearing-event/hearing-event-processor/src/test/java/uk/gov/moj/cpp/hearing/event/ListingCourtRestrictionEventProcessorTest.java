@@ -9,6 +9,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
@@ -21,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import javax.json.Json;
+
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ public class ListingCourtRestrictionEventProcessorTest {
         final UUID hearingId = randomUUID();
         final List<UUID> caseIds = Arrays.asList(randomUUID(), randomUUID());
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.listing.court-list-restricted"), Json.createObjectBuilder().add("hearingId", hearingId.toString()).build());
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.listing.court-list-restricted"), createObjectBuilder().add("hearingId", hearingId.toString()).build());
 
         processor.processRestrictCourtListPublicEvent(event);
 

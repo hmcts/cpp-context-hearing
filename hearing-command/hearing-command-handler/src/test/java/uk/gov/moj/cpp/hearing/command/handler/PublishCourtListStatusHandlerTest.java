@@ -1,9 +1,9 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-import static javax.json.Json.createReader;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory.createEnvelope;
+import static uk.gov.moj.cpp.hearing.command.handler.util.TokenGenerator.generateAlphanumeric;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportFailed.publishCourtListExportFailed;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportSuccessful.publishCourtListExportSuccessful;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListRequested.publishCourtListRequested;
@@ -39,7 +40,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
@@ -95,7 +95,7 @@ public class PublishCourtListStatusHandlerTest {
         final UUID courtCenterId = UUID.randomUUID();
         final String createdTime = "2016-09-09T08:31:40Z";
         final String errorMessage = "Unable to download the file from file service";
-        final String courtListFileName = randomAlphanumeric(30).toString();
+        final String courtListFileName = generateAlphanumeric(30);
         when(eventSource.getStreamById(courtCenterId)).thenReturn(eventStream);
         when(aggregateService.get(eventStream, CourtListAggregate.class)).thenReturn(courtListAggregate);
         when(courtListAggregate.recordCourtListExportFailed(any(UUID.class), any(String.class),
@@ -106,9 +106,9 @@ public class PublishCourtListStatusHandlerTest {
                 .replace("COURT_CENTRE_ID", courtCenterId.toString())
                 .replace("COURT_LIST_FILE_NAME", courtListFileName)
                 .replace("ERROR_MESSAGE", errorMessage)
-                .replace("CREATED_TIME", createdTime.toString());
+                .replace("CREATED_TIME", createdTime);
         try {
-            final JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
+            final JsonReader jsonReader = createReader(new StringReader(jsonString));
             final JsonEnvelope commandEnvelope = createEnvelope("hearing.command.record-court-list-export-failed", jsonReader.readObject());
             publishCourtListStatusHandler.recordCourtListExportFailed(commandEnvelope);
             verify(courtListAggregate).recordCourtListExportFailed(any(UUID.class), any(String.class), any(ZonedDateTime.class), eq(errorMessage));
@@ -121,7 +121,8 @@ public class PublishCourtListStatusHandlerTest {
     public void hearingCommandHandlerShouldTriggerExportSuccessfulForPublishEvent() throws Exception {
         final UUID courtCenterId = UUID.randomUUID();
         final String createdTime = "2016-09-09T08:31:40Z";
-        final String courtListFileName = randomAlphanumeric(30);
+
+        final String courtListFileName = generateAlphanumeric(30);
         when(eventSource.getStreamById(courtCenterId)).thenReturn(eventStream);
         when(aggregateService.get(eventStream, CourtListAggregate.class)).thenReturn(courtListAggregate);
         when(courtListAggregate.recordCourtListExportSuccessful(any(UUID.class), any(String.class),
@@ -133,7 +134,7 @@ public class PublishCourtListStatusHandlerTest {
                 .replace("CREATED_TIME", createdTime);
 
         try {
-            final JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
+            final JsonReader jsonReader = createReader(new StringReader(jsonString));
             final JsonEnvelope commandEnvelope = createEnvelope("hearing.command.record-court-list-export-successful", jsonReader.readObject());
             publishCourtListStatusHandler.recordCourtListExportSuccessful(commandEnvelope);
             verify(courtListAggregate).recordCourtListExportSuccessful(any(UUID.class), any(String.class), any(ZonedDateTime.class));
@@ -154,7 +155,7 @@ public class PublishCourtListStatusHandlerTest {
         final String jsonString = givenPayload("/hearing.command.publish-court-list.json").toString()
                 .replace("COURT_CENTRE_ID", courtCentreId.toString());
 
-        final JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
+        final JsonReader jsonReader = createReader(new StringReader(jsonString));
         final JsonEnvelope commandEnvelope = createEnvelope("hearing.command.publish-court-list", jsonReader.readObject());
         publishCourtListStatusHandler.publishCourtList(commandEnvelope);
         verify(courtListAggregate).recordCourtListRequested(any(UUID.class), any(ZonedDateTime.class));

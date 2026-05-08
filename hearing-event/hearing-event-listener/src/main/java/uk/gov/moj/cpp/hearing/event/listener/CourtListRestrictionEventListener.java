@@ -69,12 +69,14 @@ public class CourtListRestrictionEventListener {
                     .withCourtApplicationIds(combineLists(existingApplicationCourtListRestriction.getCourtApplicationIds(), courtListRestricted.getCourtApplicationIds()))
                     .withCourtApplicationApplicantIds(combineLists(existingApplicationCourtListRestriction.getCourtApplicationApplicantIds(), courtListRestricted.getCourtApplicationApplicantIds()))
                     .withCourtApplicationRespondentIds(combineLists(existingApplicationCourtListRestriction.getCourtApplicationRespondentIds(), courtListRestricted.getCourtApplicationRespondentIds()))
+                    .withCourtApplicationSubjectIds(combineLists(existingApplicationCourtListRestriction.getCourtApplicationSubjectIds(), courtListRestricted.getCourtApplicationSubjectIds()))
                     .build();
         } else {
             applicationCourtListRestriction = ApplicationCourtListRestriction.applicationCourtListRestriction()
                     .withCourtApplicationIds(removeFromList(existingApplicationCourtListRestriction.getCourtApplicationIds(), courtListRestricted.getCourtApplicationIds()))
                     .withCourtApplicationApplicantIds(removeFromList(existingApplicationCourtListRestriction.getCourtApplicationApplicantIds(), courtListRestricted.getCourtApplicationApplicantIds()))
                     .withCourtApplicationRespondentIds(removeFromList(existingApplicationCourtListRestriction.getCourtApplicationRespondentIds(), courtListRestricted.getCourtApplicationRespondentIds()))
+                    .withCourtApplicationSubjectIds(removeFromList(existingApplicationCourtListRestriction.getCourtApplicationSubjectIds(), courtListRestricted.getCourtApplicationSubjectIds()))
                     .build();
         }
 
@@ -97,7 +99,8 @@ public class CourtListRestrictionEventListener {
     private boolean hasApplicationRestriction(final CourtListRestricted courtListRestricted) {
         return isNotEmpty(courtListRestricted.getCourtApplicationIds()) ||
                 isNotEmpty(courtListRestricted.getCourtApplicationApplicantIds()) ||
-                isNotEmpty(courtListRestricted.getCourtApplicationRespondentIds());
+                isNotEmpty(courtListRestricted.getCourtApplicationRespondentIds()) ||
+                isNotEmpty(courtListRestricted.getCourtApplicationSubjectIds());
     }
 
     private List<UUID> combineLists(final List<UUID> existing, final List<UUID> toBeAdded) {

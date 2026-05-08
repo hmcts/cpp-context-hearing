@@ -12,8 +12,8 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -59,6 +59,8 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.Level;
@@ -161,7 +163,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.json.Json;
+
 import javax.json.JsonObject;
 
 import org.apache.commons.lang3.SerializationException;
@@ -1443,6 +1445,165 @@ public class HearingAggregateTest {
         assertThat(hearingAggregate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getMasterDefendantId(), Matchers.is(result.getDefendant().getMasterDefendantId()));
         assertThat(hearingAggregate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getPersonDetails().getLastName(), Matchers.is(result.getDefendant().getPersonDefendant().getPersonDetails().getLastName()));
 
+    }
+
+    @Test
+    void shouldEmitCourtListRestrictedWhenDefendantDetailsUpdatedAndDefendantIsUnderEighteen() {
+        final LocalDate hearingDate = LocalDate.of(2024, 6, 1);
+        final ZonedDateTime sittingDay = hearingDate.atStartOfDay(ZoneOffset.UTC);
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final LocalDate underAgeDob = LocalDate.of(2010, 6, 2);
+
+        final Defendant hearingDefendant = Defendant.defendant()
+                .withId(defendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName("John")
+                                .withLastName("Doe")
+                                .build())
+                        .build())
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withHearingDays(singletonList(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(prosecutionCaseId)
+                        .withDefendants(singletonList(hearingDefendant))
+                        .build()))
+                .withHasSharedResults(false)
+                .build();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant commandDefendant = new uk.gov.moj.cpp.hearing.command.defendant.Defendant();
+        commandDefendant.setId(defendantId);
+        commandDefendant.setProsecutionCaseId(prosecutionCaseId);
+        commandDefendant.setPersonDefendant(PersonDefendant.personDefendant()
+                .withPersonDetails(Person.person()
+                        .withFirstName("Young")
+                        .withLastName("Minor")
+                        .withDateOfBirth(underAgeDob)
+                        .build())
+                .build());
+
+        final List<Object> events = hearingAggregate.updateDefendantDetails(hearingId, commandDefendant)
+                .collect(Collectors.toList());
+
+        assertThat(events, hasSize(2));
+        assertThat(events.get(0), instanceOf(DefendantDetailsUpdated.class));
+        assertThat(events.get(1), instanceOf(uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted.class));
+
+        final uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted restrictedEvent =
+                (uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted) events.get(1);
+        assertThat(restrictedEvent.getHearingId(), is(hearingId));
+        assertThat(restrictedEvent.getDefendantIds(), hasSize(1));
+        assertThat(restrictedEvent.getDefendantIds().get(0), is(defendantId));
+        assertThat(restrictedEvent.getRestrictCourtList(), is(true));
+    }
+
+    @Test
+    void shouldNotEmitCourtListRestrictedWhenDefendantDetailsUpdatedAndDefendantIsOverEighteen() {
+        final LocalDate hearingDate = LocalDate.of(2024, 6, 1);
+        final ZonedDateTime sittingDay = hearingDate.atStartOfDay(ZoneOffset.UTC);
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final LocalDate adultDob = LocalDate.of(2000, 1, 1);
+
+        final Defendant hearingDefendant = Defendant.defendant()
+                .withId(defendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName("Adult")
+                                .withLastName("Defendant")
+                                .build())
+                        .build())
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withHearingDays(singletonList(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(prosecutionCaseId)
+                        .withDefendants(singletonList(hearingDefendant))
+                        .build()))
+                .withHasSharedResults(false)
+                .build();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant commandDefendant = new uk.gov.moj.cpp.hearing.command.defendant.Defendant();
+        commandDefendant.setId(defendantId);
+        commandDefendant.setProsecutionCaseId(prosecutionCaseId);
+        commandDefendant.setPersonDefendant(PersonDefendant.personDefendant()
+                .withPersonDetails(Person.person()
+                        .withFirstName("Updated")
+                        .withLastName("Adult")
+                        .withDateOfBirth(adultDob)
+                        .build())
+                .build());
+
+        final List<Object> events = hearingAggregate.updateDefendantDetails(hearingId, commandDefendant)
+                .collect(Collectors.toList());
+
+        assertThat(events, hasSize(1));
+        assertThat(events.get(0), instanceOf(DefendantDetailsUpdated.class));
+    }
+
+    @Test
+    void shouldNotEmitCourtListRestrictedWhenDefendantDetailsUpdatedAndDefendantHasNoDob() {
+        final LocalDate hearingDate = LocalDate.of(2024, 6, 1);
+        final ZonedDateTime sittingDay = hearingDate.atStartOfDay(ZoneOffset.UTC);
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+
+        final Defendant hearingDefendant = Defendant.defendant()
+                .withId(defendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName("John")
+                                .withLastName("Doe")
+                                .build()) // no dateOfBirth
+                        .build())
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withHearingDays(singletonList(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(prosecutionCaseId)
+                        .withDefendants(singletonList(hearingDefendant))
+                        .build()))
+                .withHasSharedResults(false)
+                .build();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant commandDefendant = new uk.gov.moj.cpp.hearing.command.defendant.Defendant();
+        commandDefendant.setId(defendantId);
+        commandDefendant.setProsecutionCaseId(prosecutionCaseId);
+        commandDefendant.setPersonDefendant(PersonDefendant.personDefendant()
+                .withPersonDetails(Person.person()
+                        .withFirstName("John")
+                        .withLastName("Doe")
+                        .build()) // no dateOfBirth
+                .build());
+
+        final List<Object> events = hearingAggregate.updateDefendantDetails(hearingId, commandDefendant)
+                .collect(Collectors.toList());
+
+        assertThat(events, hasSize(1));
+        assertThat(events.get(0), instanceOf(DefendantDetailsUpdated.class));
     }
 
 
@@ -2950,6 +3111,292 @@ public class HearingAggregateTest {
     }
 
     @Test
+    void shouldEmitCourtListRestrictedWhenDefendantIsUnderEighteenAtHearingDate() {
+        final LocalDate hearingDate = LocalDate.of(2024, 6, 1);
+        final ZonedDateTime sittingDay = hearingDate.atStartOfDay(ZoneOffset.UTC);
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID underAgeDefendantId = randomUUID();
+        final LocalDate underAgeDob = LocalDate.of(2010, 6, 2);
+
+        final Defendant underAgeDefendant = Defendant.defendant()
+                .withId(underAgeDefendantId)
+                .withMasterDefendantId(underAgeDefendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName("Young")
+                                .withLastName("Defendant")
+                                .withDateOfBirth(underAgeDob)
+                                .build())
+                        .build())
+                .withOffences(singletonList(Offence.offence().withId(randomUUID()).build()))
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withId(prosecutionCaseId)
+                .withDefendants(singletonList(underAgeDefendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withHearingDays(singletonList(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
+                .withProsecutionCases(singletonList(prosecutionCase))
+                .withHasSharedResults(false)
+                .build();
+
+        final List<Object> events = new HearingAggregate().initiate(hearing).collect(Collectors.toList());
+
+        assertThat(events, hasSize(2));
+        assertThat(events.get(0), instanceOf(HearingInitiated.class));
+        assertThat(events.get(1), instanceOf(uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted.class));
+
+        final uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted restrictedEvent =
+                (uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted) events.get(1);
+        assertThat(restrictedEvent.getHearingId(), is(hearingId));
+        assertThat(restrictedEvent.getDefendantIds(), hasSize(1));
+        assertThat(restrictedEvent.getDefendantIds().get(0), is(underAgeDefendantId));
+        assertThat(restrictedEvent.getRestrictCourtList(), is(true));
+    }
+
+    @Test
+    void shouldNotEmitCourtListRestrictedWhenAllDefendantsAreOverEighteen() {
+        final LocalDate hearingDate = LocalDate.of(2024, 6, 1);
+        final ZonedDateTime sittingDay = hearingDate.atStartOfDay(ZoneOffset.UTC);
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID adultDefendantId = randomUUID();
+        final LocalDate adultDob = LocalDate.of(2000, 1, 1);
+
+        final Defendant adultDefendant = Defendant.defendant()
+                .withId(adultDefendantId)
+                .withMasterDefendantId(adultDefendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName("Adult")
+                                .withLastName("Defendant")
+                                .withDateOfBirth(adultDob)
+                                .build())
+                        .build())
+                .withOffences(singletonList(Offence.offence().withId(randomUUID()).build()))
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withId(prosecutionCaseId)
+                .withDefendants(singletonList(adultDefendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withHearingDays(singletonList(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
+                .withProsecutionCases(singletonList(prosecutionCase))
+                .withHasSharedResults(false)
+                .build();
+
+        final List<Object> events = new HearingAggregate().initiate(hearing).collect(Collectors.toList());
+
+        assertThat(events, hasSize(1));
+        assertThat(events.get(0), instanceOf(HearingInitiated.class));
+    }
+
+    @Test
+    void shouldOnlyRestrictUnderEighteenDefendantsWhenMixedAges() {
+        final LocalDate hearingDate = LocalDate.of(2024, 6, 1);
+        final ZonedDateTime sittingDay = hearingDate.atStartOfDay(ZoneOffset.UTC);
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID underAgeDefendantId = randomUUID();
+        final UUID adultDefendantId = randomUUID();
+
+        final Defendant underAgeDefendant = Defendant.defendant()
+                .withId(underAgeDefendantId)
+                .withMasterDefendantId(underAgeDefendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName("Young")
+                                .withLastName("Defendant")
+                                .withDateOfBirth(LocalDate.of(2010, 6, 2))
+                                .build())
+                        .build())
+                .withOffences(singletonList(Offence.offence().withId(randomUUID()).build()))
+                .build();
+
+        final Defendant adultDefendant = Defendant.defendant()
+                .withId(adultDefendantId)
+                .withMasterDefendantId(adultDefendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName("Adult")
+                                .withLastName("Defendant")
+                                .withDateOfBirth(LocalDate.of(2000, 1, 1))
+                                .build())
+                        .build())
+                .withOffences(singletonList(Offence.offence().withId(randomUUID()).build()))
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withId(prosecutionCaseId)
+                .withDefendants(Arrays.asList(underAgeDefendant, adultDefendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withHearingDays(singletonList(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
+                .withProsecutionCases(singletonList(prosecutionCase))
+                .withHasSharedResults(false)
+                .build();
+
+        final List<Object> events = new HearingAggregate().initiate(hearing).collect(Collectors.toList());
+
+        assertThat(events, hasSize(2));
+        assertThat(events.get(0), instanceOf(HearingInitiated.class));
+        assertThat(events.get(1), instanceOf(uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted.class));
+
+        final uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted restrictedEvent =
+                (uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted) events.get(1);
+        assertThat(restrictedEvent.getDefendantIds(), hasSize(1));
+        assertThat(restrictedEvent.getDefendantIds().get(0), is(underAgeDefendantId));
+    }
+
+    @Test
+    void shouldNotEmitCourtListRestrictedWhenDefendantTurnsEighteenOnHearingDate() {
+        final LocalDate hearingDate = LocalDate.of(2024, 6, 1);
+        final ZonedDateTime sittingDay = hearingDate.atStartOfDay(ZoneOffset.UTC);
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final LocalDate dobTurns18OnHearingDate = LocalDate.of(2006, 6, 1);
+
+        final Defendant defendant = Defendant.defendant()
+                .withId(defendantId)
+                .withMasterDefendantId(defendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName("Exact")
+                                .withLastName("Eighteen")
+                                .withDateOfBirth(dobTurns18OnHearingDate)
+                                .build())
+                        .build())
+                .withOffences(singletonList(Offence.offence().withId(randomUUID()).build()))
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withId(prosecutionCaseId)
+                .withDefendants(singletonList(defendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withHearingDays(singletonList(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
+                .withProsecutionCases(singletonList(prosecutionCase))
+                .withHasSharedResults(false)
+                .build();
+
+        final List<Object> events = new HearingAggregate().initiate(hearing).collect(Collectors.toList());
+
+        assertThat(events, hasSize(1));
+        assertThat(events.get(0), instanceOf(HearingInitiated.class));
+    }
+
+    @Test
+    void shouldSkipDefendantWithNullDateOfBirthAndNotCrash() {
+        final LocalDate hearingDate = LocalDate.of(2024, 6, 1);
+        final ZonedDateTime sittingDay = hearingDate.atStartOfDay(ZoneOffset.UTC);
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantNoDobId = randomUUID();
+        final UUID underAgeDefendantId = randomUUID();
+
+        final Defendant defendantNoDob = Defendant.defendant()
+                .withId(defendantNoDobId)
+                .withMasterDefendantId(defendantNoDobId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName("NoDob")
+                                .withLastName("Defendant")
+                                .build())
+                        .build())
+                .withOffences(singletonList(Offence.offence().withId(randomUUID()).build()))
+                .build();
+
+        final Defendant underAgeDefendant = Defendant.defendant()
+                .withId(underAgeDefendantId)
+                .withMasterDefendantId(underAgeDefendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName("Young")
+                                .withLastName("Defendant")
+                                .withDateOfBirth(LocalDate.of(2010, 6, 2))
+                                .build())
+                        .build())
+                .withOffences(singletonList(Offence.offence().withId(randomUUID()).build()))
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withId(prosecutionCaseId)
+                .withDefendants(Arrays.asList(defendantNoDob, underAgeDefendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withHearingDays(singletonList(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
+                .withProsecutionCases(singletonList(prosecutionCase))
+                .withHasSharedResults(false)
+                .build();
+
+        final List<Object> events = new HearingAggregate().initiate(hearing).collect(Collectors.toList());
+
+        assertThat(events, hasSize(2));
+        assertThat(events.get(0), instanceOf(HearingInitiated.class));
+        assertThat(events.get(1), instanceOf(uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted.class));
+
+        final uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted restrictedEvent =
+                (uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted) events.get(1);
+        assertThat(restrictedEvent.getDefendantIds(), hasSize(1));
+        assertThat(restrictedEvent.getDefendantIds().get(0), is(underAgeDefendantId));
+    }
+
+    @Test
+    void shouldSkipDefendantWithNullPersonDefendantAndNotCrash() {
+        final LocalDate hearingDate = LocalDate.of(2024, 6, 1);
+        final ZonedDateTime sittingDay = hearingDate.atStartOfDay(ZoneOffset.UTC);
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID orgDefendantId = randomUUID();
+
+        final Defendant orgDefendant = Defendant.defendant()
+                .withId(orgDefendantId)
+                .withMasterDefendantId(orgDefendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(null)
+                .withOffences(singletonList(Offence.offence().withId(randomUUID()).build()))
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withId(prosecutionCaseId)
+                .withDefendants(singletonList(orgDefendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withHearingDays(singletonList(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
+                .withProsecutionCases(singletonList(prosecutionCase))
+                .withHasSharedResults(false)
+                .build();
+
+        final List<Object> events = new HearingAggregate().initiate(hearing).collect(Collectors.toList());
+
+        assertThat(events, hasSize(1));
+        assertThat(events.get(0), instanceOf(HearingInitiated.class));
+    }
+
+    @Test
     void shouldRaiseHearingIgnoredForRemoveOffencesFromExistingHearingIfNoHearingExist() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
@@ -4184,7 +4631,7 @@ public class HearingAggregateTest {
                 .withHearing(hearing)
                 .build());
         hearingAggregate.apply(new HearingAmended(hearing.getId(), userId, SHARED_AMEND_LOCKED_ADMIN_ERROR));
-        hearingAggregate.apply(new DraftResultSavedV2(hearing.getId(), hearingDay, Json.createObjectBuilder().build(), userId, 3));
+        hearingAggregate.apply(new DraftResultSavedV2(hearing.getId(), hearingDay, createObjectBuilder().build(), userId, 3));
         hearingAggregate.apply(new ResultAmendmentsValidated(hearing.getId(), userId, ZonedDateTime.now()));
 
         assertThat(hearingAggregate.getHearingDaySharedOffencesMap().get(hearingDay).size(), is(2));
