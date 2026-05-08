@@ -754,6 +754,19 @@ public class TestTemplates {
                             , courtId, courtRoomId, courtRoomName, localDate, defenceCounselId, caseId, hearingTypeId).build());
         }
 
+        public static InitiateHearingCommand initiateHearingTemplateWithParamNoReportingRestrictionYoungDefendant(final UUID courtId, final UUID courtRoomId, final String courtRoomName, final LocalDate localDate, final UUID defenceCounselId, final UUID caseId, final Optional<UUID> hearingTypeId) throws NoSuchAlgorithmException {
+            return initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearingWithParam(defaultArguments()
+                                    .setDefendantType(PERSON)
+                                    .setHearingLanguage(ENGLISH)
+                                    .setJurisdictionType(CROWN)
+                                    .setReportingRestriction(false)
+                                    .setMinimumAssociatedPerson(true)
+                                    .setMinimumDefenceOrganisation(true)
+                                    .setDefendantDateOfBirth(localDate.minusYears(15))
+                            , courtId, courtRoomId, courtRoomName, localDate, defenceCounselId, caseId, hearingTypeId).build());
+        }
+
         public static InitiateHearingCommand initiateHearingTemplateForApplicationNoReportingRestriction(final UUID courtId, final UUID courtRoomId, final String courtRoomName, final LocalDate localDate, final UUID defenceCounselId, final UUID caseId, final Optional<UUID> hearingTypeId) throws NoSuchAlgorithmException {
             return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearingWithParam(defaultArguments()

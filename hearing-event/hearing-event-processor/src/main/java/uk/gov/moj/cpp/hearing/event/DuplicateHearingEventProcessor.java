@@ -1,14 +1,15 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilderWithFilter;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjects;
+
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -81,6 +82,6 @@ public class DuplicateHearingEventProcessor {
     }
 
     private JsonObject getPublicEventPayload(final JsonObject payload) {
-        return JsonObjects.createObjectBuilderWithFilter(payload, s -> !COURT_CENTRE_ID_FIELD.equals(s) && !REASON_FIELD.equals(s)).build();
+        return createObjectBuilderWithFilter(payload, s -> !COURT_CENTRE_ID_FIELD.equals(s) && !REASON_FIELD.equals(s)).build();
     }
 }

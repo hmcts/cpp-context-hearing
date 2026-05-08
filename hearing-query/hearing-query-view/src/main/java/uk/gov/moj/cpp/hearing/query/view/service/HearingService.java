@@ -13,13 +13,14 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
-import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 import static uk.gov.moj.cpp.hearing.mapping.ApplicationAmendmentAllowedResolver.isAmendmentAllowed;
 
@@ -120,7 +121,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -358,7 +358,7 @@ public class HearingService {
             source = filterHearingsBasedOnPermissions.filterHearings(source, accessibleCasesAndApplicationIds);
         }
 
-        if (CollectionUtils.isEmpty(source)) {
+        if (isEmpty(source)) {
             return new GetHearings(null);
         }
 
@@ -398,7 +398,7 @@ public class HearingService {
         }
         final List<Hearing> filteredHearings = getAndInitializeHearings(date, userId);
         filterForShadowListedOffencesAndCases(filteredHearings);
-        if (CollectionUtils.isEmpty(filteredHearings)) {
+        if (isEmpty(filteredHearings)) {
             return new GetHearings(null);
         }
         filteredHearings.sort(Comparator.nullsFirst(Comparator.comparing(o -> sortListingSequence(date, o))));
@@ -418,7 +418,7 @@ public class HearingService {
         }
         List<Hearing> filteredHearings = hearingRepository.findByDefendantAndHearingType(date, userId);
         filteredHearings = filterForTrial(filteredHearings, hearingTypeList);
-        if (CollectionUtils.isEmpty(filteredHearings)) {
+        if (isEmpty(filteredHearings)) {
             return new GetHearings(null);
         }
 
@@ -456,7 +456,7 @@ public class HearingService {
             return new DefendantInfoQueryResult(null);
         }
         final List<Hearing> hearings = hearingRepository.findByFilters(date, courtCentreId, roomId);
-        if (CollectionUtils.isEmpty(hearings)) {
+        if (isEmpty(hearings)) {
             return new DefendantInfoQueryResult(null);
         }
 
@@ -796,7 +796,7 @@ public class HearingService {
         final List<Now> nows = nowRepository.findByHearingId(hearingId);
         final NowListResponse.Builder builder = NowListResponse.builder();
 
-        if (!CollectionUtils.isEmpty(nows)) {
+        if (!isEmpty(nows)) {
             final List<NowResponse> nowResponses = nows
                     .stream()
                     .map(now -> new NowResponse(now.getId(), now.getHearingId()))
@@ -810,8 +810,8 @@ public class HearingService {
     @Transactional
     public JsonObject getNowsRepository(final String q) {
         LOGGER.debug("Searching for allowed user groups with materialId='{}'", q);
-        final JsonObjectBuilder json = Json.createObjectBuilder();
-        final JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+        final JsonObjectBuilder json = createObjectBuilder();
+        final JsonArrayBuilder jsonArrayBuilder = createArrayBuilder();
         final NowsMaterial nowsMaterial = nowsMaterialRepository.findBy(fromString(q));
         if (nowsMaterial != null) {
             nowsMaterial.getUserGroups().stream().sorted().collect(toList()).forEach(jsonArrayBuilder::add);
@@ -858,7 +858,7 @@ public class HearingService {
 
             LOGGER.error(format("Exception occurred while retrieve get subscriptions = '%s - %s'", referenceDateParam, nowTypeParam), e);
 
-            return Json.createObjectBuilder().build();
+            return createObjectBuilder().build();
         }
     }
 
@@ -1074,7 +1074,7 @@ public class HearingService {
 
         final List<Hearing> filteredHearings = hearingRepository.findHearingsByCaseIdsLaterThan(caseIdList, UTC_CLOCK.now().toLocalDate());
 
-        if (CollectionUtils.isEmpty(filteredHearings)) {
+        if (isEmpty(filteredHearings)) {
             return new GetHearings(null);
         }
 
@@ -1115,7 +1115,7 @@ public class HearingService {
     }
 
     public static boolean isUserHasPermissionForApplicationTypeCode(final Metadata metadata, final Requester requester, final String applicationTypeCode) {
-        final JsonObject getOrganisationForUserRequest = Json.createObjectBuilder()
+        final JsonObject getOrganisationForUserRequest = createObjectBuilder()
                 .add(ACTION, ACCESS_TO_STANDALONE_APPLICATION)
                 .add(OBJECT, applicationTypeCode)
                 .build();

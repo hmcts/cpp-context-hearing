@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
@@ -51,6 +52,7 @@ import uk.gov.justice.core.courts.LaaReference;
 import uk.gov.justice.core.courts.ListHearingRequest;
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -543,17 +545,19 @@ public class HearingAggregate implements Aggregate {
             hearing.setHasSharedResults(false);
         }
 
-        //check if offence count is missing for crown court hearing
-        //removing this bit of code here as offence count is not a mandatory field to initiatehearing
-        /*
-        if (JurisdictionType.CROWN.equals(hearing.getJurisdictionType()) && hearing.getProsecutionCases() != null) {
-            final List<Offence> offences = this.hearingDelegate.getAllOffencesMissingCount(hearing);
-            if (!offences.isEmpty()) {
-                return apply(this.hearingDelegate.ignoreHearingInitiate(offences, hearing.getId()));
-            }
+        final List<UUID> underAgeDefendantIds = findUnderAgeDefendantIds(hearing);
+
+        if (underAgeDefendantIds.isEmpty()) {
+            return apply(this.hearingDelegate.initiate(hearing));
         }
-        */
-        return apply(this.hearingDelegate.initiate(hearing));
+
+        return apply(Stream.concat(
+                this.hearingDelegate.initiate(hearing),
+                Stream.of(CourtListRestricted.courtListRestricted()
+                        .withHearingId(hearing.getId())
+                        .withDefendantIds(underAgeDefendantIds)
+                        .withRestrictCourtList(true)
+                        .build())));
     }
 
     public Stream<Object> extend(final UUID hearingId, final List<HearingDay> hearingDays, final CourtCentre courtCentre, final JurisdictionType jurisdictionType,
@@ -1015,7 +1019,24 @@ public class HearingAggregate implements Aggregate {
             return warnEventIgnored(hearingId, "updateDefendantDetails");
         }
 
-        return apply(this.defendantDelegate.updateDefendantDetails(hearingId, defendant));
+        final List<Object> updateEvents = this.defendantDelegate.updateDefendantDetails(hearingId, defendant)
+                .collect(toList());
+
+        if (updateEvents.isEmpty()) {
+            return Stream.empty();
+        }
+
+        if (isUnderEighteenAtHearingDate(defendant)) {
+            return apply(Stream.concat(
+                    updateEvents.stream(),
+                    Stream.of(CourtListRestricted.courtListRestricted()
+                            .withHearingId(hearingId)
+                            .withDefendantIds(List.of(defendant.getId()))
+                            .withRestrictCourtList(true)
+                            .build())));
+        }
+
+        return apply(updateEvents.stream());
     }
 
     public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId, final Offence offence) {
@@ -1505,12 +1526,12 @@ public class HearingAggregate implements Aggregate {
                 .withCourtApplicationApplicantIds(courtListRestrictedCmd.getCourtApplicationApplicantIds())
                 .withCourtApplicationIds(courtListRestrictedCmd.getCourtApplicationIds())
                 .withCourtApplicationRespondentIds(courtListRestrictedCmd.getCourtApplicationRespondentIds())
+                .withCourtApplicationSubjectIds(courtListRestrictedCmd.getCourtApplicationSubjectIds())
                 .withCourtApplicationType(courtListRestrictedCmd.getCourtApplicationType())
                 .withDefendantIds(courtListRestrictedCmd.getDefendantIds())
                 .withRestrictCourtList(courtListRestrictedCmd.getRestrictCourtList())
                 .withHearingId(courtListRestrictedCmd.getHearingId())
                 .withOffenceIds(courtListRestrictedCmd.getOffenceIds())
-                .withCourtApplicationType(courtListRestrictedCmd.getCourtApplicationType())
                 .build()));
     }
 
@@ -1556,6 +1577,70 @@ public class HearingAggregate implements Aggregate {
 
     public Map<LocalDate, Set<UUID>> getHearingDaySharedOffencesMap() {
         return hearingDaySharedOffencesMap;
+    }
+
+    private List<UUID> findUnderAgeDefendantIds(final Hearing hearing) {
+        if (isNull(hearing) || isNull(hearing.getHearingDays()) || hearing.getHearingDays().isEmpty()
+                || isNull(hearing.getProsecutionCases())) {
+            return emptyList();
+        }
+
+        final LocalDate startDate = hearing.getHearingDays().stream()
+                .filter(Objects::nonNull)
+                .filter(hearingDay -> nonNull(hearingDay.getSittingDay()))
+                .map(hearingDay -> hearingDay.getSittingDay().toLocalDate())
+                .min(LocalDate::compareTo)
+                .orElse(null);
+
+        if (isNull(startDate)) {
+            return emptyList();
+        }
+
+        return hearing.getProsecutionCases().stream()
+                .filter(Objects::nonNull)
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .filter(Objects::nonNull)
+                .filter(defendant -> isUnderEighteenAtDate(defendant, startDate))
+                .map(uk.gov.justice.core.courts.Defendant::getId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(toList());
+    }
+
+    private boolean isUnderEighteenAtHearingDate(final Defendant defendant) {
+        final Hearing hearing = momento.getHearing();
+        if (isNull(hearing) || isNull(hearing.getHearingDays()) || hearing.getHearingDays().isEmpty()) {
+            return false;
+        }
+
+        final LocalDate startDate = hearing.getHearingDays().stream()
+                .filter(Objects::nonNull)
+                .filter(hearingDay -> nonNull(hearingDay.getSittingDay()))
+                .map(hearingDay -> hearingDay.getSittingDay().toLocalDate())
+                .min(LocalDate::compareTo)
+                .orElse(null);
+
+        return isUnderEighteenAtDate(defendant.getPersonDefendant(), startDate);
+    }
+
+    private boolean isUnderEighteenAtDate(final uk.gov.justice.core.courts.Defendant defendant, final LocalDate startDate) {
+        try {
+            return isUnderEighteenAtDate(defendant.getPersonDefendant(), startDate);
+        } catch (final Exception e) {
+            LOGGER.warn("Failed to determine age for defendant {}: {}", defendant.getId(), e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean isUnderEighteenAtDate(final uk.gov.justice.core.courts.PersonDefendant personDefendant, final LocalDate startDate) {
+        if (isNull(startDate) || isNull(personDefendant)
+                || isNull(personDefendant.getPersonDetails())
+                || isNull(personDefendant.getPersonDetails().getDateOfBirth())) {
+            return false;
+        }
+        final LocalDate dateOfBirth = personDefendant.getPersonDetails().getDateOfBirth();
+        final LocalDate eighteenthBirthday = dateOfBirth.plusYears(18);
+        return startDate.isBefore(eighteenthBirthday);
     }
 
     private Stream<Object> warnEventIgnored(final UUID hearingId, final String methodName) {
