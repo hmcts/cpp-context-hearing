@@ -250,7 +250,8 @@ public class HearingEventListenerYamlConfigTest {
                 ApplicationOrganisationDetailsUpdatedEventListener.class,
                 IndicatedPleaUpdated.class,
                 HearingJudiciaryListener.class,
-                TargetUpdatedEventListener.class));
+                TargetUpdatedEventListener.class,
+                UpdateHearingDayBdfEventListener.class));
 
         yamlEventNames = new SubscriptionsDescriptorLoader(PATH_TO_YAML).eventNames();
     }
