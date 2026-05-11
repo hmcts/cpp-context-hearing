@@ -6,6 +6,8 @@ public class OffenceDto {
     private final String offenceTitle;
     private final Integer orderIndex;
     private final String caseUrn;
+    private final Boolean hasExistingCtlRecord;
+    private final Boolean isConvicted;
 
     private OffenceDto(Builder builder) {
         this.id = builder.id;
@@ -13,6 +15,8 @@ public class OffenceDto {
         this.offenceTitle = builder.offenceTitle;
         this.orderIndex = builder.orderIndex;
         this.caseUrn = builder.caseUrn;
+        this.hasExistingCtlRecord = builder.hasExistingCtlRecord;
+        this.isConvicted = builder.isConvicted;
     }
 
     // Getters
@@ -21,6 +25,8 @@ public class OffenceDto {
     public String getOffenceTitle() { return offenceTitle; }
     public Integer getOrderIndex() { return orderIndex; }
     public String getCaseUrn() { return caseUrn; }
+    public Boolean getHasExistingCtlRecord() { return hasExistingCtlRecord; }
+    public Boolean getIsConvicted() { return isConvicted; }
 
     // Builder
     public static class Builder {
@@ -29,6 +35,8 @@ public class OffenceDto {
         private String offenceTitle;
         private Integer orderIndex;
         private String caseUrn;
+        private Boolean hasExistingCtlRecord;
+        private Boolean isConvicted;
 
         public Builder id(String id) {
             this.id = id;
@@ -52,6 +60,16 @@ public class OffenceDto {
 
         public Builder caseUrn(String caseUrn) {
             this.caseUrn = caseUrn;
+            return this;
+        }
+
+        public Builder hasExistingCtlRecord(Boolean hasExistingCtlRecord) {
+            this.hasExistingCtlRecord = hasExistingCtlRecord;
+            return this;
+        }
+
+        public Builder isConvicted(Boolean isConvicted) {
+            this.isConvicted = isConvicted;
             return this;
         }
 

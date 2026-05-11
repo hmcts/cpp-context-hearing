@@ -11,6 +11,7 @@ import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -56,6 +57,10 @@ public class ValidationRequestMapper {
                                                         .offenceTitle(offence.getOffenceTitle())
                                                         .orderIndex(offence.getOrderIndex())
                                                         .caseUrn(caseUrn)
+                                                        .isConvicted(offence.getConvictionDate() != null)
+                                                        .hasExistingCtlRecord(offence.getCustodyTimeLimit() != null
+                                                                && offence.getCustodyTimeLimit().getTimeLimit() != null
+                                                                && offence.getCustodyTimeLimit().getTimeLimit().isAfter(LocalDate.now()))
                                                         .build()));
                                     }
                                 });
