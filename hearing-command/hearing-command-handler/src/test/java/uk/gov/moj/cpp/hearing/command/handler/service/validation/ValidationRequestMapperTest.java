@@ -447,35 +447,6 @@ class ValidationRequestMapperTest {
     }
 
     @Test
-    void shouldSetHasExistingCtlRecordFalseWhenTimeLimitIsInThePast() {
-        final CustodyTimeLimit custodyTimeLimit = CustodyTimeLimit.custodyTimeLimit()
-                .withTimeLimit(LocalDate.of(2024, 1, 1))
-                .build();
-
-        final Offence offence = Offence.offence()
-                .withId(randomUUID())
-                .withCustodyTimeLimit(custodyTimeLimit)
-                .build();
-
-        final Defendant defendant = Defendant.defendant()
-                .withId(randomUUID())
-                .withOffences(List.of(offence))
-                .build();
-
-        final Hearing hearing = Hearing.hearing()
-                .withProsecutionCases(List.of(
-                        ProsecutionCase.prosecutionCase()
-                                .withDefendants(List.of(defendant))
-                                .build()))
-                .build();
-
-        final ValidationRequest request = mapper.toValidationRequest(
-                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
-
-        assertThat(request.getOffences().get(0).getHasExistingCtlRecord(), is(false));
-    }
-
-    @Test
     void shouldSetHasExistingCtlRecordFalseWhenTimeLimitIsNull() {
         final CustodyTimeLimit custodyTimeLimit = CustodyTimeLimit.custodyTimeLimit()
                 .build();
