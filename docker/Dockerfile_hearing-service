@@ -1,5 +1,5 @@
-ARG baseImageUri
-ARG baseImageTag
+ARG baseImageUri=eclipse-temurin
+ARG baseImageTag=17-jre
 FROM ${baseImageUri}:${baseImageTag}
 
 ARG version
@@ -35,4 +35,5 @@ RUN mkdir /opt/cpp-tools
 ADD ${mavenArtifactBaseUrl}/uk/gov/justice/services/framework-jmx-command-client/${framework_version}/framework-jmx-command-client-${framework_version}.jar /opt/cpp-tools/framework-jmx-command-client.jar
 RUN chown ${wildfly_user}:${wildfly_user} /opt/cpp-tools/framework-jmx-command-client.jar && chmod 755 /opt/cpp-tools/framework-jmx-command-client.jar
 USER ${wildfly_user}
-LABEL base_image ${baseImageTag}
+ARG baseImageTag
+LABEL base_image=${baseImageTag}
