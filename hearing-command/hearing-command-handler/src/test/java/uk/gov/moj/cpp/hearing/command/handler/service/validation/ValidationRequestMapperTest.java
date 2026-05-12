@@ -244,6 +244,39 @@ class ValidationRequestMapperTest {
     }
 
     @Test
+    void shouldMapCategoryFromResultLine() {
+        final SharedResultsCommandResultLineV2 resultLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(randomUUID())
+                .withShortCode("IMP")
+                .withDefendantId(randomUUID())
+                .withOffenceId(randomUUID())
+                .withCategory("F")
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
+        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+
+        assertThat(request.getResultLines().get(0).getCategory(), is("F"));
+    }
+
+    @Test
+    void shouldMapNullCategoryFromResultLine() {
+        final SharedResultsCommandResultLineV2 resultLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(randomUUID())
+                .withShortCode("IMP")
+                .withDefendantId(randomUUID())
+                .withOffenceId(randomUUID())
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
+        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+
+        assertThat(request.getResultLines().get(0).getCategory(), is(nullValue()));
+    }
+
+    @Test
     void shouldHandleNullProsecutionCasesGracefully() {
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), emptyList());
 
