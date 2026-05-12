@@ -190,7 +190,7 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final HearingAggregate hearingAggregate = aggregateService.get(eventStream, HearingAggregate.class);
 
         final Hearing hearing = hearingAggregate.getHearing();
-        hearing.setId(null);
+
         final ValidationRequest validationRequest = validationRequestMapper.toValidationRequest(command, hearing);
         final String userIdString = userId != null ? userId.toString() : "";
 

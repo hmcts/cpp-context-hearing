@@ -80,7 +80,7 @@ public class ValidationRequestMapper {
         }
 
         return new ValidationRequest(
-                uuidToString(command.getHearingId()),
+                uuidToString(null),
                 command.getHearingDay(),
                 courtType,
                 caseId,
