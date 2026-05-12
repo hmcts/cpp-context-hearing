@@ -86,6 +86,8 @@ import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -1135,6 +1137,61 @@ public class InitiateHearingEventListenerTest {
                         )
                 )
         );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "GUILTY_REQUEST_HEARING",
+        "GUILTY_SINGLE_JUSTICE_PROCEDURE",
+        "MCA_GUILTY",
+        "GUILTY_LESSER_OFFENCE_NAMELY",
+        "GUILTY_TO_ALTERNATIVE_OFFENCE",
+        "CHANGE_TO_GUILTY_AFTER_SWORN",
+        "CHANGE_TO_GUILTY_NO_JURY"
+    })
+    void convictionDateIsSetForGuiltyPleaTypes(final String pleaValue) {
+        final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
+                .withUserId(randomUUID())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .build();
+        final uk.gov.justice.core.courts.Plea pleaPojo = uk.gov.justice.core.courts.Plea.plea()
+                .withOffenceId(randomUUID())
+                .withOriginatingHearingId(randomUUID())
+                .withPleaDate(PAST_LOCAL_DATE.next())
+                .withPleaValue(pleaValue)
+                .withDelegatedPowers(delegatedPowersPojo)
+                .build();
+
+        final InheritedPlea event = new InheritedPlea()
+                .setHearingId(randomUUID())
+                .setPlea(pleaPojo);
+
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(event.getPlea().getOffenceId(), event.getHearingId());
+
+        final Offence offence = new Offence();
+        offence.setId(snapshotKey);
+        when(offenceRepository.findBy(snapshotKey)).thenReturn(offence);
+
+        final DelegatedPowers delegatedPowers = new DelegatedPowers();
+        delegatedPowers.setDelegatedPowersUserId(delegatedPowersPojo.getUserId());
+        delegatedPowers.setDelegatedPowersLastName(delegatedPowersPojo.getLastName());
+        delegatedPowers.setDelegatedPowersFirstName(delegatedPowersPojo.getFirstName());
+
+        final Plea plea = new Plea();
+        plea.setPleaValue(pleaPojo.getPleaValue());
+        plea.setPleaDate(pleaPojo.getPleaDate());
+        plea.setOriginatingHearingId(pleaPojo.getOriginatingHearingId());
+        plea.setDelegatedPowers(delegatedPowers);
+
+        when(pleaJPAMapper.toJPA(Mockito.any())).thenReturn(plea);
+
+        initiateHearingEventListener.hearingInitiatedPleaData(envelopeFrom(
+                metadataWithRandomUUID("hearing.events.inherited-plea"),
+                objectToJsonObjectConverter.convert(event)));
+
+        verify(offenceRepository).save(offence);
+        assertThat(offence.getConvictionDate(), is(pleaPojo.getPleaDate()));
     }
 
     private JsonEnvelope getInitiateHearingJsonEnvelope(final uk.gov.justice.core.courts.Hearing hearing) {
