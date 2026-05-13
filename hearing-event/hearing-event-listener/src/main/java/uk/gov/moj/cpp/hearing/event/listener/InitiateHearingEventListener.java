@@ -63,9 +63,17 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S2201", "squid:S134"})
 @ServiceComponent(EVENT_LISTENER)
 public class InitiateHearingEventListener {
-    private static final String GUILTY = "GUILTY";
-
-    private static final String CHANGE_TO_GUILTY_MAGISTRATES_COURT = "CHANGE_TO_GUILTY_MAGISTRATES_COURT";
+    private static final Set<String> GUILTY_PLEA_TYPES = Set.of(
+            "GUILTY",
+            "CHANGE_TO_GUILTY_MAGISTRATES_COURT",
+            "GUILTY_REQUEST_HEARING",
+            "GUILTY_SINGLE_JUSTICE_PROCEDURE",
+            "MCA_GUILTY",
+            "GUILTY_LESSER_OFFENCE_NAMELY",
+            "GUILTY_TO_ALTERNATIVE_OFFENCE",
+            "CHANGE_TO_GUILTY_AFTER_SWORN",
+            "CHANGE_TO_GUILTY_NO_JURY"
+    );
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InitiateHearingEventListener.class.getName());
 
@@ -300,7 +308,7 @@ public class InitiateHearingEventListener {
 
             if (shouldSetPlea) {
                 offence.setPlea(pleaJPAMapper.toJPA(event.getPlea()));
-                final boolean IS_GUILTY_PLEA = GUILTY.equals(event.getPlea().getPleaValue()) || CHANGE_TO_GUILTY_MAGISTRATES_COURT.equals(event.getPlea().getPleaValue());
+                final boolean IS_GUILTY_PLEA = GUILTY_PLEA_TYPES.contains(event.getPlea().getPleaValue());
                 offence.setConvictionDate(IS_GUILTY_PLEA ? event.getPlea().getPleaDate() : null);
                 offenceRepository.save(offence);
             }
