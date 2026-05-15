@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
@@ -171,7 +172,7 @@ public class ReferenceDataService {
 
     private Optional<CourtCentre> buildCourtCentreFromRoom(final JsonObject ou, final UUID courtCentreId, final UUID courtRoomId) {
         final JsonArray courtrooms = ou.getJsonArray("courtrooms");
-        if (courtrooms == null) {
+        if (isNull(courtrooms)) {
             return Optional.empty();
         }
 
