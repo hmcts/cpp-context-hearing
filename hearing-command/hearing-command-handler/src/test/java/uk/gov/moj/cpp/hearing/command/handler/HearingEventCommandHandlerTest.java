@@ -1,8 +1,11 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
@@ -255,6 +258,66 @@ public class HearingEventCommandHandlerTest {
                         .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getId, is(initiateHearingCommand.getHearing().getCourtCentre().getId()))
                         .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getRoomId, is(initiateHearingCommand.getHearing().getCourtCentre().getRoomId())))
         );
+    }
+
+    /**
+     * Covers the override flow that {@code OverrideCourtRoomActiveHearingsIT}
+     * used to cover end-to-end: when the {@code log-hearing-event} command
+     * arrives with {@code override=true} and a list of {@code activeHearings},
+     * the handler must emit a PAUSE event against each active hearing's
+     * aggregate, on top of the target hearing's own event.
+     */
+    @Test
+    public void logHearingEvent_shouldPauseEachActiveHearing_whenOverrideIsTrue() throws Exception {
+
+        final UUID PAUSE_HEARING_EVENT_DEFINITION_ID = UUID.fromString("160ecb51-29ee-4954-bbbf-daab18a24fbb");
+
+        final InitiateHearingCommand targetInit = standardInitiateHearingTemplate();
+        final UUID targetHearingId = targetInit.getHearing().getId();
+
+        final InitiateHearingCommand activeInit = standardInitiateHearingTemplate();
+        final UUID activeHearingId = activeInit.getHearing().getId();
+
+        final EventStream activeHearingStream = mock(EventStream.class);
+        setupMockedEventStream(targetHearingId, this.eventStream, with(new HearingAggregate(), a -> {
+            a.apply(new HearingInitiated(targetInit.getHearing()));
+        }));
+        setupMockedEventStream(activeHearingId, activeHearingStream, with(new HearingAggregate(), a -> {
+            a.apply(new HearingInitiated(activeInit.getHearing()));
+        }));
+
+        final ZonedDateTime eventTime = getPastDate();
+        final UUID targetEventDefId = randomUUID();
+        final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), targetHearingId, targetEventDefId,
+                STRING.next(), STRING.next(), eventTime, eventTime, false, randomUUID(),
+                Arrays.asList(randomUUID()), randomUUID());
+
+        // Same shape as the regular log-hearing-event command, but with override=true and
+        // activeHearings populated by the Command-API layer (the production code path).
+        final javax.json.JsonObject baseCommandPayload = objectToJsonObjectConverter.convert(logEventCommand);
+        final javax.json.JsonObjectBuilder payloadBuilder = createObjectBuilder();
+        baseCommandPayload.forEach(payloadBuilder::add);
+        final javax.json.JsonObject payload = payloadBuilder
+                .add("override", true)
+                .add("activeHearings", createArrayBuilder().add(activeHearingId.toString()))
+                .build();
+
+        final JsonEnvelope jsonEnvelopCommand = envelopeFrom(metadataWithRandomUUID("hearing.log-hearing-event"), payload);
+
+        hearingEventCommandHandler.logHearingEvent(jsonEnvelopCommand);
+
+        // Target hearing got its own (non-pause) event.
+        final JsonEnvelope targetEnvelope = verifyAppendAndGetArgumentFrom(eventStream).findFirst().get();
+        assertThat(uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo(targetEnvelope, HearingEventLogged.class), isBean(HearingEventLogged.class)
+                .with(HearingEventLogged::getHearingId, is(targetHearingId))
+                .with(HearingEventLogged::getHearingEventDefinitionId, is(targetEventDefId)));
+
+        // Active hearing was paused via its own aggregate stream.
+        final JsonEnvelope pauseEnvelope = verifyAppendAndGetArgumentFrom(activeHearingStream).findFirst().get();
+        assertThat(uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo(pauseEnvelope, HearingEventLogged.class), isBean(HearingEventLogged.class)
+                .with(HearingEventLogged::getHearingId, is(activeHearingId))
+                .with(HearingEventLogged::getHearingEventDefinitionId, is(PAUSE_HEARING_EVENT_DEFINITION_ID))
+                .with(HearingEventLogged::getRecordedLabel, is("Hearing paused")));
     }
 
     @Test
