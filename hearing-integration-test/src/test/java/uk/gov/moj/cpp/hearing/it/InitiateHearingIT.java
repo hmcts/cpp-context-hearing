@@ -21,6 +21,7 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
+import static uk.gov.moj.cpp.hearing.it.Queries.getHearingForManageHearingPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingsByDatePollForMatch;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
@@ -326,6 +327,32 @@ public class InitiateHearingIT extends AbstractIT {
                                 ))
                         ))
         );
+
+        getHearingForManageHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearing.getId()))
+                        .with(Hearing::getType, isBean(HearingType.class)
+                                .with(HearingType::getId, is(hearing.getType().getId())))
+                        .with(Hearing::getJurisdictionType, is(JurisdictionType.CROWN))
+                        .with(Hearing::getHearingLanguage, is(ENGLISH))
+                        .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                                .with(CourtCentre::getId, is(hearing.getCourtCentre().getId())))
+                        .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
+                                .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
+                        .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
+                                .with(JudicialRole::getJudicialId, is(judicialRole.getJudicialId()))
+                                .withValue(jr -> judicialRole.getJudicialRoleType().getJudiciaryType(), judicialRole.getJudicialRoleType().getJudiciaryType())))
+                        .with(Hearing::getCourtApplications, first(isBean(CourtApplication.class)
+                                .withValue(CourtApplication::getId, courtApplication.getId())
+                                .withValue(CourtApplication::getApplicationReference, courtApplication.getApplicationReference())
+                        ))
+
+                )
+        );
+
+
     }
 
     @Test
