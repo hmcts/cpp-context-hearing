@@ -38,9 +38,10 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
     private static final String GET_ACTIVE_HEARINGS_FOR_COURT_ROOM =
             "SELECT hearingEvent FROM uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent hearingEvent, " +
                     "uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearing " +
+                    "LEFT JOIN hearing.hearingDays day WITH day.date = :date " +
                     "WHERE hearing.id = hearingEvent.hearingId and " +
                     "hearing.courtCentre.id = :courtCentreId and " +
-                    "hearing.courtCentre.roomId = :roomId and " +
+                    "COALESCE(day.courtRoomId, hearing.courtCentre.roomId) = :roomId and " +
                     "hearingEvent.eventDate = :date and " +
                     "hearingEvent.deleted is false and " +
                     "hearingEvent.alterable is false";
@@ -73,13 +74,14 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
             "WITH sub_qry " +
                     "AS ( " +
                     "   SELECT max(hearingeve2_.event_time) evtme " +
-                    "   FROM ha_hearing_event hearingeve2_, ha_hearing hearing3_ " +
+                    "   FROM ha_hearing_event hearingeve2_ " +
+                    "       INNER JOIN ha_hearing hearing3_ ON hearing3_.id = hearingeve2_.hearing_id " +
+                    "       LEFT JOIN ha_hearing_day day_ ON day_.hearing_id = hearing3_.id AND day_.date = :eventDate " +
                     "   WHERE hearingeve2_.event_date = :eventDate " +
                     "       AND hearingeve2_.hearing_event_definition_id IN (" + REPLACE_WITH_HEARING_EVENT_DEF_IDS + ") " +
                     "       AND hearingeve2_.deleted = false " +
-                    "       AND hearing3_.id = hearingeve2_.hearing_id " +
                     "       AND hearing3_.court_centre_id IN (" + REPLACE_WITH_COURT_CENTRE_IDS + ") " +
-                    "   GROUP BY room_id " +
+                    "   GROUP BY coalesce(day_.court_room_id, hearing3_.room_id) " +
                     "   ) " +
                     "SELECT CAST(defence_counsel_id AS VARCHAR) AS defence_counsel_id, " +
                     "   deleted, " +
@@ -102,13 +104,14 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
             "WITH sub_qry " +
             "AS ( " +
                     "   SELECT max(hearingeve2_.event_time) evtme " +
-                    "   FROM ha_hearing_event hearingeve2_, ha_hearing hearing3_ " +
+                    "   FROM ha_hearing_event hearingeve2_ " +
+                    "       INNER JOIN ha_hearing hearing3_ ON hearing3_.id = hearingeve2_.hearing_id " +
+                    "       LEFT JOIN ha_hearing_day day_ ON day_.hearing_id = hearing3_.id AND day_.date = :eventDate " +
                     "   WHERE hearingeve2_.event_date = :eventDate " +
                     "       AND hearingeve2_.hearing_event_definition_id IN (" + REPLACE_WITH_HEARING_EVENT_DEF_IDS + ") " +
                     "       AND hearingeve2_.deleted = false " +
-                    "       AND hearing3_.id = hearingeve2_.hearing_id " +
                     "       AND hearing3_.court_centre_id = :courtCentreId " +
-                    "   GROUP BY room_id " +
+                    "   GROUP BY coalesce(day_.court_room_id, hearing3_.room_id) " +
                     "   ) " +
             "SELECT CAST(defence_counsel_id AS VARCHAR) AS defence_counsel_id, " +
                     "   deleted, " +
