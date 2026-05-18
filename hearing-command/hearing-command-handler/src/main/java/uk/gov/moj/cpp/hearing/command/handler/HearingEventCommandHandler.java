@@ -3,21 +3,27 @@ package uk.gov.moj.cpp.hearing.command.handler;
 import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
+import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CreateHearingEventDefinitionsCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.updateEvent.UpdateHearingEventsCommand;
+import uk.gov.moj.cpp.hearing.domain.CourtCentre;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingEventDefinitionAggregate;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import javax.inject.Inject;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
@@ -37,6 +43,9 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
     private static final String PAUSE_HEARING_EVENT_RECORDED_LABEL = "Hearing paused";
 
     private static final UUID PAUSE_HEARING_EVENT_DEFINITION_ID = UUID.fromString("160ecb51-29ee-4954-bbbf-daab18a24fbb");
+
+    @Inject
+    private ReferenceDataService referenceDataService;
 
     @Handles("hearing.create-hearing-event-definitions")
     public void createHearingEventDefinitions(final JsonEnvelope jsonEnvelope) throws EventStreamException {
@@ -94,12 +103,14 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
                         .build();
 
                 final UUID activeHearingId = UUID.fromString(activeHearings.getString(index));
+                final CourtCentre pauseCourtCentre = resolveCourtCentre(activeHearingId, logEventCommand.getEventTime());
 
-                aggregate(HearingAggregate.class, activeHearingId, jsonEnvelope, a -> a.logHearingEvent(activeHearingId, PAUSE_HEARING_EVENT_DEFINITION_ID, alterable, defenceCounselId, pauseHearingEvent, hearingTypeIds, userId));
+                aggregate(HearingAggregate.class, activeHearingId, jsonEnvelope, a -> a.logHearingEvent(activeHearingId, PAUSE_HEARING_EVENT_DEFINITION_ID, alterable, defenceCounselId, pauseHearingEvent, hearingTypeIds, userId, pauseCourtCentre));
             }
         }
 
-        aggregate(HearingAggregate.class, logEventCommand.getHearingId(), jsonEnvelope, a -> a.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, hearingTypeIds, userId));
+        final CourtCentre courtCentre = resolveCourtCentre(hearingId, logEventCommand.getEventTime());
+        aggregate(HearingAggregate.class, logEventCommand.getHearingId(), jsonEnvelope, a -> a.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, hearingTypeIds, userId, courtCentre));
     }
 
     @Handles("hearing.command.update-hearing-events")
@@ -130,12 +141,33 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
                 .withLastModifiedTime(correctLogEventCommand.getLastModifiedTime())
                 .withRecordedLabel(correctLogEventCommand.getRecordedLabel())
                 .withNote(correctLogEventCommand.getNote()).build();
+        final CourtCentre courtCentre = resolveCourtCentre(correctLogEventCommand.getHearingId(), correctLogEventCommand.getEventTime());
         aggregate(HearingAggregate.class, correctLogEventCommand.getHearingId(), jsonEnvelope, a -> a.correctHearingEvent(correctLogEventCommand.getLatestHearingEventId(),
                 correctLogEventCommand.getHearingId(),
                 correctLogEventCommand.getHearingEventDefinitionId(),
                 correctLogEventCommand.getAlterable(),
                 correctLogEventCommand.getDefenceCounselId(),
                 hearingEvent,
-                userId));
+                userId,
+                courtCentre));
+    }
+
+    private CourtCentre resolveCourtCentre(final UUID hearingId, final ZonedDateTime eventTime) {
+        try {
+            final HearingAggregate aggregate = aggregate(HearingAggregate.class, hearingId);
+            final Optional<HearingDay> matchedDay = aggregate.findHearingDayFor(eventTime);
+            if (matchedDay.isEmpty()) {
+                return null;
+            }
+            final UUID centreId = matchedDay.get().getCourtCentreId();
+            final UUID roomId = matchedDay.get().getCourtRoomId();
+            if (centreId == null || roomId == null) {
+                return null;
+            }
+            return referenceDataService.resolveCourtCentre(centreId, roomId).orElse(null);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to resolve court centre for hearing {} at {}; falling back to top-level", hearingId, eventTime, e);
+            return null;
+        }
     }
 }
