@@ -118,13 +118,18 @@ public class InitiateHearingEventListener {
         getOffencesForHearing(hearingEntity)
                 .forEach(x -> updateOffenceForShadowListedStatus(initiated.getHearing().getShadowListedOffences(), x));
 
-        ofNullable(initiated.getHearing().getCourtApplications()).stream().flatMap(Collection::stream).map(CourtApplication::getId).collect(Collectors.toSet()).forEach(courtApplicationId -> {
-            final HearingApplication hearingApplication = new HearingApplication();
-            hearingApplication.setId(new HearingApplicationKey(courtApplicationId, hearingEntity.getId()));
-            hearingApplicationRepository.save(hearingApplication);
-        });
+        if (hearingRepository.findOptionalBy(hearingEntity.getId()).isEmpty()) {
+            hearingRepository.save(hearingEntity);
+        }
 
-        hearingRepository.save(hearingEntity);
+        ofNullable(initiated.getHearing().getCourtApplications()).stream().flatMap(Collection::stream).map(CourtApplication::getId).collect(Collectors.toSet()).forEach(courtApplicationId -> {
+            final HearingApplicationKey hearingApplicationKey = new HearingApplicationKey(courtApplicationId, hearingEntity.getId());
+            if (hearingApplicationRepository.findBy(hearingApplicationKey) == null) {
+                final HearingApplication hearingApplication = new HearingApplication();
+                hearingApplication.setId(hearingApplicationKey);
+                hearingApplicationRepository.save(hearingApplication);
+            }
+        });
 
     }
 
@@ -160,6 +165,14 @@ public class InitiateHearingEventListener {
                 hearingEntity.setJurisdictionType(hearingExtended.getJurisdictionType());
             }
             hearingRepository.save(hearingEntity);
+
+            final HearingApplicationKey hearingApplicationKey = new HearingApplicationKey(
+                    hearingExtended.getCourtApplication().getId(), hearingEntity.getId());
+            if (hearingApplicationRepository.findBy(hearingApplicationKey) == null) {
+                final HearingApplication hearingApplication = new HearingApplication();
+                hearingApplication.setId(hearingApplicationKey);
+                hearingApplicationRepository.save(hearingApplication);
+            }
         }
         updateHearing(hearingEntity, hearingExtended.getProsecutionCases(), hearingExtended.getShadowListedOffences());
     }
@@ -235,6 +248,13 @@ public class InitiateHearingEventListener {
         hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
 
         hearingRepository.save(hearingEntity);
+
+        final HearingApplicationKey hearingApplicationKey = new HearingApplicationKey(updatedCourtApplication.getId(), hearingEntity.getId());
+        if (hearingApplicationRepository.findBy(hearingApplicationKey) == null) {
+            final HearingApplication hearingApplication = new HearingApplication();
+            hearingApplication.setId(hearingApplicationKey);
+            hearingApplicationRepository.save(hearingApplication);
+        }
     }
 
     private static List<CourtApplicationCase> getUpdatedCases(CourtApplication persistedApplication, ApplicationLaareferenceUpdated applicationLaareferenceUpdated) {
