@@ -201,6 +201,32 @@ public class NextHearingHelperV3Test  {
     }
 
     @Test
+    public void shouldPopulateNextHearingForCrownCourtHearingWithBookingReference() {
+        final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-v3-with-nexthearing-crowncourt-booking-reference.json");
+
+        setupMocks(event, null);
+
+        final ResultDefinition resultDefinition = jsonObjectToObjectConverter
+                .convert(givenPayload("/data/resultdefinition-fbed768b-ee95-4434-87c8-e81cbc8d24c8.json"), ResultDefinition.class);
+
+        final ResultsSharedV3 resultsSharedV3 = jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), ResultsSharedV3.class);
+
+        final List<ResultLine2> resultLine2s = getResultLines(resultsSharedV3);
+
+        final ResultLine2 resultLine = resultsSharedV3.getTargets().get(0).getResultLines().stream()
+                .filter(rl3 -> rl3.getResultLabel().equalsIgnoreCase("Next hearing in Crown Court"))
+                .findFirst().get();
+
+        final Optional<NextHearing> nextHearing = nextHearingHelperV3.getNextHearing(
+                event, resultDefinition, resultLine2s, resultLine,
+                getPrompts(resultsSharedV3, resultDefinition), resultsSharedV3, resultDefinitions);
+
+        assertValid(nextHearing, JurisdictionType.CROWN, ZonedDateTimes.fromString("2024-04-30T09:00Z"), "1 HOURS", hearingType, true);
+        assertThat(nextHearing.get().getBookingReference(), is(fromString("a8c9d1e2-f3b4-5678-90ab-cdef01234567")));
+    }
+
+    @Test
     public void shouldPopulateNextHearingForCrownCourtHearingFixedDateWithoutTime() {
         final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-v3-with-nexthearing-crowncourt-fixed-date_without_time.json");
 

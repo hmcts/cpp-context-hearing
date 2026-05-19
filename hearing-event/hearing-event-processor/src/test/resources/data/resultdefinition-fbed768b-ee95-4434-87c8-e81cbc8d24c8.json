@@ -511,6 +511,23 @@
             "min": "1",
             "max": "100",
             "reference": "specialRequirements"
+        },
+        {
+            "id": "e73e6ab8-9bfe-4135-9fe6-f526544584d6",
+            "label": "Booking reference",
+            "resultPromptRule": "optional",
+            "type": "TXT",
+            "nameEmail": false,
+            "hidden": true,
+            "associateToReferenceData": false,
+            "sequence": 1500,
+            "userGroups": [],
+            "courtExtract": "N",
+            "financial": "N",
+            "jurisdiction": "C",
+            "min": "1",
+            "max": "50",
+            "reference": "bookingReference"
         }
     ]
 }
