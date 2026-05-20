@@ -147,6 +147,20 @@ public class HearingQueryView {
                 .withMetadataFrom(envelope);
     }
 
+    public Envelope<GetHearings> getHearingCheckIn(final JsonEnvelope envelope,
+                                                   final List<UUID> accessibleCasesAndApplicationIds,
+                                                   final boolean isDDJorRecorder) {
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        final LocalDate date = LocalDates.from(payload.getString(FIELD_DATE));
+        final UUID courtCentreId = UUID.fromString(payload.getString(FIELD_COURT_CENTRE_ID));
+        final UUID roomId = payload.containsKey(FIELD_ROOM_ID) ? UUID.fromString(payload.getString(FIELD_ROOM_ID)) : null;
+
+        final GetHearings hearingListResponse = hearingService.getHearingsForCheckIn(date, courtCentreId, roomId, accessibleCasesAndApplicationIds, isDDJorRecorder);
+        return envelop(hearingListResponse)
+                .withName("hearing.get.hearings-check-in")
+                .withMetadataFrom(envelope);
+    }
+
     @SuppressWarnings({"squid:S3655"})
     public Envelope<GetHearings> findHearingsForToday(final JsonEnvelope envelope) {
         final GetHearings hearingListResponse = hearingService.getHearingsForToday(now(), fromString(envelope.metadata().userId().get()));

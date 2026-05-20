@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyCollectionOf;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -2687,5 +2688,134 @@ public class HearingServiceTest {
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
+    }
+
+    // ── getHearingsForCheckIn ───────────────────────────────────────────────
+
+    @Test
+    public void getHearingsForCheckIn_shouldReturnEmptyWhenDateIsNull() {
+        final GetHearings result = hearingService.getHearingsForCheckIn(null, randomUUID(), null, emptyList(), false);
+
+        assertNull(result.getHearingSummaries());
+    }
+
+    @Test
+    public void getHearingsForCheckIn_shouldReturnEmptyWhenCourtCentreIdIsNull() {
+        final GetHearings result = hearingService.getHearingsForCheckIn(LocalDate.now(), null, null, emptyList(), false);
+
+        assertNull(result.getHearingSummaries());
+    }
+
+    @Test
+    public void getHearingsForCheckIn_shouldReturnEmptyWhenNoHearingsFound() {
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final UUID courtCentreId = randomUUID();
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(emptyList());
+
+        final GetHearings result = hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
+
+        assertNull(result.getHearingSummaries());
+    }
+
+    @Test
+    public void getHearingsForCheckIn_shouldQueryByRoomIdWhenRoomIdProvided() {
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+        final UUID roomId = hearingEntity.getCourtCentre().getRoomId();
+
+        when(hearingRepository.findByFilters(date, courtCentreId, roomId)).thenReturn(asList(hearingEntity));
+
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing()
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase().build()))
+                .build();
+        final UUID summaryId = randomUUID();
+        final HearingSummaries.Builder builder = HearingSummaries.hearingSummaries().withId(summaryId);
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summaryForCheckIn(hearingPojo)).thenReturn(builder);
+
+        final GetHearings result = hearingService.getHearingsForCheckIn(date, courtCentreId, roomId, emptyList(), false);
+
+        assertThat(result.getHearingSummaries(), hasSize(1));
+        assertThat(result.getHearingSummaries().get(0).getId(), is(summaryId));
+    }
+
+    @Test
+    public void getHearingsForCheckIn_shouldQueryWithoutRoomIdWhenRoomIdIsNull() {
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
+
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing()
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase().build()))
+                .build();
+        final UUID summaryId = randomUUID();
+        final HearingSummaries.Builder builder = HearingSummaries.hearingSummaries().withId(summaryId);
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summaryForCheckIn(hearingPojo)).thenReturn(builder);
+
+        final GetHearings result = hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
+
+        assertThat(result.getHearingSummaries(), hasSize(1));
+        assertThat(result.getHearingSummaries().get(0).getId(), is(summaryId));
+    }
+
+    @Test
+    public void getHearingsForCheckIn_shouldFilterHearingsForDDJorRecorder() {
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+        final List<UUID> accessibleIds = asList(randomUUID());
+
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
+        when(filterHearingsBasedOnPermissions.filterHearings(asList(hearingEntity), accessibleIds))
+                .thenReturn(emptyList());
+
+        final GetHearings result = hearingService.getHearingsForCheckIn(date, courtCentreId, null, accessibleIds, true);
+
+        assertNull(result.getHearingSummaries());
+        verify(filterHearingsBasedOnPermissions).filterHearings(asList(hearingEntity), accessibleIds);
+    }
+
+    @Test
+    public void getHearingsForCheckIn_shouldExcludeHearingsWithNoProsecutionCases() {
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
+
+        // hearing with no prosecution cases — should be filtered out
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing()
+                .withProsecutionCases(null)
+                .build();
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
+
+        final GetHearings result = hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
+
+        assertThat(result.getHearingSummaries(), is(empty()));
+        verify(getHearingsTransformer, never()).summaryForCheckIn(any());
+    }
+
+    @Test
+    public void getHearingsForCheckIn_shouldNotApplyPermissionCheckForApplicationTypes() {
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing()
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase().build()))
+                .build();
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summaryForCheckIn(hearingPojo))
+                .thenReturn(HearingSummaries.hearingSummaries().withId(randomUUID()));
+
+        hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
+
+        // userDataService must never be consulted — no application-type gating for check-in
+        verify(userDataService, never()).getUserPermissionForApplicationTypes(any());
     }
 }
