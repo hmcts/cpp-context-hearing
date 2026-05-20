@@ -392,6 +392,38 @@ public class HearingService {
     }
 
 
+    @Transactional
+    public GetHearings getHearingsForCheckIn(final LocalDate date, final UUID courtCentreId, final UUID roomId,
+                                             final List<UUID> accessibleCasesAndApplicationIds,
+                                             final boolean isDDJorRecorder) {
+        if (null == date || null == courtCentreId) {
+            return new GetHearings(null);
+        }
+
+        List<Hearing> source;
+        if (null == roomId) {
+            source = hearingRepository.findHearings(date, courtCentreId);
+        } else {
+            source = hearingRepository.findByFilters(date, courtCentreId, roomId);
+        }
+
+        if (isDDJorRecorder) {
+            source = filterHearingsBasedOnPermissions.filterHearings(source, accessibleCasesAndApplicationIds);
+        }
+
+        if (isEmpty(source)) {
+            return new GetHearings(null);
+        }
+
+        return GetHearings.getHearings()
+                .withHearingSummaries(source.stream()
+                        .map(ha -> hearingJPAMapper.fromJPA(ha))
+                        .filter(ha -> isNotEmpty(ha.getProsecutionCases()))
+                        .map(h -> getHearingTransformer.summaryForCheckIn(h).build())
+                        .collect(toList()))
+                .build();
+    }
+
     public GetHearings getHearingsForToday(final LocalDate date, final UUID userId) {
         if (null == date || null == userId) {
             return new GetHearings(null);
