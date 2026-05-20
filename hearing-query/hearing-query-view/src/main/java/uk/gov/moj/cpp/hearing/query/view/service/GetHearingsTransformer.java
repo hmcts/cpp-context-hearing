@@ -11,6 +11,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtApplicationType;
+import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
@@ -82,6 +83,49 @@ public class GetHearingsTransformer {
                                 hearing.getProsecutionCases().stream().map(pc -> summaryForToday(pc).build())
                                         .collect(toList())
                 );
+    }
+
+    public HearingSummaries.Builder summaryForCheckIn(final Hearing hearing) {
+        final CourtCentre courtCentre = hearing.getCourtCentre();
+        return HearingSummaries.hearingSummaries()
+                .withId(hearing.getId())
+                .withCourtCentre(courtCentre != null
+                        ? CourtCentre.courtCentre()
+                                .withRoomName(courtCentre.getRoomName())
+                                .build()
+                        : null)
+                .withProsecutionCaseSummaries(
+                        isEmpty(hearing.getProsecutionCases()) ? emptyList() :
+                                hearing.getProsecutionCases().stream()
+                                        .map(pc -> summaryForCheckIn(pc).build())
+                                        .collect(toList())
+                );
+    }
+
+    private ProsecutionCaseSummaries.Builder summaryForCheckIn(final ProsecutionCase prosecutionCase) {
+        return ProsecutionCaseSummaries.prosecutionCaseSummaries()
+                .withId(prosecutionCase.getId())
+                .withProsecutionCaseIdentifier(
+                        prosecutionCase.getProsecutionCaseIdentifier() != null
+                                ? ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                                        .withCaseURN(prosecutionCase.getProsecutionCaseIdentifier().getCaseURN())
+                                        .build()
+                                : null)
+                .withDefendants(prosecutionCase.getDefendants() == null ? emptyList() :
+                        prosecutionCase.getDefendants().stream()
+                                .map(d -> summaryForCheckIn(d).build())
+                                .collect(toList()));
+    }
+
+    private Defendants.Builder summaryForCheckIn(final Defendant defendant) {
+        final Defendants.Builder result = Defendants.defendants();
+        result.withId(defendant.getId());
+        if (defendant.getPersonDefendant() != null && defendant.getPersonDefendant().getPersonDetails() != null) {
+            result.withFirstName(defendant.getPersonDefendant().getPersonDetails().getFirstName());
+            result.withMiddleName(defendant.getPersonDefendant().getPersonDetails().getMiddleName());
+            result.withLastName(defendant.getPersonDefendant().getPersonDetails().getLastName());
+        }
+        return result;
     }
 
     private boolean shouldCaseBeIncluded(final Hearing hearing, final ProsecutionCase pc) {

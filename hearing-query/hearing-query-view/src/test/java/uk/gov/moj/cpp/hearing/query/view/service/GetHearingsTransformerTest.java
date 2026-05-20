@@ -2,10 +2,17 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.lang.Boolean.TRUE;
 import static java.time.ZonedDateTime.now;
+import static java.util.Collections.emptyList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
@@ -18,6 +25,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CourtOrder;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -662,5 +670,165 @@ public class GetHearingsTransformerTest {
         assertTrue(filteredCases.contains(hearingSummaryForToday.getProsecutionCaseSummaries().get(0).getId()));
         assertTrue(filteredCases.contains(hearingSummaryForToday.getProsecutionCaseSummaries().get(1).getId()));
         assertTrue(filteredCases.contains(hearingSummaryForToday.getProsecutionCaseSummaries().get(2).getId()));
+    }
+
+    // ── summaryForCheckIn ──────────────────────────────────────────────────────
+
+    @Test
+    public void summaryForCheckIn_shouldMapIdAndRoomNameOnly() {
+        final UUID hearingId = randomUUID();
+        final String roomName = "Courtroom 01";
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withCourtCentre(CourtCentre.courtCentre().withRoomName(roomName).build())
+                .withProsecutionCases(emptyList())
+                .build();
+
+        final HearingSummaries result = target.summaryForCheckIn(hearing).build();
+
+        assertThat(result.getId(), is(hearingId));
+        assertThat(result.getCourtCentre().getRoomName(), is(roomName));
+        // fields from full summary that must NOT be populated
+        assertNull(result.getHearingDays());
+        assertNull(result.getJurisdictionType());
+        assertNull(result.getType());
+        assertNull(result.getCourtApplicationSummaries());
+        assertThat(result.getProsecutionCaseSummaries(), is(empty()));
+    }
+
+    @Test
+    public void summaryForCheckIn_shouldMapProsecutionCaseSummaryWithCaseUrnAndDefendants() {
+        final UUID hearingId = randomUUID();
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final String caseUrn = "63GD4414126";
+        final String firstName = "Glennie";
+        final String middleName = "PersonGivenName20A PersonGivenName30A";
+        final String lastName = "Bailey";
+
+        final Person personDetails = Person.person()
+                .withFirstName(firstName)
+                .withMiddleName(middleName)
+                .withLastName(lastName)
+                .build();
+
+        final Defendant defendant = uk.gov.justice.core.courts.Defendant.defendant()
+                .withId(defendantId)
+                .withPersonDefendant(PersonDefendant.personDefendant().withPersonDetails(personDetails).build())
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withProsecutionCaseIdentifier(
+                        ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                                .withCaseURN(caseUrn)
+                                .build())
+                .withDefendants(asList(defendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withCourtCentre(CourtCentre.courtCentre().withRoomName("Courtroom 01").build())
+                .withProsecutionCases(asList(prosecutionCase))
+                .build();
+
+        final HearingSummaries result = target.summaryForCheckIn(hearing).build();
+
+        assertThat(result.getId(), is(hearingId));
+        assertThat(result.getProsecutionCaseSummaries(), hasSize(1));
+
+        final ProsecutionCaseSummaries pcSummary = result.getProsecutionCaseSummaries().get(0);
+        assertThat(pcSummary.getId(), is(caseId));
+        assertThat(pcSummary.getProsecutionCaseIdentifier().getCaseURN(), is(caseUrn));
+        // group/civil flags must NOT be set
+        assertNull(pcSummary.getIsCivil());
+        assertNull(pcSummary.getGroupId());
+
+        assertThat(pcSummary.getDefendants(), hasSize(1));
+        final Defendants d = pcSummary.getDefendants().get(0);
+        assertThat(d.getId(), is(defendantId));
+        assertThat(d.getFirstName(), is(firstName));
+        assertThat(d.getMiddleName(), is(middleName));
+        assertThat(d.getLastName(), is(lastName));
+        // fields not in check-in response must NOT be set
+        assertNull(d.getMasterDefendantId());
+        assertNull(d.getSynonym());
+        assertThat(d.getOffences(), is(nullValue()));
+    }
+
+    @Test
+    public void summaryForCheckIn_shouldHandleNullCourtCentre() {
+        final Hearing hearing = Hearing.hearing()
+                .withId(randomUUID())
+                .withCourtCentre(null)
+                .withProsecutionCases(emptyList())
+                .build();
+
+        final HearingSummaries result = target.summaryForCheckIn(hearing).build();
+
+        assertNull(result.getCourtCentre());
+    }
+
+    @Test
+    public void summaryForCheckIn_shouldHandleNullProsecutionCaseIdentifier() {
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withId(randomUUID())
+                .withProsecutionCaseIdentifier(null)
+                .withDefendants(emptyList())
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(randomUUID())
+                .withCourtCentre(CourtCentre.courtCentre().withRoomName("Room 1").build())
+                .withProsecutionCases(asList(prosecutionCase))
+                .build();
+
+        final HearingSummaries result = target.summaryForCheckIn(hearing).build();
+
+        assertNull(result.getProsecutionCaseSummaries().get(0).getProsecutionCaseIdentifier());
+    }
+
+    @Test
+    public void summaryForCheckIn_shouldHandleDefendantWithNoPersonDetails() {
+        final UUID defendantId = randomUUID();
+
+        final Defendant defendant = uk.gov.justice.core.courts.Defendant.defendant()
+                .withId(defendantId)
+                .withPersonDefendant(null)
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withId(randomUUID())
+                .withDefendants(asList(defendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(randomUUID())
+                .withCourtCentre(CourtCentre.courtCentre().withRoomName("Room 1").build())
+                .withProsecutionCases(asList(prosecutionCase))
+                .build();
+
+        final HearingSummaries result = target.summaryForCheckIn(hearing).build();
+
+        final Defendants d = result.getProsecutionCaseSummaries().get(0).getDefendants().get(0);
+        assertThat(d.getId(), is(defendantId));
+        assertNull(d.getFirstName());
+        assertNull(d.getMiddleName());
+        assertNull(d.getLastName());
+    }
+
+    @Test
+    public void summaryForCheckIn_shouldReturnEmptyProsecutionCasesWhenNullList() {
+        final Hearing hearing = Hearing.hearing()
+                .withId(randomUUID())
+                .withCourtCentre(CourtCentre.courtCentre().withRoomName("Room 1").build())
+                .withProsecutionCases(null)
+                .build();
+
+        final HearingSummaries result = target.summaryForCheckIn(hearing).build();
+
+        assertNotNull(result.getProsecutionCaseSummaries());
+        assertThat(result.getProsecutionCaseSummaries(), is(empty()));
     }
 }
