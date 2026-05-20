@@ -10,8 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
@@ -37,7 +35,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -76,8 +74,8 @@ public class EjectCaseOrApplicationCommandHandlerTest {
     public void shouldEjectCase() throws EventStreamException {
         final UUID hearingId = randomUUID();
         final UUID prosecutionCaseId = randomUUID();
-        JsonObject payload = createObjectBuilder()
-                .add("hearingIds", createArrayBuilder().add(hearingId.toString()))
+        JsonObject payload = JsonObjects.createObjectBuilder()
+                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()))
                 .add("prosecutionCaseId", prosecutionCaseId.toString())
                 .build();
         final JsonEnvelope envelope =
@@ -97,7 +95,7 @@ public class EjectCaseOrApplicationCommandHandlerTest {
     @Test
     public void shouldEjectCaseWhenHearingIdsNotPresent() throws EventStreamException {
         final UUID prosecutionCaseId = randomUUID();
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("prosecutionCaseId", prosecutionCaseId.toString())
                 .build();
         final JsonEnvelope envelope =
@@ -114,7 +112,7 @@ public class EjectCaseOrApplicationCommandHandlerTest {
     @Test
     public void shouldEjectApplicationWhenHearingIdsNotPresent() throws EventStreamException {
         final UUID applicationId = randomUUID();
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("applicationId", applicationId.toString())
                 .build();
         final JsonEnvelope envelope =
@@ -131,7 +129,7 @@ public class EjectCaseOrApplicationCommandHandlerTest {
     @Test
     public void shouldRaiseCourtApplicationEjectedWhenProsecutionCaseIdIsNullButHearingIdsIsNotNull() throws EventStreamException {
         final UUID applicationId = randomUUID();
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("applicationId", applicationId.toString())
                 .build();
         final JsonEnvelope envelope =
@@ -152,8 +150,8 @@ public class EjectCaseOrApplicationCommandHandlerTest {
     public void shouldEjectCourtApplication() throws EventStreamException {
         final UUID hearingId = randomUUID();
         final UUID applicationId = randomUUID();
-        JsonObject payload = createObjectBuilder()
-                .add("hearingIds", createArrayBuilder().add(hearingId.toString()))
+        JsonObject payload = JsonObjects.createObjectBuilder()
+                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()))
                 .add("applicationId", applicationId.toString())
                 .build();
         final JsonEnvelope envelope =

@@ -43,7 +43,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -917,10 +917,10 @@ public class ReferenceDataStub {
         builder.add("courtNameWelsh", "courtNameWelsh");
         builder.add("id", randomUUID().toString());
 
-        final JsonArrayBuilder youthCourtsBuilder = createArrayBuilder();
+        final JsonArrayBuilder youthCourtsBuilder = JsonObjects.createArrayBuilder();
         youthCourtsBuilder.add(builder.build());
         final JsonObject payload =
-                createObjectBuilder().add("youthCourts", youthCourtsBuilder.build()).build();
+                JsonObjects.createObjectBuilder().add("youthCourts", youthCourtsBuilder.build()).build();
         stub(payload, REFERENCE_DATA_YOUTH_COURT_QUERY_URL, REFERENCE_DATA_QUERY_YOUTH_COURT_MEDIA_TYPE, "magsUUID", magsUUID.toString());
     }
 

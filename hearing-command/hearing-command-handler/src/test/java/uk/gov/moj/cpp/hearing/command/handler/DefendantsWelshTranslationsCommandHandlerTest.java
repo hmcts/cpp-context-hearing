@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static java.util.UUID.randomUUID;
-import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,7 +33,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObjectBuilder;
 
 import org.junit.jupiter.api.Test;
@@ -104,7 +103,7 @@ public class DefendantsWelshTranslationsCommandHandlerTest {
                                                                                                final DefendantsWithWelshTranslationsCommand defendantsWithWelshTranslationsCommand) {
         final JsonObjectBuilder payloadBuilder = createObjectBuilder()
                 .add("hearingId", hearingId.toString())
-                .add("defendantsWelshList", createArrayBuilder().add(objectToJsonObjectConverter.convert(defendantsWithWelshTranslationsCommand)).build());
+                .add("defendantsWelshList", JsonObjects.createArrayBuilder().add(objectToJsonObjectConverter.convert(defendantsWithWelshTranslationsCommand)).build());
 
         return JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.command.save-defendants-welsh-translations"), payloadBuilder.build());
     }

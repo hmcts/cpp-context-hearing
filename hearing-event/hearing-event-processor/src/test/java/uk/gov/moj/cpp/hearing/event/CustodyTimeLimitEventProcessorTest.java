@@ -10,7 +10,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
@@ -21,7 +20,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +48,7 @@ public class CustodyTimeLimitEventProcessorTest {
         final String offence1Id = randomUUID().toString();
         final String offence2Id = randomUUID().toString();
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.event.custody-time-limit-clock-stopped"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingId", hearingId)
                         .add("offenceIds", createArrayBuilder()
                                 .add(offence1Id)
@@ -80,7 +79,7 @@ public class CustodyTimeLimitEventProcessorTest {
         final String extendedCustodyTimeLimit = "2021-05-23";
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.events.progression.custody-time-limit-extended"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingIds", createArrayBuilder()
                                 .add(hearingId1)
                                 .add(hearingId2)

@@ -60,7 +60,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.ws.rs.BadRequestException;
@@ -359,7 +359,7 @@ public class HearingQueryApi {
             return requestStagingEnforcementToGetOutstandingFines(query, viewResponseEnvelopePayload);
         }
         return envelopeFrom(query.metadata(),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("outstandingFines",
                                 createArrayBuilder()).build());
     }

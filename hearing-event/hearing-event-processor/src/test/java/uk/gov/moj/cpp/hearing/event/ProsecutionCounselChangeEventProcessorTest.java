@@ -18,7 +18,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +50,7 @@ public class ProsecutionCounselChangeEventProcessorTest {
     public void processProsecutionCounselChangeIgnoredEvent() {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.prosecution-counsel-change-ignored"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("reason", REASON)
                         .build());
 
@@ -96,7 +96,7 @@ public class ProsecutionCounselChangeEventProcessorTest {
     @Test
     public void processProsecutionCounselRemovedEvent() {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.prosecution-counsel-removed"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("id", ID)
                         .add("hearingId", HEARING_ID)
                         .build());

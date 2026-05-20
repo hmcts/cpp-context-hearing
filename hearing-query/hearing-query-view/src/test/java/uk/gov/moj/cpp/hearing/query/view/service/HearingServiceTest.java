@@ -184,7 +184,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
@@ -196,6 +196,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -2000,7 +2001,7 @@ public class HearingServiceTest {
                         .withType(CourtApplicationType.courtApplicationType()
                                 .withCode("PL302487").build())
                         .build()));
-        final JsonObject responsePayload = createObjectBuilder()
+        final JsonObject responsePayload = JsonObjects.createObjectBuilder()
                 .add("hasPermission", false)
                 .build();
         when(requester.request(any(), any())).thenReturn(Envelope.envelopeFrom(Envelope.metadataBuilder()
@@ -2027,7 +2028,7 @@ public class HearingServiceTest {
                         .withType(CourtApplicationType.courtApplicationType()
                                 .withCode("PL302487").build())
                         .build()));
-        final JsonObject responsePayload = createObjectBuilder()
+        final JsonObject responsePayload = JsonObjects.createObjectBuilder()
                 .add("hasPermission", true)
                 .build();
         when(requester.request(any(), any())).thenReturn(Envelope.envelopeFrom(Envelope.metadataBuilder()

@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
 import static java.util.stream.Collectors.toList;
-import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -11,7 +10,7 @@ import uk.gov.justice.services.messaging.spi.DefaultJsonEnvelopeProvider;
 import java.io.StringReader;
 import java.util.List;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -41,7 +40,7 @@ public class Framework5Fix {
             } catch (JsonProcessingException ex) {
                 throw new RuntimeException(ex.getMessage(), ex);
             }
-            return defaultJsonEnvelopeProvider.envelopeFrom(e.metadata(), createReader(new StringReader(jsonString)).readObject());
+            return defaultJsonEnvelopeProvider.envelopeFrom(e.metadata(), JsonObjects.createReader(new StringReader(jsonString)).readObject());
         } else {
             throw new IllegalArgumentException("don't know how to convert this");
         }

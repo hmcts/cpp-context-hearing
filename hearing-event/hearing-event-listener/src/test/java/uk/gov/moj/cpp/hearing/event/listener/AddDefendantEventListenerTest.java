@@ -27,7 +27,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import java.util.HashSet;
 import java.util.UUID;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -136,7 +136,7 @@ public class AddDefendantEventListenerTest {
 
     private JsonEnvelope getDefendantAddedJsonEnvelope(final UUID arbitraryHearingId, final UUID caseId) {
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant arbitraryDefendant = defendantTemplate(caseId);
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("hearingId", arbitraryHearingId.toString())
                 .add("defendant", objectToJsonObjectConverter.convert(arbitraryDefendant))
                 .build();

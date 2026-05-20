@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.AssociatedDefenceOrganisation.associatedDefenceOrganisation;
 import static uk.gov.justice.core.courts.CourtApplication.courtApplication;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
@@ -32,7 +31,7 @@ import java.io.StringReader;
 import java.time.LocalDate;
 import java.util.UUID;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
@@ -116,7 +115,7 @@ public class ApplicationOrganisationDetailsUpdateListenerTest {
         verify(hearingRepository).save(hearingArgumentCaptor.capture());
         final Hearing hearingOut = hearingArgumentCaptor.getValue();
         assertThat(hearingOut.getId(), is(hearingId));
-        final JsonArray applicationsJsonArray = createReader(new StringReader(hearingOut.getCourtApplicationsJson())).readObject().getJsonArray("courtApplications");
+        final JsonArray applicationsJsonArray = JsonObjects.createReader(new StringReader(hearingOut.getCourtApplicationsJson())).readObject().getJsonArray("courtApplications");
         assertThat(applicationsJsonArray.size(), is(2));
         assertThat(applicationsJsonArray.get(0).asJsonObject().getString("id"), is(applicationId.toString()));
         assertThat(applicationsJsonArray.get(0).asJsonObject().getJsonObject("subject").getJsonObject("associatedDefenceOrganisation").getString("applicationReference"), is(associatedDefenceOrganisation.getApplicationReference()));

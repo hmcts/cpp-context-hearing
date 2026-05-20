@@ -11,7 +11,6 @@ import static org.hamcrest.core.AllOf.allOf;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.AssociatedDefenceOrganisation.associatedDefenceOrganisation;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
@@ -51,7 +50,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.util.UUID;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -106,7 +105,7 @@ public class ApplicationDetailChangeCommandHandlerTest {
         when(this.eventSource.getStreamById(courtApplication.getId())).thenReturn(this.applicationEventStream);
         when(this.aggregateService.get(this.applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
 
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("courtApplication", objectToJsonObjectConverter.convert(courtApplication))
                 .build();
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-court-application"), payload);
@@ -139,7 +138,7 @@ public class ApplicationDetailChangeCommandHandlerTest {
         when(this.aggregateService.get(this.applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
 
 
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("courtApplication", objectToJsonObjectConverter.convert(courtApplication))
                 .build();
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-court-application"), payload);
@@ -178,7 +177,7 @@ public class ApplicationDetailChangeCommandHandlerTest {
         when(this.eventSource.getStreamById(applicationId)).thenReturn(this.applicationEventStream);
         when(this.aggregateService.get(this.applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
 
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("applicationId", applicationId.toString())
                 .add("subjectId", subjectId.toString() )
                 .add("offenceId", offenceId.toString() )
@@ -222,7 +221,7 @@ public class ApplicationDetailChangeCommandHandlerTest {
         when(this.aggregateService.get(this.applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
 
 
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("applicationId", applicationId.toString())
                 .add("subjectId", subjectId.toString() )
                 .add("offenceId", offenceId.toString() )
@@ -268,7 +267,7 @@ public class ApplicationDetailChangeCommandHandlerTest {
         when(this.aggregateService.get(this.applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
 
 
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("applicationId", applicationId.toString())
                 .add("subjectId", subjectId.toString() )
                 .add("laaReference", objectToJsonObjectConverter.convert(laaReference))
@@ -315,7 +314,7 @@ public class ApplicationDetailChangeCommandHandlerTest {
         when(this.eventSource.getStreamById(applicationId)).thenReturn(this.applicationEventStream);
         when(this.aggregateService.get(this.applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
 
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("applicationId", applicationId.toString())
                 .add("subjectId", subjectId.toString() )
                 .add("associatedDefenceOrganisation", objectToJsonObjectConverter.convert(associatedDefenceOrganisation))
@@ -363,7 +362,7 @@ public class ApplicationDetailChangeCommandHandlerTest {
         when(this.aggregateService.get(this.applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
 
 
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("applicationId", applicationId.toString())
                 .add("subjectId", subjectId.toString() )
                 .add("associatedDefenceOrganisation", objectToJsonObjectConverter.convert(associatedDefenceOrganisation))
@@ -416,7 +415,7 @@ public class ApplicationDetailChangeCommandHandlerTest {
         when(this.aggregateService.get(this.applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
 
 
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("applicationId", applicationId.toString())
                 .add("subjectId", subjectId.toString() )
                 .build();

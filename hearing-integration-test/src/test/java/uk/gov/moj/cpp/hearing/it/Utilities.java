@@ -6,7 +6,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
-import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.ENDPOINT_PROPERTIES;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.getLoggedInUser;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPrivateTopicInstance;
@@ -26,7 +25,7 @@ import java.util.UUID;
 
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -161,7 +160,7 @@ public class Utilities {
                     }
 
                     jsonObjectMutable.remove("_metadata");
-                    JsonObject jsonObject = createReader(new StringReader(jsonObjectMutable.toString())).readObject();
+                    JsonObject jsonObject = JsonObjects.createReader(new StringReader(jsonObjectMutable.toString())).readObject();
                     beanValue = MapJsonObjectToTypeMatcher.convert(PublicHearingDraftResultSaved.class, jsonObject);
                     return beanMatcher.matches(beanValue);
                 }

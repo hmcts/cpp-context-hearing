@@ -9,12 +9,11 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.HEARING_ID;
 
 @ServiceComponent(EVENT_PROCESSOR)
@@ -45,7 +44,7 @@ public class CaseDefendantsUpdatedProcessor {
         final JsonObject eventPayload = envelop.payloadAsJsonObject();
         final JsonArray hearingIds = eventPayload.getJsonArray("hearingIds");
         hearingIds.stream().forEach(hearingId -> {
-            final JsonObject commandPayload = createObjectBuilder()
+            final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                     .add(HEARING_ID, hearingId)
                     .add(PROSECUTION_CASE, eventPayload.getJsonObject(PROSECUTION_CASE))
                     .build();
@@ -63,7 +62,7 @@ public class CaseDefendantsUpdatedProcessor {
         final JsonObject eventPayload = envelop.payloadAsJsonObject();
         final JsonArray hearingIds = eventPayload.getJsonArray("hearingIds");
         hearingIds.stream().forEach(hearingId -> {
-            final JsonObject commandPayload = createObjectBuilder()
+            final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                     .add(HEARING_ID, hearingId)
                     .add(COURT_APPLICATION, eventPayload.getJsonObject(COURT_APPLICATION))
                     .build();

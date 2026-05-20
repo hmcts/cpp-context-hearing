@@ -19,7 +19,7 @@ import uk.gov.moj.cpp.hearing.query.view.SessionTimeQueryView;
 
 import java.util.function.Function;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
@@ -90,7 +90,7 @@ public class DefendantOutstandingFinesQueryApiTest {
     @Test
     public void should_return_NO_outstanding_fines_when_defendant_id_is_unknown() {
         when(hearingQueryView.getOutstandingFinesQueryFromDefendantId(any())).thenReturn(jsonEnvelopeFromHearing);
-        JsonObject emptyResponseFromHearingQueryView = createObjectBuilder().build();
+        JsonObject emptyResponseFromHearingQueryView = JsonObjects.createObjectBuilder().build();
 
         setUp(emptyResponseFromHearingQueryView);
 

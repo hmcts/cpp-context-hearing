@@ -12,7 +12,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.core.AllOf.allOf;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
@@ -44,7 +43,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,7 +78,7 @@ public class ApplicationTimelineIT extends AbstractIT {
         stubApplicationsByParentId(applicationId);
         sendMessage(getPublicTopicInstance().createProducer(),
                 "public.progression.events.court-application-deleted",
-                createObjectBuilder().add("hearingId",hearingOne.getId().toString()).add("applicationId",applicationId.toString() ).build(),
+                JsonObjects.createObjectBuilder().add("hearingId",hearingOne.getId().toString()).add("applicationId",applicationId.toString() ).build(),
                 metadataOf(randomUUID(),"public.progression.events.court-application-deleted")
                         .withUserId(randomUUID().toString())
                         .build()

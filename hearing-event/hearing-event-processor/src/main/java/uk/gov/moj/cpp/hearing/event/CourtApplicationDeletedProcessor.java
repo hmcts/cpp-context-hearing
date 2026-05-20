@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.event;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -11,7 +10,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
@@ -32,7 +31,7 @@ public class CourtApplicationDeletedProcessor {
             LOGGER.debug("Received '{}' event with payload {}", "public.progression.events.court-application-deleted", envelope.toObfuscatedDebugString());
         }
 
-        final JsonObjectBuilder commandBuilder = createObjectBuilder();
+        final JsonObjectBuilder commandBuilder = JsonObjects.createObjectBuilder();
         final JsonObject payload = envelope.payloadAsJsonObject();
         commandBuilder
                 .add("hearingId", payload.getJsonString("hearingId"))

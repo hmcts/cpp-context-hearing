@@ -17,7 +17,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit.courtCentreOrganisationUnit;
 import static uk.gov.justice.hearing.courts.referencedata.Courtrooms.courtrooms;
-import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.CourtCentre;
@@ -49,7 +48,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
@@ -306,7 +305,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
 
     private static JsonObject givenPayload(final String filePath) {
         try (InputStream inputStream = NextHearingHelperTest.class.getResourceAsStream(filePath)) {
-            final JsonReader jsonReader = createReader(inputStream);
+            final JsonReader jsonReader = JsonObjects.createReader(inputStream);
             return jsonReader.readObject();
         } catch (Exception e) {
             throw new RuntimeException(e);

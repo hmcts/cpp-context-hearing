@@ -7,8 +7,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
@@ -45,7 +43,7 @@ import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import java.util.Arrays;
 import java.util.UUID;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -122,7 +120,7 @@ public class UpdateCaseDefendantsHandlerTest {
                         .withId(defendantId)
                         .withProceedingsConcluded(true).build()))
                 .build();
-        final JsonObject commandPayload = createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                 .add("prosecutionCase",objectToJsonObjectConverter.convert(prosecutionCase))
                 .build();
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.update-case-defendants"), commandPayload);
@@ -143,12 +141,12 @@ public class UpdateCaseDefendantsHandlerTest {
         setupMockedEventStream(hearingId, this.hearingEventStream, hearingAggregate);
         hearingAggregate.initiate(initiateHearingCommand.getHearing());
 
-        final JsonObject commandPayload = createObjectBuilder()
-                .add("prosecutionCase",createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
+                .add("prosecutionCase",JsonObjects.createObjectBuilder()
                     .add("caseStatus", "CLOSED")
                     .add("id", caseId.toString())
-                    .add("defendants", createArrayBuilder()
-                        .add(createObjectBuilder()
+                    .add("defendants", JsonObjects.createArrayBuilder()
+                        .add(JsonObjects.createObjectBuilder()
                           .add("id",defendantId.toString())
                           .add("proceedingsConcluded", true)
                           .build()).build())
@@ -180,7 +178,7 @@ public class UpdateCaseDefendantsHandlerTest {
                         .withId(defendantId)
                         .build())
                 .build();
-        final JsonObject commandPayload = createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                 .add("courtApplication",objectToJsonObjectConverter.convert(courtApplication))
                 .build();
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.update-application-defendants"), commandPayload);
@@ -204,10 +202,10 @@ public class UpdateCaseDefendantsHandlerTest {
         setupMockedEventStream(hearingId, this.hearingEventStream, hearingAggregate);
         hearingAggregate.initiate(initiateHearingCommand.getHearing());
 
-        final JsonObject commandPayload = createObjectBuilder()
-                .add("courtApplication", createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
+                .add("courtApplication", JsonObjects.createObjectBuilder()
                         .add("id", applicationId.toString())
-                        .add("applicant", createObjectBuilder()
+                        .add("applicant", JsonObjects.createObjectBuilder()
                                 .add("id", defendantId.toString())
                                 .build()).build())
                 .add("hearingId", hearingId.toString())

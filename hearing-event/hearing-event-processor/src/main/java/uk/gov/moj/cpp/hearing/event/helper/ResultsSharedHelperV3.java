@@ -24,7 +24,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import java.util.List;
 import java.util.UUID;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
@@ -124,7 +124,7 @@ public class ResultsSharedHelperV3 {
         for (final HearingDay hearingDay : hearingDaysList) {
             arrayBuilder.add(createObjectBuilder(objectToJsonObjectConverter.convert(hearingDay)).build());
         }
-        final JsonObject payload = createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("hearingDays", arrayBuilder)
                 .build();

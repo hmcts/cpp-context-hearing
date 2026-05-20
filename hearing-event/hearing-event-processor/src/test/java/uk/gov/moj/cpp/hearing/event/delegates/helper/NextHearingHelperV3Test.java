@@ -18,7 +18,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit.courtCentreOrganisationUnit;
 import static uk.gov.justice.hearing.courts.referencedata.Courtrooms.courtrooms;
-import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.RESULT_DEFINITIONS_JSON;
 
 import uk.gov.justice.core.courts.Address;
@@ -52,7 +51,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
@@ -375,7 +374,7 @@ public class NextHearingHelperV3Test  {
 
     private static JsonObject givenPayload(final String filePath) {
         try (InputStream inputStream = NextHearingHelperV3Test.class.getResourceAsStream(filePath)) {
-            final JsonReader jsonReader = createReader(inputStream);
+            final JsonReader jsonReader = JsonObjects.createReader(inputStream);
             return jsonReader.readObject();
         } catch (Exception e) {
             throw new RuntimeException(e);

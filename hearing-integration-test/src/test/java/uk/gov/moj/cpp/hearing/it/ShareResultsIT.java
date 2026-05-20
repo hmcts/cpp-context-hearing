@@ -194,7 +194,7 @@ import java.util.stream.IntStream;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.jms.MessageConsumer;
-
+import uk.gov.justice.services.messaging.JsonObjects;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
@@ -1691,7 +1691,7 @@ public class ShareResultsIT extends AbstractIT {
                 .replaceAll("OFFENCE_ID", randomUUID().toString());
 
         final JsonObject saveDraftResultJson = new StringToJsonObjectConverter().convert(eventPayloadString);
-        JsonObjectBuilder builder = createObjectBuilder();
+        JsonObjectBuilder builder = JsonObjects.createObjectBuilder();
         saveDraftResultJson.forEach(builder::add);
         builder.add("version", version);
         final JsonObject draftResultWithVersionJson = builder.build();

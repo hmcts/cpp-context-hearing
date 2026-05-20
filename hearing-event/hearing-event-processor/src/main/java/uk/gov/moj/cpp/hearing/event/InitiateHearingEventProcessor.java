@@ -40,6 +40,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import uk.gov.justice.services.messaging.JsonObjects;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
