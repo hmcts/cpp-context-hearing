@@ -52,6 +52,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class PublishCourtListStatusHandlerTest {
 
@@ -258,12 +259,12 @@ public class PublishCourtListStatusHandlerTest {
     }
 
     private JsonEnvelope generateEmptyCommandEnvelope() {
-        return createEnvelope(".", createObjectBuilder().build());
+        return createEnvelope(".", JsonObjects.createObjectBuilder().build());
     }
 
     private JsonEnvelope generateCommandEnvelope() {
-        return createEnvelope(".", createObjectBuilder()
-                .add("ids", createArrayBuilder().add("10356a8a-558b-4c1d-80a7-ef96f488f9cb").add("dde1282c-ce21-41cf-8ae9-1ddf1ff989d7").build())
+        return createEnvelope(".", JsonObjects.createObjectBuilder()
+                .add("ids", JsonObjects.createArrayBuilder().add("10356a8a-558b-4c1d-80a7-ef96f488f9cb").add("dde1282c-ce21-41cf-8ae9-1ddf1ff989d7").build())
                 .build());
     }
 

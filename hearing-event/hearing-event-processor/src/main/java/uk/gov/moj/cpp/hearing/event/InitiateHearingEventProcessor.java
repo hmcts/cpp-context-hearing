@@ -47,6 +47,7 @@ import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @SuppressWarnings({"squid:S1188"})
 @ServiceComponent(EVENT_PROCESSOR)
 public class InitiateHearingEventProcessor {
@@ -143,7 +144,7 @@ public class InitiateHearingEventProcessor {
                 .filter(courtApplication -> courtApplication.getSubject().getMasterDefendant() != null)
                 .filter(courtApplication -> !isApplicationFinalisedOrListed(event, courtApplication.getId()))
                 .forEach(
-                        courtApplication -> this.sender.send(Enveloper.envelop(createObjectBuilder()
+                        courtApplication -> this.sender.send(Enveloper.envelop(JsonObjects.createObjectBuilder()
                                 .add("applicationType", ENFORCEMENT_NOTIFICATION_APPLICATION_TYPES.get(courtApplication.getType().getCode()))
                                 .add("masterDefendantId", courtApplication.getSubject().getMasterDefendant().getMasterDefendantId().toString())
                                 .add("listingDate", dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))
@@ -178,7 +179,7 @@ public class InitiateHearingEventProcessor {
 
 
     private JsonArrayBuilder createCaseUrns(final CourtApplication courtApplication) {
-        final JsonArrayBuilder builder = createArrayBuilder();
+        final JsonArrayBuilder builder = JsonObjects.createArrayBuilder();
         courtApplication.getCourtApplicationCases().stream()
                 .map(cac -> ofNullable(cac.getProsecutionCaseIdentifier().getCaseURN()).orElse(cac.getProsecutionCaseIdentifier().getProsecutionAuthorityReference()))
                 .forEach(builder::add);
@@ -186,7 +187,7 @@ public class InitiateHearingEventProcessor {
     }
 
     private JsonArrayBuilder createCaseOffenceIds(final List<CourtApplicationCase> courtApplicationCases) {
-        final JsonArrayBuilder builder = createArrayBuilder();
+        final JsonArrayBuilder builder = JsonObjects.createArrayBuilder();
         if (isNotEmpty(courtApplicationCases)) {
             courtApplicationCases.stream()
                     .filter(cac -> isNotEmpty(cac.getOffences()))
@@ -198,7 +199,7 @@ public class InitiateHearingEventProcessor {
     }
 
     private JsonArrayBuilder createCaseIds(final CourtApplication courtApplication) {
-        final JsonArrayBuilder builder = createArrayBuilder();
+        final JsonArrayBuilder builder = JsonObjects.createArrayBuilder();
         courtApplication.getCourtApplicationCases().stream()
                 .map(cac -> cac.getProsecutionCaseId().toString())
                 .forEach(builder::add);

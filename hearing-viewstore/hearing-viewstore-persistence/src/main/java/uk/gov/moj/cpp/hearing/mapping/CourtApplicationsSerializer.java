@@ -15,6 +15,7 @@ import javax.json.JsonReader;
 
 import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @SuppressWarnings({"squid:S2384"})
 public class CourtApplicationsSerializer {
     @Inject

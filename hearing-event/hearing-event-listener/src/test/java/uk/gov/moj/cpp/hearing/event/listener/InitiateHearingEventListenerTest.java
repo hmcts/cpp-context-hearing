@@ -93,6 +93,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class InitiateHearingEventListenerTest {
     private static final String GUILTY = "GUILTY";
@@ -946,7 +947,7 @@ public class InitiateHearingEventListenerTest {
     public void shouldPassSchemaValidationForValidPayloadOfConvictionDateAdded() {
         //given
         JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("caseId", "30dd24a6-e383-48f6-afa0-e4b174ecb89c")
                         .add("hearingId", "c76ead4b-5ac8-48e0-b744-f4ade56c8198")
                         .add("offenceId", "0683dfed-f9a4-4661-aaa9-d43fda9ef93d")
@@ -962,7 +963,7 @@ public class InitiateHearingEventListenerTest {
     public void shouldPassSchemaValidationForValidPayloadOfConvictionDateRemoved() {
         //given
         JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("caseId", "30dd24a6-e383-48f6-afa0-e4b174ecb89c")
                         .add("hearingId", "c76ead4b-5ac8-48e0-b744-f4ade56c8198")
                         .add("offenceId", "0683dfed-f9a4-4661-aaa9-d43fda9ef93d")

@@ -74,6 +74,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @SuppressWarnings({"squid:S3655", "squid:CallToDeprecatedMethod"})
 public class HearingQueryView {
 
@@ -318,14 +319,14 @@ public class HearingQueryView {
 
         final Optional<CourtListPublishStatusResult> publishCourtListStatus = courtListRepository.courtListPublishStatuses(fromString(courtCentreId));
 
-        final JsonObjectBuilder builder = createObjectBuilder();
+        final JsonObjectBuilder builder = JsonObjects.createObjectBuilder();
         if (publishCourtListStatus.isPresent()) {
             builder.add(FIELD_COURT_CENTRE_ID, publishCourtListStatus.get().getCourtCentreId().toString())
                     .add("lastUpdated", publishCourtListStatus.get().getLastUpdated().toString())
                     .add("publishStatus", publishCourtListStatus.get().getPublishStatus().toString())
                     .add("errorMessage", defaultIfEmpty(publishCourtListStatus.get().getFailureMessage(), ""));
         }
-        return enveloper.withMetadataFrom(query, "hearing.court.list.publish.status").apply(createObjectBuilder().add("publishCourtListStatus", builder.build()).build());
+        return enveloper.withMetadataFrom(query, "hearing.court.list.publish.status").apply(JsonObjects.createObjectBuilder().add("publishCourtListStatus", builder.build()).build());
     }
 
 
@@ -338,7 +339,7 @@ public class HearingQueryView {
 
         final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsForWebPage(courtCentreList, LocalDate.parse(dateOfHearing.get()), cppHearingEventIds);
 
-        return enveloper.withMetadataFrom(envelope, "hearing.get-latest-hearings-by-court-centres").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : createObjectBuilder().build());
+        return enveloper.withMetadataFrom(envelope, "hearing.get-latest-hearings-by-court-centres").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : JsonObjects.createObjectBuilder().build());
     }
 
     @SuppressWarnings({"squid:CallToDeprecatedMethod", "squid:CallToDeprecatedMethod"})
@@ -350,14 +351,14 @@ public class HearingQueryView {
 
         final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsByDate(courtCentreList, LocalDate.parse(dateOfHearing.get()), cppHearingEventIds);
 
-        return enveloper.withMetadataFrom(envelope, "hearing.hearings-court-centres-for-date").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : createObjectBuilder().build());
+        return enveloper.withMetadataFrom(envelope, "hearing.hearings-court-centres-for-date").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : JsonObjects.createObjectBuilder().build());
     }
 
     @SuppressWarnings("squid:S1166")
 
     public JsonEnvelope getOutstandingFinesQueryFromDefendantId(final JsonEnvelope envelope) {
         final Optional<UUID> defendantId = getUUID(envelope.payloadAsJsonObject(), FIELD_DEFENDANT_ID);
-        final JsonEnvelope jsonEnvelopeWithoutPayload = envelopeFrom(envelope.metadata(), createObjectBuilder().build());
+        final JsonEnvelope jsonEnvelopeWithoutPayload = envelopeFrom(envelope.metadata(), JsonObjects.createObjectBuilder().build());
         if (defendantId.isPresent()) {
             try {
                 final DefendantSearch defendantSearch = defendantRepository.getDefendantDetailsForSearching(defendantId.get());
@@ -375,7 +376,7 @@ public class HearingQueryView {
     }
 
     private JsonObject convertToOutstandingFinesQuery(final DefendantSearch defendantSearch) {
-        final JsonObjectBuilder objectBuilder = createObjectBuilder();
+        final JsonObjectBuilder objectBuilder = JsonObjects.createObjectBuilder();
         objectBuilder.add("defendantId", defendantSearch.getDefendantId().toString());
         if (isEmpty(defendantSearch.getLegalEntityOrganizationName())) {
             objectBuilder.add("firstname", defendantSearch.getForename());
@@ -413,7 +414,7 @@ public class HearingQueryView {
 
         } catch (final NoResultException nre) {
             LOGGER.error("### No defendant found with {}. Exception: {}", envelope.toObfuscatedDebugString(), nre);
-            return envelopeFrom(envelope.metadata(), createObjectBuilder().build());
+            return envelopeFrom(envelope.metadata(), JsonObjects.createObjectBuilder().build());
         }
     }
 
@@ -423,7 +424,7 @@ public class HearingQueryView {
         final Optional<uk.gov.justice.core.courts.Hearing> hearingEntity = hearingService.getHearingDomainById(hearingId);
 
         if (!hearingEntity.isPresent()) {
-            return envelopeFrom(envelope.metadata(), createObjectBuilder().build());
+            return envelopeFrom(envelope.metadata(), JsonObjects.createObjectBuilder().build());
         }
 
         final uk.gov.justice.core.courts.Hearing hearing = hearingEntity.get();
@@ -454,14 +455,14 @@ public class HearingQueryView {
 
         if (nonNull(expiryDate)) {
 
-            final JsonObject ctlExpiryDate = createObjectBuilder()
+            final JsonObject ctlExpiryDate = JsonObjects.createObjectBuilder()
                     .add(FIELD_CUSTODY_TIME_LIMIT, expiryDate.toString())
                     .build();
 
             return envelopeFrom(envelope.metadata(), ctlExpiryDate);
 
         } else {
-            return envelopeFrom(envelope.metadata(), createObjectBuilder().build());
+            return envelopeFrom(envelope.metadata(), JsonObjects.createObjectBuilder().build());
         }
 
     }

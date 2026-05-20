@@ -34,6 +34,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 class ProgressionServiceTest {
 
@@ -61,9 +62,9 @@ class ProgressionServiceTest {
         final JsonEnvelope envelope = mock(JsonEnvelope.class);
         final Metadata metadata = JsonEnvelope.metadataBuilder().withId(randomUUID()).withName(SEARCH_APPLICATION).build();
 
-       final JsonObject courtApplicationObj = createObjectBuilder().add("courtApplication",
-                        createObjectBuilder().add("id", applicationId.toString())
-                                .add("applicant", createObjectBuilder().add("id", randomUUID().toString()))
+       final JsonObject courtApplicationObj = JsonObjects.createObjectBuilder().add("courtApplication",
+                        JsonObjects.createObjectBuilder().add("id", applicationId.toString())
+                                .add("applicant", JsonObjects.createObjectBuilder().add("id", randomUUID().toString()))
                                 .add("applicationStatus", "FINALISED")
                                 .build()).build();
 

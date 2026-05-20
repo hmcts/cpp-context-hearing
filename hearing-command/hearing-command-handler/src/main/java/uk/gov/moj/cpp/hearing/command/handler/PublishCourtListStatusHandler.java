@@ -32,6 +32,7 @@ import javax.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ServiceComponent(COMMAND_HANDLER)
 public class PublishCourtListStatusHandler extends AbstractCommandHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(PublishCourtListStatusHandler.class);
@@ -96,7 +97,7 @@ public class PublishCourtListStatusHandler extends AbstractCommandHandler {
     @Handles("hearing.command.publish-hearing-lists-for-crown-courts-with-ids")
     public void publishHearingListsForCrownCourtsWithIds(final JsonEnvelope commandEnvelope) {
         Optional.ofNullable(commandEnvelope.payloadAsJsonObject().getJsonArray("ids"))
-                .orElse(createArrayBuilder().build()).getValuesAs(JsonString.class)
+                .orElse(JsonObjects.createArrayBuilder().build()).getValuesAs(JsonString.class)
                 .stream().map(JsonString::getString).map(UUID::fromString)
                 .forEach(courtCentreId -> publishFinalCourtList(commandEnvelope.metadata(), courtCentreId));
     }
@@ -123,7 +124,7 @@ public class PublishCourtListStatusHandler extends AbstractCommandHandler {
     }
 
     public static JsonValue asJson(final PublishCourtList publishCourtList) {
-        return createObjectBuilder()
+        return JsonObjects.createObjectBuilder()
                 .add(PublishCourtListFields.COURT_CENTRE_ID.getInternalName(), publishCourtList.getCourtCentreId().toString())
                 .add(PublishCourtListFields.CREATED_TIME.getInternalName(), publishCourtList.getCreatedTime().toString())
                 .build();

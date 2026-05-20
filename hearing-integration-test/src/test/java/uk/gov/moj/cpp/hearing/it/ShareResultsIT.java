@@ -207,6 +207,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @SuppressWarnings({"squid:S2699"})
 @NotThreadSafe
 public class ShareResultsIT extends AbstractIT {
@@ -1691,7 +1692,7 @@ public class ShareResultsIT extends AbstractIT {
                 .replaceAll("OFFENCE_ID", randomUUID().toString());
 
         final JsonObject saveDraftResultJson = new StringToJsonObjectConverter().convert(eventPayloadString);
-        JsonObjectBuilder builder = createObjectBuilder();
+        JsonObjectBuilder builder = JsonObjects.createObjectBuilder();
         saveDraftResultJson.forEach(builder::add);
         builder.add("version", version);
         final JsonObject draftResultWithVersionJson = builder.build();
@@ -2392,7 +2393,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     private void saveDraftResultsWithShadowListedFlag(final InitiateHearingCommandHelper hearing, final UUID targetId) {
-        final JsonObject saveDraftResultsCommand = createObjectBuilder()
+        final JsonObject saveDraftResultsCommand = JsonObjects.createObjectBuilder()
                 .add("draftResult", "draft results content")
                 .add("hearingId", hearing.getHearing().toString())
                 .add("offenceId", hearing.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())
@@ -3501,7 +3502,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     private void removeDraftTarget(final UUID hearingId, final UUID targetId) {
-        final JsonObject payload = createObjectBuilder().add("targetIds", createArrayBuilder().add(targetId.toString()).build()).build();
+        final JsonObject payload = JsonObjects.createObjectBuilder().add("targetIds", JsonObjects.createArrayBuilder().add(targetId.toString()).build()).build();
         makeCommand(getRequestSpec(), "hearing.remove-targets")
                 .ofType("application/vnd.hearing.remove-targets+json")
                 .withArgs(hearingId)

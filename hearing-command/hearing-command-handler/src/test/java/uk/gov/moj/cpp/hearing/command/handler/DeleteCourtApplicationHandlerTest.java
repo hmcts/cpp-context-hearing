@@ -32,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class DeleteCourtApplicationHandlerTest {
 
@@ -63,7 +64,7 @@ public class DeleteCourtApplicationHandlerTest {
         when(eventSource.getStreamById(any())).thenReturn(eventStream);
         when(aggregateService.get(eventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
         when(hearingAggregate.deleteCourtApplicationHearing(hearingId)).thenReturn(mock(Stream.class));
-        final JsonObject payload = createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .build();
         final JsonEnvelope commandEnvelope = createEnvelope("hearing.command.delete-court-application-hearing", payload);

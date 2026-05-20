@@ -37,6 +37,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @Adapter(Component.QUERY_API)
 public class DefaultQueryApiHearingsEventLogExtractResource implements QueryApiHearingsEventLogExtractResource {
 
@@ -68,7 +69,7 @@ public class DefaultQueryApiHearingsEventLogExtractResource implements QueryApiH
     @Override
     public Response getHearingsEventLogExtract(final String caseId, final String hearingId, final String applicationId, final String hearingDate, final UUID userId) throws IOException {
 
-        final JsonObjectBuilder payloadBuilder = createObjectBuilder();
+        final JsonObjectBuilder payloadBuilder = JsonObjects.createObjectBuilder();
 
         if (nonNull(hearingId)) {
             payloadBuilder.add("hearingId", hearingId);

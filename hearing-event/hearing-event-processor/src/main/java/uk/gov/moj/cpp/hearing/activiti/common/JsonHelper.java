@@ -20,6 +20,7 @@ import java.util.UUID;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 public class JsonHelper {
 
     public static final String PROCESS_ID = "processId";
@@ -31,12 +32,12 @@ public class JsonHelper {
     }
 
     public static Metadata createMetadataWithProcessIdAndUserId(final String id, final String name, final String processId, final String userId) {
-        return metadataFrom(createObjectBuilder()
+        return metadataFrom(JsonObjects.createObjectBuilder()
                 .add(ID, id)
                 .add(NAME, name)
                 .add(PROCESS_ID, processId)
                 .add(ORIGINATOR, ORIGINATOR_VALUE)
-                .add(CONTEXT, createObjectBuilder()
+                .add(CONTEXT, JsonObjects.createObjectBuilder()
                         .add(USER_ID, userId))
                 .build()).build();
     }
@@ -52,7 +53,7 @@ public class JsonHelper {
     }
 
     private static JsonObject addMetadataToPayload(final JsonObject load, final Metadata metadata) {
-        final JsonObjectBuilder job = createObjectBuilder();
+        final JsonObjectBuilder job = JsonObjects.createObjectBuilder();
         load.entrySet().forEach(entry -> job.add(entry.getKey(), entry.getValue()));
         job.add(JsonEnvelope.METADATA, metadata.asJsonObject());
         return job.build();

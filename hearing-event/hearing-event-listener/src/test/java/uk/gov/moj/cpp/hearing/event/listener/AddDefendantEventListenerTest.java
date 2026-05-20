@@ -39,6 +39,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class AddDefendantEventListenerTest {
 
@@ -136,7 +137,7 @@ public class AddDefendantEventListenerTest {
 
     private JsonEnvelope getDefendantAddedJsonEnvelope(final UUID arbitraryHearingId, final UUID caseId) {
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant arbitraryDefendant = defendantTemplate(caseId);
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("hearingId", arbitraryHearingId.toString())
                 .add("defendant", objectToJsonObjectConverter.convert(arbitraryDefendant))
                 .build();

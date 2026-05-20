@@ -204,6 +204,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class HearingServiceTest {
 
@@ -429,7 +430,7 @@ public class HearingServiceTest {
         final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withCourtApplications(singletonList(courtApplication().withType(CourtApplicationType.courtApplicationType().withCode(applicationTypeCode).build()).build())).build();
         final UUID hearingSummaryId = randomUUID();
         final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
-        hearingEntity.setCourtApplicationsJson(createObjectBuilder().add("type", createObjectBuilder().add("code", applicationTypeCode).build()).build().toString());
+        hearingEntity.setCourtApplicationsJson(JsonObjects.createObjectBuilder().add("type", JsonObjects.createObjectBuilder().add("code", applicationTypeCode).build()).build().toString());
         final List<Hearing> hearings = asList(hearingEntity);
         when(hearingRepository.findByFilters(startDateStartOfDay, hearingEntity.getCourtCentre().getId(), hearingEntity.getCourtCentre().getRoomId())).thenReturn(hearings);
         when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
@@ -456,7 +457,7 @@ public class HearingServiceTest {
         final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withCourtApplications(singletonList(courtApplication().withType(CourtApplicationType.courtApplicationType().withCode(applicationTypeCode).build()).build())).build();
         final UUID hearingSummaryId = randomUUID();
         final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
-        hearingEntity.setCourtApplicationsJson(createObjectBuilder().add("type", createObjectBuilder().add("code", applicationTypeCode).build()).build().toString());
+        hearingEntity.setCourtApplicationsJson(JsonObjects.createObjectBuilder().add("type", JsonObjects.createObjectBuilder().add("code", applicationTypeCode).build()).build().toString());
         final List<Hearing> hearings = asList(hearingEntity);
         when(hearingRepository.findByFilters(startDateStartOfDay, hearingEntity.getCourtCentre().getId(), hearingEntity.getCourtCentre().getRoomId())).thenReturn(hearings);
         when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
@@ -485,7 +486,7 @@ public class HearingServiceTest {
         final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withCourtApplications(singletonList(courtApplication().withType(CourtApplicationType.courtApplicationType().withCode(applicationTypeCode).build()).build())).build();
         final UUID hearingSummaryId = randomUUID();
         final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
-        hearingEntity.setCourtApplicationsJson(createObjectBuilder().add("type", createObjectBuilder().add("code", applicationTypeCode).build()).build().toString());
+        hearingEntity.setCourtApplicationsJson(JsonObjects.createObjectBuilder().add("type", JsonObjects.createObjectBuilder().add("code", applicationTypeCode).build()).build().toString());
         final List<Hearing> hearings = asList(hearingEntity);
         when(hearingRepository.findByFilters(startDateStartOfDay, hearingEntity.getCourtCentre().getId(), hearingEntity.getCourtCentre().getRoomId())).thenReturn(hearings);
         when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
@@ -1986,7 +1987,7 @@ public class HearingServiceTest {
     @Test
     public void shouldValidateUserPermissionForApplicationTypeAndThrowForbiddenRequestException() throws IOException {
         final UUID hearingId = randomUUID();
-        final JsonObject jsonObject = createObjectBuilder()
+        final JsonObject jsonObject = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString()).build();
         final JsonEnvelope jsonEnvelope = envelopeFrom(
                 metadataBuilder().withId(randomUUID()).withName("hearing.get.hearing").build(),
@@ -2000,7 +2001,7 @@ public class HearingServiceTest {
                         .withType(CourtApplicationType.courtApplicationType()
                                 .withCode("PL302487").build())
                         .build()));
-        final JsonObject responsePayload = createObjectBuilder()
+        final JsonObject responsePayload = JsonObjects.createObjectBuilder()
                 .add("hasPermission", false)
                 .build();
         when(requester.request(any(), any())).thenReturn(Envelope.envelopeFrom(Envelope.metadataBuilder()
@@ -2013,7 +2014,7 @@ public class HearingServiceTest {
     @Test
     public void shouldValidateUserPermissionForApplicationTypeIsTrueAndDoNotThrowForbiddenRequestException() throws IOException {
         final UUID hearingId = randomUUID();
-        final JsonObject jsonObject = createObjectBuilder()
+        final JsonObject jsonObject = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString()).build();
         final JsonEnvelope jsonEnvelope = envelopeFrom(
                 metadataBuilder().withId(randomUUID()).withName("hearing.get.hearing").build(),
@@ -2027,7 +2028,7 @@ public class HearingServiceTest {
                         .withType(CourtApplicationType.courtApplicationType()
                                 .withCode("PL302487").build())
                         .build()));
-        final JsonObject responsePayload = createObjectBuilder()
+        final JsonObject responsePayload = JsonObjects.createObjectBuilder()
                 .add("hasPermission", true)
                 .build();
         when(requester.request(any(), any())).thenReturn(Envelope.envelopeFrom(Envelope.metadataBuilder()
@@ -2552,7 +2553,7 @@ public class HearingServiceTest {
                 .withId(randomUUID()).withName("hearing.get.hearing").build();
         when(requester.request(any(), any())).thenReturn(
                 Envelope.envelopeFrom(Envelope.metadataBuilder().withId(randomUUID()).withName("test").build(),
-                        createObjectBuilder().build()));
+                        JsonObjects.createObjectBuilder().build()));
 
         assertTrue(HearingService.isUserHasPermissionForApplicationTypeCode(metadata, requester, "PL302487"));
     }
@@ -2563,7 +2564,7 @@ public class HearingServiceTest {
                 .withId(randomUUID()).withName("hearing.get.hearing").build();
         when(requester.request(any(), any())).thenReturn(
                 Envelope.envelopeFrom(Envelope.metadataBuilder().withId(randomUUID()).withName("test").build(),
-                        createObjectBuilder().add("hasPermission", true).build()));
+                        JsonObjects.createObjectBuilder().add("hasPermission", true).build()));
 
         assertTrue(HearingService.isUserHasPermissionForApplicationTypeCode(metadata, requester, "PL302487"));
     }
@@ -2574,7 +2575,7 @@ public class HearingServiceTest {
                 .withId(randomUUID()).withName("hearing.get.hearing").build();
         when(requester.request(any(), any())).thenReturn(
                 Envelope.envelopeFrom(Envelope.metadataBuilder().withId(randomUUID()).withName("test").build(),
-                        createObjectBuilder().add("hasPermission", false).build()));
+                        JsonObjects.createObjectBuilder().add("hasPermission", false).build()));
 
         assertFalse(HearingService.isUserHasPermissionForApplicationTypeCode(metadata, requester, "PL302487"));
     }
@@ -2585,7 +2586,7 @@ public class HearingServiceTest {
     public void shouldNotThrow_whenHearingIdIsAbsentFromPayload() {
         final JsonEnvelope envelope = envelopeFrom(
                 metadataBuilder().withId(randomUUID()).withName("hearing.get.hearing").build(),
-                createObjectBuilder().build());
+                JsonObjects.createObjectBuilder().build());
 
         assertDoesNotThrow(() -> hearingService.validateUserPermissionForApplicationType(envelope));
         verify(hearingRepository, never()).findBy(any(UUID.class));
@@ -2596,7 +2597,7 @@ public class HearingServiceTest {
         final UUID hearingId = randomUUID();
         final JsonEnvelope envelope = envelopeFrom(
                 metadataBuilder().withId(randomUUID()).withName("hearing.get.hearing").build(),
-                createObjectBuilder().add("hearingId", hearingId.toString()).build());
+                JsonObjects.createObjectBuilder().add("hearingId", hearingId.toString()).build());
         when(hearingRepository.findBy(hearingId)).thenReturn(null);
 
         assertDoesNotThrow(() -> hearingService.validateUserPermissionForApplicationType(envelope));
@@ -2683,7 +2684,7 @@ public class HearingServiceTest {
         when(hearingRepository.findAllHearingsByApplicationId(applicationId)).thenReturn(Collections.emptyList());
 
         final List<TimelineHearingSummary> result = hearingService.getTimelineHearingSummariesByApplicationId(
-                applicationId, buildCrackedIneffectiveVacatedTrialTypes(randomUUID()), createObjectBuilder().build());
+                applicationId, buildCrackedIneffectiveVacatedTrialTypes(randomUUID()), JsonObjects.createObjectBuilder().build());
 
         assertNotNull(result);
         assertTrue(result.isEmpty());

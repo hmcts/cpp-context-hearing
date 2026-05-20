@@ -172,6 +172,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 public class HearingAggregateTest {
 
     private static final String GUILTY = "GUILTY";
@@ -2757,7 +2758,7 @@ public class HearingAggregateTest {
 
         //save draft results ALLOWED when isResetResult flag true
         //after cancel / reject / unlock amendments results are set to pre amended state and hearing state = SHARED
-        final Map<UUID, JsonObject> resultLineMap = Map.of(randomUUID(), createObjectBuilder().add("offenceId", offence1Id.toString()).build());
+        final Map<UUID, JsonObject> resultLineMap = Map.of(randomUUID(), JsonObjects.createObjectBuilder().add("offenceId", offence1Id.toString()).build());
         final DraftResultSavedV2 draftResultSavedV2 = (DraftResultSavedV2) hearingAggregate.saveDraftResultV2(userId, null, hearing.getId(), hearingDay, 1, resultLineMap, true)
                 .toList().get(0);
         assertEquals(hearing.getId(), draftResultSavedV2.getHearingId());
@@ -4456,14 +4457,14 @@ public class HearingAggregateTest {
                 .build());
 
         final UUID hearingId = hearing.getId();
-        final JsonObject draftResultsPayload = createObjectBuilder().add("resultLines", createArrayBuilder()
-                .add(createObjectBuilder().add("offenceId", offence1Id.toString()).build())
-                .add(createObjectBuilder().add("offenceId", offence2Id.toString()).build())
+        final JsonObject draftResultsPayload = JsonObjects.createObjectBuilder().add("resultLines", JsonObjects.createArrayBuilder()
+                .add(JsonObjects.createObjectBuilder().add("offenceId", offence1Id.toString()).build())
+                .add(JsonObjects.createObjectBuilder().add("offenceId", offence2Id.toString()).build())
                 .build()
         ).build();
 
-        final Map<UUID, JsonObject> resultLineMap = Map.of(randomUUID(), createObjectBuilder().add("offenceId", offence1Id.toString()).build(),
-                randomUUID(), createObjectBuilder().add("offenceId", offence2Id.toString()).build());
+        final Map<UUID, JsonObject> resultLineMap = Map.of(randomUUID(), JsonObjects.createObjectBuilder().add("offenceId", offence1Id.toString()).build(),
+                randomUUID(), JsonObjects.createObjectBuilder().add("offenceId", offence2Id.toString()).build());
 
         //save draft results for both offences - ALLOWED
         final Stream<Object> eventStream = hearingAggregate.saveDraftResultV2(userId, draftResultsPayload, hearingId, hearingDay, version, resultLineMap, null);
@@ -4553,14 +4554,14 @@ public class HearingAggregateTest {
                 .build());
 
         final UUID hearingId = hearing.getId();
-        final JsonObject draftResultsPayload = createObjectBuilder().add("resultLines", createArrayBuilder()
-                .add(createObjectBuilder().add("applicationId", applicationId.toString()).build())
-                .add(createObjectBuilder().add("offenceId", offence1Id.toString()).build())
+        final JsonObject draftResultsPayload = JsonObjects.createObjectBuilder().add("resultLines", JsonObjects.createArrayBuilder()
+                .add(JsonObjects.createObjectBuilder().add("applicationId", applicationId.toString()).build())
+                .add(JsonObjects.createObjectBuilder().add("offenceId", offence1Id.toString()).build())
                 .build()
         ).build();
 
-        final Map<UUID, JsonObject> resultLineMap = Map.of(randomUUID(), createObjectBuilder().add("applicationId", applicationId.toString()).build(),
-                randomUUID(), createObjectBuilder().add("offenceId", offence1Id.toString()).build());
+        final Map<UUID, JsonObject> resultLineMap = Map.of(randomUUID(), JsonObjects.createObjectBuilder().add("applicationId", applicationId.toString()).build(),
+                randomUUID(), JsonObjects.createObjectBuilder().add("offenceId", offence1Id.toString()).build());
 
         final Stream<Object> eventStream = hearingAggregate.saveDraftResultV2(userId, draftResultsPayload, hearingId, hearingDay, version, resultLineMap, null);
         final List<Object> eventList = eventStream.toList();
@@ -4631,7 +4632,7 @@ public class HearingAggregateTest {
                 .withHearing(hearing)
                 .build());
         hearingAggregate.apply(new HearingAmended(hearing.getId(), userId, SHARED_AMEND_LOCKED_ADMIN_ERROR));
-        hearingAggregate.apply(new DraftResultSavedV2(hearing.getId(), hearingDay, createObjectBuilder().build(), userId, 3));
+        hearingAggregate.apply(new DraftResultSavedV2(hearing.getId(), hearingDay, JsonObjects.createObjectBuilder().build(), userId, 3));
         hearingAggregate.apply(new ResultAmendmentsValidated(hearing.getId(), userId, ZonedDateTime.now()));
 
         assertThat(hearingAggregate.getHearingDaySharedOffencesMap().get(hearingDay).size(), is(2));

@@ -42,6 +42,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class UpdateResultLineSharedDatesCommandHandlerTest {
     @Spy
@@ -81,10 +82,10 @@ public class UpdateResultLineSharedDatesCommandHandlerTest {
         final UUID resultLineId1 = UUID.randomUUID();
         final String sharedDate = "2020-02-05";
 
-        final JsonObject payload = createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
-                .add("resultLinesToBeUpdated", createArrayBuilder()
-                        .add(createObjectBuilder()
+                .add("resultLinesToBeUpdated", JsonObjects.createArrayBuilder()
+                        .add(JsonObjects.createObjectBuilder()
                                 .add("resultLineId", resultLineId1.toString())
                                 .add("sharedDate", sharedDate)
                         )).build();

@@ -33,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class RelistReferenceDataServiceTest {
 
@@ -69,7 +70,7 @@ public class RelistReferenceDataServiceTest {
 
     @Test
     public void shouldReturnEmptyResultDefinition() {
-        final JsonObject jsonObjectPayload = createObjectBuilder().add("resultDefinitions", createArrayBuilder().add(createObjectBuilder().build())).build();
+        final JsonObject jsonObjectPayload = JsonObjects.createObjectBuilder().add("resultDefinitions", JsonObjects.createArrayBuilder().add(JsonObjects.createObjectBuilder().build())).build();
         final Metadata metadata = CommandEventTestBase.metadataFor(RESULT_QUERY, randomUUID().toString());
         final Envelope envelope = Envelope.envelopeFrom(metadata, jsonObjectPayload);
 

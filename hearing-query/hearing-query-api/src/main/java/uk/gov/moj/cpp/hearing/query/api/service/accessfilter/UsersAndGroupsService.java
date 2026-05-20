@@ -20,6 +20,7 @@ import javax.inject.Inject;
 
 import javax.json.JsonObject;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 public class UsersAndGroupsService {
     private static final String GET_LOGGED_IN_USER_PERMISSIONS = "usersgroups.get-logged-in-user-permissions";
     private static final String ROLES_FOR_USER = "usersgroups.get-roles-for-user";
@@ -45,7 +46,7 @@ public class UsersAndGroupsService {
 
         final Metadata metadata = metadataBuilder().withName(GET_LOGGED_IN_USER_PERMISSIONS)
                 .withId(randomUUID()).withUserId(userId).build();
-        final Envelope envelope = envelopeFrom(metadata, createObjectBuilder().build());
+        final Envelope envelope = envelopeFrom(metadata, JsonObjects.createObjectBuilder().build());
         final Envelope<JsonObject> response = requester.request(envelope, JsonObject.class);
 
         return new Permissions.Builder()
@@ -62,7 +63,7 @@ public class UsersAndGroupsService {
                 .withId(randomUUID())
                 .withUserId(userId).build();
 
-        final JsonObject build = createObjectBuilder().add(USER_ID, userId).build();
+        final JsonObject build = JsonObjects.createObjectBuilder().add(USER_ID, userId).build();
         final Envelope envelope = envelopeFrom(metadata, build);
         final Envelope<JsonObject> response = requester.request(envelope, JsonObject.class);
 

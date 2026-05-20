@@ -30,6 +30,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class DefendantOutstandingFinesQueryApiTest {
 
@@ -90,7 +91,7 @@ public class DefendantOutstandingFinesQueryApiTest {
     @Test
     public void should_return_NO_outstanding_fines_when_defendant_id_is_unknown() {
         when(hearingQueryView.getOutstandingFinesQueryFromDefendantId(any())).thenReturn(jsonEnvelopeFromHearing);
-        JsonObject emptyResponseFromHearingQueryView = createObjectBuilder().build();
+        JsonObject emptyResponseFromHearingQueryView = JsonObjects.createObjectBuilder().build();
 
         setUp(emptyResponseFromHearingQueryView);
 
@@ -106,7 +107,7 @@ public class DefendantOutstandingFinesQueryApiTest {
 
 
     private JsonObject getDefendantDetails() {
-        return createObjectBuilder()
+        return JsonObjects.createObjectBuilder()
                 .add("forename", "Max")
                 .add("surename", "Tango")
                 .build();

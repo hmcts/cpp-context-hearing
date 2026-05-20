@@ -24,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class CourtApplicationDeletedProcessorTest {
 
@@ -38,7 +39,7 @@ public class CourtApplicationDeletedProcessorTest {
 
     @Test
     public void shouldHandleCourtApplicationDeletedPublicEvent(){
-        final JsonObjectBuilder objectBuilder = createObjectBuilder();
+        final JsonObjectBuilder objectBuilder = JsonObjects.createObjectBuilder();
         final String hearingId = randomUUID().toString();
         final String applicationId = randomUUID().toString();
         objectBuilder

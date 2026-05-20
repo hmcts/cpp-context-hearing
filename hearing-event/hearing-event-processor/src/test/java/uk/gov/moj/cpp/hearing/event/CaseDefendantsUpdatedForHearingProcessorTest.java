@@ -51,6 +51,7 @@ import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("squid:S2187")
 public class CaseDefendantsUpdatedForHearingProcessorTest {
@@ -121,7 +122,7 @@ public class CaseDefendantsUpdatedForHearingProcessorTest {
     @Test
     public void shouldCallCommand(){
         final String hearingId = randomUUID().toString();
-        JsonObject relatedHearingUpdatedforAdhocHearing = createObjectBuilder()
+        JsonObject relatedHearingUpdatedforAdhocHearing = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId)
                 .build();
 

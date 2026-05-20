@@ -44,6 +44,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class UpdateDefendantLegalAidStatusCommandHandlerTest {
 
@@ -89,10 +90,10 @@ public class UpdateDefendantLegalAidStatusCommandHandlerTest {
 
         defendantAggregate.registerHearing(defendantId, hearingId);
 
-        final JsonObject commandPayload = createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                 .add("defendantId", defendantId.toString())
                 .add("legalAidStatus", "Granted")
-                .add("hearingIds", createArrayBuilder().add(hearingId.toString()).build())
+                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()).build())
                 .build();
 
 
@@ -116,10 +117,10 @@ public class UpdateDefendantLegalAidStatusCommandHandlerTest {
 
 
 
-        final JsonObject commandPayload = createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                 .add("defendantId", defendantId.toString())
                 .add("legalAidStatus", "Granted")
-                .add("hearingIds", createArrayBuilder().add(hearingId.toString()).build())
+                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()).build())
                 .build();
 
 
@@ -139,7 +140,7 @@ public class UpdateDefendantLegalAidStatusCommandHandlerTest {
         hearingAggregate.initiate(initiateHearingCommand.getHearing());
 
 
-        final JsonObject commandPayload = createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("defendantId", defendantId.toString())
                 .add("legalAidStatus", "Granted")

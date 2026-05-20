@@ -30,6 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class UsersAndGroupsServiceTest{
     private static final UUID GROUP_ID1 = randomUUID();
@@ -82,7 +83,7 @@ public class UsersAndGroupsServiceTest{
         final Metadata metadata = metadataBuilder().withName("usersgroups.get-logged-in-user-permissions")
                 .withId(randomUUID()).withUserId(userId).build();
 
-        final Envelope envelope = Envelope.envelopeFrom(metadata, createObjectBuilder().build());
+        final Envelope envelope = Envelope.envelopeFrom(metadata, JsonObjects.createObjectBuilder().build());
         when(requester.request(any(), any())).thenReturn(envelope);
         when(groupsMapper.mapGroups(envelope)).thenReturn(groups());
         when(switchableRolesMapper.switchableRoles(envelope)).thenReturn(switchableRoles());
@@ -101,7 +102,7 @@ public class UsersAndGroupsServiceTest{
         final Metadata metadata = metadataBuilder().withName("usersgroups.get-roles-for-user")
                 .withId(randomUUID()).withUserId(userId).build();
 
-        final Envelope envelope = Envelope.envelopeFrom(metadata, createObjectBuilder().add("userId", userId).build());
+        final Envelope envelope = Envelope.envelopeFrom(metadata, JsonObjects.createObjectBuilder().add("userId", userId).build());
         when(requester.request(any(), any())).thenReturn(envelope);
         when(switchableRolesMapper.mapRoles(envelope)).thenReturn(switchableRoles());
         final List<UserRole> userRoles = usersAndGroupsService.userRoles(userId);

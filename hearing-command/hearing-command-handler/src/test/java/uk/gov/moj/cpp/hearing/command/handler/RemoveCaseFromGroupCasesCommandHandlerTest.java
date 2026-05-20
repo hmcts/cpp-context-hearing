@@ -54,6 +54,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class RemoveCaseFromGroupCasesCommandHandlerTest {
     private static final UUID HEARING1_ID = randomUUID();
@@ -223,7 +224,7 @@ public class RemoveCaseFromGroupCasesCommandHandlerTest {
     }
 
     private JsonEnvelope getJsonEnvelopeForRemoveCommand(final UUID groupId, final UUID masterCaseId, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
-        JsonObjectBuilder builder = createObjectBuilder()
+        JsonObjectBuilder builder = JsonObjects.createObjectBuilder()
                 .add("groupId", groupId.toString())
                 .add("masterCaseId", masterCaseId.toString())
                 .add("removedCase", objectToJsonObjectConverter.convert(removedCase));

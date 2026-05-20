@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ApplicationScoped
 public class HearingDefenceCounselJPAMapper {
 
@@ -46,13 +47,13 @@ public class HearingDefenceCounselJPAMapper {
         defenceCounsel.setId(new HearingSnapshotKey(pojo.getId(), hearing.getId()));
         defenceCounsel.setHearing(hearing);
 
-        final JsonArrayBuilder defendants = createArrayBuilder();
+        final JsonArrayBuilder defendants = JsonObjects.createArrayBuilder();
         pojo.getDefendants().forEach(defendantId -> defendants.add(defendantId.toString()));
 
-        final JsonArrayBuilder attendanceDays = createArrayBuilder();
+        final JsonArrayBuilder attendanceDays = JsonObjects.createArrayBuilder();
         pojo.getAttendanceDays().forEach(localDate -> attendanceDays.add(localDate.toString()));
 
-        final JsonObjectBuilder payLoad = createObjectBuilder()
+        final JsonObjectBuilder payLoad = JsonObjects.createObjectBuilder()
                 .add("attendanceDays", attendanceDays)
                 .add("firstName", pojo.getFirstName())
                 .add("lastName", pojo.getLastName())

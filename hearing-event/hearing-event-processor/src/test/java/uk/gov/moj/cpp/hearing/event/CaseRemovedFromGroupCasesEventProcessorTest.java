@@ -40,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class CaseRemovedFromGroupCasesEventProcessorTest {
 
@@ -73,7 +74,7 @@ public class CaseRemovedFromGroupCasesEventProcessorTest {
     @Test
     public void processPublicEventCaseRemovedFromGroup() {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.case-removed-from-group-cases"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("groupId", GROUP_ID.toString())
                         .add("masterCaseId", MASTER_CASE_ID.toString())
                         .add("removedCase", objectToJsonObjectConverter.convert(getProsecutionCase(GROUP_ID, CASE_ID, Boolean.FALSE, Boolean.FALSE)))
@@ -104,7 +105,7 @@ public class CaseRemovedFromGroupCasesEventProcessorTest {
     @Test
     public void processPublicEventCaseRemovedFromGroup_WithOnlyMandatoryFields() {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.case-removed-from-group-cases"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("groupId", GROUP_ID.toString())
                         .add("masterCaseId", MASTER_CASE_ID.toString())
                         .add("removedCase", objectToJsonObjectConverter.convert(getProsecutionCase(GROUP_ID, CASE_ID, Boolean.FALSE, Boolean.FALSE)))
@@ -129,7 +130,7 @@ public class CaseRemovedFromGroupCasesEventProcessorTest {
     @Test
     public void processHearingEventCaseRemovedFromGroup() {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.case-removed-from-group-cases"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingId", HEARING_ID.toString())
                         .add("groupId", GROUP_ID.toString())
                         .add("removedCase", objectToJsonObjectConverter.convert(getProsecutionCase(GROUP_ID, CASE_ID, Boolean.FALSE, Boolean.FALSE)))
@@ -160,7 +161,7 @@ public class CaseRemovedFromGroupCasesEventProcessorTest {
     @Test
     public void processHearingEventCaseRemovedFromGroup_WithOnlyMandatoryFields() {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.case-removed-from-group-cases"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingId", HEARING_ID.toString())
                         .add("groupId", GROUP_ID.toString())
                         .add("removedCase", objectToJsonObjectConverter.convert(getProsecutionCase(GROUP_ID, CASE_ID, Boolean.FALSE, Boolean.FALSE)))

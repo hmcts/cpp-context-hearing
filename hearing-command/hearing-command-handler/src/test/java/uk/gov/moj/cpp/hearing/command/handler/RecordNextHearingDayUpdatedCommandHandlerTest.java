@@ -44,6 +44,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class RecordNextHearingDayUpdatedCommandHandlerTest {
 
@@ -77,7 +78,7 @@ public class RecordNextHearingDayUpdatedCommandHandlerTest {
         final UUID seedingHearingId = randomUUID();
         final ZonedDateTime earliestNextHearingDate = ZonedDateTime.of(2022, 01, 01, 0, 0, 0, 0, ZoneId.of("UTC"));
 
-        final JsonObject payload = createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("seedingHearingId", seedingHearingId.toString())
                 .add("hearingStartDate", "2021-06-20T00:00:00.000Z")

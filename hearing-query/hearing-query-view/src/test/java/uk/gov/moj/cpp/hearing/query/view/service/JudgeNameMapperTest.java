@@ -30,6 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class JudgeNameMapperTest {
 
@@ -77,7 +78,7 @@ public class JudgeNameMapperTest {
     }
 
     private JsonObject createJudiciaryWithRequestedName() {
-        final JsonObjectBuilder judiciaryBuilder = createObjectBuilder();
+        final JsonObjectBuilder judiciaryBuilder = JsonObjects.createObjectBuilder();
         judiciaryBuilder.add(REQUESTED_NAME, REQUESTED_NAME);
         judiciaryBuilder.add(SURNAME, SURNAME);
         judiciaryBuilder.add(FORENAMES, FORENAMES);
@@ -88,7 +89,7 @@ public class JudgeNameMapperTest {
     }
 
     private JsonObject createJudiciaryWithoutRequestedName() {
-        final JsonObjectBuilder judiciaryBuilder = createObjectBuilder();
+        final JsonObjectBuilder judiciaryBuilder = JsonObjects.createObjectBuilder();
         judiciaryBuilder.add(SURNAME, SURNAME);
         judiciaryBuilder.add(FORENAMES, FORENAMES);
         judiciaryBuilder.add(TITLE_SUFFIX, TITLE_SUFFIX);

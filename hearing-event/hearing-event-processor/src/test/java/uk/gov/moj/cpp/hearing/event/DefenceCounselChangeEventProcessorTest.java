@@ -28,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class DefenceCounselChangeEventProcessorTest {
 
@@ -49,7 +50,7 @@ public class DefenceCounselChangeEventProcessorTest {
     @Test
     public void processDefenceCounselChangeIgnoredEvent() {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.defence-counsel-change-ignored"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("reason", REASON)
                         .build());
 
@@ -71,7 +72,7 @@ public class DefenceCounselChangeEventProcessorTest {
     @Test
     public void processDefenceCounselUpdatedEvent() {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.defence-counsel-updated"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("personId", PERSON_ID)
                         .add("attendeeId", ATTENDEE_ID)
                         .build());
@@ -95,7 +96,7 @@ public class DefenceCounselChangeEventProcessorTest {
     @Test
     public void processDefenceCounselRemovedEvent() {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.defence-counsel-removed"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("id", ID)
                         .add("hearingId", HEARING_ID)
                         .build());

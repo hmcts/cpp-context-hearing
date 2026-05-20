@@ -68,6 +68,7 @@ import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ServiceComponent(EVENT_PROCESSOR)
 @SuppressWarnings({"squid:S1188"})
 public class PublishResultsEventProcessor {
@@ -149,7 +150,7 @@ public class PublishResultsEventProcessor {
 
     public void updateTheDefendantsCase(final JsonEnvelope event, final UUID hearingId, final UUID caseId, final UUID defendantId, final List<UUID> offenceIds, final Map<UUID, OffenceResult> offenceResultMap) {
 
-        final JsonObject payload = createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("caseId", caseId.toString())
                 .add("defendantId", defendantId.toString())
@@ -163,15 +164,15 @@ public class PublishResultsEventProcessor {
     }
 
     private JsonArrayBuilder convertToJsonArray(final List<UUID> offenceIds) {
-        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
         offenceIds.stream().map(UUID::toString).forEach(arrayBuilder::add);
         return arrayBuilder;
     }
 
     private JsonArrayBuilder convertOffenceResultMapToJsonArray(final Map<UUID, OffenceResult> offenceResultMap) {
-        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
         offenceResultMap.forEach((key, value) -> {
-            final JsonObject offenceResultObject = createObjectBuilder()
+            final JsonObject offenceResultObject = JsonObjects.createObjectBuilder()
                     .add("offenceId", key.toString())
                     .add("offenceResult", value.name())
                     .build();

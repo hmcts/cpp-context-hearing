@@ -47,6 +47,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 public class Utilities {
 
     public static final int RETRY_TIMEOUT_IN_MILLIS = 5000;

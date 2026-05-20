@@ -69,6 +69,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ServiceComponent(Component.QUERY_API)
 public class HearingQueryApi {
     public static final String STAGINGENFORCEMENT_QUERY_OUTSTANDING_FINES = "stagingenforcement.defendant.outstanding-fines";
@@ -223,7 +224,7 @@ public class HearingQueryApi {
         if(flag) {
             return getJsonEnvelope(this.hearingEventQueryView.getHearingEventLogForDocuments(query));
         } else {
-            return getJsonEnvelope(envelop(createObjectBuilder().add(REASON, EVENT_LOG_FAILED).build())
+            return getJsonEnvelope(envelop(JsonObjects.createObjectBuilder().add(REASON, EVENT_LOG_FAILED).build())
                     .withName(GET_HEARING_EVENT_LOG_FOR_DOCUMENTS)
                     .withMetadataFrom(query));
         }
@@ -237,7 +238,7 @@ public class HearingQueryApi {
         if(flag) {
             return getJsonEnvelope(this.hearingEventQueryView.getHearingEventLogCount(query));
         } else {
-            return getJsonEnvelope(envelop(createObjectBuilder().add(REASON, EVENT_LOG_COUNT_FAILED).build())
+            return getJsonEnvelope(envelop(JsonObjects.createObjectBuilder().add(REASON, EVENT_LOG_COUNT_FAILED).build())
                     .withName(GET_HEARING_EVENT_LOG_COUNT)
                     .withMetadataFrom(query));
         }
@@ -359,9 +360,9 @@ public class HearingQueryApi {
             return requestStagingEnforcementToGetOutstandingFines(query, viewResponseEnvelopePayload);
         }
         return envelopeFrom(query.metadata(),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("outstandingFines",
-                                createArrayBuilder()).build());
+                                JsonObjects.createArrayBuilder()).build());
     }
 
     @Handles("hearing.defendant.info")
@@ -442,7 +443,7 @@ public class HearingQueryApi {
     public JsonEnvelope getHearingOutstandingFines(final JsonEnvelope queryEnvelope) {
 
         final OutstandingFinesQuery outstandingFinesQuery = jsonObjectToObjectConverter.convert(queryEnvelope.payloadAsJsonObject(), OutstandingFinesQuery.class);
-        final JsonEnvelope envelopeWithReStructuredPayload = envelopeFrom(queryEnvelope.metadata(), createObjectBuilder()
+        final JsonEnvelope envelopeWithReStructuredPayload = envelopeFrom(queryEnvelope.metadata(), JsonObjects.createObjectBuilder()
                 .add("courtCentreId", outstandingFinesQuery.getCourtCentreId().toString())
                 .add("courtRoomIds", outstandingFinesQuery.getCourtRoomIds().stream().map(UUID::toString).collect(Collectors.joining(",")))
                 .add("hearingDate", outstandingFinesQuery.getHearingDate().toString())
@@ -453,8 +454,8 @@ public class HearingQueryApi {
 
         if (defendantInfoPayload.isEmpty()) {
             LOGGER.info("hearing.defendant.info response information is empty");
-            return envelopeFrom(queryEnvelope.metadata(), createObjectBuilder()
-                    .add("courtRooms", createArrayBuilder())
+            return envelopeFrom(queryEnvelope.metadata(), JsonObjects.createObjectBuilder()
+                    .add("courtRooms", JsonObjects.createArrayBuilder())
                     .build());
         }
 

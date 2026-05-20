@@ -36,6 +36,7 @@ import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 public class CaseDefendantsUpdatedProcessorTest {
     public static final String HEARING_ID = "hearingId";
     @Spy
@@ -70,8 +71,8 @@ public class CaseDefendantsUpdatedProcessorTest {
                         .withProceedingsConcluded(true).build()))
                 .build();
 
-        final JsonObject eventPayload = createObjectBuilder()
-                .add("hearingIds", createArrayBuilder().add(hearingId.toString()).build())
+        final JsonObject eventPayload = JsonObjects.createObjectBuilder()
+                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()).build())
                 .add("prosecutionCase",objectToJsonObjectConverter.convert(prosecutionCase))
                 .build();
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.case-defendants-updated"),
@@ -105,8 +106,8 @@ public class CaseDefendantsUpdatedProcessorTest {
                         .build())
                 .build();
 
-        final JsonObject eventPayload = createObjectBuilder()
-                .add("hearingIds", createArrayBuilder().add(hearingId.toString()).build())
+        final JsonObject eventPayload = JsonObjects.createObjectBuilder()
+                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()).build())
                 .add("courtApplication",objectToJsonObjectConverter.convert(courtApplication))
                 .build();
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.application-defendants-updated"),

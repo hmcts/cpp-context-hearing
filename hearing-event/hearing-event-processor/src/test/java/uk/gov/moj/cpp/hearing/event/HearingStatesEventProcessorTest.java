@@ -32,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class HearingStatesEventProcessorTest {
 
@@ -54,7 +55,7 @@ public class HearingStatesEventProcessorTest {
         final String USER_ID = UUID.randomUUID().toString();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(HEARING_EVENT_APPROVAL_REJECTED),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingId", HEARING_ID)
                         .add("userId", USER_ID)
                         .build());
@@ -79,7 +80,7 @@ public class HearingStatesEventProcessorTest {
         final String USER_ID = UUID.randomUUID().toString();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(HEARING_HEARING_LOCKED),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingId", HEARING_ID)
                         .build());
 
@@ -102,7 +103,7 @@ public class HearingStatesEventProcessorTest {
         final String USER_ID = UUID.randomUUID().toString();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(PUBLIC_HEARING_HEARING_LOCKED_BY_OTHER_USER),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingId", HEARING_ID)
                         .build());
 
@@ -125,7 +126,7 @@ public class HearingStatesEventProcessorTest {
         final String USER_ID = UUID.randomUUID().toString();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(HEARING_EVENT_HEARING_UNLOCK_FAILED),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingId", HEARING_ID)
                         .build());
 
@@ -146,7 +147,7 @@ public class HearingStatesEventProcessorTest {
         final String USER_ID = UUID.randomUUID().toString();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(HEARING_EVENT_HEARING_UNLOCKED),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingId", HEARING_ID)
                         .add("userId", USER_ID)
                         .build());
