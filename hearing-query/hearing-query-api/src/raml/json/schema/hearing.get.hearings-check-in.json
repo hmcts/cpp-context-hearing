@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/get-hearings-check-in.json",
+  "type": "object",
+  "properties": {
+    "hearingSummaries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/hearingSummary"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "hearingSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "courtCentre": {
+          "$ref": "#/definitions/courtCentre"
+        },
+        "prosecutionCaseSummaries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/prosecutionCaseSummary"
+          }
+        }
+      }
+    },
+    "courtCentre": {
+      "type": "object",
+      "properties": {
+        "roomName": {
+          "description": "The name of the court room",
+          "type": "string"
+        }
+      }
+    },
+    "prosecutionCaseSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "prosecutionCaseIdentifier": {
+          "$ref": "#/definitions/prosecutionCaseIdentifier"
+        },
+        "defendants": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/defendant"
+          }
+        }
+      }
+    },
+    "prosecutionCaseIdentifier": {
+      "type": "object",
+      "properties": {
+        "caseURN": {
+          "description": "The case URN",
+          "type": "string"
+        }
+      }
+    },
+    "defendant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "firstName": {
+          "description": "The person forename",
+          "type": "string"
+        },
+        "middleName": {
+          "description": "The person middle name",
+          "type": "string"
+        },
+        "lastName": {
+          "description": "The person last name",
+          "type": "string"
+        }
+      }
+    }
+  }
+}
