@@ -1,7 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view.converter;
 
-import uk.gov.justice.services.messaging.JsonObjects;
-
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
