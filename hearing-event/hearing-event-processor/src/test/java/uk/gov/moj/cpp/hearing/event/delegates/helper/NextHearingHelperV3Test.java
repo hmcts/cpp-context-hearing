@@ -296,6 +296,56 @@ public class NextHearingHelperV3Test  {
     }
 
     @Test
+    public void shouldPopulateNextHearingForMagistrateCourtHearingWithBookingReference() {
+        final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-v3-with-nexthearing-magistratescourt-booking-reference.json");
+        setupMagsMocks(event, null);
+
+        final ResultsSharedV3 resultsSharedV3 = jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), ResultsSharedV3.class);
+
+        final List<ResultLine2> resultLine2s = getResultLines(resultsSharedV3);
+
+        final ResultDefinition resultDefinition = jsonObjectToObjectConverter
+                .convert(givenPayload("/data/resultdefinition-70c98fa6-804d-11e8-adc0-fa7ae01bbebc.json"), ResultDefinition.class);
+
+        final ResultLine2 resultLine = resultsSharedV3.getTargets().get(0).getResultLines().stream()
+                .filter(rl3 -> rl3.getResultLabel().equalsIgnoreCase("Next hearing in magistrates' court"))
+                .findFirst().get();
+
+        final Optional<NextHearing> nextHearing = nextHearingHelperV3.getNextHearing(
+                event, resultDefinition, resultLine2s, resultLine,
+                getPrompts(resultsSharedV3, resultDefinition), resultsSharedV3, resultDefinitions);
+
+        assertValid(nextHearing, JurisdictionType.MAGISTRATES, ZonedDateTimes.fromString("2024-04-30T22:30Z"), "20 MINUTES", firstHearingType, true);
+        assertThat(nextHearing.get().getBookingReference(), is(fromString("b1c2d3e4-f5a6-7890-ab12-cd34ef567890")));
+    }
+
+    @Test
+    public void shouldReturnNullBookingReferenceForMagistrateCourtHearingWithoutBookingReferencePrompt() {
+        final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-v3-with-nexthearing-magistratescourt.json");
+        setupMagsMocks(event, null);
+
+        final ResultsSharedV3 resultsSharedV3 = jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), ResultsSharedV3.class);
+
+        final List<ResultLine2> resultLine2s = getResultLines(resultsSharedV3);
+
+        final ResultDefinition resultDefinition = jsonObjectToObjectConverter
+                .convert(givenPayload("/data/resultdefinition-70c98fa6-804d-11e8-adc0-fa7ae01bbebc.json"), ResultDefinition.class);
+
+        final ResultLine2 resultLine = resultsSharedV3.getTargets().get(0).getResultLines().stream()
+                .filter(rl3 -> rl3.getResultLabel().equalsIgnoreCase("Next hearing in magistrates' court"))
+                .findFirst().get();
+
+        final Optional<NextHearing> nextHearing = nextHearingHelperV3.getNextHearing(
+                event, resultDefinition, resultLine2s, resultLine,
+                getPrompts(resultsSharedV3, resultDefinition), resultsSharedV3, resultDefinitions);
+
+        assertValid(nextHearing, JurisdictionType.MAGISTRATES, ZonedDateTimes.fromString("2024-04-30T22:30Z"), "20 MINUTES", firstHearingType, true);
+        assertThat(nextHearing.get().getBookingReference(), is(nullValue()));
+    }
+
+    @Test
     public void shouldPopulateNextHearingForUnscheduled() {
         final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-v3-with-nexthearing-crowncourt-date-tobe-fixed.json");
 
