@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class ListingCourtRestrictionEventProcessorTest {
 
@@ -55,7 +56,7 @@ public class ListingCourtRestrictionEventProcessorTest {
         final UUID hearingId = randomUUID();
         final List<UUID> caseIds = Arrays.asList(randomUUID(), randomUUID());
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.listing.court-list-restricted"), createObjectBuilder().add("hearingId", hearingId.toString()).build());
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.listing.court-list-restricted"), JsonObjects.createObjectBuilder().add("hearingId", hearingId.toString()).build());
 
         processor.processRestrictCourtListPublicEvent(event);
 

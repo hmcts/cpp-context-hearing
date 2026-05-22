@@ -34,6 +34,7 @@ import javax.json.JsonString;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ApplicationScoped
 public class HearingCaseNoteJPAMapper {
 
@@ -48,16 +49,16 @@ public class HearingCaseNoteJPAMapper {
         hearingCaseNote.setId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()));
         hearingCaseNote.setHearing(hearing);
 
-        final JsonArrayBuilder prosecutionCases = createArrayBuilder();
+        final JsonArrayBuilder prosecutionCases = JsonObjects.createArrayBuilder();
         pojo.getProsecutionCases().forEach(caseId -> prosecutionCases.add(caseId.toString()));
 
-        final JsonObjectBuilder payLoad = createObjectBuilder()
+        final JsonObjectBuilder payLoad = JsonObjects.createObjectBuilder()
                 .add("note", pojo.getNote())
                 .add("noteType", pojo.getNoteType().toString())
                 .add("originatingHearingId", pojo.getOriginatingHearingId().toString())
                 .add("noteDateTime", ZonedDateTimes.toString(pojo.getNoteDateTime()))
                 .add("prosecutionCases", prosecutionCases)
-                .add("courtClerk", createObjectBuilder()
+                .add("courtClerk", JsonObjects.createObjectBuilder()
                         .add("userId", pojo.getCourtClerk().getUserId().toString())
                         .add("firstName", pojo.getCourtClerk().getFirstName())
                         .add("lastName", pojo.getCourtClerk().getLastName())

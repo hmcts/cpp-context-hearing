@@ -35,6 +35,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class ReferenceDataServiceTest {
     private static final String FIELD_PLEA_STATUS_TYPES = "pleaStatusTypes";
@@ -66,7 +67,7 @@ public class ReferenceDataServiceTest {
         verify(requester).requestAsAdmin(argumentCaptorForRequestEnvelope.capture());
         final JsonEnvelope requestEnvelope = argumentCaptorForRequestEnvelope.getValue();
         assertThat(requestEnvelope.metadata().name(), is("referencedata.query.courtrooms"));
-        final JsonObject expectedPayload = createObjectBuilder()
+        final JsonObject expectedPayload = JsonObjects.createObjectBuilder()
                 .add("oucodeL1Code", "C")
                 .build();
         final JsonObject payloadOfRequestEnvelope = requestEnvelope.payloadAsJsonObject();
@@ -87,15 +88,15 @@ public class ReferenceDataServiceTest {
     }
 
     private JsonObject buildPleaStatusTypesPayload(){
-        return createObjectBuilder().add(FIELD_PLEA_STATUS_TYPES, createArrayBuilder()
-                .add(createObjectBuilder().add(FIELD_PLEA_VALUE, GUILTY).add(FIELD_PLEA_TYPE_GUILTY_FLAG, GUILTY_FLAG_YES))
-                .add(createObjectBuilder().add(FIELD_PLEA_VALUE, NOT_GUILTY).add(FIELD_PLEA_TYPE_GUILTY_FLAG, GUILTY_FLAG_NO)))
+        return JsonObjects.createObjectBuilder().add(FIELD_PLEA_STATUS_TYPES, JsonObjects.createArrayBuilder()
+                .add(JsonObjects.createObjectBuilder().add(FIELD_PLEA_VALUE, GUILTY).add(FIELD_PLEA_TYPE_GUILTY_FLAG, GUILTY_FLAG_YES))
+                .add(JsonObjects.createObjectBuilder().add(FIELD_PLEA_VALUE, NOT_GUILTY).add(FIELD_PLEA_TYPE_GUILTY_FLAG, GUILTY_FLAG_NO)))
                 .build();
     }
 
     private JsonEnvelope generateReferenceDataServiceResponse(final List<UUID> expectedCourtCentreIds) {
-        return createEnvelope(".", createObjectBuilder()
-                .add("organisationunits", createArrayBuilder()
+        return createEnvelope(".", JsonObjects.createObjectBuilder()
+                .add("organisationunits", JsonObjects.createArrayBuilder()
                         .add(buildOrgUnit(expectedCourtCentreIds.get(0)))
                         .add(buildOrgUnit(expectedCourtCentreIds.get(1)))
                 )
@@ -103,7 +104,7 @@ public class ReferenceDataServiceTest {
     }
 
     private JsonObject buildOrgUnit(final UUID courtCentreId) {
-        return createObjectBuilder()
+        return JsonObjects.createObjectBuilder()
                 .add("id", courtCentreId.toString())
                 .build();
     }
@@ -114,18 +115,18 @@ public class ReferenceDataServiceTest {
         final UUID courtRoomId = randomUUID();
 
         final JsonEnvelope responseEnvelope = createEnvelope(".",
-                createObjectBuilder()
-                        .add("organisationunits", createArrayBuilder()
-                                .add(createObjectBuilder()
+                JsonObjects.createObjectBuilder()
+                        .add("organisationunits", JsonObjects.createArrayBuilder()
+                                .add(JsonObjects.createObjectBuilder()
                                         .add("id", courtCentreId.toString())
                                         .add("oucodeL3Name", "Centre English")
                                         .add("oucodeL3WelshName", "Centre Welsh")
-                                        .add("courtrooms", createArrayBuilder()
-                                                .add(createObjectBuilder()
+                                        .add("courtrooms", JsonObjects.createArrayBuilder()
+                                                .add(JsonObjects.createObjectBuilder()
                                                         .add("id", randomUUID().toString())
                                                         .add("courtroomName", "Other Room")
                                                         .add("welshCourtroomName", "Other Welsh Room"))
-                                                .add(createObjectBuilder()
+                                                .add(JsonObjects.createObjectBuilder()
                                                         .add("id", courtRoomId.toString())
                                                         .add("courtroomName", "Target Room")
                                                         .add("welshCourtroomName", "Welsh Target Room")))))
@@ -155,13 +156,13 @@ public class ReferenceDataServiceTest {
         final UUID courtRoomId = randomUUID();
 
         final JsonEnvelope responseEnvelope = createEnvelope(".",
-                createObjectBuilder()
-                        .add("organisationunits", createArrayBuilder()
-                                .add(createObjectBuilder()
+                JsonObjects.createObjectBuilder()
+                        .add("organisationunits", JsonObjects.createArrayBuilder()
+                                .add(JsonObjects.createObjectBuilder()
                                         .add("id", courtCentreId.toString())
                                         .add("oucodeL3Name", "Centre")
-                                        .add("courtrooms", createArrayBuilder()
-                                                .add(createObjectBuilder()
+                                        .add("courtrooms", JsonObjects.createArrayBuilder()
+                                                .add(JsonObjects.createObjectBuilder()
                                                         .add("id", randomUUID().toString())
                                                         .add("courtroomName", "Other Room")))))
                         .build());
@@ -182,8 +183,8 @@ public class ReferenceDataServiceTest {
     @Test
     public void resolveCourtCentre_shouldReturnEmpty_whenNoOrganisationUnits() {
         final JsonEnvelope responseEnvelope = createEnvelope(".",
-                createObjectBuilder()
-                        .add("organisationunits", createArrayBuilder())
+                JsonObjects.createObjectBuilder()
+                        .add("organisationunits", JsonObjects.createArrayBuilder())
                         .build());
         when(requester.requestAsAdmin(any(JsonEnvelope.class))).thenReturn(responseEnvelope);
 

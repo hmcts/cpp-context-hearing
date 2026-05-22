@@ -115,6 +115,7 @@ import org.hamcrest.Matchers;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Test;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 public class InitiateHearingIT extends AbstractIT {
 
     private static final String COURT_ROOM_NAME = "Room 1";
@@ -1448,7 +1449,7 @@ public class InitiateHearingIT extends AbstractIT {
 
         final UUID hearingId = hearing.getId();
 
-        final JsonObject commandPayload = createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("estimatedMinutes", 30)
                 .build();
@@ -1472,7 +1473,7 @@ public class InitiateHearingIT extends AbstractIT {
     }
 
     private void markHearingAsADuplicate(final UUID hearingId) {
-        final JsonObject payload = createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .build();
 
         makeCommand(getRequestSpec(), "hearing.mark-as-duplicate")
@@ -1484,7 +1485,7 @@ public class InitiateHearingIT extends AbstractIT {
     }
 
     private void markHearingAsADuplicateV2(final UUID hearingId) {
-        final JsonObject payload = createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .build();
 
         makeCommand(getRequestSpec(), "hearing.mark-as-duplicate-v2")
@@ -1496,7 +1497,7 @@ public class InitiateHearingIT extends AbstractIT {
     }
 
     private void markHearingAsADuplicateWithReason(final UUID hearingId) {
-        final JsonObject payload = createObjectBuilder().add("reason", "Duplicate hearing was added by accident")
+        final JsonObject payload = JsonObjects.createObjectBuilder().add("reason", "Duplicate hearing was added by accident")
                 .build();
 
         makeCommand(getRequestSpec(), "hearing.mark-as-duplicate-with-reason")
@@ -1508,7 +1509,7 @@ public class InitiateHearingIT extends AbstractIT {
     }
 
     private void addWitnessToHearing(final UUID hearingId, final String witnessName) {
-        final JsonObject payload = createObjectBuilder().add("witness", witnessName)
+        final JsonObject payload = JsonObjects.createObjectBuilder().add("witness", witnessName)
                 .build();
 
         makeCommand(getRequestSpec(), "hearing.add-witness")

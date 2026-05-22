@@ -44,6 +44,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class DefendantsWelshTranslationsCommandHandlerTest {
 
@@ -102,9 +103,9 @@ public class DefendantsWelshTranslationsCommandHandlerTest {
 
     private JsonEnvelope createHearingCommandSaveDefendantsWelshTranslationsEnvelopeForHearing(final UUID hearingId,
                                                                                                final DefendantsWithWelshTranslationsCommand defendantsWithWelshTranslationsCommand) {
-        final JsonObjectBuilder payloadBuilder = createObjectBuilder()
+        final JsonObjectBuilder payloadBuilder = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
-                .add("defendantsWelshList", createArrayBuilder().add(objectToJsonObjectConverter.convert(defendantsWithWelshTranslationsCommand)).build());
+                .add("defendantsWelshList", JsonObjects.createArrayBuilder().add(objectToJsonObjectConverter.convert(defendantsWithWelshTranslationsCommand)).build());
 
         return JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.command.save-defendants-welsh-translations"), payloadBuilder.build());
     }

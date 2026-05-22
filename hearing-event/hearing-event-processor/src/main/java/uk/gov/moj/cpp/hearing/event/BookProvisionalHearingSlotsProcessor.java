@@ -25,6 +25,7 @@ import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ServiceComponent(EVENT_PROCESSOR)
 public class BookProvisionalHearingSlotsProcessor {
 
@@ -52,13 +53,13 @@ public class BookProvisionalHearingSlotsProcessor {
         }
 
         final BookProvisionalHearingSlots bookProvisionalHearingSlots = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), BookProvisionalHearingSlots.class);
-        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
         bookProvisionalHearingSlots.getSlots().forEach(
                 bookProvisionalHearingSlotsCommand -> {
                     final String hearingStartTimeStr = Objects.nonNull(bookProvisionalHearingSlotsCommand.getHearingStartTime()) ?
                             bookProvisionalHearingSlotsCommand.getHearingStartTime().format(DATE_TIME_FORMATTER) : StringUtils.EMPTY;
                     arrayBuilder.add(
-                            createObjectBuilder().add("courtScheduleId", bookProvisionalHearingSlotsCommand.getCourtScheduleId().toString())
+                            JsonObjects.createObjectBuilder().add("courtScheduleId", bookProvisionalHearingSlotsCommand.getCourtScheduleId().toString())
                                     .add("hearingStartTime", hearingStartTimeStr)
                                     .build()
                     );
@@ -66,18 +67,18 @@ public class BookProvisionalHearingSlotsProcessor {
 
         );
 
-        final JsonObject payload = createObjectBuilder().add("provisionalSlots",arrayBuilder.build()).build();
+        final JsonObject payload = JsonObjects.createObjectBuilder().add("provisionalSlots",arrayBuilder.build()).build();
 
         final ProvisionalBookingServiceResponse provisionalBookingServiceResponse = provisionalBookingService.bookSlots(payload);
 
 
         //raise public event for UI
         if (!provisionalBookingServiceResponse.hasError()) {
-            sender.send(Enveloper.envelop(createObjectBuilder().add("bookingId", provisionalBookingServiceResponse.getBookingId()).build())
+            sender.send(Enveloper.envelop(JsonObjects.createObjectBuilder().add("bookingId", provisionalBookingServiceResponse.getBookingId()).build())
                     .withName("public.hearing.hearing-slots-provisionally-booked")
                     .withMetadataFrom(event));
         } else {
-            sender.send(Enveloper.envelop(createObjectBuilder().add("error", provisionalBookingServiceResponse.getErrorMessage()).build())
+            sender.send(Enveloper.envelop(JsonObjects.createObjectBuilder().add("error", provisionalBookingServiceResponse.getErrorMessage()).build())
                     .withName("public.hearing.hearing-slots-provisionally-booked")
                     .withMetadataFrom(event));
         }

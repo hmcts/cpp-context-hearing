@@ -128,6 +128,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.json.JSONObject;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 public class UseCases {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -734,9 +735,9 @@ public class UseCases {
         sendMessage(
                 getPublicTopicInstance().createProducer(),
                 eventName,
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("defendant",
-                                createObjectBuilder(jsonObject).build())
+                                JsonObjects.createObjectBuilder(jsonObject).build())
                         .build(),
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
 
@@ -970,9 +971,9 @@ public class UseCases {
         sendMessage(
                 getPublicTopicInstance().createProducer(),
                 eventName,
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("foooo", "to test additional properties")
-                        .add("defendants", createArrayBuilder().add(createObjectBuilder(jsonObject).build()))
+                        .add("defendants", JsonObjects.createArrayBuilder().add(JsonObjects.createObjectBuilder(jsonObject).build()))
                         .build(),
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
 
@@ -990,8 +991,8 @@ public class UseCases {
         sendMessage(
                 getPublicTopicInstance().createProducer(),
                 eventName,
-                createObjectBuilder()
-                        .add("courtApplication", createObjectBuilder(jsonObject).build())
+                JsonObjects.createObjectBuilder()
+                        .add("courtApplication", JsonObjects.createObjectBuilder(jsonObject).build())
                         .build(),
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
 
@@ -1004,7 +1005,7 @@ public class UseCases {
         sendMessage(
                 getPublicTopicInstance().createProducer(),
                 eventName,
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("applicationId", applicationId)
                         .add("offenceId", offenceId)
                         .add("subjectId", subjectId)
@@ -1021,7 +1022,7 @@ public class UseCases {
         sendMessage(
                 getPublicTopicInstance().createProducer(),
                 eventName,
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("applicationId", applicationId)
                         .add("subjectId", subjectId)
                         .add("associatedDefenceOrganisation", associatedOrganisation)
@@ -1034,7 +1035,7 @@ public class UseCases {
                                                   final InterpreterIntermediary interpreterIntermediary) {
         try {
 
-            final JsonObject addInterpreterIntermediary = createObjectBuilder().add("interpreterIntermediary", objectToJsonObject(interpreterIntermediary)).build();
+            final JsonObject addInterpreterIntermediary = JsonObjects.createObjectBuilder().add("interpreterIntermediary", objectToJsonObject(interpreterIntermediary)).build();
 
             makeCommand(requestSpec, "hearing.update-hearing")
                     .ofType("application/vnd.hearing.add-interpreter-intermediary+json")
@@ -1104,14 +1105,14 @@ public class UseCases {
     public static void updateCaseMarkers(final UUID prosecutionCaseId, final UUID hearingId, final List<Marker> markers) throws Exception {
 
         final String eventName = "public.progression.case-markers-updated";
-        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
         for (final Marker marker : markers) {
             final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
             final String payloadAsString = mapper.writeValueAsString(marker);
             final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
-            arrayBuilder.add(createObjectBuilder(jsonObject).build());
+            arrayBuilder.add(JsonObjects.createObjectBuilder(jsonObject).build());
         }
-        final JsonObject payload = createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("prosecutionCaseId", prosecutionCaseId.toString())
                 .add("hearingId", hearingId.toString())
                 .add("caseMarkers", arrayBuilder)
@@ -1126,7 +1127,7 @@ public class UseCases {
 
     public static void removeCaseFromGroupCases(final UUID groupId, final UUID masterCaseId, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) throws Exception {
         final String eventName = "public.progression.case-removed-from-group-cases";
-        final JsonObjectBuilder jsonObjectBuilder = createObjectBuilder()
+        final JsonObjectBuilder jsonObjectBuilder = JsonObjects.createObjectBuilder()
                 .add("groupId", groupId.toString())
                 .add("masterCaseId", masterCaseId.toString())
                 .add("removedCase", objectToJsonObject(removedCase));
@@ -1146,7 +1147,7 @@ public class UseCases {
 
         final String eventName = "public.events.listing.next-hearing-day-changed";
 
-        final JsonObject payload = createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("seedingHearingId", seedingHearingId.toString())
                 .add("hearingId", hearingId.toString())
                 .add("hearingStartDate", nextHearingStartDate.format(DATE_TIME_FORMATTER))
@@ -1163,11 +1164,11 @@ public class UseCases {
     public static void updateProsecutor(final UUID prosecutionCaseId, final List<UUID> hearingIds, final CpsProsecutorUpdated cpsProsecutorUpdated) throws JsonProcessingException {
 
         final String eventName = "public.progression.events.cps-prosecutor-updated";
-        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
         for (final UUID hearingId : hearingIds) {
             arrayBuilder.add(hearingId.toString());
         }
-        final JsonObject payload = createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("prosecutionCaseId", prosecutionCaseId.toString())
                 .add("hearingIds", arrayBuilder.build())
                 .add("prosecutionAuthorityId", cpsProsecutorUpdated.getProsecutionAuthorityId().toString())
@@ -1209,7 +1210,7 @@ public class UseCases {
 
     public static void correctHearingDaysWithoutCourtCentre(final RequestSpecification requestSpec, final UUID hearingId, final List<HearingDay> hearingDays) {
 
-        final JsonArrayBuilder hearingDayArrayBuilder = createArrayBuilder();
+        final JsonArrayBuilder hearingDayArrayBuilder = JsonObjects.createArrayBuilder();
         hearingDays.forEach(d -> {
             try {
                 hearingDayArrayBuilder.add(objectToJsonObject(d));
@@ -1218,7 +1219,7 @@ public class UseCases {
             }
         });
 
-        final JsonObject commandPayload = createObjectBuilder().add("id", hearingId.toString())
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder().add("id", hearingId.toString())
                 .add("hearingDays", hearingDayArrayBuilder).build();
 
 

@@ -107,6 +107,7 @@ import org.hamcrest.core.Is;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @SuppressWarnings("unchecked")
 @NotThreadSafe
 public class HearingEventsIT extends AbstractIT {
@@ -601,16 +602,16 @@ public class HearingEventsIT extends AbstractIT {
     private JsonObject updateHearingEvents(final RequestSpecification requestSpec,
                                            final UUID hearingId, final List<HearingEvent> hearingEvents,
                                            final String updateEventsEndpoint, final Header headers) {
-        final JsonArrayBuilder hearingEventsArray = createArrayBuilder();
+        final JsonArrayBuilder hearingEventsArray = JsonObjects.createArrayBuilder();
         hearingEvents.stream().forEach(event -> {
-            final JsonObject hearingEvent = createObjectBuilder()
+            final JsonObject hearingEvent = JsonObjects.createObjectBuilder()
                     .add("hearingEventId", event.getHearingEventId().toString())
                     .add("recordedLabel", event.getRecordedLabel())
                     .build();
             hearingEventsArray.add(hearingEvent);
         });
         final JsonObject payload =
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingEvents", hearingEventsArray).build();
         final Utilities.EventListener publicEventTopic =
                 listenFor("public.hearing.events-updated")

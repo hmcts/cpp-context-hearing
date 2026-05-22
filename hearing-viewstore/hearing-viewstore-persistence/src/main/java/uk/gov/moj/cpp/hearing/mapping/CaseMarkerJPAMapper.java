@@ -25,6 +25,7 @@ import javax.json.JsonReader;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @SuppressWarnings("squid:S1186")
 @ApplicationScoped
 public class CaseMarkerJPAMapper {
@@ -53,7 +54,7 @@ public class CaseMarkerJPAMapper {
         caseMarker.setProsecutionCase(prosecutionCase);
         caseMarker.setProsecutionCaseId(prosecutionCase.getId().getId());
 
-        final JsonObject payload = createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add(ID, pojo.getId().toString())
                 .add(MARKER_TYPE_ID, pojo.getMarkerTypeid().toString())
                 .add(MARKER_TYPE_CODE, pojo.getMarkerTypeCode())

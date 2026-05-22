@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ApplicationScoped
 public class DraftResultJPAMapper {
 

@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 class UpdateTargetCommandHandlerTest {
 
@@ -62,7 +63,7 @@ class UpdateTargetCommandHandlerTest {
         final UUID hearingId = UUID.randomUUID();
         final UUID targetId = UUID.randomUUID();
         final LocalDate hearingDay = LocalDate.now();
-        final JsonObject payload = createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("targetId", targetId.toString())
                 .add("hearingDay", hearingDay.toString())

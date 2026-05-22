@@ -31,6 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class CustodyTimeLimitEventProcessorTest {
 
@@ -49,9 +50,9 @@ public class CustodyTimeLimitEventProcessorTest {
         final String offence1Id = randomUUID().toString();
         final String offence2Id = randomUUID().toString();
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.event.custody-time-limit-clock-stopped"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingId", hearingId)
-                        .add("offenceIds", createArrayBuilder()
+                        .add("offenceIds", JsonObjects.createArrayBuilder()
                                 .add(offence1Id)
                                 .add(offence2Id)
                                 .build())
@@ -80,8 +81,8 @@ public class CustodyTimeLimitEventProcessorTest {
         final String extendedCustodyTimeLimit = "2021-05-23";
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.events.progression.custody-time-limit-extended"),
-                createObjectBuilder()
-                        .add("hearingIds", createArrayBuilder()
+                JsonObjects.createObjectBuilder()
+                        .add("hearingIds", JsonObjects.createArrayBuilder()
                                 .add(hearingId1)
                                 .add(hearingId2)
                                 .build())

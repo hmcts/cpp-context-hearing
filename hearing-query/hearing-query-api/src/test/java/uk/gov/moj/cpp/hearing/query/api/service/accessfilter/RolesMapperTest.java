@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class RolesMapperTest {
     public static final String ROLES = "allRoles";
@@ -59,13 +60,13 @@ public class RolesMapperTest {
         final Metadata metadata = metadataBuilder().withName("usersgroups.get-logged-in-user-permissions")
                 .withId(randomUUID()).withUserId(userId).build();
 
-        final JsonObjectBuilder role1Json = createObjectBuilder();
+        final JsonObjectBuilder role1Json = JsonObjects.createObjectBuilder();
         role1Json.add(ROLE_ID, ROLE_ID1.toString());
         role1Json.add(DESCRIPTION, DESCRIPTION1);
         role1Json.add(LABEL, LABEL1);
         role1Json.add(SELECTABLE, SELECTABLE1);
 
-        final JsonObjectBuilder role2Json = createObjectBuilder();
+        final JsonObjectBuilder role2Json = JsonObjects.createObjectBuilder();
         role2Json.add(ROLE_ID, ROLE_ID2.toString());
         role2Json.add(DESCRIPTION, DESCRIPTION2);
         role2Json.add(LABEL, LABEL2);
@@ -74,11 +75,11 @@ public class RolesMapperTest {
         role2Json.add(START_DATE, START_DATE2.toString());
         role2Json.add(END_DATE, END_DATE2.toString());
 
-        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
         arrayBuilder.add(role1Json);
         arrayBuilder.add(role2Json);
 
-        final JsonObjectBuilder permissions = createObjectBuilder();
+        final JsonObjectBuilder permissions = JsonObjects.createObjectBuilder();
         permissions.add(SWITCHABLE_ROLES, arrayBuilder.build());
 
         final Envelope envelope = Envelope.envelopeFrom(metadata, permissions.build());
@@ -92,7 +93,7 @@ public class RolesMapperTest {
         final Metadata metadata = metadataBuilder().withName("usersgroups.get-logged-in-user-permissions")
                 .withId(randomUUID()).withUserId(userId).build();
 
-        final Envelope envelope = Envelope.envelopeFrom(metadata,  createObjectBuilder().build());
+        final Envelope envelope = Envelope.envelopeFrom(metadata,  JsonObjects.createObjectBuilder().build());
         final List<UserRole> switchableRoles = rolesMapper.switchableRoles(envelope);
         assertThat(switchableRoles.size(), is(0));
     }
@@ -103,13 +104,13 @@ public class RolesMapperTest {
         final Metadata metadata = metadataBuilder().withName("usersgroups.roles")
                 .withId(randomUUID()).withUserId(userId).build();
 
-        final JsonObjectBuilder role1Json = createObjectBuilder();
+        final JsonObjectBuilder role1Json = JsonObjects.createObjectBuilder();
         role1Json.add(ROLE_ID, ROLE_ID1.toString());
         role1Json.add(DESCRIPTION, DESCRIPTION1);
         role1Json.add(LABEL, LABEL1);
         role1Json.add(SELECTABLE, SELECTABLE1);
 
-        final JsonObjectBuilder role2Json = createObjectBuilder();
+        final JsonObjectBuilder role2Json = JsonObjects.createObjectBuilder();
         role2Json.add(ROLE_ID, ROLE_ID2.toString());
         role2Json.add(DESCRIPTION, DESCRIPTION2);
         role2Json.add(LABEL, LABEL2);
@@ -118,11 +119,11 @@ public class RolesMapperTest {
         role2Json.add(START_DATE, START_DATE2.toString());
         role2Json.add(END_DATE, END_DATE2.toString());
 
-        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
         arrayBuilder.add(role1Json);
         arrayBuilder.add(role2Json);
 
-        final JsonObjectBuilder permissions = createObjectBuilder();
+        final JsonObjectBuilder permissions = JsonObjects.createObjectBuilder();
         permissions.add(ROLES, arrayBuilder.build());
 
         final Envelope envelope = Envelope.envelopeFrom(metadata, permissions.build());
@@ -136,7 +137,7 @@ public class RolesMapperTest {
         final Metadata metadata = metadataBuilder().withName("usersgroups.roles")
                 .withId(randomUUID()).withUserId(userId).build();
 
-        final Envelope envelope = Envelope.envelopeFrom(metadata, createObjectBuilder().build());
+        final Envelope envelope = Envelope.envelopeFrom(metadata, JsonObjects.createObjectBuilder().build());
         final List<UserRole> roles = rolesMapper.mapRoles(envelope);
         assertThat(roles.size(),is(0));
     }

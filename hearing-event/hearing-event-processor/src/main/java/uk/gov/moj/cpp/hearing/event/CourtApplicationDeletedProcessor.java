@@ -18,6 +18,7 @@ import javax.json.JsonObjectBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ServiceComponent(EVENT_PROCESSOR)
 public class CourtApplicationDeletedProcessor {
 
@@ -32,7 +33,7 @@ public class CourtApplicationDeletedProcessor {
             LOGGER.debug("Received '{}' event with payload {}", "public.progression.events.court-application-deleted", envelope.toObfuscatedDebugString());
         }
 
-        final JsonObjectBuilder commandBuilder = createObjectBuilder();
+        final JsonObjectBuilder commandBuilder = JsonObjects.createObjectBuilder();
         final JsonObject payload = envelope.payloadAsJsonObject();
         commandBuilder
                 .add("hearingId", payload.getJsonString("hearingId"))

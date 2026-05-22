@@ -28,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class ReferenceDataLoaderTest {
     @Mock
@@ -50,7 +51,7 @@ public class ReferenceDataLoaderTest {
         verify(requester).requestAsAdmin(argumentCaptorForRequestEnvelope.capture());
         final JsonEnvelope requestEnvelope = argumentCaptorForRequestEnvelope.getValue();
         assertThat(requestEnvelope.metadata().name(), is("referencedata.query.courtrooms"));
-        final JsonObject expectedPayload = createObjectBuilder()
+        final JsonObject expectedPayload = JsonObjects.createObjectBuilder()
                 .add("oucodeL1Code", "C")
                 .build();
         final JsonObject payloadOfRequestEnvelope = requestEnvelope.payloadAsJsonObject();
@@ -61,8 +62,8 @@ public class ReferenceDataLoaderTest {
     }
 
     private JsonEnvelope generateReferenceDataServiceResponse(final List<UUID> expectedCourtCentreIds) {
-        return createEnvelope(".", createObjectBuilder()
-                .add("organisationunits", createArrayBuilder()
+        return createEnvelope(".", JsonObjects.createObjectBuilder()
+                .add("organisationunits", JsonObjects.createArrayBuilder()
                         .add(buildOrgUnit(expectedCourtCentreIds.get(0)))
                         .add(buildOrgUnit(expectedCourtCentreIds.get(1)))
                 )
@@ -70,7 +71,7 @@ public class ReferenceDataLoaderTest {
     }
 
     private JsonObject buildOrgUnit(final UUID courtCentreId) {
-        return createObjectBuilder()
+        return JsonObjects.createObjectBuilder()
                 .add("id", courtCentreId.toString())
                 .build();
     }

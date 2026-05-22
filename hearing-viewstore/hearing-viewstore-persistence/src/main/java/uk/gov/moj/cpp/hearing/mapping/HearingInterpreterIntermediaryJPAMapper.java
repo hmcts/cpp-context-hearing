@@ -32,6 +32,7 @@ import javax.json.JsonString;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ApplicationScoped
 public class HearingInterpreterIntermediaryJPAMapper {
 
@@ -49,7 +50,7 @@ public class HearingInterpreterIntermediaryJPAMapper {
         hearingInterpreterIntermediary.setId(new HearingSnapshotKey(pojo.getId(), hearing.getId()));
         hearingInterpreterIntermediary.setHearing(hearing);
 
-        final JsonObjectBuilder attendant = createObjectBuilder();
+        final JsonObjectBuilder attendant = JsonObjects.createObjectBuilder();
         if(pojo.getAttendant().getAttendantType() == uk.gov.justice.hearing.courts.AttendantType.DEFENDANTS) {
             attendant.add(ATTENDANT_TYPE, pojo.getAttendant().getAttendantType().toString());
             attendant.add("defendantId", pojo.getAttendant().getDefendantId().toString());
@@ -60,10 +61,10 @@ public class HearingInterpreterIntermediaryJPAMapper {
             attendant.add("name", pojo.getAttendant().getName());
         }
 
-        final JsonArrayBuilder attendanceDays = createArrayBuilder();
+        final JsonArrayBuilder attendanceDays = JsonObjects.createArrayBuilder();
         pojo.getAttendanceDays().forEach(localDate -> attendanceDays.add(localDate.toString()));
 
-        final JsonObjectBuilder payLoad = createObjectBuilder()
+        final JsonObjectBuilder payLoad = JsonObjects.createObjectBuilder()
                 .add("attendanceDays", attendanceDays)
                 .add(ATTENDANT, attendant)
                 .add("firstName", pojo.getFirstName())

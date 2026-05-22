@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 
+import uk.gov.justice.services.messaging.JsonObjects;
 public class DefendantLegalAidStatusUpdateIT extends AbstractIT {
 
     private final String defendantLegalAidStatusUpdatedEvent = "public.progression.defendant-legalaid-status-updated";
@@ -43,7 +44,7 @@ public class DefendantLegalAidStatusUpdateIT extends AbstractIT {
         final UUID defendantId = hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId();
         final UUID caseId = hearingOne.getHearing().getProsecutionCases().get(0).getId();
 
-        final JsonObject commandPayload = createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                 .add("defendantId", defendantId.toString())
                 .add("legalAidStatus", "Granted")
                 .add("caseId", caseId.toString())

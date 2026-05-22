@@ -31,6 +31,7 @@ import javax.json.JsonString;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ApplicationScoped
 public class HearingRespondentCounselJPAMapper {
 
@@ -46,13 +47,13 @@ public class HearingRespondentCounselJPAMapper {
         respondentCounsel.setId(new HearingSnapshotKey(pojo.getId(), hearing.getId()));
         respondentCounsel.setHearing(hearing);
 
-        final JsonArrayBuilder respondents = createArrayBuilder();
+        final JsonArrayBuilder respondents = JsonObjects.createArrayBuilder();
         pojo.getRespondents().forEach(caseId -> respondents.add(caseId.toString()));
 
-        final JsonArrayBuilder attendanceDays = createArrayBuilder();
+        final JsonArrayBuilder attendanceDays = JsonObjects.createArrayBuilder();
         pojo.getAttendanceDays().forEach(localDate -> attendanceDays.add(localDate.toString()));
 
-        final JsonObjectBuilder payLoad = createObjectBuilder()
+        final JsonObjectBuilder payLoad = JsonObjects.createObjectBuilder()
                 .add("attendanceDays", attendanceDays)
                 .add("firstName", pojo.getFirstName())
                 .add("lastName", pojo.getLastName())

@@ -31,6 +31,7 @@ import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFact
 
 import javax.json.JsonObject;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class NextHearingEventProcessorTest {
 
@@ -59,7 +60,7 @@ public class NextHearingEventProcessorTest {
         final String seedingHearingId = randomUUID().toString();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.events.listing.next-hearing-day-changed"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("hearingId", hearingId)
                         .add("seedingHearingId", seedingHearingId)
                         .add("hearingStartDate", "2021-06-20T00:00:00.000Z")

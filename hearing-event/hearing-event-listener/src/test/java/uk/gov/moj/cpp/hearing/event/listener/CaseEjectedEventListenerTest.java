@@ -33,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class CaseEjectedEventListenerTest {
     @Mock
@@ -65,9 +66,9 @@ public class CaseEjectedEventListenerTest {
 
     }
     private JsonEnvelope getCaseEjectedEventEnvelope(final UUID hearingId) {
-        JsonObject payload = createObjectBuilder()
+        JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("prosecutionCaseId", randomUUID().toString())
-                .add("hearingIds", createArrayBuilder().add(hearingId.toString()))
+                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()))
                 .build();
         final Metadata metadata = metadataOf(randomUUID(), "event-name").build();
 

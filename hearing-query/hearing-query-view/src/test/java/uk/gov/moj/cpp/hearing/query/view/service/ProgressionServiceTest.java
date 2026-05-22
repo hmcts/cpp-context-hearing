@@ -31,6 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class ProgressionServiceTest {
 
@@ -80,10 +81,10 @@ public class ProgressionServiceTest {
     @Test
     void shouldGetApplicationStatusForGivenListOfApplicationsIds() {
         when(requester.requestAsAdmin(any(), any(Class.class))).thenReturn(jsonEnvelopeMock);
-        when(jsonEnvelopeMock.payload()).thenReturn(createObjectBuilder()
-                .add(APPLICATIONS_WITH_STATUS, createArrayBuilder()
-                        .add(createObjectBuilder().add(APPLICATION_ID, "uuid-1").add(APPLICATION_STATUS, "LISTED"))
-                        .add(createObjectBuilder().add(APPLICATION_ID, "uuid-2").add(APPLICATION_STATUS, "FINALISED"))
+        when(jsonEnvelopeMock.payload()).thenReturn(JsonObjects.createObjectBuilder()
+                .add(APPLICATIONS_WITH_STATUS, JsonObjects.createArrayBuilder()
+                        .add(JsonObjects.createObjectBuilder().add(APPLICATION_ID, "uuid-1").add(APPLICATION_STATUS, "LISTED"))
+                        .add(JsonObjects.createObjectBuilder().add(APPLICATION_ID, "uuid-2").add(APPLICATION_STATUS, "FINALISED"))
                         .build())
                 .build());
 

@@ -79,6 +79,7 @@ import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @SuppressWarnings({"squid:S1188", "squid:S1612", "squid:UnusedPrivateMethod", "squid:S4144"})
 public class PublishResultsDelegate {
 
@@ -210,7 +211,7 @@ public class PublishResultsDelegate {
                 .setShadowListedOffences(getOffenceShadowListedForMagistratesNextHearing(resultsShared));
 
         final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingResulted);
-        final JsonEnvelope successEvent = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted-success"), createObjectBuilder().build());
+        final JsonEnvelope successEvent = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted-success"), JsonObjects.createObjectBuilder().build());
         sender.send(successEvent);
         final JsonEnvelope jsonEnvelope = this.enveloper.withMetadataFrom(context, "public.events.hearing.hearing-resulted").apply(jsonObject);
         if (LOGGER.isDebugEnabled()) {

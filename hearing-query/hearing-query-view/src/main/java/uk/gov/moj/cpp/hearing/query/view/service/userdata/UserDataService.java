@@ -27,6 +27,7 @@ import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 public class UserDataService {
 
     private static final String GET_USERS = "usersgroups.search-users";
@@ -48,7 +49,7 @@ public class UserDataService {
         if (Strings.isNullOrEmpty(userIds)) {
             return Collections.emptyList();
         }
-        final JsonObject params = createObjectBuilder()
+        final JsonObject params = JsonObjects.createObjectBuilder()
                 .add(USER_IDS, userIds)
                 .build();
         final Envelope<JsonObject> requestEnvelop = envelop(params)
@@ -61,7 +62,7 @@ public class UserDataService {
     }
 
     public List<Permission> getUserPermissionForApplicationTypes(final Metadata metadata) {
-        final JsonObject getOrganisationForUserRequest = createObjectBuilder()
+        final JsonObject getOrganisationForUserRequest = JsonObjects.createObjectBuilder()
                 .add(ACTION, ACCESS_TO_STANDALONE_APPLICATION)
                 .build();
         final MetadataBuilder metadataWithActionName = Envelope.metadataFrom(metadata).withName("usersgroups.is-logged-in-user-has-permission-for-action");

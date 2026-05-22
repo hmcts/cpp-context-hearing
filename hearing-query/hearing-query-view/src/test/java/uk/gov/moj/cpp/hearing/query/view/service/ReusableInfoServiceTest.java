@@ -46,6 +46,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class ReusableInfoServiceTest {
 
@@ -113,9 +114,9 @@ public class ReusableInfoServiceTest {
         final UUID masterDefendantId = UUID.randomUUID();
         Defendant defendant = new Defendant.Builder()
                 .withMasterDefendantId(masterDefendantId).build();
-        final JsonObject jsonObj = createObjectBuilder()
-                .add("reusablePrompts",createArrayBuilder().add("reusablePrompts1").add("reusablePrompts2").build())
-                .add("reusableResults",createArrayBuilder().add("reusableResults1").add("reusableResults2").build())
+        final JsonObject jsonObj = JsonObjects.createObjectBuilder()
+                .add("reusablePrompts",JsonObjects.createArrayBuilder().add("reusablePrompts1").add("reusablePrompts2").build())
+                .add("reusableResults",JsonObjects.createArrayBuilder().add("reusableResults1").add("reusableResults2").build())
                 .build();
         final ReusableInfo reusableInfo = ReusableInfo.builder()
                 .withId(masterDefendantId)
@@ -123,8 +124,8 @@ public class ReusableInfoServiceTest {
         when(reusableInfoRepository.findReusableInfoByMasterDefendantIds(Stream.of(masterDefendantId).collect(toList())))
                 .thenReturn(Stream.of(reusableInfo).collect(toList()));
         when(mapper.treeToValue(getJsonNode(jsonObj), JsonObject.class))
-                .thenReturn(createObjectBuilder().build());
-        reusableInfoService.getViewStoreReusableInformation(Stream.of(defendant).collect(toList()), Stream.of(createObjectBuilder().build()).collect(toList()));
+                .thenReturn(JsonObjects.createObjectBuilder().build());
+        reusableInfoService.getViewStoreReusableInformation(Stream.of(defendant).collect(toList()), Stream.of(JsonObjects.createObjectBuilder().build()).collect(toList()));
     }
 
     private JsonNode getJsonNode(final JsonObject jsonObj) throws IOException {

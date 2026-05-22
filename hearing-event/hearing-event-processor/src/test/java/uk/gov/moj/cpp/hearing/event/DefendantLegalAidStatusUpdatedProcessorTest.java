@@ -34,6 +34,7 @@ import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 public class DefendantLegalAidStatusUpdatedProcessorTest {
 
     private static final String DEFENDANT_ID = "defendantId";
@@ -66,7 +67,7 @@ public class DefendantLegalAidStatusUpdatedProcessorTest {
 
     @Test
     public void testDefendantLegalAidStatusUpdate() {
-        final JsonObject eventPayload = createObjectBuilder()
+        final JsonObject eventPayload = JsonObjects.createObjectBuilder()
                 .add(DEFENDANT_ID, defendantId)
                 .add(CASE_ID, caseId)
                 .add(LEGAL_AID_STATUS, "Granted")
@@ -97,9 +98,9 @@ public class DefendantLegalAidStatusUpdatedProcessorTest {
         final UUID defendantId = randomUUID();
         final UUID hearingId = randomUUID();
 
-        final JsonObject eventPayload = createObjectBuilder()
+        final JsonObject eventPayload = JsonObjects.createObjectBuilder()
                 .add(DEFENDANT_ID, defendantId.toString())
-                .add("hearingIds", createArrayBuilder().add(hearingId.toString()).build())
+                .add("hearingIds", JsonObjects.createArrayBuilder().add(hearingId.toString()).build())
                 .add(LEGAL_AID_STATUS, "Granted")
                 .build();
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.defendant-legalaid-status-updated"),

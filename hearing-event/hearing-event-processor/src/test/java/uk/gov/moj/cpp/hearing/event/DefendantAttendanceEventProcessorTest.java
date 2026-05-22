@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class DefendantAttendanceEventProcessorTest {
 
@@ -40,7 +41,7 @@ public class DefendantAttendanceEventProcessorTest {
     public void processPublicDefendantAttendanceUpdated() {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.hearing.defendant-attendance-updated"),
-                createObjectBuilder().build());
+                JsonObjects.createObjectBuilder().build());
 
         processor.publishPublicDefendantAttendanceUpdatedEvent(event);
 

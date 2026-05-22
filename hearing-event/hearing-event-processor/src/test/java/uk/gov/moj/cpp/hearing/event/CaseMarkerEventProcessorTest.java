@@ -27,6 +27,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class CaseMarkerEventProcessorTest {
 
@@ -45,11 +46,11 @@ public class CaseMarkerEventProcessorTest {
     @Test
     public void processPublicEventCaseMarkersUpdated() {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.case-markers-updated"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("prosecutionCaseId", "34d07e81-9770-4d23-af6f-84f1d7571bd3")
                         .add("hearingId", "581767a1-22af-408a-92f0-20837846cc6f")
-                        .add("caseMarkers", createArrayBuilder()
-                            .add(createObjectBuilder()
+                        .add("caseMarkers", JsonObjects.createArrayBuilder()
+                            .add(JsonObjects.createObjectBuilder()
                                 .add("id", "3789ab16-0bb7-4ef1-87ef-c936bf0364f1")
                                 .add("markerTypeid", "3789ab16-0bb7-4ef1-87ef-c936bf0364f1")
                                 .add("markerTypeCode", "WP")
@@ -74,14 +75,14 @@ public class CaseMarkerEventProcessorTest {
     @Test
     public void processEnrichUpdateCaseMarkersWithAssociatedHearings() {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.case-markers-enriched-with-associated-hearings"),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("prosecutionCaseId", "34d07e81-9770-4d23-af6f-84f1d7571bd3")
-                        .add("hearingIds", createArrayBuilder()
+                        .add("hearingIds", JsonObjects.createArrayBuilder()
                                 .add("a8448a33-68ab-4b9b-84c2-59cee4fe36f4")
                                 .add("095d7412-ba76-4a15-942d-566d3aeae7c9")
                                 .build())
-                        .add("caseMarkers", createArrayBuilder()
-                                .add(createObjectBuilder()
+                        .add("caseMarkers", JsonObjects.createArrayBuilder()
+                                .add(JsonObjects.createObjectBuilder()
                                         .add("id", "3789ab16-0bb7-4ef1-87ef-c936bf0364f1")
                                         .add("markerTypeid", "3789ab16-0bb7-4ef1-87ef-c936bf0364f1")
                                         .add("markerTypeCode", "WP")

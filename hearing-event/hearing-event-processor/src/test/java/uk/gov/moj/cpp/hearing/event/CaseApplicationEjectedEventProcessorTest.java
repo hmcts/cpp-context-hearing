@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class CaseApplicationEjectedEventProcessorTest {
 
@@ -42,8 +43,8 @@ public class CaseApplicationEjectedEventProcessorTest {
     public void processCaseApplicationEjected() {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.events.case-or-application-ejected"),
-                createObjectBuilder()
-                        .add("hearingIds", createArrayBuilder().add(randomUUID().toString()))
+                JsonObjects.createObjectBuilder()
+                        .add("hearingIds", JsonObjects.createArrayBuilder().add(randomUUID().toString()))
                         .build());
 
         processor.processCaseApplicationEjected(event);

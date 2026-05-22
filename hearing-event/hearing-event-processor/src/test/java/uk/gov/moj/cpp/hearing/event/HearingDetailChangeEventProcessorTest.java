@@ -40,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class HearingDetailChangeEventProcessorTest {
     public static final String ARBITRARY_TRIAL = RandomGenerator.STRING.next();
@@ -67,10 +68,10 @@ public class HearingDetailChangeEventProcessorTest {
     private HearingDetailChangeEventProcessor testObj;
 
     public static Metadata createMetadataWithUserId(final String id, final String name, final String userId) {
-        JsonObject jsonObject = createObjectBuilder()
+        JsonObject jsonObject = JsonObjects.createObjectBuilder()
                 .add(ID, id)
                 .add(NAME, name)
-                .add(CONTEXT, createObjectBuilder()
+                .add(CONTEXT, JsonObjects.createObjectBuilder()
                         .add(USER_ID, userId).build())
                 .build();
 
@@ -107,20 +108,20 @@ public class HearingDetailChangeEventProcessorTest {
     }
 
     private JsonObject publicHearingChangedEvent() {
-        return createObjectBuilder()
-                .add("hearing", createObjectBuilder()
+        return JsonObjects.createObjectBuilder()
+                .add("hearing", JsonObjects.createObjectBuilder()
                         .add("id", ARBITRARY_HEARING_ID)
                         .add("type", ARBITRARY_TRIAL)
                         .add("judge", getJudge())
                         .add("courtRoomId", ARBITRARY_HEARING_COURT_ROOM_ID)
                         .add("courtRoomName", ARBITRARY_COURT_NAME)
-                        .add("hearingDays", createArrayBuilder().add(ARBITRARY_HEARING_DAY).add("2016-07-03T10:15:00Z").build())
+                        .add("hearingDays", JsonObjects.createArrayBuilder().add(ARBITRARY_HEARING_DAY).add("2016-07-03T10:15:00Z").build())
                         .build())
                 .build();
     }
 
     private JsonObject getJudge() {
-        final JsonObject judgeJsonObject = createObjectBuilder()
+        final JsonObject judgeJsonObject = JsonObjects.createObjectBuilder()
                 .add("id", ARBITRARY_HEARING_JUDGE_ID)
                 .add("firstName", ARBITRARY_HEARING_JUDGE_FIRST_NAME)
                 .add("lastName", ARBITRARY_HEARING_JUDGE_LAST_NAME)

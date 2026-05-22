@@ -73,6 +73,7 @@ import javax.json.JsonObjectBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ServiceComponent(EVENT_PROCESSOR)
 @SuppressWarnings({"squid:S1188"})
 public class PublishResultsV3EventProcessor {
@@ -184,7 +185,7 @@ public class PublishResultsV3EventProcessor {
 
     public void updateTheDefendantsCase(final JsonEnvelope event, final UUID hearingId, final UUID caseId, final UUID defendantId, final List<UUID> offenceIds, final Map<UUID, OffenceResult> offenceResultMap) {
 
-        final JsonObject payload = createObjectBuilder()
+        final JsonObject payload = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("caseId", caseId.toString())
                 .add("defendantId", defendantId.toString())
@@ -198,15 +199,15 @@ public class PublishResultsV3EventProcessor {
     }
 
     private JsonArrayBuilder convertToJsonArray(final List<UUID> offenceIds) {
-        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
         offenceIds.stream().map(UUID::toString).forEach(arrayBuilder::add);
         return arrayBuilder;
     }
 
     private JsonArrayBuilder convertOffenceResultMapToJsonArray(final Map<UUID, OffenceResult> offenceResultMap) {
-        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
+        final JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
         offenceResultMap.entrySet().stream().forEach(offenceResult -> {
-            final JsonObject offenceResultObject = createObjectBuilder()
+            final JsonObject offenceResultObject = JsonObjects.createObjectBuilder()
                     .add("offenceId", offenceResult.getKey().toString())
                     .add("offenceResult", offenceResult.getValue().name())
                     .build();
@@ -432,7 +433,7 @@ public class PublishResultsV3EventProcessor {
     }
 
     private void sendCommandToStopCustodyTimeLimitClock(final JsonEnvelope event, final Hearing hearing) {
-        final JsonObjectBuilder commandPayload = createObjectBuilder().add("hearing", objectToJsonObjectConverter.convert(hearing));
+        final JsonObjectBuilder commandPayload = JsonObjects.createObjectBuilder().add("hearing", objectToJsonObjectConverter.convert(hearing));
         sender.send(envelopeFrom(metadataFrom(event.metadata()).withName("hearing.command.stop-custody-time-limit-clock"), commandPayload.build()));
     }
 }

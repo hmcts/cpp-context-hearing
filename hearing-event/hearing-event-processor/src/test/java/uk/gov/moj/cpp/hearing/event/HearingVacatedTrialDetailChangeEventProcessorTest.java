@@ -33,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class HearingVacatedTrialDetailChangeEventProcessorTest {
     private static final String PUBLIC_EVENT_HEARING_VACATE_TRIAL_DETAIL_CHANGED = "public.listing.vacated-trial-updated";
@@ -79,7 +80,7 @@ public class HearingVacatedTrialDetailChangeEventProcessorTest {
     }
 
     private JsonObject publicHearingVacatedTrialDetailUpdatedEvent() {
-        return createObjectBuilder()
+        return JsonObjects.createObjectBuilder()
                 .add("hearingId", HEARING_ID)
                 .add("vacatedTrialReasonId", VACATED_TRIAL_REASON_ID)
                 .add("isVacated", true)

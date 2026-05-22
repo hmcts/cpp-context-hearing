@@ -123,6 +123,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class HearingEventListenerTest {
     private static final UUID RI_UNKNOWN_RESULT_DEFINITON_ID = UUID.randomUUID();
@@ -219,11 +220,11 @@ public class HearingEventListenerTest {
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final uk.gov.justice.core.courts.Target.Builder target = CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID());
-        final JsonObject result = createObjectBuilder().add("resultCode", RI_UNKNOWN_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = createArrayBuilder()
+        final JsonObject result = JsonObjects.createObjectBuilder().add("resultCode", RI_UNKNOWN_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = JsonObjects.createArrayBuilder()
                 .add(result)
                 .build();
-        target.withDraftResult(createObjectBuilder().add("results", results).build().toString());
+        target.withDraftResult(JsonObjects.createObjectBuilder().add("results", results).build().toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(target.build(), HearingState.INITIALISED, randomUUID());
 
@@ -267,11 +268,11 @@ public class HearingEventListenerTest {
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final uk.gov.justice.core.courts.Target.Builder target = CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID());
-        final JsonObject result = createObjectBuilder().add("resultCode", RILA_L_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = createArrayBuilder()
+        final JsonObject result = JsonObjects.createObjectBuilder().add("resultCode", RILA_L_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = JsonObjects.createArrayBuilder()
                 .add(result)
                 .build();
-        target.withDraftResult(createObjectBuilder().add("results", results).build().toString());
+        target.withDraftResult(JsonObjects.createObjectBuilder().add("results", results).build().toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(target.build(), HearingState.INITIALISED, randomUUID());
 
@@ -320,11 +321,11 @@ public class HearingEventListenerTest {
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final uk.gov.justice.core.courts.Target.Builder target = CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID());
-        final JsonObject result = createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = createArrayBuilder()
+        final JsonObject result = JsonObjects.createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = JsonObjects.createArrayBuilder()
                 .add(result)
                 .build();
-        target.withDraftResult(createObjectBuilder().add("results", results).build().toString());
+        target.withDraftResult(JsonObjects.createObjectBuilder().add("results", results).build().toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(target.build(), HearingState.INITIALISED, randomUUID());
 
@@ -377,10 +378,10 @@ public class HearingEventListenerTest {
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonObject result1 = createObjectBuilder().add("resultCode", CCIIYDA_S_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = createArrayBuilder().add(result1).build();
+        final JsonObject result1 = JsonObjects.createObjectBuilder().add("resultCode", CCIIYDA_S_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = JsonObjects.createArrayBuilder().add(result1).build();
 
-        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
+        draftResultSaved.getTarget().setDraftResult(JsonObjects.createObjectBuilder().add("results", results).build().toString());
 
         final Offence offence = new Offence();
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
@@ -429,10 +430,10 @@ public class HearingEventListenerTest {
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonObject result1 = createObjectBuilder().add("resultCode", RILA_L_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = createArrayBuilder().add(result1).build();
+        final JsonObject result1 = JsonObjects.createObjectBuilder().add("resultCode", RILA_L_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = JsonObjects.createArrayBuilder().add(result1).build();
 
-        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
+        draftResultSaved.getTarget().setDraftResult(JsonObjects.createObjectBuilder().add("results", results).build().toString());
 
         final Offence offence = new Offence();
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
@@ -481,10 +482,10 @@ public class HearingEventListenerTest {
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonObject result1 = createObjectBuilder().add("resultCode", RIB_P_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = createArrayBuilder().add(result1).build();
+        final JsonObject result1 = JsonObjects.createObjectBuilder().add("resultCode", RIB_P_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = JsonObjects.createArrayBuilder().add(result1).build();
 
-        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
+        draftResultSaved.getTarget().setDraftResult(JsonObjects.createObjectBuilder().add("results", results).build().toString());
 
         final Offence offence = new Offence();
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
@@ -533,10 +534,10 @@ public class HearingEventListenerTest {
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonObject result1 = createObjectBuilder().add("resultCode", CCIU_U_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = createArrayBuilder().add(result1).build();
+        final JsonObject result1 = JsonObjects.createObjectBuilder().add("resultCode", CCIU_U_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = JsonObjects.createArrayBuilder().add(result1).build();
 
-        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
+        draftResultSaved.getTarget().setDraftResult(JsonObjects.createObjectBuilder().add("results", results).build().toString());
 
         final Offence offence = new Offence();
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
@@ -585,10 +586,10 @@ public class HearingEventListenerTest {
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonObject result1 = createObjectBuilder().add("resultCode", REMCBY_B_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = createArrayBuilder().add(result1).build();
+        final JsonObject result1 = JsonObjects.createObjectBuilder().add("resultCode", REMCBY_B_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = JsonObjects.createArrayBuilder().add(result1).build();
 
-        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
+        draftResultSaved.getTarget().setDraftResult(JsonObjects.createObjectBuilder().add("results", results).build().toString());
 
         final Offence offence = new Offence();
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
@@ -637,15 +638,15 @@ public class HearingEventListenerTest {
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonObject result1 = createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
-        final JsonObject result2 = createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
-        final JsonObject result3 = createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
-        final JsonObject result4 = createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
-        final JsonObject result5 = createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
-        final JsonArray results = createArrayBuilder()
+        final JsonObject result1 = JsonObjects.createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
+        final JsonObject result2 = JsonObjects.createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
+        final JsonObject result3 = JsonObjects.createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
+        final JsonObject result4 = JsonObjects.createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
+        final JsonObject result5 = JsonObjects.createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
+        final JsonArray results = JsonObjects.createArrayBuilder()
                 .add(result1).add(result2).add(result3).add(result4).add(result5)
                 .build();
-        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
+        draftResultSaved.getTarget().setDraftResult(JsonObjects.createObjectBuilder().add("results", results).build().toString());
 
         final Offence offence = new Offence();
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
@@ -694,8 +695,8 @@ public class HearingEventListenerTest {
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonArray emptyResults = createArrayBuilder().build();
-        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", emptyResults).build().toString());
+        final JsonArray emptyResults = JsonObjects.createArrayBuilder().build();
+        draftResultSaved.getTarget().setDraftResult(JsonObjects.createObjectBuilder().add("results", emptyResults).build().toString());
 
 
         final Hearing dbHearing = new Hearing()
@@ -983,8 +984,8 @@ public class HearingEventListenerTest {
                 );
 
         DraftResult draftResult = mock(DraftResult.class);
-        JsonObject draftResultJsonObject = createObjectBuilder()
-                .add("__metadata__", createObjectBuilder()
+        JsonObject draftResultJsonObject = JsonObjects.createObjectBuilder()
+                .add("__metadata__", JsonObjects.createObjectBuilder()
                         .add("version", "1")
                         .build())
                 .build();
@@ -1049,8 +1050,8 @@ public class HearingEventListenerTest {
                 .setId(resultsShared.getHearingId());
 
         DraftResult draftResult = mock(DraftResult.class);
-        JsonObject draftResultJsonObject = createObjectBuilder()
-                .add("__metadata__", createObjectBuilder()
+        JsonObject draftResultJsonObject = JsonObjects.createObjectBuilder()
+                .add("__metadata__", JsonObjects.createObjectBuilder()
                         .add("version", "1")
                         .build())
                 .build();
@@ -1122,8 +1123,8 @@ public class HearingEventListenerTest {
                 );
 
         DraftResult draftResult = mock(DraftResult.class);
-        JsonObject draftResultJsonObject = createObjectBuilder()
-                .add("__metadata__", createObjectBuilder()
+        JsonObject draftResultJsonObject = JsonObjects.createObjectBuilder()
+                .add("__metadata__", JsonObjects.createObjectBuilder()
                         .add("version", "1")
                         .build())
                 .build();
@@ -1205,7 +1206,7 @@ public class HearingEventListenerTest {
         final Hearing hearing = Mockito.mock(Hearing.class);
         when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
 
-        hearingEventListener.handleHearingMarkedAsDuplicate(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
+        hearingEventListener.handleHearingMarkedAsDuplicate(envelopeFrom(metadataWithDefaults().build(), JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .build()));
 
@@ -1219,7 +1220,7 @@ public class HearingEventListenerTest {
         final UUID hearingId = randomUUID();
         final Hearing hearing = new Hearing();
         when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
-        hearingEventListener.handleWitnessAddedToHearing(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
+        hearingEventListener.handleWitnessAddedToHearing(envelopeFrom(metadataWithDefaults().build(), JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("witness", "test")
                 .build()));
@@ -1234,7 +1235,7 @@ public class HearingEventListenerTest {
         final UUID hearingId = randomUUID();
         when(hearingRepository.findBy(hearingId)).thenReturn(null);
 
-        hearingEventListener.handleHearingMarkedAsDuplicate(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
+        hearingEventListener.handleHearingMarkedAsDuplicate(envelopeFrom(metadataWithDefaults().build(), JsonObjects.createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .build()));
 
@@ -1773,10 +1774,10 @@ public class HearingEventListenerTest {
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonObject result1 = createObjectBuilder().add("resultCode", RIB_P_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = createArrayBuilder().add(result1).build();
+        final JsonObject result1 = JsonObjects.createObjectBuilder().add("resultCode", RIB_P_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = JsonObjects.createArrayBuilder().add(result1).build();
 
-        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
+        draftResultSaved.getTarget().setDraftResult(JsonObjects.createObjectBuilder().add("results", results).build().toString());
 
         final Offence offence = new Offence();
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);

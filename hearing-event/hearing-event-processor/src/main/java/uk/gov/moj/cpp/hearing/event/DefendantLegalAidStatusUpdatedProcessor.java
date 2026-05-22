@@ -23,6 +23,7 @@ import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.HEARING_
 
 import java.util.UUID;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ServiceComponent(EVENT_PROCESSOR)
 public class DefendantLegalAidStatusUpdatedProcessor {
 
@@ -52,7 +53,7 @@ public class DefendantLegalAidStatusUpdatedProcessor {
         }
 
         final JsonObject jsonObject = envelop.payloadAsJsonObject();
-        final JsonObject commandPayload = createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                 .add(CASE_ID, jsonObject.getString(CASE_ID))
                 .add(DEFENDANT_ID, jsonObject.getString(DEFENDANT_ID))
                 .add(LEGAL_AID_STATUS, jsonObject.getString(LEGAL_AID_STATUS))
@@ -75,7 +76,7 @@ public class DefendantLegalAidStatusUpdatedProcessor {
             final String defendantId = eventPayload.getString(DEFENDANT_ID);
             final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(UUID.fromString(defendantId), UUID.fromString(((JsonString)hearingId).getString())));
             if(defendant != null){
-                final JsonObject commandPayload = createObjectBuilder()
+                final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                         .add(HEARING_ID, hearingId)
                         .add(DEFENDANT_ID, defendantId)
                         .add(LEGAL_AID_STATUS, eventPayload.getString(LEGAL_AID_STATUS))

@@ -39,6 +39,7 @@ import javax.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @SuppressWarnings("squid:S2699")
 public class ExtendHearingIT extends AbstractIT {
 
@@ -213,9 +214,9 @@ public class ExtendHearingIT extends AbstractIT {
 
         UUID courtApplicationId = randomUUID();
 
-        final JsonObject publicEventBreachApplicationsToBeAdded = createObjectBuilder()
+        final JsonObject publicEventBreachApplicationsToBeAdded = JsonObjects.createObjectBuilder()
                 .add("hearingId", hearing.getId().toString())
-                .add("breachedApplications", createArrayBuilder().add(courtApplicationId.toString()))
+                .add("breachedApplications", JsonObjects.createArrayBuilder().add(courtApplicationId.toString()))
                 .build();
 
         sendMessage(getPublicTopicInstance().createProducer(),

@@ -52,6 +52,7 @@ import javax.json.JsonValue;
 import com.google.common.collect.Lists;
 import org.apache.http.HttpHeaders;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 public class ReferenceDataStub {
 
     public static final String VERDICT_TYPE_GUILTY_ID = "c4ca4238-a0b9-3382-8dcc-509a6f75849b";
@@ -714,19 +715,19 @@ public class ReferenceDataStub {
             englishCourtId = courtCentre.getId();
         }
         changeCourtRoomsStubWithAdding(
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("id", englishCourtId.toString())
                         .add("oucodeL3Name", courtCentre.getName())
                         .add("isWelsh", false)
-                        .add("courtrooms", createArrayBuilder()
-                                .add(createObjectBuilder()
+                        .add("courtrooms", JsonObjects.createArrayBuilder()
+                                .add(JsonObjects.createObjectBuilder()
                                         .add("id", courtCentre.getRoomId().toString())
                                         .add("venueName", courtCentre.getName())
                                         .add("courtroomName", courtCentre.getRoomName())
                                         .build())
                                 .build())
                         .build(),
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("id", courtCentre.getId().toString())
                         .add("oucode", "B01BE01")
                         .add("oucodeL1Code", "C")
@@ -737,15 +738,15 @@ public class ReferenceDataStub {
                         .add("defaultStartTime", "10:00")
                         .add("defaultDurationHrs", "7:00")
                         .add("isWelsh", false)
-                        .add("courtrooms", createArrayBuilder()
-                                .add(createObjectBuilder()
+                        .add("courtrooms", JsonObjects.createArrayBuilder()
+                                .add(JsonObjects.createObjectBuilder()
                                         .add("id", "f703dc83-d0e4-42c8-8d44-0352d46e5194")
                                         .add("venueName", "WIMBLEDON MAGISTRATES' COURT")
                                         .add("courtroomId", 789)
                                         .add("courtroomName", "Room A")
                                         .add("oucodeL3Name", "Wimbledon")
                                         .build())
-                                .add(createObjectBuilder()
+                                .add(JsonObjects.createObjectBuilder()
                                         .add("id", "2bd3e322-f603-411d-a5ab-2e42ff4b6e00")
                                         .add("venueName", "WIMBLEDON MAGISTRATES' COURT")
                                         .add("courtroomId", 790)
@@ -756,15 +757,15 @@ public class ReferenceDataStub {
                         .build()
 
                 ,
-                createObjectBuilder()
+                JsonObjects.createObjectBuilder()
                         .add("id", welshCourtId.toString())
                         .add("oucode", "C55BN00")
                         .add("lja", 3522)
                         .add("oucodeL1Code", "C")
                         .add("oucodeL3Name", "Welsh Name")
                         .add("isWelsh", true)
-                        .add("courtrooms", createArrayBuilder()
-                                .add(createObjectBuilder()
+                        .add("courtrooms", JsonObjects.createArrayBuilder()
+                                .add(JsonObjects.createObjectBuilder()
                                         .add("id", courtCentre.getRoomId().toString())
                                         .add("venueName", "welshCourtRoom")
                                         .add("welshVenueName", courtCentre.getWelshName())
@@ -779,9 +780,9 @@ public class ReferenceDataStub {
     public static void changeCourtRoomsStubWithAdding(JsonObject... courtRooms) {
         final List<JsonValue> organisationunits = createCourtRoomFixture();
         Collections.addAll(organisationunits, courtRooms);
-        JsonArrayBuilder arrayBuilder = createArrayBuilder();
+        JsonArrayBuilder arrayBuilder = JsonObjects.createArrayBuilder();
         organisationunits.forEach(arrayBuilder::add);
-        final JsonObject responsePayload = createObjectBuilder()
+        final JsonObject responsePayload = JsonObjects.createObjectBuilder()
                 .add("organisationunits", arrayBuilder)
                 .build();
 
@@ -850,14 +851,14 @@ public class ReferenceDataStub {
     }
 
     public static void stubOrganisationUnit(final String... ouIds) {
-        final JsonArrayBuilder orgUnits = createArrayBuilder();
+        final JsonArrayBuilder orgUnits = JsonObjects.createArrayBuilder();
         for (String ouId : ouIds) {
             String payloadAsString = getPayload("stub-data/referencedata.query.organisationunits.json")
                     .replace("OU_ID", ouId);
             final JsonObject payloadJson = (new StringToJsonObjectConverter().convert(payloadAsString)).getJsonArray("organisationunits").getJsonObject(0);
             orgUnits.add(payloadJson);
         }
-        final JsonObject organisationunits = createObjectBuilder().add("organisationunits", orgUnits).build();
+        final JsonObject organisationunits = JsonObjects.createObjectBuilder().add("organisationunits", orgUnits).build();
 
         stubFor(get(urlPathMatching(REFERENCEDATA_QUERY_ORGANISATION_UNITS_URL))
                 .willReturn(aResponse().withStatus(SC_OK)
@@ -911,16 +912,16 @@ public class ReferenceDataStub {
     }
 
     public static void stubForYouthCourtForMagUUID(final UUID magsUUID) {
-        final JsonObjectBuilder builder = createObjectBuilder();
+        final JsonObjectBuilder builder = JsonObjects.createObjectBuilder();
         builder.add("courtCode", "5410");
         builder.add("courtName", "courtName");
         builder.add("courtNameWelsh", "courtNameWelsh");
         builder.add("id", randomUUID().toString());
 
-        final JsonArrayBuilder youthCourtsBuilder = createArrayBuilder();
+        final JsonArrayBuilder youthCourtsBuilder = JsonObjects.createArrayBuilder();
         youthCourtsBuilder.add(builder.build());
         final JsonObject payload =
-                createObjectBuilder().add("youthCourts", youthCourtsBuilder.build()).build();
+                JsonObjects.createObjectBuilder().add("youthCourts", youthCourtsBuilder.build()).build();
         stub(payload, REFERENCE_DATA_YOUTH_COURT_QUERY_URL, REFERENCE_DATA_QUERY_YOUTH_COURT_MEDIA_TYPE, "magsUUID", magsUUID.toString());
     }
 

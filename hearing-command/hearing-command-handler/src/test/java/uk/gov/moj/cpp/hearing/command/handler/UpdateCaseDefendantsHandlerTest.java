@@ -56,6 +56,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @ExtendWith(MockitoExtension.class)
 public class UpdateCaseDefendantsHandlerTest {
     @Spy
@@ -122,7 +123,7 @@ public class UpdateCaseDefendantsHandlerTest {
                         .withId(defendantId)
                         .withProceedingsConcluded(true).build()))
                 .build();
-        final JsonObject commandPayload = createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                 .add("prosecutionCase",objectToJsonObjectConverter.convert(prosecutionCase))
                 .build();
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.update-case-defendants"), commandPayload);
@@ -143,12 +144,12 @@ public class UpdateCaseDefendantsHandlerTest {
         setupMockedEventStream(hearingId, this.hearingEventStream, hearingAggregate);
         hearingAggregate.initiate(initiateHearingCommand.getHearing());
 
-        final JsonObject commandPayload = createObjectBuilder()
-                .add("prosecutionCase",createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
+                .add("prosecutionCase",JsonObjects.createObjectBuilder()
                     .add("caseStatus", "CLOSED")
                     .add("id", caseId.toString())
-                    .add("defendants", createArrayBuilder()
-                        .add(createObjectBuilder()
+                    .add("defendants", JsonObjects.createArrayBuilder()
+                        .add(JsonObjects.createObjectBuilder()
                           .add("id",defendantId.toString())
                           .add("proceedingsConcluded", true)
                           .build()).build())
@@ -180,7 +181,7 @@ public class UpdateCaseDefendantsHandlerTest {
                         .withId(defendantId)
                         .build())
                 .build();
-        final JsonObject commandPayload = createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
                 .add("courtApplication",objectToJsonObjectConverter.convert(courtApplication))
                 .build();
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.update-application-defendants"), commandPayload);
@@ -204,10 +205,10 @@ public class UpdateCaseDefendantsHandlerTest {
         setupMockedEventStream(hearingId, this.hearingEventStream, hearingAggregate);
         hearingAggregate.initiate(initiateHearingCommand.getHearing());
 
-        final JsonObject commandPayload = createObjectBuilder()
-                .add("courtApplication", createObjectBuilder()
+        final JsonObject commandPayload = JsonObjects.createObjectBuilder()
+                .add("courtApplication", JsonObjects.createObjectBuilder()
                         .add("id", applicationId.toString())
-                        .add("applicant", createObjectBuilder()
+                        .add("applicant", JsonObjects.createObjectBuilder()
                                 .add("id", defendantId.toString())
                                 .build()).build())
                 .add("hearingId", hearingId.toString())

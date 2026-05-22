@@ -50,6 +50,7 @@ import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 @SuppressWarnings("java:S2699")
 public class ApplicationTimelineIT extends AbstractIT {
 
@@ -79,7 +80,7 @@ public class ApplicationTimelineIT extends AbstractIT {
         stubApplicationsByParentId(applicationId);
         sendMessage(getPublicTopicInstance().createProducer(),
                 "public.progression.events.court-application-deleted",
-                createObjectBuilder().add("hearingId",hearingOne.getId().toString()).add("applicationId",applicationId.toString() ).build(),
+                JsonObjects.createObjectBuilder().add("hearingId",hearingOne.getId().toString()).add("applicationId",applicationId.toString() ).build(),
                 metadataOf(randomUUID(),"public.progression.events.court-application-deleted")
                         .withUserId(randomUUID().toString())
                         .build()
