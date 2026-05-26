@@ -66,7 +66,7 @@
           "type": "string"
         },
         "prosecutionAuthorityReference": {
-          "description": "",
+          "description": "The prosecuting authorities reference for the defendant for the given case",
           "type": "string"
         }
       }
@@ -90,7 +90,7 @@
           "type": "string"
         },
         "organisationName": {
-          "description": "",
+          "description": "The organisation name",
           "type": "string"
         }
       }
