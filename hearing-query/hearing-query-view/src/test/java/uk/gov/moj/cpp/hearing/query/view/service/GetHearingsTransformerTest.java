@@ -703,6 +703,7 @@ public class GetHearingsTransformerTest {
         final UUID caseId = randomUUID();
         final UUID defendantId = randomUUID();
         final String caseUrn = "63GD4414126";
+        final String prosecutionAuthorityReference = "Y25D24123";
         final String firstName = "Glennie";
         final String middleName = "PersonGivenName20A PersonGivenName30A";
         final String lastName = "Bailey";
@@ -723,6 +724,7 @@ public class GetHearingsTransformerTest {
                 .withProsecutionCaseIdentifier(
                         ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
                                 .withCaseURN(caseUrn)
+                                .withProsecutionAuthorityReference(prosecutionAuthorityReference)
                                 .build())
                 .withDefendants(asList(defendant))
                 .build();
@@ -741,6 +743,7 @@ public class GetHearingsTransformerTest {
         final ProsecutionCaseSummaries pcSummary = result.getProsecutionCaseSummaries().get(0);
         assertThat(pcSummary.getId(), is(caseId));
         assertThat(pcSummary.getProsecutionCaseIdentifier().getCaseURN(), is(caseUrn));
+        assertThat(pcSummary.getProsecutionCaseIdentifier().getProsecutionAuthorityReference(), is(prosecutionAuthorityReference));
         // group/civil flags must NOT be set
         assertNull(pcSummary.getIsCivil());
         assertNull(pcSummary.getGroupId());
@@ -755,6 +758,49 @@ public class GetHearingsTransformerTest {
         assertNull(d.getMasterDefendantId());
         assertNull(d.getSynonym());
         assertThat(d.getOffences(), is(nullValue()));
+    }
+
+    @Test
+    public void summaryForCheckIn_shouldMapOrganisationNameForLegalEntityDefendant() {
+        final UUID hearingId = randomUUID();
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final String organisationName = "Acme Legal Entities Ltd";
+
+        final Defendant defendant = uk.gov.justice.core.courts.Defendant.defendant()
+                .withId(defendantId)
+                .withLegalEntityDefendant(LegalEntityDefendant.legalEntityDefendant()
+                        .withOrganisation(Organisation.organisation()
+                                .withName(organisationName)
+                                .build())
+                        .build())
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withProsecutionCaseIdentifier(
+                        ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                                .withCaseURN("63GD9999999")
+                                .build())
+                .withDefendants(asList(defendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withCourtCentre(CourtCentre.courtCentre().withRoomName("Courtroom 02").build())
+                .withProsecutionCases(asList(prosecutionCase))
+                .build();
+
+        final HearingSummaries result = target.summaryForCheckIn(hearing).build();
+
+        assertThat(result.getProsecutionCaseSummaries(), hasSize(1));
+        final Defendants d = result.getProsecutionCaseSummaries().get(0).getDefendants().get(0);
+        assertThat(d.getId(), is(defendantId));
+        assertThat(d.getOrganisationName(), is(organisationName));
+        // person name fields must NOT be set for a legal entity
+        assertNull(d.getFirstName());
+        assertNull(d.getMiddleName());
+        assertNull(d.getLastName());
     }
 
     @Test

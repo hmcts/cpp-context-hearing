@@ -109,6 +109,7 @@ public class GetHearingsTransformer {
                         prosecutionCase.getProsecutionCaseIdentifier() != null
                                 ? ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
                                         .withCaseURN(prosecutionCase.getProsecutionCaseIdentifier().getCaseURN())
+                                        .withProsecutionAuthorityReference(prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityReference())
                                         .build()
                                 : null)
                 .withDefendants(prosecutionCase.getDefendants() == null ? emptyList() :
@@ -124,6 +125,9 @@ public class GetHearingsTransformer {
             result.withFirstName(defendant.getPersonDefendant().getPersonDetails().getFirstName());
             result.withMiddleName(defendant.getPersonDefendant().getPersonDetails().getMiddleName());
             result.withLastName(defendant.getPersonDefendant().getPersonDetails().getLastName());
+        }
+        if (defendant.getLegalEntityDefendant() != null && defendant.getLegalEntityDefendant().getOrganisation() != null) {
+            result.withOrganisationName(defendant.getLegalEntityDefendant().getOrganisation().getName());
         }
         return result;
     }
