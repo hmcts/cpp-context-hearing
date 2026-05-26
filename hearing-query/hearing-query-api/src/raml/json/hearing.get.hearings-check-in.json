@@ -9,14 +9,16 @@
         {
           "id": "5fdf2e80-ae0b-4357-b920-c85f09c9de6b",
           "prosecutionCaseIdentifier": {
-            "caseURN": "63GD4414126"
+            "caseURN": "63GD4414126",
+            "prosecutionAuthorityReference": "Y25D24123"
           },
           "defendants": [
             {
               "id": "a385e458-c100-41d2-9397-cad24b3e10d5",
               "firstName": "Glennie",
               "middleName": "PersonGivenName20A PersonGivenName30A",
-              "lastName": "Bailey"
+              "lastName": "Bailey",
+              "organisationName": ""
             }
           ]
         }
