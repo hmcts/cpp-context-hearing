@@ -64,6 +64,10 @@
         "caseURN": {
           "description": "The case URN",
           "type": "string"
+        },
+        "prosecutionAuthorityReference": {
+          "description": "",
+          "type": "string"
         }
       }
     },
@@ -83,6 +87,10 @@
         },
         "lastName": {
           "description": "The person last name",
+          "type": "string"
+        },
+        "organisationName": {
+          "description": "",
           "type": "string"
         }
       }
