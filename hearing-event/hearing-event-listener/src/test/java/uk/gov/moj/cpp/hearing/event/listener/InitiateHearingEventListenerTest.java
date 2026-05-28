@@ -182,9 +182,12 @@ public class InitiateHearingEventListenerTest {
 
         final List<ProsecutionCase> prosecutionCases = new ArrayList<>();
         prosecutionCases.add(ProsecutionCase.prosecutionCase().withId(UUID.randomUUID()).build());
-        final HearingExtended hearingExtended = new HearingExtended(UUID.randomUUID(),null, null, null, CourtApplication.courtApplication().withId(UUID.randomUUID()).build(), prosecutionCases, null);
+        final UUID hearingId = UUID.randomUUID();
+        final UUID courtApplicationId = UUID.randomUUID();
+        final HearingExtended hearingExtended = new HearingExtended(hearingId,null, null, null, CourtApplication.courtApplication().withId(courtApplicationId).build(), prosecutionCases, null);
 
         Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
         hearing.setCourtApplicationsJson("zyz");
         final String expectedUpdatedCourtApplicationJson = "abcdef";
         final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> prosecutionCaseSet = new HashSet<>();
@@ -202,6 +205,12 @@ public class InitiateHearingEventListenerTest {
 
         final String updatedCourtApplicationsJson = hearingExArgumentCaptor.getValue().getCourtApplicationsJson();
         assertThat(updatedCourtApplicationsJson, is(expectedUpdatedCourtApplicationJson));
+
+        final ArgumentCaptor<uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication> haCaptor =
+                ArgumentCaptor.forClass(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication.class);
+        verify(hearingApplicationRepository).save(haCaptor.capture());
+        assertThat(haCaptor.getValue().getId().getApplicationId(), is(courtApplicationId));
+        assertThat(haCaptor.getValue().getId().getHearingId(), is(hearingId));
     }
 
     @Test
