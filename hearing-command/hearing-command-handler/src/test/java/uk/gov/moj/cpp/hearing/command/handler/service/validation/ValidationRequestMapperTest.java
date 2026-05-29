@@ -79,7 +79,7 @@ class ValidationRequestMapperTest {
         final ValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getDefendants(), hasSize(1));
-        assertThat(request.getDefendants().get(0).getId(), is(defendantId.toString()));
+        assertThat(request.getDefendants().get(0).getDefendantId(), is(defendantId.toString()));
     }
 
     @Test
@@ -171,7 +171,7 @@ class ValidationRequestMapperTest {
         final ValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getOffences(), hasSize(1));
-        assertThat(request.getOffences().get(0).getId(), is(offenceId.toString()));
+        assertThat(request.getOffences().get(0).getOffenceId(), is(offenceId.toString()));
         assertThat(request.getOffences().get(0).getOffenceCode(), is("TH68001"));
         assertThat(request.getOffences().get(0).getOffenceTitle(), is("Theft"));
         assertThat(request.getOffences().get(0).getOrderIndex(), is(1));
@@ -235,7 +235,7 @@ class ValidationRequestMapperTest {
         final ValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getResultLines(), hasSize(1));
-        assertThat(request.getResultLines().get(0).getId(), is(resultLineId.toString()));
+        assertThat(request.getResultLines().get(0).getResultLineId(), is(resultLineId.toString()));
         assertThat(request.getResultLines().get(0).getShortCode(), is("IMP"));
         assertThat(request.getResultLines().get(0).getLabel(), is("Imprisonment"));
         assertThat(request.getResultLines().get(0).getDefendantId(), is(defendantId.toString()));
