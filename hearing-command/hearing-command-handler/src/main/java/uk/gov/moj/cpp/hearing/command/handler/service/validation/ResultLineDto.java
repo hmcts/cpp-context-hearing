@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 import com.fasterxml.jackson.annotation.JsonProperty;
 public class ResultLineDto {
 
-    private final String id;
+    private final String resultLineId;
     private final String shortCode;
     private final String label;
     private final String defendantId;
@@ -13,7 +13,7 @@ public class ResultLineDto {
     private final String consecutiveToOffence;
 
     private ResultLineDto(Builder builder) {
-        this.id = builder.id;
+        this.resultLineId = builder.resultLineId;
         this.shortCode = builder.shortCode;
         this.label = builder.label;
         this.defendantId = builder.defendantId;
@@ -23,7 +23,7 @@ public class ResultLineDto {
     }
 
     // Getters
-    public String getId() { return id; }
+    public String getResultLineId() { return resultLineId; }
     public String getShortCode() { return shortCode; }
     public String getLabel() { return label; }
     public String getDefendantId() { return defendantId; }
@@ -33,7 +33,7 @@ public class ResultLineDto {
 
     // Builder
     public static class Builder {
-        private String id;
+        private String resultLineId;
         private String shortCode;
         private String label;
         private String defendantId;
@@ -41,8 +41,8 @@ public class ResultLineDto {
         private Boolean isConcurrent;
         private String consecutiveToOffence;
 
-        public Builder id(String id) {
-            this.id = id;
+        public Builder resultLineId(String resultLineId) {
+            this.resultLineId = resultLineId;
             return this;
         }
 
