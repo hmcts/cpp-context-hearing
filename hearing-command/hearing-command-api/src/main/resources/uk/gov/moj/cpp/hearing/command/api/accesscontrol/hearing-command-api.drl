@@ -623,6 +623,15 @@ rule "Command - API - Action - hearing.delete-hearing-bdf"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.update-hearing-day-bdf"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.update-hearing-day-bdf");
+    eval(userAndGroupProvider.isSystemUser($action));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Command - API - Action - hearing.patch-application-finalised-on-target"
   when
     $outcome: Outcome();

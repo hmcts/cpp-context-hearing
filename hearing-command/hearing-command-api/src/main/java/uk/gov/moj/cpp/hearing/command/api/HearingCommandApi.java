@@ -367,6 +367,11 @@ public class HearingCommandApi {
     public void deleteHearingBdf(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.delete-hearing-bdf");
     }
+
+    @Handles("hearing.update-hearing-day-bdf")
+    public void updateHearingDayBdf(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.update-hearing-day-bdf");
+    }
     //hearing.add-witness
 
     /**
