@@ -178,6 +178,41 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
+    public void shouldNotResaveHearingWhenInitRedeliveredButShouldEnsureLinkRowsPresent() {
+
+        final InitiateHearingCommand command = minimumInitiateHearingTemplate();
+        final uk.gov.justice.core.courts.Hearing hearing = command.getHearing();
+
+        final Hearing existing = new Hearing();
+        existing.setId(hearing.getId());
+        when(hearingRepository.findOptionalBy(hearing.getId())).thenReturn(Optional.of(existing));
+
+        initiateHearingEventListener.newHearingInitiated(getInitiateHearingJsonEnvelope(hearing));
+
+        verify(hearingJPAMapper, never()).toJPA(any(uk.gov.justice.core.courts.Hearing.class));
+        verify(hearingRepository, never()).save(any(Hearing.class));
+        verify(hearingApplicationRepository).save(any());
+    }
+
+    @Test
+    public void shouldBeFullyIdempotentWhenHearingAndLinkRowsAlreadyExist() {
+
+        final InitiateHearingCommand command = minimumInitiateHearingTemplate();
+        final uk.gov.justice.core.courts.Hearing hearing = command.getHearing();
+
+        final Hearing existing = new Hearing();
+        existing.setId(hearing.getId());
+        when(hearingRepository.findOptionalBy(hearing.getId())).thenReturn(Optional.of(existing));
+        when(hearingApplicationRepository.findBy(any()))
+                .thenReturn(new uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication());
+
+        initiateHearingEventListener.newHearingInitiated(getInitiateHearingJsonEnvelope(hearing));
+
+        verify(hearingRepository, never()).save(any(Hearing.class));
+        verify(hearingApplicationRepository, never()).save(any());
+    }
+
+    @Test
     public void shouldExtendHearing() {
 
         final List<ProsecutionCase> prosecutionCases = new ArrayList<>();
