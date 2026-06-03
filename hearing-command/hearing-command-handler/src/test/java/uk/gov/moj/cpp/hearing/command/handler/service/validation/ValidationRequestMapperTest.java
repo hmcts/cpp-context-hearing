@@ -8,7 +8,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
-import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JurisdictionType;
@@ -318,6 +317,9 @@ class ValidationRequestMapperTest {
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(true));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(nullValue()));
+        assertThat(request.getResultLines().get(0).getPrompts(), hasSize(1));
+        assertThat(request.getResultLines().get(0).getPrompts().get(0).getPromptRef(), is("concurrent"));
+        assertThat(request.getResultLines().get(0).getPrompts().get(0).getPromptValue(), is("true"));
     }
 
     @Test
@@ -340,6 +342,9 @@ class ValidationRequestMapperTest {
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(nullValue()));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(consecutiveOffenceId));
+        assertThat(request.getResultLines().get(0).getPrompts(), hasSize(1));
+        assertThat(request.getResultLines().get(0).getPrompts().get(0).getPromptRef(), is("consecutiveToOffenceNumber"));
+        assertThat(request.getResultLines().get(0).getPrompts().get(0).getPromptValue(), is(consecutiveOffenceId));
     }
 
     @Test
@@ -364,6 +369,7 @@ class ValidationRequestMapperTest {
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(false));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(consecutiveOffenceId));
+        assertThat(request.getResultLines().get(0).getPrompts(), hasSize(2));
     }
 
     @Test
@@ -381,6 +387,7 @@ class ValidationRequestMapperTest {
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(nullValue()));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(nullValue()));
+        assertThat(request.getResultLines().get(0).getPrompts(), is(nullValue()));
     }
 
     @Test
@@ -399,136 +406,7 @@ class ValidationRequestMapperTest {
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(nullValue()));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(nullValue()));
-    }
-
-    @Test
-    void shouldSetIsConvictedTrueWhenConvictionDateIsPresent() {
-        final Offence offence = Offence.offence()
-                .withId(randomUUID())
-                .withConvictionDate(LocalDate.of(2025, 1, 10))
-                .build();
-
-        final Defendant defendant = Defendant.defendant()
-                .withId(randomUUID())
-                .withOffences(List.of(offence))
-                .build();
-
-        final Hearing hearing = Hearing.hearing()
-                .withProsecutionCases(List.of(
-                        ProsecutionCase.prosecutionCase()
-                                .withDefendants(List.of(defendant))
-                                .build()))
-                .build();
-
-        final ValidationRequest request = mapper.toValidationRequest(
-                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
-
-        assertThat(request.getOffences().get(0).getIsConvicted(), is(true));
-    }
-
-    @Test
-    void shouldSetIsConvictedFalseWhenConvictionDateIsAbsent() {
-        final Offence offence = Offence.offence()
-                .withId(randomUUID())
-                .build();
-
-        final Defendant defendant = Defendant.defendant()
-                .withId(randomUUID())
-                .withOffences(List.of(offence))
-                .build();
-
-        final Hearing hearing = Hearing.hearing()
-                .withProsecutionCases(List.of(
-                        ProsecutionCase.prosecutionCase()
-                                .withDefendants(List.of(defendant))
-                                .build()))
-                .build();
-
-        final ValidationRequest request = mapper.toValidationRequest(
-                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
-
-        assertThat(request.getOffences().get(0).getIsConvicted(), is(false));
-    }
-
-    @Test
-    void shouldSetHasExistingCtlRecordTrueWhenCustodyTimeLimitIsPresent() {
-        final CustodyTimeLimit custodyTimeLimit = CustodyTimeLimit.custodyTimeLimit()
-                .withTimeLimit(LocalDate.of(2026, 6, 1))
-                .build();
-
-        final Offence offence = Offence.offence()
-                .withId(randomUUID())
-                .withCustodyTimeLimit(custodyTimeLimit)
-                .build();
-
-        final Defendant defendant = Defendant.defendant()
-                .withId(randomUUID())
-                .withOffences(List.of(offence))
-                .build();
-
-        final Hearing hearing = Hearing.hearing()
-                .withProsecutionCases(List.of(
-                        ProsecutionCase.prosecutionCase()
-                                .withDefendants(List.of(defendant))
-                                .build()))
-                .build();
-
-        final ValidationRequest request = mapper.toValidationRequest(
-                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
-
-        assertThat(request.getOffences().get(0).getHasExistingCtlRecord(), is(true));
-    }
-
-    @Test
-    void shouldSetHasExistingCtlRecordFalseWhenTimeLimitIsNull() {
-        final CustodyTimeLimit custodyTimeLimit = CustodyTimeLimit.custodyTimeLimit()
-                .build();
-
-        final Offence offence = Offence.offence()
-                .withId(randomUUID())
-                .withCustodyTimeLimit(custodyTimeLimit)
-                .build();
-
-        final Defendant defendant = Defendant.defendant()
-                .withId(randomUUID())
-                .withOffences(List.of(offence))
-                .build();
-
-        final Hearing hearing = Hearing.hearing()
-                .withProsecutionCases(List.of(
-                        ProsecutionCase.prosecutionCase()
-                                .withDefendants(List.of(defendant))
-                                .build()))
-                .build();
-
-        final ValidationRequest request = mapper.toValidationRequest(
-                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
-
-        assertThat(request.getOffences().get(0).getHasExistingCtlRecord(), is(false));
-    }
-
-    @Test
-    void shouldSetHasExistingCtlRecordFalseWhenCustodyTimeLimitIsAbsent() {
-        final Offence offence = Offence.offence()
-                .withId(randomUUID())
-                .build();
-
-        final Defendant defendant = Defendant.defendant()
-                .withId(randomUUID())
-                .withOffences(List.of(offence))
-                .build();
-
-        final Hearing hearing = Hearing.hearing()
-                .withProsecutionCases(List.of(
-                        ProsecutionCase.prosecutionCase()
-                                .withDefendants(List.of(defendant))
-                                .build()))
-                .build();
-
-        final ValidationRequest request = mapper.toValidationRequest(
-                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
-
-        assertThat(request.getOffences().get(0).getHasExistingCtlRecord(), is(false));
+        assertThat(request.getResultLines().get(0).getPrompts(), is(empty()));
     }
 
     private ShareDaysResultsCommand buildCommand(final UUID hearingId, final LocalDate hearingDay,

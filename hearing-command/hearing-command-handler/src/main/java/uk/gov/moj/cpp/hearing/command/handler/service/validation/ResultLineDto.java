@@ -1,6 +1,9 @@
 package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
+
 public class ResultLineDto {
 
     private final String id;
@@ -12,6 +15,7 @@ public class ResultLineDto {
     private final Boolean isConcurrent;
     private final String consecutiveToOffence;
     private final String category;
+    private final List<PromptDto> prompts;
 
     private ResultLineDto(Builder builder) {
         this.id = builder.id;
@@ -22,6 +26,7 @@ public class ResultLineDto {
         this.isConcurrent = builder.isConcurrent;
         this.consecutiveToOffence = builder.consecutiveToOffence;
         this.category = builder.category;
+        this.prompts = builder.prompts;
     }
 
     // Getters
@@ -33,6 +38,7 @@ public class ResultLineDto {
     public Boolean getIsConcurrent() { return isConcurrent; }
     public String getConsecutiveToOffence() { return consecutiveToOffence; }
     public String getCategory() { return category; }
+    public List<PromptDto> getPrompts() { return prompts; }
 
     // Builder
     public static class Builder {
@@ -44,6 +50,7 @@ public class ResultLineDto {
         private Boolean isConcurrent;
         private String consecutiveToOffence;
         private String category;
+        private List<PromptDto> prompts;
 
         public Builder id(String id) {
             this.id = id;
@@ -82,6 +89,11 @@ public class ResultLineDto {
 
         public Builder category(String category) {
             this.category = category;
+            return this;
+        }
+
+        public Builder prompts(List<PromptDto> prompts) {
+            this.prompts = prompts;
             return this;
         }
 
