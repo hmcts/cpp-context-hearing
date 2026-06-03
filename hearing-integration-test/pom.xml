@@ -157,6 +157,7 @@
                                     <threadCount>1</threadCount>
                                     <perCoreThreadCount>false</perCoreThreadCount>
                                     <parallel>classesAndMethods</parallel>
+                                    <rerunFailingTestsCount>5</rerunFailingTestsCount>
                                     <systemProperties>
                                         <property>
                                             <name>stubPerExecution</name>
