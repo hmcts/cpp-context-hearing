@@ -75,14 +75,7 @@ public class ValidationRequestMapper {
                 .offenceTitle(offence.getOffenceTitle())
                 .orderIndex(offence.getOrderIndex())
                 .caseUrn(caseUrn)
-                .isConvicted(offence.getConvictionDate() != null)
-                .hasExistingCtlRecord(hasExistingCustodyTimeLimit(offence))
                 .build();
-    }
-
-    private boolean hasExistingCustodyTimeLimit(final Offence offence) {
-        return offence.getCustodyTimeLimit() != null
-                && offence.getCustodyTimeLimit().getTimeLimit() != null;
     }
 
     private String extractCaseId(final List<SharedResultsCommandResultLineV2> resultLines) {
@@ -115,6 +108,7 @@ public class ValidationRequestMapper {
                 .consecutiveToOffence(extractConsecutiveToOffence(line.getPrompts()))
                 .isConcurrent(extractIsConcurrent(line.getPrompts()))
                 .category(line.getCategory())
+                .prompts(mapPrompts(line.getPrompts()))
                 .build();
     }
 
@@ -134,6 +128,15 @@ public class ValidationRequestMapper {
 
     private String uuidToString(final UUID uuid) {
         return uuid != null ? uuid.toString() : null;
+    }
+
+    private List<PromptDto> mapPrompts(final List<SharedResultsCommandPrompt> prompts) {
+        if (prompts == null) {
+            return null;
+        }
+        return prompts.stream()
+                .map(p -> new PromptDto(p.getPromptRef(), p.getValue()))
+                .toList();
     }
 
     private Boolean extractIsConcurrent(final List<SharedResultsCommandPrompt> prompts) {
