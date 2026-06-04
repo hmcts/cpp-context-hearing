@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Optional.of;
@@ -11,6 +12,10 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.moj.cpp.hearing.it.PublishLatestCourtCentreHearingEventsIT.XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID;
+import static uk.gov.moj.cpp.hearing.utils.WebDavStub.awaitNewFile;
+import static uk.gov.moj.cpp.hearing.utils.WebDavStub.awaitNewSentXmlForPubDisplay;
+import static uk.gov.moj.cpp.hearing.utils.WebDavStub.countFilesAt;
+import static uk.gov.moj.cpp.hearing.utils.WebDavStub.countSentXmlForPubDisplay;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getFileForPath;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForPubDisplay;
 
@@ -106,9 +111,14 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
 
         publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
 
+        final int webPageCountBeforeSecondPublish = countFilesAt(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
+        final int pubDisplayCountBeforeSecondPublish = countSentXmlForPubDisplay();
+
         courtCentreId = sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId);
 
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+        awaitNewFile(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26, webPageCountBeforeSecondPublish);
+        awaitNewSentXmlForPubDisplay(pubDisplayCountBeforeSecondPublish);
 
         filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         filePayloadForPubDisplay = getSentXmlForPubDisplay();
@@ -171,8 +181,13 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
         courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
                 withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants", hasSize(1)));
 
+        final int webPageCountBeforeSecondPublish = countFilesAt(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
+        final int pubDisplayCountBeforeSecondPublish = countSentXmlForPubDisplay();
+
         courtCentreId = sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId);
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+        awaitNewFile(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26, webPageCountBeforeSecondPublish);
+        awaitNewSentXmlForPubDisplay(pubDisplayCountBeforeSecondPublish);
 
         filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         filePayloadForPubDisplay = getSentXmlForPubDisplay();
@@ -242,9 +257,14 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
 
         publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
 
+        final int webPageCountBeforeSecondPublish = countFilesAt(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
+        final int pubDisplayCountBeforeSecondPublish = countSentXmlForPubDisplay();
+
         courtCentreId = sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId);
 
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+        awaitNewFile(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26, webPageCountBeforeSecondPublish);
+        awaitNewSentXmlForPubDisplay(pubDisplayCountBeforeSecondPublish);
 
         filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         filePayloadForPubDisplay = getSentXmlForPubDisplay();
@@ -275,7 +295,7 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
 
         // Wait for applicant restriction to land in the projection before publishing
         courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
-                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants[0].firstName", org.hamcrest.CoreMatchers.nullValue()));
+                hasNoJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants[0].firstName"));
 
         JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
 
@@ -308,9 +328,14 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
 
         publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
 
+        final int webPageCountBeforeSecondPublish = countFilesAt(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
+        final int pubDisplayCountBeforeSecondPublish = countSentXmlForPubDisplay();
+
         courtCentreId = sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId);
 
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+        awaitNewFile(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26, webPageCountBeforeSecondPublish);
+        awaitNewSentXmlForPubDisplay(pubDisplayCountBeforeSecondPublish);
 
         filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         filePayloadForPubDisplay = getSentXmlForPubDisplay();
