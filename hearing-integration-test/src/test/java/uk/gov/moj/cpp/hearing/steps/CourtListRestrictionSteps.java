@@ -11,6 +11,7 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
@@ -106,6 +107,12 @@ public class CourtListRestrictionSteps extends AbstractIT {
      * Required because {@link #hearingEventsCourtListRestrictedReceived(Matcher)} only confirms the
      * hearing event was emitted; the listener that projects it into the JPA entity runs in a
      * separate transaction and may lag behind the publish command if not waited for.
+     * <p>
+     * A hearing-visibility precondition ({@code courtRoomId notNullValue}) is prepended to the
+     * caller's matcher to prevent the poll from short-circuiting on the empty/not-yet-projected
+     * state — without this, lenient matchers such as {@code hasNoJsonPath(...)} or
+     * {@code withJsonPath(..., hasSize(0))} would match an empty {@code {}} response and return
+     * before the restriction event has actually been processed.
      */
     public void waitForRestrictionProjection(final String courtCentreId,
                                              final LocalDate hearingDate,
@@ -118,7 +125,9 @@ public class CourtListRestrictionSteps extends AbstractIT {
                 .withHeader(USER_ID, getLoggedInSystemUserHeader()))
                 .timeout(60, SECONDS)
                 .pollInterval(1, SECONDS)
-                .until(status().is(OK), payload().isJson(expectedPayload));
+                .until(status().is(OK), payload().isJson(allOf(
+                        withJsonPath("$.court.courtSites[0].courtRooms[0].courtRoomId", notNullValue()),
+                        expectedPayload)));
     }
 
     private void sendListingPublicEvent(final JsonObject restrictCourtListDataObject) {
@@ -137,7 +146,7 @@ public class CourtListRestrictionSteps extends AbstractIT {
     }
 
     public CommandHelpers.InitiateHearingCommandHelper createHearingEventWithYoungDefendant(final UUID caseId, final UUID hearingEventId, final String courtRoomId, final String defenceCounselId,
-                                                                                           final UUID eventDefinitionId, final ZonedDateTime eventTime, final Optional<UUID> hearingTypeId, final String courtCenter, final LocalDate localDate) throws NoSuchAlgorithmException {
+                                                                                            final UUID eventDefinitionId, final ZonedDateTime eventTime, final Optional<UUID> hearingTypeId, final String courtCenter, final LocalDate localDate) throws NoSuchAlgorithmException {
         try (final Utilities.EventListener eventListener = listenFor(HEARING_EVENTS_COURT_LIST_RESTRICTED, HEARING_EVENT)
                 .withFilter(isJson(allOf(
                         withJsonPath("$.defendantIds", hasSize(1)),
