@@ -1164,6 +1164,8 @@ public class HearingService {
     }
 
     private void filterProsecutionCaseOffencesAndDeduplicateFromApplications(final uk.gov.justice.core.courts.Hearing hearing) {
+
+        // Collect all offence IDs referenced by CourtApplicationCases
         final Set<UUID> courtAppOffenceIds = hearing.getCourtApplications().stream()
                 .filter(app -> nonNull(app.getCourtApplicationCases()))
                 .flatMap(app -> app.getCourtApplicationCases().stream())
@@ -1172,6 +1174,7 @@ public class HearingService {
                 .map(uk.gov.justice.core.courts.Offence::getId)
                 .collect(toSet());
 
+        // Step 1: keep only offences those appear in the CourtApplicationCases
         if (isNotEmpty(hearing.getProsecutionCases())) {
             hearing.getProsecutionCases().stream()
                     .filter(pc -> nonNull(pc.getDefendants()))
@@ -1181,6 +1184,7 @@ public class HearingService {
                             .removeIf(offence -> !courtAppOffenceIds.contains(offence.getId())));
         }
 
+        // Collect offence IDs that survived in step 1
         final Set<UUID> keptOffenceIds = isNull(hearing.getProsecutionCases())
                 ? emptySet()
                 : hearing.getProsecutionCases().stream()
@@ -1191,6 +1195,8 @@ public class HearingService {
                         .map(uk.gov.justice.core.courts.Offence::getId)
                         .collect(toSet());
 
+        // Step 2: remove from CourtApplicationCases any offence already present under prosecution cases;
+        // set offences to null (rather than empty list) so the field is omitted from the JSON response.
         hearing.getCourtApplications().stream()
                 .filter(app -> nonNull(app.getCourtApplicationCases()))
                 .flatMap(app -> app.getCourtApplicationCases().stream())
