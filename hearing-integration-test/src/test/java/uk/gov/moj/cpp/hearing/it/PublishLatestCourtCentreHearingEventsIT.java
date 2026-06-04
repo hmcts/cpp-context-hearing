@@ -41,7 +41,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 
 @NotThreadSafe
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class PublishLatestCourtCentreHearingEventsIT  extends AbstractPublishLatestCourtCentreHearingIT {
+public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLatestCourtCentreHearingIT {
 
     private static final UUID RESUME_ID_WHICH_IS_NOT_TO_BE_INCLUDED_IN_FILTER = RESUME_HEARING_EVENT_DEFINITION_ID;
     private static final String LISTING_COMMAND_PUBLISH_COURT_LIST = "hearing.command.publish-court-list";
