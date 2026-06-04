@@ -5,6 +5,7 @@ import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -13,8 +14,10 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
@@ -128,7 +131,6 @@ import javax.transaction.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -621,7 +623,7 @@ public class HearingService {
 
         if (hearing.getCourtApplications() != null) {
 
-            Set<UUID> uniqueApplications = hearing.getCourtApplications().stream().map(CourtApplication::getId).collect(Collectors.toSet());
+            Set<UUID> uniqueApplications = hearing.getCourtApplications().stream().map(CourtApplication::getId).collect(toSet());
             relatedApplicationId = hearing.getCourtApplications().get(0).getId();
 
             final List<CourtApplication> parentCourtApplications = hearing.getCourtApplications().stream()
@@ -1135,7 +1137,12 @@ public class HearingService {
             return payload;
         }
 
-        payload.setHearing(buildHearingWithoutProsecutionCases(payload.getHearing()));
+        //if all selected offenses inactive(proceedingsConcluded=true) then this is an application hearing
+        if (areAllCourtApplicationOffencesConcluded(payload.getHearing())) {
+            payload.setHearing(buildHearingWithoutProsecutionCases(payload.getHearing()));
+        } else { //otherwise this is a case hearing
+            filterProsecutionCaseOffencesAndDeduplicateFromApplications(payload.getHearing());
+        }
 
         return payload;
     }
@@ -1145,6 +1152,55 @@ public class HearingService {
                 .withValuesFrom(hearing)
                 .withProsecutionCases(null)
                 .build();
+    }
+
+    private boolean areAllCourtApplicationOffencesConcluded(final uk.gov.justice.core.courts.Hearing hearing) {
+        return hearing.getCourtApplications().stream()
+                .filter(app -> nonNull(app.getCourtApplicationCases()))
+                .flatMap(app -> app.getCourtApplicationCases().stream())
+                .filter(courtCase -> isNotEmpty(courtCase.getOffences()))
+                .flatMap(courtCase -> courtCase.getOffences().stream())
+                .allMatch(offence -> isTrue(offence.getProceedingsConcluded()));
+    }
+
+    private void filterProsecutionCaseOffencesAndDeduplicateFromApplications(final uk.gov.justice.core.courts.Hearing hearing) {
+        final Set<UUID> courtAppOffenceIds = hearing.getCourtApplications().stream()
+                .filter(app -> nonNull(app.getCourtApplicationCases()))
+                .flatMap(app -> app.getCourtApplicationCases().stream())
+                .filter(courtCase -> nonNull(courtCase.getOffences()))
+                .flatMap(courtCase -> courtCase.getOffences().stream())
+                .map(uk.gov.justice.core.courts.Offence::getId)
+                .collect(toSet());
+
+        if (isNotEmpty(hearing.getProsecutionCases())) {
+            hearing.getProsecutionCases().stream()
+                    .filter(pc -> nonNull(pc.getDefendants()))
+                    .flatMap(pc -> pc.getDefendants().stream())
+                    .filter(defendant -> nonNull(defendant.getOffences()))
+                    .forEach(defendant -> defendant.getOffences()
+                            .removeIf(offence -> !courtAppOffenceIds.contains(offence.getId())));
+        }
+
+        final Set<UUID> keptOffenceIds = isNull(hearing.getProsecutionCases())
+                ? emptySet()
+                : hearing.getProsecutionCases().stream()
+                        .filter(pc -> nonNull(pc.getDefendants()))
+                        .flatMap(pc -> pc.getDefendants().stream())
+                        .filter(defendant -> nonNull(defendant.getOffences()))
+                        .flatMap(defendant -> defendant.getOffences().stream())
+                        .map(uk.gov.justice.core.courts.Offence::getId)
+                        .collect(toSet());
+
+        hearing.getCourtApplications().stream()
+                .filter(app -> nonNull(app.getCourtApplicationCases()))
+                .flatMap(app -> app.getCourtApplicationCases().stream())
+                .filter(courtCase -> nonNull(courtCase.getOffences()))
+                .forEach(courtCase -> {
+                    courtCase.getOffences().removeIf(offence -> keptOffenceIds.contains(offence.getId()));
+                    if (courtCase.getOffences().isEmpty()) {
+                        courtCase.setOffences(null);
+                    }
+                });
     }
 
     private boolean isApplicationHasNoOffences(final uk.gov.justice.core.courts.Hearing hearing) {

@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.iterableWithSize;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -2283,6 +2284,7 @@ public class HearingServiceTest {
                         .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
                                 .withOffences(singletonList(Offence.offence()
                                         .withId(randomUUID())
+                                        .withProceedingsConcluded(true)
                                         .build()))
                                 .build()))
                         .build()))
@@ -2330,5 +2332,81 @@ public class HearingServiceTest {
         assertThat(isNull(result.getHearing().getProsecutionCases()), is(false));
         assertThat(result.getHearing().getProsecutionCases(), hasSize(1));
         assertThat(result.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().size(), is(1));
+    }
+
+    @Test
+    public void shouldKeepFilteredProsecutionCasesWhenApplicationOffencesNotConcluded() {
+        final UUID sharedOffenceId = randomUUID();
+        final UUID extraOffenceId = randomUUID();
+
+        final uk.gov.justice.core.courts.Hearing hearing = hearing()
+                .withCourtApplications(singletonList(CourtApplication.courtApplication()
+                        .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                                .withOffences(new ArrayList<>(singletonList(Offence.offence()
+                                        .withId(sharedOffenceId)
+                                        .withProceedingsConcluded(false)
+                                        .build())))
+                                .build()))
+                        .build()))
+                .withProsecutionCases(singletonList(uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase()
+                        .withDefendants(singletonList(uk.gov.justice.core.courts.Defendant.defendant()
+                                .withId(randomUUID())
+                                .withOffences(new ArrayList<>(Arrays.asList(
+                                        Offence.offence().withId(sharedOffenceId).build(),
+                                        Offence.offence().withId(extraOffenceId).build())))
+                                .build()))
+                        .build()))
+                .build();
+
+        final HearingDetailsResponse payload = new HearingDetailsResponse();
+        payload.setHearing(hearing);
+
+        final HearingDetailsResponse result = hearingService.filterOutProsecutionCases(payload);
+
+        assertThat(result.getHearing().getProsecutionCases(), hasSize(1));
+        final List<Offence> remainingDefendantOffences =
+                result.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences();
+        assertThat(remainingDefendantOffences, hasSize(1));
+        assertThat(remainingDefendantOffences.get(0).getId(), is(sharedOffenceId));
+
+        final List<Offence> remainingAppOffences = result.getHearing().getCourtApplications()
+                .get(0).getCourtApplicationCases().get(0).getOffences();
+        assertThat(remainingAppOffences, nullValue());
+    }
+
+    @Test
+    public void shouldLeaveEmptyDefendantOffencesWhenNoneMatchCourtApplicationOffences() {
+        final UUID appOffenceId = randomUUID();
+        final UUID defOffenceId = randomUUID();
+
+        final uk.gov.justice.core.courts.Hearing hearing = hearing()
+                .withCourtApplications(singletonList(CourtApplication.courtApplication()
+                        .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                                .withOffences(new ArrayList<>(singletonList(Offence.offence()
+                                        .withId(appOffenceId)
+                                        .withProceedingsConcluded(false)
+                                        .build())))
+                                .build()))
+                        .build()))
+                .withProsecutionCases(singletonList(uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase()
+                        .withDefendants(singletonList(uk.gov.justice.core.courts.Defendant.defendant()
+                                .withId(randomUUID())
+                                .withOffences(new ArrayList<>(singletonList(
+                                        Offence.offence().withId(defOffenceId).build())))
+                                .build()))
+                        .build()))
+                .build();
+
+        final HearingDetailsResponse payload = new HearingDetailsResponse();
+        payload.setHearing(hearing);
+
+        final HearingDetailsResponse result = hearingService.filterOutProsecutionCases(payload);
+
+        assertThat(result.getHearing().getProsecutionCases(), hasSize(1));
+        assertThat(result.getHearing().getProsecutionCases().get(0)
+                        .getDefendants().get(0).getOffences(), empty());
+
+        assertThat(result.getHearing().getCourtApplications()
+                        .get(0).getCourtApplicationCases().get(0).getOffences(), hasSize(1));
     }
 }
