@@ -273,9 +273,11 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
                 withJsonPath("$.courtApplicationApplicantIds", hasSize(1)),
                 withJsonPath("$.restrictCourtList", is(true)))));
 
-        // Wait for applicant restriction to land in the projection before publishing
+        // Wait for applicant restriction to land in the projection before publishing.
+        // When restricted the applicant is nulled out and the defendant serialises as {} (no keys),
+        // so we assert on the object being empty rather than firstName being null (absent key ≠ null).
         courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
-                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants[0].firstName", org.hamcrest.CoreMatchers.nullValue()));
+                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants[0]", is(java.util.Collections.emptyMap())));
 
         JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
 
