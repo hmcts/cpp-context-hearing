@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Optional.of;
@@ -11,6 +12,10 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.moj.cpp.hearing.it.PublishLatestCourtCentreHearingEventsIT.XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID;
+import static uk.gov.moj.cpp.hearing.utils.WebDavStub.awaitNewFile;
+import static uk.gov.moj.cpp.hearing.utils.WebDavStub.awaitNewSentXmlForPubDisplay;
+import static uk.gov.moj.cpp.hearing.utils.WebDavStub.countFilesAt;
+import static uk.gov.moj.cpp.hearing.utils.WebDavStub.countSentXmlForPubDisplay;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getFileForPath;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForPubDisplay;
 
@@ -71,6 +76,10 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
                 withJsonPath("$.caseIds", hasSize(1)),
                 withJsonPath("$.restrictCourtList", is(true)))));
 
+        // Wait for the restriction projection to land before publishing
+        courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
+                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails", hasSize(0)));
+
         JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
@@ -96,11 +105,20 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
                 withJsonPath("$.caseIds", hasSize(1)),
                 withJsonPath("$.restrictCourtList", is(false)))));
 
+        // Wait for the un-restriction projection to land before publishing
+        courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
+                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails", hasSize(1)));
+
         publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
+
+        final int webPageCountBeforeSecondPublish = countFilesAt(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
+        final int pubDisplayCountBeforeSecondPublish = countSentXmlForPubDisplay();
 
         courtCentreId = sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId);
 
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+        awaitNewFile(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26, webPageCountBeforeSecondPublish);
+        awaitNewSentXmlForPubDisplay(pubDisplayCountBeforeSecondPublish);
 
         filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         filePayloadForPubDisplay = getSentXmlForPubDisplay();
@@ -126,6 +144,10 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
                 withJsonPath("$.hearingId", is(initiateHearingCommandHelper.getHearing().getId().toString())),
                 withJsonPath("$.defendantIds", hasSize(1)),
                 withJsonPath("$.restrictCourtList", is(true)))));
+
+        // Wait for defendant restriction to land in the projection before publishing
+        courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
+                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants", hasSize(0)));
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
@@ -155,8 +177,17 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
                 withJsonPath("$.defendantIds", hasSize(1)),
                 withJsonPath("$.restrictCourtList", is(false)))));
 
+        // Wait for defendant un-restriction to land in the projection before publishing
+        courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
+                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants", hasSize(1)));
+
+        final int webPageCountBeforeSecondPublish = countFilesAt(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
+        final int pubDisplayCountBeforeSecondPublish = countSentXmlForPubDisplay();
+
         courtCentreId = sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId);
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+        awaitNewFile(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26, webPageCountBeforeSecondPublish);
+        awaitNewSentXmlForPubDisplay(pubDisplayCountBeforeSecondPublish);
 
         filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         filePayloadForPubDisplay = getSentXmlForPubDisplay();
@@ -191,6 +222,10 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
                 withJsonPath("$.courtApplicationIds", hasSize(1)),
                 withJsonPath("$.restrictCourtList", is(true)))));
 
+        // Wait for application restriction to land in the projection before publishing
+        courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
+                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails", hasSize(0)));
+
         JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
@@ -216,11 +251,20 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
                 withJsonPath("$.courtApplicationIds", hasSize(1)),
                 withJsonPath("$.restrictCourtList", is(false)))));
 
+        // Wait for application un-restriction to land in the projection before publishing
+        courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
+                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails", hasSize(1)));
+
         publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
+
+        final int webPageCountBeforeSecondPublish = countFilesAt(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
+        final int pubDisplayCountBeforeSecondPublish = countSentXmlForPubDisplay();
 
         courtCentreId = sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId);
 
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+        awaitNewFile(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26, webPageCountBeforeSecondPublish);
+        awaitNewSentXmlForPubDisplay(pubDisplayCountBeforeSecondPublish);
 
         filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         filePayloadForPubDisplay = getSentXmlForPubDisplay();
@@ -249,6 +293,10 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
                 withJsonPath("$.courtApplicationApplicantIds", hasSize(1)),
                 withJsonPath("$.restrictCourtList", is(true)))));
 
+        // Wait for applicant restriction to land in the projection before publishing
+        courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
+                hasNoJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants[0].firstName"));
+
         JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
@@ -274,11 +322,20 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
                 withJsonPath("$.courtApplicationApplicantIds", hasSize(1)),
                 withJsonPath("$.restrictCourtList", is(false)))));
 
+        // Wait for applicant un-restriction to land in the projection before publishing
+        courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
+                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants[0].firstName", org.hamcrest.CoreMatchers.notNullValue()));
+
         publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
+
+        final int webPageCountBeforeSecondPublish = countFilesAt(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
+        final int pubDisplayCountBeforeSecondPublish = countSentXmlForPubDisplay();
 
         courtCentreId = sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId);
 
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+        awaitNewFile(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26, webPageCountBeforeSecondPublish);
+        awaitNewSentXmlForPubDisplay(pubDisplayCountBeforeSecondPublish);
 
         filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         filePayloadForPubDisplay = getSentXmlForPubDisplay();
@@ -307,6 +364,10 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
         final InitiateHearingCommandHelper initiateHearingCommandHelper = courtListRestrictionSteps.createHearingEventWithYoungDefendant(
                 caseId, randomUUID(), courtRoom2Id, randomUUID().toString(),
                 OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId, eventTime.toLocalDate());
+
+        // Wait for the young-defendant restriction to land in the projection before publishing
+        courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
+                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants", hasSize(0)));
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
