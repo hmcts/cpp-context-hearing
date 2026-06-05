@@ -130,6 +130,33 @@ public class CourtListRestrictionSteps extends AbstractIT {
                         expectedPayload)));
     }
 
+    /**
+     * Polls the publish-side query {@code hearing.latest-hearings-by-court-centres} until the
+     * just-created hearing is observable. MUST be called after {@code createHearingEvent*} and
+     * BEFORE any {@code hide*FromXhibit} call.
+     * <p>
+     * Without this wait, the {@code public.listing.court-list-restricted} → ... →
+     * {@code hearing.event.court-list-restricted} chain can reach
+     * {@link uk.gov.moj.cpp.hearing.event.listener.CourtListRestrictionEventListener} before the
+     * hearing-creation projection has committed to {@code ha_hearing}. The listener does
+     * {@code hearingRepository.findOptionalBy(hearingId)} and, if the row is missing, silently
+     * returns (the message is consumed and never replayed). The restriction is then lost, the
+     * subsequent publish reads the un-restricted hearing, and the assertion on the redacted XML
+     * fails. This flake reproduced ~2/3 of CI runs on team/rv-2616.
+     */
+    public void waitForHearingVisible(final String courtCentreId, final LocalDate hearingDate) {
+        setupAsAuthorizedAndSystemUser(USER_ID_VALUE_AS_ADMIN);
+        final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.latest-hearings-by-court-centres"), courtCentreId, hearingDate);
+        final String searchCourtListUrl = String.format("%s/%s", getBaseUri(), queryPart);
+
+        poll(requestParams(searchCourtListUrl, "application/vnd.hearing.latest-hearings-by-court-centres+json")
+                .withHeader(USER_ID, getLoggedInSystemUserHeader()))
+                .timeout(60, SECONDS)
+                .pollInterval(1, SECONDS)
+                .until(status().is(OK), payload().isJson(
+                        withJsonPath("$.court.courtSites[0].courtRooms[0].courtRoomId", notNullValue())));
+    }
+
     private void sendListingPublicEvent(final JsonObject restrictCourtListDataObject) {
         sendMessage(
                 getPublicTopicInstance().createProducer(),
@@ -142,11 +169,12 @@ public class CourtListRestrictionSteps extends AbstractIT {
                                                                           final UUID eventDefinitionId, final ZonedDateTime eventTime, final Optional<UUID> hearingTypeId, String courtCenter, LocalDate localDate) throws NoSuchAlgorithmException {
         final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearingWithNsp(getRequestSpec(), initiateHearingTemplateWithParamNoReportingRestriction(fromString(courtCenter), fromString(courtRoomId), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, hearingTypeId)));
         logEvent(hearingEventId, getRequestSpec(), asDefault(), hearing.it(), eventDefinitionId, false, fromString(defenceCounselId), eventTime, null);
+        waitForHearingVisible(courtCenter, eventTime.toLocalDate());
         return hearing;
     }
 
     public CommandHelpers.InitiateHearingCommandHelper createHearingEventWithYoungDefendant(final UUID caseId, final UUID hearingEventId, final String courtRoomId, final String defenceCounselId,
-                                                                                           final UUID eventDefinitionId, final ZonedDateTime eventTime, final Optional<UUID> hearingTypeId, final String courtCenter, final LocalDate localDate) throws NoSuchAlgorithmException {
+                                                                                            final UUID eventDefinitionId, final ZonedDateTime eventTime, final Optional<UUID> hearingTypeId, final String courtCenter, final LocalDate localDate) throws NoSuchAlgorithmException {
         try (final Utilities.EventListener eventListener = listenFor(HEARING_EVENTS_COURT_LIST_RESTRICTED, HEARING_EVENT)
                 .withFilter(isJson(allOf(
                         withJsonPath("$.defendantIds", hasSize(1)),
@@ -155,6 +183,7 @@ public class CourtListRestrictionSteps extends AbstractIT {
                     initiateHearingTemplateWithParamNoReportingRestrictionYoungDefendant(fromString(courtCenter), fromString(courtRoomId), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, hearingTypeId)));
             logEvent(hearingEventId, getRequestSpec(), asDefault(), hearing.it(), eventDefinitionId, false, fromString(defenceCounselId), eventTime, null);
             eventListener.waitFor();
+            waitForHearingVisible(courtCenter, eventTime.toLocalDate());
             return hearing;
         }
     }
@@ -164,6 +193,7 @@ public class CourtListRestrictionSteps extends AbstractIT {
         final CommandHelpers.InitiateHearingCommandHelper hearing = h(initiateHearingForApplication(getRequestSpec(), initiateHearingTemplateForApplicationNoReportingRestriction(fromString(courtCenter), fromString(courtRoomId), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, hearingTypeId)));
         givenAUserHasLoggedInAsACourtClerk(randomUUID());
         logEvent(hearingEventId, getRequestSpec(), asDefault(), hearing.it(), eventDefinitionId, false, fromString(defenceCounselId), eventTime, null);
+        waitForHearingVisible(courtCenter, eventTime.toLocalDate());
         return hearing;
     }
 
