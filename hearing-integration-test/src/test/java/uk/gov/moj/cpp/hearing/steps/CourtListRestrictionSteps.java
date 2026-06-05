@@ -43,6 +43,10 @@ import uk.gov.moj.cpp.hearing.it.Utilities;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -53,8 +57,11 @@ import javax.json.JsonObject;
 import io.restassured.path.json.JsonPath;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.awaitility.Awaitility;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CourtListRestrictionSteps extends AbstractIT {
 
@@ -131,31 +138,69 @@ public class CourtListRestrictionSteps extends AbstractIT {
     }
 
     /**
-     * Polls the publish-side query {@code hearing.latest-hearings-by-court-centres} until the
-     * just-created hearing is observable. MUST be called after {@code createHearingEvent*} and
-     * BEFORE any {@code hide*FromXhibit} call.
-     * <p>
+     * Polls the view-store DB directly until the just-created hearing has BOTH
+     * {@code ha_hearing} AND {@code ha_hearing_day} rows for the given courtCentreId/date.
+     * MUST be called after {@code createHearingEvent*} and BEFORE any {@code hide*FromXhibit}
+     * call or any {@code sendPublishCourtListCommand}.
+     *
+     * <h3>Two races this closes</h3>
+     *
+     * <p><b>1. The listener silent-drop race.</b>
      * Without this wait, the {@code public.listing.court-list-restricted} → ... →
      * {@code hearing.event.court-list-restricted} chain can reach
      * {@link uk.gov.moj.cpp.hearing.event.listener.CourtListRestrictionEventListener} before the
      * hearing-creation projection has committed to {@code ha_hearing}. The listener does
      * {@code hearingRepository.findOptionalBy(hearingId)} and, if the row is missing, silently
-     * returns (the message is consumed and never replayed). The restriction is then lost, the
+     * returns — the message is consumed and never replayed, the restriction is lost, the
      * subsequent publish reads the un-restricted hearing, and the assertion on the redacted XML
-     * fails. This flake reproduced ~2/3 of CI runs on team/rv-2616.
+     * fails.
+     *
+     * <p><b>2. The pub-display empty-XML race.</b>
+     * Even when {@code ha_hearing} is populated, the publish's pub-display query
+     * ({@code findHearingsByDateAndCourtCentreList}) INNER-JOINs {@code ha_hearing.hearingDays}
+     * filtered by date. If {@code ha_hearing_day} hasn't been projected yet when the publish
+     * runs, the pub-display query returns thin/empty data and the publish writes an XML with
+     * empty fields (empty courtname, cppurn, defendant fields, no {@code currentstatus} block).
+     * The web-page publish (which goes via {@code ha_hearing_event}) is unaffected and writes
+     * correct XML, so the test sees a mismatch where the same publish call produces correct
+     * web-page XML but stub pub-display XML.
+     *
+     * <p>Polling JDBC directly is more robust than polling either REST endpoint because both
+     * publish-side queries are gated on the same two tables; once both are populated, both
+     * publishes will see fresh data.
      */
     public void waitForHearingVisible(final String courtCentreId, final LocalDate hearingDate) {
-        setupAsAuthorizedAndSystemUser(USER_ID_VALUE_AS_ADMIN);
-        final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.latest-hearings-by-court-centres"), courtCentreId, hearingDate);
-        final String searchCourtListUrl = String.format("%s/%s", getBaseUri(), queryPart);
-
-        poll(requestParams(searchCourtListUrl, "application/vnd.hearing.latest-hearings-by-court-centres+json")
-                .withHeader(USER_ID, getLoggedInSystemUserHeader()))
-                .timeout(60, SECONDS)
-                .pollInterval(1, SECONDS)
-                .until(status().is(OK), payload().isJson(
-                        withJsonPath("$.court.courtSites[0].courtRooms[0].courtRoomId", notNullValue())));
+        Awaitility.await()
+                .atMost(60, SECONDS)
+                .pollInterval(500, java.util.concurrent.TimeUnit.MILLISECONDS)
+                .until(() -> hearingProjectedFor(courtCentreId, hearingDate));
     }
+
+    private boolean hearingProjectedFor(final String courtCentreId, final LocalDate hearingDate) {
+        // Both publish paths need all three tables. Web-page goes via ha_hearing_event;
+        // pub-display additionally INNER-JOINs ha_hearing_day.
+        final String sql = String.format(
+                "SELECT count(1) FROM ha_hearing h " +
+                        "INNER JOIN ha_hearing_day day ON day.hearing_id = h.id " +
+                        "INNER JOIN ha_hearing_event ev ON ev.hearing_id = h.id " +
+                        "WHERE h.court_centre_id = '%s' " +
+                        "AND day.date = '%s' " +
+                        "AND ev.event_date = '%s' " +
+                        "AND ev.deleted = false",
+                courtCentreId, hearingDate, hearingDate);
+        try (final Connection connection = testJdbcConnectionProvider.getViewStoreConnection("hearing");
+             final Statement statement = connection.createStatement();
+             final ResultSet resultSet = statement.executeQuery(sql)) {
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (final SQLException e) {
+            HEARING_VISIBILITY_LOGGER.warn("Failed to query view store for visibility check: {}", e.getMessage());
+        }
+        return false;
+    }
+
+    private static final Logger HEARING_VISIBILITY_LOGGER = LoggerFactory.getLogger(CourtListRestrictionSteps.class);
 
     private void sendListingPublicEvent(final JsonObject restrictCourtListDataObject) {
         sendMessage(
