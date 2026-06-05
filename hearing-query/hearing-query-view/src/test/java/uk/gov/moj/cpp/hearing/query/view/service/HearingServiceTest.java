@@ -1745,7 +1745,7 @@ public class HearingServiceTest {
         final List<UUID> caseIdList = new ArrayList<>();
         caseIdList.add(caseId);
 
-        when(hearingRepository.findHearingsByCaseIdsLaterThan(caseIdList, LocalDate.now())).thenReturn(emptyList());
+        when(hearingRepository.findHearingsByCaseIdsLaterThan(caseIdList, new UtcClock().now().toLocalDate())).thenReturn(emptyList());
 
         final GetHearings response = hearingService.getFutureHearingsByCaseIds(caseIdList);
 
