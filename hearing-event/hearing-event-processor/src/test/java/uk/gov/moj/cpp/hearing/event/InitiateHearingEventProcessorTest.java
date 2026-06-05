@@ -14,10 +14,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.core.courts.CourtOrder.courtOrder;
-import static uk.gov.justice.core.courts.CourtOrderOffence.courtOrderOffence;
-import static uk.gov.justice.core.courts.Offence.offence;
-import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
@@ -34,11 +30,7 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtApplicationType;
-import uk.gov.justice.core.courts.CourtOrder;
-import uk.gov.justice.core.courts.CourtOrderOffence;
-import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.MasterDefendant;
-import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -58,7 +50,6 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -68,8 +59,8 @@ import java.util.stream.Stream;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -77,10 +68,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@SuppressWarnings({"unchecked", "unused"})
+@SuppressWarnings({"unused"})
+@ExtendWith(MockitoExtension.class)
 public class InitiateHearingEventProcessorTest {
     private static final String APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_CODE = "MC80527";
     private static final String APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_SJP_CASE_CODE = "MC80528";
@@ -117,12 +109,6 @@ public class InitiateHearingEventProcessorTest {
     private ArgumentCaptor<Envelope<JsonObject>> envelopeArgumentCaptor;
     @Mock
     private ProgressionService progressionService;
-
-
-    @BeforeEach
-    public void initMocks() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     public static Stream<Arguments> applicationTypes() {
         return Stream.of(
@@ -178,13 +164,16 @@ public class InitiateHearingEventProcessorTest {
                                 .add("applicationStatus", "UN_ALLOCATED")
                                 .build()).build()));
 
+        final List<CourtApplicationCase> courtApplicationCases = createCourtApplicationCases();
+        final UUID caseId1 = courtApplicationCases.get(0).getProsecutionCaseId();
+        final UUID caseId2 = courtApplicationCases.get(1).getProsecutionCaseId();
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingWithApplicationTemplate(singletonList(CourtApplication.courtApplication()
                 .withType(CourtApplicationType.courtApplicationType()
                         .withId(randomUUID())
                         .withCode(applicationTypeId)
                         .build())
-                .withCourtApplicationCases(createCourtApplicationCases())
+                .withCourtApplicationCases(courtApplicationCases)
                 .withId(applicationId)
                 .withSubject(CourtApplicationParty.courtApplicationParty()
                         .withMasterDefendant(MasterDefendant.masterDefendant()
@@ -212,7 +201,10 @@ public class InitiateHearingEventProcessorTest {
                                 withJsonPath("$.listingDate", is(dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))),
                                 withJsonPath("$.caseUrns[0]", is("caseURN1")),
                                 withJsonPath("$.caseUrns[1]", is("caseURN2")),
-                                withJsonPath("$.hearingCourtCentreName", is(notNullValue()))
+                                withJsonPath("$.caseIds[0]", is(caseId1.toString())),
+                                withJsonPath("$.caseIds[1]", is(caseId2.toString())),
+                                withJsonPath("$.hearingCourtCentreName", is(notNullValue())),
+                                withJsonPath("$.hearingCourtCentreId", is(notNullValue()))
                         ))));
 
     }
@@ -416,13 +408,16 @@ public class InitiateHearingEventProcessorTest {
                                 .add("applicationStatus", "UN_ALLOCATED")
                                 .build()).build()));
 
+        final List<CourtApplicationCase> courtApplicationCases = createCourtApplicationCases();
+        final UUID caseId1 = courtApplicationCases.get(0).getProsecutionCaseId();
+        final UUID caseId2 = courtApplicationCases.get(1).getProsecutionCaseId();
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingWithApplicationTemplate(singletonList(CourtApplication.courtApplication()
                 .withType(CourtApplicationType.courtApplicationType()
                         .withCode(applicationTypeId).build())
                 .withId(applicationId)
                 .withApplicationStatus(ApplicationStatus.UN_ALLOCATED)
-                .withCourtApplicationCases(createCourtApplicationCases())
+                .withCourtApplicationCases(courtApplicationCases)
                 .withSubject(CourtApplicationParty.courtApplicationParty()
                         .withMasterDefendant(MasterDefendant.masterDefendant()
                                 .withMasterDefendantId(masterDefendantId)
@@ -449,7 +444,10 @@ public class InitiateHearingEventProcessorTest {
                                 withJsonPath("$.listingDate", is(dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))),
                                 withJsonPath("$.caseUrns[0]", is("caseURN1")),
                                 withJsonPath("$.caseUrns[1]", is("caseURN2")),
+                                withJsonPath("$.caseIds[0]", is(caseId1.toString())),
+                                withJsonPath("$.caseIds[1]", is(caseId2.toString())),
                                 withJsonPath("$.hearingCourtCentreName", is(notNullValue())),
+                                withJsonPath("$.hearingCourtCentreId", is(notNullValue())),
                                 withJsonPath("$.caseOffenceIdList.size()", is(2))
                         ))));
 
@@ -471,6 +469,8 @@ public class InitiateHearingEventProcessorTest {
         final List<CourtApplicationCase> courtApplicationCases = createCourtApplicationCases();
         final UUID offenceId1 = courtApplicationCases.get(0).getOffences().get(0).getId();
         final UUID offenceId2 = courtApplicationCases.get(1).getOffences().get(0).getId();
+        final UUID caseId1 = courtApplicationCases.get(0).getProsecutionCaseId();
+        final UUID caseId2 = courtApplicationCases.get(1).getProsecutionCaseId();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingWithApplicationTemplate(singletonList(CourtApplication.courtApplication()
                 .withType(CourtApplicationType.courtApplicationType()
                         .withCode(APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_CODE).build())
@@ -503,7 +503,10 @@ public class InitiateHearingEventProcessorTest {
                                 withJsonPath("$.listingDate", is(dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))),
                                 withJsonPath("$.caseUrns[0]", is("caseURN1")),
                                 withJsonPath("$.caseUrns[1]", is("caseURN2")),
+                                withJsonPath("$.caseIds[0]", is(caseId1.toString())),
+                                withJsonPath("$.caseIds[1]", is(caseId2.toString())),
                                 withJsonPath("$.hearingCourtCentreName", is(notNullValue())),
+                                withJsonPath("$.hearingCourtCentreId", is(notNullValue())),
                                 withJsonPath("$.caseOffenceIdList[0]", is(offenceId1.toString())),
                                 withJsonPath("$.caseOffenceIdList[1]", is(offenceId2.toString()))
                         ))));

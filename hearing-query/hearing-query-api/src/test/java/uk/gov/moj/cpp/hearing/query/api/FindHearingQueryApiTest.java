@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
 import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -84,6 +85,9 @@ public class FindHearingQueryApiTest {
 
     @Mock
     private EnvelopePayloadTypeConverter envelopePayloadTypeConverter;
+
+    @Mock
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     @Spy
     private Enveloper enveloper = createEnveloper();
@@ -166,8 +170,16 @@ public class FindHearingQueryApiTest {
     }
 
 
+    @Test
+    public void should_throw_bad_request_when_user_id_is_missing_ForManageHearing() {
+        when(jsonInputEnvelope.metadata()).thenReturn(metadata);
+        when(metadata.userId()).thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class, () -> hearingQueryApi.findHearingForManageHearing(jsonInputEnvelope));
+    }
+
     private CrackedIneffectiveVacatedTrialTypes getCrackedIneffectiveVacatedTrialTypes() {
-        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = new CrackedIneffectiveVacatedTrialType(randomUUID(), "", "", "","", LocalDate.now());
+        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = new CrackedIneffectiveVacatedTrialType(randomUUID(), "", "", "", "", LocalDate.now());
 
         final List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes = new ArrayList();
         crackedIneffectiveVacatedTrialTypes.add(crackedIneffectiveVacatedTrialType);
