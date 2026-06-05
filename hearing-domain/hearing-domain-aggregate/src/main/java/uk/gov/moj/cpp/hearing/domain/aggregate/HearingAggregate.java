@@ -618,11 +618,15 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final HearingEvent hearingEvent, final List<UUID> hearingTypeIds, final UUID userId) {
+        return logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, hearingTypeIds, userId, null);
+    }
+
+    public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final HearingEvent hearingEvent, final List<UUID> hearingTypeIds, final UUID userId, final uk.gov.moj.cpp.hearing.domain.CourtCentre suppliedCourtCentre) {
         if (this.momento.isDeletedOrDuplicated()) {
             return warnEventIgnored(hearingId, "logHearingEvent");
         }
 
-        return apply(Stream.concat(this.hearingEventDelegate.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, userId),
+        return apply(Stream.concat(this.hearingEventDelegate.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, userId, suppliedCourtCentre),
                 CustodyTimeLimitUtil.stopCTLExpiryForTrialHearingUser(this.momento, hearingEvent, hearingTypeIds)));
     }
 
@@ -631,7 +635,15 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> correctHearingEvent(final UUID latestHearingEventId, final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final HearingEvent hearingEvent, final UUID userId) {
-        return apply(this.hearingEventDelegate.correctHearingEvent(latestHearingEventId, hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, userId));
+        return correctHearingEvent(latestHearingEventId, hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, userId, null);
+    }
+
+    public Stream<Object> correctHearingEvent(final UUID latestHearingEventId, final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final HearingEvent hearingEvent, final UUID userId, final uk.gov.moj.cpp.hearing.domain.CourtCentre suppliedCourtCentre) {
+        return apply(this.hearingEventDelegate.correctHearingEvent(latestHearingEventId, hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, userId, suppliedCourtCentre));
+    }
+
+    public Optional<HearingDay> findHearingDayFor(final ZonedDateTime eventTime) {
+        return this.hearingEventDelegate.findHearingDayFor(eventTime);
     }
 
     public Stream<Object> deleteCourtApplicationHearing(final UUID hearingId) {

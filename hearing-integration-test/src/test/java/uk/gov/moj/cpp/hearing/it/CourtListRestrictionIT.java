@@ -25,6 +25,7 @@ import java.time.ZonedDateTime;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.json.JsonObject;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,6 +39,22 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
     public void setUpTest() {
         cleanDatabase("ha_hearing");
         eventTime = new UtcClock().now().minusMinutes(5L);
+    }
+
+    /**
+     * Hearings created here use templates that explicitly set
+     * {@code reportingRestrictionReason=""} (the
+     * {@code initiateHearingTemplateWithParamNoReportingRestriction*} variants).
+     * They sit in the same {@code courtCentreId}/{@code courtRoom2Id} bucket
+     * as
+     * {@code PublishLatestCourtCentreHearingEventsIT.shouldRequestToPublishCourtListOpenCaseProsecution}
+     * and would otherwise leak into that test's PUB-DISPLAY XML, breaking its
+     * defendant-redaction assertion. Clean up after each method so nothing
+     * survives this class.
+     */
+    @AfterEach
+    public void tearDownTest() {
+        cleanDatabase("ha_hearing");
     }
 
     @Test

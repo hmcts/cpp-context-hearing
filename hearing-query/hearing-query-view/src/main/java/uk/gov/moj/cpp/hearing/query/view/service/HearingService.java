@@ -227,7 +227,7 @@ public class HearingService {
 
         if (!hearingList.isEmpty()) {
             final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(activeHearingEventList, hearingList, activeHearingEventList);
-            return Optional.of(hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper));
+            return Optional.of(hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper, localDate));
         }
         return empty();
     }
@@ -332,7 +332,7 @@ public class HearingService {
 
         if (!hearingList.isEmpty()) {
             final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(activeHearingEventList, hearingList, allHearingEvents);
-            final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
+            final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper, localDate);
             return Optional.of(currentCourtStatus);
         }
         return empty();
@@ -594,6 +594,11 @@ public class HearingService {
     @Transactional
     public Optional<CourtCentre> getCourtCenterByHearingId(UUID hearingId) {
         return Optional.ofNullable(hearingRepository.findCourtCenterByHearingId(hearingId));
+    }
+
+    @Transactional
+    public Optional<HearingDay> getHearingDayByHearingIdAndDate(final UUID hearingId, final LocalDate date) {
+        return Optional.ofNullable(hearingRepository.findHearingDayByHearingIdAndDate(hearingId, date));
     }
 
     @Transactional
