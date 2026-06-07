@@ -17,9 +17,11 @@ import static uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory.
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.CourtCentre;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -104,5 +106,89 @@ public class ReferenceDataServiceTest {
         return createObjectBuilder()
                 .add("id", courtCentreId.toString())
                 .build();
+    }
+
+    @Test
+    public void resolveCourtCentre_shouldReturnFullCourtCentreFromReferenceData() {
+        final UUID courtCentreId = randomUUID();
+        final UUID courtRoomId = randomUUID();
+
+        final JsonEnvelope responseEnvelope = createEnvelope(".",
+                createObjectBuilder()
+                        .add("organisationunits", createArrayBuilder()
+                                .add(createObjectBuilder()
+                                        .add("id", courtCentreId.toString())
+                                        .add("oucodeL3Name", "Centre English")
+                                        .add("oucodeL3WelshName", "Centre Welsh")
+                                        .add("courtrooms", createArrayBuilder()
+                                                .add(createObjectBuilder()
+                                                        .add("id", randomUUID().toString())
+                                                        .add("courtroomName", "Other Room")
+                                                        .add("welshCourtroomName", "Other Welsh Room"))
+                                                .add(createObjectBuilder()
+                                                        .add("id", courtRoomId.toString())
+                                                        .add("courtroomName", "Target Room")
+                                                        .add("welshCourtroomName", "Welsh Target Room")))))
+                        .build());
+        when(requester.requestAsAdmin(any(JsonEnvelope.class))).thenReturn(responseEnvelope);
+        ArgumentCaptor<JsonEnvelope> captor = ArgumentCaptor.forClass(JsonEnvelope.class);
+
+        final Optional<CourtCentre> result = referenceDataService.resolveCourtCentre(courtCentreId, courtRoomId);
+
+        verify(requester).requestAsAdmin(captor.capture());
+        assertThat(captor.getValue().metadata().name(), is("referencedata.query.courtrooms"));
+        assertThat(captor.getValue().payloadAsJsonObject().getString("courtCentreId"), is(courtCentreId.toString()));
+
+        assertThat(result.isPresent(), is(true));
+        final CourtCentre cc = result.get();
+        assertThat(cc.getId(), is(courtCentreId));
+        assertThat(cc.getName(), is("Centre English"));
+        assertThat(cc.getWelshName(), is("Centre Welsh"));
+        assertThat(cc.getRoomId(), is(courtRoomId));
+        assertThat(cc.getRoomName(), is("Target Room"));
+        assertThat(cc.getWelshRoomName(), is("Welsh Target Room"));
+    }
+
+    @Test
+    public void resolveCourtCentre_shouldReturnEmpty_whenRoomNotFoundInOU() {
+        final UUID courtCentreId = randomUUID();
+        final UUID courtRoomId = randomUUID();
+
+        final JsonEnvelope responseEnvelope = createEnvelope(".",
+                createObjectBuilder()
+                        .add("organisationunits", createArrayBuilder()
+                                .add(createObjectBuilder()
+                                        .add("id", courtCentreId.toString())
+                                        .add("oucodeL3Name", "Centre")
+                                        .add("courtrooms", createArrayBuilder()
+                                                .add(createObjectBuilder()
+                                                        .add("id", randomUUID().toString())
+                                                        .add("courtroomName", "Other Room")))))
+                        .build());
+        when(requester.requestAsAdmin(any(JsonEnvelope.class))).thenReturn(responseEnvelope);
+
+        final Optional<CourtCentre> result = referenceDataService.resolveCourtCentre(courtCentreId, courtRoomId);
+
+        assertThat(result.isPresent(), is(false));
+    }
+
+    @Test
+    public void resolveCourtCentre_shouldReturnEmpty_whenInputsAreNull() {
+        assertThat(referenceDataService.resolveCourtCentre(null, randomUUID()).isPresent(), is(false));
+        assertThat(referenceDataService.resolveCourtCentre(randomUUID(), null).isPresent(), is(false));
+        assertThat(referenceDataService.resolveCourtCentre(null, null).isPresent(), is(false));
+    }
+
+    @Test
+    public void resolveCourtCentre_shouldReturnEmpty_whenNoOrganisationUnits() {
+        final JsonEnvelope responseEnvelope = createEnvelope(".",
+                createObjectBuilder()
+                        .add("organisationunits", createArrayBuilder())
+                        .build());
+        when(requester.requestAsAdmin(any(JsonEnvelope.class))).thenReturn(responseEnvelope);
+
+        final Optional<CourtCentre> result = referenceDataService.resolveCourtCentre(randomUUID(), randomUUID());
+
+        assertThat(result.isPresent(), is(false));
     }
 }

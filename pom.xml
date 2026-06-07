@@ -8,7 +8,7 @@
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
-    <version>17.104.158-SNAPSHOT</version>
+    <version>17.104.158-CCSPH2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Hearing Context - Parent Module</name>
@@ -25,10 +25,10 @@
         <datafactory.version>0.8</datafactory.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
         <authorisation.service.version>0.1.96</authorisation.service.version>
-        <coredomain.version>17.104.3</coredomain.version>
+        <coredomain.version>17.104.4</coredomain.version>
         <referencedata.version>17.103.131</referencedata.version>
-        <material.version>17.0.57</material.version>
-        <results.version>17.0.58</results.version>
+        <material.version>17.0.75</material.version>
+        <results.version>17.103.95</results.version>
         <notification.notify.version>17.0.1</notification.notify.version>
         <stagingenforcement.version>17.104.81</stagingenforcement.version>
         <progression.version>17.0.262</progression.version>
@@ -38,7 +38,7 @@
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
         <usersgroups.version>17.104.49</usersgroups.version>
-        <listing.version>17.0.116</listing.version>
+        <listing.version>17.103.137</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>17.0.96</systemdocgenerator.version>
 
