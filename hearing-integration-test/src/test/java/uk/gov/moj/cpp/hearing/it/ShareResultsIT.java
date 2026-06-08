@@ -3510,6 +3510,187 @@ public class ShareResultsIT extends AbstractIT {
                 .executeSuccessfully();
     }
 
+    // CHD-2539: Offence-level remand status tests
+
+    /**
+     * AC1 / Scenario 1: Single offence resulted with Conditional Bail.
+     * Verifies that per-offence bailStatus is set on the offence AND drives the defendant-level bailStatus.
+     */
+    @Test
+    public void shouldSetOffenceBailStatusWhenSingleOffenceIsResulted() {
+        final LocalDate orderDate = PAST_LOCAL_DATE.next();
+
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        stubCourtCentre(hearingOne.getHearing());
+        createFirstProsecutionCounsel(hearingOne);
+
+        final UUID conditionalBailResultDefId = fromString("bb90e801-0066-4bdf-85e6-8d64bc683f0c");
+        final AllResultDefinitionsReferenceDataHelper refDataHelper = setupResultDefinitionsReferenceDataWithCustodyStatus(
+                orderDate, conditionalBailResultDefId, "B");
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), orderDate, orderDate);
+        setResultLine(saveDraftResultCommand.getTarget().getResultLines().get(0),
+                findPrompt(refDataHelper, conditionalBailResultDefId), conditionalBailResultDefId, orderDate);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
+                .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
+                        .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearingOne.getHearingId())))))) {
+
+            shareResults(getRequestSpec(), hearingOne.getHearingId(), with(
+                    basicShareResultsCommandTemplate(),
+                    command -> command.setCourtClerk(getCourtClerk())
+            ), singletonList(saveDraftResultCommand.getTarget()));
+
+            final JsonPath publicHearingResulted = publicEventResulted.waitFor();
+
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].bailStatus.code"), is("B"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].bailStatus.description"), is("Conditional Bail"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].personDefendant.bailStatus.code"), is("B"));
+        }
+    }
+
+    /**
+     * AC2 / Scenario 7: Two offences with different remand priorities — defendant remand driven by highest-priority offence.
+     * In test bail status data: B=rank1 (wins), U=rank2.
+     * Offence[0] → Conditional bail (B, rank 1); Offence[1] → Unconditional bail (U, rank 2).
+     * Expected: defendant bail status = "B".
+     */
+    @Test
+    public void shouldDeriveDefendantBailStatusFromHighestPriorityOffenceAcrossTwoOffences() {
+        final LocalDate orderDate = PAST_LOCAL_DATE.next();
+
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        stubCourtCentre(hearingOne.getHearing());
+        createFirstProsecutionCounsel(hearingOne);
+
+        final UUID conditionalBailResultDefId = fromString("bb90e801-0066-4bdf-85e6-8d64bc683f0c");
+        final UUID unconditionalBailResultDefId = randomUUID();
+
+        final AllResultDefinitionsReferenceDataHelper refDataHelper = setupResultDefinitionsReferenceDataWithMultipleCustodyStatuses(
+                orderDate,
+                asList(conditionalBailResultDefId, unconditionalBailResultDefId),
+                asList("B", "U"));
+
+        final uk.gov.justice.core.courts.Hearing hearing = hearingOne.getHearing();
+        final uk.gov.justice.core.courts.Defendant defendant = hearing.getProsecutionCases().get(0).getDefendants().get(0);
+        final uk.gov.justice.core.courts.Offence offence0 = defendant.getOffences().get(0);
+        final uk.gov.justice.core.courts.Offence offence1 = defendant.getOffences().get(1);
+
+        final Target targetOffence0 = Target.target()
+                .withHearingId(hearing.getId())
+                .withDefendantId(defendant.getId())
+                .withDraftResult("{}")
+                .withOffenceId(offence0.getId())
+                .withTargetId(randomUUID())
+                .withResultLines(singletonList(standardResultLineTemplate(randomUUID(), conditionalBailResultDefId, orderDate).build()))
+                .withShadowListed(false)
+                .build();
+        setResultLine(targetOffence0.getResultLines().get(0), findPrompt(refDataHelper, conditionalBailResultDefId), conditionalBailResultDefId, orderDate);
+
+        final Target targetOffence1 = Target.target()
+                .withHearingId(hearing.getId())
+                .withDefendantId(defendant.getId())
+                .withDraftResult("{}")
+                .withOffenceId(offence1.getId())
+                .withTargetId(randomUUID())
+                .withResultLines(singletonList(standardResultLineTemplate(randomUUID(), unconditionalBailResultDefId, orderDate).build()))
+                .withShadowListed(false)
+                .build();
+        setResultLine(targetOffence1.getResultLines().get(0), findPrompt(refDataHelper, unconditionalBailResultDefId), unconditionalBailResultDefId, orderDate);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
+                .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
+                        .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearingOne.getHearingId())))))) {
+
+            shareResults(getRequestSpec(), hearingOne.getHearingId(), with(
+                    basicShareResultsCommandTemplate(),
+                    command -> command.setCourtClerk(getCourtClerk())
+            ), asList(targetOffence0, targetOffence1));
+
+            final JsonPath publicHearingResulted = publicEventResulted.waitFor();
+
+            assertThat("offence[0] should have Conditional Bail",
+                    publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].bailStatus.code"), is("B"));
+            assertThat("offence[1] should have Unconditional Bail",
+                    publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[1].bailStatus.code"), is("U"));
+            assertThat("defendant should get highest-priority offence bail status (B rank=1 wins over U rank=2)",
+                    publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].personDefendant.bailStatus.code"), is("B"));
+        }
+    }
+
+    /**
+     * AC2 / Scenario 8: Cross-hearing offence retention.
+     * A later hearing retains custody from an offence that is not present in the current hearing.
+     * The BailStatusHelper merges stored offences (from viewstore) with current-hearing offences
+     * to compute the defendant-level bail status.
+     *
+     * Note: this test requires two hearings (the first sharing allocates a new hearing via an adjourning result).
+     * The assertion is that the defendant bail status in hearing 2 is "B" (from offence not in hearing 2,
+     * retained from hearing 1 via the viewstore).
+     */
+    @Test
+    @Disabled("CHD-2539: Cross-hearing integration requires two allocated hearings — to be enabled once end-to-end flow is verified in the environment")
+    public void shouldRetainHigherPriorityBailStatusFromOffenceOutsideCurrentHearing() {
+        // This scenario is covered by unit tests in BailStatusHelperTest.
+        // An end-to-end integration test requires:
+        //   1. Share results in hearing 1 for two offences (offence0 → B, offence1 → U)
+        //   2. Wait for a new hearing to be allocated
+        //   3. Share results in hearing 2 for offence1 only (→ U), NOT offence0
+        //   4. Verify defendant bail status = "B" (from offence0 in viewstore, outside hearing 2)
+    }
+
+    private AllResultDefinitionsReferenceDataHelper setupResultDefinitionsReferenceDataWithCustodyStatus(
+            final LocalDate referenceDate, final UUID resultDefId, final String postHearingCustodyStatus) {
+        return setupResultDefinitionsReferenceDataWithMultipleCustodyStatuses(
+                referenceDate, singletonList(resultDefId), singletonList(postHearingCustodyStatus));
+    }
+
+    private AllResultDefinitionsReferenceDataHelper setupResultDefinitionsReferenceDataWithMultipleCustodyStatuses(
+            final LocalDate referenceDate, final List<UUID> resultDefIds, final List<String> custodyStatuses) {
+        final String LISTING_OFFICER_USER_GROUP = "Listing Officer";
+
+        final AllResultDefinitionsReferenceDataHelper allResultDefinitions = h(AllResultDefinitions.allResultDefinitions()
+                .setResultDefinitions(
+                        IntStream.range(0, resultDefIds.size()).mapToObj(i ->
+                                ResultDefinition.resultDefinition()
+                                        .setId(resultDefIds.get(i))
+                                        .setRank(1)
+                                        .setIsAvailableForCourtExtract(true)
+                                        .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                        .setFinancial("Y")
+                                        .setCategory(getCategoryForResultDefinition(resultDefIds.get(i)))
+                                        .setPrompts(singletonList(uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
+                                                        .setId(resultDefIds.get(i))
+                                                        .setMandatory(true)
+                                                        .setLabel("promptLabel")
+                                                        .setWelshLabel("promptLabelWelsh")
+                                                        .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                                        .setReference("bailConditionReason")
+                                                )
+                                        )
+                                        .setLabel("resultLabel")
+                                        .setWelshLabel("resultLabelWelsh")
+                                        .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                        .setCanBeSubjectOfBreach(true)
+                                        .setCanBeSubjectOfVariation(true)
+                                        .setLevel("O")
+                                        .setPostHearingCustodyStatus(custodyStatuses.get(i))
+                                        .setResultDefinitionGroup("Bail Conditions")
+                        ).collect(Collectors.toList())
+                ));
+
+        stubGetAllResultDefinitions(referenceDate, allResultDefinitions.it());
+        return allResultDefinitions;
+    }
+
     private List<SecondaryCJSCode> getSecondaryCjsCodes() {
         final List<SecondaryCJSCode> secondaryCJSCodes = new ArrayList<>();
         final SecondaryCJSCode firstSecondaryCJSCode = new SecondaryCJSCode();

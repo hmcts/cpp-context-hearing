@@ -910,4 +910,81 @@ public class UpdateOffencesForDefendantEventListenerTest {
 
     }
 
+    // ── Task 6.1-6.2: AC4 — new offence added via Edit Case has no bail status ──────────────
+
+    @Test
+    public void shouldPersistNewOffenceWithNullBailStatusWhenAddedViaEditCase() {
+        // Scenario 18: offence added via Edit Case → no remand status set → bail_status_* columns null
+        final OffenceAdded offenceAdded = OffenceAdded.offenceAdded()
+                .withHearingId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withProsecutionCaseId(randomUUID())
+                .withOffence(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(randomUUID())
+                        // no withBailStatus() — simulates Edit Case adding a new offence
+                        .build());
+
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceAdded));
+
+        final Hearing hearing = new Hearing() {{
+            setId(offenceAdded.getHearingId());
+            setProsecutionCases(new HashSet<>(Collections.singletonList(new ProsecutionCase() {{
+                setDefendants(new HashSet<>(Collections.singletonList(new Defendant() {{
+                    setId(new HearingSnapshotKey() {{
+                        setId(offenceAdded.getDefendantId());
+                    }});
+                }})));
+            }})));
+        }};
+
+        when(hearingRepository.findBy(offenceAdded.getHearingId())).thenReturn(hearing);
+
+        updateOffencesForDefendantEventListener.addOffence(envelope);
+
+        final ArgumentCaptor<Offence> captor = ArgumentCaptor.forClass(Offence.class);
+        verify(offenceRepository).saveAndFlush(captor.capture());
+
+        final Offence saved = captor.getValue();
+        assertThat(saved.getBailStatusCode(), nullValue());
+        assertThat(saved.getBailStatusId(), nullValue());
+        assertThat(saved.getBailStatusDescription(), nullValue());
+    }
+
+    @Test
+    public void shouldPersistNewOffenceWithNullBailStatusWhenAddedV2ViaEditCase() {
+        // Same check for addOffenceV2 (hearing.events.offence-added-v2)
+        final OffenceAddedV2 offenceAdded = OffenceAddedV2.offenceAddedV2()
+                .withHearingId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withProsecutionCaseId(randomUUID())
+                .withOffence(Collections.singletonList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(randomUUID())
+                        .build()));
+
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceAdded));
+
+        final Hearing hearing = new Hearing() {{
+            setId(offenceAdded.getHearingId());
+            setProsecutionCases(new HashSet<>(Collections.singletonList(new ProsecutionCase() {{
+                setDefendants(new HashSet<>(Collections.singletonList(new Defendant() {{
+                    setId(new HearingSnapshotKey() {{
+                        setId(offenceAdded.getDefendantId());
+                    }});
+                }})));
+            }})));
+        }};
+
+        when(hearingRepository.findBy(offenceAdded.getHearingId())).thenReturn(hearing);
+
+        updateOffencesForDefendantEventListener.addOffenceV2(envelope);
+
+        final ArgumentCaptor<Offence> captor = ArgumentCaptor.forClass(Offence.class);
+        verify(offenceRepository).saveAndFlush(captor.capture());
+
+        final Offence saved = captor.getValue();
+        assertThat(saved.getBailStatusCode(), nullValue());
+        assertThat(saved.getBailStatusId(), nullValue());
+        assertThat(saved.getBailStatusDescription(), nullValue());
+    }
+
 }
