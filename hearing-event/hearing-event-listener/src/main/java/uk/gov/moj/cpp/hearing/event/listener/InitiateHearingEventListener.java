@@ -110,6 +110,8 @@ public class InitiateHearingEventListener {
 
         final HearingInitiated initiated = jsonObjectToObjectConverter.convert(payload, HearingInitiated.class);
 
+        seedOffenceBailStatusFromDefendant(initiated.getHearing());
+
         final Hearing hearingEntity = hearingJPAMapper.toJPA(initiated.getHearing());
 
         LOGGER.debug("hearing.initiated event received for hearingId {}", hearingEntity.getId());
@@ -376,6 +378,20 @@ public class InitiateHearingEventListener {
                     }
             );
         }
+    }
+
+    /**
+     * Seeds each offence's bailStatus from the defendant's pre-hearing bailStatus when the offence
+     * has no bailStatus yet. Covers AC3: MCC/SPI-IN/CPPI case creation with a pre-hearing status.
+     */
+    private void seedOffenceBailStatusFromDefendant(final uk.gov.justice.core.courts.Hearing hearing) {
+        ofNullable(hearing.getProsecutionCases()).stream().flatMap(Collection::stream)
+                .forEach(prosecutionCase -> ofNullable(prosecutionCase.getDefendants()).stream().flatMap(Collection::stream)
+                        .filter(defendant -> nonNull(defendant.getPersonDefendant()))
+                        .filter(defendant -> nonNull(defendant.getPersonDefendant().getBailStatus()))
+                        .forEach(defendant -> ofNullable(defendant.getOffences()).stream().flatMap(Collection::stream)
+                                .filter(offence -> isNull(offence.getBailStatus()))
+                                .forEach(offence -> offence.setBailStatus(defendant.getPersonDefendant().getBailStatus()))));
     }
 
     private List<Offence> getOffencesForHearing(final Hearing hearingEntity) {
