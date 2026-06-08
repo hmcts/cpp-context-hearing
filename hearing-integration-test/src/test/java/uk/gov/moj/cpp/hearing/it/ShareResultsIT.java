@@ -63,6 +63,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddProsecutionCounselCom
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.addOffencesForDefendantTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantArguments;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingWith2Defendants;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateForIndicatedPlea;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithConvictingCourt;
@@ -98,6 +99,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VERDICT_TYPE_GUILTY
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataResultBailStatuses;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataResultDefinitionsWithDefaultValues;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubReferenceDataResultDefinitionWithCategory;
@@ -3520,10 +3522,13 @@ public class ShareResultsIT extends AbstractIT {
     public void shouldSetOffenceBailStatusWhenSingleOffenceIsResulted() {
         final LocalDate orderDate = PAST_LOCAL_DATE.next();
 
-        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setProceedingsConcluded(false);
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), initiateHearingCommand));
 
         stubCourtCentre(hearingOne.getHearing());
         createFirstProsecutionCounsel(hearingOne);
+        stubGetReferenceDataResultBailStatuses();
 
         final UUID conditionalBailResultDefId = fromString("bb90e801-0066-4bdf-85e6-8d64bc683f0c");
         final AllResultDefinitionsReferenceDataHelper refDataHelper = setupResultDefinitionsReferenceDataWithCustodyStatus(
@@ -3563,10 +3568,12 @@ public class ShareResultsIT extends AbstractIT {
     public void shouldDeriveDefendantBailStatusFromHighestPriorityOffenceAcrossTwoOffences() {
         final LocalDate orderDate = PAST_LOCAL_DATE.next();
 
-        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), initiateHearingWith2Defendants(
+                randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID())));
 
         stubCourtCentre(hearingOne.getHearing());
         createFirstProsecutionCounsel(hearingOne);
+        stubGetReferenceDataResultBailStatuses();
 
         final UUID conditionalBailResultDefId = fromString("bb90e801-0066-4bdf-85e6-8d64bc683f0c");
         final UUID unconditionalBailResultDefId = randomUUID();
@@ -3624,27 +3631,6 @@ public class ShareResultsIT extends AbstractIT {
             assertThat("defendant should get highest-priority offence bail status (B rank=1 wins over U rank=2)",
                     publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].personDefendant.bailStatus.code"), is("B"));
         }
-    }
-
-    /**
-     * AC2 / Scenario 8: Cross-hearing offence retention.
-     * A later hearing retains custody from an offence that is not present in the current hearing.
-     * The BailStatusHelper merges stored offences (from viewstore) with current-hearing offences
-     * to compute the defendant-level bail status.
-     *
-     * Note: this test requires two hearings (the first sharing allocates a new hearing via an adjourning result).
-     * The assertion is that the defendant bail status in hearing 2 is "B" (from offence not in hearing 2,
-     * retained from hearing 1 via the viewstore).
-     */
-    @Test
-    @Disabled("CHD-2539: Cross-hearing integration requires two allocated hearings — to be enabled once end-to-end flow is verified in the environment")
-    public void shouldRetainHigherPriorityBailStatusFromOffenceOutsideCurrentHearing() {
-        // This scenario is covered by unit tests in BailStatusHelperTest.
-        // An end-to-end integration test requires:
-        //   1. Share results in hearing 1 for two offences (offence0 → B, offence1 → U)
-        //   2. Wait for a new hearing to be allocated
-        //   3. Share results in hearing 2 for offence1 only (→ U), NOT offence0
-        //   4. Verify defendant bail status = "B" (from offence0 in viewstore, outside hearing 2)
     }
 
     private AllResultDefinitionsReferenceDataHelper setupResultDefinitionsReferenceDataWithCustodyStatus(

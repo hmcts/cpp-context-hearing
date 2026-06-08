@@ -1161,15 +1161,18 @@ public class InitiateHearingEventListenerTest {
                         .build()))
                 .build();
 
-        when(hearingJPAMapper.toJPA(any(uk.gov.justice.core.courts.Hearing.class))).thenReturn(new Hearing());
+        final ArgumentCaptor<uk.gov.justice.core.courts.Hearing> hearingArgumentCaptor =
+                ArgumentCaptor.forClass(uk.gov.justice.core.courts.Hearing.class);
+        when(hearingJPAMapper.toJPA(hearingArgumentCaptor.capture())).thenReturn(new Hearing());
 
         initiateHearingEventListener.newHearingInitiated(getInitiateHearingJsonEnvelope(hearing));
 
         // offence1 and offence2 should have had bailStatus seeded
-        assertThat(offence1.getBailStatus(), notNullValue());
-        assertThat(offence1.getBailStatus().getCode(), is("B"));
-        assertThat(offence2.getBailStatus(), notNullValue());
-        assertThat(offence2.getBailStatus().getCode(), is("B"));
+        final uk.gov.justice.core.courts.Hearing seededHearing = hearingArgumentCaptor.getValue();
+        assertThat(findOffenceById(seededHearing, offence1.getId()).getBailStatus(), notNullValue());
+        assertThat(findOffenceById(seededHearing, offence1.getId()).getBailStatus().getCode(), is("B"));
+        assertThat(findOffenceById(seededHearing, offence2.getId()).getBailStatus(), notNullValue());
+        assertThat(findOffenceById(seededHearing, offence2.getId()).getBailStatus().getCode(), is("B"));
     }
 
     @Test
@@ -1188,11 +1191,14 @@ public class InitiateHearingEventListenerTest {
                         .build()))
                 .build();
 
-        when(hearingJPAMapper.toJPA(any(uk.gov.justice.core.courts.Hearing.class))).thenReturn(new Hearing());
+        final ArgumentCaptor<uk.gov.justice.core.courts.Hearing> hearingArgumentCaptor =
+                ArgumentCaptor.forClass(uk.gov.justice.core.courts.Hearing.class);
+        when(hearingJPAMapper.toJPA(hearingArgumentCaptor.capture())).thenReturn(new Hearing());
 
         initiateHearingEventListener.newHearingInitiated(getInitiateHearingJsonEnvelope(hearing));
 
-        assertThat(offence.getBailStatus(), nullValue());
+        final uk.gov.justice.core.courts.Hearing seededHearing = hearingArgumentCaptor.getValue();
+        assertThat(findOffenceById(seededHearing, offence.getId()).getBailStatus(), nullValue());
     }
 
     @Test
@@ -1220,12 +1226,15 @@ public class InitiateHearingEventListenerTest {
                         .build()))
                 .build();
 
-        when(hearingJPAMapper.toJPA(any(uk.gov.justice.core.courts.Hearing.class))).thenReturn(new Hearing());
+        final ArgumentCaptor<uk.gov.justice.core.courts.Hearing> hearingArgumentCaptor =
+                ArgumentCaptor.forClass(uk.gov.justice.core.courts.Hearing.class);
+        when(hearingJPAMapper.toJPA(hearingArgumentCaptor.capture())).thenReturn(new Hearing());
 
         initiateHearingEventListener.newHearingInitiated(getInitiateHearingJsonEnvelope(hearing));
 
-        assertThat(def1Offence.getBailStatus().getCode(), is("B"));
-        assertThat(def2Offence.getBailStatus().getCode(), is("C"));
+        final uk.gov.justice.core.courts.Hearing seededHearing = hearingArgumentCaptor.getValue();
+        assertThat(findOffenceById(seededHearing, def1Offence.getId()).getBailStatus().getCode(), is("B"));
+        assertThat(findOffenceById(seededHearing, def2Offence.getId()).getBailStatus().getCode(), is("C"));
     }
 
     @Test
@@ -1247,12 +1256,15 @@ public class InitiateHearingEventListenerTest {
                         .build()))
                 .build();
 
-        when(hearingJPAMapper.toJPA(any(uk.gov.justice.core.courts.Hearing.class))).thenReturn(new Hearing());
+        final ArgumentCaptor<uk.gov.justice.core.courts.Hearing> hearingArgumentCaptor =
+                ArgumentCaptor.forClass(uk.gov.justice.core.courts.Hearing.class);
+        when(hearingJPAMapper.toJPA(hearingArgumentCaptor.capture())).thenReturn(new Hearing());
 
         initiateHearingEventListener.newHearingInitiated(getInitiateHearingJsonEnvelope(hearing));
 
         // existing bail status must not be overwritten
-        assertThat(offence.getBailStatus().getCode(), is("C"));
+        final uk.gov.justice.core.courts.Hearing seededHearing = hearingArgumentCaptor.getValue();
+        assertThat(findOffenceById(seededHearing, offence.getId()).getBailStatus().getCode(), is("C"));
     }
 
     private JsonEnvelope getInitiateHearingJsonEnvelope(final uk.gov.justice.core.courts.Hearing hearing) {
@@ -1270,5 +1282,15 @@ public class InitiateHearingEventListenerTest {
         final JsonObject jsonObject = createReader(new StringReader(strJsonDocument)).readObject();
 
         return envelopeFrom((Metadata) null, jsonObject);
+    }
+
+    private uk.gov.justice.core.courts.Offence findOffenceById(final uk.gov.justice.core.courts.Hearing hearing,
+                                                                 final java.util.UUID offenceId) {
+        return hearing.getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .flatMap(defendant -> defendant.getOffences().stream())
+                .filter(offence -> offence.getId().equals(offenceId))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("No offence found with id " + offenceId));
     }
 }

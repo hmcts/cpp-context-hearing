@@ -603,6 +603,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setPreviousDaysHeldInCustody(previousDaysHeldInCustody);
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setDateHeldInCustodySince(dateHeldInCustodySince);
+        initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setProceedingsConcluded(false);
 
         final InitiateHearingCommand initiateHearingCommand = initiateHearing(getRequestSpec(), initiateHearing);
         final CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = h(initiateHearingCommand);
