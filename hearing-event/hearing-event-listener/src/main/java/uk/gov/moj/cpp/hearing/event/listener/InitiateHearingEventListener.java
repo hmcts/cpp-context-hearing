@@ -109,23 +109,30 @@ public class InitiateHearingEventListener {
         final JsonObject payload = event.payloadAsJsonObject();
 
         final HearingInitiated initiated = jsonObjectToObjectConverter.convert(payload, HearingInitiated.class);
+        final UUID hearingId = initiated.getHearing().getId();
 
-        final Hearing hearingEntity = hearingJPAMapper.toJPA(initiated.getHearing());
+        LOGGER.debug("hearing.initiated event received for hearingId {}", hearingId);
 
-        LOGGER.debug("hearing.initiated event received for hearingId {}", hearingEntity.getId());
+        if (hearingRepository.findOptionalBy(hearingId).isEmpty()) {
+            final Hearing hearingEntity = hearingJPAMapper.toJPA(initiated.getHearing());
+            hearingEntity.setHearingState(HearingState.INITIALISED);
+            getOffencesForHearing(hearingEntity)
+                    .forEach(x -> updateOffenceForShadowListedStatus(initiated.getHearing().getShadowListedOffences(), x));
+            hearingRepository.save(hearingEntity);
+        }
 
-        hearingEntity.setHearingState(HearingState.INITIALISED);
-        getOffencesForHearing(hearingEntity)
-                .forEach(x -> updateOffenceForShadowListedStatus(initiated.getHearing().getShadowListedOffences(), x));
-
-        ofNullable(initiated.getHearing().getCourtApplications()).stream().flatMap(Collection::stream).map(CourtApplication::getId).collect(Collectors.toSet()).forEach(courtApplicationId -> {
-            final HearingApplication hearingApplication = new HearingApplication();
-            hearingApplication.setId(new HearingApplicationKey(courtApplicationId, hearingEntity.getId()));
-            hearingApplicationRepository.save(hearingApplication);
-        });
-
-        hearingRepository.save(hearingEntity);
-
+        ofNullable(initiated.getHearing().getCourtApplications()).stream()
+                .flatMap(Collection::stream)
+                .map(CourtApplication::getId)
+                .collect(Collectors.toSet())
+                .forEach(courtApplicationId -> {
+                    final HearingApplicationKey hearingApplicationKey = new HearingApplicationKey(courtApplicationId, hearingId);
+                    if (hearingApplicationRepository.findBy(hearingApplicationKey) == null) {
+                        final HearingApplication hearingApplication = new HearingApplication();
+                        hearingApplication.setId(hearingApplicationKey);
+                        hearingApplicationRepository.save(hearingApplication);
+                    }
+                });
     }
 
     @Transactional
@@ -160,6 +167,13 @@ public class InitiateHearingEventListener {
                 hearingEntity.setJurisdictionType(hearingExtended.getJurisdictionType());
             }
             hearingRepository.save(hearingEntity);
+            final HearingApplicationKey hearingApplicationKey = new HearingApplicationKey(
+                    hearingExtended.getCourtApplication().getId(), hearingEntity.getId());
+            if (hearingApplicationRepository.findBy(hearingApplicationKey) == null) {
+                final HearingApplication hearingApplication = new HearingApplication();
+                hearingApplication.setId(hearingApplicationKey);
+                hearingApplicationRepository.save(hearingApplication);
+            }
         }
         updateHearing(hearingEntity, hearingExtended.getProsecutionCases(), hearingExtended.getShadowListedOffences());
     }
@@ -235,6 +249,13 @@ public class InitiateHearingEventListener {
         hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
 
         hearingRepository.save(hearingEntity);
+
+        final HearingApplicationKey hearingApplicationKey = new HearingApplicationKey(updatedCourtApplication.getId(), hearingEntity.getId());
+        if (hearingApplicationRepository.findBy(hearingApplicationKey) == null) {
+            final HearingApplication hearingApplication = new HearingApplication();
+            hearingApplication.setId(hearingApplicationKey);
+            hearingApplicationRepository.save(hearingApplication);
+        }
     }
 
     private static List<CourtApplicationCase> getUpdatedCases(CourtApplication persistedApplication, ApplicationLaareferenceUpdated applicationLaareferenceUpdated) {

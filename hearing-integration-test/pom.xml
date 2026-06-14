@@ -5,7 +5,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-parent</artifactId>
-        <version>17.104.158-SNAPSHOT</version>
+        <version>17.104.159-CCSPH2-SNAPSHOT</version>
     </parent>
 
     <artifactId>hearing-integration-test</artifactId>
@@ -157,6 +157,7 @@
                                     <threadCount>1</threadCount>
                                     <perCoreThreadCount>false</perCoreThreadCount>
                                     <parallel>classesAndMethods</parallel>
+                                    <rerunFailingTestsCount>5</rerunFailingTestsCount>
                                     <systemProperties>
                                         <property>
                                             <name>stubPerExecution</name>

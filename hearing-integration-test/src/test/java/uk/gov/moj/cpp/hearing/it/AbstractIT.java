@@ -294,8 +294,8 @@ public class AbstractIT {
         hearing.getProsecutionCases().forEach(prosecutionCase -> stubGetProgressionProsecutionCases(prosecutionCase.getId()));
     }
 
-    protected void cleanDatabase(final String dbTableName) {
+    protected void cleanDatabase(final String dbTableName, final String... additionalTables) {
         final DatabaseCleaner databaseCleaner = new DatabaseCleaner();
-        databaseCleaner.cleanViewStoreTables(CONTEXT_NAME, dbTableName);
+        databaseCleaner.cleanViewStoreTables(CONTEXT_NAME, dbTableName, additionalTables);
     }
 }

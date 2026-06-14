@@ -26,8 +26,13 @@ import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.command.result.UpdateDaysResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
+import uk.gov.moj.cpp.hearing.command.handler.service.validation.ResultsValidator;
+import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationRequest;
+import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationRequestMapper;
+import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationResponse;
 import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsValidationFailed;
 
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +40,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -55,6 +59,12 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
     @Inject
     private ReferenceDataService referenceDataService;
+
+    @Inject
+    private ResultsValidator resultsValidationClient;
+
+    @Inject
+    private ValidationRequestMapper validationRequestMapper;
 
 
     @Handles("hearing.command.save-draft-result")
@@ -174,10 +184,28 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         }
         final ShareDaysResultsCommand command = convertToObject(envelope, ShareDaysResultsCommand.class);
         final UUID userId = envelope.metadata().userId().map(UUID::fromString).orElse(null);
+        long start = System.currentTimeMillis();
 
+        final EventStream eventStream = eventSource.getStreamById(command.getHearingId());
+        final HearingAggregate hearingAggregate = aggregateService.get(eventStream, HearingAggregate.class);
 
-        aggregate(HearingAggregate.class, command.getHearingId(), envelope,
-                aggregate -> shareDaysResultsEnrichedWithYouthCourt(aggregate, command, userId));
+        final ValidationRequest validationRequest = validationRequestMapper.toValidationRequest(command, hearingAggregate.getHearing());
+        final String userIdString = userId != null ? userId.toString() : "";
+
+        final ValidationResponse validationResponse = resultsValidationClient.validate(validationRequest, userIdString);
+        long end = System.currentTimeMillis();
+        LOGGER.info("Validation API call took {} ms for userId={} and for hearingId={}", end - start, userIdString, validationRequest.getHearingId());
+
+        if (validationResponse.hasErrors()) {
+            LOGGER.info("Share blocked by validation errors for hearing {}", command.getHearingId());
+            final ResultsValidationFailed failedEvent = buildValidationFailedEvent(command, userIdString, validationResponse);
+            eventStream.append(Stream.of(failedEvent).map(enveloper.withMetadataFrom(envelope)));
+            return;
+        }
+
+        eventStream.append(
+                shareDaysResultsEnrichedWithYouthCourt(hearingAggregate, command, userId)
+                        .map(enveloper.withMetadataFrom(envelope)));
     }
 
     @Handles("hearing.command.update-result-lines-status")
@@ -213,6 +241,30 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString("hearingId"));
         aggregate(HearingAggregate.class, hearingId, envelope,
                 aggregate -> aggregate.replicateSharedResultsForHearing(hearingId));
+    }
+
+    private ResultsValidationFailed buildValidationFailedEvent(final ShareDaysResultsCommand command,
+                                                                  final String userId,
+                                                                  final ValidationResponse validationResponse) {
+        return ResultsValidationFailed.builder()
+                .withHearingId(command.getHearingId())
+                .withHearingDay(command.getHearingDay())
+                .withUserId(userId)
+                .withErrors(validationResponse.getErrors().stream()
+                        .map(e -> new ResultsValidationFailed.ValidationError(
+                                e.getRuleId(), e.getSeverity(), e.getMessage(),
+                                e.getAffectedOffences().stream()
+                                        .map(o -> o.getId())
+                                        .toList()))
+                        .toList())
+                .withWarnings(validationResponse.getWarnings().stream()
+                        .map(w -> new ResultsValidationFailed.ValidationError(
+                                w.getRuleId(), w.getSeverity(), w.getMessage(),
+                                w.getAffectedOffences().stream()
+                                        .map(o -> o.getId())
+                                        .toList()))
+                        .toList())
+                .build();
     }
 
     private Stream<Object> shareResultsEnrichedWithYouthCourt(final HearingAggregate hearingAggregate, final ShareResultsCommand command ) {
@@ -278,7 +330,7 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
                     return null;
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 }
