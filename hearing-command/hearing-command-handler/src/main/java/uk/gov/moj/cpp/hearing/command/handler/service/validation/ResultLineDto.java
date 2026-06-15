@@ -11,6 +11,7 @@ public class ResultLineDto {
     @JsonProperty("isConcurrent")
     private final Boolean isConcurrent;
     private final String consecutiveToOffence;
+    private final String category;
 
     private ResultLineDto(Builder builder) {
         this.resultLineId = builder.resultLineId;
@@ -20,6 +21,7 @@ public class ResultLineDto {
         this.offenceId = builder.offenceId;
         this.isConcurrent = builder.isConcurrent;
         this.consecutiveToOffence = builder.consecutiveToOffence;
+        this.category = builder.category;
     }
 
     // Getters
@@ -30,6 +32,7 @@ public class ResultLineDto {
     public String getOffenceId() { return offenceId; }
     public Boolean getIsConcurrent() { return isConcurrent; }
     public String getConsecutiveToOffence() { return consecutiveToOffence; }
+    public String getCategory() { return category; }
 
     // Builder
     public static class Builder {
@@ -40,6 +43,7 @@ public class ResultLineDto {
         private String offenceId;
         private Boolean isConcurrent;
         private String consecutiveToOffence;
+        private String category;
 
         public Builder resultLineId(String resultLineId) {
             this.resultLineId = resultLineId;
@@ -73,6 +77,11 @@ public class ResultLineDto {
 
         public Builder consecutiveToOffence(String consecutiveToOffence) {
             this.consecutiveToOffence = consecutiveToOffence;
+            return this;
+        }
+
+        public Builder category(String category) {
+            this.category = category;
             return this;
         }
 
