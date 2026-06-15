@@ -1031,4 +1031,97 @@ public class HearingJPAMapperTest {
         assertThat(actualHearing.getCourtApplications().size(), is(1));
         assertThat(actualHearing.getCourtApplications().get(0).getId(), is(applicationId));
     }
+
+    @Test
+    public void shouldMarkLinkedApplicationAsEjectedWhenProsecutionCaseMatches() {
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID linkedAppId = randomUUID();
+        final UUID unlinkedAppId = randomUUID();
+
+        final List<CourtApplication> courtApplications = new ArrayList<>();
+        courtApplications.add(CourtApplication.courtApplication()
+                .withId(linkedAppId)
+                .withApplicationStatus(uk.gov.justice.core.courts.ApplicationStatus.UN_ALLOCATED)
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(prosecutionCaseId)
+                        .build()))
+                .build());
+        courtApplications.add(CourtApplication.courtApplication()
+                .withId(unlinkedAppId)
+                .withApplicationStatus(uk.gov.justice.core.courts.ApplicationStatus.UN_ALLOCATED)
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(randomUUID())
+                        .build()))
+                .build());
+
+        when(courtApplicationsSerializer.courtApplications(any(String.class))).thenReturn(courtApplications);
+        when(courtApplicationsSerializer.json(any())).thenReturn("result");
+
+        hearingJPAMapper.updateLinkedApplicationStatus("json", prosecutionCaseId, uk.gov.justice.core.courts.ApplicationStatus.EJECTED);
+
+        verify(courtApplicationsSerializer).json(courtApplicationCaptor.capture());
+        final List<CourtApplication> captured = courtApplicationCaptor.getValue();
+
+        assertThat(captured.stream().filter(ca -> ca.getId().equals(linkedAppId)).findFirst().get().getApplicationStatus(),
+                is(uk.gov.justice.core.courts.ApplicationStatus.EJECTED));
+        assertThat(captured.stream().filter(ca -> ca.getId().equals(unlinkedAppId)).findFirst().get().getApplicationStatus(),
+                is(uk.gov.justice.core.courts.ApplicationStatus.UN_ALLOCATED));
+    }
+
+    @Test
+    public void shouldNotMarkApplicationWhenNoProsecutionCaseMatches() {
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID appId = randomUUID();
+
+        final List<CourtApplication> courtApplications = new ArrayList<>();
+        courtApplications.add(CourtApplication.courtApplication()
+                .withId(appId)
+                .withApplicationStatus(uk.gov.justice.core.courts.ApplicationStatus.UN_ALLOCATED)
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(randomUUID())
+                        .build()))
+                .build());
+
+        when(courtApplicationsSerializer.courtApplications(any(String.class))).thenReturn(courtApplications);
+        when(courtApplicationsSerializer.json(any())).thenReturn("result");
+
+        hearingJPAMapper.updateLinkedApplicationStatus("json", prosecutionCaseId, uk.gov.justice.core.courts.ApplicationStatus.EJECTED);
+
+        verify(courtApplicationsSerializer).json(courtApplicationCaptor.capture());
+        assertThat(courtApplicationCaptor.getValue().get(0).getApplicationStatus(),
+                is(uk.gov.justice.core.courts.ApplicationStatus.UN_ALLOCATED));
+    }
+
+    @Test
+    public void shouldNotThrowWhenCourtApplicationCasesIsNull() {
+        final UUID prosecutionCaseId = randomUUID();
+
+        final List<CourtApplication> courtApplications = new ArrayList<>();
+        courtApplications.add(CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withApplicationStatus(uk.gov.justice.core.courts.ApplicationStatus.UN_ALLOCATED)
+                .withCourtApplicationCases(null)
+                .build());
+
+        when(courtApplicationsSerializer.courtApplications(any(String.class))).thenReturn(courtApplications);
+        when(courtApplicationsSerializer.json(any())).thenReturn("result");
+
+        hearingJPAMapper.updateLinkedApplicationStatus("json", prosecutionCaseId, uk.gov.justice.core.courts.ApplicationStatus.EJECTED);
+
+        verify(courtApplicationsSerializer).json(courtApplicationCaptor.capture());
+        assertThat(courtApplicationCaptor.getValue().get(0).getApplicationStatus(),
+                is(uk.gov.justice.core.courts.ApplicationStatus.UN_ALLOCATED));
+    }
+
+    @Test
+    public void shouldReturnEmptyJsonWhenCourtApplicationsIsNull() {
+        when(courtApplicationsSerializer.courtApplications(any(String.class))).thenReturn(null);
+        when(courtApplicationsSerializer.json(any())).thenReturn("[]");
+
+        final String result = hearingJPAMapper.updateLinkedApplicationStatus("json", randomUUID(), uk.gov.justice.core.courts.ApplicationStatus.EJECTED);
+
+        assertThat(result, is("[]"));
+        verify(courtApplicationsSerializer).json(courtApplicationCaptor.capture());
+        assertThat(courtApplicationCaptor.getValue().isEmpty(), is(true));
+    }
 }
