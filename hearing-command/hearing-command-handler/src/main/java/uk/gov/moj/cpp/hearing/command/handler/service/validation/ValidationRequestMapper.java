@@ -40,7 +40,7 @@ public class ValidationRequestMapper {
                                 .forEach(defendant -> {
                                     final Person personDetails = extractPersonDetails(defendant);
                                     defendants.add(DefendantDto.builder()
-                                            .withId(uuidToString(defendant.getId()))
+                                            .withDefendantId(uuidToString(defendant.getId()))
                                             .withFirstName(personDetails != null ? personDetails.getFirstName() : null)
                                             .withLastName(personDetails != null ? personDetails.getLastName() : null)
                                             .withMasterDefendantId(uuidToString(defendant.getMasterDefendantId()))
@@ -50,7 +50,7 @@ public class ValidationRequestMapper {
                                         defendant.getOffences()
                                                 .stream()
                                                 .forEach(offence -> offences.add(new OffenceDto.Builder()
-                                                        .id(uuidToString(offence.getId()))
+                                                        .offenceId(uuidToString(offence.getId()))
                                                         .offenceCode(offence.getOffenceCode())
                                                         .offenceTitle(offence.getOffenceTitle())
                                                         .orderIndex(offence.getOrderIndex())
@@ -67,7 +67,7 @@ public class ValidationRequestMapper {
                     caseId = line.getCaseId().toString();
                 }
                 resultLines.add(new ResultLineDto.Builder()
-                        .id(uuidToString(line.getResultLineId()))
+                        .resultLineId(uuidToString(line.getResultLineId()))
                         .shortCode(line.getShortCode())
                         .label(line.getResultLabel())
                         .defendantId(uuidToString(line.getDefendantId()))
