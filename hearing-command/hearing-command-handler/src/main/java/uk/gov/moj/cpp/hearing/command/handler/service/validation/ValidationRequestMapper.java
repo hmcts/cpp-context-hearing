@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -41,17 +40,17 @@ public class ValidationRequestMapper {
                                 .forEach(defendant -> {
                                     final Person personDetails = extractPersonDetails(defendant);
                                     defendants.add(DefendantDto.builder()
-                                            .withId(uuidToString(defendant.getId()))
+                                            .withDefendantId(uuidToString(defendant.getId()))
                                             .withFirstName(personDetails != null ? personDetails.getFirstName() : null)
                                             .withLastName(personDetails != null ? personDetails.getLastName() : null)
                                             .withMasterDefendantId(uuidToString(defendant.getMasterDefendantId()))
                                             .build());
 
-                                    if (defendant != null && defendant.getOffences()!= null) {
+                                    if (defendant != null && defendant.getOffences() != null) {
                                         defendant.getOffences()
                                                 .stream()
                                                 .forEach(offence -> offences.add(new OffenceDto.Builder()
-                                                        .id(uuidToString(offence.getId()))
+                                                        .offenceId(uuidToString(offence.getId()))
                                                         .offenceCode(offence.getOffenceCode())
                                                         .offenceTitle(offence.getOffenceTitle())
                                                         .orderIndex(offence.getOrderIndex())
@@ -68,12 +67,13 @@ public class ValidationRequestMapper {
                     caseId = line.getCaseId().toString();
                 }
                 resultLines.add(new ResultLineDto.Builder()
-                        .id(uuidToString(line.getResultLineId()))
+                        .resultLineId(uuidToString(line.getResultLineId()))
                         .shortCode(line.getShortCode())
                         .label(line.getResultLabel())
                         .defendantId(uuidToString(line.getDefendantId()))
                         .offenceId(uuidToString(line.getOffenceId()))
                         .consecutiveToOffence(extractConsecutiveToOffence(line.getPrompts()))
+                        .category(line.getCategory())
                         .isConcurrent(extractIsConcurrent(line.getPrompts()))
                         .build());
             }
