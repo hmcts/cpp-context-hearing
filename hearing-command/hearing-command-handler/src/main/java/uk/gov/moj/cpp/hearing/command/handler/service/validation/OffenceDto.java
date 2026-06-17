@@ -1,14 +1,14 @@
 package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 public class OffenceDto {
 
-    private final String id;
+    private final String offenceId;
     private final String offenceCode;
     private final String offenceTitle;
     private final Integer orderIndex;
     private final String caseUrn;
 
     private OffenceDto(Builder builder) {
-        this.id = builder.id;
+        this.offenceId = builder.offenceId;
         this.offenceCode = builder.offenceCode;
         this.offenceTitle = builder.offenceTitle;
         this.orderIndex = builder.orderIndex;
@@ -16,7 +16,7 @@ public class OffenceDto {
     }
 
     // Getters
-    public String getId() { return id; }
+    public String getOffenceId() { return offenceId; }
     public String getOffenceCode() { return offenceCode; }
     public String getOffenceTitle() { return offenceTitle; }
     public Integer getOrderIndex() { return orderIndex; }
@@ -24,14 +24,14 @@ public class OffenceDto {
 
     // Builder
     public static class Builder {
-        private String id;
+        private String offenceId;
         private String offenceCode;
         private String offenceTitle;
         private Integer orderIndex;
         private String caseUrn;
 
-        public Builder id(String id) {
-            this.id = id;
+        public Builder offenceId(String offenceId) {
+            this.offenceId = offenceId;
             return this;
         }
 
@@ -65,4 +65,3 @@ public class OffenceDto {
         return new Builder();
     }
 }
-
