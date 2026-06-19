@@ -35,7 +35,8 @@ public class HearingExtended implements Serializable {
                            @JsonProperty("courtCentre") final CourtCentre courtCentre,
                            @JsonProperty("jurisdictionType") final JurisdictionType jurisdictionType,
                            @JsonProperty("courtApplication") final CourtApplication courtApplication,
-                           @JsonProperty("prosecutionCases") final List<ProsecutionCase> prosecutionCases, @JsonProperty("shadowListedOffences") final List<UUID> shadowListedOffences) {
+                           @JsonProperty("prosecutionCases") final List<ProsecutionCase> prosecutionCases,
+                           @JsonProperty("shadowListedOffences") final List<UUID> shadowListedOffences) {
         this.hearingId = hearingId;
         this.hearingDays = hearingDays;
         this.courtCentre = courtCentre;
