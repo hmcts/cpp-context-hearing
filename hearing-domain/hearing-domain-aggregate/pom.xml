@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-domain</artifactId>
-        <version>17.104.160-CCSPH2-SNAPSHOT</version>
+        <version>17.104.161-CCSPH2-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-domain-aggregate</artifactId>
     <dependencies>
