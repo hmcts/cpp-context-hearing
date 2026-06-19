@@ -3,8 +3,8 @@ package uk.gov.moj.cpp.hearing.it;
 import static java.text.MessageFormat.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static uk.gov.justice.services.messaging.JsonObjects.createReader;
-import static javax.ws.rs.core.Response.Status.OK;
-import static javax.ws.rs.core.Response.Status.fromStatusCode;
+import static jakarta.ws.rs.core.Response.Status.OK;
+import static jakarta.ws.rs.core.Response.Status.fromStatusCode;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
@@ -36,8 +36,8 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import javax.json.JsonObject;
-import javax.ws.rs.core.Response;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.core.Response;
 
 import com.jayway.jsonpath.ReadContext;
 import org.hamcrest.BaseMatcher;

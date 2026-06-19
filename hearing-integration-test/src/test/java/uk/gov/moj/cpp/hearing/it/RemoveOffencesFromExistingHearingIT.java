@@ -5,7 +5,7 @@ import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
-import static javax.ws.rs.core.Response.Status.OK;
+import static jakarta.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.anyOf;
@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.restassured.path.json.JsonPath;

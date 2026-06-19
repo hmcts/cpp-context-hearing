@@ -6,7 +6,6 @@ import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.apache.deltaspike.core.util.CollectionUtils.isEmpty;
 import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromApplication;
 
 import uk.gov.justice.core.courts.Defendant;
@@ -28,7 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class BailStatusHelper {
 
@@ -127,7 +126,7 @@ public class BailStatusHelper {
     }
 
     private Optional<BailStatus> getBailStatusByJudicialResults(final List<JudicialResult> judicialResults, final List<BailStatus> bailStatusesFromRefData) {
-        if (isEmpty(judicialResults) || (judicialResults.stream().allMatch(s -> s.getPostHearingCustodyStatus() != null && "A".equals(s.getPostHearingCustodyStatus()))
+        if ((judicialResults == null || judicialResults.isEmpty()) || (judicialResults.stream().allMatch(s -> s.getPostHearingCustodyStatus() != null && "A".equals(s.getPostHearingCustodyStatus()))
                 && judicialResults.stream().anyMatch(s -> Arrays.asList(NHCCS_RESULT_DEFINITION_ID,NHMC_RESULT_DEFINITION_ID).contains(s.getJudicialResultTypeId().toString())))) {
             return empty();
         }

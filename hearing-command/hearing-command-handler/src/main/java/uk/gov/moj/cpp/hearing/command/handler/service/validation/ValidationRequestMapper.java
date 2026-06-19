@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class ValidationRequestMapper {

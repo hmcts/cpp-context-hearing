@@ -74,7 +74,6 @@ import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -336,7 +335,7 @@ public class InitiateHearingCommandHandlerTest {
                                 .with(CourtCentre::getRoomId, is(courtCentre.getRoomId()))
                                 .with(CourtCentre::getRoomName, is(courtCentre.getRoomName())))
                         .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
-                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay()))
                                 .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))))
                         .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
                                 .with(JudicialRole::getFirstName, is(judicialRole.getFirstName()))
@@ -361,7 +360,7 @@ public class InitiateHearingCommandHandlerTest {
                                 .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
                                         .with(Defendant::getId, is(defendant.getId()))
                                         .with(Defendant::getMasterDefendantId, is(defendant.getMasterDefendantId()))
-                                        .with(Defendant::getCourtProceedingsInitiated, is(defendant.getCourtProceedingsInitiated().withZoneSameLocal(ZoneId.of("UTC"))))
+                                        .with(Defendant::getCourtProceedingsInitiated, is(defendant.getCourtProceedingsInitiated()))
                                         .with(Defendant::getProsecutionCaseId, is(defendant.getProsecutionCaseId()))
                                         .with(Defendant::getNumberOfPreviousConvictionsCited, is(defendant.getNumberOfPreviousConvictionsCited()))
                                         .with(Defendant::getProsecutionAuthorityReference, is(defendant.getProsecutionAuthorityReference()))
@@ -412,7 +411,7 @@ public class InitiateHearingCommandHandlerTest {
                                 .with(CourtCentre::getRoomId, is(courtCentre.getRoomId()))
                                 .with(CourtCentre::getRoomName, is(courtCentre.getRoomName())))
                         .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
-                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay()))
                                 .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))))
                         .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
                                 .with(JudicialRole::getFirstName, is(judicialRole.getFirstName()))

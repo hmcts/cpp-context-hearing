@@ -4,7 +4,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
-import static javax.ws.rs.core.Response.Status.OK;
+import static jakarta.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;

@@ -38,10 +38,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import jakarta.inject.Inject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;

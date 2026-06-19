@@ -13,7 +13,7 @@ import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createReader;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.http.HttpStatus.SC_OK;
 import static uk.gov.moj.cpp.hearing.it.Utilities.JsonUtil.toJsonString;
 import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
@@ -44,10 +44,10 @@ import java.util.List;
 import java.util.UUID;
 
 
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
 
 import com.google.common.collect.Lists;
 import org.apache.http.HttpHeaders;

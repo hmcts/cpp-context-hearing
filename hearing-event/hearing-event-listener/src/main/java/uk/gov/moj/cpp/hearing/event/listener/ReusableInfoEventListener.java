@@ -25,9 +25,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
+import jakarta.inject.Inject;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

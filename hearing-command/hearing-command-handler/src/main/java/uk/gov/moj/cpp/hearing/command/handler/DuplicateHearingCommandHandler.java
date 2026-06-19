@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.json.JsonArray;
-import javax.json.JsonString;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonString;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

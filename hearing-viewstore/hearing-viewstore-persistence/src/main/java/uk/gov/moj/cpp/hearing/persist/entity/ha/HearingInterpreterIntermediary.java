@@ -1,23 +1,18 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.vladmihalcea.hibernate.type.json.JsonNodeBinaryType;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "ha_hearing_interpreter_intermediary")
-@TypeDef(
-        name = "jsonb-node",
-        typeClass = JsonNodeBinaryType.class
-)
 public class HearingInterpreterIntermediary {
 
     @Id
@@ -28,7 +23,7 @@ public class HearingInterpreterIntermediary {
     private Hearing hearing;
 
     @Column(name = "payload", columnDefinition = "jsonb")
-    @Type(type = "jsonb-node")
+    @JdbcTypeCode(SqlTypes.JSON)
     private JsonNode payload;
 
     @Column(name = "deleted")

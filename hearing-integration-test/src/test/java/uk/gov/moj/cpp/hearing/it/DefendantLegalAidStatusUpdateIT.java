@@ -21,7 +21,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import java.util.UUID;
 
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

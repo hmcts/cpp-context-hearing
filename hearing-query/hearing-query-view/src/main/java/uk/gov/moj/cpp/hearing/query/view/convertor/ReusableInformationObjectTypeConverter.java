@@ -7,9 +7,9 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.common.ReusableInformation;
 import uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 public class ReusableInformationObjectTypeConverter extends ReusableInformationBaseConverter<Object> {
 

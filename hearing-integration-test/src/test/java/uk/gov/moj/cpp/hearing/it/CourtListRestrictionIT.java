@@ -28,7 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.ZonedDateTime;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

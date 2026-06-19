@@ -10,8 +10,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

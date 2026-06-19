@@ -15,9 +15,9 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import javax.ejb.Startup;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.ejb.Startup;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;

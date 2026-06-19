@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createObjectBuilder;
+import static jakarta.json.Json.createObjectBuilder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;

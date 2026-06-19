@@ -13,8 +13,8 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AllAlc
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
+import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 
 public class AlcoholLevelMethodsReferenceDataLoader {
 

@@ -4,7 +4,7 @@ import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCaseIdentifier;

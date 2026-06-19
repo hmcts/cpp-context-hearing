@@ -5,8 +5,8 @@ import uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType;
 
 import java.util.Objects;
 
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 public class ReusableInformationFixlConverter extends ReusableInformationBaseConverter<String> {
 

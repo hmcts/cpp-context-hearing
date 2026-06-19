@@ -3,8 +3,8 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class LaaApplnReference {

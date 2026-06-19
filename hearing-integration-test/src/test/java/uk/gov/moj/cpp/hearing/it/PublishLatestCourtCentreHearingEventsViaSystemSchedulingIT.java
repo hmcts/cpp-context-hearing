@@ -35,8 +35,8 @@ import java.time.ZonedDateTime;
 import java.util.Random;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import javax.json.JsonObject;
-import javax.ws.rs.core.Response;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

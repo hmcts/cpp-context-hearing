@@ -15,8 +15,8 @@
         </dependency>
 
         <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -73,7 +73,7 @@
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.github.benas</groupId>

@@ -21,7 +21,7 @@ import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

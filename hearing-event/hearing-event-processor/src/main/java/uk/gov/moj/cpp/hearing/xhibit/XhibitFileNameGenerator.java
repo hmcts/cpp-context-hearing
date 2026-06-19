@@ -8,8 +8,8 @@ import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 
 @ApplicationScoped

@@ -3,8 +3,8 @@ package uk.gov.moj.cpp.hearing.mapping;
 import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class PersonDefendantJPAMapper {

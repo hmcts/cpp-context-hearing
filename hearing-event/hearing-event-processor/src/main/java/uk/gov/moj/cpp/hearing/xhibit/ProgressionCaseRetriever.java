@@ -14,9 +14,9 @@ import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCa
 
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.json.JsonObject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 
 @ApplicationScoped
 public class ProgressionCaseRetriever {

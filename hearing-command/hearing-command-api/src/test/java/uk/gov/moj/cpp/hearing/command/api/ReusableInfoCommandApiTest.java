@@ -13,7 +13,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
 import uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

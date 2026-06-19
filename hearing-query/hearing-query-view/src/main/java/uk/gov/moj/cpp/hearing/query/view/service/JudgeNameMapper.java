@@ -11,7 +11,7 @@ import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.json.JsonObject;
 
 import org.apache.commons.lang3.StringUtils;

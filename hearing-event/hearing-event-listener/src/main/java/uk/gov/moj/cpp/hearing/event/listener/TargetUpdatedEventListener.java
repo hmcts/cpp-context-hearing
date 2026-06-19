@@ -11,7 +11,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import uk.gov.moj.cpp.hearing.repository.TargetRepository;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @ServiceComponent(EVENT_LISTENER)
 public class TargetUpdatedEventListener {

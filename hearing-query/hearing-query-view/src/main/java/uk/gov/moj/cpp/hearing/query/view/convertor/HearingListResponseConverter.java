@@ -15,7 +15,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCas
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
 

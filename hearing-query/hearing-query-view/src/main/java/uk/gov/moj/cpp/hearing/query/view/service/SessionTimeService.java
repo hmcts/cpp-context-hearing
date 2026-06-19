@@ -11,10 +11,10 @@ import uk.gov.moj.cpp.hearing.persist.entity.sessiontime.SessionTime;
 import uk.gov.moj.cpp.hearing.query.view.response.SessionTimeResponse;
 import uk.gov.moj.cpp.hearing.repository.SessionTimeRepository;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.ws.rs.NotFoundException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.NotFoundException;
 import java.time.LocalDate;
 import java.util.UUID;
 

@@ -4,7 +4,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea;
 
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class IndicatedPleaJPAMapper {
