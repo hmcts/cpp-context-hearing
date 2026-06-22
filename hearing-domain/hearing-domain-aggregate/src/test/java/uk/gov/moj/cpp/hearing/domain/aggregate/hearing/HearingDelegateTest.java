@@ -350,6 +350,66 @@ public class HearingDelegateTest {
     }
 
     @Test
+    public void shouldStripActiveOffenceAlreadyOnHearingAndNewlyMovedOffenceFromApplicationOnExtend() {
+        // Reproduces the CCT-2353 extended-hearing bug: an application selects two active offences across two
+        // related cases and is listed onto a hearing that already carries case1's offence. Both offences must
+        // leave the court application — case1's because it is already on the hearing, case2's because it is the
+        // newly moved prosecution case.
+        final UUID hearingId = randomUUID();
+        final UUID caseId1 = randomUUID();
+        final UUID caseId2 = randomUUID();
+        final UUID defendantId1 = randomUUID();
+        final UUID defendantId2 = randomUUID();
+        final UUID offenceOnHearing = randomUUID();   // case1 active offence, already on the hearing
+        final UUID newlyMovedOffence = randomUUID();   // case2 active offence, newly selected
+
+        // the hearing already carries case1 with its active offence
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(caseList(createProsecutionCases(caseId1, defendantId1, offenceOnHearing)))
+                .build());
+
+        // the application re-selects case1's offence and adds case2's offence; both are active
+        final CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withCourtApplicationCases(asList(
+                        CourtApplicationCase.courtApplicationCase()
+                                .withProsecutionCaseId(caseId1)
+                                .withOffences(new ArrayList<>(asList(Offence.offence().withId(offenceOnHearing).withProceedingsConcluded(false).build())))
+                                .build(),
+                        CourtApplicationCase.courtApplicationCase()
+                                .withProsecutionCaseId(caseId2)
+                                .withOffences(new ArrayList<>(asList(Offence.offence().withId(newlyMovedOffence).withProceedingsConcluded(false).build())))
+                                .build()))
+                .build();
+
+        // the command handler moves only case2 (case1's offence is already on the hearing, so it is skipped)
+        final List<ProsecutionCase> movedProsecutionCases = caseList(createProsecutionCases(caseId2, defendantId2, newlyMovedOffence));
+
+        final List<Object> events = hearingDelegate.extend(hearingId, null, null, null, courtApplication, movedProsecutionCases, null).collect(toList());
+
+        final HearingExtended emitted = events.stream()
+                .filter(HearingExtended.class::isInstance)
+                .map(HearingExtended.class::cast)
+                .findFirst().orElseThrow(AssertionError::new);
+
+        // both court-application cases have their active offences stripped (lists nulled, since each held only the one)
+        final List<CourtApplicationCase> applicationCases = emitted.getCourtApplication().getCourtApplicationCases();
+        assertNull(offencesForCase(applicationCases, caseId1));
+        assertNull(offencesForCase(applicationCases, caseId2));
+
+        // only the newly-moved case is emitted on the prosecution side
+        assertThat(emitted.getProsecutionCases(), is(movedProsecutionCases));
+    }
+
+    private List<Offence> offencesForCase(final List<CourtApplicationCase> cases, final UUID prosecutionCaseId) {
+        final CourtApplicationCase match = cases.stream()
+                .filter(c -> prosecutionCaseId.equals(c.getProsecutionCaseId()))
+                .findFirst().orElseThrow(AssertionError::new);
+        return match.getOffences();
+    }
+
+    @Test
     public void shouldRemoveConcludedOffenceFromProsecutionButKeepOthersOnHandleHearingExtended() {
         final UUID hearingId = randomUUID();
         final UUID caseId = randomUUID();
