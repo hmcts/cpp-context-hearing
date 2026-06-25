@@ -111,6 +111,7 @@ public class GetHearingsTransformerTest {
                         ))
                 ))
                 .with(HearingSummaries::getProsecutionCaseSummaries, first(isBean(ProsecutionCaseSummaries.class)
+                        .withValue(ProsecutionCaseSummaries::getId, prosecutionCase.getId())
                         .withValue(ProsecutionCaseSummaries::getProsecutionCaseIdentifier, prosecutionCase.getProsecutionCaseIdentifier())
                         .with(ProsecutionCaseSummaries::getDefendants, first(isBean(Defendants.class)
                                 .withValue(Defendants::getMasterDefendantId, defendant.getMasterDefendantId())
@@ -444,6 +445,7 @@ public class GetHearingsTransformerTest {
 
         assertThat(hearingSummary, isBean(HearingSummaries.class)
                 .with(HearingSummaries::getProsecutionCaseSummaries, first(isBean(ProsecutionCaseSummaries.class)
+                        .withValue(ProsecutionCaseSummaries::getId, prosecutionCase.getId())
                         .withValue(ProsecutionCaseSummaries::getProsecutionCaseIdentifier, prosecutionCase.getProsecutionCaseIdentifier())
                         .with(ProsecutionCaseSummaries::getDefendants, first(isBean(Defendants.class)
                                 .withValue(Defendants::getMasterDefendantId, defendant.getMasterDefendantId())
@@ -502,6 +504,7 @@ public class GetHearingsTransformerTest {
 
         assertThat(hearingSummary, isBean(HearingSummaries.class)
                 .with(HearingSummaries::getProsecutionCaseSummaries, first(isBean(ProsecutionCaseSummaries.class)
+                        .withValue(ProsecutionCaseSummaries::getId, prosecutionCase.getId())
                         .withValue(ProsecutionCaseSummaries::getProsecutionCaseIdentifier, prosecutionCase.getProsecutionCaseIdentifier())
                         .with(ProsecutionCaseSummaries::getDefendants, first(isBean(Defendants.class)
                                 .withValue(Defendants::getMasterDefendantId, defendant.getMasterDefendantId())

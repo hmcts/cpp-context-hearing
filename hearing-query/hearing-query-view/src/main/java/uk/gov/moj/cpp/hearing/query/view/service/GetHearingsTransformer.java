@@ -228,6 +228,7 @@ public class GetHearingsTransformer {
 
     private ProsecutionCaseSummaries.Builder summary(final ProsecutionCase prosecutionCase) {
         return ProsecutionCaseSummaries.prosecutionCaseSummaries()
+                .withId(prosecutionCase.getId())
                 .withProsecutionCaseIdentifier(prosecutionCase.getProsecutionCaseIdentifier())
                 .withIsCivil(prosecutionCase.getIsCivil())
                 .withGroupId(prosecutionCase.getGroupId())
