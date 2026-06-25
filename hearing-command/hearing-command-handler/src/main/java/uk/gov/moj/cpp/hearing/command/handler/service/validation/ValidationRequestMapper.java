@@ -24,7 +24,7 @@ public class ValidationRequestMapper {
         final List<DefendantDto> defendants = new ArrayList<>();
         final List<OffenceDto> offences = new ArrayList<>();
 
-        if (hearing.getProsecutionCases() != null) {
+        if (hearing != null && hearing.getProsecutionCases() != null) {
             hearing.getProsecutionCases()
                     .forEach(prosecutionCase -> processProsecutionCase(prosecutionCase, defendants, offences));
         }
@@ -61,7 +61,7 @@ public class ValidationRequestMapper {
     private DefendantDto toDefendantDto(final Defendant defendant) {
         final Person personDetails = extractPersonDetails(defendant);
         return DefendantDto.builder()
-                .withId(uuidToString(defendant.getId()))
+                .withDefendantId(uuidToString(defendant.getId()))
                 .withFirstName(personDetails != null ? personDetails.getFirstName() : null)
                 .withLastName(personDetails != null ? personDetails.getLastName() : null)
                 .withMasterDefendantId(uuidToString(defendant.getMasterDefendantId()))
@@ -70,7 +70,7 @@ public class ValidationRequestMapper {
 
     private OffenceDto toOffenceDto(final Offence offence, final String caseUrn) {
         return new OffenceDto.Builder()
-                .id(uuidToString(offence.getId()))
+                .offenceId(uuidToString(offence.getId()))
                 .offenceCode(offence.getOffenceCode())
                 .offenceTitle(offence.getOffenceTitle())
                 .orderIndex(offence.getOrderIndex())
@@ -100,7 +100,7 @@ public class ValidationRequestMapper {
 
     private ResultLineDto toResultLineDto(final SharedResultsCommandResultLineV2 line) {
         return new ResultLineDto.Builder()
-                .id(uuidToString(line.getResultLineId()))
+                .resultLineId(uuidToString(line.getResultLineId()))
                 .shortCode(line.getShortCode())
                 .label(line.getResultLabel())
                 .defendantId(uuidToString(line.getDefendantId()))

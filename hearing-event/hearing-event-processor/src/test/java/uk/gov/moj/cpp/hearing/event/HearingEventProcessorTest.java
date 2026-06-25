@@ -301,6 +301,32 @@ public class HearingEventProcessorTest {
     }
 
     @Test
+    public void shouldForwardResultsValidationFailedToPublicTopic() {
+        final JsonObjectBuilder payload = createObjectBuilder()
+                .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                .add(FIELD_HEARING_DAY, "2026-05-08")
+                .add("userId", USER_ID.toString());
+        final JsonEnvelope eventIn = envelopeFrom(
+                metadataWithRandomUUID("hearing.events.results-validation-failed"),
+                payload.build());
+
+        this.hearingEventProcessor.handleResultsValidationFailed(eventIn);
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(),
+                is(HearingEventProcessor.PUBLIC_HEARING_RESULTS_VALIDATION_FAILED));
+        // The processor is a pure passthrough — payload preserved unchanged.
+        assertThat(envelopeOut.payloadAsJsonObject().getString(FIELD_HEARING_ID),
+                is(HEARING_ID.toString()));
+        assertThat(envelopeOut.payloadAsJsonObject().getString(FIELD_HEARING_DAY),
+                is("2026-05-08"));
+        assertThat(envelopeOut.payloadAsJsonObject().getString("userId"),
+                is(USER_ID.toString()));
+    }
+
+    @Test
     public void shouldPublishDraftResultDeletedV2PublicEvent() {
 
         UUID userId = UUID.randomUUID();

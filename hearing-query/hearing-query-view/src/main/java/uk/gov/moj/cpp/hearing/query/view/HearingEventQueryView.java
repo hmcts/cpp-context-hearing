@@ -26,6 +26,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingProsecutionCounsel;
@@ -555,13 +556,14 @@ public class HearingEventQueryView {
             return Collections.emptyList();
         }
 
-        final CourtCentre courtCentre = optionalCourtCentre.get();
+        final CourtCentre topLevel = optionalCourtCentre.get();
+        final Optional<HearingDay> matchedDay = hearingService.getHearingDayByHearingIdAndDate(hearingId, date);
+
+        final UUID centreId = matchedDay.map(HearingDay::getCourtCentreId).filter(java.util.Objects::nonNull).orElse(topLevel.getId());
+        final UUID roomId = matchedDay.map(HearingDay::getCourtRoomId).filter(java.util.Objects::nonNull).orElse(topLevel.getRoomId());
+
         final List<HearingEvent> hearingEvents =
-                hearingService
-                        .getHearingEvents(
-                                courtCentre.getId(),
-                                courtCentre.getRoomId(),
-                                date);
+                hearingService.getHearingEvents(centreId, roomId, date);
 
         return getActiveHearingIdsByHearingEvents(hearingEvents);
     }
