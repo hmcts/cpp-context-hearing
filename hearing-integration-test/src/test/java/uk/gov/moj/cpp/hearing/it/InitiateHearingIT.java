@@ -1525,6 +1525,7 @@ public class InitiateHearingIT extends AbstractIT {
 
     public BeanMatcher<ProsecutionCaseSummaries> hasProsecutionCaseSummary(final ProsecutionCase prosecutionCase) {
         return isBean(ProsecutionCaseSummaries.class)
+                .withValue(ProsecutionCaseSummaries::getId, prosecutionCase.getId())
                 .with(ProsecutionCaseSummaries::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
                         .withValue(ProsecutionCaseIdentifier::getCaseURN, prosecutionCase.getProsecutionCaseIdentifier().getCaseURN())
                         .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityCode())
