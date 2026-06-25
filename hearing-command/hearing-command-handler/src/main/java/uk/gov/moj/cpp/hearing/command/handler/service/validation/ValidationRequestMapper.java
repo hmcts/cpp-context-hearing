@@ -21,10 +21,16 @@ import javax.enterprise.context.ApplicationScoped;
 public class ValidationRequestMapper {
 
     public ValidationRequest toValidationRequest(final ShareDaysResultsCommand command, final Hearing hearing) {
+
+        final String courtType = hearing.getJurisdictionType() != null
+                ? hearing.getJurisdictionType().name()
+                : null;
+
         final List<DefendantDto> defendants = new ArrayList<>();
         final List<OffenceDto> offences = new ArrayList<>();
+        String caseId = null;
 
-        if (hearing.getProsecutionCases() != null) {
+        if (hearing != null && hearing.getProsecutionCases() != null) {
             hearing.getProsecutionCases()
                     .forEach(prosecutionCase -> processProsecutionCase(prosecutionCase, defendants, offences));
         }
