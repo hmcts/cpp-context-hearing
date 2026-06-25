@@ -8,6 +8,8 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
@@ -45,6 +47,7 @@ import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
 import uk.gov.moj.cpp.listing.domain.referencedata.CourtRoomMapping;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -174,6 +177,60 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
         verify(judgeNameMapper).getJudgeName(hearing);
 
+    }
+
+    @Test
+    public void shouldUseDayCourtCentreAndRoom_whenHearingDayHasOverrideRoom() {
+        final UUID topCentreId = randomUUID();
+        final UUID topRoomId = randomUUID();
+        final UUID dayCentreId = randomUUID();
+        final UUID dayRoomId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final LocalDate publishDate = LocalDate.now();
+        final ZonedDateTime sittingDay = publishDate.atStartOfDay(ZonedDateTime.now().getZone());
+
+        final HearingEvent hearingEvent = HearingEvent.hearingEvent().build();
+        final List<Hearing> hearingList = asList(hearing);
+        final List<ProsecutionCase> prosecutionCases = asList(prosecutionCase);
+        final List<Defendant> defendantList = asList(defendant);
+        final List<HearingDay> hearingDays = asList(hearingDay);
+        final ProsecutionCaseIdentifier prosecutionCaseIdentifier = ProsecutionCaseIdentifier
+                .prosecutionCaseIdentifier().withCaseURN("caseURN").build();
+
+        when(hearingEventsToHearingMapper.getActiveHearingIds()).thenReturn(new HashSet<>());
+        when(prosecutionCase.getProsecutionCaseIdentifier()).thenReturn(prosecutionCaseIdentifier);
+        when(prosecutionCase.getDefendants()).thenReturn(defendantList);
+        when(defendant.getPersonDefendant()).thenReturn(personDefendant);
+        when(personDefendant.getPersonDetails()).thenReturn(person);
+        when(person.getFirstName()).thenReturn("firstName");
+        when(person.getMiddleName()).thenReturn("middleName");
+        when(person.getLastName()).thenReturn("lastName");
+
+        when(hearing.getHearingDays()).thenReturn(hearingDays);
+        when(hearingDay.getSittingDay()).thenReturn(sittingDay);
+        when(hearingDay.getCourtCentreId()).thenReturn(dayCentreId);
+        when(hearingDay.getCourtRoomId()).thenReturn(dayRoomId);
+
+        when(hearing.getId()).thenReturn(hearingId);
+        when(hearing.getType()).thenReturn(HearingType.hearingType().withDescription("hearingTypeDescription").build());
+        when(hearing.getProsecutionCases()).thenReturn(prosecutionCases);
+        when(hearing.getCourtCentre()).thenReturn(CourtCentre.courtCentre().withName(COURT_NAME).withRoomId(topRoomId).withId(topCentreId).build());
+        when(hearingEventsToHearingMapper.getHearingList()).thenReturn(hearingList);
+        when(hearingEventsToHearingMapper.getAllHearingEventBy(hearingId)).thenReturn(Optional.of(hearingEvent));
+
+        when(commonXhibitReferenceDataService.getCourtRoomMappingBy(eq(dayCentreId), eq(dayRoomId))).thenReturn(courtRoomMapping);
+        when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("Day room name");
+        when(courtRoomMapping.getCrestCourtSiteUUID()).thenReturn(randomUUID());
+
+        mockHearingTypeId();
+        when(commonXhibitReferenceDataService.getXhibitHearingType(hearingTypeId).getExhibitHearingDescription()).thenReturn("Plea");
+
+        final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper, publishDate);
+
+        verify(commonXhibitReferenceDataService, atLeastOnce()).getCourtRoomMappingBy(eq(dayCentreId), eq(dayRoomId));
+        final CourtRoom courtRoom = currentCourtStatus.getCourt().getCourtSites().get(0).getCourtRooms().get(0);
+        assertThat(courtRoom.getCourtRoomName(), is("Day room name"));
+        assertThat(courtRoom.getCourtRoomId(), is(dayRoomId));
     }
 
     @Test
