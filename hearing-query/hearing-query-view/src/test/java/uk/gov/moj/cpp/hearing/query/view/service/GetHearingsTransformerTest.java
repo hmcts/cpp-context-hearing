@@ -198,6 +198,86 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
+    public void shouldTransformSubjectWithPersonDefendantInMasterDefendant() {
+        final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
+        final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
+        final CourtApplicationParty subject = courtApplication.getSubject();
+        final Person personDetails = courtApplication.getApplicant().getPersonDetails();
+        final UUID masterDefendantId = randomUUID();
+
+        final Hearing hearingWithSubjectMasterDefendant = Hearing.hearing().withValuesFrom(hearing)
+                .withCourtApplications(asList(CourtApplication.courtApplication()
+                        .withValuesFrom(courtApplication)
+                        .withSubject(CourtApplicationParty.courtApplicationParty()
+                                .withValuesFrom(subject)
+                                .withPersonDetails(null)
+                                .withOrganisation(null)
+                                .withProsecutingAuthority(null)
+                                .withMasterDefendant(MasterDefendant.masterDefendant()
+                                        .withMasterDefendantId(masterDefendantId)
+                                        .withPersonDefendant(PersonDefendant.personDefendant()
+                                                .withPersonDetails(personDetails)
+                                                .build())
+                                        .build())
+                                .build())
+                        .build()))
+                .build();
+
+        final HearingSummaries hearingSummary = target.summary(hearingWithSubjectMasterDefendant).build();
+
+        assertThat(hearingSummary, isBean(HearingSummaries.class)
+                .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
+                        .with(CourtApplicationSummaries::getSubject, isBean(Subject.class)
+                                .withValue(Subject::getId, subject.getId())
+                                .withValue(Subject::getMasterDefendantId, masterDefendantId)
+                                .withValue(Subject::getFirstName, personDetails.getFirstName())
+                                .withValue(Subject::getMiddleName, personDetails.getMiddleName())
+                                .withValue(Subject::getLastName, personDetails.getLastName())
+                        )
+                ))
+        );
+    }
+
+    @Test
+    public void shouldTransformSubjectWithLegalEntityDefendantInMasterDefendant() {
+        final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
+        final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
+        final CourtApplicationParty subject = courtApplication.getSubject();
+        final Organisation organisation = courtApplication.getApplicant().getOrganisation();
+        final UUID masterDefendantId = randomUUID();
+
+        final Hearing hearingWithSubjectMasterDefendant = Hearing.hearing().withValuesFrom(hearing)
+                .withCourtApplications(asList(CourtApplication.courtApplication()
+                        .withValuesFrom(courtApplication)
+                        .withSubject(CourtApplicationParty.courtApplicationParty()
+                                .withValuesFrom(subject)
+                                .withPersonDetails(null)
+                                .withOrganisation(null)
+                                .withProsecutingAuthority(null)
+                                .withMasterDefendant(MasterDefendant.masterDefendant()
+                                        .withMasterDefendantId(masterDefendantId)
+                                        .withLegalEntityDefendant(LegalEntityDefendant.legalEntityDefendant()
+                                                .withOrganisation(organisation)
+                                                .build())
+                                        .build())
+                                .build())
+                        .build()))
+                .build();
+
+        final HearingSummaries hearingSummary = target.summary(hearingWithSubjectMasterDefendant).build();
+
+        assertThat(hearingSummary, isBean(HearingSummaries.class)
+                .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
+                        .with(CourtApplicationSummaries::getSubject, isBean(Subject.class)
+                                .withValue(Subject::getId, subject.getId())
+                                .withValue(Subject::getMasterDefendantId, masterDefendantId)
+                                .withValue(Subject::getOrganisationName, organisation.getName())
+                        )
+                ))
+        );
+    }
+
+    @Test
     public void shouldTransformHearingWhenOrganisationInProsecutionAuthorityName() {
         final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
         final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
