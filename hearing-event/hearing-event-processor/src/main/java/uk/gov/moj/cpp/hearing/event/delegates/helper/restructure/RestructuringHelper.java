@@ -27,7 +27,7 @@ import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class RestructuringHelper {
 

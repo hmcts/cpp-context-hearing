@@ -12,7 +12,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import java.util.UUID;
 

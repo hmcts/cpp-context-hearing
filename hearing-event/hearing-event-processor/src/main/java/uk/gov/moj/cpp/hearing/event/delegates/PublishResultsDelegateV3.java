@@ -18,7 +18,6 @@ import static uk.gov.justice.core.courts.Level.DEFENDANT;
 import static uk.gov.justice.core.courts.Level.OFFENCE;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.DeletedJudicialResultTransformer.toDeletedResults;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.CategoryEnumUtils.getCategory;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
 import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromHearing;
@@ -66,8 +65,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
+import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,11 +154,6 @@ public class PublishResultsDelegateV3 {
                 .setSharedTime(resultsShared.getSharedTime())
                 .setHearingDay(resultsShared.getHearingDay())
                 .setShadowListedOffences(getOffenceShadowListedForMagistratesNextHearing(resultsShared));
-
-        final List<TreeNode<ResultLine2>> restructuredDeletedResults = this.restructuringHelper.getDeletedResults(context, resultsShared, treeNodes);
-        if (isNotEmpty(restructuredDeletedResults)) {
-            hearingResulted.getHearing().setDeletedJudicialResults(toDeletedResults(restructuredDeletedResults, resultsShared.getHearing()));
-        }
 
         final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingResulted);
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted"), jsonObject);

@@ -111,9 +111,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.persistence.NoResultException;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.persistence.NoResultException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

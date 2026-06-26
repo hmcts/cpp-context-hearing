@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.mapping;
 
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CpsProsecutor;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class CpsProsecutorJPAMapper {

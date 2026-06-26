@@ -9,8 +9,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourDefendantsKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourtDefendants;
 import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;

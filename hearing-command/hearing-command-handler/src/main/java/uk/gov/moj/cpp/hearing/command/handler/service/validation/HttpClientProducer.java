@@ -5,10 +5,10 @@ import uk.gov.justice.services.common.configuration.Value;
 import java.io.Closeable;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;

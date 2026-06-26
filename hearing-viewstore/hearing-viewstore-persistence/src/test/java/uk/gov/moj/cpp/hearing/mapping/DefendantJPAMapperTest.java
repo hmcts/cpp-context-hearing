@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import static java.util.Arrays.asList;
-import static org.apache.deltaspike.core.util.ArraysUtils.asSet;
+import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
@@ -179,7 +179,7 @@ public class DefendantJPAMapperTest {
         defendantEntity2.setPersonDefendant(personDefendant2);
         defendantEntity2.setCourtListRestricted(false);
 
-        List<Defendant> results = defendantJPAMapper.fromJPAWithCourtListRestrictions(asSet(defendantEntity1, defendantEntity2));
+        List<Defendant> results = defendantJPAMapper.fromJPAWithCourtListRestrictions(Set.of(defendantEntity1, defendantEntity2));
         Assert.assertEquals(1, results.size());
     }
 

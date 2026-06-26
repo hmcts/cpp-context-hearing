@@ -13,7 +13,7 @@ import uk.gov.moj.cpp.hearing.command.sessiontime.RecordSessionTime;
 import uk.gov.moj.cpp.hearing.common.SessionTimeUUIDService;
 import uk.gov.moj.cpp.hearing.domain.aggregate.SessionTimeAggregate;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.time.LocalDate;
 import java.util.UUID;
 import java.util.stream.Stream;

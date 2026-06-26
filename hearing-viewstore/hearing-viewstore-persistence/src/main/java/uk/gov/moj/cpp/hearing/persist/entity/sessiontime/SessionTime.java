@@ -4,22 +4,17 @@ package uk.gov.moj.cpp.hearing.persist.entity.sessiontime;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.vladmihalcea.hibernate.type.json.JsonNodeBinaryType;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "ha_session_time")
-@TypeDef(
-        name = "jsonb-node",
-        typeClass = JsonNodeBinaryType.class
-)
 public class SessionTime {
 
     @Id
@@ -36,11 +31,11 @@ public class SessionTime {
     private UUID courtRoomId;
 
     @Column(name = "am_court_session", columnDefinition = "jsonb")
-    @Type(type = "jsonb-node")
+    @JdbcTypeCode(SqlTypes.JSON)
     private JsonNode amCourtSession;
 
     @Column(name = "pm_court_session", columnDefinition = "jsonb")
-    @Type(type = "jsonb-node")
+    @JdbcTypeCode(SqlTypes.JSON)
     private JsonNode pmCourtSession;
 
     public SessionTime() {

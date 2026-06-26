@@ -2,27 +2,25 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JudicialRoleType;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.test.utils.core.converter.JsonObjectToObjectConverterFactory;
 import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,8 +40,6 @@ public class JudgeNameMapperTest {
     private static final UUID JUDICIAL_ROLE_ID = randomUUID();
     private static final String CIRCUIT = "CIRCUIT";
 
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverterFactory().createJsonObjectToObjectConverter();
-
     @Mock(answer = RETURNS_DEEP_STUBS)
     private CommonXhibitReferenceDataService commonXhibitReferenceDataService;
 
@@ -56,8 +52,9 @@ public class JudgeNameMapperTest {
 
     @Test
     public void shouldReturnRequestedNameAsJudgeName() {
+        final JsonObject judiciary = mockJudiciaryWithRequestedName();
         when(hearing.getJudiciary()).thenReturn(getJudicialRoles());
-        when(commonXhibitReferenceDataService.getJudiciary(JUDICIAL_ROLE_ID)).thenReturn(createJudiciaryWithRequestedName());
+        when(commonXhibitReferenceDataService.getJudiciary(JUDICIAL_ROLE_ID)).thenReturn(judiciary);
         final String judgeName = judgeNameMapper.getJudgeName(hearing);
         assertThat(judgeName, is(REQUESTED_NAME));
         verify(commonXhibitReferenceDataService).getJudiciary(JUDICIAL_ROLE_ID);
@@ -66,8 +63,9 @@ public class JudgeNameMapperTest {
 
     @Test
     public void shouldNotReturnRequestedNameAsJudgeName() {
+        final JsonObject judiciary = mockJudiciaryWithoutRequestedName();
         when(hearing.getJudiciary()).thenReturn(getJudicialRoles());
-        when(commonXhibitReferenceDataService.getJudiciary(JUDICIAL_ROLE_ID)).thenReturn(createJudiciaryWithoutRequestedName());
+        when(commonXhibitReferenceDataService.getJudiciary(JUDICIAL_ROLE_ID)).thenReturn(judiciary);
         final String judgeName = judgeNameMapper.getJudgeName(hearing);
         final String formattedName = format("%s %s %s %s", TITLE_JUDICIAL_PREFIX, FORENAMES, SURNAME, TITLE_SUFFIX).trim();
 
@@ -76,35 +74,28 @@ public class JudgeNameMapperTest {
         verify(hearing).getJudiciary();
     }
 
-    private JsonObject createJudiciaryWithRequestedName() {
-        final JsonObjectBuilder judiciaryBuilder = createObjectBuilder();
-        judiciaryBuilder.add(REQUESTED_NAME, REQUESTED_NAME);
-        judiciaryBuilder.add(SURNAME, SURNAME);
-        judiciaryBuilder.add(FORENAMES, FORENAMES);
-        judiciaryBuilder.add(TITLE_SUFFIX, TITLE_SUFFIX);
-        judiciaryBuilder.add(TITLE_JUDICIAL_PREFIX, TITLE_JUDICIAL_PREFIX);
-        judiciaryBuilder.add(TITLE_PREFIX, TITLE_PREFIX);
-        return judiciaryBuilder.build();
+    private JsonObject mockJudiciaryWithRequestedName() {
+        final JsonObject judiciary = mock(JsonObject.class);
+        when(judiciary.getString(eq(REQUESTED_NAME), eq(EMPTY))).thenReturn(REQUESTED_NAME);
+        return judiciary;
     }
 
-    private JsonObject createJudiciaryWithoutRequestedName() {
-        final JsonObjectBuilder judiciaryBuilder = createObjectBuilder();
-        judiciaryBuilder.add(SURNAME, SURNAME);
-        judiciaryBuilder.add(FORENAMES, FORENAMES);
-        judiciaryBuilder.add(TITLE_SUFFIX, TITLE_SUFFIX);
-        judiciaryBuilder.add(TITLE_JUDICIAL_PREFIX, TITLE_JUDICIAL_PREFIX);
-        judiciaryBuilder.add(TITLE_PREFIX, TITLE_PREFIX);
-        return judiciaryBuilder.build();
+    private JsonObject mockJudiciaryWithoutRequestedName() {
+        final JsonObject judiciary = mock(JsonObject.class);
+        when(judiciary.getString(eq(REQUESTED_NAME), eq(EMPTY))).thenReturn(EMPTY);
+        when(judiciary.getString(eq(TITLE_PREFIX), eq(EMPTY))).thenReturn(TITLE_PREFIX);
+        when(judiciary.getString(eq(TITLE_JUDICIAL_PREFIX), eq(TITLE_PREFIX))).thenReturn(TITLE_JUDICIAL_PREFIX);
+        when(judiciary.getString(FORENAMES)).thenReturn(FORENAMES);
+        when(judiciary.getString(SURNAME)).thenReturn(SURNAME);
+        when(judiciary.getString(eq(TITLE_SUFFIX), eq(EMPTY))).thenReturn(TITLE_SUFFIX);
+        return judiciary;
     }
 
     private List<JudicialRole> getJudicialRoles() {
-        final JudicialRole judicialRole = getJudicialRole();
-
         final List<JudicialRole> roles = new ArrayList();
-        roles.add(judicialRole);
+        roles.add(getJudicialRole());
         return roles;
     }
-
 
     private JudicialRole getJudicialRole() {
         final JudicialRoleType judicialRoleType = JudicialRoleType.judicialRoleType()

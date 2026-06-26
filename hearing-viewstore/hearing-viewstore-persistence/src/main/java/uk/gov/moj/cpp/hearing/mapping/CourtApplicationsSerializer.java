@@ -8,10 +8,10 @@ import java.io.StringReader;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 
 import static uk.gov.justice.services.messaging.JsonObjects.createReader;
 

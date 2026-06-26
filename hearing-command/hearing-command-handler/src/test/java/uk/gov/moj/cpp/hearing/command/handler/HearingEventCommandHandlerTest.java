@@ -1,8 +1,8 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
+import static jakarta.json.Json.createArrayBuilder;
+import static jakarta.json.Json.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
@@ -49,7 +49,6 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -150,9 +149,9 @@ public class HearingEventCommandHandlerTest {
                         .with(uk.gov.moj.cpp.hearing.domain.HearingType::getId, is(initiateHearingCommand.getHearing().getType().getId()))
                         .with(uk.gov.moj.cpp.hearing.domain.HearingType::getDescription, is(initiateHearingCommand.getHearing().getType().getDescription())))
                 .with(HearingEventLogged::getRecordedLabel, is(logEventCommand.getRecordedLabel()))
-                .with(HearingEventLogged::getEventTime, is(logEventCommand.getEventTime().withZoneSameLocal(ZoneId.of("UTC"))))
+                .with(HearingEventLogged::getEventTime, is(logEventCommand.getEventTime()))
                 .with(HearingEventLogged::isAlterable, is(logEventCommand.getAlterable()))
-                .with(HearingEventLogged::getLastModifiedTime, is(logEventCommand.getLastModifiedTime().withZoneSameLocal(ZoneId.of("UTC"))))
+                .with(HearingEventLogged::getLastModifiedTime, is(logEventCommand.getLastModifiedTime()))
                 .with(HearingEventLogged::getCourtCentre, isBean(uk.gov.moj.cpp.hearing.domain.CourtCentre.class)
                         .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getId, is(initiateHearingCommand.getHearing().getCourtCentre().getId()))
                         .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getName, is(initiateHearingCommand.getHearing().getCourtCentre().getName()))
@@ -294,10 +293,10 @@ public class HearingEventCommandHandlerTest {
 
         // Same shape as the regular log-hearing-event command, but with override=true and
         // activeHearings populated by the Command-API layer (the production code path).
-        final javax.json.JsonObject baseCommandPayload = objectToJsonObjectConverter.convert(logEventCommand);
-        final javax.json.JsonObjectBuilder payloadBuilder = createObjectBuilder();
+        final jakarta.json.JsonObject baseCommandPayload = objectToJsonObjectConverter.convert(logEventCommand);
+        final jakarta.json.JsonObjectBuilder payloadBuilder = createObjectBuilder();
         baseCommandPayload.forEach(payloadBuilder::add);
-        final javax.json.JsonObject payload = payloadBuilder
+        final jakarta.json.JsonObject payload = payloadBuilder
                 .add("override", true)
                 .add("activeHearings", createArrayBuilder().add(activeHearingId.toString()))
                 .build();
@@ -370,7 +369,7 @@ public class HearingEventCommandHandlerTest {
                 .with(HearingEventIgnored::getHearingEventId, is(logEventCommand.getHearingEventId()))
                 .with(HearingEventIgnored::getHearingId, is(logEventCommand.getHearingId()))
                 .with(HearingEventIgnored::getRecordedLabel, is(logEventCommand.getRecordedLabel()))
-                .with(HearingEventIgnored::getEventTime, is(logEventCommand.getEventTime().withZoneSameLocal(ZoneId.of("UTC"))))
+                .with(HearingEventIgnored::getEventTime, is(logEventCommand.getEventTime()))
                 .with(HearingEventIgnored::isAlterable, is(logEventCommand.getAlterable()))
         );
     }
@@ -439,9 +438,9 @@ public class HearingEventCommandHandlerTest {
                         .with(uk.gov.moj.cpp.hearing.domain.HearingType::getId, is(initiateHearingCommand.getHearing().getType().getId()))
                         .with(uk.gov.moj.cpp.hearing.domain.HearingType::getDescription, is(initiateHearingCommand.getHearing().getType().getDescription())))
                 .with(HearingEventLogged::getRecordedLabel, is(correctLogEvenCommand.getRecordedLabel()))
-                .with(HearingEventLogged::getEventTime, is(correctLogEvenCommand.getEventTime().withZoneSameLocal(ZoneId.of("UTC"))))
+                .with(HearingEventLogged::getEventTime, is(correctLogEvenCommand.getEventTime()))
                 .with(HearingEventLogged::isAlterable, is(correctLogEvenCommand.getAlterable()))
-                .with(HearingEventLogged::getLastModifiedTime, is(correctLogEvenCommand.getLastModifiedTime().withZoneSameLocal(ZoneId.of("UTC"))))
+                .with(HearingEventLogged::getLastModifiedTime, is(correctLogEvenCommand.getLastModifiedTime()))
                 .with(HearingEventLogged::getCourtCentre, isBean(uk.gov.moj.cpp.hearing.domain.CourtCentre.class)
                         .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getId, is(initiateHearingCommand.getHearing().getCourtCentre().getId()))
                         .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getName, is(initiateHearingCommand.getHearing().getCourtCentre().getName()))
@@ -480,7 +479,7 @@ public class HearingEventCommandHandlerTest {
                 .with(HearingEventIgnored::getHearingEventId, is(correctLogEventCommand.getHearingEventId()))
                 .with(HearingEventIgnored::getHearingId, is(correctLogEventCommand.getHearingId()))
                 .with(HearingEventIgnored::getRecordedLabel, is(correctLogEventCommand.getRecordedLabel()))
-                .with(HearingEventIgnored::getEventTime, is(correctLogEventCommand.getEventTime().withZoneSameLocal(ZoneId.of("UTC"))))
+                .with(HearingEventIgnored::getEventTime, is(correctLogEventCommand.getEventTime()))
                 .with(HearingEventIgnored::isAlterable, is(correctLogEventCommand.getAlterable()))
         );
     }

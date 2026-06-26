@@ -103,7 +103,7 @@ import uk.gov.moj.cpp.hearing.test.TestTemplates;
 import uk.gov.moj.cpp.hearing.test.TestUtilities;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,7 +116,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -230,7 +230,7 @@ public class ShareResultsCommandHandlerV2Test {
         final PersonDefendant curPd = currentDefendant.getPersonDefendant();
         final Person cpd = curPd.getPersonDetails();
         Person person = new Person(cpd.getAdditionalNationalityCode(), cpd.getAdditionalNationalityDescription(), cpd.getAdditionalNationalityId(), cpd.getAddress(), cpd.getContact(), cpd.getDateOfBirth(),
-                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), firstName, cpd.getGender(), cpd.getHearingLanguageNeeds(), cpd.getInterpreterLanguageNeeds(), cpd.getIsAddressConfidential(),
+                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), firstName, cpd.getGender(), cpd.getHearingLanguageNeeds(), cpd.getInterpreterLanguageNeeds(),
                 cpd.getLastName(), cpd.getMiddleName(), cpd.getNationalInsuranceNumber(), cpd.getNationalityCode(), cpd.getNationalityDescription(), cpd.getNationalityId(),
                 cpd.getOccupation(), cpd.getOccupationCode(), cpd.getPersonMarkers(), cpd.getSpecificRequirements(), cpd.getTitle());
 
@@ -538,7 +538,7 @@ public class ShareResultsCommandHandlerV2Test {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final UUID courtClerkId = randomUUID();
         final LocalDate hearingDay = LocalDate.of(2022, 5, 6);
-        final ZonedDateTime sharedDateTime = ZonedDateTime.of(2022, 01, 01, 0, 0, 0, 0, ZoneId.of("UTC"));
+        final ZonedDateTime sharedDateTime = ZonedDateTime.of(2022, 01, 01, 0, 0, 0, 0, ZoneOffset.UTC);
         final UUID sharedResultLineId = randomUUID();
 
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
@@ -585,7 +585,7 @@ public class ShareResultsCommandHandlerV2Test {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final UUID courtClerkId = randomUUID();
         final LocalDate hearingDay = LocalDate.of(2022, 5, 6);
-        final ZonedDateTime sharedDateTime = ZonedDateTime.of(2022, 01, 01, 0, 0, 0, 0, ZoneId.of("UTC"));
+        final ZonedDateTime sharedDateTime = ZonedDateTime.of(2022, 01, 01, 0, 0, 0, 0, ZoneOffset.UTC);
         final UUID sharedResultLineId = randomUUID();
 
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);

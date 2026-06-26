@@ -19,6 +19,11 @@
                 <artifactId>messaging-adapter-generator-plugin</artifactId>
                 <dependencies>
                     <dependency>
+                        <groupId>jakarta.platform</groupId>
+                        <artifactId>jakarta.jakartaee-api</artifactId>
+                        <version>${javaee-api.version}</version>
+                    </dependency>
+                    <dependency>
                         <groupId>uk.gov.moj.cpp.hearing</groupId>
                         <artifactId>hearing-event-sources</artifactId>
                         <classifier>yaml</classifier>
@@ -30,6 +35,11 @@
                 <groupId>uk.gov.justice.framework-generators</groupId>
                 <artifactId>messaging-client-generator-plugin</artifactId>
                 <dependencies>
+                    <dependency>
+                        <groupId>jakarta.platform</groupId>
+                        <artifactId>jakarta.jakartaee-api</artifactId>
+                        <version>${javaee-api.version}</version>
+                    </dependency>
                     <dependency>
                         <groupId>uk.gov.moj.cpp.hearing</groupId>
                         <artifactId>hearing-event-sources</artifactId>

@@ -72,9 +72,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
+import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -506,9 +506,9 @@ public class HearingQueryApiTest {
 
         final HearingDetailsResponse hearingDetailsResponse = mock(HearingDetailsResponse.class);
         final HearingDetailsResponse filteredResponse = mock(HearingDetailsResponse.class);
-        final javax.json.JsonObject filteredJsonObject = createObjectBuilder().add("hearingId", hearingId.toString()).build();
+        final jakarta.json.JsonObject filteredJsonObject = createObjectBuilder().add("hearingId", hearingId.toString()).build();
 
-        when(jsonObjectToObjectConverter.convert(any(javax.json.JsonObject.class), eq(HearingDetailsResponse.class))).thenReturn(hearingDetailsResponse);
+        when(jsonObjectToObjectConverter.convert(any(jakarta.json.JsonObject.class), eq(HearingDetailsResponse.class))).thenReturn(hearingDetailsResponse);
         when(hearingService.filterOutProsecutionCases(hearingDetailsResponse)).thenReturn(filteredResponse);
         when(objectToJsonObjectConverter.convert(filteredResponse)).thenReturn(filteredJsonObject);
 

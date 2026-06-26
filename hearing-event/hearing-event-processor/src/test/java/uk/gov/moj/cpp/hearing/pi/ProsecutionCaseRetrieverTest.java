@@ -22,7 +22,7 @@ import uk.gov.moj.cpp.hearing.test.FileUtil;
 
 import java.util.Optional;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;

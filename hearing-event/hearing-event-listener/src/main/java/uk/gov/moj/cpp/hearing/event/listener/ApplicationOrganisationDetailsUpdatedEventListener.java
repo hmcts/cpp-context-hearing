@@ -20,8 +20,8 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import java.util.List;
 import java.util.UUID;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 @SuppressWarnings({"squid:S3776", "pmd:NullAssignment"})
 @ServiceComponent(EVENT_LISTENER)

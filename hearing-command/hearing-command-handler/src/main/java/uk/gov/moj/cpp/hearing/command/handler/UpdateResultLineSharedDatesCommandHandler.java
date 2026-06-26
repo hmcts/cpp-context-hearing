@@ -7,7 +7,7 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.HearingResultLineSharedDatesUpdated;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.UUID;
 import java.util.stream.Stream;
 

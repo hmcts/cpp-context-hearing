@@ -103,8 +103,8 @@ import java.util.Set;
 import java.util.UUID;
 
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -1354,7 +1354,7 @@ public class HearingEventListenerTest {
                 .withTargets(new ArrayList<>(singletonList(
                         CoreTestTemplates.target2(hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstOffenceIdForFirstDefendant(), completedResultLineId).build()
                 )))
-                .withSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                .withSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(UTC))
                 .withHearing(hearingOne.getHearing())
                 .withCourtClerk(DelegatedPowers.delegatedPowers()
                         .withUserId(randomUUID())
@@ -1368,7 +1368,7 @@ public class HearingEventListenerTest {
                                 .withLastName(STRING.next())
                                 .build())
                         .withId(completedResultLineId)
-                        .withLastSharedDateTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                        .withLastSharedDateTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(UTC))
                         .build()
                 ))
                 .withVariantDirectory(singletonList(
@@ -1694,7 +1694,7 @@ public class HearingEventListenerTest {
 
         final UUID hearingId = randomUUID();
         final UUID seedingHearingId = randomUUID();
-        final ZonedDateTime earliestNextHearingDate = new UtcClock().now().withZoneSameInstant(ZoneId.of("UTC"));
+        final ZonedDateTime earliestNextHearingDate = new UtcClock().now().withZoneSameInstant(UTC);
 
         final Hearing hearingEntity = new Hearing()
                 .setId(hearingId);

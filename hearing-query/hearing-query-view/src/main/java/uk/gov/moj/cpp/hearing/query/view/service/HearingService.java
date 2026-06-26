@@ -120,11 +120,11 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.transaction.Transactional;
+import jakarta.inject.Inject;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.transaction.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
@@ -696,7 +696,6 @@ public class HearingService {
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
             crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                             trialType.getReasonCode(),
-                            hearing.getCrackedIneffectiveSubReasonId(),
                             trialType.getDate(),
                             trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
                             trialType.getId(),
@@ -711,7 +710,6 @@ public class HearingService {
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getVacatedTrialReasonId(), crackedIneffectiveVacatedTrialTypes);
             crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                             trialType.getReasonCode(),
-                            null,
                             trialType.getDate(),
                             trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
                             trialType.getId(),
@@ -784,7 +782,6 @@ public class HearingService {
 
             return crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                             trialType.getReasonCode(),
-                            null,
                             trialType.getDate(),
                             trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
                             trialType.getId(),

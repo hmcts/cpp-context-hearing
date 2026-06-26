@@ -5,8 +5,8 @@ import static java.util.Objects.isNull;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceOrganisation;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class DefenceOrganisationJPAMapper {

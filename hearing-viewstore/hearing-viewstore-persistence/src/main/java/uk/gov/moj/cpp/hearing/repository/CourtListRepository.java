@@ -7,21 +7,17 @@ import static java.util.Optional.of;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 
-import org.apache.deltaspike.data.api.EntityRepository;
-import org.apache.deltaspike.data.api.Repository;
-import org.apache.deltaspike.data.api.criteria.CriteriaSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("squid:S1166")
-@Repository
 @ApplicationScoped
-public abstract class CourtListRepository implements EntityRepository<CourtListPublishStatus, UUID>, CriteriaSupport<CourtListPublishStatus> {
+public class CourtListRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CourtListRepository.class);
 
@@ -31,8 +27,12 @@ public abstract class CourtListRepository implements EntityRepository<CourtListP
                     "AND publish_status ='EXPORT_SUCCESSFUL' " +
                     " ORDER  BY last_updated DESC limit 1";
 
-    @Inject
+    @PersistenceContext(unitName = "hearing-persistence-unit")
     private EntityManager entityManager;
+
+    public CourtListPublishStatus save(final CourtListPublishStatus entity) {
+        return entityManager.merge(entity);
+    }
 
     public Optional<CourtListPublishStatusResult> courtListPublishStatuses(final UUID courtCentreId) {
         try {

@@ -41,7 +41,6 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -130,7 +129,7 @@ public class HearingDetailChangeCommandHandlerTest {
                         .with(HearingType::getId, Matchers.is(hearingType.getId()))
                         .with(HearingType::getDescription, Matchers.is(hearingType.getDescription())))
                 .with(HearingDetailChanged::getHearingDays, first(isBean(HearingDay.class)
-                        .with(HearingDay::getSittingDay, is(hearingDays.get(0).getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                        .with(HearingDay::getSittingDay, is(hearingDays.get(0).getSittingDay()))
                         .with(HearingDay::getListedDurationMinutes, is(hearingDays.get(0).getListedDurationMinutes()))
                         .with(HearingDay::getListingSequence, is(hearingDays.get(0).getListingSequence()))))
                 .with(HearingDetailChanged::getJudiciary, first(isBean(JudicialRole.class)
