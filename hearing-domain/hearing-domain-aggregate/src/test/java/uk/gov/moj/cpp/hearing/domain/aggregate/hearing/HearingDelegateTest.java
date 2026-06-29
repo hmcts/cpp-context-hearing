@@ -320,6 +320,39 @@ public class HearingDelegateTest {
     }
 
     @Test
+    public void shouldEmitNullProsecutionCasesWhenNoneResolvedOnExtend() {
+        // The hearing-extended event schema allows prosecutionCases to be absent but forbids an empty
+        // array (minItems: 1). When the command handler resolves no prosecution cases (e.g. an active
+        // application offence whose owning case is not in the view store), it passes an empty list; the
+        // aggregate must emit null, not [], otherwise the event fails schema validation on consumption.
+        final UUID hearingId = randomUUID();
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(new ArrayList<>())
+                .build());
+
+        final CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withCourtApplicationCases(asList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(randomUUID())
+                        .withOffences(new ArrayList<>(asList(
+                                Offence.offence().withId(randomUUID()).withProceedingsConcluded(false).build())))
+                        .build()))
+                .build();
+
+        final List<Object> events = hearingDelegate.extend(hearingId, null, null, null, courtApplication, new ArrayList<>(), null).collect(toList());
+
+        final HearingExtended emitted = events.stream()
+                .filter(HearingExtended.class::isInstance)
+                .map(HearingExtended.class::cast)
+                .findFirst().orElseThrow(AssertionError::new);
+
+        assertNull(emitted.getProsecutionCases());
+        assertThat(emitted.getCourtApplication().getId(), is(courtApplication.getId()));
+    }
+
+    @Test
     public void shouldNullApplicationCaseOffencesWhenAllAreMovedOnExtend() {
         final UUID hearingId = randomUUID();
         final UUID caseId = randomUUID();

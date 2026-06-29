@@ -324,7 +324,7 @@ public class HearingDelegate implements Serializable {
         final CourtApplication shapedCourtApplication = removeActiveProsecutionOffencesFromApplication(courtApplication, prosecutionOffenceIds);
 
         return streamBuilder.add(new HearingExtended(hearingId, hearingDays, courtCentre, jurisdictionType,
-                shapedCourtApplication, prosecutionCases, shadowListedOffences)).build();
+                shapedCourtApplication, isEmpty(prosecutionCases) ? null : prosecutionCases, shadowListedOffences)).build();
     }
 
     private CourtApplication removeActiveProsecutionOffencesFromApplication(final CourtApplication courtApplication, final Set<UUID> prosecutionOffenceIds) {
