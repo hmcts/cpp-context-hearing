@@ -65,7 +65,7 @@ public class HearingCommandApiTest {
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts","publishHearingListsForCrownCourtsWithIds",
             "computeOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant", "cancelAmendments",
             "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing","markAsDuplicateHearingV2", "markAsDuplicateHearingWithReason", "saveMultipleDraftResult", "updateResultLineSharedDates", "reusableInfo", "hearing.youth-court-defendants",
-            "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "addWitnessToHearing","saveDraftResultsForHearingDay", "removeOffences", "saveDraftResultV2", "deleteDraftResultV2", "amendHearing", "amendHearingSupport", "unlockHearing", "replicateHearingResults", "deleteHearingBdf", "patchApplicationFinalisedOnTarget");
+            "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "addWitnessToHearing","saveDraftResultsForHearingDay", "removeOffences", "saveDraftResultV2", "deleteDraftResultV2", "amendHearing", "amendHearingSupport", "unlockHearing", "replicateHearingResults", "deleteHearingBdf", "patchApplicationFinalisedOnTarget", "updateHearingDayBdf");
 
     private static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
     private static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
@@ -592,6 +592,15 @@ public class HearingCommandApiTest {
         hearingCommandApi.deleteHearingBdf(jsonRequestEnvelope);
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.delete-hearing-bdf");
+    }
+
+    @Test
+    public void shouldUpdateHearingDayBdf() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-hearing-day-bdf");
+
+        hearingCommandApi.updateHearingDayBdf(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.update-hearing-day-bdf");
     }
 
     @Test

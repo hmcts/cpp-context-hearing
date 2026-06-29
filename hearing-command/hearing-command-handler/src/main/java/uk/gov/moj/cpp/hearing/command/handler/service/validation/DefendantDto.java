@@ -1,20 +1,20 @@
 package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 
 public class DefendantDto {
-    private final String id;
+    private final String defendantId;
     private final String firstName;
     private final String lastName;
     private final String masterDefendantId;
 
     private DefendantDto(Builder builder) {
-        this.id = builder.id;
+        this.defendantId = builder.defendantId;
         this.firstName = builder.firstName;
         this.lastName = builder.lastName;
         this.masterDefendantId = builder.masterDefendantId;
     }
 
-    public String getId() {
-        return id;
+    public String getDefendantId() {
+        return defendantId;
     }
 
     public String getFirstName() {
@@ -34,13 +34,13 @@ public class DefendantDto {
     }
 
     public static final class Builder {
-        private String id;
+        private String defendantId;
         private String firstName;
         private String lastName;
         private String masterDefendantId;
 
-        public Builder withId(String id) {
-            this.id = id;
+        public Builder withDefendantId(String defendantId) {
+            this.defendantId = defendantId;
             return this;
         }
 
