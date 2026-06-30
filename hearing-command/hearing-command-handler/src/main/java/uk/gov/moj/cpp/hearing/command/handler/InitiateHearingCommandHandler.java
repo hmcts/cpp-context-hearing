@@ -166,7 +166,7 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
                         .ifPresentOrElse(
                                 movedCase -> mergeMovedCase(enriched, movedCase),
                                 () -> LOGGER.warn("Could not resolve prosecution case {} for active application offences; leaving them on the application side", caseId)));
-        return enriched;
+        return enriched.isEmpty() ? existingProsecutionCases : enriched;
     }
 
     /**
