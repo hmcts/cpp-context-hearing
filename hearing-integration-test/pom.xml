@@ -5,7 +5,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-parent</artifactId>
-        <version>17.104.174-SNAPSHOT</version>
+        <version>17.104.174-CHD-2505-SNAPSHOT</version>
     </parent>
 
     <artifactId>hearing-integration-test</artifactId>
