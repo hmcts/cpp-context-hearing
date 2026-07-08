@@ -28,8 +28,11 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
-import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationIssue;
-import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationRequest;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.AffectedOffence;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationRequest;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationResponse;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ValidationErrors;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ValidationIssue;
 import uk.gov.moj.cpp.hearing.command.result.DeleteDraftResultV2Command;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultV2Command;
 import uk.gov.moj.cpp.hearing.command.result.SaveMultipleResultsCommand;
@@ -74,7 +77,6 @@ import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.command.handler.service.validation.ResultsValidator;
 import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationRequestMapper;
-import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationResponse;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsValidationFailed;
@@ -82,6 +84,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -561,10 +564,11 @@ public class ShareResultsCommandHandlerTest {
         when(mockAggregate.getHearing()).thenReturn(hearing);
         when(mockAggregate.shareResultForDay(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(Stream.empty());
         when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
-        final ValidationRequest validationRequest = new ValidationRequest(
-                command.getHearingId().toString(), command.getHearingDay(), "MAGISTRATE", null, List.of(), List.of(), List.of());
+        final DraftValidationRequest validationRequest = new DraftValidationRequest()
+                .hearingId(command.getHearingId().toString())
+                .hearingDay(command.getHearingDay());
         when(validationRequestMapper.toValidationRequest(any(), any())).thenReturn(validationRequest);
-        when(resultsValidationClient.validate(any(), any())).thenReturn(ValidationResponse.passThrough());
+        when(resultsValidationClient.validate(any(), any())).thenReturn(new DraftValidationResponse().isValid(true));
         when(clock.now()).thenReturn(sharedTime);
 
         final JsonEnvelope envelope = envelopeFrom(
@@ -586,11 +590,27 @@ public class ShareResultsCommandHandlerTest {
         final HearingAggregate mockAggregate = mock(HearingAggregate.class);
         when(mockAggregate.getHearing()).thenReturn(hearing);
         when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
-        final ValidationRequest validationRequest = new ValidationRequest(
-                command.getHearingId().toString(), command.getHearingDay(), "MAGISTRATE", null, List.of(), List.of(), List.of());
+        final DraftValidationRequest validationRequest = new DraftValidationRequest()
+                .hearingId(command.getHearingId().toString())
+                .hearingDay(command.getHearingDay());
         when(validationRequestMapper.toValidationRequest(any(), any())).thenReturn(validationRequest);
-        final ValidationIssue error = new ValidationIssue("RULE1", "ERROR", "Validation error", List.of());
-        when(resultsValidationClient.validate(any(), any())).thenReturn(new ValidationResponse(false, List.of(error), List.of()));
+        final ValidationIssue error = new ValidationIssue()
+                .ruleId("RULE1")
+                .severity(ValidationIssue.SeverityEnum.ERROR)
+                .affectedResultCodes(List.of())
+                .affectedOffences(List.of(new AffectedOffence().offenceId("off-1").offenceTitle("Offence 1").message("Validation error")))
+                .affectedDefendants(List.of())
+                .validationLevel(ValidationIssue.ValidationLevelEnum.OFFENCE);
+        final ValidationErrors errors = new ValidationErrors().errorMessages(List.of("Validation error")).validationIssues(List.of(error));
+        when(resultsValidationClient.validate(any(), any())).thenReturn(new DraftValidationResponse()
+                .validationId("validation-abc")
+                .timestamp(OffsetDateTime.parse("2026-03-16T10:00:00Z"))
+                .mode("advisory")
+                .rulesEvaluated(List.of("RULE1"))
+                .isValid(false)
+                .errors(errors)
+                .warnings(List.of())
+                .processingTimeMs(42));
 
         final JsonEnvelope envelope = envelopeFrom(
                 metadataOf(metadataId, "hearing.command.share-days-results").withUserId(randomUUID().toString()),
@@ -603,6 +623,16 @@ public class ShareResultsCommandHandlerTest {
                 .filter(e -> "hearing.events.results-validation-failed".equals(e.metadata().name()))
                 .findFirst();
         assertThat(validationFailed.isPresent(), is(true));
+
+        final ResultsValidationFailed event = jsonObjectToObjectConverter.convert(
+                validationFailed.get().payloadAsJsonObject(), ResultsValidationFailed.class);
+        assertThat(event.getValidationId(), is("validation-abc"));
+        assertThat(event.getMode(), is("advisory"));
+        assertThat(event.isValid(), is(false));
+        assertThat(event.getProcessingTimeMs(), is(42));
+        assertThat(event.getErrors().getErrorMessages(), is(List.of("Validation error")));
+        assertThat(event.getErrors().getValidationIssues().get(0).getRuleId(), is("RULE1"));
+        assertThat(event.getErrors().getValidationIssues().get(0).getAffectedOffences().get(0).getOffenceId(), is("off-1"));
     }
 
     @Test
