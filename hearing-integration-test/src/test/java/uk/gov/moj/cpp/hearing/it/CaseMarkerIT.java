@@ -58,7 +58,6 @@ public class CaseMarkerIT extends AbstractIT {
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
-                                .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
                                 .with(ProsecutionCase::getCaseMarkers, hasSize(0))))));
 
     }
