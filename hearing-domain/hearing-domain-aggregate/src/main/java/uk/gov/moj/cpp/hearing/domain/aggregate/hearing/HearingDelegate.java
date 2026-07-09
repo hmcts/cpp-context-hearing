@@ -167,8 +167,10 @@ public class HearingDelegate implements Serializable {
 
                         if (nonNull(currentPC)) {
                             final ProsecutionCase mergedPC = createProsecutionCase(extendedPC, currentPC);
-                            this.momento.getHearing().getProsecutionCases().removeIf(caseToBeRemoved -> caseToBeRemoved.getId().equals(mergedPC.getId()));
-                            this.momento.getHearing().getProsecutionCases().add(mergedPC);
+                            // replace in place so an already-present case keeps its position: existing
+                            // cases stay first, newly extended-in cases are appended (CHD-2687)
+                            final List<ProsecutionCase> currentCases = this.momento.getHearing().getProsecutionCases();
+                            currentCases.set(currentCases.indexOf(currentPC), mergedPC);
                         } else {
                             this.momento.getHearing().getProsecutionCases().add(extendedPC);
                         }
