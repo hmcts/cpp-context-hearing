@@ -60,6 +60,14 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
 
     @Test
     public void shouldRequestToPublishCourtListOpenCaseProsecution() throws NoSuchAlgorithmException {
+        // CourtListRestrictionIT (which runs alphabetically before this class)
+        // creates hearings in the same courtCentreId/courtRoom2Id with
+        // reportingRestrictionReason explicitly empty, and event-sourced inserts
+        // can land in ha_hearing after CourtListRestrictionIT's @AfterEach
+        // cleanup has run. Without clearing the table here, those leaked
+        // hearings appear in this test's PUB-DISPLAY query and break the
+        // empty-defendant assertion below.
+        cleanDatabase("ha_hearing");
         stubOrganisationalUnit(fromString(courtCentreId), "OUCODE");
         createHearingEvent(randomUUID(), courtRoom2Id, randomUUID().toString(), OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId);
 

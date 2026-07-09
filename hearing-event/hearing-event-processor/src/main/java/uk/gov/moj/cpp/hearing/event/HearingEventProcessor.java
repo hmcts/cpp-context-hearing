@@ -48,6 +48,7 @@ public class HearingEventProcessor {
     public static final String PUBLIC_HEARING_SAVE_DRAFT_RESULT_FAILED = "public.hearing.save-draft-result-failed";
     public static final String PUBLIC_HEARING_MANAGE_RESULTS_FAILED = "public.hearing.manage-results-failed";
     public static final String PUBLIC_HEARING_SHARE_RESULTS_FAILED = "public.hearing.share-results-failed";
+    public static final String PUBLIC_HEARING_RESULTS_VALIDATION_FAILED = "public.hearing.results-validation-failed";
     public static final String PUBLIC_HEARING_TRIAL_VACATED = "public.hearing.trial-vacated";
     public static final String PUBLIC_LISTING_HEARING_RESCHEDULED = "public.listing.hearing-rescheduled";
     public static final String PUBLIC_PROGRESSION_EVENTS_BREACH_APPLICATIONS_TO_BE_ADDED_TO_HEARING = "public.progression.breach-applications-to-be-added-to-hearing";
@@ -196,6 +197,16 @@ public class HearingEventProcessor {
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicEventShareResultsFailed);
         final MetadataBuilder metadata = metadataFrom(event.metadata()).withName(PUBLIC_HEARING_SHARE_RESULTS_FAILED);
         sender.send(envelopeFrom(metadata, publicEventPayload));
+    }
+
+    @Handles("hearing.events.results-validation-failed")
+    public void handleResultsValidationFailed(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.results-validation-failed event received {}", event.toObfuscatedDebugString());
+        }
+        sender.send(envelopeFrom(
+                metadataFrom(event.metadata()).withName(PUBLIC_HEARING_RESULTS_VALIDATION_FAILED),
+                event.payloadAsJsonObject()));
     }
 
     @Handles("hearing.multiple-draft-results-saved")

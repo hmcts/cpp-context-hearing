@@ -63,6 +63,9 @@ subscriptions_descriptor:
         - name: public.hearing.manage-results-failed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-manage-results-failed.json
 
+        - name: public.hearing.results-validation-failed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.results-validation-failed.json
+
         # Pleas
         - name: public.hearing.plea-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-plea-updated.json

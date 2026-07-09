@@ -820,6 +820,21 @@ public class HearingDelegateTest {
         assertThat(momento.isDuplicate(), is(false));
     }
 
+    @Test
+    public void shouldEmitHearingUpdatedHearingDayBdfEvent() {
+        final UUID hearingId = randomUUID();
+        final HearingDay hearingDay = new HearingDay(randomUUID(), randomUUID(), false, false, 60, 1, ZonedDateTime.now());
+
+        final Stream<Object> events = hearingDelegate.updateHearingDayBdf(hearingId, hearingDay);
+
+        final List<Object> eventList = events.collect(Collectors.toList());
+        assertThat(eventList.size(), is(1));
+
+        final uk.gov.moj.cpp.hearing.domain.event.HearingUpdatedHearingDayBdf event =
+                (uk.gov.moj.cpp.hearing.domain.event.HearingUpdatedHearingDayBdf) eventList.get(0);
+        assertThat(event.getHearingId(), is(hearingId));
+        assertThat(event.getHearingDay(), is(hearingDay));
+    }
 
 
 

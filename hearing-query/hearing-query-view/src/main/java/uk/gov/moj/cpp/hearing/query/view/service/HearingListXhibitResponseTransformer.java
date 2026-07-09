@@ -41,6 +41,7 @@ import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
 import uk.gov.moj.cpp.listing.domain.referencedata.CourtRoomMapping;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,30 +75,35 @@ public class HearingListXhibitResponseTransformer {
     private static final DateTimeFormatter dateTimeFormatter = ofPattern("yyyy-MM-dd'T'HH:mm'Z'");
 
     public CurrentCourtStatus transformFrom(final HearingEventsToHearingMapper hearingEventsToHearingMapper) {
+        return transformFrom(hearingEventsToHearingMapper, null);
+    }
+
+    public CurrentCourtStatus transformFrom(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final LocalDate publishDate) {
         return currentCourtStatus()
-                .withCourt(getCourt(hearingEventsToHearingMapper))
+                .withCourt(getCourt(hearingEventsToHearingMapper, publishDate))
                 .build();
     }
 
-    private Court getCourt(final HearingEventsToHearingMapper hearingEventsToHearingMapper) {
+    private Court getCourt(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final LocalDate publishDate) {
         final Map<UUID, CourtSite> courtSiteMap = new HashMap<>();
         return court()
                 //Logically all hearings will belong to single court centre, therefore we pick up the first one
                 .withCourtName(hearingEventsToHearingMapper.getHearingList().get(0).getCourtCentre().getName())
-                .withCourtSites(getCourtSites(hearingEventsToHearingMapper, courtSiteMap))
+                .withCourtSites(getCourtSites(hearingEventsToHearingMapper, courtSiteMap, publishDate))
                 .build();
     }
 
-    private List<CourtSite> getCourtSites(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final Map<UUID, CourtSite> courtSiteMap) {
+    private List<CourtSite> getCourtSites(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final Map<UUID, CourtSite> courtSiteMap, final LocalDate publishDate) {
         return hearingEventsToHearingMapper.getHearingList()
                 .stream()
-                .map(hearing -> getCourtSite(hearingEventsToHearingMapper, hearing, courtSiteMap))
+                .map(hearing -> getCourtSite(hearingEventsToHearingMapper, hearing, courtSiteMap, publishDate))
                 .distinct()
                 .collect(toList());
     }
 
-    private CourtSite getCourtSite(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final Hearing hearing, final Map<UUID, CourtSite> courtSiteMap) {
-        final CourtRoomMapping courtRoomMapping = commonXhibitReferenceDataService.getCourtRoomMappingBy(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
+    private CourtSite getCourtSite(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final Hearing hearing, final Map<UUID, CourtSite> courtSiteMap, final LocalDate publishDate) {
+        final ResolvedRoom resolved = resolveCentreAndRoom(hearing, publishDate);
+        final CourtRoomMapping courtRoomMapping = commonXhibitReferenceDataService.getCourtRoomMappingBy(resolved.centreId, resolved.roomId);
         CourtSite courtSite = courtSiteMap.get(courtRoomMapping.getCrestCourtSiteUUID());
         if (courtSite == null) {
             courtSite = courtSite()
@@ -106,31 +112,34 @@ public class HearingListXhibitResponseTransformer {
                     .withCourtRooms(new ArrayList<>())
                     .build();
         }
-        courtSite.getCourtRooms().addAll(getCourtRoomsForCourtSite(hearingEventsToHearingMapper, courtRoomMapping.getCrestCourtSiteUUID()));
+        courtSite.getCourtRooms().addAll(getCourtRoomsForCourtSite(hearingEventsToHearingMapper, courtRoomMapping.getCrestCourtSiteUUID(), publishDate));
         return courtSite;
     }
 
-    private List<CourtRoom> getCourtRoomsForCourtSite(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final UUID crestCourtSiteId) {
+    private List<CourtRoom> getCourtRoomsForCourtSite(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final UUID crestCourtSiteId, final LocalDate publishDate) {
         final Map<UUID, CourtRoom> courtRoomMap = new HashMap<>();
         return hearingEventsToHearingMapper.getHearingList()
                 .stream()
-                .filter(hearing -> isHearingForCourtSite(crestCourtSiteId, hearing))
-                .map(hearing -> getCourtRoom(hearingEventsToHearingMapper, hearing, courtRoomMap))
+                .filter(hearing -> isHearingForCourtSite(crestCourtSiteId, hearing, publishDate))
+                .map(hearing -> getCourtRoom(hearingEventsToHearingMapper, hearing, courtRoomMap, publishDate))
                 .distinct()
                 .collect(toList());
     }
 
-    private boolean isHearingForCourtSite(final UUID crestCourtSiteId, final Hearing hearing) {
-        final CourtRoomMapping mapping = commonXhibitReferenceDataService.getCourtRoomMappingBy(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
+    private boolean isHearingForCourtSite(final UUID crestCourtSiteId, final Hearing hearing, final LocalDate publishDate) {
+        final ResolvedRoom resolved = resolveCentreAndRoom(hearing, publishDate);
+        final CourtRoomMapping mapping = commonXhibitReferenceDataService.getCourtRoomMappingBy(resolved.centreId, resolved.roomId);
         final UUID siteId = mapping.getCrestCourtSiteUUID();
         return crestCourtSiteId != null && crestCourtSiteId.equals(siteId);
     }
 
     private CourtRoom getCourtRoom(final HearingEventsToHearingMapper hearingEventsToHearingMapper,
                                    final Hearing hearing,
-                                   final Map<UUID, CourtRoom> courtRoomMap) {
-        final UUID courtRoomKey = hearing.getCourtCentre().getRoomId();
-        final CourtRoomMapping courtRoomMapping = commonXhibitReferenceDataService.getCourtRoomMappingBy(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
+                                   final Map<UUID, CourtRoom> courtRoomMap,
+                                   final LocalDate publishDate) {
+        final ResolvedRoom resolved = resolveCentreAndRoom(hearing, publishDate);
+        final UUID courtRoomKey = resolved.roomId;
+        final CourtRoomMapping courtRoomMapping = commonXhibitReferenceDataService.getCourtRoomMappingBy(resolved.centreId, resolved.roomId);
         CourtRoom courtRoom = courtRoomMap.get(courtRoomKey);
 
         final Set<UUID> activeHearingIds = hearingEventsToHearingMapper.getActiveHearingIds();
@@ -363,5 +372,31 @@ public class HearingListXhibitResponseTransformer {
                 reportingRestriction ->
                         ofNullable(reportingRestriction).ifPresent(restriction -> publicNoticesValue.add(restriction.getLabel())));
         return publicNoticesValue;
+    }
+
+    private ResolvedRoom resolveCentreAndRoom(final Hearing hearing, final LocalDate publishDate) {
+        final UUID topCentreId = hearing.getCourtCentre().getId();
+        final UUID topRoomId = hearing.getCourtCentre().getRoomId();
+        if (publishDate == null || hearing.getHearingDays() == null) {
+            return new ResolvedRoom(topCentreId, topRoomId);
+        }
+        return hearing.getHearingDays().stream()
+                .filter(day -> nonNull(day.getSittingDay())
+                        && day.getSittingDay().toLocalDate().equals(publishDate))
+                .findFirst()
+                .map(day -> new ResolvedRoom(
+                        nonNull(day.getCourtCentreId()) ? day.getCourtCentreId() : topCentreId,
+                        nonNull(day.getCourtRoomId()) ? day.getCourtRoomId() : topRoomId))
+                .orElse(new ResolvedRoom(topCentreId, topRoomId));
+    }
+
+    private static final class ResolvedRoom {
+        private final UUID centreId;
+        private final UUID roomId;
+
+        ResolvedRoom(final UUID centreId, final UUID roomId) {
+            this.centreId = centreId;
+            this.roomId = roomId;
+        }
     }
 }

@@ -6,6 +6,7 @@ import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 
@@ -111,6 +112,11 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
     @Query(value = "SELECT hearing.courtCentre FROM Hearing hearing " +
             "WHERE hearing.id = :hearingId", singleResult = OPTIONAL)
     public abstract CourtCentre findCourtCenterByHearingId(@QueryParam("hearingId") final UUID hearingId);
+
+    @Query(value = "SELECT day FROM Hearing hearing INNER JOIN hearing.hearingDays day " +
+            "WHERE hearing.id = :hearingId AND day.date = :date", singleResult = OPTIONAL)
+    public abstract HearingDay findHearingDayByHearingIdAndDate(@QueryParam("hearingId") final UUID hearingId,
+                                                                @QueryParam("date") final LocalDate date);
 
     @Query(value = "SELECT target FROM Target target " +
             "WHERE target.hearing.id = :hearingId")

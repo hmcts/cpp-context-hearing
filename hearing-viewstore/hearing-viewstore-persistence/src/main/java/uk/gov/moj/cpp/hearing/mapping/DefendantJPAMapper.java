@@ -102,7 +102,9 @@ public class DefendantJPAMapper {
         if (null == pojos) {
             return new HashSet<>();
         }
-        return pojos.stream().map(pojo -> toJPA(hearing, prosecutionCase, pojo)).collect(Collectors.toSet());
+        return pojos.stream().filter(p -> prosecutionCase.getId().getId().equals(p.getProsecutionCaseId()))
+                .map(pojo -> toJPA(hearing, prosecutionCase, pojo))
+                .collect(Collectors.toSet());
     }
 
     uk.gov.justice.core.courts.Defendant fromJPA(final Defendant pojo) {

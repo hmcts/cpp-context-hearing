@@ -212,6 +212,32 @@ public class HearingRepositoryTest {
     }
 
     @Test
+    public void shouldFindHearingDayByHearingIdAndDate() {
+        final uk.gov.justice.core.courts.Hearing hearing = hearings.get(0);
+        final UUID hearingId = hearing.getId();
+        final LocalDate date = hearing.getHearingDays().get(0).getSittingDay().toLocalDate();
+
+        final HearingDay matched = hearingRepository.findHearingDayByHearingIdAndDate(hearingId, date);
+
+        assertNotNull(matched);
+        assertEquals(date, matched.getDate());
+    }
+
+    @Test
+    public void shouldReturnNullForFindHearingDayByHearingIdAndDate_whenNoDayMatchesDate() {
+        final UUID hearingId = hearings.get(0).getId();
+        final LocalDate unknownDate = LocalDate.of(1999, 1, 1);
+
+        assertNull(hearingRepository.findHearingDayByHearingIdAndDate(hearingId, unknownDate));
+    }
+
+    @Test
+    public void shouldReturnNullForFindHearingDayByHearingIdAndDate_whenHearingIdIsUnknown() {
+        final LocalDate anyDate = hearings.get(0).getHearingDays().get(0).getSittingDay().toLocalDate();
+        assertNull(hearingRepository.findHearingDayByHearingIdAndDate(randomUUID(), anyDate));
+    }
+
+    @Test
     public void shouldFindTargetsByHearingId() {
         final UUID hearingId = hearings.get(0).getId();
         final List<Target> targets = hearingRepository.findTargetsByHearingId(hearingId);
