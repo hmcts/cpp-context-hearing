@@ -2766,4 +2766,96 @@ public class HearingServiceTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
+
+    // ---- CHD-2687: display order of prosecution cases -----------------------------------------
+
+    @Test
+    public void orderProsecutionCasesShouldPutApplicationCarriedCasesLast() {
+        final UUID hearingOwnCaseId = randomUUID();
+        final UUID applicationCaseId = randomUUID();
+
+        // deliberately ordered application-case first, mimicking adverse Set iteration order
+        final uk.gov.justice.core.courts.Hearing hearing = uk.gov.justice.core.courts.Hearing.hearing()
+                .withId(randomUUID())
+                .withProsecutionCases(new ArrayList<>(Arrays.asList(domainCase(applicationCaseId), domainCase(hearingOwnCaseId))))
+                .withCourtApplications(singletonList(uk.gov.justice.core.courts.CourtApplication.courtApplication()
+                        .withId(randomUUID())
+                        .withCourtApplicationCases(singletonList(uk.gov.justice.core.courts.CourtApplicationCase.courtApplicationCase()
+                                .withProsecutionCaseId(applicationCaseId)
+                                .build()))
+                        .build()))
+                .build();
+
+        hearingService.orderProsecutionCasesForDisplay(hearing);
+
+        assertThat(hearing.getProsecutionCases().get(0).getId(), is(hearingOwnCaseId));
+        assertThat(hearing.getProsecutionCases().get(1).getId(), is(applicationCaseId));
+    }
+
+    @Test
+    public void orderProsecutionCasesShouldTreatCourtOrderReferencedCaseAsApplicationCarried() {
+        final UUID hearingOwnCaseId = randomUUID();
+        final UUID courtOrderCaseId = randomUUID();
+
+        final uk.gov.justice.core.courts.Hearing hearing = uk.gov.justice.core.courts.Hearing.hearing()
+                .withId(randomUUID())
+                .withProsecutionCases(new ArrayList<>(Arrays.asList(domainCase(courtOrderCaseId), domainCase(hearingOwnCaseId))))
+                .withCourtApplications(singletonList(uk.gov.justice.core.courts.CourtApplication.courtApplication()
+                        .withId(randomUUID())
+                        .withCourtOrder(uk.gov.justice.core.courts.CourtOrder.courtOrder()
+                                .withId(randomUUID())
+                                .withCourtOrderOffences(singletonList(uk.gov.justice.core.courts.CourtOrderOffence.courtOrderOffence()
+                                        .withProsecutionCaseId(courtOrderCaseId)
+                                        .build()))
+                                .build())
+                        .build()))
+                .build();
+
+        hearingService.orderProsecutionCasesForDisplay(hearing);
+
+        assertThat(hearing.getProsecutionCases().get(0).getId(), is(hearingOwnCaseId));
+        assertThat(hearing.getProsecutionCases().get(1).getId(), is(courtOrderCaseId));
+    }
+
+    @Test
+    public void orderProsecutionCasesShouldLeaveOrderUntouchedWithoutApplications() {
+        final UUID firstCaseId = randomUUID();
+        final UUID secondCaseId = randomUUID();
+
+        final uk.gov.justice.core.courts.Hearing hearing = uk.gov.justice.core.courts.Hearing.hearing()
+                .withId(randomUUID())
+                .withProsecutionCases(new ArrayList<>(Arrays.asList(domainCase(firstCaseId), domainCase(secondCaseId))))
+                .build();
+
+        hearingService.orderProsecutionCasesForDisplay(hearing);
+
+        assertThat(hearing.getProsecutionCases().get(0).getId(), is(firstCaseId));
+        assertThat(hearing.getProsecutionCases().get(1).getId(), is(secondCaseId));
+    }
+
+    @Test
+    public void orderProsecutionCasesShouldStayStableWhenAllCasesAreApplicationCarried() {
+        final UUID firstCaseId = randomUUID();
+        final UUID secondCaseId = randomUUID();
+
+        final uk.gov.justice.core.courts.Hearing hearing = uk.gov.justice.core.courts.Hearing.hearing()
+                .withId(randomUUID())
+                .withProsecutionCases(new ArrayList<>(Arrays.asList(domainCase(firstCaseId), domainCase(secondCaseId))))
+                .withCourtApplications(singletonList(uk.gov.justice.core.courts.CourtApplication.courtApplication()
+                        .withId(randomUUID())
+                        .withCourtApplicationCases(Arrays.asList(
+                                uk.gov.justice.core.courts.CourtApplicationCase.courtApplicationCase().withProsecutionCaseId(firstCaseId).build(),
+                                uk.gov.justice.core.courts.CourtApplicationCase.courtApplicationCase().withProsecutionCaseId(secondCaseId).build()))
+                        .build()))
+                .build();
+
+        hearingService.orderProsecutionCasesForDisplay(hearing);
+
+        assertThat(hearing.getProsecutionCases().get(0).getId(), is(firstCaseId));
+        assertThat(hearing.getProsecutionCases().get(1).getId(), is(secondCaseId));
+    }
+
+    private static uk.gov.justice.core.courts.ProsecutionCase domainCase(final UUID caseId) {
+        return uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase().withId(caseId).build();
+    }
 }

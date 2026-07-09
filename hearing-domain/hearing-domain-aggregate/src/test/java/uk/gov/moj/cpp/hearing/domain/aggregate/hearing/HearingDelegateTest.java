@@ -199,6 +199,37 @@ public class HearingDelegateTest {
     }
 
     @Test
+    public void shouldKeepExistingCasePositionWhenHearingExtendedMergesIt() {
+        final UUID hearingId = randomUUID();
+        final UUID existingCaseId1 = randomUUID();
+        final UUID existingCaseId2 = randomUUID();
+        final UUID newCaseId = randomUUID();
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(caseList(
+                        createProsecutionCases(existingCaseId1, randomUUID()),
+                        createProsecutionCases(existingCaseId2, randomUUID())))
+                .build());
+
+        // payload re-sends the FIRST existing case (merged) plus a newcomer
+        final List<ProsecutionCase> extendedCases = caseList(
+                createProsecutionCases(existingCaseId1, randomUUID()),
+                createProsecutionCases(newCaseId, randomUUID()));
+
+        hearingDelegate.handleHearingExtended(new HearingExtended(hearingId, null, null, null, null, extendedCases, null));
+
+        // merged existing case keeps its position; newcomer appended - arrival order preserved
+        final List<ProsecutionCase> prosecutionCases = momento.getHearing().getProsecutionCases();
+        assertThat(prosecutionCases.size(), is(3));
+        assertThat(prosecutionCases.get(0).getId(), is(existingCaseId1));
+        assertThat(prosecutionCases.get(1).getId(), is(existingCaseId2));
+        assertThat(prosecutionCases.get(2).getId(), is(newCaseId));
+        // and the merge still combined the defendants on the re-sent case
+        assertThat(prosecutionCases.get(0).getDefendants().size(), is(2));
+    }
+
+    @Test
     public void shouldHandleHearingExtendedWhenHavingDifferentCase() {
         final UUID hearingId = randomUUID();
         final UUID newCaseId = randomUUID();

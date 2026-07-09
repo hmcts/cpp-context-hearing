@@ -115,6 +115,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -608,6 +609,40 @@ public class HearingService {
     }
 
     @Transactional
+    /**
+     * Orders the hearing's prosecution cases for display: cases carried onto the hearing by a court
+     * application (referenced via courtApplicationCases or court-order offences) are shown after the
+     * hearing's own cases. The view store keeps cases in an unordered Set, so without this the
+     * response order is the Set's iteration order (CHD-2687). Stable partition - relative order within
+     * each group is preserved; no-op when the hearing has no applications or no prosecution cases.
+     */
+    // package-private for unit testing
+    void orderProsecutionCasesForDisplay(final uk.gov.justice.core.courts.Hearing hearing) {
+        if (isEmpty(hearing.getProsecutionCases()) || isEmpty(hearing.getCourtApplications())) {
+            return;
+        }
+        final Set<UUID> applicationCaseIds = new HashSet<>();
+        hearing.getCourtApplications().forEach(application -> {
+            ofNullable(application.getCourtApplicationCases()).orElse(emptyList())
+                    .forEach(courtApplicationCase -> {
+                        if (nonNull(courtApplicationCase.getProsecutionCaseId())) {
+                            applicationCaseIds.add(courtApplicationCase.getProsecutionCaseId());
+                        }
+                    });
+            if (nonNull(application.getCourtOrder()) && nonNull(application.getCourtOrder().getCourtOrderOffences())) {
+                application.getCourtOrder().getCourtOrderOffences().forEach(courtOrderOffence -> {
+                    if (nonNull(courtOrderOffence.getProsecutionCaseId())) {
+                        applicationCaseIds.add(courtOrderOffence.getProsecutionCaseId());
+                    }
+                });
+            }
+        });
+        if (applicationCaseIds.isEmpty()) {
+            return;
+        }
+        hearing.getProsecutionCases().sort(comparing(prosecutionCase -> applicationCaseIds.contains(prosecutionCase.getId())));
+    }
+
     public HearingDetailsResponse getHearingDetailsResponseById(final JsonEnvelope envelope, final UUID hearingId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes,
                                                                 final List<UUID> accessibleCaseAndApplicationIds,
                                                                 final boolean isDDJ) {
@@ -644,6 +679,8 @@ public class HearingService {
                 hearing.getCourtApplications().addAll(parentCourtApplications);
             }
         }
+
+        orderProsecutionCasesForDisplay(hearing);
 
         final HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse(
                 hearing,
