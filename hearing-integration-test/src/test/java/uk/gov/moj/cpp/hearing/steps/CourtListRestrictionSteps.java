@@ -3,14 +3,22 @@ package uk.gov.moj.cpp.hearing.steps;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.text.MessageFormat.format;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasSize;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.hamcrest.Matchers.is;
-import static org.awaitility.Durations.FIVE_MINUTES;
+import static org.hamcrest.Matchers.notNullValue;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
+import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
+import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorizedAndSystemUser;
 import static uk.gov.justice.hearing.courts.CourtListRestricted.courtListRestricted;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
@@ -26,7 +34,6 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
 import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.hearing.courts.ApplicationCourtListRestriction;
 import uk.gov.justice.hearing.courts.CourtListRestricted;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -57,8 +64,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CourtListRestrictionSteps extends AbstractIT {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CourtListRestrictionSteps.class);
 
     private static final String PUBLIC_EVENTS_LISTING_COURT_LIST_RESTRICTED = "public.listing.court-list-restricted";
     private static final String HEARING_EVENTS_COURT_LIST_RESTRICTED = "hearing.event.court-list-restricted";
@@ -100,100 +105,102 @@ public class CourtListRestrictionSteps extends AbstractIT {
         }
     }
 
-    public void waitForCaseCourtListRestriction(final UUID caseId, final boolean restricted) {
-        final String criteria = String.format(" id='%s' and is_court_list_restricted=%s", caseId, restricted);
-        waitUntilDataPersist("ha_case", criteria, 1);
+    /**
+     * Polls the publish-side query {@code hearing.latest-hearings-by-court-centres} until the
+     * restriction projection has reached the expected state. The publish flow internally consumes
+     * the same query — once it reflects the toggle, the next {@code publish-court-list} command is
+     * guaranteed to see the same state.
+     * <p>
+     * Required because {@link #hearingEventsCourtListRestrictedReceived(Matcher)} only confirms the
+     * hearing event was emitted; the listener that projects it into the JPA entity runs in a
+     * separate transaction and may lag behind the publish command if not waited for.
+     * <p>
+     * A hearing-visibility precondition ({@code courtRoomId notNullValue}) is prepended to the
+     * caller's matcher to prevent the poll from short-circuiting on the empty/not-yet-projected
+     * state — without this, lenient matchers such as {@code hasNoJsonPath(...)} or
+     * {@code withJsonPath(..., hasSize(0))} would match an empty {@code {}} response and return
+     * before the restriction event has actually been processed.
+     */
+    public void waitForRestrictionProjection(final String courtCentreId,
+                                             final LocalDate hearingDate,
+                                             final Matcher<? super com.jayway.jsonpath.ReadContext> expectedPayload) {
+        setupAsAuthorizedAndSystemUser(USER_ID_VALUE_AS_ADMIN);
+        final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.latest-hearings-by-court-centres"), courtCentreId, hearingDate);
+        final String searchCourtListUrl = String.format("%s/%s", getBaseUri(), queryPart);
+
+        poll(requestParams(searchCourtListUrl, "application/vnd.hearing.latest-hearings-by-court-centres+json")
+                .withHeader(USER_ID, getLoggedInSystemUserHeader()))
+                .timeout(60, SECONDS)
+                .pollInterval(1, SECONDS)
+                .until(status().is(OK), payload().isJson(allOf(
+                        withJsonPath("$.court.courtSites[0].courtRooms[0].courtRoomId", notNullValue()),
+                        expectedPayload)));
     }
 
-    public void waitForDefendantCourtListRestriction(final UUID masterDefendantId, final boolean restricted) {
-        final String criteria = String.format(" master_defendant_id='%s' and is_court_list_restricted=%s", masterDefendantId, restricted);
-        waitUntilDataPersist("ha_defendant", criteria, 1);
-    }
-
-    public void waitForApplicationCourtListRestriction(final UUID hearingId, final UUID applicationId, final boolean restricted) {
+    /**
+     * Polls the view-store DB directly until the just-created hearing has BOTH
+     * {@code ha_hearing} AND {@code ha_hearing_day} rows for the given courtCentreId/date.
+     * MUST be called after {@code createHearingEvent*} and BEFORE any {@code hide*FromXhibit}
+     * call or any {@code sendPublishCourtListCommand}.
+     *
+     * <h3>Two races this closes</h3>
+     *
+     * <p><b>1. The listener silent-drop race.</b>
+     * Without this wait, the {@code public.listing.court-list-restricted} → ... →
+     * {@code hearing.event.court-list-restricted} chain can reach
+     * {@link uk.gov.moj.cpp.hearing.event.listener.CourtListRestrictionEventListener} before the
+     * hearing-creation projection has committed to {@code ha_hearing}. The listener does
+     * {@code hearingRepository.findOptionalBy(hearingId)} and, if the row is missing, silently
+     * returns — the message is consumed and never replayed, the restriction is lost, the
+     * subsequent publish reads the un-restricted hearing, and the assertion on the redacted XML
+     * fails.
+     *
+     * <p><b>2. The pub-display empty-XML race.</b>
+     * Even when {@code ha_hearing} is populated, the publish's pub-display query
+     * ({@code findHearingsByDateAndCourtCentreList}) INNER-JOINs {@code ha_hearing.hearingDays}
+     * filtered by date. If {@code ha_hearing_day} hasn't been projected yet when the publish
+     * runs, the pub-display query returns thin/empty data and the publish writes an XML with
+     * empty fields (empty courtname, cppurn, defendant fields, no {@code currentstatus} block).
+     * The web-page publish (which goes via {@code ha_hearing_event}) is unaffected and writes
+     * correct XML, so the test sees a mismatch where the same publish call produces correct
+     * web-page XML but stub pub-display XML.
+     *
+     * <p>Polling JDBC directly is more robust than polling either REST endpoint because both
+     * publish-side queries are gated on the same two tables; once both are populated, both
+     * publishes will see fresh data.
+     */
+    public void waitForHearingVisible(final String courtCentreId, final LocalDate hearingDate) {
         Awaitility.await()
-                .atMost(FIVE_MINUTES)
-                .until(() -> isApplicationCourtListRestrictionPersisted(hearingId, applicationId, restricted));
+                .atMost(60, SECONDS)
+                .pollInterval(500, java.util.concurrent.TimeUnit.MILLISECONDS)
+                .until(() -> hearingProjectedFor(courtCentreId, hearingDate));
     }
 
-    public void waitForApplicationApplicantCourtListRestriction(final UUID hearingId, final UUID applicantId, final boolean restricted) {
-        Awaitility.await()
-                .atMost(FIVE_MINUTES)
-                .until(() -> isApplicationApplicantCourtListRestrictionPersisted(hearingId, applicantId, restricted));
-    }
-
-    private boolean isApplicationCourtListRestrictionPersisted(final UUID hearingId, final UUID applicationId, final boolean restricted) {
-        final ApplicationCourtListRestriction restrictions = readApplicationCourtListRestriction(hearingId).orElse(null);
-        if (restricted) {
-            return restrictions != null
-                    && isNotEmpty(restrictions.getCourtApplicationIds())
-                    && restrictions.getCourtApplicationIds().contains(applicationId);
-        }
-        return restrictions == null
-                || isEmpty(restrictions.getCourtApplicationIds())
-                || !restrictions.getCourtApplicationIds().contains(applicationId);
-    }
-
-    private boolean isApplicationApplicantCourtListRestrictionPersisted(final UUID hearingId, final UUID applicantId, final boolean restricted) {
-        final ApplicationCourtListRestriction restrictions = readApplicationCourtListRestriction(hearingId).orElse(null);
-        if (restricted) {
-            return restrictions != null
-                    && isNotEmpty(restrictions.getCourtApplicationApplicantIds())
-                    && restrictions.getCourtApplicationApplicantIds().contains(applicantId);
-        }
-        return restrictions == null
-                || isEmpty(restrictions.getCourtApplicationApplicantIds())
-                || !restrictions.getCourtApplicationApplicantIds().contains(applicantId);
-    }
-
-    private Optional<ApplicationCourtListRestriction> readApplicationCourtListRestriction(final UUID hearingId) {
-        final Optional<String> restrictCourtListJson = readRestrictCourtListJson(hearingId);
-        if (restrictCourtListJson.isEmpty()) {
-            return Optional.empty();
-        }
-        try {
-            return Optional.of(objectMapper.readValue(restrictCourtListJson.get(), ApplicationCourtListRestriction.class));
-        } catch (final Exception exception) {
-            LOGGER.error("Failed to parse restrict_court_list_json for hearing {}", hearingId, exception);
-            return Optional.empty();
-        }
-    }
-
-    private Optional<String> readRestrictCourtListJson(final UUID hearingId) {
-        try (final Connection viewStoreConnection = testJdbcConnectionProvider.getViewStoreConnection("hearing");
-             final Statement statement = viewStoreConnection.createStatement()) {
-            final String sql = String.format("select restrict_court_list_json from ha_hearing where id='%s'", hearingId);
-            final ResultSet resultSet = statement.executeQuery(sql);
+    private boolean hearingProjectedFor(final String courtCentreId, final LocalDate hearingDate) {
+        // Both publish paths need all three tables. Web-page goes via ha_hearing_event;
+        // pub-display additionally INNER-JOINs ha_hearing_day.
+        final String sql = String.format(
+                "SELECT count(1) FROM ha_hearing h " +
+                        "INNER JOIN ha_hearing_day day ON day.hearing_id = h.id " +
+                        "INNER JOIN ha_hearing_event ev ON ev.hearing_id = h.id " +
+                        "WHERE h.court_centre_id = '%s' " +
+                        "AND day.date = '%s' " +
+                        "AND ev.event_date = '%s' " +
+                        "AND ev.deleted = false",
+                courtCentreId, hearingDate, hearingDate);
+        try (final Connection connection = testJdbcConnectionProvider.getViewStoreConnection("hearing");
+             final Statement statement = connection.createStatement();
+             final ResultSet resultSet = statement.executeQuery(sql)) {
             if (resultSet.next()) {
-                return Optional.ofNullable(resultSet.getString(1));
+                return resultSet.getInt(1) > 0;
             }
-        } catch (SQLException exception) {
-            LOGGER.error("Failed to read restrict_court_list_json for hearing {}", hearingId, exception);
+        } catch (final SQLException e) {
+            HEARING_VISIBILITY_LOGGER.warn("Failed to query view store for visibility check: {}", e.getMessage());
         }
-        return Optional.empty();
+        return false;
     }
 
-    private void waitUntilDataPersist(final String tableName, final String criteria, final int count) {
-        Awaitility.await()
-                .atMost(FIVE_MINUTES)
-                .until(() -> countRows(tableName, criteria) == count);
-    }
-
-    private int countRows(final String tableName, final String criteria) {
-        try (final Connection viewStoreConnection = testJdbcConnectionProvider.getViewStoreConnection("hearing");
-             final Statement statement = viewStoreConnection.createStatement()) {
-            final String sql = String.format("select count(1) from %s where %s", tableName, criteria);
-            final ResultSet resultSet = statement.executeQuery(sql);
-
-            if (resultSet.next()) {
-                return resultSet.getInt(1);
-            }
-        } catch (SQLException exception) {
-            LOGGER.error("Failed to count from table {} with condition {}", tableName, criteria, exception);
-        }
-
-        return 0;
-    }
+    private static final Logger HEARING_VISIBILITY_LOGGER = LoggerFactory.getLogger(CourtListRestrictionSteps.class);
 
     private void sendListingPublicEvent(final JsonObject restrictCourtListDataObject) {
         sendMessage(
@@ -207,11 +214,12 @@ public class CourtListRestrictionSteps extends AbstractIT {
                                                                           final UUID eventDefinitionId, final ZonedDateTime eventTime, final Optional<UUID> hearingTypeId, String courtCenter, LocalDate localDate) throws NoSuchAlgorithmException {
         final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearingWithNsp(getRequestSpec(), initiateHearingTemplateWithParamNoReportingRestriction(fromString(courtCenter), fromString(courtRoomId), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, hearingTypeId)));
         logEvent(hearingEventId, getRequestSpec(), asDefault(), hearing.it(), eventDefinitionId, false, fromString(defenceCounselId), eventTime, null);
+        waitForHearingVisible(courtCenter, eventTime.toLocalDate());
         return hearing;
     }
 
     public CommandHelpers.InitiateHearingCommandHelper createHearingEventWithYoungDefendant(final UUID caseId, final UUID hearingEventId, final String courtRoomId, final String defenceCounselId,
-                                                                                           final UUID eventDefinitionId, final ZonedDateTime eventTime, final Optional<UUID> hearingTypeId, final String courtCenter, final LocalDate localDate) throws NoSuchAlgorithmException {
+                                                                                            final UUID eventDefinitionId, final ZonedDateTime eventTime, final Optional<UUID> hearingTypeId, final String courtCenter, final LocalDate localDate) throws NoSuchAlgorithmException {
         try (final Utilities.EventListener eventListener = listenFor(HEARING_EVENTS_COURT_LIST_RESTRICTED, HEARING_EVENT)
                 .withFilter(isJson(allOf(
                         withJsonPath("$.defendantIds", hasSize(1)),
@@ -220,6 +228,7 @@ public class CourtListRestrictionSteps extends AbstractIT {
                     initiateHearingTemplateWithParamNoReportingRestrictionYoungDefendant(fromString(courtCenter), fromString(courtRoomId), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, hearingTypeId)));
             logEvent(hearingEventId, getRequestSpec(), asDefault(), hearing.it(), eventDefinitionId, false, fromString(defenceCounselId), eventTime, null);
             eventListener.waitFor();
+            waitForHearingVisible(courtCenter, eventTime.toLocalDate());
             return hearing;
         }
     }
@@ -229,6 +238,7 @@ public class CourtListRestrictionSteps extends AbstractIT {
         final CommandHelpers.InitiateHearingCommandHelper hearing = h(initiateHearingForApplication(getRequestSpec(), initiateHearingTemplateForApplicationNoReportingRestriction(fromString(courtCenter), fromString(courtRoomId), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, hearingTypeId)));
         givenAUserHasLoggedInAsACourtClerk(randomUUID());
         logEvent(hearingEventId, getRequestSpec(), asDefault(), hearing.it(), eventDefinitionId, false, fromString(defenceCounselId), eventTime, null);
+        waitForHearingVisible(courtCenter, eventTime.toLocalDate());
         return hearing;
     }
 

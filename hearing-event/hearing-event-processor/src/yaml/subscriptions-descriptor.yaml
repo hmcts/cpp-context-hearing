@@ -317,6 +317,10 @@ subscriptions_descriptor:
         - name: hearing.share-results-failed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.share-results-failed.json
 
+        # Results Validation Failed
+        - name: hearing.events.results-validation-failed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.results-validation-failed.json
+
         - name: hearing.event.approval-rejected
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.approval-rejected.json
 

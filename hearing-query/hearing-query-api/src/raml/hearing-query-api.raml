@@ -191,6 +191,9 @@ protocols: [ HTTP, HTTPS ]
         (mapping):
             responseType: application/vnd.hearing.get.hearing+json
             name: hearing.get.hearing
+        (mapping):
+            responseType: application/vnd.hearing.get.hearing-for-manage-hearing+json
+            name: hearing.get.hearing-for-manage-hearing
         ...
       responses:
             200:
@@ -199,6 +202,9 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get.hearing+json:
                     example:  !include json/hearing.get.hearing.json
                     schema:  !include  json/schema/hearing.get.hearing.json
+                  application/vnd.hearing.get.hearing-for-manage-hearing+json:
+                    example: !include json/hearing.get.hearing.json
+                    schema: !include  json/schema/hearing.get.hearing.json
 
 /hearings:
    get:
@@ -238,6 +244,36 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.get.hearings.json
                     schema:  !include  json/schema/hearing.get.hearings.json
 
+
+/hearings-check-in:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.hearings-check-in+json
+            name: hearing.get.hearings-check-in
+        ...
+      queryParameters:
+        date:
+          description: date of hearing
+          type: string
+          required: true
+        courtCentreId:
+          description: court centre id
+          type: string
+          required: true
+        roomId:
+          description: room id
+          type: string
+          required: false
+
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.hearings-check-in+json:
+                    example:  !include json/hearing.get.hearings-check-in.json
+                    schema:   !include json/schema/hearing.get.hearings-check-in.json
 
 /hearings-for-today:
    get:

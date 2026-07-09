@@ -8,8 +8,11 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationHearingDeleted;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import javax.inject.Inject;
@@ -27,6 +30,9 @@ public class HearingDeletedEventListener {
 
     @Inject
     private HearingRepository hearingRepository;
+
+    @Inject
+    private ProsecutionCaseRepository pcRepository;
 
     @Handles(HEARING_EVENT_HEARING_DELETED)
     public void hearingDeleted(final JsonEnvelope event) {
@@ -49,6 +55,13 @@ public class HearingDeletedEventListener {
         final UUID hearingId = UUID.fromString(event.payloadAsJsonObject().getString("hearingId"));
 
         LOGGER.info("Received event '{}' hearingId: {}", HEARING_EVENT_HEARING_DELETED_BDF, hearingId);
+
+        final List<ProsecutionCase> prosecutionCases = hearingRepository.findProsecutionCasesByHearingId(hearingId);
+
+        if(!prosecutionCases.isEmpty()) {
+            prosecutionCases.forEach(pcRepository::remove);
+            pcRepository.flush();
+        }
 
         final Hearing hearing = hearingRepository.findBy(hearingId);
 
