@@ -19,6 +19,8 @@ import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationRequest;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ResultLineDto;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -39,7 +41,7 @@ class ValidationRequestMapperTest {
 
         final Hearing hearing = Hearing.hearing().build();
 
-        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+        final DraftValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getHearingId(), is(hearingId.toString()));
         assertThat(request.getHearingDay(), is(hearingDay));
@@ -53,9 +55,9 @@ class ValidationRequestMapperTest {
                 .withJurisdictionType(JurisdictionType.MAGISTRATES)
                 .build();
 
-        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+        final DraftValidationRequest request = mapper.toValidationRequest(command, hearing);
 
-        assertThat(request.getCourtType(), is("MAGISTRATES"));
+        assertThat(request.getCourtType(), is(DraftValidationRequest.CourtTypeEnum.MAGISTRATES));
     }
 
     @Test
@@ -76,7 +78,7 @@ class ValidationRequestMapperTest {
 
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), emptyList());
 
-        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+        final DraftValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getDefendants(), hasSize(1));
         assertThat(request.getDefendants().get(0).getDefendantId(), is(defendantId.toString()));
@@ -110,7 +112,7 @@ class ValidationRequestMapperTest {
 
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), emptyList());
 
-        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+        final DraftValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getDefendants(), hasSize(1));
         assertThat(request.getDefendants().get(0).getFirstName(), is("John"));
@@ -135,7 +137,7 @@ class ValidationRequestMapperTest {
 
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), emptyList());
 
-        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+        final DraftValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getDefendants(), hasSize(1));
         assertThat(request.getDefendants().get(0).getFirstName(), is(nullValue()));
@@ -168,7 +170,7 @@ class ValidationRequestMapperTest {
 
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), emptyList());
 
-        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+        final DraftValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getOffences(), hasSize(1));
         assertThat(request.getOffences().get(0).getOffenceId(), is(offenceId.toString()));
@@ -207,7 +209,7 @@ class ValidationRequestMapperTest {
 
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), emptyList());
 
-        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+        final DraftValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getOffences(), hasSize(1));
         assertThat(request.getOffences().get(0).getCaseUrn(), is(caseUrn));
@@ -232,7 +234,7 @@ class ValidationRequestMapperTest {
 
         final Hearing hearing = Hearing.hearing().build();
 
-        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+        final DraftValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getResultLines(), hasSize(1));
         assertThat(request.getResultLines().get(0).getResultLineId(), is(resultLineId.toString()));
@@ -254,9 +256,9 @@ class ValidationRequestMapperTest {
                 .build();
 
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
-        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+        final DraftValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
 
-        assertThat(request.getResultLines().get(0).getCategory(), is("F"));
+        assertThat(request.getResultLines().get(0).getCategory(), is(ResultLineDto.CategoryEnum.F));
     }
 
     @Test
@@ -270,7 +272,7 @@ class ValidationRequestMapperTest {
                 .build();
 
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
-        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+        final DraftValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
 
         assertThat(request.getResultLines().get(0).getCategory(), is(nullValue()));
     }
@@ -281,7 +283,7 @@ class ValidationRequestMapperTest {
 
         final Hearing hearing = Hearing.hearing().build();
 
-        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+        final DraftValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getDefendants(), is(empty()));
         assertThat(request.getOffences(), is(empty()));
@@ -293,7 +295,7 @@ class ValidationRequestMapperTest {
 
         final Hearing hearing = Hearing.hearing().build();
 
-        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+        final DraftValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getCourtType(), is(nullValue()));
     }
@@ -313,7 +315,7 @@ class ValidationRequestMapperTest {
                 .build();
 
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
-        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+        final DraftValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(true));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(nullValue()));
@@ -335,7 +337,7 @@ class ValidationRequestMapperTest {
                 .build();
 
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
-        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+        final DraftValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(nullValue()));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(consecutiveOffenceId));
@@ -359,7 +361,7 @@ class ValidationRequestMapperTest {
                 .build();
 
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
-        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+        final DraftValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(false));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(consecutiveOffenceId));
@@ -376,7 +378,7 @@ class ValidationRequestMapperTest {
                 .build();
 
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
-        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+        final DraftValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(nullValue()));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(nullValue()));
@@ -394,7 +396,7 @@ class ValidationRequestMapperTest {
                 .build();
 
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), List.of(resultLine));
-        final ValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+        final DraftValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(nullValue()));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(nullValue()));
