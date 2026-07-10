@@ -12,7 +12,6 @@ import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -137,8 +136,6 @@ public class HearingQueryApi {
 
     @Inject
     private HearingService hearingService;
-    @Inject
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     @Handles("hearing.get.hearings")
     public JsonEnvelope findHearings(final JsonEnvelope query) {
@@ -186,16 +183,6 @@ public class HearingQueryApi {
         final Envelope<HearingDetailsResponse> envelope = this.hearingQueryView.findHearing(query, crackedIneffectiveVacatedTrialTypes, accessibleCasesAndApplications, ddJorRecorder);
         return getJsonEnvelope(envelope);
     }
-
-    @Handles("hearing.get.hearing-for-manage-hearing")
-    public JsonEnvelope findHearingForManageHearing(final JsonEnvelope query) {
-        final JsonEnvelope jsonEnvelope = findHearing(query);
-
-        final HearingDetailsResponse hearingDetailsResponse = jsonObjectToObjectConverter.convert(jsonEnvelope.payloadAsJsonObject(), HearingDetailsResponse.class);
-
-        return envelopeFrom(metadataFrom(jsonEnvelope.metadata()),objectToJsonObjectConverter.convert(hearingService.filterOutProsecutionCases(hearingDetailsResponse)));
-    }
-
 
     @Handles("hearing.get-hearing-event-definitions")
     public JsonEnvelope getHearingEventDefinitionsVersionTwo(final JsonEnvelope query) {
