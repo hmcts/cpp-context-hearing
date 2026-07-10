@@ -11,8 +11,10 @@
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <!-- H2 has no native jsonb type; production/IT schema is Liquibase on Postgres. For the hbm2ddl-create H2 test
+                 schema, alias jsonb -> H2's JSON type so the @columnDefinition="jsonb" tables (payload columns) create cleanly. -->
             <property name="jakarta.persistence.jdbc.url"
-                      value="jdbc:h2:mem:hearingtest;DB_CLOSE_DELAY=-1;NON_KEYWORDS=VALUE,KEY"/>
+                      value="jdbc:h2:mem:hearingtest;DB_CLOSE_DELAY=-1;NON_KEYWORDS=VALUE,KEY;INIT=CREATE DOMAIN IF NOT EXISTS JSONB AS JSON"/>
             <property name="jakarta.persistence.jdbc.user" value="sa"/>
             <property name="jakarta.persistence.jdbc.password" value=""/>
             <property name="hibernate.archive.autodetection" value="class"/>

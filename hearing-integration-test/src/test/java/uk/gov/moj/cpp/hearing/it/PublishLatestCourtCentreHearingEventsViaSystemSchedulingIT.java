@@ -31,6 +31,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Random;
 
@@ -61,7 +62,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     @BeforeEach
     public void setup() throws NoSuchAlgorithmException {
         stubUsersAndGroupsUserRoles(getLoggedInUser());
-        eventTime = new UtcClock().now().withZoneSameLocal(ZoneId.of("UTC"));
+        eventTime = new UtcClock().now().withZoneSameLocal(ZoneOffset.UTC);
         hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", eventTime.toLocalDate(), randomUUID(), caseId, of(hearingTypeId))));
         stubGetReferenceDataCourtRooms(hearing.getHearing().getCourtCentre(), ENGLISH, ouId3, ouId4);
         stubOrganisationalUnit(fromString(courtCentreId), "OUCODE");

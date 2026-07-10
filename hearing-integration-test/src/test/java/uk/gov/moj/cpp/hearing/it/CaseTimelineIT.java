@@ -40,6 +40,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.test.TestUtilities;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -93,7 +94,7 @@ public class CaseTimelineIT extends AbstractIT {
 
     @Test
     public void shouldDisplayCaseTimelineWithBoxHearing() {
-        setUpHearing(now(ZoneId.of("UTC")).plusDays(1L), true);
+        setUpHearing(now(ZoneOffset.UTC).plusDays(1L), true);
         stubCourtRoom(hearing);
         stubProsecutionCases(hearing);
         final String hearingDate = hearingDay.getSittingDay().toLocalDate().format(ofPattern("dd MMM yyyy"));
@@ -102,7 +103,7 @@ public class CaseTimelineIT extends AbstractIT {
 
     @Test
     public void shouldDisplayCaseTimelineWithoutIsBoxHearing() {
-        setUpHearing(now(ZoneId.of("UTC")).plusDays(1L), false);
+        setUpHearing(now(ZoneOffset.UTC).plusDays(1L), false);
         stubCourtRoom(hearing);
         stubProsecutionCases(hearing);
         final String hearingDate = hearingDay.getSittingDay().toLocalDate().format(ofPattern("dd MMM yyyy"));

@@ -41,6 +41,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -53,7 +54,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"unchecked", "java:S2699"})
 public class ProsecutionCounselIT extends AbstractIT {
 
-    private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC"));
+    private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneOffset.UTC);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProsecutionCounselIT.class);
 

@@ -3168,7 +3168,7 @@ public class ShareResultsIT extends AbstractIT {
                                 .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))
                                 .with(CourtCentre::getName, is(hearing.getCourtCentre().getName())))
                         .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
-                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneOffset.UTC)))
                                 .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
                                 .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
                         .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(prosecutionCases))

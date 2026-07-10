@@ -25,6 +25,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.HearingFactory;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -66,7 +67,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
         // Eject case will also eject linked application
         ejectCaseWithLinkedApplication(hearing.getId(), prosecutionCaseId, standAloneApplicationId);
         Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(),
-                hearing.getHearingDays().get(0).getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
+                hearing.getHearingDays().get(0).getSittingDay().withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         .withValue(h -> h.getHearingSummaries().size(), 1)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
@@ -78,7 +79,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
         // Eject standalone application
         ejectStandAloneApplication(hearing.getId(), standAloneApplicationId);
         Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(),
-                hearing.getHearingDays().get(0).getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
+                hearing.getHearingDays().get(0).getSittingDay().withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         // all applications ejected now including child and linked
                         .withValue(h -> h.getHearingSummaries().size(), 0)

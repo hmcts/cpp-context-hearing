@@ -11,9 +11,22 @@
 
     <build>
         <plugins>
+            <!-- Jakarta successor of the deprecated org.jvnet.jaxb2.maven2:maven-jaxb2-plugin; emits jakarta.xml.bind.
+                 The old -Xnamespace-prefix add-on (jaxb2-namespace-prefix, javax-only) was dropped — it only affects
+                 the XHIBIT XML namespace-prefix output of the generated classes, not compilation. If the XHIBIT XML
+                 output requires the custom prefixes, apply them at marshal time (glassfish NamespacePrefixMapper in
+                 the event-processor), mirroring the listing migration. -->
             <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
+                <groupId>org.jvnet.jaxb</groupId>
+                <artifactId>jaxb-maven-plugin</artifactId>
+                <version>4.0.8</version>
+                <configuration>
+                    <strict>false</strict>
+                    <args>
+                        <arg>-XautoNameResolution</arg>
+                        <arg>-extension</arg>
+                    </args>
+                </configuration>
                 <executions>
                     <execution>
                         <id>generate-web-page</id>
@@ -21,13 +34,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <args>
-                                <arg>-XautoNameResolution</arg>
-                                <arg>-extension</arg>
-                                <arg>-Xnamespace-prefix</arg>
-                            </args>
                             <schemaDirectory>src/main/resources/xhibit/xsd/iwp</schemaDirectory>
-                            <strict>false</strict>
                             <generatePackage>uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp
                             </generatePackage>
                             <generateDirectory>${project.build.directory}/generated-sources/xjc-iwp
@@ -40,13 +47,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <args>
-                                <arg>-XautoNameResolution</arg>
-                                <arg>-extension</arg>
-                                <arg>-Xnamespace-prefix</arg>
-                            </args>
                             <schemaDirectory>src/main/resources/xhibit/xsd/pd</schemaDirectory>
-                            <strict>false</strict>
                             <generatePackage>uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd
                             </generatePackage>
                             <generateDirectory>${project.build.directory}/generated-sources/xjc-pd
@@ -54,20 +55,13 @@
                         </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.jvnet.jaxb2_commons</groupId>
-                        <artifactId>jaxb2-namespace-prefix</artifactId>
-                        <version>1.3</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
     <dependencies>
         <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
         </dependency>
     </dependencies>
 </project>
