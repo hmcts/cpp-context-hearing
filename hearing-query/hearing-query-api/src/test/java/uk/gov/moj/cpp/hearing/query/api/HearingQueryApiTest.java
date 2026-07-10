@@ -23,7 +23,6 @@ import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
 import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
@@ -200,9 +199,6 @@ public class HearingQueryApiTest {
 
     @Mock
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
-    @Mock
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     @Mock
     private Permissions mockPermissions;
@@ -483,41 +479,6 @@ public class HearingQueryApiTest {
         hearingQueryApi.getHearingEventLogCount(query);
 
         verify(hearingEventQueryView, times(0)).getHearingEventLogCount(any(JsonEnvelope.class));
-    }
-
-    @Test
-    public void shouldFindHearingForManageHearing() {
-        final UUID userId = randomUUID();
-        final UUID hearingId = randomUUID();
-
-        final JsonEnvelope query = mock(JsonEnvelope.class, RETURNS_DEEP_STUBS);
-        when(query.metadata().userId()).thenReturn(Optional.of(userId.toString()));
-        when(query.payloadAsJsonObject()).thenReturn(createObjectBuilder().add("hearingId", hearingId.toString()).build());
-
-        when(referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes()).thenReturn(crackedIneffectiveVacatedTrialTypes);
-        when(usersAndGroupsService.permissions(userId.toString())).thenReturn(mockPermissions);
-        when(ddjChecker.isDDJ(mockPermissions)).thenReturn(false);
-        when(recorderChecker.isRecorder(mockPermissions)).thenReturn(false);
-        when(hearingQueryView.findHearing(any(), any(), any(), anyBoolean())).thenReturn(mockHearingDetailsResponseEnvelope);
-        when(mockEnvelopePayloadTypeConverter.convert(any(), any(Class.class))).thenReturn(mockJsonValueEnvelope);
-
-        final JsonEnvelope repackedEnvelope = EnvelopeFactory.createEnvelope("hearing.get.hearing", createObjectBuilder().add("hearingId", hearingId.toString()).build());
-        when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(repackedEnvelope);
-
-        final HearingDetailsResponse hearingDetailsResponse = mock(HearingDetailsResponse.class);
-        final HearingDetailsResponse filteredResponse = mock(HearingDetailsResponse.class);
-        final javax.json.JsonObject filteredJsonObject = createObjectBuilder().add("hearingId", hearingId.toString()).build();
-
-        when(jsonObjectToObjectConverter.convert(any(javax.json.JsonObject.class), eq(HearingDetailsResponse.class))).thenReturn(hearingDetailsResponse);
-        when(hearingService.filterOutProsecutionCases(hearingDetailsResponse)).thenReturn(filteredResponse);
-        when(objectToJsonObjectConverter.convert(filteredResponse)).thenReturn(filteredJsonObject);
-
-        final JsonEnvelope result = hearingQueryApi.findHearingForManageHearing(query);
-
-        verify(hearingService).validateUserPermissionForApplicationType(query);
-        verify(hearingService).filterOutProsecutionCases(hearingDetailsResponse);
-        verify(objectToJsonObjectConverter).convert(filteredResponse);
-        assertThat(result, is(notNullValue()));
     }
 
     private Set<UUID> buildPIEventCache() {
