@@ -17,6 +17,7 @@ import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingCasesForDay;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -144,6 +145,16 @@ public class HearingQueryView {
         final GetHearings hearingListResponse = hearingService.getHearings(date, startTime, endTime, courtCentreId, roomId, accessibleCasesAndApplicationIds, isDDJorRecorder, envelope.metadata());
         return envelop(hearingListResponse)
                 .withName("hearing.get.hearings")
+                .withMetadataFrom(envelope);
+    }
+
+    public Envelope<HearingCasesForDay> findHearingCasesForDay(final JsonEnvelope envelope) {
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        final LocalDate date = LocalDates.from(payload.getString(FIELD_DATE));
+
+        final HearingCasesForDay hearingCasesForDay = hearingService.getHearingCasesForDay(date);
+        return envelop(hearingCasesForDay)
+                .withName("hearing.get.hearing-cases-for-day")
                 .withMetadataFrom(envelope);
     }
 

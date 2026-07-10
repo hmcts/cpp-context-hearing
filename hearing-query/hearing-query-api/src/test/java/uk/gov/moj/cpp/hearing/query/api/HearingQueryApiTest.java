@@ -28,6 +28,7 @@ import static uk.gov.justice.services.messaging.JsonObjects.getString;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingCasesForDay;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -139,6 +140,9 @@ public class HearingQueryApiTest {
 
     @Mock
     private Envelope<GetHearings> mockGetHearingsEnvelope;
+
+    @Mock
+    private Envelope<HearingCasesForDay> mockHearingCasesForDayEnvelope;
 
     @Mock
     private Envelope<SessionTimeResponse> mockSessionTimeResponse;
@@ -792,6 +796,26 @@ public class HearingQueryApiTest {
     public void shouldInitPIEventMapperCacheAndReturnCppHearingEventIds(){
         Set<UUID> set =  piEventMapperCache1.getCppHearingEventIds();
         assertThat(set.size(),is(32));
+    }
+
+    // ── findHearingCasesForDay ──────────────────────────────────────────────────
+    @Test
+    public void findHearingCasesForDay_shouldDelegateToViewAndReturnRepacked() {
+        final UUID userId = randomUUID();
+
+        final JsonEnvelope query = mock(JsonEnvelope.class, RETURNS_DEEP_STUBS);
+        when(query.metadata().userId()).thenReturn(Optional.of(userId.toString()));
+
+        when(hearingQueryView.findHearingCasesForDay(eq(query))).thenReturn(mockHearingCasesForDayEnvelope);
+        when(mockEnvelopePayloadTypeConverter.convert(any(), any(Class.class)))
+                .thenReturn(mockJsonValueEnvelope);
+        when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(mockJsonEnvelope);
+
+        final JsonEnvelope result = hearingQueryApi.findHearingCasesForDay(query);
+
+        verify(hearingQueryView).findHearingCasesForDay(eq(query));
+        verify(mockJsonEnvelopeRepacker).repack(mockJsonValueEnvelope);
+        assertThat(result, is(mockJsonEnvelope));
     }
 
     // ── getHearingCheckIn ──────────────────────────────────────────────────

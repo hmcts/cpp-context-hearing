@@ -1,0 +1,24 @@
+{
+  "hearingCases": [
+    {
+      "hearingCase": {
+        "hearingId": "9fc0a60e-44d0-45bd-a71b-dfc0953a6635",
+        "courtCentreId": "3dd43664-e771-44cd-abe9-bacbdc10ef79",
+        "courtRoomId": "1a0dfd61-565d-4811-9d4c-53c66a454f07",
+        "hearingDate": "2023-07-07",
+        "prosecutionCases": [
+          {
+            "caseSummary": {
+              "id": "e9edde4b-42d4-49df-b877-37eb68d6bbe9",
+              "prosecutionCaseIdentifier": {
+                "prosecutionAuthorityCode": "TFL",
+                "prosecutionAuthorityId": "904f367e-307b-4b9e-b532-19ece38ad501",
+                "caseURN": "82SK912711"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

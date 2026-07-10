@@ -1,16 +1,17 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
 import static java.util.UUID.fromString;
-import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingCasesForDay;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Component;
@@ -60,7 +61,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.ws.rs.BadRequestException;
@@ -152,6 +152,17 @@ public class HearingQueryApi {
         final boolean isDDJorRecorder = isDDJorRecorder(permissions);
         final List<UUID> accessibleCasesAndApplications = getAccessibleCasesAndApplications(userId, isDDJorRecorder, permissions);
         final Envelope<GetHearings> envelope = this.hearingQueryView.findHearings(query, accessibleCasesAndApplications, isDDJorRecorder);
+        return getJsonEnvelope(envelope);
+    }
+
+    @Handles("hearing.get.hearing-cases-for-day")
+    public JsonEnvelope findHearingCasesForDay(final JsonEnvelope query) {
+        final Optional<String> optionalUserId = query.metadata().userId();
+        if (optionalUserId.isEmpty()) {
+            throw new BadRequestException(NO_LOGGED_IN_USER_ID_FOUND_TO_PERFORM_HEARINGS_SEARCH);
+        }
+
+        final Envelope<HearingCasesForDay> envelope = this.hearingQueryView.findHearingCasesForDay(query);
         return getJsonEnvelope(envelope);
     }
 

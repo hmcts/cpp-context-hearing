@@ -33,6 +33,7 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsMagistrateUser;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 import uk.gov.justice.core.courts.ApplicationStatus;
@@ -54,6 +55,8 @@ import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.core.courts.SummonsTemplateType;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingCases;
+import uk.gov.justice.hearing.courts.HearingCasesForDay;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.test.utils.core.http.RequestParams;
@@ -272,6 +275,32 @@ public class HearingForTodayIT extends AbstractIT {
         );
     }
 
+    @Test
+    public void shouldRetrieveHearingCasesForDayForSystemUser() {
+        final UUID userId = randomUUID();
+        setupAsSystemUser(userId);
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+
+        final UUID hearingId = randomUUID();
+        final UUID courtCentreId = randomUUID();
+        final UUID roomId = randomUUID();
+        final InitiateHearingCommand initiateHearingCommand = createHearingForToday(hearingId, courtCentreId, roomId, userId, null);
+        final String hearingDate = initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate().toString();
+
+        initiateHearing(getRequestSpec(), initiateHearingCommand);
+
+        getHearingCasesForDayPollForMatch(userId, hearingDate, 30, isBean(HearingCasesForDay.class)
+                .with(HearingCasesForDay::getHearingCases, hasSize(greaterThanOrEqualTo(1)))
+                .with(HearingCasesForDay::getHearingCases, hasItem(isBean(HearingCases.class)
+                        .with(HearingCases::getHearingId, is(hearingId))
+                        .with(HearingCases::getCourtCentreId, is(courtCentreId))
+                        .with(HearingCases::getCourtRoomId, is(roomId))
+//                        .with(HearingCases::getHearingDate, is(LocalDate.now()))
+                        )
+                )
+        );
+    }
+
     private static void getHearingForTodayPollForMatch(final UUID userId, final long timeout, final BeanMatcher<GetHearings> resultMatcher) {
         final RequestParams requestParams = requestParams(getURL("hearing.get.hearings-for-today"), "application/vnd.hearing.get.hearings-for-today+json")
                 .withHeader(HeaderConstants.USER_ID, userId)
@@ -284,6 +313,22 @@ public class HearingForTodayIT extends AbstractIT {
                         status().is(OK),
                         expectedConditions
                 );
+    }
+
+    private static void getHearingCasesForDayPollForMatch(final UUID userId, final String date, final long timeout, final BeanMatcher<HearingCasesForDay> resultMatcher) {
+        final RequestParams requestParams = requestParams(getURL("hearing.get.hearing-cases-for-day", date), "application/vnd.hearing.get.hearing-cases-for-day+json")
+                .withHeader(HeaderConstants.USER_ID, userId)
+                .build();
+
+        final Matcher<ResponseData> expectedConditions = allOf(status().is(OK), jsonPayloadMatchesBean(HearingCasesForDay.class, resultMatcher));
+        final ResponseData responseData = poll(requestParams)
+                .timeout(timeout, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        expectedConditions
+                );
+
+        System.out.println(responseData.getPayload());
     }
 
 

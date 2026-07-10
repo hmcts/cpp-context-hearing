@@ -91,9 +91,14 @@ import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingCases;
+import uk.gov.justice.hearing.courts.HearingCasesForDay;
+import uk.gov.justice.hearing.courts.HearingCasesForDay;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -250,6 +255,8 @@ public class HearingServiceTest {
     private DraftResultJPAMapper draftResultJPAMapper;
     @Mock
     private GetHearingsTransformer getHearingsTransformer;
+    @Spy
+    private GetHearingCaseTransformer getHearingCaseTransformer;
     @Mock
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
     @InjectMocks
@@ -2716,6 +2723,57 @@ public class HearingServiceTest {
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
+    }
+
+    // ── findHearingCasesForDay ───────────────────────────────────────────────
+    @Test
+    public void getHearingCasesForDay_shouldReturnEmptyWhenDateIsNull() {
+        final HearingCasesForDay result = hearingService.getHearingCasesForDay(null);
+
+        assertNull(result.getHearingCases());
+    }
+
+    @Test
+    public void getHearingCasesForDay_shouldReturnEmptyWhenNoHearingsFoundForTheDate() {
+        final LocalDate date = LocalDate.now();
+        when(hearingRepository.findHearings(date)).thenReturn(emptyList());
+
+        final HearingCasesForDay result = hearingService.getHearingCasesForDay(date);
+
+        assertNull(result.getHearingCases());
+    }
+
+    @Test
+    public void getHearingCasesForDay_shouldReturnHearingCasesForTheDate() {
+        final UUID courtCentreId = randomUUID();
+        final UUID roomId = randomUUID();
+        final UUID caseId = randomUUID();
+        final String caseUrn = "CASE_URN";
+
+        final Hearing hearing = HearingTestUtils.buildHearing();
+        final List<Hearing> hearings = asList(hearing);
+
+        final LocalDate date = LocalDate.now();
+        when(hearingRepository.findHearings(date)).thenReturn(hearings);
+        final uk.gov.justice.core.courts.Hearing hearingPojo = hearing()
+                .withId(hearing.getId())
+                .withHearingDays(List.of(uk.gov.justice.core.courts.HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build()))
+                .withCourtCentre(uk.gov.justice.core.courts.CourtCentre.courtCentre().withId(courtCentreId)
+                        .withRoomId(roomId).build())
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase().withId(caseId)
+                        .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier().withCaseURN(caseUrn).build())
+                        .build()))
+                .build();
+        when(hearingJPAMapper.fromJPAMinimal(hearing)).thenReturn(hearingPojo);
+
+        final HearingCasesForDay result = hearingService.getHearingCasesForDay(date);
+
+        assertNotNull(result.getHearingCases());
+        assertThat(result.getHearingCases().get(0).getHearingId(), is(hearing.getId()));
+        assertThat(result.getHearingCases().get(0).getCourtCentreId(), is(courtCentreId));
+        assertThat(result.getHearingCases().get(0).getCourtRoomId(), is(roomId));
+        assertThat(result.getHearingCases().get(0).getProsecutionCases().get(0).getCaseId(), is(caseId));
+        assertThat(result.getHearingCases().get(0).getHearingDate(), is(LocalDate.now().toString()));
     }
 
     // ---- CHD-2687: display order of prosecution cases -----------------------------------------
