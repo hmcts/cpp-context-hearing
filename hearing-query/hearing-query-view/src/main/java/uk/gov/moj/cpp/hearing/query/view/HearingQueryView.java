@@ -100,7 +100,7 @@ public class HearingQueryView {
     private static final String FIELD_COURT_APPLICATIONS = "courtApplications";
     private static final String FIELD_APPLICATION_ID = "applicationId";
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingQueryView.class);
-    private static final String HEARING_CASES_FOR_DAY = "hearingCasesForDay";
+    private static final String FEATURE_HEARING_CASES_FOR_DAY = "hearingCasesForDay";
 
     @Inject
     private HearingService hearingService;
@@ -157,7 +157,7 @@ public class HearingQueryView {
         final JsonObject payload = envelope.payloadAsJsonObject();
         final LocalDate date = LocalDates.from(payload.getString(FIELD_DATE));
 
-        final HearingCasesForDay hearingCasesForDay = featureControlGuard.isFeatureEnabled(HEARING_CASES_FOR_DAY)
+        final HearingCasesForDay hearingCasesForDay = featureControlGuard.isFeatureEnabled(FEATURE_HEARING_CASES_FOR_DAY)
                 ? hearingService.getHearingCasesForDay(date)
                 : HearingCasesForDay.hearingCasesForDay().build();
         return envelop(hearingCasesForDay)
