@@ -24,6 +24,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.featurecontrol.FeatureControlGuard;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -99,6 +100,7 @@ public class HearingQueryView {
     private static final String FIELD_COURT_APPLICATIONS = "courtApplications";
     private static final String FIELD_APPLICATION_ID = "applicationId";
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingQueryView.class);
+    private static final String HEARING_CASES_FOR_DAY = "hearingCasesForDay";
 
     @Inject
     private HearingService hearingService;
@@ -132,6 +134,9 @@ public class HearingQueryView {
     @ServiceComponent(QUERY_VIEW)
     private Requester requester;
 
+    @Inject
+    private FeatureControlGuard featureControlGuard;
+
     public Envelope<GetHearings> findHearings(final JsonEnvelope envelope,
                                               final List<UUID> accessibleCasesAndApplicationIds,
                                               final boolean isDDJorRecorder) {
@@ -152,7 +157,9 @@ public class HearingQueryView {
         final JsonObject payload = envelope.payloadAsJsonObject();
         final LocalDate date = LocalDates.from(payload.getString(FIELD_DATE));
 
-        final HearingCasesForDay hearingCasesForDay = hearingService.getHearingCasesForDay(date);
+        final HearingCasesForDay hearingCasesForDay = featureControlGuard.isFeatureEnabled(HEARING_CASES_FOR_DAY)
+                ? hearingService.getHearingCasesForDay(date)
+                : HearingCasesForDay.hearingCasesForDay().build();
         return envelop(hearingCasesForDay)
                 .withName("hearing.get.hearing-cases-for-day")
                 .withMetadataFrom(envelope);
