@@ -9,6 +9,13 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <jta-data-source>java:/DS.hearing</jta-data-source>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+            <!-- Hibernate 6+ is stricter about lazy collection access outside an active session/transaction. The query
+                 response path walks lazy collections (e.g. Hearing.prosecutionCases, Hearing.hearingDefenceCounsels) after
+                 the tx has ended, which now throws LazyInitializationException. Enable temporary-session lazy loading to
+                 preserve the previous behaviour. Longer-term the hearing team may prefer fetch-joins / DTOs. -->
+            <property name="hibernate.enable_lazy_load_no_trans" value="true"/>
+        </properties>
     </persistence-unit>
 
 </persistence>

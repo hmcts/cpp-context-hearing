@@ -80,6 +80,7 @@ import uk.gov.moj.cpp.hearing.test.TestUtilities;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -506,7 +507,7 @@ public class ShareResultsV2IT extends AbstractIT {
                                 .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))
                                 .with(CourtCentre::getName, is(hearing.getCourtCentre().getName())))
                         .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
-                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneOffset.UTC)))
                                 .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
                                 .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
                         .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(hearing.getProsecutionCases()))

@@ -2688,4 +2688,27 @@ public class HearingServiceTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    void shouldConvertHearingEventTimesToUtcRegardlessOfJdbcType() throws Exception {
+        // The PostgreSQL JDBC driver (Java 25 / Hibernate 6+) returns timestamptz columns as OffsetDateTime;
+        // convertToZonedDateTime must handle it (and java.sql.Timestamp) and normalise everything to UTC.
+        final java.lang.reflect.Method method =
+                HearingService.class.getDeclaredMethod("convertToZonedDateTime", Object.class);
+        method.setAccessible(true);
+
+        final java.time.OffsetDateTime offsetDateTime =
+                java.time.OffsetDateTime.of(2026, 7, 13, 12, 30, 0, 0, java.time.ZoneOffset.ofHours(2));
+
+        final ZonedDateTime fromOffset = (ZonedDateTime) method.invoke(hearingService, offsetDateTime);
+        assertThat(fromOffset.getZone(), is(java.time.ZoneOffset.UTC));
+        assertThat(fromOffset.toInstant(), is(offsetDateTime.toInstant()));
+
+        final java.sql.Timestamp timestamp = java.sql.Timestamp.from(offsetDateTime.toInstant());
+        final ZonedDateTime fromTimestamp = (ZonedDateTime) method.invoke(hearingService, timestamp);
+        assertThat(fromTimestamp.getZone(), is(java.time.ZoneOffset.UTC));
+        assertThat(fromTimestamp.toInstant(), is(offsetDateTime.toInstant()));
+
+        assertNull(method.invoke(hearingService, new Object[]{null}));
+    }
 }

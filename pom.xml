@@ -33,13 +33,17 @@
         <stagingenforcement.version>17.104.81</stagingenforcement.version>
         <progression.version>17.0.258</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
+        <jaxb.runtime.version>4.0.5</jaxb.runtime.version>
         <jakarta.xml.bind-api.raml.version>2.3.2</jakarta.xml.bind-api.raml.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
         <usersgroups.version>17.104.48</usersgroups.version>
-        <listing.version>17.103.137</listing.version>
+        <!-- hearing-query-view + hearing-event-processor use listing-common (compile scope). Pinned to the jakarta
+             listing published on the 25.104.x track. Cross-context -M*-SNAPSHOT deps are accepted during the milestone
+             cycle on this track (mi-reportdata consumes hearing the same way); advance as the listing milestone moves. -->
+        <listing.version>25.104.0-M1-SNAPSHOT</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>17.0.96</systemdocgenerator.version>
         <access.control.common.providers.version>25.104.0-M5</access.control.common.providers.version>

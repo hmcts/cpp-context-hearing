@@ -260,14 +260,13 @@ public class HearingService {
 
     private ZonedDateTime convertToZonedDateTime(Object obj) {
         if (obj == null) return null;
-        if (obj instanceof ZonedDateTime) return (ZonedDateTime) obj;
-        if (obj instanceof String) {
-            return ZonedDateTime.parse((String) obj);
-        }
-        if (obj instanceof java.sql.Timestamp) {
-            return ((java.sql.Timestamp) obj).toInstant()
-                    .atZone(ZoneId.of("Europe/London"));
-        }
+        // All times are held in UTC; any display-local (e.g. Europe/London) conversion happens downstream at render time.
+        if (obj instanceof ZonedDateTime) return ((ZonedDateTime) obj).withZoneSameInstant(ZoneOffset.UTC);
+        // The PostgreSQL JDBC driver (Java 25 / Hibernate 6+) returns timestamptz columns as OffsetDateTime.
+        if (obj instanceof java.time.OffsetDateTime) return ((java.time.OffsetDateTime) obj).atZoneSameInstant(ZoneOffset.UTC);
+        if (obj instanceof java.time.Instant) return ((java.time.Instant) obj).atZone(ZoneOffset.UTC);
+        if (obj instanceof String) return ZonedDateTime.parse((String) obj).withZoneSameInstant(ZoneOffset.UTC);
+        if (obj instanceof java.sql.Timestamp) return ((java.sql.Timestamp) obj).toInstant().atZone(ZoneOffset.UTC);
         return null;
     }
 

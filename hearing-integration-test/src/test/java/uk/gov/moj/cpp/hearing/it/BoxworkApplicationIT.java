@@ -40,6 +40,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.HearingFactory;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -53,7 +54,7 @@ public class BoxworkApplicationIT extends AbstractIT {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithIsBoxHearing(true);
         final Hearing hearing = initiateHearingCommand.getHearing();
         final HearingDay hearingDay = hearing.getHearingDays().get(0);
-        hearingDay.setSittingDay(ZonedDateTime.now(ZoneId.of("UTC")).plusDays(1L));
+        hearingDay.setSittingDay(ZonedDateTime.now(ZoneOffset.UTC).plusDays(1L));
 
         final InitiateHearingCommandHelper hearingHelper = h(initiateHearing(getRequestSpec(), initiateHearingCommand));
         final UUID applicationId = hearingHelper.getHearing().getCourtApplications().get(0).getId();

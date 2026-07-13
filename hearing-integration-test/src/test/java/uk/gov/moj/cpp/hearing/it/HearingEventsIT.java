@@ -82,6 +82,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Month;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -111,7 +112,7 @@ import org.junit.jupiter.api.Test;
 @NotThreadSafe
 public class HearingEventsIT extends AbstractIT {
 
-    private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC"));
+    private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneOffset.UTC);
     private final UUID DEFENCE_COUNSEL_ID = randomUUID();
     private static final String DOCUMENT_TEXT = STRING.next();
     private final StringToJsonObjectConverter stringToJsonObjectConverter = new StringToJsonObjectConverter();
@@ -258,7 +259,7 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishMultipleEventsAndCorrection_shouldReturnInEventTimeOrder() {
 
-        final ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDate.of(2019, Month.APRIL, 10), LocalTime.of(22, 1), ZoneId.of("UTC"));
+        final ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDate.of(2019, Month.APRIL, 10), LocalTime.of(22, 1), ZoneOffset.UTC);
 
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
@@ -551,7 +552,7 @@ public class HearingEventsIT extends AbstractIT {
                         .withLastestHearingEventId(randomUUID()) // the new event id.
                         .withHearingEventDefinitionId(hearingEventDefinitionId)
                         .withEventTime(eventTime)
-                        .withLastModifiedTime(PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC")))
+                        .withLastModifiedTime(PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneOffset.UTC))
                         .withRecordedLabel(STRING.next())
                 , consumer).withDefenceCounselId(randomUUID()).build();
 
@@ -564,8 +565,8 @@ public class HearingEventsIT extends AbstractIT {
                                 .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getHearingEventId, Is.is(logEvent.getLatestHearingEventId()))
                                 .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getRecordedLabel, Is.is(logEvent.getRecordedLabel()))
                                 .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getLastHearingEventId, Is.is(hearingEventId))
-                                .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getEventTime, Is.is(logEvent.getEventTime().withZoneSameInstant(ZoneId.of("UTC"))))
-                                .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getLastModifiedTime, Is.is(logEvent.getLastModifiedTime().withZoneSameInstant(ZoneId.of("UTC"))))
+                                .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getEventTime, Is.is(logEvent.getEventTime().withZoneSameInstant(ZoneOffset.UTC)))
+                                .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getLastModifiedTime, Is.is(logEvent.getLastModifiedTime().withZoneSameInstant(ZoneOffset.UTC)))
 
                         )
                         .with(PublicHearingEventLogged::getCase, isBean(uk.gov.moj.cpp.hearing.eventlog.Case.class)
@@ -659,8 +660,8 @@ public class HearingEventsIT extends AbstractIT {
                         .withHearingEventId(randomUUID())
                         .withHearingEventDefinitionId(hearingEventDefinitionId)
                         .withHearingId(hearingId)
-                        .withEventTime(PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC")))
-                        .withLastModifiedTime(PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC")))
+                        .withEventTime(PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneOffset.UTC))
+                        .withLastModifiedTime(PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneOffset.UTC))
                         .withRecordedLabel(STRING.next())
                 , consumer).build();
 
@@ -743,8 +744,8 @@ public class HearingEventsIT extends AbstractIT {
                         .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getHearingEventId, Is.is(logEvent.getHearingEventId()))
                         .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getRecordedLabel, Is.is(logEvent.getRecordedLabel()))
                         .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getLastHearingEventId, Is.is(nullValue()))
-                        .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getEventTime, Is.is(logEvent.getEventTime().withZoneSameInstant(ZoneId.of("UTC"))))
-                        .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getLastModifiedTime, Is.is(logEvent.getLastModifiedTime().withZoneSameInstant(ZoneId.of("UTC"))))
+                        .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getEventTime, Is.is(logEvent.getEventTime().withZoneSameInstant(ZoneOffset.UTC)))
+                        .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getLastModifiedTime, Is.is(logEvent.getLastModifiedTime().withZoneSameInstant(ZoneOffset.UTC)))
 
                 )
                 .with(PublicHearingEventLogged::getCase, isBean(Case.class)

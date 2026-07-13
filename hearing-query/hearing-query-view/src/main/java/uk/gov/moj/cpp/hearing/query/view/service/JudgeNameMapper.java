@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.apache.commons.lang3.StringUtils;
 

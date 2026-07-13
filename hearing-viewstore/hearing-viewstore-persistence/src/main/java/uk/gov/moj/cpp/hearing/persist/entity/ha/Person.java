@@ -7,11 +7,15 @@ import uk.gov.justice.core.courts.HearingLanguage;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import uk.gov.moj.cpp.hearing.persist.type.UnspecifiedUuidUserType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+
+import org.hibernate.annotations.Type;
 
 
 @SuppressWarnings("squid:S1067")
@@ -21,7 +25,9 @@ public class Person {
     @Column(name = "additional_nationality_code")
     private String additionalNationalityCode;
 
+    // Column is uuid in associated_person but text in ha_defendant; bind via JDBC OTHER so PG infers the type. See UnspecifiedUuidUserType.
     @Column(name = "additional_nationality_id")
+    @Type(UnspecifiedUuidUserType.class)
     private UUID additionalNationalityId;
 
     @Embedded
@@ -59,7 +65,9 @@ public class Person {
     @Column(name = "national_insurance_number")
     private String nationalInsuranceNumber;
 
+    // Column is uuid in associated_person but text in ha_defendant; bind via JDBC OTHER so PG infers the type. See UnspecifiedUuidUserType.
     @Column(name = "nationality_id")
+    @Type(UnspecifiedUuidUserType.class)
     private UUID nationalityId;
 
     @Column(name = "nationality_code")

@@ -105,6 +105,7 @@ import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
 import java.io.IOException;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -1238,7 +1239,7 @@ public class UseCases {
                         .withHearingEventDefinitionId(hearingEventDefinitionId)
                         .withHearingId(initiateHearingCommand.getHearing().getId())
                         .withEventTime(eventTime)
-                        .withLastModifiedTime(PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC")))
+                        .withLastModifiedTime(PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneOffset.UTC))
                         .withRecordedLabel(recordedLabel)
                         .withDefenceCounselId(defenceCounselId)
                         .withAlterable(alterable)

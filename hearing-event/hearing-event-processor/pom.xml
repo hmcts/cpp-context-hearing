@@ -21,25 +21,6 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <!-- Xhibit JAXB tests: generated classes use javax.xml.bind annotations;
-                             Jakarta EE 10 JAXB runtime only recognises jakarta.xml.bind annotations.
-                             Xhibit XML marshaling is covered by integration tests. -->
-                        <exclude>**/XmlUtilsTest.java</exclude>
-                        <exclude>**/EmptyWebPageCourtCentreXmlGeneratorTest.java</exclude>
-                        <exclude>**/PublicDisplayCourtCentreXmlGeneratorTest.java</exclude>
-                        <exclude>**/WebPageCourtCentreXmlGeneratorTest.java</exclude>
-                        <!-- Xhibit Mockito tests: inline mocking of CommonXhibitReferenceDataService
-                             fails on Java 25 without add-opens for listing-common package. -->
-                        <exclude>**/XhibitFileNameGeneratorTest.java</exclude>
-                        <exclude>**/XhibitHelperTest.java</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>uk.gov.justice.framework-generators</groupId>
                 <artifactId>messaging-client-generator-plugin</artifactId>
                 <dependencies>
@@ -239,15 +220,12 @@
             <version>${sardine.version}</version>
         </dependency>
 
+        <!-- Jakarta JAXB runtime (glassfish) — provides org.glassfish.jaxb.runtime.v2.ContextFactory for out-of-container
+             xhibit XML marshalling tests; the pre-EE9 com.sun.xml.bind impl only provides the com.sun ContextFactory. -->
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>${jaxb.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
-            <version>${jaxb.version}</version>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>${jaxb.runtime.version}</version>
         </dependency>
 
         <dependency>
