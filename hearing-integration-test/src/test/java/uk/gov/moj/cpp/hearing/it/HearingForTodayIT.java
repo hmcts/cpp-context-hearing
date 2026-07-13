@@ -295,7 +295,7 @@ public class HearingForTodayIT extends AbstractIT {
                         .with(HearingCases::getHearingId, is(hearingId))
                         .with(HearingCases::getCourtCentreId, is(courtCentreId))
                         .with(HearingCases::getCourtRoomId, is(roomId))
-//                        .with(HearingCases::getHearingDate, is(LocalDate.now()))
+                        .with(HearingCases::getHearingDate, is(LocalDate.now().toString()))
                         )
                 )
         );
@@ -321,14 +321,12 @@ public class HearingForTodayIT extends AbstractIT {
                 .build();
 
         final Matcher<ResponseData> expectedConditions = allOf(status().is(OK), jsonPayloadMatchesBean(HearingCasesForDay.class, resultMatcher));
-        final ResponseData responseData = poll(requestParams)
+        poll(requestParams)
                 .timeout(timeout, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         expectedConditions
                 );
-
-        System.out.println(responseData.getPayload());
     }
 
 

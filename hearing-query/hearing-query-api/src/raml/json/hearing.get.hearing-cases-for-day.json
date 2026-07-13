@@ -1,24 +1,20 @@
 {
   "hearingCases": [
     {
-      "hearingCase": {
-        "hearingId": "9fc0a60e-44d0-45bd-a71b-dfc0953a6635",
-        "courtCentreId": "3dd43664-e771-44cd-abe9-bacbdc10ef79",
-        "courtRoomId": "1a0dfd61-565d-4811-9d4c-53c66a454f07",
-        "hearingDate": "2023-07-07",
-        "prosecutionCases": [
-          {
-            "caseSummary": {
-              "id": "e9edde4b-42d4-49df-b877-37eb68d6bbe9",
-              "prosecutionCaseIdentifier": {
-                "prosecutionAuthorityCode": "TFL",
-                "prosecutionAuthorityId": "904f367e-307b-4b9e-b532-19ece38ad501",
-                "caseURN": "82SK912711"
-              }
-            }
+      "courtCentreId": "5701c3af-746f-413e-b7fa-2f4dc9d10ac7",
+      "courtRoomId": "e45bd3b2-e564-4092-853f-38ab020fced1",
+      "hearingDate": "2026-07-13",
+      "hearingId": "7bb8b8f7-f534-4bd2-8584-1c5792dfa549",
+      "prosecutionCases": [
+        {
+          "caseId": "e278a9a5-a705-46fc-9c64-ce01a68a67c8",
+          "prosecutionCaseIdentifier": {
+            "prosecutionAuthorityCode": "code",
+            "prosecutionAuthorityId": "9eb29c83-9d0f-4e2c-ac0f-57ac99532dc2",
+            "caseURN": "caseURN"
           }
-        ]
-      }
+        }
+      ]
     }
   ]
 }
