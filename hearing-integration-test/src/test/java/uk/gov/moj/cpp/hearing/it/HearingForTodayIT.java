@@ -302,7 +302,7 @@ public class HearingForTodayIT extends AbstractIT {
                 )
         );
 
-        //adding dummy assertion
+        //adding dummy assertion, real checks are inside the isBean(...) matcher
         assertThat(response, containsString(hearingId.toString()));
     }
 

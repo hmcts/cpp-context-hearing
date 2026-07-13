@@ -400,7 +400,7 @@ public class HearingService {
                 .withHearingCases(hearingsForDay.stream()
                         .map(ha -> hearingJPAMapper.fromJPAMinimal(ha))
                         .filter(ha -> isNotEmpty(ha.getProsecutionCases()))
-                        .map(h -> getHearingCaseTransformer.hearingCases(h).build())
+                        .map(h -> getHearingCaseTransformer.hearingCases(h, date).build())
                         .distinct()
                         .toList())
                 .build();

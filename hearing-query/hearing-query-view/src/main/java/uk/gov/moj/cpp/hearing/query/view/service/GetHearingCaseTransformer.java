@@ -4,7 +4,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
@@ -12,17 +12,18 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.hearing.courts.HearingCases;
 import uk.gov.justice.hearing.courts.ProsecutionCases;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class GetHearingCaseTransformer {
 
-    public HearingCases.Builder hearingCases(final Hearing hearing) {
+    public HearingCases.Builder hearingCases(final Hearing hearing, final LocalDate date) {
 
         return HearingCases.hearingCases()
                 .withHearingId(hearing.getId())
                 .withCourtCentreId(hearing.getCourtCentre().getId())
                 .withCourtRoomId(hearing.getCourtCentre().getRoomId())
-                .withHearingDate(getHearingDate(hearing.getHearingDays()))
+                .withHearingDate(getHearingDate(hearing.getHearingDays(), date))
                 .withProsecutionCases(
                         hearing.getProsecutionCases() == null ? emptyList() :
                                 hearing.getProsecutionCases().stream()
@@ -32,9 +33,14 @@ public class GetHearingCaseTransformer {
                 );
     }
 
-    private String getHearingDate(final List<HearingDay> hearingDays) {
+    private String getHearingDate(final List<HearingDay> hearingDays, final LocalDate date) {
         if (isNotEmpty(hearingDays)) {
-            return hearingDays.get(0).getSittingDay().toLocalDate().toString();
+            return hearingDays.stream()
+                    .map(hd -> hd.getSittingDay().toLocalDate())
+                    .filter(date::equals)
+                    .findFirst()
+                    .map(LocalDate::toString)
+                    .orElse(hearingDays.get(0).getSittingDay().toLocalDate().toString()); // defensive fallback; shouldn't hit since the repo already filtered on this date
         }
         return null;
     }

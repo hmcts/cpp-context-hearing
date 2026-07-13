@@ -36,7 +36,7 @@ class GetHearingCaseTransformerTest {
                 .withProsecutionCases(null)
                 .build();
 
-        final HearingCases result = transformer.hearingCases(hearing).build();
+        final HearingCases result = transformer.hearingCases(hearing, LocalDate.now()).build();
 
         assertThat(result.getHearingId(), equalTo(hearingId));
         assertThat(result.getCourtCentreId(), equalTo(courtCentreId));
@@ -52,9 +52,10 @@ class GetHearingCaseTransformerTest {
         final UUID roomId = randomUUID();
         final UUID caseId = randomUUID();
         final String caseUrn = "caseUrn";
+        final ZonedDateTime sittingDay = ZonedDateTime.now();
         final Hearing hearing = hearing().withId(hearingId)
                 .withCourtCentre(courtCentre().withId(courtCentreId).withRoomId(roomId).build())
-                .withHearingDays(List.of(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build()))
+                .withHearingDays(List.of(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
                 .withProsecutionCases(List.of(
                         prosecutionCase().withId(caseId)
                                 .withProsecutionCaseIdentifier(prosecutionCaseIdentifier().withCaseURN(caseUrn).build())
@@ -62,7 +63,7 @@ class GetHearingCaseTransformerTest {
                 ))
                 .build();
 
-        final HearingCases result = transformer.hearingCases(hearing).build();
+        final HearingCases result = transformer.hearingCases(hearing, sittingDay.toLocalDate()).build();
 
         assertThat(result.getHearingId(), equalTo(hearingId));
         assertThat(result.getCourtCentreId(), equalTo(courtCentreId));
@@ -70,5 +71,22 @@ class GetHearingCaseTransformerTest {
         assertThat(result.getHearingDate(), is(LocalDate.now().toString()));
         assertThat(result.getProsecutionCases().get(0).getCaseId(), equalTo(caseId));
         assertThat(result.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN(), equalTo(caseUrn));
+    }
+
+    @Test
+    void shouldReturnHearingDateMatchingTheQueriedDayForMultiDayHearing() {
+        final ZonedDateTime today = ZonedDateTime.now();
+        final ZonedDateTime tomorrow = today.plusDays(1);
+        final Hearing hearing = hearing().withId(randomUUID())
+                .withCourtCentre(courtCentre().withId(randomUUID()).withRoomId(randomUUID()).build())
+                .withHearingDays(List.of(
+                        HearingDay.hearingDay().withSittingDay(today).build(),
+                        HearingDay.hearingDay().withSittingDay(tomorrow).build()))
+                .withProsecutionCases(List.of())
+                .build();
+
+        final HearingCases result = transformer.hearingCases(hearing, tomorrow.toLocalDate()).build();
+
+        assertThat(result.getHearingDate(), is(tomorrow.toLocalDate().toString()));
     }
 }
