@@ -5,6 +5,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -289,7 +291,7 @@ public class HearingForTodayIT extends AbstractIT {
 
         initiateHearing(getRequestSpec(), initiateHearingCommand);
 
-        getHearingCasesForDayPollForMatch(userId, hearingDate, 30, isBean(HearingCasesForDay.class)
+        final String response = getHearingCasesForDayPollForMatch(userId, hearingDate, 30, isBean(HearingCasesForDay.class)
                 .with(HearingCasesForDay::getHearingCases, hasSize(greaterThanOrEqualTo(1)))
                 .with(HearingCasesForDay::getHearingCases, hasItem(isBean(HearingCases.class)
                         .with(HearingCases::getHearingId, is(hearingId))
@@ -299,6 +301,9 @@ public class HearingForTodayIT extends AbstractIT {
                         )
                 )
         );
+
+        //adding dummy assertion
+        assertThat(response, containsString(hearingId.toString()));
     }
 
     private static void getHearingForTodayPollForMatch(final UUID userId, final long timeout, final BeanMatcher<GetHearings> resultMatcher) {
@@ -315,18 +320,18 @@ public class HearingForTodayIT extends AbstractIT {
                 );
     }
 
-    private static void getHearingCasesForDayPollForMatch(final UUID userId, final String date, final long timeout, final BeanMatcher<HearingCasesForDay> resultMatcher) {
+    private static String getHearingCasesForDayPollForMatch(final UUID userId, final String date, final long timeout, final BeanMatcher<HearingCasesForDay> resultMatcher) {
         final RequestParams requestParams = requestParams(getURL("hearing.get.hearing-cases-for-day", date), "application/vnd.hearing.get.hearing-cases-for-day+json")
                 .withHeader(HeaderConstants.USER_ID, userId)
                 .build();
 
         final Matcher<ResponseData> expectedConditions = allOf(status().is(OK), jsonPayloadMatchesBean(HearingCasesForDay.class, resultMatcher));
-        poll(requestParams)
+        return poll(requestParams)
                 .timeout(timeout, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         expectedConditions
-                );
+                ).getPayload();
     }
 
 
