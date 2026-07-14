@@ -27,13 +27,15 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.command.result.UpdateDaysResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.command.handler.service.validation.ResultsValidator;
-import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationRequest;
 import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationRequestMapper;
-import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationResponse;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationRequest;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationResponse;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ValidationErrors;
 import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsValidationFailed;
 
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -53,6 +55,13 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ShareResultsCommandHandler.class.getName());
+
+    /**
+     * Canonical wire format for the validation-failed event timestamp: always UTC, always seconds precision.
+     * Prevents OffsetDateTime.toString() from dropping ":00" seconds, which would make the persisted/published
+     * timestamp vary in shape and break exact-string matching by downstream consumers of the public event.
+     */
+    private static final DateTimeFormatter VALIDATION_TIMESTAMP_FORMAT = DateTimeFormatter.ISO_INSTANT;
 
     @Inject
     private Clock clock;
@@ -189,14 +198,14 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final EventStream eventStream = eventSource.getStreamById(command.getHearingId());
         final HearingAggregate hearingAggregate = aggregateService.get(eventStream, HearingAggregate.class);
 
-        final ValidationRequest validationRequest = validationRequestMapper.toValidationRequest(command, hearingAggregate.getHearing());
+        final DraftValidationRequest validationRequest = validationRequestMapper.toValidationRequest(command, hearingAggregate.getHearing());
         final String userIdString = userId != null ? userId.toString() : "";
 
-        final ValidationResponse validationResponse = resultsValidationClient.validate(validationRequest, userIdString);
+        final DraftValidationResponse validationResponse = resultsValidationClient.validate(validationRequest, userIdString);
         long end = System.currentTimeMillis();
         LOGGER.info("Validation API call took {} ms for userId={} and for hearingId={}", end - start, userIdString, validationRequest.getHearingId());
 
-        if (validationResponse.hasErrors()) {
+        if (!Boolean.TRUE.equals(validationResponse.getIsValid())) {
             LOGGER.info("Share blocked by validation errors for hearing {}", command.getHearingId());
             final ResultsValidationFailed failedEvent = buildValidationFailedEvent(command, userIdString, validationResponse);
             eventStream.append(Stream.of(failedEvent).map(enveloper.withMetadataFrom(envelope)));
@@ -245,25 +254,23 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
     private ResultsValidationFailed buildValidationFailedEvent(final ShareDaysResultsCommand command,
                                                                   final String userId,
-                                                                  final ValidationResponse validationResponse) {
+                                                                  final DraftValidationResponse validationResponse) {
         return ResultsValidationFailed.builder()
                 .withHearingId(command.getHearingId())
                 .withHearingDay(command.getHearingDay())
                 .withUserId(userId)
-                .withErrors(validationResponse.getErrors().stream()
-                        .map(e -> new ResultsValidationFailed.ValidationError(
-                                e.getRuleId(), e.getSeverity(), e.getMessage(),
-                                e.getAffectedOffences().stream()
-                                        .map(o -> o.getId())
-                                        .toList()))
-                        .toList())
-                .withWarnings(validationResponse.getWarnings().stream()
-                        .map(w -> new ResultsValidationFailed.ValidationError(
-                                w.getRuleId(), w.getSeverity(), w.getMessage(),
-                                w.getAffectedOffences().stream()
-                                        .map(o -> o.getId())
-                                        .toList()))
-                        .toList())
+                .withValidationId(validationResponse.getValidationId())
+                .withTimestamp(validationResponse.getTimestamp() != null
+                        ? VALIDATION_TIMESTAMP_FORMAT.format(validationResponse.getTimestamp()) : null)
+                .withMode(validationResponse.getMode())
+                .withRulesEvaluated(validationResponse.getRulesEvaluated() != null
+                        ? validationResponse.getRulesEvaluated() : List.of())
+                .withIsValid(Boolean.TRUE.equals(validationResponse.getIsValid()))
+                .withErrors(validationResponse.getErrors() != null
+                        ? validationResponse.getErrors() : new ValidationErrors())
+                .withWarnings(validationResponse.getWarnings() != null
+                        ? validationResponse.getWarnings() : List.of())
+                .withProcessingTimeMs(validationResponse.getProcessingTimeMs())
                 .build();
     }
 
