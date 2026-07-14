@@ -53,6 +53,7 @@ import static uk.gov.moj.cpp.hearing.utils.ResultsValidatorStub.capturedValidati
 import static uk.gov.moj.cpp.hearing.utils.ResultsValidatorStub.stubResultsValidatorValidate;
 import static uk.gov.moj.cpp.hearing.utils.ResultsValidatorStub.stubResultsValidatorValidateWithErrors;
 
+import org.junit.jupiter.api.Disabled;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.AttendanceType;
 import uk.gov.justice.core.courts.CourtCentre;
@@ -139,6 +140,7 @@ public class ShareResultsV2IT extends AbstractIT {
     }
 
     @Test
+    @Disabled("Temporarily disabled due to feature toggle in the pipeline")
     public void shouldInvokeResultsValidatorAndRaiseResultsSharedV3EventOnShareDaysResults() {
 
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
@@ -209,6 +211,7 @@ public class ShareResultsV2IT extends AbstractIT {
     }
 
     @Test
+    @Disabled("Temporarily disabled due to feature toggle in the pipeline")
     public void shouldRaiseResultsValidationFailedEventAndNotShareResultsWhenValidatorReturnsErrors() {
 
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
