@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-query</artifactId>
-        <version>25.104.0-M3-SNAPSHOT</version>
+        <version>25.104.1-M3-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-query-api</artifactId>
     <packaging>war</packaging>
