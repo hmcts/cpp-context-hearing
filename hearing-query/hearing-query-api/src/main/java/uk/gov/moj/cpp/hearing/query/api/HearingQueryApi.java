@@ -155,6 +155,21 @@ public class HearingQueryApi {
         return getJsonEnvelope(envelope);
     }
 
+    @Handles("hearing.get.hearings-check-in")
+    public JsonEnvelope getHearingCheckIn(final JsonEnvelope query) {
+
+        final Optional<String> optionalUserId = query.metadata().userId();
+        if (!optionalUserId.isPresent()) {
+            throw new BadRequestException(NO_LOGGED_IN_USER_ID_FOUND_TO_PERFORM_HEARINGS_SEARCH);
+        }
+        final String userId = optionalUserId.get();
+        final Permissions permissions = usersAndGroupsService.permissions(userId);
+        final boolean isDDJorRecorder = isDDJorRecorder(permissions);
+        final List<UUID> accessibleCasesAndApplications = getAccessibleCasesAndApplications(userId, isDDJorRecorder, permissions);
+        final Envelope<GetHearings> envelope = this.hearingQueryView.getHearingCheckIn(query, accessibleCasesAndApplications, isDDJorRecorder);
+        return getJsonEnvelope(envelope);
+    }
+
     @Handles("hearing.get.hearings-for-today")
     public JsonEnvelope findHearingsForToday(final JsonEnvelope query) {
         final Envelope<GetHearings> envelope = this.hearingQueryView.findHearingsForToday(query);
