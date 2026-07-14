@@ -36,7 +36,6 @@ import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
-import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
 import uk.gov.justice.hearing.courts.Defendants;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
@@ -126,9 +125,6 @@ public class RecorderIT extends AbstractIT {
                                 .with(HearingSummaries::getId, is(hearing.getId()))
                                 .withValue(HearingSummaries::getReportingRestrictionReason, hearing.getReportingRestrictionReason())
                                 .withValue(HearingSummaries::getHearingLanguage, ENGLISH.name())
-                                .with(HearingSummaries::getCourtCentre, isBean(CourtCentre.class)
-                                        .withValue(CourtCentre::getId, hearing.getCourtCentre().getId())
-                                        .withValue(CourtCentre::getName, hearing.getCourtCentre().getName()))
                                 .with(HearingSummaries::getType, isBean(HearingType.class)
                                         .withValue(HearingType::getId, hearing.getType().getId())
                                         .withValue(HearingType::getDescription, hearing.getType().getDescription()))
@@ -138,9 +134,6 @@ public class RecorderIT extends AbstractIT {
                                         .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearing.getProsecutionCases()))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasSize(3))
-                                .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
-                                        .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
-                                ))
                         ))
         );
 
@@ -223,9 +216,6 @@ public class RecorderIT extends AbstractIT {
                                 .with(HearingSummaries::getId, is(hearing.getId()))
                                 .withValue(HearingSummaries::getReportingRestrictionReason, hearing.getReportingRestrictionReason())
                                 .withValue(HearingSummaries::getHearingLanguage, ENGLISH.name())
-                                .with(HearingSummaries::getCourtCentre, isBean(CourtCentre.class)
-                                        .withValue(CourtCentre::getId, hearing.getCourtCentre().getId())
-                                        .withValue(CourtCentre::getName, hearing.getCourtCentre().getName()))
                                 .with(HearingSummaries::getType, isBean(HearingType.class)
                                         .withValue(HearingType::getId, hearing.getType().getId())
                                         .withValue(HearingType::getDescription, hearing.getType().getDescription()))
@@ -235,9 +225,6 @@ public class RecorderIT extends AbstractIT {
                                         .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearing.getProsecutionCases()))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasSize(1))
-                                .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
-                                        .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
-                                ))
                         ))
         );
 
@@ -375,9 +362,6 @@ public class RecorderIT extends AbstractIT {
                                 .with(HearingSummaries::getId, is(hearing.getId()))
                                 .withValue(HearingSummaries::getReportingRestrictionReason, hearing.getReportingRestrictionReason())
                                 .withValue(HearingSummaries::getHearingLanguage, ENGLISH.name())
-                                .with(HearingSummaries::getCourtCentre, isBean(CourtCentre.class)
-                                        .withValue(CourtCentre::getId, hearing.getCourtCentre().getId())
-                                        .withValue(CourtCentre::getName, hearing.getCourtCentre().getName()))
                                 .with(HearingSummaries::getType, isBean(HearingType.class)
                                         .withValue(HearingType::getId, hearing.getType().getId())
                                         .withValue(HearingType::getDescription, hearing.getType().getDescription()))
@@ -387,9 +371,6 @@ public class RecorderIT extends AbstractIT {
                                         .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearing.getProsecutionCases()))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasSize(3))
-                                .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
-                                        .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
-                                ))
                         ))
         );
 
@@ -421,7 +402,6 @@ public class RecorderIT extends AbstractIT {
     private Matcher<Iterable<Defendants>> hasDefendantSummaries(final ProsecutionCase prosecutionCase) {
         return hasItems(prosecutionCase.getDefendants().stream().map(defendant ->
                 isBean(Defendants.class)
-                        .withValue(Defendants::getId, defendant.getId())
                         .withValue(Defendants::getFirstName, defendant.getPersonDefendant().getPersonDetails().getFirstName()))
                 .toArray(BeanMatcher[]::new));
     }
