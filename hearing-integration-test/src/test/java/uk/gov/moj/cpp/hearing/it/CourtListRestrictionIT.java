@@ -166,9 +166,10 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
                 withJsonPath("$.defendantIds", hasSize(1)),
                 withJsonPath("$.restrictCourtList", is(true)))));
 
-        // Wait for defendant restriction to land in the projection before publishing
+        // Wait for defendant restriction to land in the projection before publishing.
+        // The restricted defendant is retained (with a masked name), not dropped, so it is still present in the projection.
         courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
-                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants", hasSize(0)));
+                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants", hasSize(1)));
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
@@ -180,15 +181,22 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
         String filePayloadForPubDisplay = getSentXmlForPubDisplay();
 
         final String expectedCasesXMLValueForWeb = "<caseDetails>";
-        String expectedDefendantXMLValueForWeb = "<defendants/>";
+        // Restricted defendant is masked (present with ****** name), NOT dropped - so the defendants element is
+        // populated ("<defendants>") rather than an empty self-closing "<defendants/>", and the name fields carry ******.
+        final String maskedFirstName = "<firstname>******</firstname>";
+        final String maskedLastName = "<lastname>******</lastname>";
 
         assertThat(filePayload, containsString(E20903_PCO_TYPE));
         assertThat(filePayload, containsString(expectedCasesXMLValueForWeb));
-        assertThat(filePayload, containsString(expectedDefendantXMLValueForWeb));
+        assertThat(filePayload, containsString("<defendants>"));
+        assertThat(filePayload, containsString(maskedFirstName));
+        assertThat(filePayload, containsString(maskedLastName));
 
         assertThat(filePayloadForPubDisplay, containsString(E20903_PCO_TYPE));
         assertThat(filePayloadForPubDisplay, containsString(expectedCasesXMLValueForWeb));
-        assertThat(filePayloadForPubDisplay, containsString(expectedDefendantXMLValueForWeb));
+        assertThat(filePayloadForPubDisplay, containsString("<defendants>"));
+        assertThat(filePayloadForPubDisplay, containsString(maskedFirstName));
+        assertThat(filePayloadForPubDisplay, containsString(maskedLastName));
 
         // disable restriction
         courtListRestrictionSteps.hideDefendantFromXhibit(initiateHearingCommandHelper.getHearing(), false);
@@ -212,7 +220,7 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
 
         filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         filePayloadForPubDisplay = getSentXmlForPubDisplay();
-        expectedDefendantXMLValueForWeb = "<defendants>";
+        final String expectedDefendantXMLValueForWeb = "<defendants>";
 
         assertThat(filePayload, containsString(E20903_PCO_TYPE));
         assertThat(filePayload, containsString(expectedCasesXMLValueForWeb));
@@ -386,9 +394,10 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
                 caseId, randomUUID(), courtRoom2Id, randomUUID().toString(),
                 OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId, eventTime.toLocalDate());
 
-        // Wait for the young-defendant restriction to land in the projection before publishing
+        // Wait for the young-defendant restriction to land in the projection before publishing.
+        // The youth is retained (with a masked name), not dropped, so it is still present in the projection.
         courtListRestrictionSteps.waitForRestrictionProjection(courtCentreId, eventTime.toLocalDate(),
-                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants", hasSize(0)));
+                withJsonPath("$.court.courtSites[0].courtRooms[0].cases.casesDetails[0].defendants", hasSize(1)));
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
@@ -400,14 +409,22 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
         final String filePayloadForPubDisplay = getSentXmlForPubDisplay();
 
         final String expectedCasesXMLValueForWeb = "<caseDetails>";
-        final String expectedDefendantXMLValueForWeb = "<defendants/>";
+        // The youth defendant is masked (present with ****** name), NOT dropped - so the defendants element is
+        // populated ("<defendants>") rather than an empty self-closing "<defendants/>" that XHIBIT cannot display,
+        // and the name fields carry ******.
+        final String maskedFirstName = "<firstname>******</firstname>";
+        final String maskedLastName = "<lastname>******</lastname>";
 
         assertThat(filePayload, containsString(E20903_PCO_TYPE));
         assertThat(filePayload, containsString(expectedCasesXMLValueForWeb));
-        assertThat(filePayload, containsString(expectedDefendantXMLValueForWeb));
+        assertThat(filePayload, containsString("<defendants>"));
+        assertThat(filePayload, containsString(maskedFirstName));
+        assertThat(filePayload, containsString(maskedLastName));
         assertThat(filePayloadForPubDisplay, containsString(E20903_PCO_TYPE));
         assertThat(filePayloadForPubDisplay, containsString(expectedCasesXMLValueForWeb));
-        assertThat(filePayloadForPubDisplay, containsString(expectedDefendantXMLValueForWeb));
+        assertThat(filePayloadForPubDisplay, containsString("<defendants>"));
+        assertThat(filePayloadForPubDisplay, containsString(maskedFirstName));
+        assertThat(filePayloadForPubDisplay, containsString(maskedLastName));
     }
 
 }

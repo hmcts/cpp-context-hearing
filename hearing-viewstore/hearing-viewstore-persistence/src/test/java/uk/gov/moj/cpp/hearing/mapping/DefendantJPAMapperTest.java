@@ -166,21 +166,49 @@ public class DefendantJPAMapperTest {
 
     @Test
     public void testFromJPAMapWithDefendantCourtListRestriction() {
-        uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant personDefendant1 = new uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant();
-        uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity1 = new uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant();
-        UUID hearingID = UUID.randomUUID();
+        final UUID hearingID = UUID.randomUUID();
+
+        // Court-list-restricted (e.g. youth) defendant: name is masked, defendant is retained (not dropped)
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Person person1 = new uk.gov.moj.cpp.hearing.persist.entity.ha.Person();
+        person1.setFirstName("John");
+        person1.setMiddleName("Quentin");
+        person1.setLastName("Smith");
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant personDefendant1 = new uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant();
+        personDefendant1.setPersonDetails(person1);
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity1 = new uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant();
         defendantEntity1.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingID));
         defendantEntity1.setPersonDefendant(personDefendant1);
         defendantEntity1.setCourtListRestricted(true);
 
-        uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant personDefendant2 = new uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant();
-        uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity2 = new uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant();
+        // Non-restricted defendant: name is unchanged
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Person person2 = new uk.gov.moj.cpp.hearing.persist.entity.ha.Person();
+        person2.setFirstName("Jane");
+        person2.setLastName("Doe");
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant personDefendant2 = new uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant();
+        personDefendant2.setPersonDetails(person2);
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity2 = new uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant();
         defendantEntity2.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingID));
         defendantEntity2.setPersonDefendant(personDefendant2);
         defendantEntity2.setCourtListRestricted(false);
 
-        List<Defendant> results = defendantJPAMapper.fromJPAWithCourtListRestrictions(asSet(defendantEntity1, defendantEntity2));
-        Assert.assertEquals(1, results.size());
+        final List<Defendant> results = defendantJPAMapper.fromJPAWithCourtListRestrictions(asSet(defendantEntity1, defendantEntity2));
+
+        // Both defendants are retained - the restricted one is masked, not dropped (consistent with the listing court-list feed)
+        Assert.assertEquals(2, results.size());
+
+        final Defendant restricted = results.stream()
+                .filter(d -> "******".equals(d.getPersonDefendant().getPersonDetails().getFirstName()))
+                .findFirst().orElse(null);
+        assertNotNull("Restricted defendant should be present with a masked name, not dropped", restricted);
+        Assert.assertEquals("******", restricted.getPersonDefendant().getPersonDetails().getFirstName());
+        Assert.assertEquals("******", restricted.getPersonDefendant().getPersonDetails().getMiddleName());
+        Assert.assertEquals("******", restricted.getPersonDefendant().getPersonDetails().getLastName());
+
+        final Defendant unrestricted = results.stream()
+                .filter(d -> "Jane".equals(d.getPersonDefendant().getPersonDetails().getFirstName()))
+                .findFirst().orElse(null);
+        assertNotNull("Non-restricted defendant should be present with its real name", unrestricted);
+        Assert.assertEquals("Doe", unrestricted.getPersonDefendant().getPersonDetails().getLastName());
     }
 
     @Test
