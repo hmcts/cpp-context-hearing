@@ -14,12 +14,14 @@ import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingCasesForDay;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
 import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.featurecontrol.FeatureControlGuard;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -80,6 +82,7 @@ public class HearingQueryApi {
     private static final String GET_HEARING_EVENT_LOG_COUNT = "hearing.get-hearing-event-log-count";
     private static final String GET_HEARING_EVENT_LOG_FOR_DOCUMENTS= "hearing.get-hearing-event-log-for-documents";
     private static final String NO_LOGGED_IN_USER_ID_FOUND_TO_PERFORM_HEARINGS_SEARCH = "No Logged in UserId found to perform hearings search";
+    private static final String FEATURE_HEARING_CASES_FOR_DAY = "hearingCasesForDay";
 
     @Inject
     private Requester requester;
@@ -140,6 +143,9 @@ public class HearingQueryApi {
     @Inject
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
+    @Inject
+    private FeatureControlGuard featureControlGuard;
+
     @Handles("hearing.get.hearings")
     public JsonEnvelope findHearings(final JsonEnvelope query) {
 
@@ -160,6 +166,10 @@ public class HearingQueryApi {
         final Optional<String> optionalUserId = query.metadata().userId();
         if (optionalUserId.isEmpty()) {
             throw new BadRequestException(NO_LOGGED_IN_USER_ID_FOUND_TO_PERFORM_HEARINGS_SEARCH);
+        }
+
+        if (!featureControlGuard.isFeatureEnabled(FEATURE_HEARING_CASES_FOR_DAY)){
+            throw new AccessControlViolationException("Forbidden! 'get.hearing-cases-for-day' feature not enabled.");
         }
 
         final Envelope<HearingCasesForDay> envelope = this.hearingQueryView.findHearingCasesForDay(query);

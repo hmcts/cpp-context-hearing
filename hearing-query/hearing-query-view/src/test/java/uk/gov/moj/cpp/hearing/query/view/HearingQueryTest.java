@@ -13,7 +13,6 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -62,7 +61,6 @@ import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.featurecontrol.FeatureControlGuard;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
@@ -193,8 +191,6 @@ public class HearingQueryTest {
 
     @Spy
     private StringToJsonObjectConverter stringToJsonObjectConverter;
-    @Mock
-    private FeatureControlGuard featureControlGuard;
 
     private LocalDate date(String strDate) {
         return LocalDate.parse(strDate, dateTimeFormatter);
@@ -1076,27 +1072,10 @@ public class HearingQueryTest {
                         .add("date", date.toString())
                         .build());
         when(hearingService.getHearingCasesForDay(date)).thenReturn(hearingCasesForDay().withHearingCases(List.of(hearingCases().withHearingId(randomUUID()).build())).build());
-        when(featureControlGuard.isFeatureEnabled("hearingCasesForDay")).thenReturn(true);
 
         final Envelope<HearingCasesForDay> hearings = target.findHearingCasesForDay(envelope);
 
         assertThat(hearings.payload().getHearingCases().size(), is(1));
-        assertThat(hearings.metadata().name(), is("hearing.get.hearing-cases-for-day"));
-    }
-
-    @Test
-    public void findHearingCasesForDayWhenFeatureControlGuardDisabled() {
-        final LocalDate date = LocalDate.now();
-        final JsonEnvelope envelope = envelopeFrom(metadataBuilder().withId(randomUUID())
-                        .withName("hearing.get.hearing-cases-for-day"),
-                createObjectBuilder()
-                        .add("date", date.toString())
-                        .build());
-        when(featureControlGuard.isFeatureEnabled("hearingCasesForDay")).thenReturn(false);
-
-        final Envelope<HearingCasesForDay> hearings = target.findHearingCasesForDay(envelope);
-
-        assertThat(hearings.payload().getHearingCases(), is(nullValue()));
         assertThat(hearings.metadata().name(), is("hearing.get.hearing-cases-for-day"));
     }
 

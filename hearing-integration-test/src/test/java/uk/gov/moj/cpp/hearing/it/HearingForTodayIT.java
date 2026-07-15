@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -37,6 +38,7 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsMagistrateUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
+import static uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber.stubFeaturesFor;
 
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.BreachType;
@@ -73,6 +75,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 
@@ -282,6 +285,8 @@ public class HearingForTodayIT extends AbstractIT {
         final UUID userId = randomUUID();
         setupAsSystemUser(userId);
         stubUsersAndGroupsUserRoles(getLoggedInUser());
+        final ImmutableMap<String, Boolean> features = of("hearingCasesForDay", true);
+        stubFeaturesFor("hearing", features);
 
         final UUID hearingId = randomUUID();
         final UUID courtCentreId = randomUUID();
