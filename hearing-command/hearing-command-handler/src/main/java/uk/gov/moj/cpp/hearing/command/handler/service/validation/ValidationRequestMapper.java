@@ -114,6 +114,7 @@ public class ValidationRequestMapper {
                 .offenceId(uuidToString(line.getOffenceId()))
                 .consecutiveToOffence(extractConsecutiveToOffence(line.getPrompts()))
                 .isConcurrent(extractIsConcurrent(line.getPrompts()))
+                .category(line.getCategory())
                 .build();
     }
 
