@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
 import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -10,11 +12,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +29,7 @@ import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
 import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
@@ -57,6 +64,8 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListRespons
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
+
+import javax.ws.rs.BadRequestException;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -199,6 +208,9 @@ public class HearingQueryApiTest {
 
     @Mock
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    @Mock
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     @Mock
     private Permissions mockPermissions;
@@ -481,6 +493,41 @@ public class HearingQueryApiTest {
         verify(hearingEventQueryView, times(0)).getHearingEventLogCount(any(JsonEnvelope.class));
     }
 
+    @Test
+    public void shouldFindHearingForManageHearing() {
+        final UUID userId = randomUUID();
+        final UUID hearingId = randomUUID();
+
+        final JsonEnvelope query = mock(JsonEnvelope.class, RETURNS_DEEP_STUBS);
+        when(query.metadata().userId()).thenReturn(Optional.of(userId.toString()));
+        when(query.payloadAsJsonObject()).thenReturn(createObjectBuilder().add("hearingId", hearingId.toString()).build());
+
+        when(referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes()).thenReturn(crackedIneffectiveVacatedTrialTypes);
+        when(usersAndGroupsService.permissions(userId.toString())).thenReturn(mockPermissions);
+        when(ddjChecker.isDDJ(mockPermissions)).thenReturn(false);
+        when(recorderChecker.isRecorder(mockPermissions)).thenReturn(false);
+        when(hearingQueryView.findHearing(any(), any(), any(), anyBoolean())).thenReturn(mockHearingDetailsResponseEnvelope);
+        when(mockEnvelopePayloadTypeConverter.convert(any(), any(Class.class))).thenReturn(mockJsonValueEnvelope);
+
+        final JsonEnvelope repackedEnvelope = EnvelopeFactory.createEnvelope("hearing.get.hearing", createObjectBuilder().add("hearingId", hearingId.toString()).build());
+        when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(repackedEnvelope);
+
+        final HearingDetailsResponse hearingDetailsResponse = mock(HearingDetailsResponse.class);
+        final HearingDetailsResponse filteredResponse = mock(HearingDetailsResponse.class);
+        final javax.json.JsonObject filteredJsonObject = createObjectBuilder().add("hearingId", hearingId.toString()).build();
+
+        when(jsonObjectToObjectConverter.convert(any(javax.json.JsonObject.class), eq(HearingDetailsResponse.class))).thenReturn(hearingDetailsResponse);
+        when(hearingService.filterOutProsecutionCases(hearingDetailsResponse)).thenReturn(filteredResponse);
+        when(objectToJsonObjectConverter.convert(filteredResponse)).thenReturn(filteredJsonObject);
+
+        final JsonEnvelope result = hearingQueryApi.findHearingForManageHearing(query);
+
+        verify(hearingService).validateUserPermissionForApplicationType(query);
+        verify(hearingService).filterOutProsecutionCases(hearingDetailsResponse);
+        verify(objectToJsonObjectConverter).convert(filteredResponse);
+        assertThat(result, is(notNullValue()));
+    }
+
     private Set<UUID> buildPIEventCache() {
         final UUID cpHearingEventId_1 = randomUUID();
         final UUID cpHearingEventId_2 = UUID.fromString("abdaeb88-8952-4c07-99c4-d27c39d4e63a");
@@ -745,5 +792,125 @@ public class HearingQueryApiTest {
     public void shouldInitPIEventMapperCacheAndReturnCppHearingEventIds(){
         Set<UUID> set =  piEventMapperCache1.getCppHearingEventIds();
         assertThat(set.size(),is(32));
+    }
+
+    // ── getHearingCheckIn ──────────────────────────────────────────────────
+
+    @Test
+    public void getHearingCheckIn_shouldDelegateToViewAndReturnRepacked() {
+        final UUID userId = randomUUID();
+
+        final JsonEnvelope query = mock(JsonEnvelope.class, RETURNS_DEEP_STUBS);
+        when(query.metadata().userId()).thenReturn(Optional.of(userId.toString()));
+
+        when(usersAndGroupsService.permissions(userId.toString())).thenReturn(mockPermissions);
+        when(ddjChecker.isDDJ(mockPermissions)).thenReturn(false);
+        when(recorderChecker.isRecorder(mockPermissions)).thenReturn(false);
+        when(hearingQueryView.getHearingCheckIn(eq(query), anyList(), eq(false)))
+                .thenReturn(mockGetHearingsEnvelope);
+        when(mockEnvelopePayloadTypeConverter.convert(any(), any(Class.class)))
+                .thenReturn(mockJsonValueEnvelope);
+        when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(mockJsonEnvelope);
+
+        final JsonEnvelope result = hearingQueryApi.getHearingCheckIn(query);
+
+        verify(usersAndGroupsService).permissions(userId.toString());
+        verify(hearingQueryView).getHearingCheckIn(eq(query), anyList(), eq(false));
+        verify(mockJsonEnvelopeRepacker).repack(mockJsonValueEnvelope);
+        assertThat(result, is(mockJsonEnvelope));
+    }
+
+    @Test
+    public void getHearingCheckIn_shouldThrowBadRequestExceptionWhenNoUserIdPresent() {
+        final JsonEnvelope query = mock(JsonEnvelope.class, RETURNS_DEEP_STUBS);
+        when(query.metadata().userId()).thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class, () -> hearingQueryApi.getHearingCheckIn(query));
+
+        verify(usersAndGroupsService, never()).permissions(anyString());
+        verify(hearingQueryView, never()).getHearingCheckIn(any(), any(), anyBoolean());
+    }
+
+    @Test
+    public void getHearingCheckIn_shouldFetchAccessibleCasesAndApplicationsWhenUserIsDDJ() {
+        final UUID userId = randomUUID();
+        final List<UUID> accessibleCaseIds = singletonList(randomUUID());
+        final List<UUID> accessibleAppIds = singletonList(randomUUID());
+
+        final JsonEnvelope query = mock(JsonEnvelope.class, RETURNS_DEEP_STUBS);
+        when(query.metadata().userId()).thenReturn(Optional.of(userId.toString()));
+
+        when(usersAndGroupsService.permissions(userId.toString())).thenReturn(mockPermissions);
+        when(ddjChecker.isDDJ(mockPermissions)).thenReturn(true);
+        when(recorderChecker.isRecorder(mockPermissions)).thenReturn(false);
+        when(accessibleCases.findCases(mockPermissions, userId.toString())).thenReturn(accessibleCaseIds);
+        when(accessibleApplications.findApplications(mockPermissions, userId.toString())).thenReturn(accessibleAppIds);
+        when(hearingQueryView.getHearingCheckIn(eq(query), anyList(), eq(true)))
+                .thenReturn(mockGetHearingsEnvelope);
+        when(mockEnvelopePayloadTypeConverter.convert(any(), any(Class.class)))
+                .thenReturn(mockJsonValueEnvelope);
+        when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(mockJsonEnvelope);
+
+        hearingQueryApi.getHearingCheckIn(query);
+
+        verify(accessibleCases).findCases(mockPermissions, userId.toString());
+        verify(accessibleApplications).findApplications(mockPermissions, userId.toString());
+        verify(hearingQueryView).getHearingCheckIn(eq(query), anyList(), eq(true));
+    }
+
+    @Test
+    public void getHearingCheckIn_shouldFetchAccessibleCasesAndApplicationsWhenUserIsRecorder() {
+        final UUID userId = randomUUID();
+        final List<UUID> accessibleCaseIds = singletonList(randomUUID());
+        final List<UUID> accessibleAppIds = singletonList(randomUUID());
+
+        final JsonEnvelope query = mock(JsonEnvelope.class, RETURNS_DEEP_STUBS);
+        when(query.metadata().userId()).thenReturn(Optional.of(userId.toString()));
+
+        when(usersAndGroupsService.permissions(userId.toString())).thenReturn(mockPermissions);
+        when(ddjChecker.isDDJ(mockPermissions)).thenReturn(false);
+        when(recorderChecker.isRecorder(mockPermissions)).thenReturn(true);
+        when(accessibleCases.findCases(mockPermissions, userId.toString())).thenReturn(accessibleCaseIds);
+        when(accessibleApplications.findApplications(mockPermissions, userId.toString())).thenReturn(accessibleAppIds);
+        when(hearingQueryView.getHearingCheckIn(eq(query), anyList(), eq(true)))
+                .thenReturn(mockGetHearingsEnvelope);
+        when(mockEnvelopePayloadTypeConverter.convert(any(), any(Class.class)))
+                .thenReturn(mockJsonValueEnvelope);
+        when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(mockJsonEnvelope);
+
+        hearingQueryApi.getHearingCheckIn(query);
+
+        verify(accessibleCases).findCases(mockPermissions, userId.toString());
+        verify(accessibleApplications).findApplications(mockPermissions, userId.toString());
+        verify(hearingQueryView).getHearingCheckIn(eq(query), anyList(), eq(true));
+    }
+
+    @Test
+    public void getHearingCheckIn_shouldNotFetchAccessibleCasesWhenUserIsNeitherDDJNorRecorder() {
+        final UUID userId = randomUUID();
+
+        final JsonEnvelope query = mock(JsonEnvelope.class, RETURNS_DEEP_STUBS);
+        when(query.metadata().userId()).thenReturn(Optional.of(userId.toString()));
+
+        when(usersAndGroupsService.permissions(userId.toString())).thenReturn(mockPermissions);
+        when(ddjChecker.isDDJ(mockPermissions)).thenReturn(false);
+        when(recorderChecker.isRecorder(mockPermissions)).thenReturn(false);
+        when(hearingQueryView.getHearingCheckIn(eq(query), eq(emptyList()), eq(false)))
+                .thenReturn(mockGetHearingsEnvelope);
+        when(mockEnvelopePayloadTypeConverter.convert(any(), any(Class.class)))
+                .thenReturn(mockJsonValueEnvelope);
+        when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(mockJsonEnvelope);
+
+        hearingQueryApi.getHearingCheckIn(query);
+
+        verify(accessibleCases, never()).findCases(any(), anyString());
+        verify(accessibleApplications, never()).findApplications(any(), anyString());
+        verify(hearingQueryView).getHearingCheckIn(eq(query), eq(emptyList()), eq(false));
+    }
+
+    @Test
+    public void getHearingCheckIn_handlesAnnotationShouldBeHearingGetHearingsCheckIn() {
+        final String handlesValue = apiMethodsToHandlerNames.get("getHearingCheckIn");
+        assertThat(handlesValue, is("hearing.get.hearings-check-in"));
     }
 }

@@ -348,17 +348,7 @@ public class HearingService {
             return new GetHearings(null);
         }
 
-        List<Hearing> source;
-        if (null == roomId) {
-            source = hearingRepository.findHearings(date, courtCentreId);
-        } else {
-            source = hearingRepository.findByFilters(date, courtCentreId, roomId);
-        }
-
-        if (isDDJorRecorder) {
-            source = filterHearingsBasedOnPermissions.filterHearings(source, accessibleCasesAndApplicationIds);
-        }
-
+        final List<Hearing> source = loadAndFilterHearings(date, courtCentreId, roomId, accessibleCasesAndApplicationIds, isDDJorRecorder);
         if (isEmpty(source)) {
             return new GetHearings(null);
         }
@@ -392,6 +382,44 @@ public class HearingService {
                 .build();
     }
 
+
+    @Transactional
+    public GetHearings getHearingsForCheckIn(final LocalDate date, final UUID courtCentreId, final UUID roomId,
+                                             final List<UUID> accessibleCasesAndApplicationIds,
+                                             final boolean isDDJorRecorder) {
+        if (null == date || null == courtCentreId) {
+            return new GetHearings(null);
+        }
+
+        final List<Hearing> source = loadAndFilterHearings(date, courtCentreId, roomId, accessibleCasesAndApplicationIds, isDDJorRecorder);
+        if (isEmpty(source)) {
+            return new GetHearings(null);
+        }
+
+        return GetHearings.getHearings()
+                .withHearingSummaries(source.stream()
+                        .map(ha -> hearingJPAMapper.fromJPA(ha))
+                        .filter(ha -> isNotEmpty(ha.getProsecutionCases()))
+                        .map(h -> getHearingTransformer.summaryForCheckIn(h).build())
+                        .collect(toList()))
+                .build();
+    }
+
+    private List<Hearing> loadAndFilterHearings(final LocalDate date, final UUID courtCentreId,
+                                                final UUID roomId,
+                                                final List<UUID> accessibleCasesAndApplicationIds,
+                                                final boolean isDDJorRecorder) {
+        List<Hearing> source;
+        if (null == roomId) {
+            source = hearingRepository.findHearings(date, courtCentreId);
+        } else {
+            source = hearingRepository.findByFilters(date, courtCentreId, roomId);
+        }
+        if (isDDJorRecorder) {
+            source = filterHearingsBasedOnPermissions.filterHearings(source, accessibleCasesAndApplicationIds);
+        }
+        return source;
+    }
 
     public GetHearings getHearingsForToday(final LocalDate date, final UUID userId) {
         if (null == date || null == userId) {
@@ -1172,4 +1200,33 @@ public class HearingService {
         return response.payload().getBoolean("hasPermission");
     }
 
+    public HearingDetailsResponse filterOutProsecutionCases(final HearingDetailsResponse payload) {
+        if (isNotApplicationHearing(payload.getHearing()) || isApplicationHasNoOffences(payload.getHearing())) {
+            return payload;
+        }
+
+        payload.setHearing(buildHearingWithoutProsecutionCases(payload.getHearing()));
+
+        return payload;
+    }
+
+    private uk.gov.justice.core.courts.Hearing buildHearingWithoutProsecutionCases(final uk.gov.justice.core.courts.Hearing hearing) {
+        return uk.gov.justice.core.courts.Hearing.hearing()
+                .withValuesFrom(hearing)
+                .withProsecutionCases(null)
+                .build();
+    }
+
+    private boolean isApplicationHasNoOffences(final uk.gov.justice.core.courts.Hearing hearing) {
+        if (isNull(hearing.getCourtApplications())) {
+            return true;
+        }
+        return hearing.getCourtApplications().stream()
+                .noneMatch(application -> nonNull(application.getCourtApplicationCases()) && application.getCourtApplicationCases().stream()
+                        .anyMatch(courtApplicationCase -> isNotEmpty(courtApplicationCase.getOffences())));
+    }
+
+    private boolean isNotApplicationHearing(final uk.gov.justice.core.courts.Hearing hearing) {
+        return isEmpty(hearing.getCourtApplications());
+    }
 }
