@@ -2809,4 +2809,81 @@ public class HearingServiceTest {
     private static uk.gov.justice.core.courts.ProsecutionCase domainCase(final UUID caseId) {
         return uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase().withId(caseId).build();
     }
+
+    // ---- filterOutProsecutionCases -----------------------------------------
+
+    @Test
+    public void filterOutProsecutionCasesShouldReturnUnchangedWhenNotAnApplicationHearing() {
+        final uk.gov.justice.core.courts.Hearing hearing = hearing()
+                .withProsecutionCases(singletonList(domainCase(randomUUID())))
+                .build();
+        final HearingDetailsResponse payload = new HearingDetailsResponse(hearing, null, null);
+
+        final HearingDetailsResponse result = hearingService.filterOutProsecutionCases(payload);
+
+        assertThat(result, is(payload));
+        assertThat(result.getHearing().getProsecutionCases(), hasSize(1));
+    }
+
+    @Test
+    public void filterOutProsecutionCasesShouldReturnUnchangedWhenApplicationHasNullCourtApplicationCases() {
+        final uk.gov.justice.core.courts.Hearing hearing = hearing()
+                .withProsecutionCases(singletonList(domainCase(randomUUID())))
+                .withCourtApplications(singletonList(courtApplication().withId(randomUUID()).build()))
+                .build();
+        final HearingDetailsResponse payload = new HearingDetailsResponse(hearing, null, null);
+
+        final HearingDetailsResponse result = hearingService.filterOutProsecutionCases(payload);
+
+        assertThat(result, is(payload));
+        assertThat(result.getHearing().getProsecutionCases(), hasSize(1));
+    }
+
+    @Test
+    public void filterOutProsecutionCasesShouldReturnUnchangedWhenApplicationCasesHaveNoOffences() {
+        final uk.gov.justice.core.courts.Hearing hearing = hearing()
+                .withProsecutionCases(singletonList(domainCase(randomUUID())))
+                .withCourtApplications(singletonList(courtApplication()
+                        .withId(randomUUID())
+                        .withCourtApplicationCases(singletonList(
+                                uk.gov.justice.core.courts.CourtApplicationCase.courtApplicationCase()
+                                        .withProsecutionCaseId(randomUUID())
+                                        .withOffences(emptyList())
+                                        .build()))
+                        .build()))
+                .build();
+        final HearingDetailsResponse payload = new HearingDetailsResponse(hearing, null, null);
+
+        final HearingDetailsResponse result = hearingService.filterOutProsecutionCases(payload);
+
+        assertThat(result, is(payload));
+        assertThat(result.getHearing().getProsecutionCases(), hasSize(1));
+    }
+
+    @Test
+    public void filterOutProsecutionCasesShouldRemoveProsecutionCasesWhenApplicationHasOffences() {
+        final UUID hearingId = randomUUID();
+        final uk.gov.justice.core.courts.CourtApplication courtApplication = courtApplication()
+                .withId(randomUUID())
+                .withCourtApplicationCases(singletonList(
+                        uk.gov.justice.core.courts.CourtApplicationCase.courtApplicationCase()
+                                .withProsecutionCaseId(randomUUID())
+                                .withOffences(singletonList(uk.gov.justice.core.courts.Offence.offence().withId(randomUUID()).build()))
+                                .build()))
+                .build();
+        final uk.gov.justice.core.courts.Hearing hearing = hearing()
+                .withId(hearingId)
+                .withProsecutionCases(singletonList(domainCase(randomUUID())))
+                .withCourtApplications(singletonList(courtApplication))
+                .build();
+        final HearingDetailsResponse payload = new HearingDetailsResponse(hearing, null, null);
+
+        final HearingDetailsResponse result = hearingService.filterOutProsecutionCases(payload);
+
+        assertThat(result, is(payload));
+        assertThat(result.getHearing().getProsecutionCases(), is(nullValue()));
+        // other hearing values are preserved via withValuesFrom
+        assertThat(result.getHearing().getId(), is(hearingId));
+        assertThat(result.getHearing().getCourtApplications(), hasSize(1));
+    }
 }
