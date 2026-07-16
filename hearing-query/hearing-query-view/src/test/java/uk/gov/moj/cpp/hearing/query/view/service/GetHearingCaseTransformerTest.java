@@ -69,8 +69,7 @@ class GetHearingCaseTransformerTest {
         assertThat(result.getCourtCentreId(), equalTo(courtCentreId));
         assertThat(result.getCourtRoomId(), equalTo(roomId));
         assertThat(result.getHearingDate(), is(LocalDate.now().toString()));
-        assertThat(result.getProsecutionCases().get(0).getCaseId(), equalTo(caseId));
-        assertThat(result.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN(), equalTo(caseUrn));
+        assertThat(result.getProsecutionCases().get(0), equalTo(caseId));
     }
 
     @Test

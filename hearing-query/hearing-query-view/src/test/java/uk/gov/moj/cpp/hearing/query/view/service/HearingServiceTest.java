@@ -2772,7 +2772,7 @@ public class HearingServiceTest {
         assertThat(result.getHearingCases().get(0).getHearingId(), is(hearing.getId()));
         assertThat(result.getHearingCases().get(0).getCourtCentreId(), is(courtCentreId));
         assertThat(result.getHearingCases().get(0).getCourtRoomId(), is(roomId));
-        assertThat(result.getHearingCases().get(0).getProsecutionCases().get(0).getCaseId(), is(caseId));
+        assertThat(result.getHearingCases().get(0).getProsecutionCases().get(0), is(caseId));
         assertThat(result.getHearingCases().get(0).getHearingDate(), is(LocalDate.now().toString()));
     }
 

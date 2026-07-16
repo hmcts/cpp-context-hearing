@@ -10,7 +10,6 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.hearing.courts.HearingCases;
-import uk.gov.justice.hearing.courts.ProsecutionCases;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,7 +27,7 @@ public class GetHearingCaseTransformer {
                         hearing.getProsecutionCases() == null ? emptyList() :
                                 hearing.getProsecutionCases().stream()
                                         .filter(pc -> shouldCaseBeIncluded(hearing, pc))
-                                        .map(pc -> caseDetailForToday(pc).build())
+                                        .map(ProsecutionCase::getId)
                                         .collect(toList())
                 );
     }
@@ -56,11 +55,4 @@ public class GetHearingCaseTransformer {
             return true;
         }
     }
-
-    private ProsecutionCases.Builder caseDetailForToday(final ProsecutionCase prosecutionCase) {
-        return ProsecutionCases.prosecutionCases()
-                .withCaseId(prosecutionCase.getId())
-                .withProsecutionCaseIdentifier(prosecutionCase.getProsecutionCaseIdentifier());
-    }
-
 }

@@ -1,19 +1,21 @@
 {
   "hearingCases": [
     {
-      "courtCentreId": "5701c3af-746f-413e-b7fa-2f4dc9d10ac7",
-      "courtRoomId": "e45bd3b2-e564-4092-853f-38ab020fced1",
-      "hearingDate": "2026-07-13",
-      "hearingId": "7bb8b8f7-f534-4bd2-8584-1c5792dfa549",
+      "courtCentreId": "135cc630-f141-40b5-ae30-7615b0faa367",
+      "courtRoomId": "50168b64-ab8e-450f-9e90-feb7c71b83cd",
+      "hearingDate": "2026-07-16",
+      "hearingId": "394f3d42-2dfb-4e45-808a-b76a62f76438",
       "prosecutionCases": [
-        {
-          "caseId": "e278a9a5-a705-46fc-9c64-ce01a68a67c8",
-          "prosecutionCaseIdentifier": {
-            "prosecutionAuthorityCode": "code",
-            "prosecutionAuthorityId": "9eb29c83-9d0f-4e2c-ac0f-57ac99532dc2",
-            "caseURN": "caseURN"
-          }
-        }
+        "378e4ea9-f759-4aef-af78-3a440f6b5d94"
+      ]
+    },
+    {
+      "courtCentreId": "1a5af776-f775-4328-9d93-9ab333f2ca10",
+      "courtRoomId": "649502e5-184c-44c1-9a72-fc93e85a3ff0",
+      "hearingDate": "2026-07-16",
+      "hearingId": "740aff61-6492-4030-93d1-ac4291405379",
+      "prosecutionCases": [
+        "03ede5fd-d72d-4769-aa69-5d28a831fdf3"
       ]
     }
   ]
