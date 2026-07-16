@@ -10,6 +10,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static uk.gov.moj.cpp.hearing.it.PublishLatestCourtCentreHearingEventsIT.XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.awaitNewFile;
@@ -112,11 +113,11 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
         String filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         String filePayloadForPubDisplay = getSentXmlForPubDisplay();
 
-        String expectedCasesXMLValueForWeb = "<cases/>";
-
+        // Case/application fully restricted: the schema forbids an empty <cases/>, so the whole <cases> element is
+        // omitted from the court room rather than emitted empty. The court-room-level status event is still present.
         assertThat(filePayload, containsString(E20903_PCO_TYPE));
-        assertThat(filePayload, containsString(expectedCasesXMLValueForWeb));
-        assertThat(filePayloadForPubDisplay, containsString(expectedCasesXMLValueForWeb));
+        assertThat(filePayload, not(containsString("<cases")));
+        assertThat(filePayloadForPubDisplay, not(containsString("<cases")));
 
         // disable restriction
         courtListRestrictionSteps.hideCaseFromXhibit(initiateHearingCommandHelper.getHearing(), false);
@@ -144,7 +145,7 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
         filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         filePayloadForPubDisplay = getSentXmlForPubDisplay();
 
-        expectedCasesXMLValueForWeb = "<cases>";
+        final String expectedCasesXMLValueForWeb = "<cases>";
 
         assertThat(filePayload, containsString(E20903_PCO_TYPE));
         assertThat(filePayload, containsString(expectedCasesXMLValueForWeb));
@@ -266,11 +267,11 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
         String filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         String filePayloadForPubDisplay = getSentXmlForPubDisplay();
 
-        String expectedCasesXMLValueForWeb = "<cases/>";
-
+        // Case/application fully restricted: the schema forbids an empty <cases/>, so the whole <cases> element is
+        // omitted from the court room rather than emitted empty. The court-room-level status event is still present.
         assertThat(filePayload, containsString(E20903_PCO_TYPE));
-        assertThat(filePayload, containsString(expectedCasesXMLValueForWeb));
-        assertThat(filePayloadForPubDisplay, containsString(expectedCasesXMLValueForWeb));
+        assertThat(filePayload, not(containsString("<cases")));
+        assertThat(filePayloadForPubDisplay, not(containsString("<cases")));
 
         // disable restriction
         courtListRestrictionSteps.hideApplicationFromXhibit(initiateHearingCommandHelper.getHearing(), false);
@@ -298,7 +299,7 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
         filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         filePayloadForPubDisplay = getSentXmlForPubDisplay();
 
-        expectedCasesXMLValueForWeb = "<cppurn>";
+        final String expectedCasesXMLValueForWeb = "<cppurn>";
         String expectedDefendantXMLValueForWeb = "<defendant>";
         assertThat(filePayload, containsString(E20903_PCO_TYPE));
         assertThat(filePayload, containsString(expectedCasesXMLValueForWeb));
