@@ -173,6 +173,14 @@ public class FindHearingQueryApiTest {
     }
 
 
+    @Test
+    public void should_throw_bad_request_when_user_id_is_missing_ForManageHearing() {
+        when(jsonInputEnvelope.metadata()).thenReturn(metadata);
+        when(metadata.userId()).thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class, () -> hearingQueryApi.findHearingForManageHearing(jsonInputEnvelope));
+    }
+
     private CrackedIneffectiveVacatedTrialTypes getCrackedIneffectiveVacatedTrialTypes() {
         final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = new CrackedIneffectiveVacatedTrialType(randomUUID(), "", "", "", "", LocalDate.now());
 
