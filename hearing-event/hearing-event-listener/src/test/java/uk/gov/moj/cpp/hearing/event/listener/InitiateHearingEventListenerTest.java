@@ -497,6 +497,83 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
+    public void shouldRemoveConcludedOffenceFromProsecutionSideOnHearingExtendedButKeepOthers() {
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceToRemove = randomUUID();
+        final UUID offenceToKeep = randomUUID();
+
+        final Hearing hearing = hearingWithSingleDefendantOffences(hearingId, prosecutionCaseId, defendantId, offenceToRemove, offenceToKeep);
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity =
+                hearing.getProsecutionCases().iterator().next().getDefendants().iterator().next();
+
+        when(hearingRepository.findOptionalBy(hearingId)).thenReturn(Optional.of(hearing));
+
+        // the concluded application offence (offenceToRemove) is derived from the event's court application
+        final HearingExtended hearingExtended = new HearingExtended(hearingId, null, null, null,
+                applicationWithConcludedOffence(offenceToRemove), null, null);
+        initiateHearingEventListener.hearingExtended(envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(hearingExtended)));
+
+        assertThat(defendantEntity.getOffences().size(), is(1));
+        assertThat(defendantEntity.getOffences().iterator().next().getId().getId(), is(offenceToKeep));
+    }
+
+    @Test
+    public void shouldPruneEmptiedDefendantAndCaseOnHearingExtendedRemoval() {
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceToRemove = randomUUID();
+
+        final Hearing hearing = hearingWithSingleDefendantOffences(hearingId, prosecutionCaseId, defendantId, offenceToRemove);
+
+        when(hearingRepository.findOptionalBy(hearingId)).thenReturn(Optional.of(hearing));
+
+        final HearingExtended hearingExtended = new HearingExtended(hearingId, null, null, null,
+                applicationWithConcludedOffence(offenceToRemove), null, null);
+        initiateHearingEventListener.hearingExtended(envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(hearingExtended)));
+
+        assertThat(hearing.getProsecutionCases().isEmpty(), is(true));
+    }
+
+    private uk.gov.justice.core.courts.CourtApplication applicationWithConcludedOffence(final UUID offenceId) {
+        return uk.gov.justice.core.courts.CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withCourtApplicationCases(java.util.List.of(uk.gov.justice.core.courts.CourtApplicationCase.courtApplicationCase()
+                        .withOffences(java.util.List.of(uk.gov.justice.core.courts.Offence.offence().withId(offenceId).withProceedingsConcluded(true).build()))
+                        .build()))
+                .build();
+    }
+
+    private Hearing hearingWithSingleDefendantOffences(final UUID hearingId, final UUID prosecutionCaseId, final UUID defendantId, final UUID... offenceIds) {
+        final Set<Offence> offences = new HashSet<>();
+        for (final UUID offenceId : offenceIds) {
+            final Offence offence = new Offence();
+            offence.setId(new HearingSnapshotKey(offenceId, hearingId));
+            offences.add(offence);
+        }
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity = new uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant();
+        defendantEntity.setId(new HearingSnapshotKey(defendantId, hearingId));
+        defendantEntity.setOffences(offences);
+
+        final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant> defendants = new HashSet<>();
+        defendants.add(defendantEntity);
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCaseEntity = new uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase();
+        prosecutionCaseEntity.setId(new HearingSnapshotKey(prosecutionCaseId, hearingId));
+        prosecutionCaseEntity.setDefendants(defendants);
+
+        final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> prosecutionCases = new HashSet<>();
+        prosecutionCases.add(prosecutionCaseEntity);
+
+        final Hearing hearing = new Hearing();
+        hearing.setProsecutionCases(prosecutionCases);
+        return hearing;
+    }
+
+    @Test
     public void shouldAddOffenceToTheExistingDefendantWhenOffenceIsNotPresentInTheDefendant() {
 
         final UUID hearingId = randomUUID();
