@@ -41,6 +41,8 @@ stages:
         parameters:
           sonarqube_project: ${{ variables['sonarqubeProject'] }}
           sonarQubeType: 'sonarQubeAKS'
+          # EDO-965: opt in to Maven .m2 caching to measure the build-time gain (hearing only).
+          enableMavenCache: true
 
   - ${{ if eq(variables['Build.Reason'], 'IndividualCI') }}:
       - template: pipelines/context-validation.yaml@cppAzureDevOpsTemplates
