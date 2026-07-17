@@ -41,6 +41,9 @@ stages:
         parameters:
           sonarqube_project: ${{ variables['sonarqubeProject'] }}
           sonarQubeType: 'sonarQubeAKS'
+          # EDO-965: run the Maven reactor in parallel (~2 threads on the 2-CPU agent) to speed up
+          # the PR verify build. Appended to the mvn command via the template's sonarQubeOptions passthrough.
+          sonarQubeOptions: '-T 1C'
 
   - ${{ if eq(variables['Build.Reason'], 'IndividualCI') }}:
       - template: pipelines/context-validation.yaml@cppAzureDevOpsTemplates
