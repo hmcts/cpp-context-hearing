@@ -128,28 +128,6 @@
                 <artifactId>sonar-maven-plugin</artifactId>
                 <version>3.11.0.3922</version>
             </plugin>
-            <!-- EDO-965: run tests in parallel forks to use both CPUs allocated to the PR-verify agent.
-                 Unlike Maven -T (which parallelises the whole reactor and broke the non-thread-safe
-                 compile/jar steps in hearing-domain-common), this keeps the reactor single-threaded and
-                 parallelises only the test phase (about 75% of the build). forkCount is fixed at 2 to
-                 match the 2-CPU / ~8Gi agent (predictable memory). argLine is intentionally NOT
-                 overridden so inherited jacoco / add-opens JVM settings are preserved.
-                 NOTE: needs tests isolated across forks (no shared fixed ports / single shared DB /
-                 global temp files); validate on a build run and tune forkCount down if OOM or flaky. -->
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <forkCount>2</forkCount>
-                    <reuseForks>true</reuseForks>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <forkCount>2</forkCount>
-                    <reuseForks>true</reuseForks>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
