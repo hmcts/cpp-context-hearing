@@ -21,7 +21,9 @@ resources:
       type: github
       name: hmcts/cpp-azure-devops-templates
       endpoint: 'hmcts'
-      ref: 'main'
+      # EDO-965 (TEMPORARY): point at the feature branch so the PR build uses the template's
+      # enableMavenCache change. REVERT to 'main' once the template change is merged.
+      ref: 'feature/sv-edo-965-improve-mvn-perf'
 
 pool:
   name: "MDV-ADO-AGENT-AKS-01"
