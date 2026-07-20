@@ -1,10 +1,13 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -33,7 +36,9 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsMagistrateUser;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
+import static uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber.stubFeaturesFor;
 
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.BreachType;
@@ -54,6 +59,8 @@ import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.core.courts.SummonsTemplateType;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingCases;
+import uk.gov.justice.hearing.courts.HearingCasesForDay;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.test.utils.core.http.RequestParams;
@@ -68,6 +75,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 
@@ -272,6 +280,38 @@ public class HearingForTodayIT extends AbstractIT {
         );
     }
 
+    @Test
+    public void shouldRetrieveHearingCasesForDayForSystemUser() {
+        final UUID userId = randomUUID();
+        setupAsSystemUser(userId);
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+        final ImmutableMap<String, Boolean> features = of("hearingCasesForDay", true);
+        stubFeaturesFor("hearing", features);
+
+        final UUID hearingId = randomUUID();
+        final UUID courtCentreId = randomUUID();
+        final UUID roomId = randomUUID();
+        final InitiateHearingCommand initiateHearingCommand = createHearingForToday(hearingId, courtCentreId, roomId, userId, null);
+        final String hearingDate = initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate().toString();
+
+        initiateHearing(getRequestSpec(), initiateHearingCommand);
+
+        final String response = getHearingCasesForDayPollForMatch(userId, hearingDate, 30, isBean(HearingCasesForDay.class)
+                .with(HearingCasesForDay::getHearingCases, hasSize(greaterThanOrEqualTo(1)))
+                .with(HearingCasesForDay::getHearingCases, hasItem(isBean(HearingCases.class)
+                        .with(HearingCases::getHearingId, is(hearingId))
+                        .with(HearingCases::getCourtCentreId, is(courtCentreId))
+                        .with(HearingCases::getCourtRoomId, is(roomId))
+                        .with(HearingCases::getHearingDate, is(LocalDate.now().toString()))
+                        )
+                )
+        );
+
+        //adding dummy assertion, real checks are inside the isBean(...) matcher
+        System.out.println(response);
+        assertThat(response, containsString(hearingId.toString()));
+    }
+
     private static void getHearingForTodayPollForMatch(final UUID userId, final long timeout, final BeanMatcher<GetHearings> resultMatcher) {
         final RequestParams requestParams = requestParams(getURL("hearing.get.hearings-for-today"), "application/vnd.hearing.get.hearings-for-today+json")
                 .withHeader(HeaderConstants.USER_ID, userId)
@@ -284,6 +324,20 @@ public class HearingForTodayIT extends AbstractIT {
                         status().is(OK),
                         expectedConditions
                 );
+    }
+
+    private static String getHearingCasesForDayPollForMatch(final UUID userId, final String date, final long timeout, final BeanMatcher<HearingCasesForDay> resultMatcher) {
+        final RequestParams requestParams = requestParams(getURL("hearing.get.hearing-cases-for-day", date), "application/vnd.hearing.get.hearing-cases-for-day+json")
+                .withHeader(HeaderConstants.USER_ID, userId)
+                .build();
+
+        final Matcher<ResponseData> expectedConditions = allOf(status().is(OK), jsonPayloadMatchesBean(HearingCasesForDay.class, resultMatcher));
+        return poll(requestParams)
+                .timeout(timeout, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        expectedConditions
+                ).getPayload();
     }
 
 
