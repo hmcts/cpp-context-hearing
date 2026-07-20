@@ -21,7 +21,9 @@ resources:
       type: github
       name: hmcts/cpp-azure-devops-templates
       endpoint: 'hmcts'
-      ref: 'main'
+      # EDO-965 (TEMPORARY): point at the feature branch so the PR build uses the template's
+      # enableMavenCache change. REVERT to 'main' once the template change is merged.
+      ref: 'feature/sv-edo-965-improve-mvn-perf'
 
 pool:
   name: "MDV-ADO-AGENT-AKS-01"
@@ -41,6 +43,9 @@ stages:
         parameters:
           sonarqube_project: ${{ variables['sonarqubeProject'] }}
           sonarQubeType: 'sonarQubeAKS'
+          # EDO-965: cache DISABLED here to capture the no-cache baseline (same template branch,
+          # only this flag differs from the cache-on branch = clean A/B).
+          enableMavenCache: false
 
   - ${{ if eq(variables['Build.Reason'], 'IndividualCI') }}:
       - template: pipelines/context-validation.yaml@cppAzureDevOpsTemplates
