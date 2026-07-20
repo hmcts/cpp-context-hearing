@@ -1,0 +1,16 @@
+{
+  "firstName": "${__RandomString(20,abcdefghijklmnoprqstvwxyz,)}",
+  "lastName": "${__RandomString(20,abcdefghijklmnoprqstvwxyz,)}",
+  "email": "Fred.Bloggs@jones.com",
+  "source": "IDAM",
+  "userType": "User",
+  "organisationId": "${organisationId}",
+  "userId": "${newUserId}",
+  "_metadata": {
+    "name": "usersgroups.set-user-details",
+    "context": {
+      "user": "${userId}"
+    },
+    "id": "${__UUID}"
+  }
+}

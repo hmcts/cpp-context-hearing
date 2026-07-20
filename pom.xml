@@ -8,7 +8,7 @@
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
-    <version>25.104.2-M3-SNAPSHOT</version>
+    <version>25.104.2-JMETER-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Hearing Context - Parent Module</name>
@@ -31,7 +31,7 @@
         <results.version>17.103.95</results.version>
         <notification.notify.version>17.0.1</notification.notify.version>
         <stagingenforcement.version>17.104.81</stagingenforcement.version>
-        <progression.version>17.0.258</progression.version>
+        <progression.version>17.0.279</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <jaxb.runtime.version>4.0.5</jaxb.runtime.version>
         <jakarta.xml.bind-api.raml.version>2.3.2</jakarta.xml.bind-api.raml.version>
@@ -47,6 +47,7 @@
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>17.0.96</systemdocgenerator.version>
         <access.control.common.providers.version>25.104.0-M5</access.control.common.providers.version>
+        <jmeter-maven-plugin.version>3.8.0</jmeter-maven-plugin.version>
 
         <sonar.coverage.exclusions>
             **/uk/gov/moj/cpp/hearing/nows/events/**/*,
@@ -109,6 +110,7 @@
         <module>hearing-event-sources</module>
         <module>hearing-common</module>
         <module>hearing-healthchecks</module>
+        <module>hearing-performance-test</module>
     </modules>
 
     <build>

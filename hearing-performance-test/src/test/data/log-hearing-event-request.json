@@ -1,0 +1,11 @@
+{
+  "hearingEventId": "${hearingEventId}",
+  "hearingId": "${hearingId}",
+  "hearingEventDefinitionId": "e9060336-4821-4f46-969c-e08b33b48071",
+  "recordedLabel": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+  "eventTime": "2026-01-23T15:35:51.804Z",
+  "lastModifiedTime": "2025-12-05T15:40:53.897Z",
+  "alterable": false,
+  "defenceCounselId": "${defenceCounselId}"
+}
+

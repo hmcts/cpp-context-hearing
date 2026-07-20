@@ -1,0 +1,15 @@
+{
+  "object": "case",
+  "action": "view",
+  "active": true,
+  "id": "${__UUID}",
+  "source": "${userIdParam}",
+  "target": "${__UUID}",
+  "_metadata": {
+    "name": "usersgroups.create-permission-with-details",
+    "context": {
+      "user": "${userId}"
+    },
+    "id": "${__UUID}"
+  }
+}

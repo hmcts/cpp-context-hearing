@@ -1,0 +1,15 @@
+{
+  "label": "${roleName}",
+  "description": "${__RandomString(50,abcdefghijklmnoprqstvwxyz,)}",
+  "selectable": false,
+  "groupIds": [
+    "${groupId}"
+  ],
+  "_metadata": {
+    "name": "usersgroups.create-role-with-details",
+    "context": {
+      "user": "${userId}"
+    },
+    "id": "${__UUID}"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "courtClerk": {
+    "firstName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+    "lastName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+    "userId": "${__UUID}"
+  },
+  "resultLines": [
+    {
+      "shortCode": "SHORT_CODE",
+      "delegatedPowers": {
+        "firstName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "lastName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "userId": "${__UUID}"
+      },
+      "orderedDate": "2025-09-07",
+      "sharedDate": "${hearingDay}",
+      "resultLineId": "${resultLineId}",
+      "offenceId": "${offenceId}",
+      "resultDefinitionId": "1f3c83cc-53eb-4861-8cb8-2289b4a08307",
+      "prompts": [
+        {
+          "id": "1f3c83cc-53eb-4861-8cb8-2289b4a08307",
+          "label": "promptLabel",
+          "fixedListCode": "fixedListCode",
+          "value": "value1",
+          "welshValue": "wvalue1",
+          "promptRef": "bailConditionReason"
+        }
+      ],
+      "resultLabel": "imprisonment",
+      "level": "OFFENCE",
+      "isModified": true,
+      "isComplete": true,
+      "applicationId": "${applicationId}",
+      "caseId": "${caseId}",
+      "amendmentDate": "2026-01-23T11:54:42.585634329Z",
+      "isDeleted": false,
+      "shadowListed": false,
+      "draftResult": "{}",
+      "amendmentsLog": "AMENDMENTS_LOG",
+      "category": "I",
+      "nonStandaloneAncillaryResult": false,
+      "autoPopulateBooleanResult": "${__UUID}",
+      "disabled": false
+    }
+  ],
+  "hearingDay": "${hearingDay}",
+  "version": 1
+}
+
