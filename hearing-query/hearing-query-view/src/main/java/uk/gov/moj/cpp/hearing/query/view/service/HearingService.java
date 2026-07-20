@@ -29,6 +29,7 @@ import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingCasesForDay;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -168,6 +169,8 @@ public class HearingService {
     private ResultLineJPAMapper resultLineJPAMapper;
     @Inject
     private GetHearingsTransformer getHearingTransformer;
+    @Inject
+    private GetHearingCaseTransformer getHearingCaseTransformer;
     @Inject
     private TimelineHearingSummaryHelper timelineHearingSummaryHelper;
     @Inject
@@ -382,6 +385,26 @@ public class HearingService {
                 .build();
     }
 
+    @Transactional
+    public HearingCasesForDay getHearingCasesForDay(final LocalDate date) {
+        if (isNull(date)) {
+            return new HearingCasesForDay(null);
+        }
+
+        final List<Hearing> hearingsForDay = hearingRepository.findHearings(date);
+        if (isEmpty(hearingsForDay)) {
+            return new HearingCasesForDay(null);
+        }
+
+        return HearingCasesForDay.hearingCasesForDay()
+                .withHearingCases(hearingsForDay.stream()
+                        .map(ha -> hearingJPAMapper.fromJPAMinimal(ha))
+                        .filter(ha -> isNotEmpty(ha.getProsecutionCases()))
+                        .map(h -> getHearingCaseTransformer.hearingCases(h, date).build())
+                        .distinct()
+                        .toList())
+                .build();
+    }
 
     @Transactional
     public GetHearings getHearingsForCheckIn(final LocalDate date, final UUID courtCentreId, final UUID roomId,
