@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/hearing.events.hearing-updated-hearing-day-bdf.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "hearingDay": {
+      "$ref": "http://justice.gov.uk/core/courts/hearingDay.json"
+    }
+  },
+  "required": [
+    "hearingId",
+    "hearingDay"
+  ],
+  "additionalProperties": false
+}

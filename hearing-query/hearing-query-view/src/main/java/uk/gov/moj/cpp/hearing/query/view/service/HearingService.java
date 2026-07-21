@@ -13,6 +13,7 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
@@ -28,6 +29,7 @@ import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingCasesForDay;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -112,6 +114,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -128,7 +131,6 @@ import javax.transaction.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -167,6 +169,8 @@ public class HearingService {
     private ResultLineJPAMapper resultLineJPAMapper;
     @Inject
     private GetHearingsTransformer getHearingTransformer;
+    @Inject
+    private GetHearingCaseTransformer getHearingCaseTransformer;
     @Inject
     private TimelineHearingSummaryHelper timelineHearingSummaryHelper;
     @Inject
@@ -347,17 +351,7 @@ public class HearingService {
             return new GetHearings(null);
         }
 
-        List<Hearing> source;
-        if (null == roomId) {
-            source = hearingRepository.findHearings(date, courtCentreId);
-        } else {
-            source = hearingRepository.findByFilters(date, courtCentreId, roomId);
-        }
-
-        if (isDDJorRecorder) {
-            source = filterHearingsBasedOnPermissions.filterHearings(source, accessibleCasesAndApplicationIds);
-        }
-
+        final List<Hearing> source = loadAndFilterHearings(date, courtCentreId, roomId, accessibleCasesAndApplicationIds, isDDJorRecorder);
         if (isEmpty(source)) {
             return new GetHearings(null);
         }
@@ -391,6 +385,64 @@ public class HearingService {
                 .build();
     }
 
+    @Transactional
+    public HearingCasesForDay getHearingCasesForDay(final LocalDate date) {
+        if (isNull(date)) {
+            return new HearingCasesForDay(null);
+        }
+
+        final List<Hearing> hearingsForDay = hearingRepository.findHearings(date);
+        if (isEmpty(hearingsForDay)) {
+            return new HearingCasesForDay(null);
+        }
+
+        return HearingCasesForDay.hearingCasesForDay()
+                .withHearingCases(hearingsForDay.stream()
+                        .map(ha -> hearingJPAMapper.fromJPAMinimal(ha))
+                        .filter(ha -> isNotEmpty(ha.getProsecutionCases()))
+                        .map(h -> getHearingCaseTransformer.hearingCases(h, date).build())
+                        .distinct()
+                        .toList())
+                .build();
+    }
+
+    @Transactional
+    public GetHearings getHearingsForCheckIn(final LocalDate date, final UUID courtCentreId, final UUID roomId,
+                                             final List<UUID> accessibleCasesAndApplicationIds,
+                                             final boolean isDDJorRecorder) {
+        if (null == date || null == courtCentreId) {
+            return new GetHearings(null);
+        }
+
+        final List<Hearing> source = loadAndFilterHearings(date, courtCentreId, roomId, accessibleCasesAndApplicationIds, isDDJorRecorder);
+        if (isEmpty(source)) {
+            return new GetHearings(null);
+        }
+
+        return GetHearings.getHearings()
+                .withHearingSummaries(source.stream()
+                        .map(ha -> hearingJPAMapper.fromJPA(ha))
+                        .filter(ha -> isNotEmpty(ha.getProsecutionCases()))
+                        .map(h -> getHearingTransformer.summaryForCheckIn(h).build())
+                        .collect(toList()))
+                .build();
+    }
+
+    private List<Hearing> loadAndFilterHearings(final LocalDate date, final UUID courtCentreId,
+                                                final UUID roomId,
+                                                final List<UUID> accessibleCasesAndApplicationIds,
+                                                final boolean isDDJorRecorder) {
+        List<Hearing> source;
+        if (null == roomId) {
+            source = hearingRepository.findHearings(date, courtCentreId);
+        } else {
+            source = hearingRepository.findByFilters(date, courtCentreId, roomId);
+        }
+        if (isDDJorRecorder) {
+            source = filterHearingsBasedOnPermissions.filterHearings(source, accessibleCasesAndApplicationIds);
+        }
+        return source;
+    }
 
     public GetHearings getHearingsForToday(final LocalDate date, final UUID userId) {
         if (null == date || null == userId) {
@@ -606,6 +658,40 @@ public class HearingService {
     }
 
     @Transactional
+    /**
+     * Orders the hearing's prosecution cases for display: cases carried onto the hearing by a court
+     * application (referenced via courtApplicationCases or court-order offences) are shown after the
+     * hearing's own cases. The view store keeps cases in an unordered Set, so without this the
+     * response order is the Set's iteration order (CHD-2687). Stable partition - relative order within
+     * each group is preserved; no-op when the hearing has no applications or no prosecution cases.
+     */
+    // package-private for unit testing
+    void orderProsecutionCasesForDisplay(final uk.gov.justice.core.courts.Hearing hearing) {
+        if (isEmpty(hearing.getProsecutionCases()) || isEmpty(hearing.getCourtApplications())) {
+            return;
+        }
+        final Set<UUID> applicationCaseIds = new HashSet<>();
+        hearing.getCourtApplications().forEach(application -> {
+            ofNullable(application.getCourtApplicationCases()).orElse(emptyList())
+                    .forEach(courtApplicationCase -> {
+                        if (nonNull(courtApplicationCase.getProsecutionCaseId())) {
+                            applicationCaseIds.add(courtApplicationCase.getProsecutionCaseId());
+                        }
+                    });
+            if (nonNull(application.getCourtOrder()) && nonNull(application.getCourtOrder().getCourtOrderOffences())) {
+                application.getCourtOrder().getCourtOrderOffences().forEach(courtOrderOffence -> {
+                    if (nonNull(courtOrderOffence.getProsecutionCaseId())) {
+                        applicationCaseIds.add(courtOrderOffence.getProsecutionCaseId());
+                    }
+                });
+            }
+        });
+        if (applicationCaseIds.isEmpty()) {
+            return;
+        }
+        hearing.getProsecutionCases().sort(comparing(prosecutionCase -> applicationCaseIds.contains(prosecutionCase.getId())));
+    }
+
     public HearingDetailsResponse getHearingDetailsResponseById(final JsonEnvelope envelope, final UUID hearingId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes,
                                                                 final List<UUID> accessibleCaseAndApplicationIds,
                                                                 final boolean isDDJ) {
@@ -626,7 +712,7 @@ public class HearingService {
 
         if (hearing.getCourtApplications() != null) {
 
-            Set<UUID> uniqueApplications = hearing.getCourtApplications().stream().map(CourtApplication::getId).collect(Collectors.toSet());
+            Set<UUID> uniqueApplications = hearing.getCourtApplications().stream().map(CourtApplication::getId).collect(toSet());
             relatedApplicationId = hearing.getCourtApplications().get(0).getId();
 
             final List<CourtApplication> parentCourtApplications = hearing.getCourtApplications().stream()
@@ -642,6 +728,8 @@ public class HearingService {
                 hearing.getCourtApplications().addAll(parentCourtApplications);
             }
         }
+
+        orderProsecutionCasesForDisplay(hearing);
 
         final HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse(
                 hearing,

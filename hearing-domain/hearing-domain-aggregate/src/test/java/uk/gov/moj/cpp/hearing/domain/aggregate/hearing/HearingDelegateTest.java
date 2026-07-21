@@ -15,6 +15,7 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -198,6 +199,37 @@ public class HearingDelegateTest {
     }
 
     @Test
+    public void shouldKeepExistingCasePositionWhenHearingExtendedMergesIt() {
+        final UUID hearingId = randomUUID();
+        final UUID existingCaseId1 = randomUUID();
+        final UUID existingCaseId2 = randomUUID();
+        final UUID newCaseId = randomUUID();
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(caseList(
+                        createProsecutionCases(existingCaseId1, randomUUID()),
+                        createProsecutionCases(existingCaseId2, randomUUID())))
+                .build());
+
+        // payload re-sends the FIRST existing case (merged) plus a newcomer
+        final List<ProsecutionCase> extendedCases = caseList(
+                createProsecutionCases(existingCaseId1, randomUUID()),
+                createProsecutionCases(newCaseId, randomUUID()));
+
+        hearingDelegate.handleHearingExtended(new HearingExtended(hearingId, null, null, null, null, extendedCases, null));
+
+        // merged existing case keeps its position; newcomer appended - arrival order preserved
+        final List<ProsecutionCase> prosecutionCases = momento.getHearing().getProsecutionCases();
+        assertThat(prosecutionCases.size(), is(3));
+        assertThat(prosecutionCases.get(0).getId(), is(existingCaseId1));
+        assertThat(prosecutionCases.get(1).getId(), is(existingCaseId2));
+        assertThat(prosecutionCases.get(2).getId(), is(newCaseId));
+        // and the merge still combined the defendants on the re-sent case
+        assertThat(prosecutionCases.get(0).getDefendants().size(), is(2));
+    }
+
+    @Test
     public void shouldHandleHearingExtendedWhenHavingDifferentCase() {
         final UUID hearingId = randomUUID();
         final UUID newCaseId = randomUUID();
@@ -275,6 +307,219 @@ public class HearingDelegateTest {
 
         assertThat(newOffence.isPresent(), is(true));
 
+    }
+
+    @Test
+    public void shouldStripMovedActiveOffencesFromApplicationOnExtend() {
+        final UUID hearingId = randomUUID();
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID activeOffenceId = randomUUID();
+        final UUID concludedOffenceId = randomUUID();
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(new ArrayList<>())
+                .build());
+
+        final CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withCourtApplicationCases(asList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(caseId)
+                        .withOffences(new ArrayList<>(asList(
+                                Offence.offence().withId(activeOffenceId).withProceedingsConcluded(false).build(),
+                                Offence.offence().withId(concludedOffenceId).withProceedingsConcluded(true).build())))
+                        .build()))
+                .build();
+
+        // Simulates the command handler having attached the active offence under its owner defendant.
+        final List<ProsecutionCase> movedProsecutionCases = caseList(createProsecutionCases(caseId, defendantId, activeOffenceId));
+
+        final List<Object> events = hearingDelegate.extend(hearingId, null, null, null, courtApplication, movedProsecutionCases, null).collect(toList());
+
+        final HearingExtended emitted = events.stream()
+                .filter(HearingExtended.class::isInstance)
+                .map(HearingExtended.class::cast)
+                .findFirst().orElseThrow(AssertionError::new);
+
+        // the moved active offence is stripped from the application; the concluded one stays
+        final List<Offence> remainingApplicationOffences = emitted.getCourtApplication().getCourtApplicationCases().get(0).getOffences();
+        assertThat(remainingApplicationOffences.size(), is(1));
+        assertThat(remainingApplicationOffences.get(0).getId(), is(concludedOffenceId));
+
+        assertThat(emitted.getProsecutionCases(), is(movedProsecutionCases));
+    }
+
+    @Test
+    public void shouldEmitNullProsecutionCasesWhenNoneResolvedOnExtend() {
+        // The hearing-extended event schema allows prosecutionCases to be absent but forbids an empty
+        // array (minItems: 1). When the command handler resolves no prosecution cases (e.g. an active
+        // application offence whose owning case is not in the view store), it passes an empty list; the
+        // aggregate must emit null, not [], otherwise the event fails schema validation on consumption.
+        final UUID hearingId = randomUUID();
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(new ArrayList<>())
+                .build());
+
+        final CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withCourtApplicationCases(asList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(randomUUID())
+                        .withOffences(new ArrayList<>(asList(
+                                Offence.offence().withId(randomUUID()).withProceedingsConcluded(false).build())))
+                        .build()))
+                .build();
+
+        final List<Object> events = hearingDelegate.extend(hearingId, null, null, null, courtApplication, new ArrayList<>(), null).collect(toList());
+
+        final HearingExtended emitted = events.stream()
+                .filter(HearingExtended.class::isInstance)
+                .map(HearingExtended.class::cast)
+                .findFirst().orElseThrow(AssertionError::new);
+
+        assertNull(emitted.getProsecutionCases());
+        assertThat(emitted.getCourtApplication().getId(), is(courtApplication.getId()));
+    }
+
+    @Test
+    public void shouldNullApplicationCaseOffencesWhenAllAreMovedOnExtend() {
+        final UUID hearingId = randomUUID();
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID activeOffenceId = randomUUID();
+
+        momento.setHearing(Hearing.hearing().withId(hearingId).withProsecutionCases(new ArrayList<>()).build());
+
+        final CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withCourtApplicationCases(asList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(caseId)
+                        .withOffences(new ArrayList<>(asList(
+                                Offence.offence().withId(activeOffenceId).withProceedingsConcluded(false).build())))
+                        .build()))
+                .build();
+
+        final List<ProsecutionCase> movedProsecutionCases = caseList(createProsecutionCases(caseId, defendantId, activeOffenceId));
+
+        final List<Object> events = hearingDelegate.extend(hearingId, null, null, null, courtApplication, movedProsecutionCases, null).collect(toList());
+
+        final HearingExtended emitted = events.stream()
+                .filter(HearingExtended.class::isInstance)
+                .map(HearingExtended.class::cast)
+                .findFirst().orElseThrow(AssertionError::new);
+
+        assertNull(emitted.getCourtApplication().getCourtApplicationCases().get(0).getOffences());
+    }
+
+    @Test
+    public void shouldStripActiveOffenceAlreadyOnHearingAndNewlyMovedOffenceFromApplicationOnExtend() {
+        // Reproduces the CCT-2353 extended-hearing bug: an application selects two active offences across two
+        // related cases and is listed onto a hearing that already carries case1's offence. Both offences must
+        // leave the court application — case1's because it is already on the hearing, case2's because it is the
+        // newly moved prosecution case.
+        final UUID hearingId = randomUUID();
+        final UUID caseId1 = randomUUID();
+        final UUID caseId2 = randomUUID();
+        final UUID defendantId1 = randomUUID();
+        final UUID defendantId2 = randomUUID();
+        final UUID offenceOnHearing = randomUUID();   // case1 active offence, already on the hearing
+        final UUID newlyMovedOffence = randomUUID();   // case2 active offence, newly selected
+
+        // the hearing already carries case1 with its active offence
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(caseList(createProsecutionCases(caseId1, defendantId1, offenceOnHearing)))
+                .build());
+
+        // the application re-selects case1's offence and adds case2's offence; both are active
+        final CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withCourtApplicationCases(asList(
+                        CourtApplicationCase.courtApplicationCase()
+                                .withProsecutionCaseId(caseId1)
+                                .withOffences(new ArrayList<>(asList(Offence.offence().withId(offenceOnHearing).withProceedingsConcluded(false).build())))
+                                .build(),
+                        CourtApplicationCase.courtApplicationCase()
+                                .withProsecutionCaseId(caseId2)
+                                .withOffences(new ArrayList<>(asList(Offence.offence().withId(newlyMovedOffence).withProceedingsConcluded(false).build())))
+                                .build()))
+                .build();
+
+        // the command handler moves only case2 (case1's offence is already on the hearing, so it is skipped)
+        final List<ProsecutionCase> movedProsecutionCases = caseList(createProsecutionCases(caseId2, defendantId2, newlyMovedOffence));
+
+        final List<Object> events = hearingDelegate.extend(hearingId, null, null, null, courtApplication, movedProsecutionCases, null).collect(toList());
+
+        final HearingExtended emitted = events.stream()
+                .filter(HearingExtended.class::isInstance)
+                .map(HearingExtended.class::cast)
+                .findFirst().orElseThrow(AssertionError::new);
+
+        // both court-application cases have their active offences stripped (lists nulled, since each held only the one)
+        final List<CourtApplicationCase> applicationCases = emitted.getCourtApplication().getCourtApplicationCases();
+        assertNull(offencesForCase(applicationCases, caseId1));
+        assertNull(offencesForCase(applicationCases, caseId2));
+
+        // only the newly-moved case is emitted on the prosecution side
+        assertThat(emitted.getProsecutionCases(), is(movedProsecutionCases));
+    }
+
+    private List<Offence> offencesForCase(final List<CourtApplicationCase> cases, final UUID prosecutionCaseId) {
+        final CourtApplicationCase match = cases.stream()
+                .filter(c -> prosecutionCaseId.equals(c.getProsecutionCaseId()))
+                .findFirst().orElseThrow(AssertionError::new);
+        return match.getOffences();
+    }
+
+    @Test
+    public void shouldRemoveConcludedOffenceFromProsecutionButKeepOthersOnHandleHearingExtended() {
+        final UUID hearingId = randomUUID();
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceToRemove = randomUUID();
+        final UUID offenceToKeep = randomUUID();
+
+        final ProsecutionCase existing = createProsecutionCase(caseId, defendantId, offenceToRemove, offenceToKeep);
+        momento.setHearing(Hearing.hearing().withId(hearingId).withProsecutionCases(caseList(existing)).build());
+
+        // the concluded application offence (offenceToRemove) is derived from the event's court application
+        final HearingExtended hearingExtended = new HearingExtended(hearingId, null, null, null,
+                applicationWithConcludedOffence(offenceToRemove), null, null);
+        hearingDelegate.handleHearingExtended(hearingExtended);
+
+        final List<ProsecutionCase> cases = momento.getHearing().getProsecutionCases();
+        assertThat(cases.size(), is(1));
+        final Defendant defendant = cases.get(0).getDefendants().get(0);
+        assertThat(defendant.getOffences().size(), is(1));
+        assertThat(defendant.getOffences().get(0).getId(), is(offenceToKeep));
+    }
+
+    @Test
+    public void shouldPruneEmptiedDefendantAndCaseWhenAllProsecutionOffencesRemovedOnHandleHearingExtended() {
+        final UUID hearingId = randomUUID();
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        final ProsecutionCase existing = createProsecutionCases(caseId, defendantId, offenceId);
+        momento.setHearing(Hearing.hearing().withId(hearingId).withProsecutionCases(caseList(existing)).build());
+
+        final HearingExtended hearingExtended = new HearingExtended(hearingId, null, null, null,
+                applicationWithConcludedOffence(offenceId), null, null);
+        hearingDelegate.handleHearingExtended(hearingExtended);
+
+        assertThat(momento.getHearing().getProsecutionCases().isEmpty(), is(true));
+    }
+
+    private CourtApplication applicationWithConcludedOffence(final UUID offenceId) {
+        return CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withCourtApplicationCases(asList(CourtApplicationCase.courtApplicationCase()
+                        .withOffences(asList(Offence.offence().withId(offenceId).withProceedingsConcluded(true).build()))
+                        .build()))
+                .build();
     }
 
     @Test
@@ -820,6 +1065,21 @@ public class HearingDelegateTest {
         assertThat(momento.isDuplicate(), is(false));
     }
 
+    @Test
+    public void shouldEmitHearingUpdatedHearingDayBdfEvent() {
+        final UUID hearingId = randomUUID();
+        final HearingDay hearingDay = new HearingDay(randomUUID(), randomUUID(), false, false, 60, 1, ZonedDateTime.now());
+
+        final Stream<Object> events = hearingDelegate.updateHearingDayBdf(hearingId, hearingDay);
+
+        final List<Object> eventList = events.collect(Collectors.toList());
+        assertThat(eventList.size(), is(1));
+
+        final uk.gov.moj.cpp.hearing.domain.event.HearingUpdatedHearingDayBdf event =
+                (uk.gov.moj.cpp.hearing.domain.event.HearingUpdatedHearingDayBdf) eventList.get(0);
+        assertThat(event.getHearingId(), is(hearingId));
+        assertThat(event.getHearingDay(), is(hearingDay));
+    }
 
 
 

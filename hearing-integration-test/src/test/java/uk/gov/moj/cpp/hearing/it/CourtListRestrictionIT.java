@@ -40,9 +40,30 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
 
     private ZonedDateTime eventTime;
 
+    /**
+     * Clean every table that can carry state across tests in this class. All five tests bind
+     * their hearings to the SAME static {@code caseId} (see
+     * {@link AbstractPublishLatestCourtCentreHearingIT}), so residual
+     * {@code is_court_list_restricted=true} on {@code ha_case} (the {@code ProsecutionCase}
+     * entity's table — see its {@code @Table} annotation) or {@code ha_defendant} from one
+     * test poisons the next. The {@code court_list_publish_status} row is also dropped so the
+     * FIRST publish in this class cannot inherit {@code EXPORT_SUCCESSFUL} from a prior test
+     * class's publish — without this,
+     * {@code verifyCourtListPublishStatusReturnedWhenQueryingFromAPI} returns on the stale
+     * status before the current publish has produced a file.
+     */
+    private void cleanRestrictionTables() {
+        cleanDatabase("ha_hearing",
+                "ha_case",
+                "ha_defendant",
+                "ha_hearing_day",
+                "ha_hearing_event",
+                "court_list_publish_status");
+    }
+
     @BeforeEach
     public void setUpTest() {
-        cleanDatabase("ha_hearing");
+        cleanRestrictionTables();
         eventTime = new UtcClock().now().minusMinutes(5L);
     }
 
