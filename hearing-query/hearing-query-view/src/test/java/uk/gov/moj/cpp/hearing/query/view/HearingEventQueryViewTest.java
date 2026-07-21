@@ -434,6 +434,38 @@ public class HearingEventQueryViewTest {
     }
 
     @Test
+    public void shouldUsePerDayCourtRoom_whenHearingDayHasOverrideRoom() {
+        final UUID dayCentreId = randomUUID();
+        final UUID dayRoomId = randomUUID();
+
+        final HearingDay matchedDay = new HearingDay();
+        matchedDay.setCourtCentreId(dayCentreId);
+        matchedDay.setCourtRoomId(dayRoomId);
+
+        when(hearingService.getCourtCenterByHearingId(HEARING_ID_1)).thenReturn(Optional.of(mockHearing().getCourtCentre()));
+        when(hearingService.getHearingDayByHearingIdAndDate(HEARING_ID_1, EVENT_TIME.toLocalDate()))
+                .thenReturn(Optional.of(matchedDay));
+        when(hearingService.getHearingEvents(dayCentreId, dayRoomId, EVENT_TIME.toLocalDate()))
+                .thenReturn(mockActiveHearingEvents(HEARING_ID_2));
+
+        final JsonEnvelope query = envelopeFrom(
+                metadataWithRandomUUIDAndName(),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, HEARING_ID_1.toString())
+                        .add(FIELD_EVENT_DATE, EVENT_TIME.toLocalDate().toString())
+                        .build());
+
+        final Envelope<JsonObject> actualActiveHearingIdsForCourtRoom = target.getActiveHearingsForCourtRoom(query);
+
+        verify(hearingService).getHearingDayByHearingIdAndDate(HEARING_ID_1, EVENT_TIME.toLocalDate());
+        verify(hearingService).getHearingEvents(dayCentreId, dayRoomId, EVENT_TIME.toLocalDate());
+        assertThat(actualActiveHearingIdsForCourtRoom.payload().toString(), allOf(
+                hasJsonPath(format("$.%s", FIELD_ACTIVE_HEARINGS), hasSize(1)),
+                hasJsonPath(format("$.%s[0]", FIELD_ACTIVE_HEARINGS), equalTo(HEARING_ID_2.toString()))
+        ));
+    }
+
+    @Test
     public void shouldGetActiveHearingIdsInCaseOfSamePauseAndResumeEventsRecorded() {
         when(hearingService.getCourtCenterByHearingId(HEARING_ID_1)).thenReturn(Optional.of(mockHearing().getCourtCentre()));
         when(hearingService

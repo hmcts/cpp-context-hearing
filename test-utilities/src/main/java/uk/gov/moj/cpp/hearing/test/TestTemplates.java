@@ -284,7 +284,11 @@ public class TestTemplates {
                 .setDefendant(defendantTemplate());
     }
 
+
     public static uk.gov.moj.cpp.hearing.command.defendant.Defendant defendantTemplate() {
+        return defendantTemplate(randomUUID());
+    }
+    public static uk.gov.moj.cpp.hearing.command.defendant.Defendant defendantTemplate(final UUID caseId) {
 
         final Defendant defendant = new Defendant();
 
@@ -292,7 +296,7 @@ public class TestTemplates {
 
         defendant.setMasterDefendantId(randomUUID());
 
-        defendant.setProsecutionCaseId(randomUUID());
+        defendant.setProsecutionCaseId(caseId);
 
         defendant.setNumberOfPreviousConvictionsCited(INTEGER.next());
 

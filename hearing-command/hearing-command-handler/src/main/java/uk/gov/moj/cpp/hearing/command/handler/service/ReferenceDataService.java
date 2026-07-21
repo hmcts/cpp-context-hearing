@@ -8,15 +8,18 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.MetadataBuilder;
+import uk.gov.moj.cpp.hearing.domain.CourtCentre;
 
 import javax.inject.Inject;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
@@ -128,6 +131,72 @@ public class ReferenceDataService {
         }
     }
 
+
+    public Optional<CourtCentre> resolveCourtCentre(final UUID courtCentreId, final UUID courtRoomId) {
+        if (courtCentreId == null || courtRoomId == null) {
+            return Optional.empty();
+        }
+
+        final JsonArray organisationUnits = queryCourtCentresFor(courtCentreId);
+        if (organisationUnits == null || organisationUnits.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return findMatchingOrganisationUnit(organisationUnits, courtCentreId)
+                .flatMap(ou -> buildCourtCentreFromRoom(ou, courtCentreId, courtRoomId));
+    }
+
+    private JsonArray queryCourtCentresFor(final UUID courtCentreId) {
+        final JsonObject payload = createObjectBuilder()
+                .add("courtCentreId", courtCentreId.toString())
+                .build();
+
+        final JsonEnvelope requestEnvelope = envelopeFrom(
+                metadataBuilder()
+                        .withName(REFERENCEDATA_QUERY_COURT_CENTRES)
+                        .withId(randomUUID())
+                        .build(),
+                payload);
+
+        return requester.requestAsAdmin(requestEnvelope)
+                .payloadAsJsonObject()
+                .getJsonArray("organisationunits");
+    }
+
+    private Optional<JsonObject> findMatchingOrganisationUnit(final JsonArray organisationUnits, final UUID courtCentreId) {
+        final String idAsString = courtCentreId.toString();
+        return organisationUnits.getValuesAs(JsonObject.class).stream()
+                .filter(unit -> idAsString.equals(getStringOrNull(unit, "id")))
+                .findFirst();
+    }
+
+    private Optional<CourtCentre> buildCourtCentreFromRoom(final JsonObject ou, final UUID courtCentreId, final UUID courtRoomId) {
+        final JsonArray courtrooms = ou.getJsonArray("courtrooms");
+        if (isNull(courtrooms)) {
+            return Optional.empty();
+        }
+
+        return courtrooms.getValuesAs(JsonObject.class).stream()
+                .filter(room -> roomIdMatches(room, courtRoomId))
+                .findFirst()
+                .map(room -> CourtCentre.courtCentre()
+                        .withId(courtCentreId)
+                        .withName(getStringOrNull(ou, "oucodeL3Name"))
+                        .withWelshName(getStringOrNull(ou, "oucodeL3WelshName"))
+                        .withRoomId(courtRoomId)
+                        .withRoomName(getStringOrNull(room, "courtroomName"))
+                        .withWelshRoomName(getStringOrNull(room, "welshCourtroomName"))
+                        .build());
+    }
+
+    private static boolean roomIdMatches(final JsonObject room, final UUID courtRoomId) {
+        final String id = getStringOrNull(room, "id");
+        return id != null && courtRoomId.equals(UUID.fromString(id));
+    }
+
+    private static String getStringOrNull(final JsonObject json, final String key) {
+        return json.containsKey(key) ? json.getString(key) : null;
+    }
 
     public Set<String> retrieveGuiltyPleaTypes() {
         final MetadataBuilder metadataBuilder = metadataBuilder()

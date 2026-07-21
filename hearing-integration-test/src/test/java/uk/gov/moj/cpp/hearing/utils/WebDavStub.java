@@ -7,11 +7,13 @@ import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.awaitility.Durations.ONE_MINUTE;
 
 import java.util.List;
 import java.util.UUID;
 
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import org.awaitility.Awaitility;
 
 public class WebDavStub {
 
@@ -34,5 +36,23 @@ public class WebDavStub {
         final LoggedRequest loggedRequest = putRequests.get(putRequests.size() - 1);
 
         return loggedRequest.getBodyAsString();
+    }
+
+    public static int countFilesAt(final String filePath) {
+        return findAll(putRequestedFor(urlPathMatching(filePath))).size();
+    }
+
+    public static int countSentXmlForPubDisplay() {
+        return countFilesAt(XHIBIT_GATEWAY_SEND_PUB_DISP_TO_XHIBIT_FILE_PATH_REG_EX);
+    }
+
+    public static void awaitNewFile(final String filePath, final int previousCount) {
+        Awaitility.await()
+                .atMost(ONE_MINUTE)
+                .until(() -> countFilesAt(filePath) > previousCount);
+    }
+
+    public static void awaitNewSentXmlForPubDisplay(final int previousCount) {
+        awaitNewFile(XHIBIT_GATEWAY_SEND_PUB_DISP_TO_XHIBIT_FILE_PATH_REG_EX, previousCount);
     }
 }
