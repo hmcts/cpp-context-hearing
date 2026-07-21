@@ -41,6 +41,10 @@ public class ResultsValidationClient implements ResultsValidator {
     protected String timeoutMs;
 
     @Inject
+    @Value(key = "resultsvalidator.share.blocking", defaultValue = "disabled")
+    protected String shareBlocking;
+
+    @Inject
     private ObjectMapper objectMapper;
 
     @Inject
@@ -88,6 +92,11 @@ public class ResultsValidationClient implements ResultsValidator {
             LOGGER.error("Results validation service call failed, proceeding with share (fail-open)", ex);
             return passThrough();
         }
+    }
+
+    @Override
+    public boolean isShareBlockingEnabled() {
+        return "enabled".equalsIgnoreCase(shareBlocking.trim());
     }
 
     /**

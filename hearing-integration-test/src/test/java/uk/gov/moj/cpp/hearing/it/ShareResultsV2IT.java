@@ -212,6 +212,10 @@ public class ShareResultsV2IT extends AbstractIT {
 
     @Test
     @Disabled("Temporarily disabled due to feature toggle in the pipeline")
+    // NOTE: when re-enabled, this test also requires the JNDI env-entry
+    // resultsvalidator.share.blocking=enabled to be set in the test environment. Without it (absent
+    // or 'disabled'), a validation failure is logged only and the share still proceeds, so no
+    // ResultsValidationFailed event is raised.
     public void shouldRaiseResultsValidationFailedEventAndNotShareResultsWhenValidatorReturnsErrors() {
 
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();

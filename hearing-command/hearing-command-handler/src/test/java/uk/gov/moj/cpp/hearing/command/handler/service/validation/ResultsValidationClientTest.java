@@ -187,6 +187,34 @@ class ResultsValidationClientTest {
         verify(httpClient, never()).execute(any());
     }
 
+    @Test
+    void isShareBlockingEnabled_falseWhenBlank() {
+        setField(resultsValidationClient, "shareBlocking", "");
+
+        assertThat(resultsValidationClient.isShareBlockingEnabled(), is(false));
+    }
+
+    @Test
+    void isShareBlockingEnabled_falseWhenDisabled() {
+        setField(resultsValidationClient, "shareBlocking", "disabled");
+
+        assertThat(resultsValidationClient.isShareBlockingEnabled(), is(false));
+    }
+
+    @Test
+    void isShareBlockingEnabled_trueWhenEnabled() {
+        setField(resultsValidationClient, "shareBlocking", "enabled");
+
+        assertThat(resultsValidationClient.isShareBlockingEnabled(), is(true));
+    }
+
+    @Test
+    void isShareBlockingEnabled_trueWhenEnabledIgnoringCaseAndWhitespace() {
+        setField(resultsValidationClient, "shareBlocking", "  ENABLED  ");
+
+        assertThat(resultsValidationClient.isShareBlockingEnabled(), is(true));
+    }
+
     private void mockHttpResponse(final int statusCode, final String body) throws IOException {
         final HttpResponse httpResponse = mock(HttpResponse.class);
         final StatusLine statusLine = mock(StatusLine.class);
