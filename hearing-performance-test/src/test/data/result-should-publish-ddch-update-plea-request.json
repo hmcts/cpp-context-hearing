@@ -1,0 +1,40 @@
+{
+  "pleas": [
+    {
+      "allocationDecision": {
+        "allocationDecisionDate": "2026-01-27",
+        "courtIndicatedSentence": {
+          "courtIndicatedSentenceDescription": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+          "courtIndicatedSentenceTypeId": "2b5e532e-60a2-4ac3-a545-7a66e81c4df6"
+        },
+        "motReasonCode": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+        "motReasonDescription": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+        "motReasonId": "${__UUID}",
+        "offenceId": "${offenceId}",
+        "originatingHearingId": "${__UUID}",
+        "sequenceNumber": 2082862263
+      },
+      "defendantId": "${defendantId}",
+      "indicatedPlea": {
+        "indicatedPleaDate": "2022-06-05",
+        "indicatedPleaValue": "INDICATED_GUILTY",
+        "offenceId": "${offenceId}",
+        "source": "ONLINE"
+      },
+      "offenceId": "${offenceId}",
+      "plea": {
+        "delegatedPowers": {
+          "firstName": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+          "lastName": "${__RandomString(10,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,)}",
+          "userId": "${__UUID}"
+        },
+        "offenceId": "${offenceId}",
+        "originatingHearingId": "${__UUID}",
+        "pleaDate": "2025-01-05",
+        "pleaValue": "GUILTY"
+      },
+      "prosecutionCaseId": "${caseId}"
+    }
+  ]
+}
+

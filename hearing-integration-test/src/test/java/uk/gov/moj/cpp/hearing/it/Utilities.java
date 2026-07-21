@@ -290,6 +290,7 @@ public class Utilities {
                     .header(new Header(USER_ID, cppUserId != null ? cppUserId.toString() : getLoggedInUser().toString())).when()
                     .post(url)
                     .then().extract().response();
+
             assertThat(writeResponse.getStatusCode(), equalTo(httpStatusCode));
         }
     }

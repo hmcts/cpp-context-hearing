@@ -1,0 +1,272 @@
+{
+  "hearing": {
+    "courtApplications": [
+      {
+        "applicant": {
+          "id": "${__UUID}",
+          "notificationRequired": false,
+          "organisation": {
+            "name": "OrganisationName"
+          },
+          "personDetails": {
+            "firstName": "Lauren",
+            "gender": "FEMALE",
+            "lastName": "Michelle",
+            "middleName": "Mia"
+          },
+          "prosecutingAuthority": {
+            "prosecutionAuthorityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+            "prosecutionAuthorityId": "${__UUID}"
+          },
+          "summonsRequired": false
+        },
+        "applicationReceivedDate": "2026-01-23",
+        "applicationReference": "12AA3456716",
+        "applicationStatus": "DRAFT",
+        "courtApplicationCases": [
+          {
+            "caseStatus": "ACTIVE",
+            "isSJP": false,
+            "offences": [
+              {
+                "id": "${__UUID}",
+                "offenceCode": "OFC",
+                "offenceDefinitionId": "${__UUID}",
+                "offenceLegislation": "OffenceLegislation",
+                "offenceTitle": "OFC TITLE",
+                "startDate": "2026-01-23",
+                "wording": "WORDING"
+              }
+            ],
+            "prosecutionCaseId": "${caseId}",
+            "prosecutionCaseIdentifier": {
+              "prosecutionAuthorityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+              "prosecutionAuthorityId": "${__UUID}",
+              "caseURN": "Case Reference"
+            }
+          }
+        ],
+        "courtOrder": {
+          "canBeSubjectOfBreachProceedings": false,
+          "canBeSubjectOfVariationProceedings": false,
+          "courtOrderOffences": [
+            {
+              "offence": {
+                "id": "${__UUID}",
+                "offenceCode": "OFC",
+                "offenceDefinitionId": "${__UUID}",
+                "offenceLegislation": "OffenceLegislation",
+                "offenceTitle": "OFC TITLE",
+                "startDate": "2026-01-23",
+                "wording": "WORDING"
+              },
+              "prosecutionCaseId": "${__UUID}",
+              "prosecutionCaseIdentifier": {
+                "prosecutionAuthorityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+                "prosecutionAuthorityId": "${__UUID}",
+                "caseURN": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+              }
+            }
+          ],
+          "id": "${__UUID}",
+          "isSJPOrder": false,
+          "judicialResultTypeId": "${__UUID}",
+          "label": "label",
+          "orderDate": "2026-01-23",
+          "orderingCourt": {
+            "id": "b52f805c-2821-4904-a0e0-26f7fda6dd08",
+            "name": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+            "roomId": "5d5d7b5e-7833-4dc1-b94a-d1a5c635c623",
+            "roomName": "CourtRoom 1",
+            "welshName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+            "welshRoomName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+          },
+          "orderingHearingId": "${__UUID}",
+          "startDate": "2026-01-23"
+        },
+        "hearingIdToBeVacated": "${__UUID}",
+        "id": "${__UUID}",
+        "respondents": [
+          {
+            "id": "${__UUID}",
+            "notificationRequired": false,
+            "organisation": {
+              "name": "OrganisationName"
+            },
+            "personDetails": {
+              "firstName": "Nina",
+              "gender": "FEMALE",
+              "lastName": "Turner"
+            },
+            "prosecutingAuthority": {
+              "prosecutionAuthorityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+              "prosecutionAuthorityId": "${__UUID}"
+            },
+            "summonsRequired": false
+          },
+          {
+            "id": "${__UUID}",
+            "notificationRequired": false,
+            "organisation": {
+              "name": "OrganisationName"
+            },
+            "personDetails": {
+              "firstName": "Gerald",
+              "gender": "MALE",
+              "lastName": "Harrison"
+            },
+            "prosecutingAuthority": {
+              "prosecutionAuthorityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+              "prosecutionAuthorityId": "${__UUID}"
+            },
+            "summonsRequired": false
+          }
+        ],
+        "subject": {
+          "id": "${__UUID}",
+          "notificationRequired": false,
+          "organisation": {
+            "name": "OrganisationName"
+          },
+          "personDetails": {
+            "firstName": "Lauren",
+            "gender": "FEMALE",
+            "lastName": "Michelle",
+            "middleName": "Mia"
+          },
+          "prosecutingAuthority": {
+            "prosecutionAuthorityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+            "prosecutionAuthorityId": "${__UUID}"
+          },
+          "summonsRequired": false
+        },
+        "thirdParties": [
+          {
+            "id": "${__UUID}",
+            "notificationRequired": false,
+            "organisation": {
+              "name": "OrganisationName"
+            },
+            "personDetails": {
+              "firstName": "Nina",
+              "gender": "FEMALE",
+              "lastName": "Turner"
+            },
+            "prosecutingAuthority": {
+              "prosecutionAuthorityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+              "prosecutionAuthorityId": "${__UUID}"
+            },
+            "summonsRequired": false
+          },
+          {
+            "id": "${__UUID}",
+            "notificationRequired": false,
+            "organisation": {
+              "name": "OrganisationName"
+            },
+            "personDetails": {
+              "firstName": "Gerald",
+              "gender": "MALE",
+              "lastName": "Harrison"
+            },
+            "prosecutingAuthority": {
+              "prosecutionAuthorityCode": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+              "prosecutionAuthorityId": "${__UUID}"
+            },
+            "summonsRequired": false
+          }
+        ],
+        "type": {
+          "appealFlag": false,
+          "applicantAppellantFlag": false,
+          "breachType": "NOT_APPLICABLE",
+          "categoryCode": "appCategory",
+          "code": "appCode",
+          "commrOfOathFlag": false,
+          "courtExtractAvlFlag": false,
+          "courtOfAppealFlag": false,
+          "id": "${__UUID}",
+          "jurisdiction": "EITHER",
+          "legislation": "appLegislation",
+          "linkType": "LINKED",
+          "offenceActiveOrder": "NOT_APPLICABLE",
+          "pleaApplicableFlag": false,
+          "prosecutorThirdPartyFlag": false,
+          "spiOutApplicableFlag": false,
+          "summonsTemplateType": "BREACH",
+          "type": "applicationType"
+        }
+      }
+    ],
+    "courtCentre": {
+      "id": "b52f805c-2821-4904-a0e0-26f7fda6dd08",
+      "name": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+      "roomId": "5d5d7b5e-7833-4dc1-b94a-d1a5c635c623",
+      "roomName": "CourtRoom 1",
+      "welshName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+      "welshRoomName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+    },
+    "defenceCounsels": [
+      {
+        "attendanceDays": ["2026-01-23"],
+        "defendants": ["${defendantId}"],
+        "firstName": "John",
+        "id": "${defenceCounselId}",
+        "lastName": "Jones",
+        "status": "OPEN",
+        "title": "Mr"
+      }
+    ],
+    "defendantReferralReasons": [
+      {
+        "defendantId": "${defendantId}",
+        "description": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "id": "${defendantReferralReasonId}",
+        "welshDescription": "welshDescription"
+      }
+    ],
+    "hearingDays": [
+      {
+        "listedDurationMinutes": 2007013476,
+        "listingSequence": 1,
+        "sittingDay": "2026-01-24T11:00:11.297Z"
+      },
+      {
+        "listedDurationMinutes": 38549104,
+        "listingSequence": 4,
+        "sittingDay": "2026-01-23T11:00:11.297Z"
+      },
+      {
+        "listedDurationMinutes": 1279293904,
+        "listingSequence": 4,
+        "sittingDay": "2026-01-22T11:00:11.297Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "${hearingId}",
+    "judiciary": [
+      {
+        "firstName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "isBenchChairman": false,
+        "isDeputy": false,
+        "judicialId": "${__UUID}",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "${__UUID}",
+          "judiciaryType": "CIRCUIT_JUDGE"
+        },
+        "lastName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "middleName": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "title": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+        "userId": "${__UUID}"
+      }
+    ],
+    "jurisdictionType": "CROWN",
+    "reportingRestrictionReason": "",
+    "type": {
+      "description": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}",
+      "id": "9cc41e45-b594-4ba6-906e-1a4626b08fed",
+      "welshDescription": "${__RandomString(10,abcdefghijklmnoprqstvwxyz,)}"
+    }
+  }
+}
+
