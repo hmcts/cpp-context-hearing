@@ -206,10 +206,14 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         LOGGER.info("Validation API call took {} ms for userId={} and for hearingId={}", end - start, userIdString, validationRequest.getHearingId());
 
         if (!Boolean.TRUE.equals(validationResponse.getIsValid())) {
-            LOGGER.info("Share blocked by validation errors for hearing {}", command.getHearingId());
-            final ResultsValidationFailed failedEvent = buildValidationFailedEvent(command, userIdString, validationResponse);
-            eventStream.append(Stream.of(failedEvent).map(enveloper.withMetadataFrom(envelope)));
-            return;
+            if (resultsValidationClient.isShareBlockingEnabled()) {
+                LOGGER.info("Share blocked by validation errors for hearing {}", command.getHearingId());
+                final ResultsValidationFailed failedEvent = buildValidationFailedEvent(command, userIdString, validationResponse);
+                eventStream.append(Stream.of(failedEvent).map(enveloper.withMetadataFrom(envelope)));
+                return;
+            }
+            LOGGER.warn("Results validation failed for hearing {} but share-blocking is disabled (JNDI resultsvalidator.share.blocking); proceeding with share. Validation errors: {}",
+                    command.getHearingId(), validationResponse.getErrors());
         }
 
         eventStream.append(

@@ -594,6 +594,7 @@ public class ShareResultsCommandHandlerTest {
                 .hearingId(command.getHearingId().toString())
                 .hearingDay(command.getHearingDay());
         when(validationRequestMapper.toValidationRequest(any(), any())).thenReturn(validationRequest);
+        when(resultsValidationClient.isShareBlockingEnabled()).thenReturn(true);
         final ValidationIssue error = new ValidationIssue()
                 .ruleId("RULE1")
                 .severity(ValidationIssue.SeverityEnum.ERROR)
@@ -633,6 +634,37 @@ public class ShareResultsCommandHandlerTest {
         assertThat(event.getErrors().getErrorMessages(), is(List.of("Validation error")));
         assertThat(event.getErrors().getValidationIssues().get(0).getRuleId(), is("RULE1"));
         assertThat(event.getErrors().getValidationIssues().get(0).getAffectedOffences().get(0).getOffenceId(), is("off-1"));
+    }
+
+    @Test
+    public void shouldShareAndNotRaiseValidationFailedEventWhenValidationFailsButShareBlockingDisabled() throws Exception {
+        final ShareDaysResultsCommand command = TestTemplates.ShareResultsCommandTemplates
+                .standardShareResultsPerDaysCommandTemplate(initiateHearingCommand.getHearing().getId())
+                .setResultLines(List.of());
+        command.setHearingDay(LocalDate.now());
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.getHearing()).thenReturn(hearing);
+        when(mockAggregate.shareResultForDay(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(Stream.empty());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+        final DraftValidationRequest validationRequest = new DraftValidationRequest()
+                .hearingId(command.getHearingId().toString())
+                .hearingDay(command.getHearingDay());
+        when(validationRequestMapper.toValidationRequest(any(), any())).thenReturn(validationRequest);
+        when(resultsValidationClient.validate(any(), any())).thenReturn(new DraftValidationResponse().isValid(false));
+        when(resultsValidationClient.isShareBlockingEnabled()).thenReturn(false);
+        when(clock.now()).thenReturn(sharedTime);
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.share-days-results").withUserId(randomUUID().toString()),
+                objectToJsonObjectConverter.convert(command));
+
+        shareResultsCommandHandler.shareResultForDay(envelope);
+
+        final Stream<JsonEnvelope> appended = verifyAppendAndGetArgumentFrom(hearingEventStream);
+        final boolean anyValidationFailed = appended
+                .anyMatch(e -> "hearing.events.results-validation-failed".equals(e.metadata().name()));
+        assertThat(anyValidationFailed, is(false));
     }
 
     @Test
