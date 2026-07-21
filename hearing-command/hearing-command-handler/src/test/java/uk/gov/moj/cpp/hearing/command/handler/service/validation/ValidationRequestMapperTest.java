@@ -141,6 +141,41 @@ class ValidationRequestMapperTest {
         assertThat(request.getDefendants(), hasSize(1));
         assertThat(request.getDefendants().get(0).getFirstName(), is(nullValue()));
         assertThat(request.getDefendants().get(0).getLastName(), is(nullValue()));
+        assertThat(request.getDefendants().get(0).getDateOfBirth(), is(nullValue()));
+    }
+
+    @Test
+    void shouldMapDefendantDateOfBirthFromPersonDetails() {
+        final UUID defendantId = randomUUID();
+        final LocalDate dateOfBirth = LocalDate.of(1990, 5, 20);
+
+        final Person person = Person.person()
+                .withDateOfBirth(dateOfBirth)
+                .build();
+
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withPersonDetails(person)
+                .build();
+
+        final Defendant defendant = Defendant.defendant()
+                .withId(defendantId)
+                .withPersonDefendant(personDefendant)
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withDefendants(List.of(defendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withProsecutionCases(List.of(prosecutionCase))
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), emptyList());
+
+        final ValidationRequest request = mapper.toValidationRequest(command, hearing);
+
+        assertThat(request.getDefendants(), hasSize(1));
+        assertThat(request.getDefendants().get(0).getDateOfBirth(), is(dateOfBirth));
     }
 
     @Test

@@ -1,16 +1,20 @@
 package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 
+import java.time.LocalDate;
+
 public class DefendantDto {
     private final String defendantId;
     private final String firstName;
     private final String lastName;
     private final String masterDefendantId;
+    private final LocalDate dateOfBirth;
 
     private DefendantDto(Builder builder) {
         this.defendantId = builder.defendantId;
         this.firstName = builder.firstName;
         this.lastName = builder.lastName;
         this.masterDefendantId = builder.masterDefendantId;
+        this.dateOfBirth = builder.dateOfBirth;
     }
 
     public String getDefendantId() {
@@ -29,6 +33,10 @@ public class DefendantDto {
         return masterDefendantId;
     }
 
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -38,6 +46,7 @@ public class DefendantDto {
         private String firstName;
         private String lastName;
         private String masterDefendantId;
+        private LocalDate dateOfBirth;
 
         public Builder withDefendantId(String defendantId) {
             this.defendantId = defendantId;
@@ -56,6 +65,11 @@ public class DefendantDto {
 
         public Builder withMasterDefendantId(String masterDefendantId) {
             this.masterDefendantId = masterDefendantId;
+            return this;
+        }
+
+        public Builder withDateOfBirth(LocalDate dateOfBirth) {
+            this.dateOfBirth = dateOfBirth;
             return this;
         }
 

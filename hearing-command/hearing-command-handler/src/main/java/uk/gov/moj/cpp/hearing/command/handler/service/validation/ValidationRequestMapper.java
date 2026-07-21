@@ -65,6 +65,7 @@ public class ValidationRequestMapper {
                 .withFirstName(personDetails != null ? personDetails.getFirstName() : null)
                 .withLastName(personDetails != null ? personDetails.getLastName() : null)
                 .withMasterDefendantId(uuidToString(defendant.getMasterDefendantId()))
+                .withDateOfBirth(personDetails != null ? personDetails.getDateOfBirth() : null)
                 .build();
     }
 
