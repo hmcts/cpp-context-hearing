@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/get.hearing-cases-for-day.json",
+  "type": "object",
+  "properties": {
+    "hearingCases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/hearingCase"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "hearingCase": {
+      "type": "object",
+      "properties": {
+        "hearingId": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "courtCentreId": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "courtRoomId": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "hearingDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "prosecutionCases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/caseSummary"
+          }
+        }
+      }
+    },
+    "caseSummary": {
+      "type": "object",
+      "properties": {
+        "caseId": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "prosecutionCaseIdentifier": {
+          "$ref": "http://justice.gov.uk/core/courts/prosecutionCaseIdentifier.json"
+        }
+      }
+    }
+  }
+}

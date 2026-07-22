@@ -187,6 +187,38 @@ public class HearingRepositoryTest {
     }
 
     @Test
+    public void shouldReturnNonEmptyListWhenFindHearingsForDayInvokedAndDataPresent() {
+        final uk.gov.justice.core.courts.Hearing hearing = hearings.get(0);
+        List<Hearing> hearingList = hearingRepository.findHearings(hearing.getHearingDays().get(0).getSittingDay().toLocalDate());
+        assertThat(hearingList, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearing.getId()))));
+        assertThat(hearingList.get(0).getHearingDays(), hasItem(isBean(HearingDay.class).with(HearingDay::getHasSharedResults, is(true))));
+    }
+
+    @Test
+    public void shouldExcludeVacatedHearingFromListWhenVacatedTrueAndFindHearingsForDayInvoked() {
+        final uk.gov.justice.core.courts.Hearing vacatedHearing = addHearingWithVacatedStatus(Boolean.TRUE);
+        assertThat(hearingRepository.findHearings(vacatedHearing.getHearingDays().get(0).getSittingDay().toLocalDate()), empty());
+    }
+
+    @Test
+    public void shouldRetrieveHearingFromListWhenHearingDayCancelledNullOrFalseAndFindHearingsForDayInvoked() {
+        final uk.gov.justice.core.courts.Hearing hearingWithCancelledFalse = addHearingWithCancelledStatus(Boolean.FALSE);
+        List<Hearing> hearings = hearingRepository.findHearings(hearingWithCancelledFalse.getHearingDays().get(0).getSittingDay().toLocalDate());
+        assertThat(hearings, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearingWithCancelledFalse.getId()))));
+
+        final uk.gov.justice.core.courts.Hearing hearingWithCancelledNull = addHearingWithCancelledStatus(null);
+        hearings = hearingRepository.findHearings(hearingWithCancelledNull.getHearingDays().get(0).getSittingDay().toLocalDate());
+        assertThat(hearings, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearingWithCancelledNull.getId()))));
+    }
+
+    @Test
+    public void shouldExcludeHearingFromListWhenHearingDayCancelledTrueAndFindHearingsForDayInvoked() {
+        final uk.gov.justice.core.courts.Hearing hearingWithCancelledDays = addHearingWithCancelledStatus(true);
+        assertThat(hearingRepository.findHearings(hearingWithCancelledDays.getHearingDays().get(0).getSittingDay().toLocalDate()), empty());
+    }
+
+
+    @Test
     public void shouldFindAll() {
         assertEquals(hearings.size() + hearingsWithHearingDay.size(), hearingRepository.findAll().size());
     }
