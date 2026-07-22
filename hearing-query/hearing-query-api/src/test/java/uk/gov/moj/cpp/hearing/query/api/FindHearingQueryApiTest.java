@@ -2,6 +2,8 @@ package uk.gov.moj.cpp.hearing.query.api;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +36,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.Test;

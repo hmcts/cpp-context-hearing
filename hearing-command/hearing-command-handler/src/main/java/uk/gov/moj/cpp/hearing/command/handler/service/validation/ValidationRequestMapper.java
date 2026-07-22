@@ -102,7 +102,14 @@ public class ValidationRequestMapper {
                 .offenceCode(offence.getOffenceCode())
                 .offenceTitle(offence.getOffenceTitle())
                 .orderIndex(offence.getOrderIndex())
-                .caseUrn(caseUrn);
+                .caseUrn(caseUrn)
+                .isConvicted(offence.getConvictionDate() != null)
+                .hasExistingCtlRecord(hasExistingCustodyTimeLimit(offence));
+    }
+
+    private boolean hasExistingCustodyTimeLimit(final Offence offence) {
+        return offence.getCustodyTimeLimit() != null
+                && offence.getCustodyTimeLimit().getTimeLimit() != null;
     }
 
     private ResultLineDto toResultLineDto(final SharedResultsCommandResultLineV2 line) {
