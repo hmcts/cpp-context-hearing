@@ -48,6 +48,14 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
     public abstract List<Hearing> findHearings(@QueryParam("date") final LocalDate date,
                                                @QueryParam("courtCentreId") final UUID courtCentreId);
 
+    @Query(value = "select  h.*" +
+            "from ha_hearing_day d, ha_hearing h " +
+            "where h.id = d.hearing_id and d.date = :date " +
+            "and coalesce(d.is_cancelled,false) !=true " +
+            "and coalesce(h.is_box_hearing,false) != true " +
+            "and coalesce(h.is_vacated_trial,false) != true", isNative = true)
+    public abstract List<Hearing> findHearings(@QueryParam("date") final LocalDate date);
+
     @Query(value = "SELECT distinct hearing " +
             "FROM Hearing hearing INNER JOIN hearing.hearingDays day INNER JOIN hearing.judicialRoles role " +
             "WHERE role.userId = :userId " +

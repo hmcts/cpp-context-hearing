@@ -244,6 +244,27 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.get.hearings.json
                     schema:  !include  json/schema/hearing.get.hearings.json
 
+/hearing-cases-for-day:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.hearing-cases-for-day+json
+            name: hearing.get.hearing-cases-for-day
+        ...
+      queryParameters:
+        date:
+          description: date of hearing in yyyy-MM-dd format
+          type: string
+          required: true
+      
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.hearing-cases-for-day+json:
+                    example:  !include json/hearing.get.hearing-cases-for-day.json
+                    schema:  !include  json/schema/hearing.get.hearing-cases-for-day.json
 
 /hearings-check-in:
    get:
