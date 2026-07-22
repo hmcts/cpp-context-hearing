@@ -80,7 +80,7 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
      */
     @AfterEach
     public void tearDownTest() {
-        cleanRestrictionTables();
+        cleanDatabase("ha_hearing");
     }
 
     @Test

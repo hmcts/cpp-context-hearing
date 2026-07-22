@@ -24,7 +24,7 @@ public class ValidationRequestMapper {
         final List<DefendantDto> defendants = new ArrayList<>();
         final List<OffenceDto> offences = new ArrayList<>();
 
-        if (hearing.getProsecutionCases() != null) {
+        if (hearing != null && hearing.getProsecutionCases() != null) {
             hearing.getProsecutionCases()
                     .forEach(prosecutionCase -> processProsecutionCase(prosecutionCase, defendants, offences));
         }
@@ -115,6 +115,7 @@ public class ValidationRequestMapper {
                 .consecutiveToOffence(extractConsecutiveToOffence(line.getPrompts()))
                 .isConcurrent(extractIsConcurrent(line.getPrompts()))
                 .category(line.getCategory())
+                .prompts(mapPrompts(line.getPrompts()))
                 .build();
     }
 
@@ -134,6 +135,15 @@ public class ValidationRequestMapper {
 
     private String uuidToString(final UUID uuid) {
         return uuid != null ? uuid.toString() : null;
+    }
+
+    private List<PromptDto> mapPrompts(final List<SharedResultsCommandPrompt> prompts) {
+        if (prompts == null) {
+            return null;
+        }
+        return prompts.stream()
+                .map(p -> new PromptDto(p.getPromptRef(), p.getValue()))
+                .toList();
     }
 
     private Boolean extractIsConcurrent(final List<SharedResultsCommandPrompt> prompts) {
