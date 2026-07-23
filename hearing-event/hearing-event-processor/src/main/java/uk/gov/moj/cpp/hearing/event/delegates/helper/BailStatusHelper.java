@@ -129,7 +129,7 @@ public class BailStatusHelper {
      */
     private List<Offence> buildAllActiveOffences(final List<Offence> currentHearingOffences, final UUID hearingId, final UUID defendantId) {
         final Map<UUID, Offence> currentById = currentHearingOffences.stream()
-                .filter(o -> nonNull(o.getId()))
+                .filter(o -> nonNull(o.getId()) && !Boolean.TRUE.equals(o.getProceedingsConcluded()))
                 .collect(toMap(Offence::getId, o -> o, (a, b) -> a));
 
         final List<Offence> storedOffences = fetchStoredOffencesForDefendant(hearingId, defendantId);
