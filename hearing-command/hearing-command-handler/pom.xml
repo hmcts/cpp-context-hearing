@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-command</artifactId>
-        <version>17.104.177-2539-SNAPSHOT</version>
+        <version>17.104.181-2539-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-command-handler</artifactId>
     <packaging>war</packaging>
@@ -39,6 +39,18 @@
                         <groupId>uk.gov.moj.cpp.referencedata</groupId>
                         <artifactId>referencedata-query-api</artifactId>
                         <version>${referencedata.version}</version>
+                        <classifier>raml</classifier>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>*</groupId>
+                                <artifactId>*</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.progression</groupId>
+                        <artifactId>progression-query-api</artifactId>
+                        <version>${progression.version}</version>
                         <classifier>raml</classifier>
                         <exclusions>
                             <exclusion>
