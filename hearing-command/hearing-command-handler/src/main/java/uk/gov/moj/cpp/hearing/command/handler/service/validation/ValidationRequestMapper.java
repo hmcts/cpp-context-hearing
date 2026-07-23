@@ -15,6 +15,7 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DefendantDto;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationRequest;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.OffenceDto;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.Prompt;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ResultLineDto;
 
 import java.util.ArrayList;
@@ -121,8 +122,19 @@ public class ValidationRequestMapper {
                 .offenceId(uuidToString(line.getOffenceId()))
                 .consecutiveToOffence(extractConsecutiveToOffence(line.getPrompts()))
                 .category(toCategory(line.getCategory()))
-                .isConcurrent(extractIsConcurrent(line.getPrompts()));
+                .isConcurrent(extractIsConcurrent(line.getPrompts()))
+                .prompts(mapPrompts(line.getPrompts()));
     }
+
+    private List<Prompt> mapPrompts(final List<SharedResultsCommandPrompt> prompts) {
+        if (prompts == null) {
+            return null;
+        }
+        return prompts.stream()
+                .map(p -> new Prompt().promptRef(p.getPromptRef()).promptValue(p.getValue()))
+                .toList();
+    }
+
 
     private String extractCaseId(final List<SharedResultsCommandResultLineV2> lines) {
         return lines.stream()
