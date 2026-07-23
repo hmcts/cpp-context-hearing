@@ -320,6 +320,9 @@ class ValidationRequestMapperTest {
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(true));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(nullValue()));
+        assertThat(request.getResultLines().get(0).getPrompts(), hasSize(1));
+        assertThat(request.getResultLines().get(0).getPrompts().get(0).getPromptRef(), is("concurrent"));
+        assertThat(request.getResultLines().get(0).getPrompts().get(0).getPromptValue(), is("true"));
     }
 
     @Test
@@ -342,6 +345,9 @@ class ValidationRequestMapperTest {
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(nullValue()));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(consecutiveOffenceId));
+        assertThat(request.getResultLines().get(0).getPrompts(), hasSize(1));
+        assertThat(request.getResultLines().get(0).getPrompts().get(0).getPromptRef(), is("consecutiveToOffenceNumber"));
+        assertThat(request.getResultLines().get(0).getPrompts().get(0).getPromptValue(), is(consecutiveOffenceId));
     }
 
     @Test
@@ -366,6 +372,7 @@ class ValidationRequestMapperTest {
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(false));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(consecutiveOffenceId));
+        assertThat(request.getResultLines().get(0).getPrompts(), hasSize(2));
     }
 
     @Test
@@ -383,6 +390,7 @@ class ValidationRequestMapperTest {
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(nullValue()));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(nullValue()));
+        assertThat(request.getResultLines().get(0).getPrompts(), is(nullValue()));
     }
 
     @Test
@@ -401,6 +409,7 @@ class ValidationRequestMapperTest {
 
         assertThat(request.getResultLines().get(0).getIsConcurrent(), is(nullValue()));
         assertThat(request.getResultLines().get(0).getConsecutiveToOffence(), is(nullValue()));
+        assertThat(request.getResultLines().get(0).getPrompts(), is(empty()));
     }
 
     @Test
