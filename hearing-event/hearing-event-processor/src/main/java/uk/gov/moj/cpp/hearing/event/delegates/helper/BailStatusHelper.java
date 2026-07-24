@@ -129,7 +129,7 @@ public class BailStatusHelper {
      */
     private List<Offence> buildAllActiveOffences(final List<Offence> currentHearingOffences, final UUID hearingId, final UUID defendantId) {
         final Map<UUID, Offence> currentById = currentHearingOffences.stream()
-                .filter(o -> nonNull(o.getId()) && !Boolean.TRUE.equals(o.getProceedingsConcluded()))
+                .filter(o -> nonNull(o.getId()) && isActiveOffence(o))
                 .collect(toMap(Offence::getId, o -> o, (a, b) -> a));
 
         final List<Offence> storedOffences = fetchStoredOffencesForDefendant(hearingId, defendantId);
@@ -138,10 +138,14 @@ public class BailStatusHelper {
         storedOffences.stream()
                 .filter(stored -> nonNull(stored.getId()))
                 .filter(stored -> !currentById.containsKey(stored.getId()))
-                .filter(stored -> !Boolean.TRUE.equals(stored.getProceedingsConcluded()))
+                .filter(BailStatusHelper::isActiveOffence)
                 .forEach(merged::add);
 
         return merged;
+    }
+
+    private static boolean isActiveOffence(final Offence stored) {
+        return !Boolean.TRUE.equals(stored.getProceedingsConcluded());
     }
 
     private List<Offence> fetchStoredOffencesForDefendant(final UUID hearingId, final UUID defendantId) {
@@ -155,7 +159,7 @@ public class BailStatusHelper {
                 .flatMap(pc -> ofNullable(pc.getDefendants()).map(Collection::stream).orElseGet(Stream::empty))
                 .filter(d -> defendantId == null || defendantId.equals(d.getId()))
                 .flatMap(d -> ofNullable(d.getOffences()).map(Collection::stream).orElseGet(Stream::empty))
-                .collect(toList());
+                .toList();
     }
 
     /**
@@ -191,7 +195,7 @@ public class BailStatusHelper {
         final List<JudicialResult> effectiveResults = judicialResults.stream()
                 .filter(jr -> nonNull(jr.getPostHearingCustodyStatus()))
                 .filter(jr -> !isExcludedMainResult(jr))
-                .collect(toList());
+                .toList();
 
         if (effectiveResults.isEmpty()) {
             return empty();
@@ -235,26 +239,6 @@ public class BailStatusHelper {
                         .orElse(null))
                 .filter(Objects::nonNull)
                 .min(comparing(BailStatus::getStatusRanking));
-    }
-
-    private Optional<BailStatus> getPostHearingCustodyStatusBasedOnRank(final Defendant defendant, final List<BailStatus> bailStatusesFromRefData) {
-        final List<JudicialResult> judicialResults = defendant.getOffences().stream()
-                .map(Offence::getJudicialResults)
-                .filter(Objects::nonNull)
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-
-        return getBailStatusByJudicialResults(judicialResults, bailStatusesFromRefData);
-    }
-
-    private Optional<BailStatus> getPostHearingCustodyStatusBasedOnRank(final List<BailStatus> bailStatusesFromRefData, final List<Offence> offences) {
-        final List<JudicialResult> judicialResults = offences.stream()
-                .map(Offence::getJudicialResults)
-                .filter(Objects::nonNull)
-                .flatMap(List::stream)
-                .collect(toList());
-
-        return getBailStatusByJudicialResults(judicialResults, bailStatusesFromRefData);
     }
 
     private Optional<BailStatus> getBailStatusByJudicialResults(final List<JudicialResult> judicialResults, final List<BailStatus> bailStatusesFromRefData) {
