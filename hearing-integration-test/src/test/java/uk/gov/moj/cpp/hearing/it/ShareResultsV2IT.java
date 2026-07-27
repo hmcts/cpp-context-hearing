@@ -9,7 +9,12 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
@@ -44,7 +49,11 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
+import static uk.gov.moj.cpp.hearing.utils.ResultsValidatorStub.capturedValidationRequests;
+import static uk.gov.moj.cpp.hearing.utils.ResultsValidatorStub.stubResultsValidatorValidate;
+import static uk.gov.moj.cpp.hearing.utils.ResultsValidatorStub.stubResultsValidatorValidateWithErrors;
 
+import org.junit.jupiter.api.Disabled;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.AttendanceType;
 import uk.gov.justice.core.courts.CourtCentre;
@@ -128,6 +137,146 @@ public class ShareResultsV2IT extends AbstractIT {
         shareDaysResultWithCourtClerk(hearing, targets, hearingDay);
 
         assertHearingResultsAreShared(hearing);
+    }
+
+    @Test
+    @Disabled("Temporarily disabled due to feature toggle in the pipeline")
+    public void shouldInvokeResultsValidatorAndRaiseResultsSharedV3EventOnShareDaysResults() {
+
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+        final LocalDate hearingDay = LocalDate.now();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommand(getUuidMapForMultipleCaseStructure());
+        final Hearing hearing = hearingCommand.getHearing();
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
+
+        stubCourtRoom(hearing);
+        stubResultsValidatorValidate();
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), orderedDate);
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
+
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+
+        final UUID expectedResultLineId = saveDraftResultCommand.getTarget().getResultLines().get(0).getResultLineId();
+        final UUID expectedOffenceId = saveDraftResultCommand.getTarget().getOffenceId();
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final ShareDaysResultsCommand sentCommand;
+        try (final Utilities.EventListener resultsSharedV3Listener = listenFor("hearing.events.results-shared-v3", "hearing.event")
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.hearingId", is(hearing.getId().toString())),
+                        withJsonPath("$.hearingDay", is(hearingDay.toString())))))) {
+
+            sentCommand = shareDaysResultWithCourtClerk(hearing, targets, hearingDay);
+
+            final JsonPath resultsSharedV3 = resultsSharedV3Listener.waitFor();
+
+            assertThat(resultsSharedV3.getString("hearingId"), is(hearing.getId().toString()));
+            assertThat(resultsSharedV3.getString("hearingDay"), is(hearingDay.toString()));
+            assertThat(resultsSharedV3.getBoolean("isReshare"), is(false));
+            assertThat(resultsSharedV3.getString("courtClerk.userId"), is(sentCommand.getCourtClerk().getUserId().toString()));
+            assertThat(resultsSharedV3.getString("courtClerk.firstName"), is(sentCommand.getCourtClerk().getFirstName()));
+            assertThat(resultsSharedV3.getString("courtClerk.lastName"), is(sentCommand.getCourtClerk().getLastName()));
+            assertThat(resultsSharedV3.getList("targets.offenceId"), hasItem(expectedOffenceId.toString()));
+            assertThat(resultsSharedV3.getList("targets.findAll { it.offenceId == '" + expectedOffenceId + "' }[0].resultLines.resultLineId"),
+                    hasItem(expectedResultLineId.toString()));
+        }
+
+        // NOTE: the following assertion only sees a captured request while the "ResultsValidation"
+        // feature toggle is enabled for the environment under test (see plan notes for this test).
+        // A failure here most likely means the toggle is off, not that the handler has regressed.
+        final List<JsonPath> validationRequests = capturedValidationRequests();
+        assertThat(validationRequests, hasSize(greaterThan(0)));
+
+        final JsonPath lastValidationRequest = validationRequests.get(validationRequests.size() - 1);
+        final String expectedCaseId = sentCommand.getResultLines().get(0).getCaseId().toString();
+        assertThat(lastValidationRequest.getString("hearingId"), is(hearing.getId().toString()));
+        assertThat(lastValidationRequest.getString("hearingDay"), is(hearingDay.toString()));
+        assertThat(lastValidationRequest.getString("courtType"), is(hearing.getJurisdictionType().name()));
+        assertThat(lastValidationRequest.getString("caseId"), is(expectedCaseId));
+        assertThat(lastValidationRequest.getList("resultLines.resultLineId"), hasItem(expectedResultLineId.toString()));
+        assertThat(lastValidationRequest.getList("offences"), is(not(empty())));
+        assertThat(lastValidationRequest.getList("defendants"), is(not(empty())));
+
+        assertHearingResultsAreShared(hearing);
+    }
+
+    @Test
+    @Disabled("Temporarily disabled due to feature toggle in the pipeline")
+    // NOTE: when re-enabled, this test also requires the JNDI env-entry
+    // resultsvalidator.share.blocking=enabled to be set in the test environment. Without it (absent
+    // or 'disabled'), a validation failure is logged only and the share still proceeds, so no
+    // ResultsValidationFailed event is raised.
+    public void shouldRaiseResultsValidationFailedEventAndNotShareResultsWhenValidatorReturnsErrors() {
+
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+        final LocalDate hearingDay = LocalDate.now();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommand(getUuidMapForMultipleCaseStructure());
+        final Hearing hearing = hearingCommand.getHearing();
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
+
+        stubCourtRoom(hearing);
+        stubResultsValidatorValidateWithErrors();
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), orderedDate);
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
+
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        try (final Utilities.EventListener resultsSharedV3Listener = listenFor("hearing.events.results-shared-v3", "hearing.event")
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.hearingId", is(hearing.getId().toString())),
+                        withJsonPath("$.hearingDay", is(hearingDay.toString())))));
+             final Utilities.EventListener validationFailedListener = listenFor("hearing.events.results-validation-failed", "hearing.event")
+                     .withFilter(isJson(allOf(
+                             withJsonPath("$.hearingId", is(hearing.getId().toString())),
+                             withJsonPath("$.hearingDay", is(hearingDay.toString())))))) {
+
+            shareDaysResultWithCourtClerk(hearing, targets, hearingDay);
+
+            final JsonPath validationFailed = validationFailedListener.waitFor();
+
+            assertThat(validationFailed.getString("hearingId"), is(hearing.getId().toString()));
+            assertThat(validationFailed.getString("hearingDay"), is(hearingDay.toString()));
+            assertThat(validationFailed.getString("userId"), is(getLoggedInUser().toString()));
+            assertThat(validationFailed.getString("validationId"), is("22222222-2222-2222-2222-222222222222"));
+            assertThat(validationFailed.getString("mode"), is("advisory"));
+            assertThat(validationFailed.getBoolean("isValid"), is(false));
+            assertThat(validationFailed.getList("errors.errorMessages"), hasItem("Sentence result is invalid for offence"));
+            assertThat(validationFailed.getList("errors.validationIssues.ruleId"), hasItem("DR-SENT-001"));
+            assertThat(validationFailed.getList("errors.validationIssues.severity"), hasItem("ERROR"));
+            assertThat(validationFailed.getList(
+                            "errors.validationIssues.findAll { it.ruleId == 'DR-SENT-001' }[0].affectedOffences.offenceId"),
+                    hasItem("11111111-1111-1111-1111-111111111111"));
+            assertThat(validationFailed.getList("warnings"), is(empty()));
+
+            // NOTE: like shouldInvokeResultsValidatorAndRaiseResultsSharedV3EventOnShareDaysResults,
+            // this test only exercises the real validator call while the "ResultsValidation" feature
+            // toggle is enabled for the environment under test. If the toggle is off, the client fails
+            // open (passThrough) and the share would proceed instead of being blocked.
+            resultsSharedV3Listener.expectNone();
+        }
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
     }
 
     @Test
@@ -321,13 +470,13 @@ public class ShareResultsV2IT extends AbstractIT {
         stubGetReferenceDataCourtRooms(courtCentre, hearing.getHearingLanguage(), ouId3, ouId4);
     }
 
-    private void shareDaysResultWithCourtClerk(final Hearing hearing, final List<Target> targets, final LocalDate hearingDay) {
+    private ShareDaysResultsCommand shareDaysResultWithCourtClerk(final Hearing hearing, final List<Target> targets, final LocalDate hearingDay) {
         final DelegatedPowers courtClerk1 = delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
                 .withUserId(randomUUID()).build();
         ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
         shareDaysResultsCommand.setHearingDay(hearingDay);
-        shareResultsPerDay(getRequestSpec(), hearing.getId(), with(
+        return shareResultsPerDay(getRequestSpec(), hearing.getId(), with(
                 shareDaysResultsCommand,
                 command -> command.setCourtClerk(courtClerk1)
         ), targets);
