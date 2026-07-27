@@ -5,10 +5,139 @@
   "properties": {
     "hearingId": {
       "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "hearingDay": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "validationId": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "rulesEvaluated": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "isValid": {
+      "type": "boolean"
+    },
+    "errors": {
+      "type": "object",
+      "properties": {
+        "errorMessages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "validationIssues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/validationIssue"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/validationIssue"
+      }
+    },
+    "processingTimeMs": {
+      "type": "integer"
     }
   },
   "required": [
     "hearingId"
   ],
-  "additionalProperties": true
+  "additionalProperties": true,
+  "definitions": {
+    "validationIssue": {
+      "type": "object",
+      "properties": {
+        "ruleId": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "ERROR",
+            "WARNING"
+          ]
+        },
+        "affectedResultCodes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "affectedOffences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/affectedOffence"
+          }
+        },
+        "affectedDefendants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/affectedDefendant"
+          }
+        },
+        "validationLevel": {
+          "type": "string",
+          "enum": [
+            "OFFENCE",
+            "DEFENDANT"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "affectedOffence": {
+      "type": "object",
+      "properties": {
+        "offenceId": {
+          "type": "string"
+        },
+        "offenceTitle": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "offenceId",
+        "message"
+      ],
+      "additionalProperties": true
+    },
+    "affectedDefendant": {
+      "type": "object",
+      "properties": {
+        "defendantId": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "defendantId",
+        "message"
+      ],
+      "additionalProperties": true
+    }
+  }
 }

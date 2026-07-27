@@ -7,6 +7,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubForReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubReferenceDataResultDefinitionWithCategory;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubRelistReferenceDataResults;
+import static uk.gov.moj.cpp.hearing.utils.ResultsValidatorStub.stubResultsValidatorValidate;
 import static uk.gov.moj.cpp.hearing.utils.StagingEnforcementStub.stubEnforceFinancialImposition;
 import static uk.gov.moj.cpp.hearing.utils.SystemIdMapperStub.stubAddMapping;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockMaterialUpload;
@@ -35,6 +36,7 @@ public class StubPerExecution {
         setupAsWildcardUserBelongingToAllGroups();
         stubAddMapping();
         stubEnforceFinancialImposition();
+        stubResultsValidatorValidate();
         stubOrganisationUnit();
         stubReferenceDataResultDefinitionWithCategory();
     }
