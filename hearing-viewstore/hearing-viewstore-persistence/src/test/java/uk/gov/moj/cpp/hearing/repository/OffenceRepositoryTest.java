@@ -11,7 +11,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.domain.OffenceBailStatus;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
@@ -158,6 +157,18 @@ public class OffenceRepositoryTest {
         assertThat(result.get(0).getOffenceId(), is(offenceId));
         assertThat(result.get(0).getBailStatusCode(), is(nullValue()));
         assertThat(result.get(0).getBailStatusDesc(), is(nullValue()));
+    }
+
+    @Test
+    public void shouldExcludeOffencesFromHearingDaysWhereResultsNotShared() {
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        saveHearingWithDefendantAndOffence(defendantId, offenceId, LATER_DAY, false, false, "C", "Remanded into Custody", null, null);
+
+        final List<OffenceBailStatus> result = offenceRepositoryTest.offenceBailStatuses(defendantId);
+
+        assertThat(result, empty());
     }
 
     @Test
