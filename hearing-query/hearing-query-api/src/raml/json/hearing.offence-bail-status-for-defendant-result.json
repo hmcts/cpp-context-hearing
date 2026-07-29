@@ -1,0 +1,10 @@
+{
+  "offenceBailStatuses": [
+    {
+      "offenceId": "8296d38a-5098-437e-b937-68606ff878a8",
+      "bailStatusId": "12e69486-4d01-3403-a50a-7419ca040635",
+      "bailStatusCode": "C",
+      "bailStatusDesc": "Custody or remanded into custody"
+    }
+  ]
+}

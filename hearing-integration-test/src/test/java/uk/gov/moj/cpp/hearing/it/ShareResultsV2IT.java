@@ -8,6 +8,7 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
@@ -46,6 +47,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VERDICT_TYPE_GUILTY
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataResultBailStatuses;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
@@ -86,6 +88,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 import uk.gov.moj.cpp.hearing.test.TestUtilities;
+import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -401,6 +404,95 @@ public class ShareResultsV2IT extends AbstractIT {
         assertHearingResultsAreShared(hearing);
     }
 
+    @Test
+    void shouldRetainHigherPriorityOffenceRemandStatusFromOutsideLaterHearingDay() {
+        final LocalDate firstHearingDay = PAST_LOCAL_DATE.next();
+        final LocalDate laterHearingDay = firstHearingDay.plusDays(1);
+
+        final UUID unconditionalBailResultDefId = randomUUID();
+        final UUID custodyResultDefId = randomUUID();
+        final UUID conditionalBailResultDefId = randomUUID();
+
+        final UUID defendantId = randomUUID();
+        final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
+        caseStructure.put(randomUUID(), toMap(defendantId, TestUtilities.asList(randomUUID(), randomUUID(), randomUUID())));
+
+        final InitiateHearingCommandHelper hearingCommand = getHearingCommand(caseStructure);
+        final Hearing hearing = hearingCommand.getHearing();
+        final Defendant defendant = hearing.getProsecutionCases().get(0).getDefendants().get(0);
+        final Offence offence1 = defendant.getOffences().get(0);
+        final Offence offence2 = defendant.getOffences().get(1);
+        final Offence offence3 = defendant.getOffences().get(2);
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
+        stubCourtRoom(hearing);
+
+        stubGetReferenceDataResultBailStatuses("referencedata.bail-statuses-priority-order.json");
+
+        setupNowsReferenceDataForRemandStatuses(firstHearingDay, unconditionalBailResultDefId, custodyResultDefId, conditionalBailResultDefId);
+        final AllResultDefinitionsReferenceDataHelper firstDayResultDefs = setupResultDefinitionsReferenceDataWithBailStatuses(firstHearingDay,
+                Map.of(unconditionalBailResultDefId, "U", custodyResultDefId, "C", conditionalBailResultDefId, "B"));
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final SaveDraftResultCommand offence1Given = buildOffenceResult(hearingCommand.it(), firstHearingDay, defendant.getId(), offence1.getId());
+        setPromptForSaveDraftResultCommand(findMandatoryPrompt(firstDayResultDefs, unconditionalBailResultDefId), offence1Given);
+
+        final SaveDraftResultCommand offence2Given = buildOffenceResult(hearingCommand.it(), firstHearingDay, defendant.getId(), offence2.getId());
+        setPromptForSaveDraftResultCommand(findMandatoryPrompt(firstDayResultDefs, custodyResultDefId), offence2Given);
+
+        final SaveDraftResultCommand offence3Given = buildOffenceResult(hearingCommand.it(), firstHearingDay, defendant.getId(), offence3.getId());
+        setPromptForSaveDraftResultCommand(findMandatoryPrompt(firstDayResultDefs, conditionalBailResultDefId), offence3Given);
+
+        shareDaysResultWithCourtClerk(hearing, asList(offence1Given.getTarget(), offence2Given.getTarget(), offence3Given.getTarget()), firstHearingDay);
+
+        getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getPersonDefendant, isBean(uk.gov.justice.core.courts.PersonDefendant.class)
+                                                .with(uk.gov.justice.core.courts.PersonDefendant::getBailStatus, isBean(uk.gov.justice.core.courts.BailStatus.class)
+                                                        .with(uk.gov.justice.core.courts.BailStatus::getCode, is("C"))))))))));
+
+        final AllResultDefinitionsReferenceDataHelper laterDayResultDefs = setupResultDefinitionsReferenceDataWithBailStatuses(laterHearingDay,
+                Map.of(unconditionalBailResultDefId, "U", custodyResultDefId, "C", conditionalBailResultDefId, "B"));
+
+        final SaveDraftResultCommand offence1Later = buildOffenceResult(hearingCommand.it(), laterHearingDay, defendant.getId(), offence1.getId());
+        setPromptForSaveDraftResultCommand(findMandatoryPrompt(laterDayResultDefs, unconditionalBailResultDefId), offence1Later);
+
+        final SaveDraftResultCommand offence3Later = buildOffenceResult(hearingCommand.it(), laterHearingDay, defendant.getId(), offence3.getId());
+        setPromptForSaveDraftResultCommand(findMandatoryPrompt(laterDayResultDefs, custodyResultDefId), offence3Later);
+
+        try (final Utilities.EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+                .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId())))))) {
+
+            shareDaysResultWithCourtClerk(hearing, asList(offence1Later.getTarget(), offence3Later.getTarget()), laterHearingDay);
+
+            final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].personDefendant.bailStatus.code"), is("C"));
+        }
+
+        final BeanMatcher<uk.gov.justice.core.courts.BailStatus> bailStatusIsCustody = isBean(uk.gov.justice.core.courts.BailStatus.class)
+                .with(uk.gov.justice.core.courts.BailStatus::getCode, is("C"));
+        final BeanMatcher<Offence> offence2StillCustody = isBean(Offence.class)
+                .with(Offence::getId, is(offence2.getId()))
+                .with(Offence::getBailStatus, bailStatusIsCustody);
+        final BeanMatcher<uk.gov.justice.core.courts.PersonDefendant> personDefendantIsCustody = isBean(uk.gov.justice.core.courts.PersonDefendant.class)
+                .with(uk.gov.justice.core.courts.PersonDefendant::getBailStatus, bailStatusIsCustody);
+        final BeanMatcher<Defendant> defendantMatcher = isBean(Defendant.class)
+                .with(Defendant::getPersonDefendant, personDefendantIsCustody)
+                .with(Defendant::getOffences, hasItem(offence2StillCustody));
+        final BeanMatcher<ProsecutionCase> prosecutionCaseMatcher = isBean(ProsecutionCase.class)
+                .with(ProsecutionCase::getDefendants, first(defendantMatcher));
+
+        getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getProsecutionCases, first(prosecutionCaseMatcher))));
+    }
+
     private CommandHelpers.UpdateVerdictCommandHelper updateDefendantAndChangeVerdict(InitiateHearingCommandHelper initiateHearingCommandHelper) {
         updateDefendantAttendance(initiateHearingCommandHelper);
 
@@ -640,6 +732,99 @@ public class ShareResultsV2IT extends AbstractIT {
 
         stubGetAllResultDefinitions(referenceDate, allResultDefinitions.it());
         return allResultDefinitions;
+    }
+
+    private AllResultDefinitionsReferenceDataHelper setupResultDefinitionsReferenceDataWithBailStatuses(final LocalDate referenceDate, final Map<UUID, String> resultDefIdToPostHearingCustodyStatus) {
+        final String LISTING_OFFICER_USER_GROUP = "Listing Officer";
+
+        final AllResultDefinitionsReferenceDataHelper allResultDefinitions = h(AllResultDefinitions.allResultDefinitions()
+                .setResultDefinitions(
+                        resultDefIdToPostHearingCustodyStatus.entrySet().stream().map(
+                                entry ->
+                                        ResultDefinition.resultDefinition()
+                                                .setId(entry.getKey())
+                                                .setRank(1)
+                                                .setIsAvailableForCourtExtract(true)
+                                                .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                                .setFinancial("Y")
+                                                .setCategory(getCategoryForResultDefinition(entry.getKey()))
+                                                .setPrompts(asList(uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
+                                                                .setId(entry.getKey())
+                                                                .setMandatory(true)
+                                                                .setLabel("promptLabel")
+                                                                .setWelshLabel(STRING.next())
+                                                                .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                                                .setReference("bailConditionReason"),
+                                                        uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
+                                                                .setId(entry.getKey())
+                                                                .setMandatory(false)
+                                                                .setLabel("Parent Guardian to Pay")
+                                                                .setWelshLabel(STRING.next())
+                                                                .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                                                .setReference("PARENT_GAURDIAN_TO_PAY")
+                                                        )
+                                                )
+                                                .setSecondaryCJSCodes(getSecondaryCjsCodes())
+                                                .setLabel("resultLabel")
+                                                .setShortCode("SC-" + entry.getValue())
+                                                .setDrivingTestStipulation(1)
+                                                .setPointsDisqualificationCode("TT99")
+                                                .setDvlaCode("C")
+                                                .setWelshLabel(STRING.next())
+                                                .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                                .setCanBeSubjectOfBreach(true)
+                                                .setCanBeSubjectOfVariation(true)
+                                                .setLevel("O")
+                                                .setPostHearingCustodyStatus(entry.getValue())
+                                                .setResultDefinitionGroup("Bail Conditions")
+                        ).collect(Collectors.toList())
+                ));
+
+        stubGetAllResultDefinitions(referenceDate, allResultDefinitions.it());
+        return allResultDefinitions;
+    }
+
+    private uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt findMandatoryPrompt(final AllResultDefinitionsReferenceDataHelper refDataHelper, final UUID resultDefId) {
+        final ResultDefinition resultDefinition = refDataHelper.it().getResultDefinitions().stream()
+                .filter(rd -> rd.getId().equals(resultDefId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("invalid test data"));
+        return resultDefinition.getPrompts().get(0);
+    }
+
+    private AllNowsReferenceDataHelper setupNowsReferenceDataForRemandStatuses(final LocalDate referenceDate, final UUID unconditionalBailResultDefId,
+                                                                                final UUID custodyResultDefId, final UUID conditionalBailResultDefId) {
+        final AllNows allNows = AllNows.allNows().setNows(Arrays.asList(
+                nowDefinitionWithPrimaryResultDefinition(unconditionalBailResultDefId),
+                nowDefinitionWithPrimaryResultDefinition(custodyResultDefId),
+                nowDefinitionWithPrimaryResultDefinition(conditionalBailResultDefId)));
+        return setupNowsReferenceData(referenceDate, allNows);
+    }
+
+    private NowDefinition nowDefinitionWithPrimaryResultDefinition(final UUID primaryResultDefinitionId) {
+        return NowDefinition.now()
+                .setId(randomUUID())
+                .setResultDefinitions(singletonList(NowResultDefinitionRequirement.resultDefinitions()
+                        .setId(primaryResultDefinitionId)
+                        .setMandatory(true)
+                        .setPrimary(true)
+                        .setWelshText("Welsh Text Primary")))
+                .setName(STRING.next())
+                .setText("NowLevel/" + STRING.next())
+                .setTemplateName(STRING.next())
+                .setRank(INTEGER.next())
+                .setJurisdiction("B")
+                .setRemotePrintingRequired(false);
+    }
+
+    private SaveDraftResultCommand buildOffenceResult(final InitiateHearingCommand initiateHearingCommand, final LocalDate hearingDay,
+                                                        final UUID defendantId, final UUID offenceId) {
+        final SaveDraftResultCommand base = saveDraftResultCommandTemplate(initiateHearingCommand, hearingDay, hearingDay);
+        final Target target = Target.target().withValuesFrom(base.getTarget())
+                .withDefendantId(defendantId)
+                .withOffenceId(offenceId)
+                .build();
+        return new SaveDraftResultCommand(target, null);
     }
 
     private void assertHearingWithMultipleCasesCreatedAndResultAreNotShared(final Hearing hearing) {
