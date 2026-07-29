@@ -7,7 +7,7 @@
     </parent>
     <artifactId>hearing-viewstore-persistence</artifactId>
     <properties>
-        <h2.version>1.4.196</h2.version>
+        <h2.version>2.1.210</h2.version>
     </properties>
     <build>
         <plugins>
