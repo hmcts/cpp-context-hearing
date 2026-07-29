@@ -5,18 +5,19 @@ import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingCasesForDay;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -63,7 +64,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -144,6 +144,30 @@ public class HearingQueryView {
         final GetHearings hearingListResponse = hearingService.getHearings(date, startTime, endTime, courtCentreId, roomId, accessibleCasesAndApplicationIds, isDDJorRecorder, envelope.metadata());
         return envelop(hearingListResponse)
                 .withName("hearing.get.hearings")
+                .withMetadataFrom(envelope);
+    }
+
+    public Envelope<HearingCasesForDay> findHearingCasesForDay(final JsonEnvelope envelope) {
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        final LocalDate date = LocalDates.from(payload.getString(FIELD_DATE));
+
+        final HearingCasesForDay hearingCasesForDay = hearingService.getHearingCasesForDay(date);
+        return envelop(hearingCasesForDay)
+                .withName("hearing.get.hearing-cases-for-day")
+                .withMetadataFrom(envelope);
+    }
+
+    public Envelope<GetHearings> getHearingCheckIn(final JsonEnvelope envelope,
+                                                   final List<UUID> accessibleCasesAndApplicationIds,
+                                                   final boolean isDDJorRecorder) {
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        final LocalDate date = LocalDates.from(payload.getString(FIELD_DATE));
+        final UUID courtCentreId = UUID.fromString(payload.getString(FIELD_COURT_CENTRE_ID));
+        final UUID roomId = payload.containsKey(FIELD_ROOM_ID) ? UUID.fromString(payload.getString(FIELD_ROOM_ID)) : null;
+
+        final GetHearings hearingListResponse = hearingService.getHearingsForCheckIn(date, courtCentreId, roomId, accessibleCasesAndApplicationIds, isDDJorRecorder);
+        return envelop(hearingListResponse)
+                .withName("hearing.get.hearings-check-in")
                 .withMetadataFrom(envelope);
     }
 
