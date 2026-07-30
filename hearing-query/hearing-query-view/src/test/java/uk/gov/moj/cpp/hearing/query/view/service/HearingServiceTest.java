@@ -106,6 +106,7 @@ import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.messaging.spi.DefaultJsonMetadata;
 import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
+import uk.gov.moj.cpp.hearing.domain.OffenceBailStatus;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
@@ -2944,8 +2945,8 @@ public class HearingServiceTest {
         final UUID defendantId = randomUUID();
         final UUID offenceId = randomUUID();
         final UUID bailStatusId = randomUUID();
-        final uk.gov.moj.cpp.hearing.repository.OffenceBailStatus repositoryResult =
-                new uk.gov.moj.cpp.hearing.repository.OffenceBailStatus(offenceId, bailStatusId, "C", "Remanded into Custody");
+        final OffenceBailStatus repositoryResult =
+                new OffenceBailStatus(offenceId, bailStatusId, "C", "Remanded into Custody");
 
         when(offenceRepository.offenceBailStatuses(defendantId)).thenReturn(singletonList(repositoryResult));
 
@@ -2975,10 +2976,10 @@ public class HearingServiceTest {
     @Test
     public void shouldMapMultipleOffenceBailStatusesPreservingOrder() {
         final UUID defendantId = randomUUID();
-        final uk.gov.moj.cpp.hearing.repository.OffenceBailStatus first =
-                new uk.gov.moj.cpp.hearing.repository.OffenceBailStatus(randomUUID(), randomUUID(), "C", "Remanded into Custody");
-        final uk.gov.moj.cpp.hearing.repository.OffenceBailStatus second =
-                new uk.gov.moj.cpp.hearing.repository.OffenceBailStatus(randomUUID(), randomUUID(), "U", "Unconditional Bail");
+        final OffenceBailStatus first =
+                new OffenceBailStatus(randomUUID(), randomUUID(), "C", "Remanded into Custody");
+        final OffenceBailStatus second =
+                new OffenceBailStatus(randomUUID(), randomUUID(), "U", "Unconditional Bail");
 
         when(offenceRepository.offenceBailStatuses(defendantId)).thenReturn(asList(first, second));
 
@@ -2994,8 +2995,8 @@ public class HearingServiceTest {
     public void shouldMapOffenceBailStatusWithNullBailStatusFieldsWhenNeitherOffenceNorDefendantHasOne() {
         final UUID defendantId = randomUUID();
         final UUID offenceId = randomUUID();
-        final uk.gov.moj.cpp.hearing.repository.OffenceBailStatus repositoryResult =
-                new uk.gov.moj.cpp.hearing.repository.OffenceBailStatus(offenceId, null, null, null);
+        final OffenceBailStatus repositoryResult =
+                new OffenceBailStatus(offenceId, null, null, null);
 
         when(offenceRepository.offenceBailStatuses(defendantId)).thenReturn(singletonList(repositoryResult));
 
