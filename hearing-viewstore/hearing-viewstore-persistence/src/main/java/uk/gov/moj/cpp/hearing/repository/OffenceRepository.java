@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.repository;
 
 import static java.util.UUID.fromString;
 
+import uk.gov.moj.cpp.hearing.domain.OffenceBailStatus;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 
