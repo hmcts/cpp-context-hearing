@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="137" author="hearing" logicalFilePath="137-create-ptph-detail">
+
+        <createTable tableName="ha_ptph_detail">
+
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+
+            <column name="tier" type="VARCHAR(20)"/>
+
+            <column name="list_type" type="VARCHAR(20)"/>
+
+            <column name="key_reason" type="TEXT"/>
+
+            <column name="finalised" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+    </changeSet>
+
+</databaseChangeLog>

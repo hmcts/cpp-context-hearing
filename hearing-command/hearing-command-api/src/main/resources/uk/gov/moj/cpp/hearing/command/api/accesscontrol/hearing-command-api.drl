@@ -423,6 +423,30 @@ rule "Command - API - Action - hearing.set-trial-type"
   then
     $outcome.setSuccess(true);
 end
+rule "Command - API - Action - hearing.save-ptph-detail"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.save-ptph-detail");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators"));
+  then
+    $outcome.setSuccess(true);
+end
+rule "Command - API - Action - hearing.finalise-ptph-detail"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.finalise-ptph-detail");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators"));
+  then
+    $outcome.setSuccess(true);
+end
+rule "Command - API - Action - hearing.delete-ptph-detail"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.delete-ptph-detail");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators"));
+  then
+    $outcome.setSuccess(true);
+end
 rule "Command - API - Action - hearing.publish-court-list"
   when
     $outcome: Outcome();

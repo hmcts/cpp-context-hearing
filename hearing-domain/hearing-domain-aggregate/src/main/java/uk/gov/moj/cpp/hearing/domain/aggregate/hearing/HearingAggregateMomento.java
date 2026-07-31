@@ -41,6 +41,10 @@ public class HearingAggregateMomento implements Serializable {
     private boolean duplicate = false;
     private ZonedDateTime lastSharedTime;
     private boolean deleted = false;
+    private String tier;
+    private String listType;
+    private String ptphDetailKeyReason;
+    private boolean ptphDetailFinalised = false;
     private Map<UUID, ZonedDateTime> nextHearingStartDates = new HashMap<>();
     private Map<UUID, ZonedDateTime> resultsAmendmentDateMap = new HashMap<>();
     private Map<LocalDate, Map<UUID, Target2>> multiDayTargets = new HashMap<>();
@@ -173,6 +177,38 @@ public class HearingAggregateMomento implements Serializable {
 
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public String getTier() {
+        return tier;
+    }
+
+    public void setTier(final String tier) {
+        this.tier = tier;
+    }
+
+    public String getListType() {
+        return listType;
+    }
+
+    public void setListType(final String listType) {
+        this.listType = listType;
+    }
+
+    public String getPtphDetailKeyReason() {
+        return ptphDetailKeyReason;
+    }
+
+    public void setPtphDetailKeyReason(final String ptphDetailKeyReason) {
+        this.ptphDetailKeyReason = ptphDetailKeyReason;
+    }
+
+    public boolean isPtphDetailFinalised() {
+        return ptphDetailFinalised;
+    }
+
+    public void setPtphDetailFinalised(final boolean ptphDetailFinalised) {
+        this.ptphDetailFinalised = ptphDetailFinalised;
     }
 
     public Map<UUID, ZonedDateTime> getNextHearingStartDates() {

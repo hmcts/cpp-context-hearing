@@ -83,6 +83,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefendantDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingEventDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingPtphDetailDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingTrialTypeDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.InterpreterIntermediaryDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NowDelegate;
@@ -172,6 +173,9 @@ import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationFinalisedOnTargetUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.PtphDetailDeleted;
+import uk.gov.moj.cpp.hearing.domain.event.PtphDetailFinalised;
+import uk.gov.moj.cpp.hearing.domain.event.PtphDetailSaved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAddedToHearing;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
@@ -261,6 +265,7 @@ public class HearingAggregate implements Aggregate {
     private final InterpreterIntermediaryDelegate interpreterIntermediaryDelegate = new InterpreterIntermediaryDelegate(momento);
 
     private final HearingTrialTypeDelegate hearingTrialTypeDelegate = new HearingTrialTypeDelegate(momento);
+    private final HearingPtphDetailDelegate hearingPtphDetailDelegate = new HearingPtphDetailDelegate(momento);
 
     private final CompanyRepresentativeDelegate companyRepresentativeDelegate = new CompanyRepresentativeDelegate(momento);
 
@@ -365,6 +370,9 @@ public class HearingAggregate implements Aggregate {
                 when(HearingTrialType.class).apply(hearingTrialTypeDelegate::handleTrialTypeSetForHearing),
                 when(HearingEffectiveTrial.class).apply(hearingTrialTypeDelegate::handleEffectiveTrailHearing),
                 when(HearingTrialVacated.class).apply(hearingTrialTypeDelegate::handleVacateTrialTypeSetForHearing),
+                when(PtphDetailSaved.class).apply(hearingPtphDetailDelegate::handlePtphDetailSaved),
+                when(PtphDetailFinalised.class).apply(hearingPtphDetailDelegate::handlePtphDetailFinalised),
+                when(PtphDetailDeleted.class).apply(hearingPtphDetailDelegate::handlePtphDetailDeleted),
                 when(CompanyRepresentativeAdded.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeAdded),
                 when(CompanyRepresentativeUpdated.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeUpdated),
                 when(CompanyRepresentativeRemoved.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeRemoved),
@@ -1192,6 +1200,18 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> setTrialType(final HearingTrialVacated trialType) {
         return apply(this.hearingTrialTypeDelegate.setTrialType(trialType));
+    }
+
+    public Stream<Object> savePtphDetail(final PtphDetailSaved event) {
+        return apply(this.hearingPtphDetailDelegate.savePtphDetail(event));
+    }
+
+    public Stream<Object> finalisePtphDetail(final PtphDetailFinalised event) {
+        return apply(this.hearingPtphDetailDelegate.finalisePtphDetail(event));
+    }
+
+    public Stream<Object> deletePtphDetail(final PtphDetailDeleted event) {
+        return apply(this.hearingPtphDetailDelegate.deletePtphDetail(event));
     }
 
     public Stream<Object> addCompanyRepresentative(final CompanyRepresentative companyRepresentative, final UUID hearingId) {

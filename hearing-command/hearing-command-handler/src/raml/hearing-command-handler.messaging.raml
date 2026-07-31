@@ -336,6 +336,19 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.set-trial-type.json
             example: !include json/hearing.command.set-trial-type.json
 
+# Tier and List Type
+        application/vnd.hearing.command.save-ptph-detail+json:
+            schema: !include json/schema/hearing.command.save-ptph-detail.json
+            example: !include json/hearing.command.save-ptph-detail.json
+
+        application/vnd.hearing.command.finalise-ptph-detail+json:
+            schema: !include json/schema/hearing.command.finalise-ptph-detail.json
+            example: !include json/hearing.command.finalise-ptph-detail.json
+
+        application/vnd.hearing.command.delete-ptph-detail+json:
+            schema: !include json/schema/hearing.command.delete-ptph-detail.json
+            example: !include json/hearing.command.delete-ptph-detail.json
+
 #NCES Notification
         application/vnd.hearing.command.update-defendant-with-financial-order+json:
             schema: !include json/schema/hearing.command.update-defendant-with-financial-order.json
