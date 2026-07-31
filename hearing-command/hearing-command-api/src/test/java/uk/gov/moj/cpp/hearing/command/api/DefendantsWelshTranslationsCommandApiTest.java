@@ -27,7 +27,6 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 public class DefendantsWelshTranslationsCommandApiTest {
 
 
-
     @Spy
     private final Enveloper enveloper = EnveloperFactory.createEnveloper();
 
