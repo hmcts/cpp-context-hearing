@@ -120,4 +120,47 @@ public class HearingQueryViewTest {
                 metadataWithRandomUUIDAndName(),
                 payloadBuilder.build());
     }
+
+    @Test
+    public void shouldGetOffenceBailStatusForDefendant() {
+        final UUID defendantId = randomUUID();
+        final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse expectedResponse =
+                uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse.builder()
+                        .withOffenceBailStatuses(singletonList(new uk.gov.moj.cpp.hearing.domain.OffenceBailStatus(
+                                randomUUID(), randomUUID(), "C", "Remanded into Custody")))
+                        .build();
+
+        when(hearingService.getOffenceBailStatusForDefendant(defendantId)).thenReturn(expectedResponse);
+
+        final JsonEnvelope query = defendantIdEnvelope(defendantId);
+
+        final Envelope<uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse> result =
+                target.getOffenceBailStatusForDefendant(query);
+
+        verify(hearingService).getOffenceBailStatusForDefendant(defendantId);
+        assertThat(result.metadata().name(), is("hearing.offence-bail-status-for-defendant-result"));
+        assertThat(result.payload(), is(sameInstance(expectedResponse)));
+    }
+
+    @Test
+    public void shouldGetOffenceBailStatusForDefendantWhenNoStatusesFound() {
+        final UUID defendantId = randomUUID();
+        final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse emptyResponse =
+                new uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse();
+
+        when(hearingService.getOffenceBailStatusForDefendant(defendantId)).thenReturn(emptyResponse);
+
+        final JsonEnvelope query = defendantIdEnvelope(defendantId);
+
+        final Envelope<uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse> result =
+                target.getOffenceBailStatusForDefendant(query);
+
+        assertThat(result.payload().getOffenceBailStatuses(), org.hamcrest.Matchers.empty());
+    }
+
+    private JsonEnvelope defendantIdEnvelope(final UUID defendantId) {
+        return uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom(
+                metadataWithRandomUUIDAndName(),
+                createObjectBuilder().add("defendantId", defendantId.toString()).build());
+    }
 }

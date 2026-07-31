@@ -106,6 +106,7 @@ import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.messaging.spi.DefaultJsonMetadata;
 import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
+import uk.gov.moj.cpp.hearing.domain.OffenceBailStatus;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
@@ -166,6 +167,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 import uk.gov.moj.cpp.hearing.repository.NowRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
+import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -216,6 +218,8 @@ public class HearingServiceTest {
     private uk.gov.justice.core.courts.HearingEvent hearingEvent;
     @Mock
     private HearingRepository hearingRepository;
+    @Mock
+    private OffenceRepository offenceRepository;
     @Mock
     private ReferenceDataService referenceDataService;
     @Mock
@@ -2934,5 +2938,75 @@ public class HearingServiceTest {
         // other hearing values are preserved via withValuesFrom
         assertThat(result.getHearing().getId(), is(hearingId));
         assertThat(result.getHearing().getCourtApplications(), hasSize(1));
+    }
+
+    @Test
+    public void shouldMapOffenceBailStatusesFromRepositoryForDefendant() {
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final UUID bailStatusId = randomUUID();
+        final OffenceBailStatus repositoryResult =
+                new OffenceBailStatus(offenceId, bailStatusId, "C", "Remanded into Custody");
+
+        when(offenceRepository.offenceBailStatuses(defendantId)).thenReturn(singletonList(repositoryResult));
+
+        final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse response =
+                hearingService.getOffenceBailStatusForDefendant(defendantId);
+
+        assertThat(response.getOffenceBailStatuses(), hasSize(1));
+        final uk.gov.moj.cpp.hearing.domain.OffenceBailStatus mapped = response.getOffenceBailStatuses().get(0);
+        assertThat(mapped.getOffenceId(), is(offenceId));
+        assertThat(mapped.getBailStatusId(), is(bailStatusId));
+        assertThat(mapped.getBailStatusCode(), is("C"));
+        assertThat(mapped.getBailStatusDesc(), is("Remanded into Custody"));
+    }
+
+    @Test
+    public void shouldReturnEmptyOffenceBailStatusesWhenRepositoryHasNoResultsForDefendant() {
+        final UUID defendantId = randomUUID();
+
+        when(offenceRepository.offenceBailStatuses(defendantId)).thenReturn(emptyList());
+
+        final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse response =
+                hearingService.getOffenceBailStatusForDefendant(defendantId);
+
+        assertThat(response.getOffenceBailStatuses(), empty());
+    }
+
+    @Test
+    public void shouldMapMultipleOffenceBailStatusesPreservingOrder() {
+        final UUID defendantId = randomUUID();
+        final OffenceBailStatus first =
+                new OffenceBailStatus(randomUUID(), randomUUID(), "C", "Remanded into Custody");
+        final OffenceBailStatus second =
+                new OffenceBailStatus(randomUUID(), randomUUID(), "U", "Unconditional Bail");
+
+        when(offenceRepository.offenceBailStatuses(defendantId)).thenReturn(asList(first, second));
+
+        final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse response =
+                hearingService.getOffenceBailStatusForDefendant(defendantId);
+
+        assertThat(response.getOffenceBailStatuses(), hasSize(2));
+        assertThat(response.getOffenceBailStatuses().get(0).getBailStatusCode(), is("C"));
+        assertThat(response.getOffenceBailStatuses().get(1).getBailStatusCode(), is("U"));
+    }
+
+    @Test
+    public void shouldMapOffenceBailStatusWithNullBailStatusFieldsWhenNeitherOffenceNorDefendantHasOne() {
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final OffenceBailStatus repositoryResult =
+                new OffenceBailStatus(offenceId, null, null, null);
+
+        when(offenceRepository.offenceBailStatuses(defendantId)).thenReturn(singletonList(repositoryResult));
+
+        final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse response =
+                hearingService.getOffenceBailStatusForDefendant(defendantId);
+
+        final uk.gov.moj.cpp.hearing.domain.OffenceBailStatus mapped = response.getOffenceBailStatuses().get(0);
+        assertThat(mapped.getOffenceId(), is(offenceId));
+        assertThat(mapped.getBailStatusId(), is(nullValue()));
+        assertThat(mapped.getBailStatusCode(), is(nullValue()));
+        assertThat(mapped.getBailStatusDesc(), is(nullValue()));
     }
 }

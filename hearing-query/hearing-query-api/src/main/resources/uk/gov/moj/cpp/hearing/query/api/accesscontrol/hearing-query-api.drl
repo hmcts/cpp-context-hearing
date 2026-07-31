@@ -294,6 +294,13 @@ rule "Query - API - hearing.prosecution-case-by-hearingid"
   then
     $outcome.setSuccess(true);
 end
+rule "Query - API - hearing.offence-bail-status-for-defendant"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.offence-bail-status-for-defendant");
+  then
+    $outcome.setSuccess(true);
+end
 rule "Query - API - hearing.get-hearing-event-log-for-documents"
   when
     $outcome: Outcome();
