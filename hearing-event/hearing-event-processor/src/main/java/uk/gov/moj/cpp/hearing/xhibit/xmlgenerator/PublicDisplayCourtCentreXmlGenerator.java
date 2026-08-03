@@ -144,7 +144,9 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
 
         cppCases.getCasesDetails()
                 .forEach(xhibitCase -> xhibitCases.getCaseDetails().add(addCaseDetails(xhibitCase, envelope)));
-        return xhibitCases;
+        // The schema declares <cases> optional but requires at least one <caseDetails> when present, so omit an
+        // empty <cases> (e.g. when every case on the court room is restricted) rather than emit an invalid <cases/>.
+        return xhibitCases.getCaseDetails().isEmpty() ? null : xhibitCases;
     }
 
     @SuppressWarnings("squid:S1172")
@@ -187,7 +189,9 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
                     exhibitDefendant.setLastname(cppDefendant.getLastName());
                     exhibitDefendants.getDefendant().add(exhibitDefendant);
                 });
-        return exhibitDefendants;
+        // The schema declares <defendants> optional but requires at least one <defendant> when present, so omit an
+        // empty <defendants> rather than emit an invalid <defendants/>.
+        return exhibitDefendants.getDefendant().isEmpty() ? null : exhibitDefendants;
     }
 
     private Publicnotices getPublicNotices(final CaseDetail cases) {
