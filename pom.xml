@@ -41,7 +41,7 @@
         <listing.version>17.103.137</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>17.0.96</systemdocgenerator.version>
-        <results-validator-api-spec.version>0.2.6</results-validator-api-spec.version>
+        <results-validator-api-spec.version>0.2.8</results-validator-api-spec.version>
         <openapi-generator-maven-plugin.version>7.23.0</openapi-generator-maven-plugin.version>
 
         <sonar.coverage.exclusions>
