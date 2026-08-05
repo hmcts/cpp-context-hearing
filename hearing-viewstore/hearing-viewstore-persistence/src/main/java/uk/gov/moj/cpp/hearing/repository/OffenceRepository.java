@@ -33,8 +33,7 @@ public abstract class OffenceRepository extends AbstractEntityRepository<Offence
             "SELECT o.id as latest_offence_id, MAX(d.sitting_day) AS latest_sitting_day " +
             "FROM ha_offence o " +
             "JOIN ha_hearing_day d ON o.hearing_id = d.hearing_id " +
-            "WHERE d.has_shared_results = true " +
-            "AND o.proceedings_concluded <> true " +
+            "WHERE o.proceedings_concluded <> true " +
             "AND o.defendant_id = :defendantId " +
             "group by o.id) latest ON latest.latest_offence_id = ho.id AND latest.latest_sitting_day = hhd.sitting_day";
 
