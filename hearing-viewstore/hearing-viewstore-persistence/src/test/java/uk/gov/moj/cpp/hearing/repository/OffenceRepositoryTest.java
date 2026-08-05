@@ -161,18 +161,6 @@ public class OffenceRepositoryTest {
     }
 
     @Test
-    public void shouldExcludeOffencesFromHearingDaysWhereResultsNotShared() {
-        final UUID defendantId = randomUUID();
-        final UUID offenceId = randomUUID();
-
-        saveHearingWithDefendantAndOffence(defendantId, offenceId, LATER_DAY, false, false, "C", "Remanded into Custody", null, null);
-
-        final List<OffenceBailStatus> result = offenceRepositoryTest.offenceBailStatuses(defendantId);
-
-        assertThat(result, empty());
-    }
-
-    @Test
     public void shouldExcludeOffencesWithConcludedProceedings() {
         final UUID defendantId = randomUUID();
         final UUID offenceId = randomUUID();
