@@ -13,6 +13,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.core.featurecontrol.FeatureControlGuard;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationRequest;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationResponse;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ValidationIssue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -60,52 +63,57 @@ class ResultsValidationClientTest {
     @Test
     void shouldReturnValidResponseWhenServiceReturns200WithNoErrors() throws Exception {
         final String responseJson = """
-                {"validationId":"abc","isValid":true,"errors":[],"warnings":[],"rulesEvaluated":["DR-SENT-002"],"processingTimeMs":10}
+                {"validationId":"abc","isValid":true,"errors":{"errorMessages":[],"validationIssues":[]},"warnings":[],"rulesEvaluated":["DR-SENT-002"],"processingTimeMs":10}
                 """;
         mockHttpResponse(200, responseJson);
 
-        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+        final DraftValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
 
-        assertThat(response.isValid(), is(true));
-        assertThat(response.hasErrors(), is(false));
+        assertThat(response.getIsValid(), is(true));
     }
 
     @Test
     void shouldReturnErrorsWhenServiceReturns200WithErrors() throws Exception {
         final String responseJson = """
-                {"validationId":"abc","isValid":false,"errors":[{"ruleId":"DR-SENT-002","severity":"ERROR","message":"Missing info","affectedOffences":[]}],"warnings":[],"rulesEvaluated":["DR-SENT-002"],"processingTimeMs":10}
+                {"validationId":"abc","isValid":false,"errors":{"errorMessages":["Missing info"],"validationIssues":[{"ruleId":"DR-SENT-002","severity":"ERROR","affectedResultCodes":[],"affectedOffences":[{"offenceId":"off-1","offenceTitle":"Offence 1","message":"Missing info"}],"affectedDefendants":[],"validationLevel":"OFFENCE"}]},"warnings":[],"rulesEvaluated":["DR-SENT-002"],"processingTimeMs":10}
                 """;
         mockHttpResponse(200, responseJson);
 
-        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+        final DraftValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
 
-        assertThat(response.isValid(), is(false));
-        assertThat(response.hasErrors(), is(true));
-        assertThat(response.getErrors(), hasSize(1));
+        assertThat(response.getIsValid(), is(false));
+        assertThat(response.getErrors().getValidationIssues(), hasSize(1));
+        final ValidationIssue issue = response.getErrors().getValidationIssues().get(0);
+        assertThat(issue.getRuleId(), is("DR-SENT-002"));
+        assertThat(issue.getSeverity(), is(ValidationIssue.SeverityEnum.ERROR));
+        assertThat(issue.getValidationLevel(), is(ValidationIssue.ValidationLevelEnum.OFFENCE));
+        assertThat(issue.getAffectedOffences().get(0).getOffenceId(), is("off-1"));
+        assertThat(issue.getAffectedOffences().get(0).getMessage(), is("Missing info"));
     }
 
     @Test
     void shouldReturnNoErrorsWhenServiceReturns200WithWarningsOnly() throws Exception {
         final String responseJson = """
-                {"validationId":"abc","isValid":true,"errors":[],"warnings":[{"ruleId":"DR-SENT-002","severity":"WARNING","message":"Advisory","affectedOffences":[]}],"rulesEvaluated":["DR-SENT-002"],"processingTimeMs":10}
+                {"validationId":"abc","isValid":true,"errors":{"errorMessages":[],"validationIssues":[]},"warnings":[{"ruleId":"DR-SENT-002","severity":"WARNING","affectedResultCodes":[],"affectedOffences":[],"affectedDefendants":[{"defendantId":"def-1","message":"Both concurrent and consecutive"}],"validationLevel":"DEFENDANT"}],"rulesEvaluated":["DR-SENT-002"],"processingTimeMs":10}
                 """;
         mockHttpResponse(200, responseJson);
 
-        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+        final DraftValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
 
-        assertThat(response.hasErrors(), is(false));
+        assertThat(response.getIsValid(), is(true));
         assertThat(response.getWarnings(), hasSize(1));
+        assertThat(response.getWarnings().get(0).getSeverity(), is(ValidationIssue.SeverityEnum.WARNING));
+        assertThat(response.getWarnings().get(0).getAffectedDefendants().get(0).getDefendantId(), is("def-1"));
     }
 
     @Test
     void shouldReturnPassThroughWhenServiceThrowsIOException() throws Exception {
         when(httpClient.execute(any(HttpPost.class))).thenThrow(new IOException("Connection refused"));
 
-        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+        final DraftValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
 
-        assertThat(response.isValid(), is(true));
-        assertThat(response.hasErrors(), is(false));
-        assertThat(response.getErrors(), is(empty()));
+        assertThat(response.getIsValid(), is(true));
+        assertThat(response.getErrors().getValidationIssues(), is(empty()));
     }
 
     @Test
@@ -117,20 +125,18 @@ class ResultsValidationClientTest {
         when(httpResponse.getStatusLine()).thenReturn(statusLine);
         when(httpClient.execute(any(HttpPost.class))).thenReturn(httpResponse);
 
-        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+        final DraftValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
 
-        assertThat(response.isValid(), is(true));
-        assertThat(response.hasErrors(), is(false));
+        assertThat(response.getIsValid(), is(true));
     }
 
     @Test
     void shouldReturnPassThroughWithoutHttpCallWhenDisabled() throws Exception {
         setField(resultsValidationClient, "enabled", "false");
 
-        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+        final DraftValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
 
-        assertThat(response.isValid(), is(true));
-        assertThat(response.hasErrors(), is(false));
+        assertThat(response.getIsValid(), is(true));
         verify(httpClient, never()).execute(any());
     }
 
@@ -138,23 +144,22 @@ class ResultsValidationClientTest {
     void toggle_off_returns_passThrough_without_http_call() throws Exception {
         when(featureControlGuard.isFeatureEnabled("ResultsValidation")).thenReturn(false);
 
-        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+        final DraftValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
 
-        assertThat(response.isValid(), is(true));
-        assertThat(response.hasErrors(), is(false));
+        assertThat(response.getIsValid(), is(true));
         verify(httpClient, never()).execute(any());
     }
 
     @Test
     void toggle_on_invokes_http_client() throws Exception {
         final String responseJson = """
-                {"validationId":"abc","isValid":true,"errors":[],"warnings":[],"rulesEvaluated":["DR-SENT-002"],"processingTimeMs":10}
+                {"validationId":"abc","isValid":true,"errors":{"errorMessages":[],"validationIssues":[]},"warnings":[],"rulesEvaluated":["DR-SENT-002"],"processingTimeMs":10}
                 """;
         mockHttpResponse(200, responseJson);
 
-        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+        final DraftValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
 
-        assertThat(response.isValid(), is(true));
+        assertThat(response.getIsValid(), is(true));
         verify(httpClient).execute(any(HttpPost.class));
     }
 
@@ -162,13 +167,13 @@ class ResultsValidationClientTest {
     void toggle_lookup_failure_falls_open_and_invokes_http_client() throws Exception {
         when(featureControlGuard.isFeatureEnabled("ResultsValidation")).thenThrow(new RuntimeException("feature store unavailable"));
         final String responseJson = """
-                {"validationId":"abc","isValid":true,"errors":[],"warnings":[],"rulesEvaluated":["DR-SENT-002"],"processingTimeMs":10}
+                {"validationId":"abc","isValid":true,"errors":{"errorMessages":[],"validationIssues":[]},"warnings":[],"rulesEvaluated":["DR-SENT-002"],"processingTimeMs":10}
                 """;
         mockHttpResponse(200, responseJson);
 
-        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+        final DraftValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
 
-        assertThat(response.isValid(), is(true));
+        assertThat(response.getIsValid(), is(true));
         verify(httpClient).execute(any(HttpPost.class));
     }
 
@@ -176,11 +181,38 @@ class ResultsValidationClientTest {
     void existing_static_disabled_path_still_short_circuits() throws Exception {
         setField(resultsValidationClient, "enabled", "false");
 
-        final ValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+        final DraftValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
 
-        assertThat(response.isValid(), is(true));
-        assertThat(response.hasErrors(), is(false));
+        assertThat(response.getIsValid(), is(true));
         verify(httpClient, never()).execute(any());
+    }
+
+    @Test
+    void isShareBlockingEnabled_falseWhenBlank() {
+        setField(resultsValidationClient, "shareBlocking", "");
+
+        assertThat(resultsValidationClient.isShareBlockingEnabled(), is(false));
+    }
+
+    @Test
+    void isShareBlockingEnabled_falseWhenDisabled() {
+        setField(resultsValidationClient, "shareBlocking", "disabled");
+
+        assertThat(resultsValidationClient.isShareBlockingEnabled(), is(false));
+    }
+
+    @Test
+    void isShareBlockingEnabled_trueWhenEnabled() {
+        setField(resultsValidationClient, "shareBlocking", "enabled");
+
+        assertThat(resultsValidationClient.isShareBlockingEnabled(), is(true));
+    }
+
+    @Test
+    void isShareBlockingEnabled_trueWhenEnabledIgnoringCaseAndWhitespace() {
+        setField(resultsValidationClient, "shareBlocking", "  ENABLED  ");
+
+        assertThat(resultsValidationClient.isShareBlockingEnabled(), is(true));
     }
 
     private void mockHttpResponse(final int statusCode, final String body) throws IOException {
@@ -195,15 +227,13 @@ class ResultsValidationClientTest {
         when(httpClient.execute(any(HttpPost.class))).thenReturn(httpResponse);
     }
 
-    private ValidationRequest buildRequest() {
-        return new ValidationRequest(
-                "hearing-1",
-                LocalDate.of(2026, 3, 16),
-                "MAGISTRATES",
-                null,
-                List.of(),
-                List.of(),
-                List.of()
-        );
+    private DraftValidationRequest buildRequest() {
+        return new DraftValidationRequest()
+                .hearingId("hearing-1")
+                .hearingDay(LocalDate.of(2026, 3, 16))
+                .courtType(DraftValidationRequest.CourtTypeEnum.MAGISTRATES)
+                .resultLines(List.of())
+                .offences(List.of())
+                .defendants(List.of());
     }
 }

@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-domain</artifactId>
-        <version>17.104.184-SNAPSHOT</version>
+        <version>17.104.185-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-domain-common</artifactId>
 
@@ -12,6 +12,14 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <!-- Supplies javax.annotation.Generated referenced by the OpenAPI-generated result-validator models
+             (not present on the JDK 11+ classpath). Provided at runtime by the WildFly container. -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.utils</groupId>
@@ -53,6 +61,75 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-results-validator-spec</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>uk.gov.hmcts.cp</groupId>
+                                    <artifactId>api-cp-crime-hearing-results-validator</artifactId>
+                                    <version>${results-validator-api-spec.version}</version>
+                                    <type>jar</type>
+                                    <includes>openapi/openapi-spec.yml</includes>
+                                    <outputDirectory>${project.build.directory}/results-validator-spec</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${openapi-generator-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-results-validator-models</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/results-validator-spec/openapi/openapi-spec.yml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <library>native</library>
+                            <generateApis>false</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateModelTests>false</generateModelTests>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <modelPackage>uk.gov.moj.cpp.hearing.domain.common.resultsvalidator</modelPackage>
+                            <configOptions>
+                                <serializableModel>true</serializableModel>
+                                <serializationLibrary>jackson</serializationLibrary>
+                                <dateLibrary>java8</dateLibrary>
+                                <useBeanValidation>false</useBeanValidation>
+                                <useJakartaEe>false</useJakartaEe>
+                                <annotationLibrary>none</annotationLibrary>
+                                <documentationProvider>none</documentationProvider>
+                                <openApiNullable>false</openApiNullable>
+                                <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                                <!-- library=native emits toUrlQueryString() referencing the ApiClient
+                                     supporting file, which we don't generate (generateSupportingFiles=false).
+                                     These DTOs are only (de)serialised via Jackson, so drop that method. -->
+                                <supportUrlQuery>false</supportUrlQuery>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>uk.gov.justice.generators</groupId>
                 <artifactId>pojo-generation-plugin</artifactId>
