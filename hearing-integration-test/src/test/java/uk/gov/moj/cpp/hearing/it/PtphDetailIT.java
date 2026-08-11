@@ -1,10 +1,12 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.moj.cpp.hearing.it.Queries.pollForPtphDetail;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.UseCases.deletePtphDetail;
 import static uk.gov.moj.cpp.hearing.it.UseCases.finalisePtphDetail;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
@@ -17,6 +19,7 @@ import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsU
 import uk.gov.moj.cpp.hearing.command.ListType;
 import uk.gov.moj.cpp.hearing.command.SavePtphDetailCommand;
 import uk.gov.moj.cpp.hearing.command.Tier;
+import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
 import java.util.UUID;
@@ -223,5 +226,55 @@ class PtphDetailIT extends AbstractIT {
                 hasNoJsonPath("$.tier"),
                 hasNoJsonPath("$.listType"),
                 withJsonPath("$.finalised", is(false)));
+    }
+
+    // ---------------------------------------------------------------------------------
+    // Public events: each command must announce its outcome on the public topic, since the
+    // 202 Accepted returns before the aggregate has run and so proves nothing on its own.
+    // ---------------------------------------------------------------------------------
+
+    @Test
+    void shouldPublishPublicEventCarryingTheValuesWhenSaved() {
+        final UUID hearingId = givenAnInitiatedHearing();
+
+        try (EventListener publicSaved = listenFor("public.hearing.ptph-detail-saved")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))))) {
+
+            savePtphDetail(getRequestSpec(), hearingId, ptphDetail(hearingId, Tier.TIER_3, ListType.TYPE_1_FIXED, KEY_REASON));
+
+            publicSaved.waitFor();
+        }
+    }
+
+    @Test
+    void shouldPublishPublicEventWhenFinalised() {
+        final UUID hearingId = givenAnInitiatedHearing();
+
+        savePtphDetail(getRequestSpec(), hearingId, ptphDetail(hearingId, Tier.TIER_3, ListType.TYPE_1_FIXED, KEY_REASON));
+        pollForPtphDetail(hearingId, withJsonPath("$.tier", is("TIER_3")));
+
+        try (EventListener publicFinalised = listenFor("public.hearing.ptph-detail-finalised")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))))) {
+
+            finalisePtphDetail(getRequestSpec(), hearingId);
+
+            publicFinalised.waitFor();
+        }
+    }
+
+    @Test
+    void shouldPublishPublicEventWhenDeleted() {
+        final UUID hearingId = givenAnInitiatedHearing();
+
+        savePtphDetail(getRequestSpec(), hearingId, ptphDetail(hearingId, Tier.TIER_2, ListType.TYPE_1_FIXED, KEY_REASON));
+        pollForPtphDetail(hearingId, withJsonPath("$.tier", is("TIER_2")));
+
+        try (EventListener publicDeleted = listenFor("public.hearing.ptph-detail-deleted")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))))) {
+
+            deletePtphDetail(getRequestSpec(), hearingId);
+
+            publicDeleted.waitFor();
+        }
     }
 }
