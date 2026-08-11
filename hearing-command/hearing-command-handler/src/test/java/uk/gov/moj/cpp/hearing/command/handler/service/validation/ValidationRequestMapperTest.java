@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -17,6 +18,7 @@ import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
@@ -27,11 +29,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 class ValidationRequestMapperTest {
 
     private final ValidationRequestMapper mapper = new ValidationRequestMapper();
+    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
 
     @Test
     void shouldMapHearingIdAndHearingDayFromCommand() {
@@ -143,6 +147,46 @@ class ValidationRequestMapperTest {
         assertThat(request.getDefendants(), hasSize(1));
         assertThat(request.getDefendants().get(0).getFirstName(), is(nullValue()));
         assertThat(request.getDefendants().get(0).getLastName(), is(nullValue()));
+        assertThat(request.getDefendants().get(0).getDateOfBirth(), is(nullValue()));
+    }
+
+    @Test
+    void shouldMapDefendantDateOfBirthFromPersonDetails() throws Exception {
+        final UUID defendantId = randomUUID();
+        final LocalDate dateOfBirth = LocalDate.of(1990, 5, 20);
+
+        final Person person = Person.person()
+                .withDateOfBirth(dateOfBirth)
+                .build();
+
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withPersonDetails(person)
+                .build();
+
+        final Defendant defendant = Defendant.defendant()
+                .withId(defendantId)
+                .withPersonDefendant(personDefendant)
+                .build();
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withDefendants(List.of(defendant))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withProsecutionCases(List.of(prosecutionCase))
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(), emptyList());
+
+        final DraftValidationRequest request = mapper.toValidationRequest(command, hearing);
+
+        assertThat(request.getDefendants(), hasSize(1));
+        assertThat(request.getDefendants().get(0).getDateOfBirth(), is(dateOfBirth));
+
+        // The validator spec declares dateOfBirth as format: date, so the outbound JSON
+        // must serialise it as an ISO yyyy-MM-dd string rather than an epoch/array form.
+        final String json = objectMapper.writeValueAsString(request);
+        assertThat(json, containsString("\"dateOfBirth\":\"1990-05-20\""));
     }
 
     @Test
