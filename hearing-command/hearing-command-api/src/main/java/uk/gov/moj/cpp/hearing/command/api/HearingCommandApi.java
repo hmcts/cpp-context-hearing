@@ -230,6 +230,21 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.set-trial-type");
     }
 
+    @Handles("hearing.save-ptph-detail")
+    public void savePtphDetail(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.save-ptph-detail");
+    }
+
+    @Handles("hearing.finalise-ptph-detail")
+    public void finalisePtphDetail(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.finalise-ptph-detail");
+    }
+
+    @Handles("hearing.delete-ptph-detail")
+    public void deletePtphDetail(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.delete-ptph-detail");
+    }
+
     @Handles("hearing.add-company-representative")
     public void addCompanyRepresentative(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.add-company-representative");

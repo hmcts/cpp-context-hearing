@@ -65,7 +65,8 @@ public class HearingCommandApiTest {
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts","publishHearingListsForCrownCourtsWithIds",
             "computeOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant", "cancelAmendments",
             "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing","markAsDuplicateHearingV2", "markAsDuplicateHearingWithReason", "saveMultipleDraftResult", "updateResultLineSharedDates", "reusableInfo", "hearing.youth-court-defendants",
-            "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "addWitnessToHearing","saveDraftResultsForHearingDay", "removeOffences", "saveDraftResultV2", "deleteDraftResultV2", "amendHearing", "amendHearingSupport", "unlockHearing", "replicateHearingResults", "deleteHearingBdf", "patchApplicationFinalisedOnTarget", "updateHearingDayBdf");
+            "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "addWitnessToHearing","saveDraftResultsForHearingDay", "removeOffences", "saveDraftResultV2", "deleteDraftResultV2", "amendHearing", "amendHearingSupport", "unlockHearing", "replicateHearingResults", "deleteHearingBdf", "patchApplicationFinalisedOnTarget", "updateHearingDayBdf",
+            "savePtphDetail", "finalisePtphDetail", "deletePtphDetail");
 
     private static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
     private static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
@@ -225,6 +226,33 @@ public class HearingCommandApiTest {
         hearingCommandApi.setTrialType(jsonRequestEnvelope);
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.set-trial-type");
+    }
+
+    @Test
+    public void shouldSendSavePtphDetail() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.save-ptph-detail");
+
+        hearingCommandApi.savePtphDetail(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.save-ptph-detail");
+    }
+
+    @Test
+    public void shouldSendFinalisePtphDetail() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.finalise-ptph-detail");
+
+        hearingCommandApi.finalisePtphDetail(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.finalise-ptph-detail");
+    }
+
+    @Test
+    public void shouldSendDeletePtphDetail() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.delete-ptph-detail");
+
+        hearingCommandApi.deletePtphDetail(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.delete-ptph-detail");
     }
 
     @Test

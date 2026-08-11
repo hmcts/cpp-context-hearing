@@ -48,6 +48,9 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_RECORD_SESSION_TIME = "hearing.record-session-time";
     private static final String ACTION_NAME_BOOK_PROVISIONAL_HEARING_SLOTS = "hearing.book-provisional-hearing-slots";
     private static final String ACTION_NAME_SET_TRIAL_TYPE = "hearing.set-trial-type";
+    private static final String ACTION_NAME_SAVE_TIER_AND_LIST_TYPE = "hearing.save-ptph-detail";
+    private static final String ACTION_NAME_FINALISE_TIER_AND_LIST_TYPE = "hearing.finalise-ptph-detail";
+    private static final String ACTION_NAME_DELETE_TIER_AND_LIST_TYPE = "hearing.delete-ptph-detail";
     private static final String ACTION_NAME_REMOVE_TARGET = "hearing.remove-targets";
     private static final String ACTION_NAME_REQUEST_APPROVAL = "hearing.request-approval";
     private static final String ACTION_NAME_MASTER_DEFENDANT_ID = "hearing.add-master-defendant-id-to-defendant";
@@ -618,6 +621,57 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUnauthorisedUserToSetTrialType() {
         final Action action = createActionFor(ACTION_NAME_SET_TRIAL_TYPE);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToSavePtphDetail() {
+        final Action action = createActionFor(ACTION_NAME_SAVE_TIER_AND_LIST_TYPE);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators"))
+                .willReturn(true);
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToSavePtphDetail() {
+        final Action action = createActionFor(ACTION_NAME_SAVE_TIER_AND_LIST_TYPE);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToFinalisePtphDetail() {
+        final Action action = createActionFor(ACTION_NAME_FINALISE_TIER_AND_LIST_TYPE);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators"))
+                .willReturn(true);
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToFinalisePtphDetail() {
+        final Action action = createActionFor(ACTION_NAME_FINALISE_TIER_AND_LIST_TYPE);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToDeletePtphDetail() {
+        final Action action = createActionFor(ACTION_NAME_DELETE_TIER_AND_LIST_TYPE);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators"))
+                .willReturn(true);
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToDeletePtphDetail() {
+        final Action action = createActionFor(ACTION_NAME_DELETE_TIER_AND_LIST_TYPE);
 
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);

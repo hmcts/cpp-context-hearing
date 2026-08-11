@@ -327,3 +327,12 @@ rule "Query - API - Action - hearing.query.outstanding-fines"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Query - API - hearing.get-ptph-detail"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get-ptph-detail");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators"));
+  then
+    $outcome.setSuccess(true);
+end

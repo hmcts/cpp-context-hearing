@@ -80,6 +80,7 @@ import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.HearingVacatedTrialCleared;
+import uk.gov.moj.cpp.hearing.command.SavePtphDetailCommand;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
@@ -1274,5 +1275,44 @@ public class UseCases {
         );
         return firstProsecutionCounsel;
 
+    }
+
+    /**
+     * LPT-2401 / LPT-2403 — save is an upsert, so re-posting also serves editing.
+     * Note the schema requires {@code hearingId} in the body as well as the path, unlike the
+     * {@code set-trial-type} precedent this slice otherwise follows.
+     */
+    public static SavePtphDetailCommand savePtphDetail(final RequestSpecification requestSpec, final UUID hearingId,
+                                                       final SavePtphDetailCommand command) {
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.save-ptph-detail+json")
+                .withArgs(hearingId)
+                .withPayload(command)
+                .executeSuccessfully();
+
+        return command;
+    }
+
+    /**
+     * LPT-2404 — empty body: the schema declares no properties and is
+     * {@code additionalProperties: false}, so sending {@code hearingId} would be rejected.
+     */
+    public static void finalisePtphDetail(final RequestSpecification requestSpec, final UUID hearingId) {
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.finalise-ptph-detail+json")
+                .withArgs(hearingId)
+                .withPayload("{}")
+                .executeSuccessfully();
+    }
+
+    /**
+     * LPT-2402 — empty body, same reason as finalise. Permitted in any state.
+     */
+    public static void deletePtphDetail(final RequestSpecification requestSpec, final UUID hearingId) {
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.delete-ptph-detail+json")
+                .withArgs(hearingId)
+                .withPayload("{}")
+                .executeSuccessfully();
     }
 }

@@ -68,6 +68,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.PtphDetail;
 import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
@@ -88,6 +89,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCas
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
+import uk.gov.moj.cpp.hearing.query.view.response.PtphDetailResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.ctl.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.query.view.service.userdata.UserDataService;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
@@ -100,6 +102,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 import uk.gov.moj.cpp.hearing.repository.NowRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
+import uk.gov.moj.cpp.hearing.repository.PtphDetailRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -179,6 +182,8 @@ public class HearingService {
     private FilterHearingsBasedOnPermissions filterHearingsBasedOnPermissions;
     @Inject
     private DraftResultRepository draftResultRepository;
+    @Inject
+    private PtphDetailRepository ptphDetailRepository;
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
     @Inject
@@ -964,6 +969,15 @@ public class HearingService {
 
         final JsonNode payload = draftResult.get(0).getDraftResultPayload();
         return new DraftResultResponse(objectToJsonObjectConverter.convert(payload), true);
+    }
+
+    @Transactional
+    public PtphDetailResponse getPtphDetail(final UUID hearingId) {
+        final PtphDetail entity = ptphDetailRepository.findBy(hearingId);
+        if (entity == null) {
+            return new PtphDetailResponse(null, null, null, false);
+        }
+        return new PtphDetailResponse(entity.getTier(), entity.getListType(), entity.getKeyReason(), entity.isFinalised());
     }
 
     @Transactional

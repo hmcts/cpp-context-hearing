@@ -242,4 +242,19 @@ public class Queries {
                         payload().isJson(allOf(matchers)
                         ));
     }
+
+    /**
+     * Polls {@code hearing.get-ptph-detail} (LPT-2406's enabler). Asserted with JsonPath rather
+     * than a bean matcher because {@code PtphDetailResponse} lives in hearing-query-view, which
+     * this module does not depend on.
+     */
+    public static void pollForPtphDetail(final UUID hearingId, final Matcher<? super ReadContext>... matchers) {
+        poll(requestParams(getURL("hearing.get-ptph-detail", hearingId), "application/vnd.hearing.get-ptph-detail+json")
+                .withHeader(HeaderConstants.USER_ID, getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, SECONDS)
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(matchers))
+                );
+    }
 }

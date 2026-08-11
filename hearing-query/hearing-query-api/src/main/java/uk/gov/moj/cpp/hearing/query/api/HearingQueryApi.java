@@ -52,6 +52,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetails
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.PtphDetailResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
 import java.util.ArrayList;
@@ -283,6 +284,11 @@ public class HearingQueryApi {
     public JsonEnvelope getDraftResult(final JsonEnvelope query) {
         final Envelope<TargetListResponse> envelope = this.hearingQueryView.getDraftResult(query);
         return getJsonEnvelope(envelope);
+    }
+
+    @Handles("hearing.get-ptph-detail")
+    public JsonEnvelope getPtphDetail(final JsonEnvelope query) {
+        return getJsonEnvelope(this.hearingQueryView.getPtphDetail(query));
     }
 
     @Handles("hearing.get-draft-result-v2")

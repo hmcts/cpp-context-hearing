@@ -42,6 +42,8 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     private static final String HEARING_CUSTODY_TIME_LIMIT = "hearing.custody-time-limit";
 
+    private static final String ACTION_NAME_GET_TIER_AND_LIST_TYPE = "hearing.get-ptph-detail";
+
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -218,6 +220,16 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     @Test
     public void shouldNotAllowUserInUnAuthorisedGroupToCustodyTimeLimit() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_CUSTODY_TIME_LIMIT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetPtphDetail() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_TIER_AND_LIST_TYPE, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetPtphDetail() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_TIER_AND_LIST_TYPE, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators");
     }
 
     @Override
