@@ -3,12 +3,15 @@
 Programme: Crime Common Platform (CPP) — Modern by Default
 Team: Listing / Hearing
 Service: `cpp-context-hearing` (hearing tickets) + listing services (listing tickets)
-Work delivering LPT-2400–2404: intended for `feature/ptph-detail`, but currently
-**uncommitted in the `cpp-context-hearing` working tree with `main` checked out** — the
-`feature/ptph-detail` branch itself carries no PTPH commits yet.
-Status last verified against the code: **2026-07-30** (endpoints, payloads and headers
-below read off the RAML, JSON schemas/examples, handlers and Drools rules in the working
-tree)
+Work delivering LPT-2400–2404 is **committed** in `cpp-context-hearing` as a single commit,
+`2252d6203` on `feature/pd`, cherry-picked cleanly to `team/cct-1981` as `55029441e`.
+Neither branch has been pushed with these changes.
+LPT-2405/2406 are committed in `cpp-context-listing` on
+`feature/LPT-2405-inherit-tier-listtype` (8 commits, worktree
+`cpp-context-listing-lpt-2405`), also unpushed.
+Status last verified against the code: **2026-08-11** (endpoints, payloads and headers
+below read off the RAML, JSON schemas/examples, handlers and Drools rules; test results
+from actual runs, noted per ticket)
 
 | Key | Summary | Type | Status | Assignee |
 |-----|---------|------|--------|----------|
@@ -17,18 +20,28 @@ tree)
 | LPT-2402 | [BE] [hearing] create endpoint for deleting list type and tier | Story | Done | Unassigned |
 | LPT-2403 | [BE] [hearing] create endpoint for editing list type and tier | Story | Done | Unassigned |
 | LPT-2404 | [BE] [hearing] create endpoint for finalizing list type and tier | Story | Done | Unassigned |
-| LPT-2405 | [BE] [listing] when next hearing is being created from a seeding hearing, retrieve tier/listType info from hearing context and store it in the listing payload | Story | New | Unassigned |
-| LPT-2406 | [BE] [listing] Endpoints used by court calendar need to return the list type and tier info | Story | New ¹ | Unassigned |
+| LPT-2405 | [BE] [listing] when next hearing is being created from a seeding hearing, retrieve tier/listType info from hearing context and store it in the listing payload | Story | Implemented ¹ | Unassigned |
+| LPT-2406 | [BE] [listing] Endpoints used by court calendar need to return the list type and tier info | Story | Implemented ² | Unassigned |
 
-> **Delivery note:** LPT-2400 through LPT-2404 are **implemented** in the hearing
-> context — the full CQRS slice exists for save / finalise / delete (command API →
+> **Delivery note:** LPT-2400 through LPT-2404 are **implemented and verified** in the
+> hearing context — the full CQRS slice for save / finalise / delete (command API →
 > handler → aggregate delegate → domain events → event listener → view store), plus
-> access-control rules, RAML/JSON schemas and unit tests.
-> LPT-2405 and LPT-2406 are listing-side follow-ups **not** started here.
+> access-control rules, RAML/JSON schemas, unit tests and `PtphDetailIT` (10 integration
+> tests, passing against a deployed WildFly).
 >
-> ¹ LPT-2406 stays open: its hearing-context enabler (`GET
-> /hearings/{hearingId}/ptph-detail` → `hearing.get-ptph-detail`) is done, but the
-> court-calendar-facing listing endpoints have not been changed.
+> ¹ LPT-2405 is implemented in `cpp-context-listing` and its full integration suite is
+> green (224 tests), but the cross-context call **cannot dispatch yet**: it needs
+> `cpp-context-hearing` released with a `hearing-query-api` RAML carrying `ptph-detail`,
+> and that artifact added to the `rest-client-generator-plugin` dependencies in
+> `listing-command/listing-command-api/pom.xml`. Its dedicated IT is `@Disabled` until
+> then. See "LPT-2405" below for the inheritance rules.
+>
+> ² LPT-2406 needed no new production code on the listing side: the court-calendar
+> endpoint (`GET /hearings/range-search`, action
+> `listing.range.search.hearings.court.calendar`) already returns the hearing's
+> `properties`, which is where LPT-2405 writes tier / list type / key reason. Regression
+> tests pin that behaviour so a future change to the response shape cannot silently drop
+> the fields.
 
 **Implemented artefacts (verified 2026-07-29):**
 
@@ -43,6 +56,8 @@ tree)
 | View store | `PtphDetail` entity, `PtphDetailRepository`, Liquibase `137-create-ptph-detail.xml` |
 | Query side | `GET /hearings/{hearingId}/ptph-detail` → `hearing.get-ptph-detail`, `HearingQueryView.getPtphDetail`, `PtphDetailResponse` |
 | Access control | Command + query Drools rules mirroring `hearing.set-trial-type` groups |
+| Integration tests | `PtphDetailIT` — 10 tests covering the slice end to end through the real event store |
+| Public events | **Designed, not yet built** — see "Public events" below |
 
 **Endpoint summary:**
 
@@ -76,6 +91,34 @@ All four are granted to the same groups as `hearing.set-trial-type`:
 > `set-trial-type` precedent (empty body). So the save call currently must repeat the
 > id, and the finalise/delete calls must **not** send it (`additionalProperties: false`
 > rejects it).
+
+**Public events (designed 2026-08-11, not yet implemented).**
+
+Every command returns `202 Accepted` before the aggregate runs, so a caller cannot tell from
+the HTTP response whether the change took effect. Three public events close that loop,
+following the context's established command → private event → public event pattern.
+
+| Private event (exists) | Public event (planned) | Payload |
+|------------------------|------------------------|---------|
+| `hearing.ptph-detail-saved` | `public.hearing.ptph-detail-saved` | `hearingId`, `tier`, `listType`, `keyReason` |
+| `hearing.ptph-detail-finalised` | `public.hearing.ptph-detail-finalised` | `hearingId` |
+| `hearing.ptph-detail-deleted` | `public.hearing.ptph-detail-deleted` | `hearingId` |
+
+Payloads pass through verbatim, matching every existing processor in this context. A new
+`PtphDetailEventProcessor` (`hearing-event-processor`) handles the three private events;
+public schemas live in-repo, so no `criminal-court-public-model` release is required.
+Design: `docs/superpowers/specs/2026-08-11-ptph-detail-public-events-design.md`.
+
+Enriching the finalised event with tier/listType was considered and deferred — the values
+would have to come either from a reshaped `PtphDetailFinalised` (touching delegate, listener
+and tests) or from a view-store read that races the listener writing the same row.
+
+> **Build trap — use `mvn clean install`.** A non-clean build of this repo reuses stale
+> generated sources, silently producing a WAR whose `CommandApiHearingResource` lacks the
+> PTPH media types. The failure surfaces at runtime as **415 Unsupported Media Type** on
+> every PTPH command, not as a build error. Verify after building:
+> `grep -c save-ptph-detail hearing-command/hearing-command-api/target/generated-sources/uk/gov/justice/api/resource/CommandApiHearingResource.java`
+> — must be greater than zero.
 
 ---
 
@@ -484,23 +527,43 @@ on the `ha_ptph_detail` row, which the LPT-2406 query then reports as
 
 ## LPT-2405 — [BE] [listing] retrieve tier/listType from hearing context when creating the next hearing from a seeding hearing
 
-**Type:** Story · **Status:** New · **Assignee:** Unassigned
+**Type:** Story · **Status:** Implemented (blocked on a hearing release) · **Assignee:** Unassigned
 
 **Description:** When a next hearing is created from a seeding hearing, the listing side
 must retrieve the tier/list-type information from the hearing context and store it in
 the listing payload, so it travels with the newly created hearing.
 
-**Scope of work (indicative — to be designed):**
-- On next-hearing creation from a seeding hearing, call the hearing-context query (LPT-2406 / `hearing.get-ptph-detail`) for the seeding hearing.
-- Map tier/list type/key reason into the listing payload/model.
-- Handle the case where the seeding hearing has no tier/list type (or is not finalised) — define expected behaviour.
+**Delivered in `cpp-context-listing`**, branch `feature/LPT-2405-inherit-tier-listtype`:
 
-**Acceptance criteria (to refine):**
-- Next hearing created from a seeding hearing carries the seeding hearing's tier/list type.
-- Behaviour defined for absent / non-finalised source data.
+| Component | Role |
+|-----------|------|
+| `PtphDetail` (listing-domain-common) | Value object — `tier`, `listType`, `keyReason`, carried as opaque strings; the hearing context stays the single validator |
+| `PtphDetailService` (listing-command-api) | Cross-context query to `hearing.get-ptph-detail`; returns empty unless `finalised = true` |
+| `PtphDetailEnrichmentService` | The rules: trial gate, finalised gate, stamping. Shared by both flows |
+| `HearingTypeFactory.getTrialHearingTypeIds` | Reads `trialTypeFlag` from the reference-data response already fetched for durations — no extra call |
+| Schemas | `tier`/`listType`/`keyReason` on the scheduled carrier; sibling `ptphDetails[]` on the unscheduled wrappers, whose carrier is coredomain and cannot be extended |
+| View store | Values ride `listing.events.hearing-listed` into the `hearing.properties` jsonb column — no Liquibase changeset |
 
-**Status:** ⛔ **Not started** — listing-side, separate service/repo. Depends on the
-hearing-context query delivered under LPT-2406.
+**Inheritance rules (as built):**
+- The hearing context is queried **only** when at least one next hearing is a trial type, and only once per command.
+- Values are inherited **only** when the seeding record is `finalised = true`. A draft or absent record leaves the new hearing blank — "no record" arrives as a successful response with `finalised = false`, not an error.
+- In a mixed command only the trial hearings are stamped.
+- Enrichment always overwrites, so values already on the inbound command cannot spoof hearing-context data.
+- A query failure propagates and fails the command, rather than silently producing a blank trial hearing.
+
+**Status:** ✅ **Implemented, not yet dispatchable.** 224 integration tests green and unit
+tests green across the 8 modules touched. The cross-context call cannot dispatch until
+`cpp-context-hearing` is released with a `hearing-query-api` RAML carrying `ptph-detail`
+and that artifact is added to the `rest-client-generator-plugin` dependencies in
+`listing-command/listing-command-api/pom.xml`. `InheritPtphDetailOnNextHearingIT` is
+`@Disabled` pending that.
+
+> **When enabling that IT**, also stub a trial hearing type: the shared referencedata stub
+> carries no `trialTypeFlag`, so `getTrialHearingTypeIds` returns empty, the trial gate
+> never opens and nothing is inherited. Stub the next hearing's type with
+> `"trialTypeFlag": true` **after** `PayloadBasedListNextHearingSteps` registers its own
+> stub. Do not add the flag to the shared stub file — that would make every other IT's
+> hearing type a trial and start calling the hearing context from tests that don't expect it.
 
 ---
 
@@ -519,10 +582,27 @@ list-type information for hearings.
 - Court-calendar endpoints return tier and list type (and finalised flag) for each relevant hearing.
 - Field naming/shape agreed with the calendar consumers.
 
-**Status:** ◑ **Partially enabled — still open.** The hearing-context read model and
-query are done (`GET /hearings/{hearingId}/ptph-detail` → `hearing.get-ptph-detail`,
-`HearingQueryView.getPtphDetail`, `PtphDetailResponse`, query Drools rule). The
-listing / court-calendar endpoint changes are **not** done.
+**Status:** ✅ **Implemented — no listing production change was required.**
+
+The court-calendar endpoint is `GET /hearings/range-search`, action
+`listing.range.search.hearings.court.calendar` → `HearingQueryView.rangeSearchHearingsForCourtCalendar`,
+responding with `listing.search.hearings.json`. That response already serialises the
+hearing's `properties` object, which is exactly where LPT-2405 writes `tier`, `listType`
+and `keyReason` — so the fields surface on the calendar as soon as LPT-2405 populates them.
+
+Rather than add redundant code, the behaviour is pinned by regression tests asserting the
+three fields survive from the view store to the court-calendar response. The tests were
+mutation-checked: removing the fields from the response makes them fail, so they are not
+vacuous.
+
+The hearing-context enabler is likewise done (`GET /hearings/{hearingId}/ptph-detail` →
+`hearing.get-ptph-detail`, `HearingQueryView.getPtphDetail`, `PtphDetailResponse`, query
+Drools rule).
+
+> **Still to agree with the calendar consumers:** field naming and shape. The values
+> currently surface inside `properties` using the hearing context's own names. If the
+> calendar wants them promoted to first-class response fields, or renamed, that is a
+> follow-up — and the regression tests are the place it would be caught.
 
 ### Endpoint detail — hearing-context enabler (implemented)
 
