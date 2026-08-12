@@ -104,6 +104,9 @@ import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantsInYouthCourtUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
+import uk.gov.moj.cpp.hearing.domain.event.PtphDetailSaved;
+import uk.gov.moj.cpp.hearing.domain.event.PtphDetailFinalised;
+import uk.gov.moj.cpp.hearing.domain.event.PtphDetailDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
@@ -5085,6 +5088,80 @@ public class HearingAggregateTest {
         final HearingAggregateMomento momento = ReflectionUtil.getValueOfField(hearingAggregate, "momento", HearingAggregateMomento.class);
         momento.setDuplicate(true);
         momento.setDeleted(true);
+    }
+
+
+    // ---------------------------------------------------------------------------------
+    // PTPH detail (LPT-2400-2404): every command must be rejected when the hearing does not
+    // exist. The framework's getStreamById creates a stream for any UUID, so without these
+    // guards a command for an unknown id would open a new stream and record tier/list type
+    // against a hearing that was never initiated.
+    // ---------------------------------------------------------------------------------
+
+    @Test
+    public void shouldRejectSavePtphDetailWhenHearingNotFound() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+
+        final List<Object> events = hearingAggregate
+                .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
+                .collect(toList());
+
+        assertThat(events.size(), is(1));
+        assertTrue(events.get(0) instanceof HearingChangeIgnored);
+        final HearingChangeIgnored ignored = (HearingChangeIgnored) events.get(0);
+        assertThat(ignored.getHearingId(), is(hearingId));
+        assertThat(ignored.getReason(), is("Rejecting 'hearing.save-ptph-detail' event as hearing not found"));
+    }
+
+    @Test
+    public void shouldRejectFinalisePtphDetailWhenHearingNotFound() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+
+        final List<Object> events = hearingAggregate
+                .finalisePtphDetail(new PtphDetailFinalised(hearingId))
+                .collect(toList());
+
+        assertThat(events.size(), is(1));
+        assertTrue(events.get(0) instanceof HearingChangeIgnored);
+        assertThat(((HearingChangeIgnored) events.get(0)).getReason(),
+                is("Rejecting 'hearing.finalise-ptph-detail' event as hearing not found"));
+    }
+
+    @Test
+    public void shouldRejectDeletePtphDetailWhenHearingNotFound() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+
+        final List<Object> events = hearingAggregate
+                .deletePtphDetail(new PtphDetailDeleted(hearingId))
+                .collect(toList());
+
+        assertThat(events.size(), is(1));
+        assertTrue(events.get(0) instanceof HearingChangeIgnored);
+        assertThat(((HearingChangeIgnored) events.get(0)).getReason(),
+                is("Rejecting 'hearing.delete-ptph-detail' event as hearing not found"));
+    }
+
+    /**
+     * The counterpart: with an initiated hearing the command proceeds and emits its own event,
+     * so the guard cannot be satisfied by rejecting everything.
+     */
+    @Test
+    public void shouldSavePtphDetailWhenHearingExists() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final HearingAggregateMomento momento = new HearingAggregateMomento();
+        momento.setHearing(uk.gov.justice.core.courts.Hearing.hearing().withId(randomUUID()).build());
+        setField(hearingAggregate, "momento", momento);
+        final UUID hearingId = randomUUID();
+
+        final List<Object> events = hearingAggregate
+                .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
+                .collect(toList());
+
+        assertThat(events.size(), is(1));
+        assertTrue(events.get(0) instanceof PtphDetailSaved);
     }
 
     private static void checkHearingEventIgnored(final List<Object> events) {

@@ -1203,14 +1203,26 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> savePtphDetail(final PtphDetailSaved event) {
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage(
+                    "Rejecting 'hearing.save-ptph-detail' event as hearing not found", event.getHearingId()));
+        }
         return apply(this.hearingPtphDetailDelegate.savePtphDetail(event));
     }
 
     public Stream<Object> finalisePtphDetail(final PtphDetailFinalised event) {
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage(
+                    "Rejecting 'hearing.finalise-ptph-detail' event as hearing not found", event.getHearingId()));
+        }
         return apply(this.hearingPtphDetailDelegate.finalisePtphDetail(event));
     }
 
     public Stream<Object> deletePtphDetail(final PtphDetailDeleted event) {
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage(
+                    "Rejecting 'hearing.delete-ptph-detail' event as hearing not found", event.getHearingId()));
+        }
         return apply(this.hearingPtphDetailDelegate.deletePtphDetail(event));
     }
 
