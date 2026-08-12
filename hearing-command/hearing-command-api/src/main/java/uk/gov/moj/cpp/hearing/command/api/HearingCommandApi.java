@@ -46,6 +46,8 @@ public class HearingCommandApi {
     public void initiateHearing(final JsonEnvelope envelope) {
         final InitiateHearingCommand command = verifyAndRemoveDDCHJudicialResult(envelope);
 
+        System.out.println("This is test Dinesh") ;
+
         this.sender.send(Enveloper.envelop(this.objectToJsonObjectConverter.convert(command))
                 .withName("hearing.initiate")
                 .withMetadataFrom(envelope));
