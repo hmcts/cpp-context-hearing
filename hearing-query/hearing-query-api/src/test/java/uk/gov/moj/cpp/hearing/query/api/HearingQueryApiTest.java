@@ -66,6 +66,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetails
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.PtphDetailResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
 import javax.ws.rs.BadRequestException;
@@ -132,6 +133,8 @@ public class HearingQueryApiTest {
 
     @Mock
     private Envelope<TargetListResponse> mockTargetListResponseEnvelope;
+    @Mock
+    private Envelope<PtphDetailResponse> mockPtphDetailEnvelope;
     @Mock
     private Envelope<CrackedIneffectiveTrial> mockCrackedIneffectiveTrialEnvelope;
     @Mock
@@ -649,6 +652,18 @@ public class HearingQueryApiTest {
         hearingQueryApi.getDraftResult(query);
 
         verify(hearingQueryView, times(1)).getDraftResult(query);
+    }
+
+    @Test
+    public void shouldGetPtphDetail(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-ptph-detail", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .build());
+        when(hearingQueryView.getPtphDetail(query)).thenReturn(mockPtphDetailEnvelope);
+
+        hearingQueryApi.getPtphDetail(query);
+
+        verify(hearingQueryView, times(1)).getPtphDetail(query);
     }
 
     @Test

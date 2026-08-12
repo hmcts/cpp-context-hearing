@@ -551,19 +551,26 @@ the listing payload, so it travels with the newly created hearing.
 - Enrichment always overwrites, so values already on the inbound command cannot spoof hearing-context data.
 - A query failure propagates and fails the command, rather than silently producing a blank trial hearing.
 
-**Status:** ✅ **Implemented, not yet dispatchable.** 224 integration tests green and unit
-tests green across the 8 modules touched. The cross-context call cannot dispatch until
-`cpp-context-hearing` is released with a `hearing-query-api` RAML carrying `ptph-detail`
-and that artifact is added to the `rest-client-generator-plugin` dependencies in
-`listing-command/listing-command-api/pom.xml`. `InheritPtphDetailOnNextHearingIT` is
-`@Disabled` pending that.
+**Status:** ✅ **Implemented and unblocked.** 224 integration tests green and unit tests
+green across the 8 modules touched.
 
-> **When enabling that IT**, also stub a trial hearing type: the shared referencedata stub
-> carries no `trialTypeFlag`, so `getTrialHearingTypeIds` returns empty, the trial gate
-> never opens and nothing is inherited. Stub the next hearing's type with
-> `"trialTypeFlag": true` **after** `PayloadBasedListNextHearingSteps` registers its own
-> stub. Do not add the flag to the shared stub file — that would make every other IT's
-> hearing type a trial and start calling the hearing context from tests that don't expect it.
+The cross-context call is now dispatchable: listing depends on hearing
+`17.104.187-cct-1981-SNAPSHOT`, whose `hearing-query-api` RAML carries the `ptph-detail`
+query, declared with classifier `raml` on the `rest-client-generator-plugin` in
+`listing-command/listing-command-api/pom.xml`. That generates
+`RemoteCommandApi2HearingQueryApi` with `@Handles("hearing.get-ptph-detail")` →
+`/hearings/{hearingId}/ptph-detail`, which is what `PtphDetailService` dispatches through.
+`PtphDetailOnNextHearingIT` is enabled.
+
+> **Two stubs are load-bearing in that IT.** `HearingServiceStub` serves the hearing query,
+> and `ReferenceDataStub.stubGetReferenceDataTrialHearingTypes` serves the next hearing's
+> type with `"trialTypeFlag": true` — without the latter, `getTrialHearingTypeIds` returns
+> empty, the trial gate never opens, nothing is inherited, and the negative test would pass
+> for entirely the wrong reason. It must be registered **after**
+> `PayloadBasedListNextHearingSteps` registers its own hearing-types stub, so it takes
+> precedence. The flag is deliberately in its own stub-data file: adding it to the shared
+> one would make every other IT's hearing type a trial and start calling the hearing
+> context from tests that don't expect it.
 
 ---
 
