@@ -15,8 +15,8 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Current
 import uk.gov.moj.cpp.hearing.xhibit.pojo.PublishCourtListRequestParameters;
 import uk.gov.moj.cpp.hearing.xhibit.xmlgenerator.CourtCentreXmlGenerator;
 import uk.gov.moj.cpp.hearing.xhibit.xmlgenerator.CourtCentreXmlGeneratorProducer;
-import uk.gov.moj.cpp.listing.common.xhibit.ExportFailedException;
-import uk.gov.moj.cpp.listing.common.xhibit.XhibitService;
+import uk.gov.moj.cpp.hearing.listing.common.xhibit.ExportFailedException;
+import uk.gov.moj.cpp.hearing.listing.common.xhibit.XhibitService;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
