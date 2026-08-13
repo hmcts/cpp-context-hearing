@@ -173,6 +173,8 @@ public class HearingQueryView {
 
     @SuppressWarnings({"squid:S3655"})
     public Envelope<GetHearings> findHearingsForToday(final JsonEnvelope envelope) {
+
+        LOGGER.info("User ID is {}",envelope.metadata().userId().get());
         final GetHearings hearingListResponse = hearingService.getHearingsForToday(now(), fromString(envelope.metadata().userId().get()));
 
         return envelop(hearingListResponse)
