@@ -27,14 +27,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.nonNull;
-import static java.util.Optional.empty;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
@@ -47,6 +45,7 @@ public class ReferenceDataService {
     private static final String PUBLIC_HOLIDAYS = "publicHolidays";
     private static final String TITLE_JUDICIAL_PREFIX = "titleJudicialPrefix";
     private static final String TITLE_SUFFIX = "titleSuffix";
+    private static final String FORENAMES = "forenames";
     private static final String SURNAME = "surname";
     private static final String REFERENCEDATA_QUERY_PUBLIC_HOLIDAYS_NAME = "referencedata.query.public-holidays";
     private static final String REFERENCEDATA_QUERY_JUDICIARIES = "referencedata.query.judiciaries";
@@ -147,33 +146,14 @@ public class ReferenceDataService {
                 .collect(Collectors.toList());
     }
 
-    private String transformToJudiciaryName(JsonObject judiciary) {
-
-        final Optional<String> titleJudicialPrefix = judiciary.getString(TITLE_JUDICIAL_PREFIX, null) == null ? empty() : Optional.of(judiciary.getString(TITLE_JUDICIAL_PREFIX));
-        final Optional<String> titleSuffix = judiciary.getString(TITLE_SUFFIX, null) == null ? empty() : Optional.of(judiciary.getString(TITLE_SUFFIX));
-
-        if (!titleSuffix.isPresent() && !titleJudicialPrefix.isPresent()) {
-            return Stream.of(judiciary.getString(SURNAME))
-                    .filter(str -> !Strings.isNullOrEmpty(str))
-                    .collect(Collectors.joining(" "));
-        }
-
-        if (!titleJudicialPrefix.isPresent()){
-            return Stream.of(judiciary.getString(SURNAME), titleSuffix.get())
-                    .filter(str -> !Strings.isNullOrEmpty(str))
-                    .collect(Collectors.joining(" "));
-        }
-
-        if (!titleSuffix.isPresent()) {
-            return Stream.of(titleJudicialPrefix.get(), judiciary.getString(SURNAME))
-                    .filter(str -> !Strings.isNullOrEmpty(str))
-                    .collect(Collectors.joining(" "));
-        }
-
-        return Stream.of(titleJudicialPrefix.get(), judiciary.getString(SURNAME), titleSuffix.get())
+    private String transformToJudiciaryName(final JsonObject judiciary) {
+        return Stream.of(
+                        judiciary.getString(TITLE_JUDICIAL_PREFIX, null),
+                        judiciary.getString(FORENAMES, null),
+                        judiciary.getString(SURNAME, null),
+                        judiciary.getString(TITLE_SUFFIX, null))
                 .filter(str -> !Strings.isNullOrEmpty(str))
                 .collect(Collectors.joining(" "));
-
     }
 
     private JsonObject getParams(final String division,
