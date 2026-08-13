@@ -7,9 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
-import uk.gov.moj.cpp.listing.common.xhibit.exception.InvalidReferenceDataException;
-import uk.gov.moj.cpp.listing.domain.xhibit.CourtLocation;
+import uk.gov.moj.cpp.hearing.listing.common.xhibit.CommonXhibitReferenceDataService;
+import uk.gov.moj.cpp.hearing.listing.common.xhibit.exception.InvalidReferenceDataException;
+import uk.gov.moj.cpp.hearing.listing.domain.xhibit.CourtLocation;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

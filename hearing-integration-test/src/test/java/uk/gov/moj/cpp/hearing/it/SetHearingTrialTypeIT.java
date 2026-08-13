@@ -53,7 +53,13 @@ class SetHearingTrialTypeIT extends AbstractIT {
         setTrialType(getRequestSpec(), hearing.getId(), addTrialType);
 
         final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = INEFFECTIVE_TRIAL_TYPE;
-        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getDate(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
+        CrackedIneffectiveTrial expectedTrialType = CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                .withCode(crackedIneffectiveVacatedTrialType.getReasonCode())
+                .withDate(crackedIneffectiveVacatedTrialType.getDate())
+                .withDescription(crackedIneffectiveVacatedTrialType.getReasonFullDescription())
+                .withId(crackedIneffectiveVacatedTrialType.getId())
+                .withType(crackedIneffectiveVacatedTrialType.getTrialType())
+                .build();
 
         getHearingPollForMatch(hearing.getId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -97,7 +103,13 @@ class SetHearingTrialTypeIT extends AbstractIT {
 
         final CrackedIneffectiveVacatedTrialType trialType = VACATED_TRIAL_TYPE;
 
-        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(trialType.getReasonCode(), trialType.getDate(), trialType.getReasonFullDescription(), trialType.getId(), trialType.getTrialType());
+        CrackedIneffectiveTrial expectedTrialType = CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                .withCode(trialType.getReasonCode())
+                .withDate(trialType.getDate())
+                .withDescription(trialType.getReasonFullDescription())
+                .withId(trialType.getId())
+                .withType(trialType.getTrialType())
+                .build();
 
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
