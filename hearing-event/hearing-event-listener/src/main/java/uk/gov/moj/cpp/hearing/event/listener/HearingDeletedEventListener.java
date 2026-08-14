@@ -9,8 +9,10 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationHearingDeleted;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.PtphDetail;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
+import uk.gov.moj.cpp.hearing.repository.PtphDetailRepository;
 
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +36,22 @@ public class HearingDeletedEventListener {
     @Inject
     private ProsecutionCaseRepository pcRepository;
 
+    @Inject
+    private PtphDetailRepository ptphDetailRepository;
+
+    /**
+     * LPT-2400–2404: {@code ha_ptph_detail} is keyed by hearing id but has no foreign key to
+     * the hearing table, so nothing removes it when the hearing goes. Without this the row is
+     * orphaned and the ptph-detail query keeps answering for a hearing that no longer exists.
+     */
+    private void removePtphDetail(final UUID hearingId) {
+        final PtphDetail ptphDetail = ptphDetailRepository.findBy(hearingId);
+        if (ptphDetail != null) {
+            LOGGER.info("Removing ptph detail for deleted hearing {}", hearingId);
+            ptphDetailRepository.removeAndFlush(ptphDetail);
+        }
+    }
+
     @Handles(HEARING_EVENT_HEARING_DELETED)
     public void hearingDeleted(final JsonEnvelope event) {
 
@@ -42,6 +60,8 @@ public class HearingDeletedEventListener {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Received event '{}' hearingId: {}", HEARING_EVENT_HEARING_DELETED, hearingId);
         }
+
+        removePtphDetail(hearingId);
 
         final Hearing hearing = hearingRepository.findBy(hearingId);
 
@@ -62,6 +82,8 @@ public class HearingDeletedEventListener {
             prosecutionCases.forEach(pcRepository::remove);
             pcRepository.flush();
         }
+
+        removePtphDetail(hearingId);
 
         final Hearing hearing = hearingRepository.findBy(hearingId);
 

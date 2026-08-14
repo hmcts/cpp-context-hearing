@@ -16,8 +16,10 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationHearingDeleted;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.PtphDetail;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
+import uk.gov.moj.cpp.hearing.repository.PtphDetailRepository;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +39,9 @@ public class HearingDeletedEventListenerTest {
 
     @Mock
     private ProsecutionCaseRepository pcRepository;
+
+    @Mock
+    private PtphDetailRepository ptphDetailRepository;
 
     @InjectMocks
     private HearingDeletedEventListener hearingDeletedEventListener;
@@ -134,6 +139,60 @@ public class HearingDeletedEventListenerTest {
         when(hearingRepository.findBy(any())).thenReturn(hearing);
         hearingDeletedEventListener.processCourtApplicationDeleted(envelope);
 
+        verify(hearingRepository).remove(hearing);
+    }
+
+    // ---------------------------------------------------------------------------------
+    // LPT-2400-2404: ha_ptph_detail is keyed by hearing id but has no foreign key to the
+    // hearing table, so nothing cascades. Without explicit cleanup the row outlives the
+    // hearing and the ptph-detail query keeps answering for a hearing that no longer exists.
+    // ---------------------------------------------------------------------------------
+
+    @Test
+    public void shouldRemovePtphDetailWhenHearingIsDeleted() {
+        final UUID hearingId = randomUUID();
+        final PtphDetail ptphDetail = new PtphDetail();
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(new Hearing());
+        when(ptphDetailRepository.findBy(hearingId)).thenReturn(ptphDetail);
+
+        hearingDeletedEventListener.hearingDeleted(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .build()));
+
+        verify(ptphDetailRepository).removeAndFlush(ptphDetail);
+    }
+
+    @Test
+    public void shouldRemovePtphDetailWhenHearingIsDeletedByBdf() {
+        final UUID hearingId = randomUUID();
+        final PtphDetail ptphDetail = new PtphDetail();
+
+        when(hearingRepository.findProsecutionCasesByHearingId(hearingId)).thenReturn(Collections.emptyList());
+        when(hearingRepository.findBy(hearingId)).thenReturn(new Hearing());
+        when(ptphDetailRepository.findBy(hearingId)).thenReturn(ptphDetail);
+
+        hearingDeletedEventListener.hearingDeletedBdf(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .build()));
+
+        verify(ptphDetailRepository).removeAndFlush(ptphDetail);
+    }
+
+    /** Most hearings have no ptph detail, so deletion must not fail for them. */
+    @Test
+    public void shouldDeleteHearingWithoutErrorWhenThereIsNoPtphDetail() {
+        final UUID hearingId = randomUUID();
+        final Hearing hearing = new Hearing();
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+        when(ptphDetailRepository.findBy(hearingId)).thenReturn(null);
+
+        hearingDeletedEventListener.hearingDeleted(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .build()));
+
+        verify(ptphDetailRepository, never()).removeAndFlush(any());
         verify(hearingRepository).remove(hearing);
     }
 }
