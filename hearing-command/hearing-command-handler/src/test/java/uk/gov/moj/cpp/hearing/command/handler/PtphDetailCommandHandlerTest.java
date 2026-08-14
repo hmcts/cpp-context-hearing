@@ -19,6 +19,8 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingType;
+import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
@@ -77,9 +79,21 @@ class PtphDetailCommandHandlerTest {
      * that state — the framework creates an event stream for any UUID, so the aggregate is the
      * only place that knows whether the hearing is real.
      */
+    /**
+     * A Crown Court PTPH — the only kind of hearing eligible for a tier and list type. A
+     * hearing without a jurisdiction and PTPH type is rejected by the aggregate guard, so
+     * these tests would otherwise assert against a rejection event.
+     */
     private HearingAggregate initiatedHearingAggregate() {
         final HearingAggregate aggregate = new HearingAggregate();
-        aggregate.apply(new HearingInitiated(Hearing.hearing().withId(hearingId).build()));
+        aggregate.apply(new HearingInitiated(Hearing.hearing()
+                .withId(hearingId)
+                .withJurisdictionType(JurisdictionType.CROWN)
+                .withType(HearingType.hearingType()
+                        .withId(UUID.fromString("06b0c2bf-3f98-46ed-ab7e-56efaf9ecced"))
+                        .withDescription("Plea and Trial Preparation")
+                        .build())
+                .build()));
         return aggregate;
     }
 

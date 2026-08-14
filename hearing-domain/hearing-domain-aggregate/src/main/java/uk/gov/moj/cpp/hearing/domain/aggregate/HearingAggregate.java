@@ -1207,6 +1207,10 @@ public class HearingAggregate implements Aggregate {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage(
                     "Rejecting 'hearing.save-ptph-detail' event as hearing not found", event.getHearingId()));
         }
+        if (!this.hearingPtphDetailDelegate.isEligibleForPtphDetail(this.momento.getHearing())) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage(
+                    "Rejecting 'hearing.save-ptph-detail' event as hearing is not a Crown Court PTPH", event.getHearingId()));
+        }
         return apply(this.hearingPtphDetailDelegate.savePtphDetail(event));
     }
 
