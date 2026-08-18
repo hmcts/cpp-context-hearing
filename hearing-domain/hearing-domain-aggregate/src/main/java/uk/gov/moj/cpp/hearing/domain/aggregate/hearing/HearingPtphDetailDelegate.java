@@ -10,25 +10,11 @@ import uk.gov.moj.cpp.hearing.domain.event.PtphDetailFinalised;
 import uk.gov.moj.cpp.hearing.domain.event.PtphDetailSaved;
 
 import java.io.Serializable;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 public class HearingPtphDetailDelegate implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Reference-data hearing type ids whose code is a Plea and Trial Preparation hearing:
-     * {@code PTP} ("Plea and Trial Preparation") and the superseded {@code FPTP}
-     * ("Further Plea &amp; Trial Preparation"). Held as ids because the core
-     * {@code hearingType} carries only id, description and welshDescription — no code — and
-     * an aggregate must stay free of I/O, so it cannot resolve the code from reference data.
-     * Adding a new PTPH type to reference data means adding its id here.
-     */
-    private static final Set<UUID> PTPH_HEARING_TYPE_IDS = Set.of(
-            UUID.fromString("06b0c2bf-3f98-46ed-ab7e-56efaf9ecced"),
-            UUID.fromString("9cc41e45-b594-4ba6-906e-1a4626b08fed"));
 
     private final HearingAggregateMomento momento;
 
@@ -37,20 +23,22 @@ public class HearingPtphDetailDelegate implements Serializable {
     }
 
     /**
-     * Tier and list type are a Crown Court PTPH concern only, so a hearing that is not a
-     * Crown PTPH must never acquire a record. Checked on save alone: it is the only command
-     * that creates one, so an ineligible hearing can never hold a record for finalise or
-     * delete to act on.
+     * Tier and list type are a Crown Court concern, so a hearing outside the Crown Court must
+     * never acquire a record. Checked on save alone: it is the only command that creates one,
+     * so an ineligible hearing can never hold a record for finalise or delete to act on.
+     *
+     * <p>The hearing <em>type</em> is deliberately not checked. Tier and list type are captured
+     * at a Plea and Trial Preparation hearing in practice, but the court may record them at any
+     * Crown hearing, and pinning the rule to a set of reference-data type ids would have meant
+     * editing this class every time a new PTPH type was added — the aggregate must stay free of
+     * I/O, so it cannot resolve a type <em>code</em> from reference data.
      *
      * <p>The hearing is passed in rather than read from this delegate's own momento: the
      * aggregate holds {@code momento} as a final field that tests replace by reflection, so a
      * delegate reading its captured reference would see a stale one.
      */
     public boolean isEligibleForPtphDetail(final Hearing hearing) {
-        return nonNull(hearing)
-                && CROWN.equals(hearing.getJurisdictionType())
-                && nonNull(hearing.getType())
-                && PTPH_HEARING_TYPE_IDS.contains(hearing.getType().getId());
+        return nonNull(hearing) && CROWN.equals(hearing.getJurisdictionType());
     }
 
     public Stream<Object> savePtphDetail(final PtphDetailSaved event) {

@@ -5162,9 +5162,10 @@ public class HearingAggregateTest {
     }
 
     // ---------------------------------------------------------------------------------
-    // PTPH detail eligibility: tier and list type are a Crown Court PTPH concept, so only a
-    // Crown PTPH hearing may acquire a record. Save is the only command that creates one, so
-    // guarding it means an ineligible hearing can never hold a record at all.
+    // PTPH detail eligibility: tier and list type are a Crown Court concept, so only a Crown
+    // hearing may acquire a record. The hearing *type* is deliberately not part of the rule -
+    // the court may record a tier at any Crown hearing. Save is the only command that creates
+    // a record, so guarding it means an ineligible hearing can never hold one at all.
     // ---------------------------------------------------------------------------------
 
     /** Reference-data id of hearing type PTP, "Plea and Trial Preparation". */
@@ -5193,12 +5194,17 @@ public class HearingAggregateTest {
         return hearingAggregate;
     }
 
-    private static void assertRejectedAsNotCrownPtph(final List<Object> events, final UUID hearingId) {
+    private static void assertRejectedAsNotCrown(final List<Object> events, final UUID hearingId) {
         assertThat(events.size(), is(1));
         assertTrue(events.get(0) instanceof HearingChangeIgnored);
         final HearingChangeIgnored ignored = (HearingChangeIgnored) events.get(0);
         assertThat(ignored.getHearingId(), is(hearingId));
-        assertThat(ignored.getReason(), is("Rejecting 'hearing.save-ptph-detail' event as hearing is not a Crown Court PTPH"));
+        assertThat(ignored.getReason(), is("Rejecting 'hearing.save-ptph-detail' event as hearing is not in the Crown Court"));
+    }
+
+    private static void assertSaved(final List<Object> events) {
+        assertThat(events.size(), is(1));
+        assertTrue(events.get(0) instanceof PtphDetailSaved);
     }
 
     @Test
@@ -5206,28 +5212,52 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = aggregateWithHearing(hearingOf(JurisdictionType.MAGISTRATES, PTPH_TYPE_ID));
         final UUID hearingId = randomUUID();
 
-        assertRejectedAsNotCrownPtph(hearingAggregate
+        assertRejectedAsNotCrown(hearingAggregate
                 .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
                 .collect(toList()), hearingId);
     }
 
+    /** Jurisdiction is the whole rule, so a magistrates hearing is refused whatever its type. */
     @Test
-    public void shouldRejectSavePtphDetailForACrownHearingThatIsNotAPtph() {
+    public void shouldRejectSavePtphDetailForAMagistratesHearingOfAnyOtherType() {
+        final HearingAggregate hearingAggregate = aggregateWithHearing(hearingOf(JurisdictionType.MAGISTRATES, randomUUID()));
+        final UUID hearingId = randomUUID();
+
+        assertRejectedAsNotCrown(hearingAggregate
+                .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
+                .collect(toList()), hearingId);
+    }
+
+    /**
+     * The type is not part of the rule: the court may record a tier at any Crown hearing, not
+     * only at a Plea and Trial Preparation one.
+     */
+    @Test
+    public void shouldSavePtphDetailForACrownHearingThatIsNotAPtph() {
         final HearingAggregate hearingAggregate = aggregateWithHearing(hearingOf(JurisdictionType.CROWN, randomUUID()));
-        final UUID hearingId = randomUUID();
 
-        assertRejectedAsNotCrownPtph(hearingAggregate
-                .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
-                .collect(toList()), hearingId);
+        assertSaved(hearingAggregate
+                .savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_2", "TYPE_1_FIXED", "reason"))
+                .collect(toList()));
     }
 
-    /** A hearing with no type cannot be confirmed as a PTPH, so it is not eligible. */
+    /** A Crown hearing that carries no type at all is still eligible. */
     @Test
-    public void shouldRejectSavePtphDetailWhenTheHearingHasNoType() {
+    public void shouldSavePtphDetailWhenTheCrownHearingHasNoType() {
         final HearingAggregate hearingAggregate = aggregateWithHearing(hearingOf(JurisdictionType.CROWN, null));
+
+        assertSaved(hearingAggregate
+                .savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_2", "TYPE_1_FIXED", "reason"))
+                .collect(toList()));
+    }
+
+    /** A hearing with no jurisdiction cannot be confirmed as Crown, so it is not eligible. */
+    @Test
+    public void shouldRejectSavePtphDetailWhenTheHearingHasNoJurisdiction() {
+        final HearingAggregate hearingAggregate = aggregateWithHearing(hearingOf(null, PTPH_TYPE_ID));
         final UUID hearingId = randomUUID();
 
-        assertRejectedAsNotCrownPtph(hearingAggregate
+        assertRejectedAsNotCrown(hearingAggregate
                 .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
                 .collect(toList()), hearingId);
     }

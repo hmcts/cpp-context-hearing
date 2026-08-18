@@ -1209,7 +1209,7 @@ public class HearingAggregate implements Aggregate {
         }
         if (!this.hearingPtphDetailDelegate.isEligibleForPtphDetail(this.momento.getHearing())) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage(
-                    "Rejecting 'hearing.save-ptph-detail' event as hearing is not a Crown Court PTPH", event.getHearingId()));
+                    "Rejecting 'hearing.save-ptph-detail' event as hearing is not in the Crown Court", event.getHearingId()));
         }
         return apply(this.hearingPtphDetailDelegate.savePtphDetail(event));
     }
