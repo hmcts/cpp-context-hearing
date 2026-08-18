@@ -224,12 +224,12 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetPtphDetail() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_TIER_AND_LIST_TYPE, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_TIER_AND_LIST_TYPE, "System Users", "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetPtphDetail() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_TIER_AND_LIST_TYPE, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_TIER_AND_LIST_TYPE, "System Users", "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators");
     }
 
     @Override
