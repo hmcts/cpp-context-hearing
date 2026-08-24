@@ -81,6 +81,23 @@ public class JudicialResultPromptHelperTest {
         assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
     }
 
+    @Test
+    public void shouldNotMakePromptForBookingReference() {
+        final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
+
+        final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1, "TEXT");
+
+        final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2, "TEXT");
+
+        final JudicialResultPrompt judicialResultPrompt3 = createJudicialResultPromptwithHmiSlotReference(PROMPT_LABEL_3, PROMPT_VALUE_3, "TEXT", "bookingReference");
+
+        createJudicialResult(resultLineTreeNode, of(judicialResultPrompt1, judicialResultPrompt2, judicialResultPrompt3), null);
+
+        final BigDecimal newPromptSequenceNumber = new BigDecimal(1000);
+        final JudicialResultPrompt judicialResultPrompt = makePrompt(resultLineTreeNode, newPromptSequenceNumber);
+        assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1 + ":" + PROMPT_VALUE_1 + System.lineSeparator() + PROMPT_LABEL_2 + ":" + PROMPT_VALUE_2));
+    }
+
     private JudicialResultPrompt createJudicialResultPrompt(final String s, final String s2, final String type) {
         return judicialResultPrompt()
                 .withLabel(s)
