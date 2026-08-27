@@ -46,9 +46,11 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateAssociatedHearingsWithIndicatedPlea;
+import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 
@@ -84,7 +86,8 @@ public class UpdatePleaCommandHandlerTest {
             OffencePleaUpdated.class,
             ConvictionDateAdded.class,
             ConvictionDateRemoved.class,
-            IndicatedPleaUpdated.class);
+            IndicatedPleaUpdated.class,
+            InheritedPlea.class);
     private ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
     @InjectMocks
     private UpdatePleaCommandHandler hearingCommandHandler;
@@ -595,5 +598,167 @@ public class UpdatePleaCommandHandlerTest {
         Set<String> guiltyPleaTypes = new HashSet<>();
         guiltyPleaTypes.add(GUILTY);
         return guiltyPleaTypes;
+    }
+
+    @Test
+    public void updateInheritPleaAndSetConvictionDateWhenGuilty() throws Throwable {
+        final InitiateHearingCommandHelper hearingHelper = h(standardInitiateHearingTemplate());
+        final UUID hearingId = hearingHelper.getHearingId();
+        final UUID offenceId = hearingHelper.getFirstOffenceForFirstDefendantForFirstCase().getId();
+        final LocalDate pleaDate = PAST_LOCAL_DATE.next();
+
+        final UpdateInheritedPleaCommand command = new UpdateInheritedPleaCommand();
+        command.setHearingIds(asList(hearingId));
+        command.setPlea(Plea.plea()
+                .withOffenceId(offenceId)
+                .withPleaValue(GUILTY)
+                .withPleaDate(pleaDate)
+                .withOriginatingHearingId(randomUUID())
+                .build());
+
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(hearingHelper.getHearing()));
+        }};
+
+        when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingAggregateEventStream);
+        when(this.aggregateService.get(this.hearingAggregateEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+        when(this.referenceDataService.retrieveGuiltyPleaTypes()).thenReturn(guiltyPleaTypes);
+
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.enrich-update-plea-with-associated-hearings"),
+                objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.updateInheritPlea(envelope);
+
+        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingAggregateEventStream).collect(Collectors.toList());
+
+        assertThat(events.size(), is(2));
+        assertThat(events.get(0).metadata().name(), is("hearing.events.inherited-plea"));
+        assertThat(events.get(1).metadata().name(), is("hearing.conviction-date-added"));
+        assertThat(asPojo(events.get(1), ConvictionDateAdded.class), isBean(ConvictionDateAdded.class)
+                .with(ConvictionDateAdded::getOffenceId, is(offenceId))
+                .with(ConvictionDateAdded::getHearingId, is(hearingId))
+                .with(ConvictionDateAdded::getConvictionDate, is(pleaDate)));
+    }
+
+    @Test
+    public void updateInheritPleaAndRemoveConvictionDateWhenNotGuilty() throws Throwable {
+        final InitiateHearingCommandHelper hearingHelper = h(standardInitiateHearingTemplate());
+        final UUID hearingId = hearingHelper.getHearingId();
+        final UUID offenceId = hearingHelper.getFirstOffenceForFirstDefendantForFirstCase().getId();
+        hearingHelper.getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(PAST_LOCAL_DATE.next());
+
+        final UpdateInheritedPleaCommand command = new UpdateInheritedPleaCommand();
+        command.setHearingIds(asList(hearingId));
+        command.setPlea(Plea.plea()
+                .withOffenceId(offenceId)
+                .withPleaValue(NOT_GUILTY)
+                .withPleaDate(PAST_LOCAL_DATE.next())
+                .withOriginatingHearingId(randomUUID())
+                .build());
+
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(hearingHelper.getHearing()));
+        }};
+
+        when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingAggregateEventStream);
+        when(this.aggregateService.get(this.hearingAggregateEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+        when(this.referenceDataService.retrieveGuiltyPleaTypes()).thenReturn(guiltyPleaTypes);
+
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.enrich-update-plea-with-associated-hearings"),
+                objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.updateInheritPlea(envelope);
+
+        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingAggregateEventStream).collect(Collectors.toList());
+
+        assertThat(events.size(), is(2));
+        assertThat(events.get(0).metadata().name(), is("hearing.events.inherited-plea"));
+        assertThat(events.get(1).metadata().name(), is("hearing.conviction-date-removed"));
+        assertThat(asPojo(events.get(1), ConvictionDateRemoved.class), isBean(ConvictionDateRemoved.class)
+                .with(ConvictionDateRemoved::getOffenceId, is(offenceId))
+                .with(ConvictionDateRemoved::getHearingId, is(hearingId)));
+    }
+
+    @Test
+    public void updateInheritPleaOnlyRaisesInheritedPleaWhenNotGuiltyWithoutConvictionDate() throws Throwable {
+        final InitiateHearingCommandHelper hearingHelper = h(standardInitiateHearingTemplate());
+        final UUID hearingId = hearingHelper.getHearingId();
+        final UUID offenceId = hearingHelper.getFirstOffenceForFirstDefendantForFirstCase().getId();
+
+        final UpdateInheritedPleaCommand command = new UpdateInheritedPleaCommand();
+        command.setHearingIds(asList(hearingId));
+        command.setPlea(Plea.plea()
+                .withOffenceId(offenceId)
+                .withPleaValue(NOT_GUILTY)
+                .withPleaDate(PAST_LOCAL_DATE.next())
+                .withOriginatingHearingId(randomUUID())
+                .build());
+
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(hearingHelper.getHearing()));
+        }};
+
+        when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingAggregateEventStream);
+        when(this.aggregateService.get(this.hearingAggregateEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+        when(this.referenceDataService.retrieveGuiltyPleaTypes()).thenReturn(guiltyPleaTypes);
+
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.enrich-update-plea-with-associated-hearings"),
+                objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.updateInheritPlea(envelope);
+
+        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingAggregateEventStream).collect(Collectors.toList());
+
+        assertThat(events.size(), is(1));
+        assertThat(events.get(0).metadata().name(), is("hearing.events.inherited-plea"));
+    }
+
+    @Test
+    public void updateInheritPleaAppliesConvictionDateToAllAssociatedHearings() throws Throwable {
+        final InitiateHearingCommandHelper firstHearingHelper = h(standardInitiateHearingTemplate());
+        final InitiateHearingCommandHelper secondHearingHelper = h(standardInitiateHearingTemplate());
+        final UUID firstHearingId = firstHearingHelper.getHearingId();
+        final UUID secondHearingId = secondHearingHelper.getHearingId();
+        final UUID offenceId = firstHearingHelper.getFirstOffenceForFirstDefendantForFirstCase().getId();
+        secondHearingHelper.getFirstOffenceForFirstDefendantForFirstCase().setId(offenceId);
+
+        final LocalDate pleaDate = PAST_LOCAL_DATE.next();
+        final UpdateInheritedPleaCommand command = new UpdateInheritedPleaCommand();
+        command.setHearingIds(Lists.newArrayList(firstHearingId, secondHearingId));
+        command.setPlea(Plea.plea()
+                .withOffenceId(offenceId)
+                .withPleaValue(GUILTY)
+                .withPleaDate(pleaDate)
+                .withOriginatingHearingId(randomUUID())
+                .build());
+
+        final HearingAggregate firstHearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(firstHearingHelper.getHearing()));
+        }};
+        final HearingAggregate secondHearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(secondHearingHelper.getHearing()));
+        }};
+
+        when(this.eventSource.getStreamById(firstHearingId)).thenReturn(this.hearingAggregateEventStream);
+        when(this.eventSource.getStreamById(secondHearingId)).thenReturn(this.offenceAggregateEventStream);
+        when(this.aggregateService.get(this.hearingAggregateEventStream, HearingAggregate.class)).thenReturn(firstHearingAggregate);
+        when(this.aggregateService.get(this.offenceAggregateEventStream, HearingAggregate.class)).thenReturn(secondHearingAggregate);
+        when(this.referenceDataService.retrieveGuiltyPleaTypes()).thenReturn(guiltyPleaTypes);
+
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.enrich-update-plea-with-associated-hearings"),
+                objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.updateInheritPlea(envelope);
+
+        final List<JsonEnvelope> firstHearingEvents = verifyAppendAndGetArgumentFrom(this.hearingAggregateEventStream).collect(Collectors.toList());
+        final List<JsonEnvelope> secondHearingEvents = verifyAppendAndGetArgumentFrom(this.offenceAggregateEventStream).collect(Collectors.toList());
+
+        assertThat(firstHearingEvents.size(), is(2));
+        assertThat(firstHearingEvents.get(0).metadata().name(), is("hearing.events.inherited-plea"));
+        assertThat(firstHearingEvents.get(1).metadata().name(), is("hearing.conviction-date-added"));
+
+        assertThat(secondHearingEvents.size(), is(2));
+        assertThat(secondHearingEvents.get(0).metadata().name(), is("hearing.events.inherited-plea"));
+        assertThat(secondHearingEvents.get(1).metadata().name(), is("hearing.conviction-date-added"));
     }
 }

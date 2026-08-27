@@ -1138,7 +1138,7 @@ public class InitiateHearingEventListenerTest {
 
         assertThat(offence, isBean(Offence.class)
                 .with(Offence::getId, is(snapshotKey))
-                .with(Offence::getConvictionDate, is(pleaPojo.getPleaDate()))
+                .with(Offence::getConvictionDate, is(convictionDate))
                 .with(Offence::getPlea, isBean(Plea.class)
                         .with(Plea::getOriginatingHearingId, is(event.getPlea().getOriginatingHearingId()))
                         .with(Plea::getPleaDate, is(event.getPlea().getPleaDate()))
@@ -1153,7 +1153,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void convictionDateIsSetForChangeToGuiltyMagistrateCourt() {
+    public void convictionDateIsUnchangedForChangeToGuiltyMagistrateCourtOnInheritedPlea() {
 
         final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
                 .withUserId(randomUUID())
@@ -1200,7 +1200,7 @@ public class InitiateHearingEventListenerTest {
 
         assertThat(offence, isBean(Offence.class)
                 .with(Offence::getId, is(snapshotKey))
-                .with(Offence::getConvictionDate, is(pleaPojo.getPleaDate()))
+                .with(Offence::getConvictionDate, is(convictionDate))
                 .with(Offence::getPlea, isBean(Plea.class)
                         .with(Plea::getOriginatingHearingId, is(event.getPlea().getOriginatingHearingId()))
                         .with(Plea::getPleaDate, is(event.getPlea().getPleaDate()))
@@ -1212,6 +1212,89 @@ public class InitiateHearingEventListenerTest {
                         )
                 )
         );
+    }
+
+    @Test
+    public void inheritedPleaListenerDoesNotSetConvictionDateWhenOffenceHasNoConvictionDate() {
+
+        final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
+                .withUserId(randomUUID())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .build();
+        final uk.gov.justice.core.courts.Plea pleaPojo = uk.gov.justice.core.courts.Plea.plea()
+                .withOffenceId(randomUUID())
+                .withOriginatingHearingId(randomUUID())
+                .withPleaDate(PAST_LOCAL_DATE.next())
+                .withPleaValue(GUILTY)
+                .withDelegatedPowers(delegatedPowersPojo)
+                .build();
+
+        final InheritedPlea event = new InheritedPlea()
+                .setHearingId(randomUUID())
+                .setPlea(pleaPojo);
+
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(event.getPlea().getOffenceId(), event.getHearingId());
+
+        final Offence offence = new Offence();
+        offence.setId(snapshotKey);
+        offence.setConvictionDate(null);
+        when(offenceRepository.findBy(snapshotKey)).thenReturn(offence);
+
+        final Plea plea = new Plea();
+        plea.setPleaValue(pleaPojo.getPleaValue());
+        plea.setPleaDate(pleaPojo.getPleaDate());
+        plea.setOriginatingHearingId(pleaPojo.getOriginatingHearingId());
+        when(pleaJPAMapper.toJPA(Mockito.any())).thenReturn(plea);
+
+        initiateHearingEventListener.hearingInitiatedPleaData(envelopeFrom(metadataWithRandomUUID("hearing.events.inherited-plea"),
+                objectToJsonObjectConverter.convert(event)));
+
+        verify(this.offenceRepository).save(offence);
+        assertThat(offence.getConvictionDate(), is(nullValue()));
+        assertThat(offence.getPlea().getPleaValue(), is(GUILTY));
+    }
+
+    @Test
+    public void inheritedPleaListenerDoesNotClearConvictionDateForNotGuiltyPlea() {
+
+        final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
+                .withUserId(randomUUID())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .build();
+        final uk.gov.justice.core.courts.Plea pleaPojo = uk.gov.justice.core.courts.Plea.plea()
+                .withOffenceId(randomUUID())
+                .withOriginatingHearingId(randomUUID())
+                .withPleaDate(PAST_LOCAL_DATE.next())
+                .withPleaValue("NOT_GUILTY")
+                .withDelegatedPowers(delegatedPowersPojo)
+                .build();
+
+        final InheritedPlea event = new InheritedPlea()
+                .setHearingId(randomUUID())
+                .setPlea(pleaPojo);
+
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(event.getPlea().getOffenceId(), event.getHearingId());
+
+        final Offence offence = new Offence();
+        offence.setId(snapshotKey);
+        final LocalDate existingConvictionDate = PAST_LOCAL_DATE.next();
+        offence.setConvictionDate(existingConvictionDate);
+        when(offenceRepository.findBy(snapshotKey)).thenReturn(offence);
+
+        final Plea plea = new Plea();
+        plea.setPleaValue(pleaPojo.getPleaValue());
+        plea.setPleaDate(pleaPojo.getPleaDate());
+        plea.setOriginatingHearingId(pleaPojo.getOriginatingHearingId());
+        when(pleaJPAMapper.toJPA(Mockito.any())).thenReturn(plea);
+
+        initiateHearingEventListener.hearingInitiatedPleaData(envelopeFrom(metadataWithRandomUUID("hearing.events.inherited-plea"),
+                objectToJsonObjectConverter.convert(event)));
+
+        verify(this.offenceRepository).save(offence);
+        assertThat(offence.getConvictionDate(), is(existingConvictionDate));
+        assertThat(offence.getPlea().getPleaValue(), is("NOT_GUILTY"));
     }
 
     private JsonEnvelope getInitiateHearingJsonEnvelope(final uk.gov.justice.core.courts.Hearing hearing) {
