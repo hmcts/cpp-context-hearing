@@ -1,9 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
@@ -144,11 +142,23 @@ class PtphDetailCommandHandlerTest {
 
         final List<JsonEnvelope> appended = verifyAppendAndGetArgumentFrom(eventStream).collect(Collectors.toList());
         final javax.json.JsonObject payload = appended.get(0).payloadAsJsonObject();
-        assertThat(!payload.containsKey("keyReason") || payload.isNull("keyReason"), org.hamcrest.CoreMatchers.is(true));
+        // Definite, not "absent or null": the framework's ObjectMapperProducer sets
+        // JsonInclude.Include.NON_ABSENT, so a null field is omitted rather than serialised as
+        // JSON null. That matters because hearing.ptph-detail-saved declares keyReason as
+        // {"type":"string"} with additionalProperties:false — an emitted null would fail schema
+        // validation on the listener and processor queues and dead-letter the event.
+        assertThat(payload.containsKey("keyReason"), org.hamcrest.CoreMatchers.is(false));
     }
 
+    /**
+     * A fixed list type with no reason is rejected by the JSON schema at both entry points, so it
+     * should never reach the handler. If one ever does, the handler must not throw: it runs inside
+     * the JMS transaction for the hearing stream, so an exception would roll back, redeliver and
+     * dead-letter the queue every hearing command shares. The aggregate drops it as
+     * hearing.hearing-change-ignored instead - asserted here, and in HearingAggregateTest.
+     */
     @Test
-    void rejectsFixedListTypeWithoutReason() {
+    void doesNotThrowOnFixedListTypeWithoutReason() throws EventStreamException {
         final JsonEnvelope envelope = JsonEnvelope.envelopeFrom(
                 metadataWithRandomUUID("hearing.command.save-ptph-detail"),
                 createObjectBuilder()
@@ -157,8 +167,13 @@ class PtphDetailCommandHandlerTest {
                         .add("listType", "TYPE_1_FIXED")
                         .build());
 
-        assertThat(assertThrows(RuntimeException.class, () -> handler.savePtphDetail(envelope)),
-                instanceOf(RuntimeException.class));
+        handler.savePtphDetail(envelope);
+
+        final List<JsonEnvelope> appended = verifyAppendAndGetArgumentFrom(eventStream).collect(Collectors.toList());
+        assertThat(appended.size(), org.hamcrest.CoreMatchers.is(1));
+        assertThat(appended.get(0).metadata().name(), org.hamcrest.CoreMatchers.is("hearing.hearing-change-ignored"));
+        assertThat(appended.get(0).payloadAsJsonObject().getString("reason"),
+                org.hamcrest.CoreMatchers.is("Rejecting 'hearing.save-ptph-detail' event as keyReason is required when listType is TYPE_1_FIXED"));
     }
 
     @Test

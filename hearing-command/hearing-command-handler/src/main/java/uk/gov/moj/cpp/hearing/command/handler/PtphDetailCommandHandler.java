@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static java.util.UUID.fromString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 import uk.gov.justice.services.core.annotation.Handles;
@@ -61,15 +60,18 @@ public class PtphDetailCommandHandler extends AbstractCommandHandler {
                 a -> a.deletePtphDetail(new PtphDetailDeleted(hearingId)));
     }
 
+    /**
+     * A key reason only applies to a fixed-date list type, so anything supplied alongside a
+     * flexible one is dropped here rather than stored and later ignored.
+     *
+     * <p>This deliberately does not reject a fixed list type that arrives without a reason. The
+     * schemas make that a {@code 400} at both entry points, and if one ever slips through, the
+     * aggregate drops the command as {@code hearing.hearing-change-ignored}. Throwing from a
+     * command handler would roll back the JMS transaction and dead-letter the hearing's command
+     * queue, taking unrelated hearing traffic with it.
+     */
     private String resolveKeyReason(final SavePtphDetailCommand command) {
-        if (command.getListType() == ListType.TYPE_1_FIXED) {
-            if (isBlank(command.getKeyReason())) {
-                throw new RuntimeException("keyReason is required when listType is TYPE_1_FIXED");
-            }
-            return command.getKeyReason();
-        }
-        // keyReason only applies to a fixed-date list type; ignore otherwise
-        return null;
+        return command.getListType() == ListType.TYPE_1_FIXED ? command.getKeyReason() : null;
     }
 
     private UUID hearingId(final JsonEnvelope envelope) {

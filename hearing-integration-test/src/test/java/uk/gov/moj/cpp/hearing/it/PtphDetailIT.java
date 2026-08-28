@@ -10,7 +10,9 @@ import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.UseCases.deletePtphDetail;
 import static uk.gov.moj.cpp.hearing.it.UseCases.finalisePtphDetail;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
+import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static uk.gov.moj.cpp.hearing.it.UseCases.savePtphDetail;
+import static uk.gov.moj.cpp.hearing.it.UseCases.savePtphDetailExpecting;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
@@ -39,9 +41,13 @@ import org.junit.jupiter.api.Test;
  * query response serialises with non-null inclusion, so an unset tier is missing from the
  * payload entirely (just {@code finalised}) rather than present as {@code null}.
  *
- * <p>The two command-side preconditions in {@code HearingPtphDetailDelegate} are asserted by
- * their observable effect on the query, not by an HTTP status: every command returns 202 before
- * the aggregate runs, so a rejected command surfaces as the view store simply not changing.
+ * <p>The command-side preconditions live in {@code HearingAggregate} and are asserted by their
+ * observable effect on the query, not by an HTTP status: every command returns 202 before the
+ * aggregate runs, so a rejected command surfaces as the view store simply not changing.
+ *
+ * <p>A rejection is emitted as {@code hearing.hearing-change-ignored} rather than thrown, so it
+ * must leave the hearing's command stream healthy — {@code shouldKeepTheHearingStreamUsableAfterARejectedCommand}
+ * is the test that would fail if a guard went back to throwing and dead-lettered the queue.
  */
 @SuppressWarnings("squid:S2699")
 class PtphDetailIT extends AbstractIT {
@@ -157,7 +163,7 @@ class PtphDetailIT extends AbstractIT {
 
     /**
      * Precondition: once finalised the record is immutable — a further save is rejected by the
-     * aggregate delegate, so the stored tier must not change.
+     * aggregate, so the stored tier must not change.
      */
     @Test
     void shouldRejectEditOnceFinalised() {
@@ -226,6 +232,69 @@ class PtphDetailIT extends AbstractIT {
                 hasNoJsonPath("$.tier"),
                 hasNoJsonPath("$.listType"),
                 withJsonPath("$.finalised", is(false)));
+    }
+
+    /**
+     * The point of emitting {@code hearing.hearing-change-ignored} instead of throwing: a rejected
+     * command must not poison the hearing's command queue. Two rejections that reach the aggregate
+     * are driven back to back — a save over a finalised record and a second finalise — and then an
+     * ordinary delete has to succeed. If either guard threw, the message would roll back and be
+     * redelivered, and the delete that follows would never be applied.
+     *
+     * <p>Both are accepted with 202 and rejected asynchronously, which is exactly why the DLQ was
+     * invisible before: the caller cannot tell a dropped command from an applied one.
+     */
+    @Test
+    void shouldKeepTheHearingStreamUsableAfterARejectedCommand() {
+        final UUID hearingId = givenAnInitiatedHearing();
+
+        savePtphDetail(getRequestSpec(), hearingId, ptphDetail(hearingId, Tier.TIER_3, ListType.TYPE_1_FIXED, KEY_REASON));
+        finalisePtphDetail(getRequestSpec(), hearingId);
+        pollForPtphDetail(hearingId, withJsonPath("$.finalised", is(true)));
+
+        savePtphDetail(getRequestSpec(), hearingId, ptphDetail(hearingId, Tier.TIER_1, ListType.TYPE_2_FLEXIBLE, null));
+        finalisePtphDetail(getRequestSpec(), hearingId);
+
+        pollForPtphDetail(hearingId,
+                withJsonPath("$.tier", is("TIER_3")),
+                withJsonPath("$.listType", is("TYPE_1_FIXED")),
+                withJsonPath("$.finalised", is(true)));
+
+        deletePtphDetail(getRequestSpec(), hearingId);
+
+        pollForPtphDetail(hearingId,
+                hasNoJsonPath("$.tier"),
+                withJsonPath("$.finalised", is(false)));
+    }
+
+    /**
+     * A fixed date must be justified, and the save schema enforces it, so the caller is told
+     * immediately with a 400 rather than getting a 202 for a command that is later dropped. This
+     * is the one PTPH rule that never reaches the aggregate.
+     */
+    @Test
+    void shouldRejectAFixedListTypeWithNoKeyReasonAtTheApi() {
+        final UUID hearingId = givenAnInitiatedHearing();
+
+        savePtphDetailExpecting(getRequestSpec(), hearingId,
+                ptphDetail(hearingId, Tier.TIER_1, ListType.TYPE_1_FIXED, null), SC_BAD_REQUEST);
+
+        pollForPtphDetail(hearingId,
+                hasNoJsonPath("$.tier"),
+                withJsonPath("$.finalised", is(false)));
+    }
+
+    /** The same list type with a reason is accepted, so the rule is not simply refusing everything. */
+    @Test
+    void shouldAcceptAFixedListTypeWhenTheKeyReasonIsPresent() {
+        final UUID hearingId = givenAnInitiatedHearing();
+
+        savePtphDetail(getRequestSpec(), hearingId, ptphDetail(hearingId, Tier.TIER_1, ListType.TYPE_1_FIXED, KEY_REASON));
+
+        pollForPtphDetail(hearingId,
+                withJsonPath("$.tier", is("TIER_1")),
+                withJsonPath("$.listType", is("TYPE_1_FIXED")),
+                withJsonPath("$.keyReason", is(KEY_REASON)));
     }
 
     // ---------------------------------------------------------------------------------
