@@ -284,6 +284,32 @@ class PtphDetailIT extends AbstractIT {
                 withJsonPath("$.finalised", is(false)));
     }
 
+    /**
+     * A whitespace-only reason is no reason. Before the schema carried {@code pattern: "\\S"} this
+     * was accepted with a 202 and then dropped by the aggregate's {@code isBlank} guard — the
+     * caller was told the save had been accepted when it never took effect.
+     */
+    @Test
+    void shouldRejectAWhitespaceOnlyKeyReasonAtTheApi() {
+        final UUID hearingId = givenAnInitiatedHearing();
+
+        savePtphDetailExpecting(getRequestSpec(), hearingId,
+                ptphDetail(hearingId, Tier.TIER_1, ListType.TYPE_1_FIXED, "   "), SC_BAD_REQUEST);
+
+        pollForPtphDetail(hearingId, hasNoJsonPath("$.tier"));
+    }
+
+    /** Free text is capped at 3000, matching the {@code note} fields on the hearing-event commands. */
+    @Test
+    void shouldRejectAnOverlongKeyReasonAtTheApi() {
+        final UUID hearingId = givenAnInitiatedHearing();
+
+        savePtphDetailExpecting(getRequestSpec(), hearingId,
+                ptphDetail(hearingId, Tier.TIER_1, ListType.TYPE_1_FIXED, "x".repeat(3001)), SC_BAD_REQUEST);
+
+        pollForPtphDetail(hearingId, hasNoJsonPath("$.tier"));
+    }
+
     /** The same list type with a reason is accepted, so the rule is not simply refusing everything. */
     @Test
     void shouldAcceptAFixedListTypeWhenTheKeyReasonIsPresent() {
