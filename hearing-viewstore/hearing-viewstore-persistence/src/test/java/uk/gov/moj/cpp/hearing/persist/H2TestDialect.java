@@ -9,8 +9,12 @@ import org.hibernate.dialect.HSQLDialect;
  *
  * H2 2.x treats BINARY(n) as a fixed-length type and zero-pads stored values,
  * so UUID identifiers (persisted as 16-byte binary) no longer match query
- * parameters. Mapping BINARY to VARBINARY restores the exact-length storage
- * behaviour of H2 1.4 that the repository tests rely on.
+ * parameters. All BINARY columns in this schema back java.util.UUID fields,
+ * so they are mapped to H2's native UUID column type instead: this both
+ * restores exact-length storage/equality semantics and makes
+ * CAST(uuidColumn AS VARCHAR) render the proper hyphenated UUID string
+ * (matching production Postgres uuid columns), rather than lossily decoding
+ * the raw binary bytes as text.
  */
 public class H2TestDialect extends HSQLDialect {
 
