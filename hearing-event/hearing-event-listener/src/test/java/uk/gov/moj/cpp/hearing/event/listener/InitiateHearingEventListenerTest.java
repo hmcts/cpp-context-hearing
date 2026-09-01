@@ -1217,8 +1217,6 @@ public class InitiateHearingEventListenerTest {
         );
     }
 
-    // ── Task 5.1-5.4: AC3 — seed offence bail status from defendant pre-hearing bail status ──
-
     @Test
     public void shouldSeedOffenceBailStatusFromDefendantPreHearingStatusOnCaseCreation() {
         // Scenario 15: case created (MCC/SPI-IN/CPPI) with defendant pre-hearing Conditional bail
