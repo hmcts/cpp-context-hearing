@@ -11,9 +11,11 @@ import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+import static uk.gov.moj.cpp.hearing.command.ListType.TYPE_1_FIXED;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.APPROVAL_REQUESTED;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.INITIALISED;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
@@ -234,6 +236,15 @@ public class HearingAggregate implements Aggregate {
     public static final String SHARE_RESULTS_NOT_PERMITTED_ALL_THE_TARGETS_ALREADY_SHARED_FOR_THE_HEARING_DAY_S = "Share results not permitted! all the targets already shared for the hearingDay %s";
     private static final String OFFENCE_ID = "offenceId";
     private static final String RESULT_LINES = "resultLines";
+
+    // PTPH detail command names and the rejection reasons shared across them. Only the reasons
+    // that apply to more than one command are named here; the ones specific to a single guard read
+    // better inline, next to the condition that produces them.
+    private static final String SAVE_PTPH_DETAIL = "hearing.save-ptph-detail";
+    private static final String FINALISE_PTPH_DETAIL = "hearing.finalise-ptph-detail";
+    private static final String DELETE_PTPH_DETAIL = "hearing.delete-ptph-detail";
+    private static final String HEARING_NOT_FOUND = "hearing not found";
+    private static final String HEARING_DELETED_OR_DUPLICATE = "hearing is deleted or a duplicate";
     private final HearingAggregateMomento momento = new HearingAggregateMomento();
 
     private final HearingDelegate hearingDelegate = new HearingDelegate(momento);
@@ -371,8 +382,8 @@ public class HearingAggregate implements Aggregate {
                 when(HearingEffectiveTrial.class).apply(hearingTrialTypeDelegate::handleEffectiveTrailHearing),
                 when(HearingTrialVacated.class).apply(hearingTrialTypeDelegate::handleVacateTrialTypeSetForHearing),
                 when(PtphDetailSaved.class).apply(hearingPtphDetailDelegate::handlePtphDetailSaved),
-                when(PtphDetailFinalised.class).apply(hearingPtphDetailDelegate::handlePtphDetailFinalised),
-                when(PtphDetailDeleted.class).apply(hearingPtphDetailDelegate::handlePtphDetailDeleted),
+                when(PtphDetailFinalised.class).apply(finalised -> hearingPtphDetailDelegate.handlePtphDetailFinalised()),
+                when(PtphDetailDeleted.class).apply(deleted -> hearingPtphDetailDelegate.handlePtphDetailDeleted()),
                 when(CompanyRepresentativeAdded.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeAdded),
                 when(CompanyRepresentativeUpdated.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeUpdated),
                 when(CompanyRepresentativeRemoved.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeRemoved),
@@ -1204,30 +1215,73 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> savePtphDetail(final PtphDetailSaved event) {
         if (this.momento.getHearing() == null) {
-            return Stream.of(hearingDelegate.generateHearingIgnoredMessage(
-                    "Rejecting 'hearing.save-ptph-detail' event as hearing not found", event.getHearingId()));
+            return ptphDetailIgnored(SAVE_PTPH_DETAIL, HEARING_NOT_FOUND, event.getHearingId());
+        }
+        if (this.momento.isDeletedOrDuplicated()) {
+            return ptphDetailIgnored(SAVE_PTPH_DETAIL, HEARING_DELETED_OR_DUPLICATE, event.getHearingId());
         }
         if (!this.hearingPtphDetailDelegate.isEligibleForPtphDetail(this.momento.getHearing())) {
-            return Stream.of(hearingDelegate.generateHearingIgnoredMessage(
-                    "Rejecting 'hearing.save-ptph-detail' event as hearing is not in the Crown Court", event.getHearingId()));
+            return ptphDetailIgnored(SAVE_PTPH_DETAIL, "hearing is not in the Crown Court", event.getHearingId());
+        }
+        if (this.momento.isPtphDetailFinalised()) {
+            return ptphDetailIgnored(SAVE_PTPH_DETAIL,
+                    "tier and list type are finalised and cannot be changed", event.getHearingId());
+        }
+        if (TYPE_1_FIXED.name().equals(event.getListType()) && isBlank(event.getKeyReason())) {
+            return ptphDetailIgnored(SAVE_PTPH_DETAIL,
+                    "keyReason is required when listType is TYPE_1_FIXED", event.getHearingId());
         }
         return apply(this.hearingPtphDetailDelegate.savePtphDetail(event));
     }
 
     public Stream<Object> finalisePtphDetail(final PtphDetailFinalised event) {
         if (this.momento.getHearing() == null) {
-            return Stream.of(hearingDelegate.generateHearingIgnoredMessage(
-                    "Rejecting 'hearing.finalise-ptph-detail' event as hearing not found", event.getHearingId()));
+            return ptphDetailIgnored(FINALISE_PTPH_DETAIL, HEARING_NOT_FOUND, event.getHearingId());
+        }
+        if (this.momento.isDeletedOrDuplicated()) {
+            return ptphDetailIgnored(FINALISE_PTPH_DETAIL, HEARING_DELETED_OR_DUPLICATE, event.getHearingId());
+        }
+        if (this.momento.isPtphDetailFinalised()) {
+            return ptphDetailIgnored(FINALISE_PTPH_DETAIL,
+                    "tier and list type are already finalised", event.getHearingId());
+        }
+        if (isNull(this.momento.getTier()) || isNull(this.momento.getListType())) {
+            return ptphDetailIgnored(FINALISE_PTPH_DETAIL,
+                    "both tier and list type are required to finalise", event.getHearingId());
         }
         return apply(this.hearingPtphDetailDelegate.finalisePtphDetail(event));
     }
 
     public Stream<Object> deletePtphDetail(final PtphDetailDeleted event) {
         if (this.momento.getHearing() == null) {
-            return Stream.of(hearingDelegate.generateHearingIgnoredMessage(
-                    "Rejecting 'hearing.delete-ptph-detail' event as hearing not found", event.getHearingId()));
+            return ptphDetailIgnored(DELETE_PTPH_DETAIL, HEARING_NOT_FOUND, event.getHearingId());
+        }
+        if (this.momento.isDeletedOrDuplicated()) {
+            return ptphDetailIgnored(DELETE_PTPH_DETAIL, HEARING_DELETED_OR_DUPLICATE, event.getHearingId());
         }
         return apply(this.hearingPtphDetailDelegate.deletePtphDetail(event));
+    }
+
+    /**
+     * A rejected PTPH command must never throw. The command handler appends to the hearing's own
+     * event stream inside the JMS transaction, so an exception rolls that transaction back, the
+     * message is redelivered and finally dead-lettered — and because every hearing command shares
+     * the one queue, a single bad PTPH payload would stall unrelated traffic. Emitting
+     * {@code hearing.hearing-change-ignored} instead records why the command was dropped and
+     * leaves the stream healthy, which is what the other guards on this aggregate already do.
+     *
+     * <p>Existence and deletion are separate checks on purpose: {@code handleHearingDeleted} and
+     * {@code handleHearingMarkedAsDuplicate} only raise a flag, they do not clear
+     * {@code momento.hearing}. A null-only guard therefore still accepts commands for a deleted or
+     * duplicated hearing, which would recreate an orphaned {@code ha_ptph_detail} row after
+     * {@code HearingDeletedEventListener} had removed it.
+     *
+     * <p>The {@code "... event as ..."} wording is load-bearing — it is the shape the existing
+     * ignored-message assertions match on.
+     */
+    private Stream<Object> ptphDetailIgnored(final String command, final String reason, final UUID hearingId) {
+        return Stream.of(hearingDelegate.generateHearingIgnoredMessage(
+                String.format("Rejecting '%s' event as %s", command, reason), hearingId));
     }
 
     public Stream<Object> addCompanyRepresentative(final CompanyRepresentative companyRepresentative, final UUID hearingId) {

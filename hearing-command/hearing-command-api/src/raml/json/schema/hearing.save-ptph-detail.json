@@ -3,11 +3,59 @@
   "id": "http://justice.gov.uk/hearing/courts/hearing.save-ptph-detail.json",
   "type": "object",
   "properties": {
-    "hearingId": { "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid" },
-    "tier": { "type": "string", "enum": ["TIER_1","TIER_2","TIER_3","TIER_4","TIER_5","TIER_6","TIER_7"] },
-    "listType": { "type": "string", "enum": ["TYPE_1_FIXED","TYPE_2_FLEXIBLE"] },
-    "keyReason": { "type": "string" }
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "TIER_1",
+        "TIER_2",
+        "TIER_3",
+        "TIER_4",
+        "TIER_5",
+        "TIER_6",
+        "TIER_7"
+      ]
+    },
+    "listType": {
+      "type": "string",
+      "enum": [
+        "TYPE_1_FIXED",
+        "TYPE_2_FLEXIBLE"
+      ]
+    },
+    "keyReason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 3000,
+      "pattern": "\\S"
+    }
   },
-  "required": ["hearingId","tier"],
+  "required": [
+    "hearingId",
+    "tier"
+  ],
+  "anyOf": [
+    {
+      "not": {
+        "properties": {
+          "listType": {
+            "enum": [
+              "TYPE_1_FIXED"
+            ]
+          }
+        },
+        "required": [
+          "listType"
+        ]
+      }
+    },
+    {
+      "required": [
+        "keyReason"
+      ]
+    }
+  ],
   "additionalProperties": false
 }

@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 
@@ -41,20 +40,22 @@ public class HearingPtphDetailDelegate implements Serializable {
         return nonNull(hearing) && CROWN.equals(hearing.getJurisdictionType());
     }
 
+    /**
+     * Emits only. Whether a save is allowed at all — hearing exists, Crown Court, not already
+     * finalised, key reason present for a fixed list type — is decided by {@code HearingAggregate},
+     * which turns a rejection into {@code hearing.hearing-change-ignored} rather than an exception.
+     * Throwing here would dead-letter the hearing's command queue; see
+     * {@code HearingAggregate.ptphDetailIgnored}.
+     */
     public Stream<Object> savePtphDetail(final PtphDetailSaved event) {
-        if (momento.isPtphDetailFinalised()) {
-            throw new RuntimeException("Tier and list type is finalised and cannot be changed");
-        }
         return Stream.of(event);
     }
 
+    /**
+     * Emits only — see {@link #savePtphDetail}. The aggregate has already established that the
+     * hearing exists, that tier and list type are both recorded, and that it is not yet finalised.
+     */
     public Stream<Object> finalisePtphDetail(final PtphDetailFinalised event) {
-        if (isNull(momento.getTier()) || isNull(momento.getListType())) {
-            throw new RuntimeException("Both tier and list type are required to finalise");
-        }
-        if (momento.isPtphDetailFinalised()) {
-            throw new RuntimeException("Tier and list type is already finalised");
-        }
         return Stream.of(event);
     }
 
@@ -68,14 +69,16 @@ public class HearingPtphDetailDelegate implements Serializable {
         momento.setPtphDetailKeyReason(event.getKeyReason());
     }
 
-    public void handlePtphDetailFinalised(final PtphDetailFinalised event) {
+    public void handlePtphDetailFinalised() {
         momento.setPtphDetailFinalised(true);
     }
 
-    public void handlePtphDetailDeleted(final PtphDetailDeleted event) {
-        momento.setTier(null);
-        momento.setListType(null);
-        momento.setPtphDetailKeyReason(null);
-        momento.setPtphDetailFinalised(false);
+    /**
+     * Shares {@code momento.clearPtphDetail()} with the hearing-deletion path in
+     * {@code HearingDelegate}: an explicit delete and the disappearance of the hearing itself
+     * leave the same nothing behind.
+     */
+    public void handlePtphDetailDeleted() {
+        momento.clearPtphDetail();
     }
 }

@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import uk.gov.moj.cpp.hearing.domain.event.PtphDetailDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.PtphDetailFinalised;
@@ -29,33 +29,29 @@ class HearingPtphDetailDelegateTest {
         assertThat(momento.getPtphDetailKeyReason(), is("reason"));
     }
 
+    /**
+     * The state rules that used to throw from here now live in {@code HearingAggregate}, which
+     * emits {@code HearingChangeIgnored} instead - a throw would dead-letter the hearing's command
+     * queue. What is pinned here is that the delegate itself never throws for any state, so the
+     * rules cannot creep back down into it.
+     */
     @Test
-    void saveRejectedWhenFinalised() {
+    void neverThrowsWhateverStateTheMomentoIsIn() {
         momento.setTier("TIER_2");
         momento.setListType("TYPE_2_FLEXIBLE");
         momento.setPtphDetailFinalised(true);
 
-        assertThrows(RuntimeException.class, () ->
-                delegate.savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_3", null, null)));
-    }
+        assertDoesNotThrow(() -> delegate.savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_3", null, null)).count());
+        assertDoesNotThrow(() -> delegate.finalisePtphDetail(new PtphDetailFinalised(randomUUID())).count());
+        assertDoesNotThrow(() -> delegate.deletePtphDetail(new PtphDetailDeleted(randomUUID())).count());
 
-    @Test
-    void finaliseRequiresBothPtphDetail() {
-        momento.setTier("TIER_2");
+        momento.setTier(null);
         momento.setListType(null);
+        momento.setPtphDetailFinalised(false);
 
-        assertThrows(RuntimeException.class, () ->
-                delegate.finalisePtphDetail(new PtphDetailFinalised(randomUUID())));
-    }
-
-    @Test
-    void finaliseRejectedWhenAlreadyFinalised() {
-        momento.setTier("TIER_2");
-        momento.setListType("TYPE_2_FLEXIBLE");
-        momento.setPtphDetailFinalised(true);
-
-        assertThrows(RuntimeException.class, () ->
-                delegate.finalisePtphDetail(new PtphDetailFinalised(randomUUID())));
+        assertDoesNotThrow(() -> delegate.savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_3", "TYPE_1_FIXED", null)).count());
+        assertDoesNotThrow(() -> delegate.finalisePtphDetail(new PtphDetailFinalised(randomUUID())).count());
+        assertDoesNotThrow(() -> delegate.deletePtphDetail(new PtphDetailDeleted(randomUUID())).count());
     }
 
     @Test
@@ -64,7 +60,7 @@ class HearingPtphDetailDelegateTest {
         momento.setListType("TYPE_2_FLEXIBLE");
 
         delegate.finalisePtphDetail(new PtphDetailFinalised(randomUUID()))
-                .forEach(e -> delegate.handlePtphDetailFinalised((PtphDetailFinalised) e));
+                .forEach(e -> delegate.handlePtphDetailFinalised());
 
         assertThat(momento.isPtphDetailFinalised(), is(true));
     }
@@ -77,7 +73,7 @@ class HearingPtphDetailDelegateTest {
         momento.setPtphDetailFinalised(true);
 
         delegate.deletePtphDetail(new PtphDetailDeleted(randomUUID()))
-                .forEach(e -> delegate.handlePtphDetailDeleted((PtphDetailDeleted) e));
+                .forEach(e -> delegate.handlePtphDetailDeleted());
 
         assertThat(momento.getTier(), is((Object) null));
         assertThat(momento.getListType(), is((Object) null));

@@ -13,6 +13,8 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +41,9 @@ public class PtphDetailEventListener {
             entity = new PtphDetail();
             entity.setHearingId(hearingId);
         }
-        entity.setTier(payload.containsKey("tier") ? payload.getString("tier") : null);
-        entity.setListType(payload.containsKey("listType") ? payload.getString("listType") : null);
-        entity.setKeyReason(payload.containsKey("keyReason") ? payload.getString("keyReason") : null);
+        entity.setTier(optionalString(payload, "tier"));
+        entity.setListType(optionalString(payload, "listType"));
+        entity.setKeyReason(optionalString(payload, "keyReason"));
         repository.save(entity);
     }
 
@@ -66,5 +68,16 @@ public class PtphDetailEventListener {
         if (entity != null) {
             repository.removeAndFlush(entity);
         }
+    }
+
+    /**
+     * Reads an optional string, tolerating a key that is absent <em>or</em> explicitly JSON
+     * {@code null}. {@code JsonObject.getString} throws on a null value, and every hearing event
+     * listener shares one queue — so a throw here would dead-letter the message and block later
+     * events for unrelated hearings. Absent, null and any unexpected type all mean "not recorded".
+     */
+    private static String optionalString(final JsonObject payload, final String key) {
+        final JsonValue value = payload.get(key);
+        return value instanceof JsonString ? ((JsonString) value).getString() : null;
     }
 }

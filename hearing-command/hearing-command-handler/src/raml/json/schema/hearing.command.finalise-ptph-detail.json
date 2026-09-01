@@ -3,7 +3,12 @@
   "id": "http://justice.gov.uk/hearing/courts/hearing.command.finalise-ptph-detail.json",
   "type": "object",
   "properties": {
-    "hearingId": { "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid" }
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    }
   },
+  "required": [
+    "hearingId"
+  ],
   "additionalProperties": false
 }

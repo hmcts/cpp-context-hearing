@@ -1294,6 +1294,21 @@ public class UseCases {
     }
 
     /**
+     * Same call, but asserting a specific HTTP status. Needed because the save schema rejects a
+     * fixed list type with no key reason, which is a 400 rather than the usual 202.
+     */
+    public static SavePtphDetailCommand savePtphDetailExpecting(final RequestSpecification requestSpec, final UUID hearingId,
+                                                                final SavePtphDetailCommand command, final int httpStatusCode) {
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.save-ptph-detail+json")
+                .withArgs(hearingId)
+                .withPayload(command)
+                .execute(httpStatusCode);
+
+        return command;
+    }
+
+    /**
      * LPT-2404 — empty body: the schema declares no properties and is
      * {@code additionalProperties: false}, so sending {@code hearingId} would be rejected.
      */
