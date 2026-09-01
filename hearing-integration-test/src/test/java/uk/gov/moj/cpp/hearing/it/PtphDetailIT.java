@@ -11,12 +11,19 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.deletePtphDetail;
 import static uk.gov.moj.cpp.hearing.it.UseCases.finalisePtphDetail;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
-import static uk.gov.moj.cpp.hearing.it.UseCases.savePtphDetail;
 import static uk.gov.moj.cpp.hearing.it.UseCases.savePtphDetailExpecting;
+import static uk.gov.moj.cpp.hearing.it.UseCases.savePtphDetail;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
+import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubApplicationsByParentId;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
+
+import uk.gov.justice.core.courts.Hearing;
 
 import uk.gov.moj.cpp.hearing.command.ListType;
 import uk.gov.moj.cpp.hearing.command.SavePtphDetailCommand;
@@ -48,6 +55,10 @@ import org.junit.jupiter.api.Test;
  * <p>A rejection is emitted as {@code hearing.hearing-change-ignored} rather than thrown, so it
  * must leave the hearing's command stream healthy — {@code shouldKeepTheHearingStreamUsableAfterARejectedCommand}
  * is the test that would fail if a guard went back to throwing and dead-lettered the queue.
+ *
+ * <p>Every command answers 202 whatever the payload: this service registers no schema-validation
+ * provider on the REST adapter, so an invalid body is accepted and refused later by the aggregate.
+ * Rejection is therefore only ever observable as the view store not changing.
  */
 @SuppressWarnings("squid:S2699")
 class PtphDetailIT extends AbstractIT {
@@ -56,12 +67,18 @@ class PtphDetailIT extends AbstractIT {
 
     private static final String KEY_REASON = "Trial fixed date required by court order";
 
+    private static final String COURT_APPLICATION_DELETED = "public.progression.events.court-application-deleted";
+
     private UUID givenAnInitiatedHearing() {
+        return givenAnInitiatedHearingObject().getId();
+    }
+
+    private Hearing givenAnInitiatedHearingObject() {
         givenAUserHasLoggedInAsACourtClerk(USER_ID);
         stubUsersAndGroupsUserRoles(USER_ID);
 
         final InitiateHearingCommandHelper hearing = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
-        return hearing.getHearingId();
+        return hearing.getHearing();
     }
 
     private SavePtphDetailCommand ptphDetail(final UUID hearingId, final Tier tier, final ListType listType, final String keyReason) {
@@ -268,9 +285,10 @@ class PtphDetailIT extends AbstractIT {
     }
 
     /**
-     * A fixed date must be justified, and the save schema enforces it, so the caller is told
-     * immediately with a 400 rather than getting a 202 for a command that is later dropped. This
-     * is the one PTPH rule that never reaches the aggregate.
+     * A fixed date must be justified. Enforced in {@code HearingCommandApi} as a
+     * {@code BadRequestException}, not in a JSON schema: the command-API schema is not applied to
+     * REST bodies in this service, and the command-handler schema IS applied on the JMS queue,
+     * where a violation is dead-lettered — or, on a container with no DLQ address, lost.
      */
     @Test
     void shouldRejectAFixedListTypeWithNoKeyReasonAtTheApi() {
@@ -285,27 +303,26 @@ class PtphDetailIT extends AbstractIT {
     }
 
     /**
-     * A whitespace-only reason is no reason. Before the schema carried {@code pattern: "\\S"} this
-     * was accepted with a 202 and then dropped by the aggregate's {@code isBlank} guard — the
-     * caller was told the save had been accepted when it never took effect.
+     * Free text is capped at 3000 — the {@code note} convention on the hearing-event commands.
+     * Enforced by the aggregate rather than the schema, so it is a 202 that stores nothing.
      */
-    @Test
-    void shouldRejectAWhitespaceOnlyKeyReasonAtTheApi() {
-        final UUID hearingId = givenAnInitiatedHearing();
-
-        savePtphDetailExpecting(getRequestSpec(), hearingId,
-                ptphDetail(hearingId, Tier.TIER_1, ListType.TYPE_1_FIXED, "   "), SC_BAD_REQUEST);
-
-        pollForPtphDetail(hearingId, hasNoJsonPath("$.tier"));
-    }
-
-    /** Free text is capped at 3000, matching the {@code note} fields on the hearing-event commands. */
     @Test
     void shouldRejectAnOverlongKeyReasonAtTheApi() {
         final UUID hearingId = givenAnInitiatedHearing();
 
         savePtphDetailExpecting(getRequestSpec(), hearingId,
                 ptphDetail(hearingId, Tier.TIER_1, ListType.TYPE_1_FIXED, "x".repeat(3001)), SC_BAD_REQUEST);
+
+        pollForPtphDetail(hearingId, hasNoJsonPath("$.tier"));
+    }
+
+    /** A whitespace-only reason is no reason: {@code isBlank} covers it, so 400 as well. */
+    @Test
+    void shouldRejectAWhitespaceOnlyKeyReasonAtTheApi() {
+        final UUID hearingId = givenAnInitiatedHearing();
+
+        savePtphDetailExpecting(getRequestSpec(), hearingId,
+                ptphDetail(hearingId, Tier.TIER_1, ListType.TYPE_1_FIXED, "   "), SC_BAD_REQUEST);
 
         pollForPtphDetail(hearingId, hasNoJsonPath("$.tier"));
     }
@@ -371,5 +388,50 @@ class PtphDetailIT extends AbstractIT {
 
             publicDeleted.waitFor();
         }
+    }
+
+    // ---------------------------------------------------------------------------------
+    // Deleting the hearing. Two defects Codex found meet here, and only end to end: the listener
+    // must remove ha_ptph_detail alongside the hearing row (it has no foreign key, so nothing
+    // cascades), and the aggregate must then refuse a late command — handleHearingDeleted only
+    // raises a flag and leaves momento.hearing populated, so an existence-only guard would let a
+    // straggling save recreate the row for a hearing that no longer exists.
+    //
+    // Unit tests cover each half separately; neither can show that the two agree.
+    // ---------------------------------------------------------------------------------
+
+    @Test
+    void shouldRemovePtphDetailWithTheHearingAndRefuseToRecreateItAfterwards() {
+        final Hearing hearing = givenAnInitiatedHearingObject();
+        final UUID hearingId = hearing.getId();
+        final UUID applicationId = hearing.getCourtApplications().get(0).getId();
+
+        savePtphDetail(getRequestSpec(), hearingId, ptphDetail(hearingId, Tier.TIER_3, ListType.TYPE_1_FIXED, KEY_REASON));
+        pollForPtphDetail(hearingId, withJsonPath("$.tier", is("TIER_3")));
+
+        stubApplicationsByParentId(applicationId);
+        sendMessage(getPublicTopicInstance().createProducer(),
+                COURT_APPLICATION_DELETED,
+                createObjectBuilder()
+                        .add("hearingId", hearingId.toString())
+                        .add("applicationId", applicationId.toString())
+                        .build(),
+                metadataOf(randomUUID(), COURT_APPLICATION_DELETED)
+                        .withUserId(randomUUID().toString())
+                        .build());
+
+        // the row goes with the hearing
+        pollForPtphDetail(hearingId,
+                hasNoJsonPath("$.tier"),
+                hasNoJsonPath("$.listType"),
+                withJsonPath("$.finalised", is(false)));
+
+        // and a straggling save must not bring it back
+        savePtphDetail(getRequestSpec(), hearingId, ptphDetail(hearingId, Tier.TIER_5, ListType.TYPE_2_FLEXIBLE, null));
+
+        pollForPtphDetail(hearingId,
+                hasNoJsonPath("$.tier"),
+                hasNoJsonPath("$.listType"),
+                withJsonPath("$.finalised", is(false)));
     }
 }

@@ -1,9 +1,12 @@
 package uk.gov.moj.cpp.hearing.command.api;
 
+import static java.lang.String.format;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 
 import uk.gov.justice.core.courts.JudicialResult;
+import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -20,11 +23,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.json.JsonObject;
 
 
 @ServiceComponent(COMMAND_API)
 public class HearingCommandApi {
     private static final String DEFENDANT_DETAILS_CHANGED_SHORT_CODE = "DDCH";
+    private static final String LIST_TYPE = "listType";
+    private static final String KEY_REASON = "keyReason";
+    private static final String TYPE_1_FIXED = "TYPE_1_FIXED";
+    private static final int MAX_KEY_REASON_LENGTH = 3000;
     public static final String HEARING_COMMAND_MARK_AS_DUPLICATE = "hearing.command.mark-as-duplicate";
 
     private final Sender sender;
@@ -230,9 +238,35 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.set-trial-type");
     }
 
+    /**
+     * The three stateless rules on a key reason are enforced here so the caller is told at once.
+     *
+     * <p>They cannot live in the JSON schemas. The command-API schema is not applied to REST
+     * request bodies in this service — an invalid body is accepted with 202 — while the
+     * command-handler schema IS applied, on the JMS queue, where a violation throws and the
+     * message is dead-lettered (and on a container with no DLQ address configured, simply lost).
+     * Throwing {@code BadRequestException} before the command is dispatched avoids both, and
+     * follows {@code ListingCommandApi} and {@code DefenceClientCommandApi}.
+     *
+     * <p>{@code HearingAggregate} repeats all three as {@code hearing.hearing-change-ignored},
+     * which still covers anything arriving straight onto the queue.
+     */
     @Handles("hearing.save-ptph-detail")
     public void savePtphDetail(final JsonEnvelope envelope) {
+        validateKeyReason(envelope.payloadAsJsonObject());
         sendEnvelopeWithName(envelope, "hearing.command.save-ptph-detail");
+    }
+
+    private void validateKeyReason(final JsonObject payload) {
+        final String listType = payload.containsKey(LIST_TYPE) ? payload.getString(LIST_TYPE) : null;
+        final String keyReason = payload.containsKey(KEY_REASON) ? payload.getString(KEY_REASON) : null;
+
+        if (TYPE_1_FIXED.equals(listType) && isBlank(keyReason)) {
+            throw new BadRequestException("keyReason is required when listType is TYPE_1_FIXED");
+        }
+        if (keyReason != null && keyReason.length() > MAX_KEY_REASON_LENGTH) {
+            throw new BadRequestException(format("keyReason must be %d characters or fewer", MAX_KEY_REASON_LENGTH));
+        }
     }
 
     @Handles("hearing.finalise-ptph-detail")

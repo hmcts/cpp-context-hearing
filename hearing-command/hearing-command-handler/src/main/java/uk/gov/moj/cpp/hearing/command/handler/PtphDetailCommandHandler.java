@@ -65,10 +65,14 @@ public class PtphDetailCommandHandler extends AbstractCommandHandler {
      * flexible one is dropped here rather than stored and later ignored.
      *
      * <p>This deliberately does not reject a fixed list type that arrives without a reason. The
-     * schemas make that a {@code 400} at both entry points, and if one ever slips through, the
-     * aggregate drops the command as {@code hearing.hearing-change-ignored}. Throwing from a
+     * aggregate drops that command as {@code hearing.hearing-change-ignored}. Throwing from a
      * command handler would roll back the JMS transaction and dead-letter the hearing's command
      * queue, taking unrelated hearing traffic with it.
+     *
+     * <p>The rule is not expressed in the JSON schemas either. The command API is REST-only and
+     * registers no schema-validation provider, so a violation there is accepted with 202 anyway;
+     * and the command-handler schema IS validated, on the JMS queue, where a violation
+     * dead-letters the message. The aggregate is the only place that can refuse it safely.
      */
     private String resolveKeyReason(final SavePtphDetailCommand command) {
         return command.getListType() == ListType.TYPE_1_FIXED ? command.getKeyReason() : null;

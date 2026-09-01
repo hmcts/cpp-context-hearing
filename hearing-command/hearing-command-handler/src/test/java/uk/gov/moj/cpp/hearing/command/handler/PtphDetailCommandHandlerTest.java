@@ -151,11 +151,11 @@ class PtphDetailCommandHandlerTest {
     }
 
     /**
-     * A fixed list type with no reason is rejected by the JSON schema at both entry points, so it
-     * should never reach the handler. If one ever does, the handler must not throw: it runs inside
-     * the JMS transaction for the hearing stream, so an exception would roll back, redeliver and
-     * dead-letter the queue every hearing command shares. The aggregate drops it as
-     * hearing.hearing-change-ignored instead - asserted here, and in HearingAggregateTest.
+     * A fixed list type with no reason reaches the handler: the command API does not schema-check
+     * REST bodies. The handler must not throw, because it runs inside the JMS transaction for the
+     * hearing stream, so an exception would roll back, redeliver and dead-letter the queue every
+     * hearing command shares. The aggregate drops it as hearing.hearing-change-ignored instead -
+     * asserted here, and in HearingAggregateTest.
      */
     @Test
     void doesNotThrowOnFixedListTypeWithoutReason() throws EventStreamException {

@@ -26,36 +26,12 @@
       ]
     },
     "keyReason": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 3000,
-      "pattern": "\\S"
+      "type": "string"
     }
   },
   "required": [
     "hearingId",
     "tier"
-  ],
-  "anyOf": [
-    {
-      "not": {
-        "properties": {
-          "listType": {
-            "enum": [
-              "TYPE_1_FIXED"
-            ]
-          }
-        },
-        "required": [
-          "listType"
-        ]
-      }
-    },
-    {
-      "required": [
-        "keyReason"
-      ]
-    }
   ],
   "additionalProperties": false
 }

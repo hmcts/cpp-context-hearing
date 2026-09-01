@@ -245,6 +245,14 @@ public class HearingAggregate implements Aggregate {
     private static final String DELETE_PTPH_DETAIL = "hearing.delete-ptph-detail";
     private static final String HEARING_NOT_FOUND = "hearing not found";
     private static final String HEARING_DELETED_OR_DUPLICATE = "hearing is deleted or a duplicate";
+
+    /**
+     * Free text bound, matching the {@code note} fields on the hearing-event commands — the only
+     * other user-typed free text in this service. Enforced here rather than in the JSON schema:
+     * the command-handler schema is validated on the JMS queue, where a violation dead-letters the
+     * message, and the command API does not validate REST bodies at all.
+     */
+    private static final int MAX_KEY_REASON_LENGTH = 3000;
     private final HearingAggregateMomento momento = new HearingAggregateMomento();
 
     private final HearingDelegate hearingDelegate = new HearingDelegate(momento);
@@ -1230,6 +1238,10 @@ public class HearingAggregate implements Aggregate {
         if (TYPE_1_FIXED.name().equals(event.getListType()) && isBlank(event.getKeyReason())) {
             return ptphDetailIgnored(SAVE_PTPH_DETAIL,
                     "keyReason is required when listType is TYPE_1_FIXED", event.getHearingId());
+        }
+        if (event.getKeyReason() != null && event.getKeyReason().length() > MAX_KEY_REASON_LENGTH) {
+            return ptphDetailIgnored(SAVE_PTPH_DETAIL,
+                    "keyReason is longer than 3000 characters", event.getHearingId());
         }
         return apply(this.hearingPtphDetailDelegate.savePtphDetail(event));
     }

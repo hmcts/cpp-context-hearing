@@ -5310,9 +5310,9 @@ public class HearingAggregateTest {
     }
 
     /**
-     * A fixed date has to be justified. The schemas make this a 400 at both entry points, so this
-     * guard only fires for a payload that reached the aggregate another way - it must still not
-     * throw.
+     * A fixed date has to be justified. This guard is the only thing enforcing it: the command API
+     * does not schema-validate REST bodies, and putting the rule in the command-handler schema
+     * would dead-letter the message on the JMS queue rather than reject it cleanly.
      */
     @Test
     public void shouldIgnoreRatherThanThrowWhenAFixedListTypeHasNoKeyReason() {
@@ -5324,6 +5324,32 @@ public class HearingAggregateTest {
                         .collect(toList()),
                 hearingId,
                 "Rejecting 'hearing.save-ptph-detail' event as keyReason is required when listType is TYPE_1_FIXED");
+    }
+
+    /**
+     * The key reason is free text from a court user and lands in an append-only event store and on
+     * the public topic, so it is bounded. 3000 matches the {@code note} fields on the hearing-event
+     * commands. The bound lives here, not in a JSON schema: the command-handler schema is validated
+     * on the JMS queue where a violation dead-letters the message.
+     */
+    @Test
+    public void shouldIgnoreRatherThanThrowWhenTheKeyReasonIsTooLong() {
+        final HearingAggregate hearingAggregate = crownAggregateWithPtphState(null, null, false);
+        final UUID hearingId = randomUUID();
+
+        assertIgnoredWithReason(hearingAggregate
+                        .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_3", "TYPE_1_FIXED", "x".repeat(3001)))
+                        .collect(toList()),
+                hearingId,
+                "Rejecting 'hearing.save-ptph-detail' event as keyReason is longer than 3000 characters");
+    }
+
+    /** The boundary itself is accepted, so the bound is off-by-one safe. */
+    @Test
+    public void shouldSavePtphDetailWhenTheKeyReasonIsExactlyAtTheLimit() {
+        assertSaved(crownAggregateWithPtphState(null, null, false)
+                .savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_3", "TYPE_1_FIXED", "x".repeat(3000)))
+                .collect(toList()));
     }
 
     /** A flexible list type needs no reason, so the same absent value must be accepted. */
