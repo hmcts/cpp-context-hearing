@@ -16,6 +16,6 @@ public class H2TestDialect extends HSQLDialect {
 
     public H2TestDialect() {
         super();
-        registerColumnType(Types.BINARY, "varbinary($l)");
+        registerColumnType(Types.BINARY, "uuid");
     }
 }
