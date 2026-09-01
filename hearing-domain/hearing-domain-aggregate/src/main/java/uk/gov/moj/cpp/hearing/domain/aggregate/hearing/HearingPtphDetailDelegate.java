@@ -69,7 +69,7 @@ public class HearingPtphDetailDelegate implements Serializable {
         momento.setPtphDetailKeyReason(event.getKeyReason());
     }
 
-    public void handlePtphDetailFinalised(final PtphDetailFinalised event) {
+    public void handlePtphDetailFinalised() {
         momento.setPtphDetailFinalised(true);
     }
 
@@ -78,7 +78,7 @@ public class HearingPtphDetailDelegate implements Serializable {
      * {@code HearingDelegate}: an explicit delete and the disappearance of the hearing itself
      * leave the same nothing behind.
      */
-    public void handlePtphDetailDeleted(final PtphDetailDeleted event) {
+    public void handlePtphDetailDeleted() {
         momento.clearPtphDetail();
     }
 }

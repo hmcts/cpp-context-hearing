@@ -60,7 +60,7 @@ class HearingPtphDetailDelegateTest {
         momento.setListType("TYPE_2_FLEXIBLE");
 
         delegate.finalisePtphDetail(new PtphDetailFinalised(randomUUID()))
-                .forEach(e -> delegate.handlePtphDetailFinalised((PtphDetailFinalised) e));
+                .forEach(e -> delegate.handlePtphDetailFinalised());
 
         assertThat(momento.isPtphDetailFinalised(), is(true));
     }
@@ -73,7 +73,7 @@ class HearingPtphDetailDelegateTest {
         momento.setPtphDetailFinalised(true);
 
         delegate.deletePtphDetail(new PtphDetailDeleted(randomUUID()))
-                .forEach(e -> delegate.handlePtphDetailDeleted((PtphDetailDeleted) e));
+                .forEach(e -> delegate.handlePtphDetailDeleted());
 
         assertThat(momento.getTier(), is((Object) null));
         assertThat(momento.getListType(), is((Object) null));
