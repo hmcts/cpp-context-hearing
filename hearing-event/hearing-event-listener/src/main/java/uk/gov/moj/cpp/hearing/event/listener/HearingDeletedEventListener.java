@@ -40,7 +40,9 @@ public class HearingDeletedEventListener {
     private PtphDetailRepository ptphDetailRepository;
 
     /**
-     * LPT-2400–2404: {@code ha_ptph_detail} is keyed by hearing id but has no foreign key to
+     * Call this immediately after removing the hearing row, never on its own.
+     *
+     * <p>LPT-2400–2404: {@code ha_ptph_detail} is keyed by hearing id but has no foreign key to
      * the hearing table, so nothing removes it when the hearing goes. Without this the row is
      * orphaned and the ptph-detail query keeps answering for a hearing that no longer exists.
      */
@@ -61,12 +63,11 @@ public class HearingDeletedEventListener {
             LOGGER.debug("Received event '{}' hearingId: {}", HEARING_EVENT_HEARING_DELETED, hearingId);
         }
 
-        removePtphDetail(hearingId);
-
         final Hearing hearing = hearingRepository.findBy(hearingId);
 
         if (hearing != null) {
             hearingRepository.remove(hearing);
+            removePtphDetail(hearingId);
         }
     }
 
@@ -83,12 +84,11 @@ public class HearingDeletedEventListener {
             pcRepository.flush();
         }
 
-        removePtphDetail(hearingId);
-
         final Hearing hearing = hearingRepository.findBy(hearingId);
 
         if (hearing != null) {
             hearingRepository.remove(hearing);
+            removePtphDetail(hearingId);
         }
     }
 
@@ -99,6 +99,7 @@ public class HearingDeletedEventListener {
 
         if (Objects.nonNull(hearingToBeDeleted)) {
             hearingRepository.remove(hearingToBeDeleted);
+            removePtphDetail(hearingId);
         }
     }
 }

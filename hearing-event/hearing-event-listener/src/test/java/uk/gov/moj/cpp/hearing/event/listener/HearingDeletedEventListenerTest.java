@@ -179,6 +179,81 @@ public class HearingDeletedEventListenerTest {
         verify(ptphDetailRepository).removeAndFlush(ptphDetail);
     }
 
+    /**
+     * The court-application deletion path deletes the same hearing row as the other two handlers,
+     * so it must clean up ha_ptph_detail too. It was the one handler that did not, leaving an
+     * orphan row that the ptph-detail query would keep answering from.
+     */
+    @Test
+    public void shouldRemovePtphDetailWhenCourtApplicationHearingIsDeleted() {
+        final Envelope<CourtApplicationHearingDeleted> envelope = (Envelope<CourtApplicationHearingDeleted>) mock(Envelope.class);
+        final UUID hearingId = randomUUID();
+        final PtphDetail ptphDetail = new PtphDetail();
+
+        given(envelope.payload()).willReturn(CourtApplicationHearingDeleted.courtApplicationHearingDeleted()
+                .withHearingId(hearingId)
+                .build());
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+        when(ptphDetailRepository.findBy(hearingId)).thenReturn(ptphDetail);
+
+        hearingDeletedEventListener.processCourtApplicationDeleted(envelope);
+
+        verify(ptphDetailRepository).removeAndFlush(ptphDetail);
+        verify(hearingRepository).remove(hearing);
+    }
+
+    /** Same rule on the plain deletion path: no hearing removed, no tier removed. */
+    @Test
+    public void shouldLeavePtphDetailAloneWhenTheHearingIsNotInTheViewStore() {
+        final UUID hearingId = randomUUID();
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(null);
+
+        hearingDeletedEventListener.hearingDeleted(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .build()));
+
+        verify(ptphDetailRepository, never()).removeAndFlush(any());
+    }
+
+    /** And on the BDF path. */
+    @Test
+    public void shouldLeavePtphDetailAloneWhenTheBdfHearingIsNotInTheViewStore() {
+        final UUID hearingId = randomUUID();
+
+        when(hearingRepository.findProsecutionCasesByHearingId(hearingId)).thenReturn(Collections.emptyList());
+        when(hearingRepository.findBy(hearingId)).thenReturn(null);
+
+        hearingDeletedEventListener.hearingDeletedBdf(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .build()));
+
+        verify(ptphDetailRepository, never()).removeAndFlush(any());
+    }
+
+    /**
+     * The cleanup is deliberately tied to the hearing actually being removed, not run
+     * unconditionally: the record exists only to describe a hearing, so it loses its reason to
+     * exist exactly when the hearing does and not before. If the upstream command is ever fixed to
+     * keep a hearing that still has other applications, the tier survives with it.
+     */
+    @Test
+    public void shouldLeavePtphDetailAloneWhenTheCourtApplicationHearingIsNotInTheViewStore() {
+        final Envelope<CourtApplicationHearingDeleted> envelope = (Envelope<CourtApplicationHearingDeleted>) mock(Envelope.class);
+        final UUID hearingId = randomUUID();
+
+        given(envelope.payload()).willReturn(CourtApplicationHearingDeleted.courtApplicationHearingDeleted()
+                .withHearingId(hearingId)
+                .build());
+        when(hearingRepository.findBy(hearingId)).thenReturn(null);
+
+        hearingDeletedEventListener.processCourtApplicationDeleted(envelope);
+
+        verify(ptphDetailRepository, never()).removeAndFlush(any());
+    }
+
     /** Most hearings have no ptph detail, so deletion must not fail for them. */
     @Test
     public void shouldDeleteHearingWithoutErrorWhenThereIsNoPtphDetail() {

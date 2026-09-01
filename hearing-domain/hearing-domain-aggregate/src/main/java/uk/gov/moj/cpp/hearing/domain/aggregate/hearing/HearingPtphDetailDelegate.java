@@ -74,6 +74,16 @@ public class HearingPtphDetailDelegate implements Serializable {
     }
 
     public void handlePtphDetailDeleted(final PtphDetailDeleted event) {
+        clearPtphDetail();
+    }
+
+    /**
+     * A tier and list type only ever describe a hearing, so they lose their reason to exist the
+     * moment the hearing does. Applied both to an explicit delete and to the deletion or
+     * duplication of the hearing itself, which mirrors {@code HearingDeletedEventListener}
+     * removing the {@code ha_ptph_detail} row alongside the hearing it belongs to.
+     */
+    public void clearPtphDetail() {
         momento.setTier(null);
         momento.setListType(null);
         momento.setPtphDetailKeyReason(null);

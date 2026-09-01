@@ -393,7 +393,10 @@ public class HearingAggregate implements Aggregate {
                                 masterDefendantIdAdded.getDefendantId(),
                                 masterDefendantIdAdded.getMasterDefendantId())),
                 when(HearingDaysWithoutCourtCentreCorrected.class).apply(hearingDelegate::handleHearingDaysWithoutCourtCentreCorrected),
-                when(HearingMarkedAsDuplicate.class).apply(duplicate -> hearingDelegate.handleHearingMarkedAsDuplicate()),
+                when(HearingMarkedAsDuplicate.class).apply(duplicate -> {
+                    hearingDelegate.handleHearingMarkedAsDuplicate();
+                    hearingPtphDetailDelegate.clearPtphDetail();
+                }),
                 when(DefendantsInYouthCourtUpdated.class).apply(e -> this.momento.getHearing().setYouthCourtDefendantIds(e.getYouthCourtDefendantIds())),
                 when(HearingAmended.class).apply(x -> {
                     this.amendingSharedHearingUserId = x.getUserId();
@@ -423,8 +426,14 @@ public class HearingAggregate implements Aggregate {
                 when(ApprovalRequestedV2.class).apply(e -> {
                     this.hearingState = APPROVAL_REQUESTED;
                 }),
-                when(HearingDeleted.class).apply(deleted -> hearingDelegate.handleHearingDeleted()),
-                when(CourtApplicationHearingDeleted.class).apply(deleted -> hearingDelegate.handleHearingDeleted()),
+                when(HearingDeleted.class).apply(deleted -> {
+                    hearingDelegate.handleHearingDeleted();
+                    hearingPtphDetailDelegate.clearPtphDetail();
+                }),
+                when(CourtApplicationHearingDeleted.class).apply(deleted -> {
+                    hearingDelegate.handleHearingDeleted();
+                    hearingPtphDetailDelegate.clearPtphDetail();
+                }),
                 when(HearingUnallocated.class).apply(hearingDelegate::handleHearingUnallocated),
                 when(NextHearingStartDateRecorded.class).apply(hearingDelegate::handleNextHearingStartDateRecorded),
                 when(EarliestNextHearingDateCleared.class).apply(cleared -> hearingDelegate.handleEarliestNextHearingDateCleared()),
@@ -1208,6 +1217,9 @@ public class HearingAggregate implements Aggregate {
         if (this.momento.getHearing() == null) {
             return ptphDetailIgnored("hearing.save-ptph-detail", "hearing not found", event.getHearingId());
         }
+        if (this.momento.isDeletedOrDuplicated()) {
+            return ptphDetailIgnored("hearing.save-ptph-detail", "hearing is deleted or a duplicate", event.getHearingId());
+        }
         if (!this.hearingPtphDetailDelegate.isEligibleForPtphDetail(this.momento.getHearing())) {
             return ptphDetailIgnored("hearing.save-ptph-detail", "hearing is not in the Crown Court", event.getHearingId());
         }
@@ -1226,6 +1238,9 @@ public class HearingAggregate implements Aggregate {
         if (this.momento.getHearing() == null) {
             return ptphDetailIgnored("hearing.finalise-ptph-detail", "hearing not found", event.getHearingId());
         }
+        if (this.momento.isDeletedOrDuplicated()) {
+            return ptphDetailIgnored("hearing.finalise-ptph-detail", "hearing is deleted or a duplicate", event.getHearingId());
+        }
         if (this.momento.isPtphDetailFinalised()) {
             return ptphDetailIgnored("hearing.finalise-ptph-detail",
                     "tier and list type are already finalised", event.getHearingId());
@@ -1241,6 +1256,9 @@ public class HearingAggregate implements Aggregate {
         if (this.momento.getHearing() == null) {
             return ptphDetailIgnored("hearing.delete-ptph-detail", "hearing not found", event.getHearingId());
         }
+        if (this.momento.isDeletedOrDuplicated()) {
+            return ptphDetailIgnored("hearing.delete-ptph-detail", "hearing is deleted or a duplicate", event.getHearingId());
+        }
         return apply(this.hearingPtphDetailDelegate.deletePtphDetail(event));
     }
 
@@ -1251,6 +1269,12 @@ public class HearingAggregate implements Aggregate {
      * the one queue, a single bad PTPH payload would stall unrelated traffic. Emitting
      * {@code hearing.hearing-change-ignored} instead records why the command was dropped and
      * leaves the stream healthy, which is what the other guards on this aggregate already do.
+     *
+     * <p>Existence and deletion are separate checks on purpose: {@code handleHearingDeleted} and
+     * {@code handleHearingMarkedAsDuplicate} only raise a flag, they do not clear
+     * {@code momento.hearing}. A null-only guard therefore still accepts commands for a deleted or
+     * duplicated hearing, which would recreate an orphaned {@code ha_ptph_detail} row after
+     * {@code HearingDeletedEventListener} had removed it.
      *
      * <p>The {@code "... event as ..."} wording is load-bearing — it is the shape the existing
      * ignored-message assertions match on.
