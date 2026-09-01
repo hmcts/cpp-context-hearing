@@ -1454,14 +1454,4 @@ public class InitiateHearingEventListenerTest {
         assertThat(offence.getPlea().getPleaValue(), is("NOT_GUILTY"));
     }
 
-    private uk.gov.justice.core.courts.Offence findOffenceById(final uk.gov.justice.core.courts.Hearing hearing,
-                                                               final java.util.UUID offenceId) {
-        return hearing.getProsecutionCases().stream()
-                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                .flatMap(defendant -> defendant.getOffences().stream())
-                .filter(offence -> offence.getId().equals(offenceId))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("No offence found with id " + offenceId));
-    }
-
 }
