@@ -607,8 +607,10 @@ public class HearingDelegate implements Serializable {
         return Stream.of(new HearingMarkedAsDuplicate(prosecutionCaseIds, defendantIds, offenceIds, hearingId, courtCentreId, reason));
     }
 
+    /** A duplicated hearing is no more entitled to a tier than a deleted one. */
     public void handleHearingMarkedAsDuplicate() {
         this.momento.setDuplicate(true);
+        this.momento.clearPtphDetail();
     }
 
 
@@ -758,8 +760,15 @@ public class HearingDelegate implements Serializable {
         return currentOffences;
     }
 
+    /**
+     * Shared by {@code HearingDeleted} and {@code CourtApplicationHearingDeleted}, so clearing the
+     * tier and list type here covers both routes and cannot be forgotten by a third. It mirrors
+     * {@code HearingDeletedEventListener} removing the {@code ha_ptph_detail} row alongside the
+     * hearing row: the record only ever described this hearing.
+     */
     public void handleHearingDeleted() {
         this.momento.setDeleted(true);
+        this.momento.clearPtphDetail();
     }
 
     public void handleHearingUnallocated(final HearingUnallocated hearingUnallocated) {

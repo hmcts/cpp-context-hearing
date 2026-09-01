@@ -393,10 +393,7 @@ public class HearingAggregate implements Aggregate {
                                 masterDefendantIdAdded.getDefendantId(),
                                 masterDefendantIdAdded.getMasterDefendantId())),
                 when(HearingDaysWithoutCourtCentreCorrected.class).apply(hearingDelegate::handleHearingDaysWithoutCourtCentreCorrected),
-                when(HearingMarkedAsDuplicate.class).apply(duplicate -> {
-                    hearingDelegate.handleHearingMarkedAsDuplicate();
-                    hearingPtphDetailDelegate.clearPtphDetail();
-                }),
+                when(HearingMarkedAsDuplicate.class).apply(duplicate -> hearingDelegate.handleHearingMarkedAsDuplicate()),
                 when(DefendantsInYouthCourtUpdated.class).apply(e -> this.momento.getHearing().setYouthCourtDefendantIds(e.getYouthCourtDefendantIds())),
                 when(HearingAmended.class).apply(x -> {
                     this.amendingSharedHearingUserId = x.getUserId();
@@ -426,14 +423,8 @@ public class HearingAggregate implements Aggregate {
                 when(ApprovalRequestedV2.class).apply(e -> {
                     this.hearingState = APPROVAL_REQUESTED;
                 }),
-                when(HearingDeleted.class).apply(deleted -> {
-                    hearingDelegate.handleHearingDeleted();
-                    hearingPtphDetailDelegate.clearPtphDetail();
-                }),
-                when(CourtApplicationHearingDeleted.class).apply(deleted -> {
-                    hearingDelegate.handleHearingDeleted();
-                    hearingPtphDetailDelegate.clearPtphDetail();
-                }),
+                when(HearingDeleted.class).apply(deleted -> hearingDelegate.handleHearingDeleted()),
+                when(CourtApplicationHearingDeleted.class).apply(deleted -> hearingDelegate.handleHearingDeleted()),
                 when(HearingUnallocated.class).apply(hearingDelegate::handleHearingUnallocated),
                 when(NextHearingStartDateRecorded.class).apply(hearingDelegate::handleNextHearingStartDateRecorded),
                 when(EarliestNextHearingDateCleared.class).apply(cleared -> hearingDelegate.handleEarliestNextHearingDateCleared()),
