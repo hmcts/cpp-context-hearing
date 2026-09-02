@@ -49,10 +49,10 @@ public class ReusableInfoQueryIT extends AbstractIT {
                         .with(Hearing::getId, is(hearingOne.getHearing().getId())))
         );
 
+        // Blank TXT prompts (defendants with no driver number) are omitted
         pollForReusableInfo(hearingOne.getHearingId().toString(), new Matcher[]{
-                withJsonPath("$.reusablePrompts", hasSize(2)),
-                withJsonPath("$.reusablePrompts[0].promptRef", is("defendantDrivingLicenceNumber")),
-                withJsonPath("$.reusablePrompts[1].promptRef", is("defendantDrivingLicenceNumber"))
+                withJsonPath("$.reusablePrompts", hasSize(1)),
+                withJsonPath("$.reusablePrompts[0].promptRef", is("defendantDrivingLicenceNumber"))
         });
     }
 
@@ -67,7 +67,7 @@ public class ReusableInfoQueryIT extends AbstractIT {
         );
 
         pollForReusableInfo(hearingOne.getHearingId().toString(), new Matcher[]{
-                withJsonPath("$.reusablePrompts", hasSize(3)),
+                withJsonPath("$.reusablePrompts", hasSize(2)),
                 withJsonPath("$.reusablePrompts[0].promptRef", is("defendantDrivingLicenceNumber")),
                 withJsonPath("$.reusablePrompts[1].promptRef", is("minorcreditornameandaddress")),
                 withJsonPath("$.reusablePrompts[1].caseId", is(caseId.toString())),
@@ -79,8 +79,7 @@ public class ReusableInfoQueryIT extends AbstractIT {
                 withJsonPath("$.reusablePrompts[1].value.minorcreditornameandaddressAddress5", is("line 5")),
                 withJsonPath("$.reusablePrompts[1].value.minorcreditornameandaddressPostCode", is("E14 4EX")),
                 withJsonPath("$.reusablePrompts[1].value.minorcreditornameandaddressEmailAddress1", is("contact@cpp.co.uk")),
-                withJsonPath("$.reusablePrompts[1].value.minorcreditornameandaddressCategoryCode", is("Charity")),
-                withJsonPath("$.reusablePrompts[2].promptRef", is("defendantDrivingLicenceNumber"))
+                withJsonPath("$.reusablePrompts[1].value.minorcreditornameandaddressCategoryCode", is("Charity"))
         });
     }
 
@@ -96,20 +95,18 @@ public class ReusableInfoQueryIT extends AbstractIT {
         );
 
         pollForReusableInfo(hearingOne.getHearingId().toString(), new Matcher[]{
-                withJsonPath("$.reusablePrompts", hasSize(4)),
+                withJsonPath("$.reusablePrompts", hasSize(3)),
                 withJsonPath("$.reusablePrompts[0].promptRef", is("defendantDrivingLicenceNumber")),
-                withJsonPath("$.reusablePrompts[1].promptRef", is("defendantDrivingLicenceNumber")),
-                withJsonPath("$.reusablePrompts[1].value", is("")),
-                withJsonPath("$.reusablePrompts[2].applicationId", is(hearingOne.getCourtApplication().getId().toString())),
-                withJsonPath("$.reusablePrompts[2].promptRef", is("prosecutortobenotified")),
-                withJsonPath("$.reusablePrompts[2].type", is("NAMEADDRESS")),
-                withJsonPath("$.reusablePrompts[2].value.prosecutortobenotifiedOrganisationName", is("ABC Org")),
-                withJsonPath("$.reusablePrompts[2].value.prosecutortobenotifiedAddress1", is("address1")),
-                withJsonPath("$.reusablePrompts[2].value.prosecutortobenotifiedAddress2", is("address2")),
-                withJsonPath("$.reusablePrompts[2].value.prosecutortobenotifiedPostCode", is("CB3 0GU")),
-                withJsonPath("$.reusablePrompts[2].value.prosecutortobenotifiedEmailAddress1", is("James.Thomas@gmail.com")),
-                withJsonPath("$.reusablePrompts[3].promptRef", is("defendantDrivingLicenceNumber")),
-                withJsonPath("$.reusablePrompts[3].value", is("DVLA12345"))
+                withJsonPath("$.reusablePrompts[1].applicationId", is(hearingOne.getCourtApplication().getId().toString())),
+                withJsonPath("$.reusablePrompts[1].promptRef", is("prosecutortobenotified")),
+                withJsonPath("$.reusablePrompts[1].type", is("NAMEADDRESS")),
+                withJsonPath("$.reusablePrompts[1].value.prosecutortobenotifiedOrganisationName", is("ABC Org")),
+                withJsonPath("$.reusablePrompts[1].value.prosecutortobenotifiedAddress1", is("address1")),
+                withJsonPath("$.reusablePrompts[1].value.prosecutortobenotifiedAddress2", is("address2")),
+                withJsonPath("$.reusablePrompts[1].value.prosecutortobenotifiedPostCode", is("CB3 0GU")),
+                withJsonPath("$.reusablePrompts[1].value.prosecutortobenotifiedEmailAddress1", is("James.Thomas@gmail.com")),
+                withJsonPath("$.reusablePrompts[2].promptRef", is("defendantDrivingLicenceNumber")),
+                withJsonPath("$.reusablePrompts[2].value", is("DVLA12345"))
         });
     }
 
