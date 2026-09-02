@@ -303,7 +303,7 @@ class PtphDetailIT extends AbstractIT {
     }
 
     /**
-     * Free text is capped at 3000 — the {@code note} convention on the hearing-event commands.
+     * Free text is capped at 500 — 
      * Enforced by the aggregate rather than the schema, so it is a 202 that stores nothing.
      */
     @Test
@@ -311,7 +311,7 @@ class PtphDetailIT extends AbstractIT {
         final UUID hearingId = givenAnInitiatedHearing();
 
         savePtphDetailExpecting(getRequestSpec(), hearingId,
-                ptphDetail(hearingId, Tier.TIER_1, ListType.TYPE_1_FIXED, "x".repeat(3001)), SC_BAD_REQUEST);
+                ptphDetail(hearingId, Tier.TIER_1, ListType.TYPE_1_FIXED, "x".repeat(501)), SC_BAD_REQUEST);
 
         pollForPtphDetail(hearingId, hasNoJsonPath("$.tier"));
     }
