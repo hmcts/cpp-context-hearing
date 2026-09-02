@@ -11,11 +11,9 @@ import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
-import static uk.gov.moj.cpp.hearing.command.ListType.TYPE_1_FIXED;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.APPROVAL_REQUESTED;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.INITIALISED;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
@@ -246,13 +244,6 @@ public class HearingAggregate implements Aggregate {
     private static final String HEARING_NOT_FOUND = "hearing not found";
     private static final String HEARING_DELETED_OR_DUPLICATE = "hearing is deleted or a duplicate";
 
-    /**
-     * Free text bound, matching the {@code note} fields on the hearing-event commands — the only
-     * other user-typed free text in this service. Enforced here rather than in the JSON schema:
-     * the command-handler schema is validated on the JMS queue, where a violation dead-letters the
-     * message, and the command API does not validate REST bodies at all.
-     */
-    private static final int MAX_KEY_REASON_LENGTH = 3000;
     private final HearingAggregateMomento momento = new HearingAggregateMomento();
 
     private final HearingDelegate hearingDelegate = new HearingDelegate(momento);
@@ -1235,14 +1226,6 @@ public class HearingAggregate implements Aggregate {
             return ptphDetailIgnored(SAVE_PTPH_DETAIL,
                     "tier and list type are finalised and cannot be changed", event.getHearingId());
         }
-        if (TYPE_1_FIXED.name().equals(event.getListType()) && isBlank(event.getKeyReason())) {
-            return ptphDetailIgnored(SAVE_PTPH_DETAIL,
-                    "keyReason is required when listType is TYPE_1_FIXED", event.getHearingId());
-        }
-        if (event.getKeyReason() != null && event.getKeyReason().length() > MAX_KEY_REASON_LENGTH) {
-            return ptphDetailIgnored(SAVE_PTPH_DETAIL,
-                    "keyReason is longer than 3000 characters", event.getHearingId());
-        }
         return apply(this.hearingPtphDetailDelegate.savePtphDetail(event));
     }
 
@@ -1281,6 +1264,11 @@ public class HearingAggregate implements Aggregate {
      * the one queue, a single bad PTPH payload would stall unrelated traffic. Emitting
      * {@code hearing.hearing-change-ignored} instead records why the command was dropped and
      * leaves the stream healthy, which is what the other guards on this aggregate already do.
+     *
+     * <p>Only rules needing aggregate state live here. The stateless ones on a key reason —
+     * required for a fixed list type, non-blank, within its length bound — are enforced in
+     * {@code HearingCommandApi}, which rejects them with a 400 before the command is dispatched.
+     * Repeating them here would be a second copy of a check the only sender already performs.
      *
      * <p>Existence and deletion are separate checks on purpose: {@code handleHearingDeleted} and
      * {@code handleHearingMarkedAsDuplicate} only raise a flag, they do not clear

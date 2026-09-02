@@ -32,7 +32,7 @@ public class HearingCommandApi {
     private static final String LIST_TYPE = "listType";
     private static final String KEY_REASON = "keyReason";
     private static final String TYPE_1_FIXED = "TYPE_1_FIXED";
-    private static final int MAX_KEY_REASON_LENGTH = 3000;
+    private static final int MAX_KEY_REASON_LENGTH = 500;
     public static final String HEARING_COMMAND_MARK_AS_DUPLICATE = "hearing.command.mark-as-duplicate";
 
     private final Sender sender;
