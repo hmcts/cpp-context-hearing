@@ -93,6 +93,12 @@ public class GetHearingsTransformer {
                                 hearing.getProsecutionCases().stream()
                                         .map(pc -> summaryForCheckIn(pc).build())
                                         .collect(toList())
+                )
+                .withCourtApplicationSummaries(
+                        isEmpty(hearing.getCourtApplications()) ? emptyList() :
+                                hearing.getCourtApplications().stream()
+                                        .map(ca -> summary(ca).build())
+                                        .collect(toList())
                 );
     }
 

@@ -2384,16 +2384,17 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void getHearingsForCheckIn_shouldExcludeHearingsWithNoProsecutionCases() {
+    public void getHearingsForCheckIn_shouldExcludeHearingsWithNoProsecutionCasesAndNoCourtApplications() {
         final LocalDate date = START_DATE_1.toLocalDate();
         final Hearing hearingEntity = buildHearing();
         final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
 
         when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
 
-        // hearing with no prosecution cases — should be filtered out
+        // hearing with no prosecution cases and no court applications — should be filtered out
         final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing()
                 .withProsecutionCases(null)
+                .withCourtApplications(null)
                 .build();
         when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
 
@@ -2401,6 +2402,33 @@ public class HearingServiceTest {
 
         assertThat(result.getHearingSummaries(), is(empty()));
         verify(getHearingsTransformer, never()).summaryForCheckIn(any());
+    }
+
+    // CAD-1609: an application hearing whose case has no active offences carries no
+    // prosecutionCases at all — it must still surface for check-in via its courtApplications.
+    @Test
+    public void getHearingsForCheckIn_shouldIncludeHearingWithCourtApplicationButNoProsecutionCases() {
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+        final UUID applicationId = randomUUID();
+        final UUID summaryId = randomUUID();
+
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
+
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing()
+                .withProsecutionCases(null)
+                .withCourtApplications(singletonList(courtApplication().withId(applicationId).build()))
+                .build();
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summaryForCheckIn(hearingPojo))
+                .thenReturn(HearingSummaries.hearingSummaries().withId(summaryId));
+
+        final GetHearings result = hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
+
+        assertThat(result.getHearingSummaries(), hasSize(1));
+        assertThat(result.getHearingSummaries().get(0).getId(), is(summaryId));
+        verify(getHearingsTransformer).summaryForCheckIn(hearingPojo);
     }
 
     @Test

@@ -693,7 +693,7 @@ public class GetHearingsTransformerTest {
         assertNull(result.getHearingDays());
         assertNull(result.getJurisdictionType());
         assertNull(result.getType());
-        assertNull(result.getCourtApplicationSummaries());
+        assertThat(result.getCourtApplicationSummaries(), is(empty()));
         assertThat(result.getProsecutionCaseSummaries(), is(empty()));
     }
 
@@ -876,5 +876,55 @@ public class GetHearingsTransformerTest {
 
         assertNotNull(result.getProsecutionCaseSummaries());
         assertThat(result.getProsecutionCaseSummaries(), is(empty()));
+    }
+
+    @Test
+    public void summaryForCheckIn_shouldReturnEmptyCourtApplicationSummariesWhenNullList() {
+        final Hearing hearing = Hearing.hearing()
+                .withId(randomUUID())
+                .withCourtCentre(CourtCentre.courtCentre().withRoomName("Room 1").build())
+                .withProsecutionCases(emptyList())
+                .withCourtApplications(null)
+                .build();
+
+        final HearingSummaries result = target.summaryForCheckIn(hearing).build();
+
+        assertNotNull(result.getCourtApplicationSummaries());
+        assertThat(result.getCourtApplicationSummaries(), is(empty()));
+    }
+
+    // CAD-1609: an application hearing whose case has no active offences carries no
+    // prosecutionCases at all (see InitiateHearingCommandHandler.enrichWithActiveApplicationOffences) —
+    // check-in must still be able to show the defence/prosecution parties from the application itself.
+    @Test
+    public void summaryForCheckIn_shouldMapCourtApplicationSummaryWhenHearingHasNoProsecutionCases() {
+        final Hearing hearing = CoreTestTemplates.hearing(defaultArguments()).build();
+        final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
+        final CourtApplicationParty applicant = courtApplication.getApplicant();
+        final CourtApplicationParty subject = courtApplication.getSubject();
+        final CourtApplicationCase courtApplicationCase = courtApplication.getCourtApplicationCases().get(0);
+
+        final Hearing applicationOnlyHearing = Hearing.hearing().withValuesFrom(hearing)
+                .withProsecutionCases(null)
+                .build();
+
+        final HearingSummaries result = target.summaryForCheckIn(applicationOnlyHearing).build();
+
+        assertThat(result.getProsecutionCaseSummaries(), is(empty()));
+        assertThat(result, isBean(HearingSummaries.class)
+                .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
+                        .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
+                        .with(CourtApplicationSummaries::getApplicant, isBean(Applicant.class)
+                                .withValue(Applicant::getFirstName, applicant.getPersonDetails().getFirstName())
+                                .withValue(Applicant::getLastName, applicant.getPersonDetails().getLastName()))
+                        .with(CourtApplicationSummaries::getSubject, isBean(Subject.class)
+                                .withValue(Subject::getFirstName, subject.getPersonDetails().getFirstName())
+                                .withValue(Subject::getLastName, subject.getPersonDetails().getLastName()))
+                        .with(CourtApplicationSummaries::getCaseSummaries, first(isBean(CaseSummaries.class)
+                                .withValue(CaseSummaries::getId, courtApplicationCase.getProsecutionCaseId())
+                                .withValue(cs -> cs.getProsecutionCaseIdentifier().getProsecutionAuthorityReference(),
+                                        courtApplicationCase.getProsecutionCaseIdentifier().getProsecutionAuthorityReference())))
+                ))
+        );
     }
 }
