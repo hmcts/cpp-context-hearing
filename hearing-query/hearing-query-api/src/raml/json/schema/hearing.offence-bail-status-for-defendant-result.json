@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.offence-bail-status-for-defendant-result.json",
+  "type": "object",
+  "properties": {
+    "offenceBailStatuses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "offenceId": {
+            "type": "string"
+          },
+          "bailStatusId": {
+            "type": "string"
+          },
+          "bailStatusCode": {
+            "type": "string"
+          },
+          "bailStatusDesc": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "offenceId"
+        ]
+      }
+    }
+  },
+  "required": [
+    "offenceBailStatuses"
+  ]
+}

@@ -126,7 +126,9 @@ public class WebPageCourtCentreXmlGenerator implements CourtCentreXmlGenerator {
 
         cppCases.getCasesDetails()
                 .forEach(xhibitCase -> xhibitCases.getCaseDetails().add(addCaseDetails(xhibitCase)));
-        return xhibitCases;
+        // The schema declares <cases> optional but requires at least one <caseDetails> when present, so omit an
+        // empty <cases> (e.g. when every case on the court room is restricted) rather than emit an invalid <cases/>.
+        return xhibitCases.getCaseDetails().isEmpty() ? null : xhibitCases;
     }
 
 
@@ -155,7 +157,9 @@ public class WebPageCourtCentreXmlGenerator implements CourtCentreXmlGenerator {
 
                             exhibitDefendants.getDefendant().add(exhibitDefendant);
                         }));
-        return exhibitDefendants;
+        // The schema declares <defendants> optional but requires at least one <defendant> when present, so omit an
+        // empty <defendants> rather than emit an invalid <defendants/>.
+        return exhibitDefendants.getDefendant().isEmpty() ? null : exhibitDefendants;
     }
 
 }

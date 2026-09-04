@@ -1,7 +1,10 @@
 package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 
+import static java.util.stream.Collectors.toList;
+
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -9,84 +12,165 @@ import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DefendantDto;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationRequest;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.OffenceDto;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.Prompt;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ResultLineDto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @ApplicationScoped
 public class ValidationRequestMapper {
 
-    public ValidationRequest toValidationRequest(final ShareDaysResultsCommand command, final Hearing hearing) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValidationRequestMapper.class);
 
-        final String courtType = hearing.getJurisdictionType() != null
-                ? hearing.getJurisdictionType().name()
-                : null;
+    public DraftValidationRequest toValidationRequest(final ShareDaysResultsCommand command, final Hearing hearing) {
 
         final List<DefendantDto> defendants = new ArrayList<>();
         final List<OffenceDto> offences = new ArrayList<>();
-        String caseId = null;
+        mapProsecutionCases(hearing, defendants, offences);
 
-        if (hearing != null && hearing.getProsecutionCases() != null) {
-            hearing.getProsecutionCases()
-                    .stream()
-                    .forEach(prosecutionCase -> {
-                        final String caseUrn = extractCaseUrn(prosecutionCase);
+        final List<SharedResultsCommandResultLineV2> commandLines =
+                command.getResultLines() != null ? command.getResultLines() : List.of();
 
-                        prosecutionCase.getDefendants()
-                                .stream()
-                                .forEach(defendant -> {
-                                    final Person personDetails = extractPersonDetails(defendant);
-                                    defendants.add(DefendantDto.builder()
-                                            .withDefendantId(uuidToString(defendant.getId()))
-                                            .withFirstName(personDetails != null ? personDetails.getFirstName() : null)
-                                            .withLastName(personDetails != null ? personDetails.getLastName() : null)
-                                            .withMasterDefendantId(uuidToString(defendant.getMasterDefendantId()))
-                                            .build());
+        final List<ResultLineDto> resultLines = commandLines.stream()
+                .map(this::toResultLineDto)
+                .collect(toList());
 
-                                    if (defendant != null && defendant.getOffences() != null) {
-                                        defendant.getOffences()
-                                                .stream()
-                                                .forEach(offence -> offences.add(new OffenceDto.Builder()
-                                                        .offenceId(uuidToString(offence.getId()))
-                                                        .offenceCode(offence.getOffenceCode())
-                                                        .offenceTitle(offence.getOffenceTitle())
-                                                        .orderIndex(offence.getOrderIndex())
-                                                        .caseUrn(caseUrn)
-                                                        .build()));
-                                    }
-                                });
-                    });
+        return new DraftValidationRequest()
+                .hearingId(uuidToString(command.getHearingId()))
+                .hearingDay(command.getHearingDay())
+                .courtType(toCourtType(hearing))
+                .caseId(extractCaseId(commandLines))
+                .resultLines(resultLines)
+                .offences(offences)
+                .defendants(defendants);
+    }
+
+    private void mapProsecutionCases(final Hearing hearing,
+                                     final List<DefendantDto> defendants,
+                                     final List<OffenceDto> offences) {
+        if (hearing.getProsecutionCases() == null) {
+            return;
         }
-        final List<ResultLineDto> resultLines = new ArrayList<>();
-        if (command.getResultLines() != null) {
-            for (final SharedResultsCommandResultLineV2 line : command.getResultLines()) {
-                if (caseId == null && line.getCaseId() != null) {
-                    caseId = line.getCaseId().toString();
-                }
-                resultLines.add(new ResultLineDto.Builder()
-                        .resultLineId(uuidToString(line.getResultLineId()))
-                        .shortCode(line.getShortCode())
-                        .label(line.getResultLabel())
-                        .defendantId(uuidToString(line.getDefendantId()))
-                        .offenceId(uuidToString(line.getOffenceId()))
-                        .consecutiveToOffence(extractConsecutiveToOffence(line.getPrompts()))
-                        .category(line.getCategory())
-                        .isConcurrent(extractIsConcurrent(line.getPrompts()))
-                        .build());
-            }
-        }
+        hearing.getProsecutionCases()
+                .forEach(prosecutionCase -> mapProsecutionCase(prosecutionCase, defendants, offences));
+    }
 
-        return new ValidationRequest(
-                uuidToString(command.getHearingId()),
-                command.getHearingDay(),
-                courtType,
-                caseId,
-                resultLines,
-                offences,
-                defendants);
+    private void mapProsecutionCase(final ProsecutionCase prosecutionCase,
+                                    final List<DefendantDto> defendants,
+                                    final List<OffenceDto> offences) {
+        if (prosecutionCase.getDefendants() == null) {
+            return;
+        }
+        final String caseUrn = extractCaseUrn(prosecutionCase);
+        prosecutionCase.getDefendants()
+                .forEach(defendant -> {
+                    defendants.add(toDefendantDto(defendant));
+                    mapOffences(defendant, caseUrn, offences);
+                });
+    }
+
+    private DefendantDto toDefendantDto(final Defendant defendant) {
+        final Person personDetails = extractPersonDetails(defendant);
+        return new DefendantDto()
+                .defendantId(uuidToString(defendant.getId()))
+                .firstName(personDetails != null ? personDetails.getFirstName() : null)
+                .lastName(personDetails != null ? personDetails.getLastName() : null)
+                .dateOfBirth(personDetails != null ? personDetails.getDateOfBirth() : null)
+                .masterDefendantId(uuidToString(defendant.getMasterDefendantId()));
+    }
+
+    private void mapOffences(final Defendant defendant, final String caseUrn, final List<OffenceDto> offences) {
+        if (defendant.getOffences() == null) {
+            return;
+        }
+        defendant.getOffences()
+                .forEach(offence -> offences.add(toOffenceDto(offence, caseUrn)));
+    }
+
+    private OffenceDto toOffenceDto(final Offence offence, final String caseUrn) {
+        return new OffenceDto()
+                .offenceId(uuidToString(offence.getId()))
+                .offenceCode(offence.getOffenceCode())
+                .offenceTitle(offence.getOffenceTitle())
+                .orderIndex(offence.getOrderIndex())
+                .caseUrn(caseUrn)
+                .isConvicted(offence.getConvictionDate() != null)
+                .hasExistingCtlRecord(hasExistingCustodyTimeLimit(offence));
+    }
+
+    private boolean hasExistingCustodyTimeLimit(final Offence offence) {
+        return offence.getCustodyTimeLimit() != null
+                && offence.getCustodyTimeLimit().getTimeLimit() != null;
+    }
+
+    private ResultLineDto toResultLineDto(final SharedResultsCommandResultLineV2 line) {
+        return new ResultLineDto()
+                .resultLineId(uuidToString(line.getResultLineId()))
+                .shortCode(line.getShortCode())
+                .label(line.getResultLabel())
+                .defendantId(uuidToString(line.getDefendantId()))
+                .offenceId(uuidToString(line.getOffenceId()))
+                .consecutiveToOffence(extractConsecutiveToOffence(line.getPrompts()))
+                .category(toCategory(line.getCategory()))
+                .isConcurrent(extractIsConcurrent(line.getPrompts()))
+                .prompts(mapPrompts(line.getPrompts()));
+    }
+
+    private List<Prompt> mapPrompts(final List<SharedResultsCommandPrompt> prompts) {
+        if (prompts == null) {
+            return null;
+        }
+        return prompts.stream()
+                .map(p -> new Prompt().promptRef(p.getPromptRef()).promptValue(p.getValue()))
+                .toList();
+    }
+
+
+    private String extractCaseId(final List<SharedResultsCommandResultLineV2> lines) {
+        return lines.stream()
+                .map(SharedResultsCommandResultLineV2::getCaseId)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .map(Object::toString)
+                .orElse(null);
+    }
+
+    private static DraftValidationRequest.CourtTypeEnum toCourtType(final Hearing hearing) {
+        return hearing.getJurisdictionType() != null
+                ? toCourtType(hearing.getJurisdictionType().name())
+                : null;
+    }
+
+    private static DraftValidationRequest.CourtTypeEnum toCourtType(final String courtType) {
+        try {
+            return DraftValidationRequest.CourtTypeEnum.fromValue(courtType);
+        } catch (final IllegalArgumentException ex) {
+            LOGGER.warn("Unrecognised court type '{}' for results validation, sending null", courtType);
+            return null;
+        }
+    }
+
+    private static ResultLineDto.CategoryEnum toCategory(final String category) {
+        if (category == null) {
+            return null;
+        }
+        try {
+            return ResultLineDto.CategoryEnum.fromValue(category);
+        } catch (final IllegalArgumentException ex) {
+            LOGGER.warn("Unrecognised result line category '{}' for results validation, sending null", category);
+            return null;
+        }
     }
 
     private Person extractPersonDetails(final Defendant defendant) {

@@ -244,6 +244,27 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.get.hearings.json
                     schema:  !include  json/schema/hearing.get.hearings.json
 
+/hearing-cases-for-day:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.hearing-cases-for-day+json
+            name: hearing.get.hearing-cases-for-day
+        ...
+      queryParameters:
+        date:
+          description: date of hearing in yyyy-MM-dd format
+          type: string
+          required: true
+      
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.hearing-cases-for-day+json:
+                    example:  !include json/hearing.get.hearing-cases-for-day.json
+                    schema:  !include  json/schema/hearing.get.hearing-cases-for-day.json
 
 /hearings-check-in:
    get:
@@ -693,6 +714,29 @@ protocols: [ HTTP, HTTPS ]
                 application/vnd.hearing.prosecution-case-by-hearingid+json:
                   example:  !include json/hearing.get-prosecutioncase-result.json
                   schema:  !include  json/schema/hearing.get-prosecutioncase-result.json
+
+/defendants/{defendantId}/offence-bail-status:
+  uriParameters:
+        defendantId:
+          description: ID of defendant to get offence bail statuses for
+          type: string
+  get:
+    description: |
+      Gets, for the given defendant, the bail status of each active offence from its most
+      recently shared hearing day, falling back to the defendant's own bail status for that
+      hearing when the offence has none.
+      ...
+      (mapping):
+          responseType: application/vnd.hearing.offence-bail-status-for-defendant+json
+          name: hearing.offence-bail-status-for-defendant
+       ...
+    responses:
+          200:
+              description: OK
+              body:
+                application/vnd.hearing.offence-bail-status-for-defendant+json:
+                  example:  !include json/hearing.offence-bail-status-for-defendant-result.json
+                  schema:  !include  json/schema/hearing.offence-bail-status-for-defendant-result.json
 
 /hearings/event-log:
     get:

@@ -372,6 +372,10 @@ public class ReferenceDataStub {
         stubGetReferenceDataResultBailStatuses(LocalDate.now(), "referencedata.bail-statuses.json");
     }
 
+    public static void stubGetReferenceDataResultBailStatuses(final String responsePath) {
+        stubGetReferenceDataResultBailStatuses(LocalDate.now(), responsePath);
+    }
+
     private static void stubGetReferenceDataResultPromptWordSynonymsForFirstDay() {
         stubGetReferenceDataResultPromptWordSynonyms(LocalDate.now(), "referencedata.result-prompt-word-synonyms.json");
     }
