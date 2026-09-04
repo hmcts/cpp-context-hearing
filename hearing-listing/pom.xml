@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>hearing-parent</artifactId>
+        <groupId>uk.gov.moj.cpp.hearing</groupId>
+        <version>17.104.187-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>hearing-listing</artifactId>
+
+    <!--
+        Xhibit reference-data + WebDAV export subsystem copied from the listing context
+        (uk.gov.moj.cpp.hearing.listing.*) to decouple hearing from listing-common / listing-domain-*.
+        Kept in its own bean-archive module (beans.xml bean-discovery-mode="all") so the copied
+        plain-class CDI beans are discovered in the service WAR without adding a bean archive to the
+        broadly-shared hearing-common (which would pull these framework-dependent beans into other
+        modules' DeltaSpike unit-test CDI containers).
+    -->
+    <dependencies>
+        <dependency>
+            <groupId>uk.gov.justice.framework-api</groupId>
+            <artifactId>framework-api-common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.gov.justice.utils</groupId>
+            <artifactId>utilities-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>messaging-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.lookfirst</groupId>
+            <artifactId>sardine</artifactId>
+            <version>${sardine.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test scope: mirrors listing-common's proven set for the ported Xhibit tests.
+             test-utils-core brings junit5/mockito/hamcrest + ReflectionUtil transitively;
+             utilities-core (compile, above) provides JsonObjects / ObjectMapperProducer / converters. -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- SardineClientFactoryTest creates a real Sardine/httpclient which needs commons-logging
+             at test runtime (mirrors listing-common's test deps). -->
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
