@@ -63,11 +63,12 @@ public class UpdatePleaCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.command.enrich-update-plea-with-associated-hearings event received {}", envelope.toObfuscatedDebugString());
         }
 
+        final Set<String> guiltyPleaTypes = referenceDataService.retrieveGuiltyPleaTypes();
         final UpdateInheritedPleaCommand command = convertToObject(envelope, UpdateInheritedPleaCommand.class);
 
         for (final UUID hearingId : command.getHearingIds()) {
             aggregate(HearingAggregate.class, hearingId, envelope,
-                    hearingAggregate -> hearingAggregate.inheritPlea(hearingId, command.getPlea()));
+                    hearingAggregate -> hearingAggregate.inheritPlea(hearingId, command.getPlea(), guiltyPleaTypes));
         }
     }
 

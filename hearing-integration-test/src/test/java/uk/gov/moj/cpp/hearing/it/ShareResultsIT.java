@@ -394,6 +394,59 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
+    public void shouldCarryForwardBailStatusToApplicationMasterDefendantFromProsecutionCaseOffenceInSameHearing() {
+        final LocalDate orderDate = PAST_LOCAL_DATE.next();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+        final UUID noBailStatusResultDefId = randomUUID();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommandForApplicationCases(getUuidMapForMultipleCaseStructure());
+        final Hearing hearing = hearingCommand.getHearing();
+
+        stubCourtRoomForApplication(hearing);
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceDataRemandedOnBailCondition(orderDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                applicationBailPrompt = getMandatoryNowResultDefPrompt(orderDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand applicationBailResult = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), orderDate);
+        setPromptForSaveDraftResultCommand(applicationBailPrompt, applicationBailResult);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        try (final EventListener firstShareResultedListener = listenFor("public.hearing.resulted")
+                .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
+                        .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId())))))) {
+
+            shareResultWithCourtClerk(hearing, singletonList(applicationBailResult.getTarget()));
+
+            final JsonPath firstPublicHearingResulted = firstShareResultedListener.waitFor();
+
+            assertThat(firstPublicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.code"), is("B"));
+            assertThat(firstPublicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.description"), is("Conditional Bail"));
+        }
+
+        final LocalDate applicationResultOrderDate = PAST_LOCAL_DATE.next();
+        final AllResultDefinitionsReferenceDataHelper applicationRefData = setupResultDefinitionsReferenceDataWithoutBailStatus(applicationResultOrderDate, noBailStatusResultDefId);
+
+        final SaveDraftResultCommand applicationResult = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), applicationResultOrderDate);
+        setResultLine(applicationResult.getTarget().getResultLines().get(0), findPrompt(applicationRefData, noBailStatusResultDefId), noBailStatusResultDefId, applicationResultOrderDate);
+
+        try (final EventListener publicEventResultedListener = listenFor("public.hearing.resulted")
+                .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
+                        .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId())))))) {
+
+            shareResultWithCourtClerk(hearing, singletonList(applicationResult.getTarget()));
+
+            final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.code"), is("B"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.description"), is("Conditional Bail"));
+        }
+    }
+
+    @Test
     @Disabled("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
     public void shouldUpdateOffencesAndSubjectWhenApplicationCasesExistFeatureEnabled() {
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
@@ -2928,6 +2981,46 @@ public class ShareResultsIT extends AbstractIT {
                                                 .setSentToCC(true)
                         ).collect(Collectors.toList())
                 ));
+
+        stubGetAllResultDefinitions(referenceDate, allResultDefinitions.it());
+        return allResultDefinitions;
+    }
+
+    private AllResultDefinitionsReferenceDataHelper setupResultDefinitionsReferenceDataWithoutBailStatus(final LocalDate referenceDate, final UUID resultDefinitionId) {
+        final String LISTING_OFFICER_USER_GROUP = "Listing Officer";
+
+        final AllResultDefinitionsReferenceDataHelper allResultDefinitions = h(AllResultDefinitions.allResultDefinitions()
+                .setResultDefinitions(singletonList(
+                        ResultDefinition.resultDefinition()
+                                .setId(resultDefinitionId)
+                                .setRank(1)
+                                .setIsAvailableForCourtExtract(true)
+                                .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                .setFinancial("Y")
+                                .setCategory(getCategoryForResultDefinition(resultDefinitionId))
+                                .setPrompts(singletonList(uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
+                                                .setId(resultDefinitionId)
+                                                .setMandatory(true)
+                                                .setLabel("promptLabel")
+                                                .setWelshLabel(STRING.next())
+                                                .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                                .setReference("bailConditionReason")
+                                        )
+                                )
+                                .setSecondaryCJSCodes(getSecondaryCjsCodes())
+                                .setLabel("resultLabel")
+                                .setDrivingTestStipulation(1)
+                                .setPointsDisqualificationCode("TT99")
+                                .setDvlaCode("C")
+                                .setWelshLabel(STRING.next())
+                                .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                .setCanBeSubjectOfBreach(true)
+                                .setCanBeSubjectOfVariation(true)
+                                .setLevel("O")
+                                .setResultDefinitionGroup("No Bail Status")
+                                .setCommittedToCC(true)
+                                .setSentToCC(true)
+                )));
 
         stubGetAllResultDefinitions(referenceDate, allResultDefinitions.it());
         return allResultDefinitions;
