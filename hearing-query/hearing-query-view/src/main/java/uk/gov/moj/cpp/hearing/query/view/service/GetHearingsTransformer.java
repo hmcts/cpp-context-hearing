@@ -98,7 +98,7 @@ public class GetHearingsTransformer {
                         isEmpty(hearing.getCourtApplications()) ? emptyList() :
                                 hearing.getCourtApplications().stream()
                                         .map(ca -> summary(ca).build())
-                                        .collect(toList())
+                                        .toList()
                 );
     }
 

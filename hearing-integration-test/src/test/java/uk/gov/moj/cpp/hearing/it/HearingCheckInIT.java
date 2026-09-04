@@ -56,14 +56,14 @@ import org.junit.jupiter.api.Test;
  * InitiateHearingCommandHandler.enrichWithActiveApplicationOffences) — the check-in list must
  * still surface the hearing, with the defence/prosecution parties coming from the application.
  */
-public class HearingCheckInIT extends AbstractIT {
+class HearingCheckInIT extends AbstractIT {
 
     private static final String DEFENDANT_FIRST_NAME = "FIRST_NAME";
     private static final String DEFENDANT_LAST_NAME = "LAST_NAME";
     private static final String APPLICATION_TYPE = "APPLICATION_TYPE";
 
     @Test
-    public void shouldRetrieveHearingWithProsecutionCaseForCheckIn() {
+    void shouldRetrieveHearingWithProsecutionCaseForCheckIn() {
         final UUID userId = randomUUID();
         setupAsMagistrateUser(userId);
         stubUsersAndGroupsUserRoles(getLoggedInUser());
@@ -73,7 +73,7 @@ public class HearingCheckInIT extends AbstractIT {
         final UUID roomId = randomUUID();
         final LocalDate hearingDate = now();
 
-        initiateHearing(getRequestSpec(), createHearingWithCase(hearingId, courtCentreId, roomId, hearingDate, null));
+        initiateHearing(getRequestSpec(), createHearingWithCase(hearingId, courtCentreId, roomId, null));
 
         getHearingsCheckInPollForMatch(courtCentreId, hearingDate.toString(), isBean(GetHearings.class)
                 .with(GetHearings::getHearingSummaries, hasSize(greaterThanOrEqualTo(1)))
@@ -86,7 +86,7 @@ public class HearingCheckInIT extends AbstractIT {
     }
 
     @Test
-    public void shouldRetrieveApplicationHearingWithNoProsecutionCaseForCheckIn() {
+    void shouldRetrieveApplicationHearingWithNoProsecutionCaseForCheckIn() {
         final UUID userId = randomUUID();
         setupAsMagistrateUser(userId);
         stubUsersAndGroupsUserRoles(getLoggedInUser());
@@ -112,8 +112,7 @@ public class HearingCheckInIT extends AbstractIT {
         );
     }
 
-    private InitiateHearingCommand createHearingWithCase(final UUID hearingId, final UUID courtCentreId, final UUID roomId,
-                                                          final LocalDate hearingDate, final List<CourtApplication> courtApplications) {
+    private InitiateHearingCommand createHearingWithCase(final UUID hearingId, final UUID courtCentreId, final UUID roomId, final List<CourtApplication> courtApplications) {
         final UUID prosecutionCaseId = randomUUID();
         return initiateHearingCommand()
                 .setHearing(hearing()
@@ -171,7 +170,7 @@ public class HearingCheckInIT extends AbstractIT {
 
     private InitiateHearingCommand createHearingWithApplicationOnly(final UUID hearingId, final UUID courtCentreId, final UUID roomId,
                                                                      final LocalDate hearingDate) {
-        final InitiateHearingCommand command = createHearingWithCase(hearingId, courtCentreId, roomId, hearingDate, asList(createCourtApplication()));
+        final InitiateHearingCommand command = createHearingWithCase(hearingId, courtCentreId, roomId, singletonList(createCourtApplication()));
         command.getHearing().setProsecutionCases(null);
         return command;
     }

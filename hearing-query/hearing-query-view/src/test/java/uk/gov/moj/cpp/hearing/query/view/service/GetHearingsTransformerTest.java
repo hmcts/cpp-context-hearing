@@ -62,12 +62,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 
 @ExtendWith(MockitoExtension.class)
-public class GetHearingsTransformerTest {
+class GetHearingsTransformerTest {
 
     private final GetHearingsTransformer target = new GetHearingsTransformer();
 
     @Test
-    public void shouldTransformHearing() {
+    void shouldTransformHearing() {
         final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
         final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
         courtApplication.setParentApplicationId(UUID.randomUUID());
@@ -123,7 +123,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void shouldTransformHearingWhenPersonDetailsInMasterDefendant() {
+    void shouldTransformHearingWhenPersonDetailsInMasterDefendant() {
         final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
         final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
         courtApplication.setParentApplicationId(UUID.randomUUID());
@@ -194,7 +194,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void shouldTransformHearingWhenOrganisationInProsecutionAuthorityName() {
+    void shouldTransformHearingWhenOrganisationInProsecutionAuthorityName() {
         final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
         final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
         courtApplication.setParentApplicationId(UUID.randomUUID());
@@ -259,7 +259,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void shouldTransformHearingWhenOrganisationInRepresentationOrganisation() {
+    void shouldTransformHearingWhenOrganisationInRepresentationOrganisation() {
         final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
         final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
         courtApplication.setParentApplicationId(UUID.randomUUID());
@@ -321,7 +321,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void shouldGetSummaryForHearingsForToday() {
+    void shouldGetSummaryForHearingsForToday() {
         final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
         final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
         courtApplication.setParentApplicationId(UUID.randomUUID());
@@ -372,7 +372,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void shouldGetSummaryForHearingsForFuture() {
+    void shouldGetSummaryForHearingsForFuture() {
         final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
         final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
         courtApplication.setParentApplicationId(UUID.randomUUID());
@@ -423,7 +423,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void shouldTransformHearingWithCourtApplicationCases() throws Exception {
+    void shouldTransformHearingWithCourtApplicationCases() throws Exception {
         ZonedDateTime localDate = now().withZoneSameLocal(ZoneId.of("UTC"));
         final Hearing hearing = CoreTestTemplates.hearingWithParam(defaultArguments()
                         .setDefendantType(PERSON)
@@ -483,7 +483,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void shouldTransformHearingWithCourtApplicationsWithCourtOrder() throws Exception {
+    void shouldTransformHearingWithCourtApplicationsWithCourtOrder() throws Exception {
         ZonedDateTime localDate = now().withZoneSameLocal(ZoneId.of("UTC"));
         final Hearing hearing = CoreTestTemplates.hearingWithCourtOrder(defaultArguments()
                         .setDefendantType(PERSON)
@@ -542,7 +542,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void shouldTransformHearingWithCivilBulkCases_WhenSomeCasesRemoved() {
+    void shouldTransformHearingWithCivilBulkCases_WhenSomeCasesRemoved() {
         final UUID groupId = randomUUID();
 
         final ProsecutionCase prosecutionCase1 = ProsecutionCase.prosecutionCase()
@@ -596,7 +596,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void shouldTransformHearingWithCivilBulkCases_WhenAllCasesRemoved() {
+    void shouldTransformHearingWithCivilBulkCases_WhenAllCasesRemoved() {
         final UUID groupId = randomUUID();
 
         final ProsecutionCase prosecutionCase1 = ProsecutionCase.prosecutionCase()
@@ -641,7 +641,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void shouldRemoveHearingDaysVulnerableFields() {
+    void shouldRemoveHearingDaysVulnerableFields() {
         final UUID groupId = randomUUID();
 
         final ProsecutionCase prosecutionCase1 = ProsecutionCase.prosecutionCase()
@@ -675,7 +675,7 @@ public class GetHearingsTransformerTest {
     // ── summaryForCheckIn ──────────────────────────────────────────────────────
 
     @Test
-    public void summaryForCheckIn_shouldMapIdAndRoomNameOnly() {
+    void summaryForCheckIn_shouldMapIdAndRoomNameOnly() {
         final UUID hearingId = randomUUID();
         final String roomName = "Courtroom 01";
 
@@ -698,7 +698,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void summaryForCheckIn_shouldMapProsecutionCaseSummaryWithCaseUrnAndDefendants() {
+    void summaryForCheckIn_shouldMapProsecutionCaseSummaryWithCaseUrnAndDefendants() {
         final UUID hearingId = randomUUID();
         final UUID caseId = randomUUID();
         final UUID defendantId = randomUUID();
@@ -761,7 +761,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void summaryForCheckIn_shouldMapOrganisationNameForLegalEntityDefendant() {
+    void summaryForCheckIn_shouldMapOrganisationNameForLegalEntityDefendant() {
         final UUID hearingId = randomUUID();
         final UUID caseId = randomUUID();
         final UUID defendantId = randomUUID();
@@ -804,7 +804,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void summaryForCheckIn_shouldHandleNullCourtCentre() {
+    void summaryForCheckIn_shouldHandleNullCourtCentre() {
         final Hearing hearing = Hearing.hearing()
                 .withId(randomUUID())
                 .withCourtCentre(null)
@@ -817,7 +817,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void summaryForCheckIn_shouldHandleNullProsecutionCaseIdentifier() {
+    void summaryForCheckIn_shouldHandleNullProsecutionCaseIdentifier() {
         final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
                 .withId(randomUUID())
                 .withProsecutionCaseIdentifier(null)
@@ -836,7 +836,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void summaryForCheckIn_shouldHandleDefendantWithNoPersonDetails() {
+    void summaryForCheckIn_shouldHandleDefendantWithNoPersonDetails() {
         final UUID defendantId = randomUUID();
 
         final Defendant defendant = uk.gov.justice.core.courts.Defendant.defendant()
@@ -865,7 +865,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void summaryForCheckIn_shouldReturnEmptyProsecutionCasesWhenNullList() {
+    void summaryForCheckIn_shouldReturnEmptyProsecutionCasesWhenNullList() {
         final Hearing hearing = Hearing.hearing()
                 .withId(randomUUID())
                 .withCourtCentre(CourtCentre.courtCentre().withRoomName("Room 1").build())
@@ -879,7 +879,7 @@ public class GetHearingsTransformerTest {
     }
 
     @Test
-    public void summaryForCheckIn_shouldReturnEmptyCourtApplicationSummariesWhenNullList() {
+    void summaryForCheckIn_shouldReturnEmptyCourtApplicationSummariesWhenNullList() {
         final Hearing hearing = Hearing.hearing()
                 .withId(randomUUID())
                 .withCourtCentre(CourtCentre.courtCentre().withRoomName("Room 1").build())
@@ -897,7 +897,7 @@ public class GetHearingsTransformerTest {
     // prosecutionCases at all (see InitiateHearingCommandHandler.enrichWithActiveApplicationOffences) —
     // check-in must still be able to show the defence/prosecution parties from the application itself.
     @Test
-    public void summaryForCheckIn_shouldMapCourtApplicationSummaryWhenHearingHasNoProsecutionCases() {
+    void summaryForCheckIn_shouldMapCourtApplicationSummaryWhenHearingHasNoProsecutionCases() {
         final Hearing hearing = CoreTestTemplates.hearing(defaultArguments()).build();
         final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
         final CourtApplicationParty applicant = courtApplication.getApplicant();

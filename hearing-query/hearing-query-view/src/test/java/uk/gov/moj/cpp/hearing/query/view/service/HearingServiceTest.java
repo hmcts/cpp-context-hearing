@@ -205,7 +205,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class HearingServiceTest {
+class HearingServiceTest {
 
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
     @Mock
@@ -288,13 +288,13 @@ public class HearingServiceTest {
     }
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
     }
 
     @Test
-    public void shouldNotFindHearingListWhenStartDateAndEndDateAreBeforeSittingDate() {
+    void shouldNotFindHearingListWhenStartDateAndEndDateAreBeforeSittingDate() {
         final LocalDate sittingDate = START_DATE_1.toLocalDate(); //2018-02-22T10:30:00
         final Hearing hearing = HearingTestUtils.buildHearing();
         final List<Hearing> hearings = asList(hearing);
@@ -311,7 +311,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldNotFindHearingListWhenStartDateAndEndDateAreAfterSittingDate() {
+    void shouldNotFindHearingListWhenStartDateAndEndDateAreAfterSittingDate() {
         final LocalDate sittingDate = START_DATE_1.toLocalDate(); //2018-02-22T10:30:00
         final Hearing hearing = HearingTestUtils.buildHearing();
         final List<Hearing> hearings = asList(hearing);
@@ -328,7 +328,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldNotFindHearingListWhenHearingIsEnded() {
+    void shouldNotFindHearingListWhenHearingIsEnded() {
         /*
          start time is :10:30
          hearing duration is 2 min
@@ -381,7 +381,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingListWhenStartDateIsBeforeAndEndDateIsAfterSittingDate() {
+    void shouldFindHearingListWhenStartDateIsBeforeAndEndDateIsAfterSittingDate() {
 
         final uk.gov.justice.core.courts.ProsecutionCaseIdentifier prosecutionCaseIdentifier = uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
                 .withCaseURN("8C720B32E45B")
@@ -423,7 +423,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFilterOutHearingsWhenApplicationTypeIsNotPermittedForTheUser() {
+    void shouldFilterOutHearingsWhenApplicationTypeIsNotPermittedForTheUser() {
 
         final String applicationTypeCode = "PL84501";
 
@@ -450,7 +450,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldNotFilterOutHearingWhenApplicationTypeIsPermittedForTheUser() {
+    void shouldNotFilterOutHearingWhenApplicationTypeIsPermittedForTheUser() {
 
         final String applicationTypeCode = "PL84501";
 
@@ -479,7 +479,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldNotFilterOutHearingWhenApplicationTypeIsNotDefinedInPermissionList() {
+    void shouldNotFilterOutHearingWhenApplicationTypeIsNotDefinedInPermissionList() {
 
         final String applicationTypeCode = "PL84501";
 
@@ -508,7 +508,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingListAndSortBySittingDate() {
+    void shouldFindHearingListAndSortBySittingDate() {
 
         final uk.gov.justice.core.courts.HearingDay hearingDay = uk.gov.justice.core.courts.HearingDay.hearingDay()
                 .withSittingDay(START_DATE_1)
@@ -555,7 +555,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingListWithSingleCourtRoom() {
+    void shouldFindHearingListWithSingleCourtRoom() {
 
         final LocalDate startDateStartOfDay = START_DATE_1.toLocalDate();
         final HearingTestUtils.HearingHelper hearingHelper = helper(HearingTestUtils.buildHearing());
@@ -583,7 +583,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingListWithCourtRoomList() {
+    void shouldFindHearingListWithCourtRoomList() {
 
         final LocalDate hearingDate = START_DATE_1.toLocalDate();
         Defendant organizationDefendant = buildRandomDefendantLegalOrganisation();
@@ -626,7 +626,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingDetailsById() throws Exception {
+    void shouldFindHearingDetailsById() throws Exception {
 
         final Hearing entity = mock(Hearing.class);
 
@@ -650,7 +650,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindUserGroupsByMaterialId() throws Exception {
+    void shouldFindUserGroupsByMaterialId() throws Exception {
         final UUID hearingId = randomUUID();
         final UUID id = randomUUID();
         final UUID defendantId = randomUUID();
@@ -681,7 +681,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldNotFindUserGroupsByMaterialId() throws Exception {
+    void shouldNotFindUserGroupsByMaterialId() throws Exception {
         final UUID nowMaterialId = randomUUID();
         when(nowsMaterialRepository.findBy(nowMaterialId)).thenReturn(null);
         final JsonObject response = hearingService.getNowsRepository(nowMaterialId.toString());
@@ -689,7 +689,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindSubscriptionByNowTypeId() {
+    void shouldFindSubscriptionByNowTypeId() {
 
         final String referenceDate = "15012018";
 
@@ -705,7 +705,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnEmptyWhenReferenceDateIsInvalid() {
+    void shouldReturnEmptyWhenReferenceDateIsInvalid() {
 
         final String referenceDate = "15132018";
 
@@ -721,7 +721,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnEmptyResponseWhenNowTypeIdNotFound() {
+    void shouldReturnEmptyResponseWhenNowTypeIdNotFound() {
 
         final String referenceDate = "15012018";
 
@@ -737,7 +737,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnEmptyResponseWhenTargetNotAdded() {
+    void shouldReturnEmptyResponseWhenTargetNotAdded() {
 
         final Hearing hearing = new Hearing();
 
@@ -755,7 +755,7 @@ public class HearingServiceTest {
 
     //@Ignore("Temporary Disable Notepad Parser")
     @Test
-    public void shouldReturnShareResultsByIdAndDate() {
+    void shouldReturnShareResultsByIdAndDate() {
         UUID hearingId = randomUUID();
         LocalDate hearingDate = LocalDate.now();
         UUID defendantId = randomUUID();
@@ -789,7 +789,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnResponseWhenTargetIsAdded() {
+    void shouldReturnResponseWhenTargetIsAdded() {
 
         final Hearing hearing = new Hearing();
         hearing.setProsecutionCases(createProsecutionCases());
@@ -857,7 +857,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnResponseWhenTargetIsAddedWithHearingDay() {
+    void shouldReturnResponseWhenTargetIsAddedWithHearingDay() {
 
         final Hearing hearing = new Hearing();
         hearing.setProsecutionCases(createProsecutionCases());
@@ -926,7 +926,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnEmptyResponseWhenTargetsByDateNotFound() {
+    void shouldReturnEmptyResponseWhenTargetsByDateNotFound() {
 
         final Hearing hearing = new Hearing();
 
@@ -943,7 +943,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnResponseWhenApplicationTargetIsAdded() {
+    void shouldReturnResponseWhenApplicationTargetIsAdded() {
         final ApplicationDraftResult applicationDraftResult = ApplicationDraftResult.applicationDraftResult()
                 .setApplicationId(randomUUID()).setDraftResult("result").setId(randomUUID());
 
@@ -961,7 +961,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingListWhenJudicialUserIsMatched() {
+    void shouldFindHearingListWhenJudicialUserIsMatched() {
 
         final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
 
@@ -985,7 +985,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFilterHearingForDDJ() {
+    void shouldFilterHearingForDDJ() {
         final UUID hearingId1 = randomUUID();
         final UUID hearingId2 = randomUUID();
         final ZonedDateTime firstSharedDate = ZonedDateTime.now();
@@ -1029,7 +1029,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFilterHearingProsecutionCasesForCivilBulkGroup_WhenSomeCasesRemoved() {
+    void shouldFilterHearingProsecutionCasesForCivilBulkGroup_WhenSomeCasesRemoved() {
         final UUID hearingId = randomUUID();
         final UUID groupId = randomUUID();
         final Defendant defendant = buildDefendant1(hearingId);
@@ -1102,7 +1102,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldNotFilterHearingProsecutionCasesForCivilBulkGroup_WhenAllCasesRemoved() {
+    void shouldNotFilterHearingProsecutionCasesForCivilBulkGroup_WhenAllCasesRemoved() {
         final UUID hearingId = randomUUID();
         final UUID groupId = randomUUID();
         final Defendant defendant = buildDefendant1(hearingId);
@@ -1165,7 +1165,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldNotFindHearingListWhenJudicialUserIsNotMatched() {
+    void shouldNotFindHearingListWhenJudicialUserIsNotMatched() {
 
         final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
 
@@ -1184,7 +1184,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingWithInEffectiveTrailType() {
+    void shouldFindHearingWithInEffectiveTrailType() {
 
         final Hearing entity = mock(Hearing.class);
 
@@ -1208,7 +1208,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingWithVacateTrailType() {
+    void shouldFindHearingWithVacateTrailType() {
 
         final Hearing entity = mock(Hearing.class);
 
@@ -1232,7 +1232,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingWithEffectiveTrailType() {
+    void shouldFindHearingWithEffectiveTrailType() {
 
         final Hearing entity = mock(Hearing.class);
 
@@ -1444,7 +1444,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingTimeLineByCaseId() {
+    void shouldFindHearingTimeLineByCaseId() {
 
         final Hearing entity = mock(Hearing.class);
         final List<Hearing> hearings = new ArrayList<>();
@@ -1473,7 +1473,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingTimeLineByApplicationId() {
+    void shouldFindHearingTimeLineByApplicationId() {
 
         final Hearing entity = mock(Hearing.class);
         entity.getCourtApplicationsJson();
@@ -1505,7 +1505,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnLatestHearingByCourtCentreIdsAndLatestModifiedTime() {
+    void shouldReturnLatestHearingByCourtCentreIdsAndLatestModifiedTime() {
         final LocalDate now = LocalDate.now();
         final List<UUID> courtCentreIds = new ArrayList();
         courtCentreIds.add(randomUUID());
@@ -1549,7 +1549,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnHearingsByCounrtCentreIdsAndDate() {
+    void shouldReturnHearingsByCounrtCentreIdsAndDate() {
         final LocalDate now = LocalDate.now();
         final List<UUID> courtCentreIds = new ArrayList();
         courtCentreIds.add(randomUUID());
@@ -1583,7 +1583,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldGetHearingById() {
+    void shouldGetHearingById() {
         final Hearing hearingStub = new Hearing();
         when(hearingRepository.findBy(Mockito.any(UUID.class))).thenReturn(hearingStub);
         final Optional<Hearing> optionalHearing = hearingService.getHearingById(randomUUID());
@@ -1594,7 +1594,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldNotGetHearingByNonExistingId() {
+    void shouldNotGetHearingByNonExistingId() {
         when(hearingRepository.findBy(Mockito.any(UUID.class))).thenReturn(null);
         final Optional<Hearing> optionalHearing = hearingService.getHearingById(randomUUID());
 
@@ -1603,7 +1603,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldGetHearingEvents() {
+    void shouldGetHearingEvents() {
         final List<HearingEvent> hearingEventsStub = Arrays.asList(new HearingEvent());
         when(hearingEventRepository.findByHearingIdOrderByEventTimeAsc(Mockito.any(UUID.class), Mockito.any(LocalDate.class))).thenReturn(hearingEventsStub);
         when(hearingEventRepository.findHearingEvents(Mockito.any(UUID.class), Mockito.any(UUID.class), Mockito.any(LocalDate.class))).thenReturn(hearingEventsStub);
@@ -1617,7 +1617,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldGetHearingEventsAsEmptyListByNonExistingHearingId() {
+    void shouldGetHearingEventsAsEmptyListByNonExistingHearingId() {
         when(hearingEventRepository.findByHearingIdOrderByEventTimeAsc(Mockito.any(UUID.class), Mockito.any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(hearingEventRepository.findHearingEvents(Mockito.any(UUID.class), Mockito.any(UUID.class), Mockito.any(LocalDate.class))).thenReturn(Collections.emptyList());
         final List<HearingEvent> firstHearingEventsList = hearingService.getHearingEvents(randomUUID(), LocalDate.now());
@@ -1630,7 +1630,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldGetHearingEventDefinition() {
+    void shouldGetHearingEventDefinition() {
         final HearingEventDefinition hearingEventDefinitionStub = new HearingEventDefinition();
         when(hearingEventDefinitionRepository.findBy(Mockito.any(UUID.class))).thenReturn(hearingEventDefinitionStub);
         final Optional<HearingEventDefinition> optionalHearingEventDefinition = hearingService.getHearingEventDefinition(randomUUID());
@@ -1641,7 +1641,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldNotGetHearingEventDefinitionByNonExistingHearingId() {
+    void shouldNotGetHearingEventDefinitionByNonExistingHearingId() {
         when(hearingEventDefinitionRepository.findBy(Mockito.any(UUID.class))).thenReturn(null);
         final Optional<HearingEventDefinition> optionalHearingEventDefinition = hearingService.getHearingEventDefinition(randomUUID());
 
@@ -1650,7 +1650,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldGetHearingEventDefinitions() {
+    void shouldGetHearingEventDefinitions() {
         final List<HearingEventDefinition> hearingEventDefinitionListStub = Arrays.asList(new HearingEventDefinition());
         when(hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel()).thenReturn(hearingEventDefinitionListStub);
         final List<HearingEventDefinition> hearingEventDefinitionList = hearingService.getHearingEventDefinitions();
@@ -1660,7 +1660,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldGetHearingEventDefinitionsAsEmptyList() {
+    void shouldGetHearingEventDefinitionsAsEmptyList() {
         when(hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel()).thenReturn(Collections.emptyList());
         final List<HearingEventDefinition> hearingEventDefinitionList = hearingService.getHearingEventDefinitions();
 
@@ -1669,7 +1669,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldGetCourtCenterByHearingId() {
+    void shouldGetCourtCenterByHearingId() {
         final CourtCentre courtCentreStub = new CourtCentre();
         when(hearingRepository.findCourtCenterByHearingId(Mockito.any(UUID.class))).thenReturn(courtCentreStub);
         final Optional<CourtCentre> optionalCourtCentre = hearingService.getCourtCenterByHearingId(randomUUID());
@@ -1680,7 +1680,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldNotGetCourtCenterByNonExistingHearingId() {
+    void shouldNotGetCourtCenterByNonExistingHearingId() {
         when(hearingRepository.findCourtCenterByHearingId(Mockito.any(UUID.class))).thenReturn(null);
         final Optional<CourtCentre> optionalCourtCentre = hearingService.getCourtCenterByHearingId(randomUUID());
 
@@ -1689,7 +1689,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldGetHearingDayByHearingIdAndDate() {
+    void shouldGetHearingDayByHearingIdAndDate() {
         final UUID hearingId = randomUUID();
         final LocalDate date = LocalDate.now();
         final HearingDay dayStub = new HearingDay();
@@ -1703,7 +1703,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnEmpty_whenHearingDayNotFound() {
+    void shouldReturnEmpty_whenHearingDayNotFound() {
         when(hearingRepository.findHearingDayByHearingIdAndDate(Mockito.any(UUID.class), Mockito.any(LocalDate.class))).thenReturn(null);
 
         final Optional<HearingDay> result = hearingService.getHearingDayByHearingIdAndDate(randomUUID(), LocalDate.now());
@@ -1712,7 +1712,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldGetFutureHearingsByCaseIds() {
+    void shouldGetFutureHearingsByCaseIds() {
         final UUID caseId = randomUUID();
         final List<UUID> caseIdList = new ArrayList<>();
         caseIdList.add(caseId);
@@ -1735,7 +1735,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldNotGetFutureHearingsByCaseIdsEmptyCaseIdList() {
+    void shouldNotGetFutureHearingsByCaseIdsEmptyCaseIdList() {
         final List<UUID> caseIdList = new ArrayList<>();
 
         final GetHearings response = hearingService.getFutureHearingsByCaseIds(caseIdList);
@@ -1744,7 +1744,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldNotGetFutureHearingsByCaseIdsNoDBRecord() {
+    void shouldNotGetFutureHearingsByCaseIdsNoDBRecord() {
         final UUID caseId = randomUUID();
         final List<UUID> caseIdList = new ArrayList<>();
         caseIdList.add(caseId);
@@ -1757,7 +1757,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingDetailsForDocumentByHearingId() {
+    void shouldFindHearingDetailsForDocumentByHearingId() {
         final UUID hearingId = randomUUID();
         final Hearing hearing = new Hearing();
         hearing.setId(hearingId);
@@ -1770,7 +1770,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingDetailsForDocumentByCaseId() {
+    void shouldFindHearingDetailsForDocumentByCaseId() {
         final UUID caseId = randomUUID();
         final Hearing hearing = new Hearing();
         hearing.setId(randomUUID());
@@ -1782,7 +1782,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldFindHearingDetailsForDocumentByApplicationId() {
+    void shouldFindHearingDetailsForDocumentByApplicationId() {
         final UUID applicationId = randomUUID();
         final Hearing hearing = new Hearing();
         hearing.setId(randomUUID());
@@ -1802,7 +1802,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnProsecutionCaseResponseByHearingId() {
+    void shouldReturnProsecutionCaseResponseByHearingId() {
         Optional<ProsecutionCaseResponse> prosecutionCaseResponse = getProsecutionCaseResponse();
         List<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> prosecutionCases = getProsecutionCases();
 
@@ -1817,7 +1817,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnBothHearings_whenFirstHearingWithProsecutionCase_andSecondHearingWithProsecutionCaseAndCourtApplication() {
+    void shouldReturnBothHearings_whenFirstHearingWithProsecutionCase_andSecondHearingWithProsecutionCaseAndCourtApplication() {
 
         final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
         final UUID hearingSummaryId = randomUUID();
@@ -1856,7 +1856,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnBothHearings_whenFirstHearingWithProsecutionCase_andSecondHearingWithProsecutionCaseAndWithoutCourtApplication() {
+    void shouldReturnBothHearings_whenFirstHearingWithProsecutionCase_andSecondHearingWithProsecutionCaseAndWithoutCourtApplication() {
 
         final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
         final UUID firstHearingSummaryId = randomUUID();
@@ -1895,7 +1895,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnBothHearings_whenFirstHearingWithProsecutionCase_andSecondHearingWithoutProsecutionCaseAndWithCourtApplication() {
+    void shouldReturnBothHearings_whenFirstHearingWithProsecutionCase_andSecondHearingWithoutProsecutionCaseAndWithCourtApplication() {
 
         final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
 
@@ -1935,7 +1935,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnOneHearing_whenFirstHearingWithProsecutionCase_andSecondHearingWithoutProsecutionCaseAndWithoutCourtApplication() {
+    void shouldReturnOneHearing_whenFirstHearingWithProsecutionCase_andSecondHearingWithoutProsecutionCaseAndWithoutCourtApplication() {
 
         final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
 
@@ -1971,7 +1971,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldGetHearingEventLogCount() {
+    void shouldGetHearingEventLogCount() {
         when(hearingEventRepository.findEventLogCountByHearingId(any())).thenReturn(2L);
         when(hearingEventRepository.findEventLogCountByHearingIdAndEventDate(any(), any())).thenReturn(1L);
 
@@ -1988,7 +1988,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldValidateUserPermissionForApplicationTypeAndThrowForbiddenRequestException() throws IOException {
+    void shouldValidateUserPermissionForApplicationTypeAndThrowForbiddenRequestException() throws IOException {
         final UUID hearingId = randomUUID();
         final JsonObject jsonObject = createObjectBuilder()
                 .add("hearingId", hearingId.toString()).build();
@@ -2015,7 +2015,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldValidateUserPermissionForApplicationTypeIsTrueAndDoNotThrowForbiddenRequestException() throws IOException {
+    void shouldValidateUserPermissionForApplicationTypeIsTrueAndDoNotThrowForbiddenRequestException() throws IOException {
         final UUID hearingId = randomUUID();
         final JsonObject jsonObject = createObjectBuilder()
                 .add("hearingId", hearingId.toString()).build();
@@ -2297,21 +2297,21 @@ public class HearingServiceTest {
     // ── getHearingsForCheckIn ───────────────────────────────────────────────
 
     @Test
-    public void getHearingsForCheckIn_shouldReturnEmptyWhenDateIsNull() {
+    void getHearingsForCheckIn_shouldReturnEmptyWhenDateIsNull() {
         final GetHearings result = hearingService.getHearingsForCheckIn(null, randomUUID(), null, emptyList(), false);
 
         assertNull(result.getHearingSummaries());
     }
 
     @Test
-    public void getHearingsForCheckIn_shouldReturnEmptyWhenCourtCentreIdIsNull() {
+    void getHearingsForCheckIn_shouldReturnEmptyWhenCourtCentreIdIsNull() {
         final GetHearings result = hearingService.getHearingsForCheckIn(LocalDate.now(), null, null, emptyList(), false);
 
         assertNull(result.getHearingSummaries());
     }
 
     @Test
-    public void getHearingsForCheckIn_shouldReturnEmptyWhenNoHearingsFound() {
+    void getHearingsForCheckIn_shouldReturnEmptyWhenNoHearingsFound() {
         final LocalDate date = START_DATE_1.toLocalDate();
         final UUID courtCentreId = randomUUID();
         when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(emptyList());
@@ -2322,7 +2322,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void getHearingsForCheckIn_shouldQueryByRoomIdWhenRoomIdProvided() {
+    void getHearingsForCheckIn_shouldQueryByRoomIdWhenRoomIdProvided() {
         final LocalDate date = START_DATE_1.toLocalDate();
         final Hearing hearingEntity = buildHearing();
         final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
@@ -2345,7 +2345,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void getHearingsForCheckIn_shouldQueryWithoutRoomIdWhenRoomIdIsNull() {
+    void getHearingsForCheckIn_shouldQueryWithoutRoomIdWhenRoomIdIsNull() {
         final LocalDate date = START_DATE_1.toLocalDate();
         final Hearing hearingEntity = buildHearing();
         final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
@@ -2367,7 +2367,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void getHearingsForCheckIn_shouldFilterHearingsForDDJorRecorder() {
+    void getHearingsForCheckIn_shouldFilterHearingsForDDJorRecorder() {
         final LocalDate date = START_DATE_1.toLocalDate();
         final Hearing hearingEntity = buildHearing();
         final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
@@ -2384,7 +2384,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void getHearingsForCheckIn_shouldExcludeHearingsWithNoProsecutionCasesAndNoCourtApplications() {
+    void getHearingsForCheckIn_shouldExcludeHearingsWithNoProsecutionCasesAndNoCourtApplications() {
         final LocalDate date = START_DATE_1.toLocalDate();
         final Hearing hearingEntity = buildHearing();
         final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
@@ -2407,7 +2407,7 @@ public class HearingServiceTest {
     // CAD-1609: an application hearing whose case has no active offences carries no
     // prosecutionCases at all — it must still surface for check-in via its courtApplications.
     @Test
-    public void getHearingsForCheckIn_shouldIncludeHearingWithCourtApplicationButNoProsecutionCases() {
+    void getHearingsForCheckIn_shouldIncludeHearingWithCourtApplicationButNoProsecutionCases() {
         final LocalDate date = START_DATE_1.toLocalDate();
         final Hearing hearingEntity = buildHearing();
         final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
@@ -2432,7 +2432,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void getHearingsForCheckIn_shouldNotApplyPermissionCheckForApplicationTypes() {
+    void getHearingsForCheckIn_shouldNotApplyPermissionCheckForApplicationTypes() {
         final LocalDate date = START_DATE_1.toLocalDate();
         final Hearing hearingEntity = buildHearing();
         final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
@@ -2455,33 +2455,33 @@ public class HearingServiceTest {
     // ── toBoolean ──────────────────────────────────────────────────────────
 
     @Test
-    public void toBoolean_shouldReturnFalse_whenNull() {
+    void toBoolean_shouldReturnFalse_whenNull() {
         assertFalse(HearingService.toBoolean(null));
     }
 
     @Test
-    public void toBoolean_shouldReturnTrue_whenBooleanTrue() {
+    void toBoolean_shouldReturnTrue_whenBooleanTrue() {
         assertTrue(HearingService.toBoolean(Boolean.TRUE));
     }
 
     @Test
-    public void toBoolean_shouldReturnFalse_whenBooleanFalse() {
+    void toBoolean_shouldReturnFalse_whenBooleanFalse() {
         assertFalse(HearingService.toBoolean(Boolean.FALSE));
     }
 
     @Test
-    public void toBoolean_shouldReturnFalse_whenNumberZero() {
+    void toBoolean_shouldReturnFalse_whenNumberZero() {
         assertFalse(HearingService.toBoolean(0));
     }
 
     @Test
-    public void toBoolean_shouldReturnTrue_whenNumberNonZero() {
+    void toBoolean_shouldReturnTrue_whenNumberNonZero() {
         assertTrue(HearingService.toBoolean(1));
         assertTrue(HearingService.toBoolean(-5));
     }
 
     @Test
-    public void toBoolean_shouldReturnTrue_whenStringTrueVariants() {
+    void toBoolean_shouldReturnTrue_whenStringTrueVariants() {
         assertTrue(HearingService.toBoolean("true"));
         assertTrue(HearingService.toBoolean("t"));
         assertTrue(HearingService.toBoolean("yes"));
@@ -2491,21 +2491,21 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void toBoolean_shouldReturnFalse_whenStringFalseVariants() {
+    void toBoolean_shouldReturnFalse_whenStringFalseVariants() {
         assertFalse(HearingService.toBoolean("false"));
         assertFalse(HearingService.toBoolean("no"));
         assertFalse(HearingService.toBoolean("0"));
     }
 
     @Test
-    public void toBoolean_shouldReturnFalse_whenUnrecognisedType() {
+    void toBoolean_shouldReturnFalse_whenUnrecognisedType() {
         assertFalse(HearingService.toBoolean(new Object()));
     }
 
     // ── getHearingDomainById ───────────────────────────────────────────────
 
     @Test
-    public void shouldReturnMappedDomainHearing_whenHearingFound() {
+    void shouldReturnMappedDomainHearing_whenHearingFound() {
         final UUID hearingId = randomUUID();
         final Hearing hearingEntity = new Hearing();
         final uk.gov.justice.core.courts.Hearing domainHearing = hearing().build();
@@ -2519,7 +2519,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnEmpty_whenHearingNotFound_getHearingDomainById() {
+    void shouldReturnEmpty_whenHearingNotFound_getHearingDomainById() {
         final UUID hearingId = randomUUID();
         when(hearingRepository.findBy(hearingId)).thenReturn(null);
 
@@ -2531,12 +2531,12 @@ public class HearingServiceTest {
     // ── fetchCrackedIneffectiveTrial ───────────────────────────────────────
 
     @Test
-    public void shouldReturnNull_whenTrialTypeIdIsNull() {
+    void shouldReturnNull_whenTrialTypeIdIsNull() {
         assertNull(hearingService.fetchCrackedIneffectiveTrial(null, buildCrackedIneffectiveVacatedTrialTypes(randomUUID())));
     }
 
     @Test
-    public void shouldReturnNull_whenTrialTypeListIsEmpty() {
+    void shouldReturnNull_whenTrialTypeListIsEmpty() {
         final CrackedIneffectiveVacatedTrialTypes emptyTypes = new CrackedIneffectiveVacatedTrialTypes()
                 .setCrackedIneffectiveVacatedTrialTypes(Collections.emptyList());
 
@@ -2544,14 +2544,14 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnNull_whenNoMatchingTrialTypeFound() {
+    void shouldReturnNull_whenNoMatchingTrialTypeFound() {
         final CrackedIneffectiveVacatedTrialTypes types = buildCrackedIneffectiveVacatedTrialTypes(randomUUID());
 
         assertNull(hearingService.fetchCrackedIneffectiveTrial(randomUUID(), types));
     }
 
     @Test
-    public void shouldReturnCrackedIneffectiveTrial_whenMatchingTrialTypeFound() {
+    void shouldReturnCrackedIneffectiveTrial_whenMatchingTrialTypeFound() {
         final UUID trialTypeId = randomUUID();
         final CrackedIneffectiveVacatedTrialTypes types = buildCrackedIneffectiveVacatedTrialTypes(trialTypeId);
 
@@ -2565,7 +2565,7 @@ public class HearingServiceTest {
     // ── getNows ────────────────────────────────────────────────────────────
 
     @Test
-    public void shouldReturnEmptyNowListResponse_whenNoNowsFound() {
+    void shouldReturnEmptyNowListResponse_whenNoNowsFound() {
         final UUID hearingId = randomUUID();
         when(nowRepository.findByHearingId(hearingId)).thenReturn(Collections.emptyList());
 
@@ -2576,7 +2576,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnNowListResponse_withMappedNows() {
+    void shouldReturnNowListResponse_withMappedNows() {
         final UUID hearingId = randomUUID();
         final UUID nowId = randomUUID();
         final Now now = new Now();
@@ -2594,7 +2594,7 @@ public class HearingServiceTest {
     // ── getDraftResult ─────────────────────────────────────────────────────
 
     @Test
-    public void shouldReturnDraftResultFromTargets_whenNoDraftResultInRepository() {
+    void shouldReturnDraftResultFromTargets_whenNoDraftResultInRepository() {
         final UUID hearingId = randomUUID();
         final String hearingDay = "1";
         when(draftResultRepository.findDraftResultByFilter(hearingId, hearingDay)).thenReturn(Collections.emptyList());
@@ -2611,7 +2611,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnDraftResultFromRepository_whenDraftResultExists() {
+    void shouldReturnDraftResultFromRepository_whenDraftResultExists() {
         final UUID hearingId = randomUUID();
         final String hearingDay = "1";
         final DraftResult draftResult = mock(DraftResult.class);
@@ -2629,7 +2629,7 @@ public class HearingServiceTest {
     // ── isUserHasPermissionForApplicationTypeCode ──────────────────────────
 
     @Test
-    public void shouldReturnTrue_whenPermissionResponsePayloadIsEmpty() {
+    void shouldReturnTrue_whenPermissionResponsePayloadIsEmpty() {
         final Metadata metadata = DefaultJsonMetadata.metadataBuilder()
                 .withId(randomUUID()).withName("hearing.get.hearing").build();
         when(requester.request(any(), any())).thenReturn(
@@ -2640,7 +2640,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnTrue_whenHasPermissionIsTrue() {
+    void shouldReturnTrue_whenHasPermissionIsTrue() {
         final Metadata metadata = DefaultJsonMetadata.metadataBuilder()
                 .withId(randomUUID()).withName("hearing.get.hearing").build();
         when(requester.request(any(), any())).thenReturn(
@@ -2651,7 +2651,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnFalse_whenHasPermissionIsFalse() {
+    void shouldReturnFalse_whenHasPermissionIsFalse() {
         final Metadata metadata = DefaultJsonMetadata.metadataBuilder()
                 .withId(randomUUID()).withName("hearing.get.hearing").build();
         when(requester.request(any(), any())).thenReturn(
@@ -2664,7 +2664,7 @@ public class HearingServiceTest {
     // ── validateUserPermissionForApplicationType – missing branches ─────────
 
     @Test
-    public void shouldNotThrow_whenHearingIdIsAbsentFromPayload() {
+    void shouldNotThrow_whenHearingIdIsAbsentFromPayload() {
         final JsonEnvelope envelope = envelopeFrom(
                 metadataBuilder().withId(randomUUID()).withName("hearing.get.hearing").build(),
                 createObjectBuilder().build());
@@ -2674,7 +2674,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldNotThrow_whenHearingIsNull() {
+    void shouldNotThrow_whenHearingIsNull() {
         final UUID hearingId = randomUUID();
         final JsonEnvelope envelope = envelopeFrom(
                 metadataBuilder().withId(randomUUID()).withName("hearing.get.hearing").build(),
@@ -2688,7 +2688,7 @@ public class HearingServiceTest {
     // ── getHearingsByDate – missing branches ───────────────────────────────
 
     @Test
-    public void shouldReturnEmpty_whenCourtCentreListIsEmpty_getHearingsByDate() {
+    void shouldReturnEmpty_whenCourtCentreListIsEmpty_getHearingsByDate() {
         final Optional<CurrentCourtStatus> result = hearingService.getHearingsByDate(
                 Collections.emptyList(), LocalDate.now(), Collections.emptySet());
 
@@ -2696,7 +2696,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnEmpty_whenHearingListIsEmpty_getHearingsByDate() {
+    void shouldReturnEmpty_whenHearingListIsEmpty_getHearingsByDate() {
         final UUID courtCentreId = randomUUID();
         final LocalDate date = LocalDate.now();
         when(hearingEventRepository.findLatestHearingsForThatDayByCourts(any(), any(), any()))
@@ -2715,7 +2715,7 @@ public class HearingServiceTest {
     // ── getHearingsForWebPage – missing branches ───────────────────────────
 
     @Test
-    public void shouldReturnEmpty_whenCourtCentreListIsEmpty_getHearingsForWebPage() {
+    void shouldReturnEmpty_whenCourtCentreListIsEmpty_getHearingsForWebPage() {
         final Optional<CurrentCourtStatus> result = hearingService.getHearingsForWebPage(
                 Collections.emptyList(), LocalDate.now(), Collections.emptySet());
 
@@ -2723,7 +2723,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnEmpty_whenNoActiveHearings_getHearingsForWebPage() {
+    void shouldReturnEmpty_whenNoActiveHearings_getHearingsForWebPage() {
         final UUID courtCentreId = randomUUID();
         when(hearingEventRepository.findLatestHearingsForThatDayByCourt(any(), any(), any()))
                 .thenReturn(Collections.emptyList());
@@ -2737,7 +2737,7 @@ public class HearingServiceTest {
     // ── getTimelineHearingSummariesByApplicationId ──────────────────────────
 
     @Test
-    public void shouldReturnEmptyList_whenNoHearingsFoundForApplication() {
+    void shouldReturnEmptyList_whenNoHearingsFoundForApplication() {
         final UUID applicationId = randomUUID();
         when(hearingRepository.findAllHearingsByApplicationId(applicationId)).thenReturn(Collections.emptyList());
 
@@ -2802,7 +2802,7 @@ public class HearingServiceTest {
     // ---- CHD-2687: display order of prosecution cases -----------------------------------------
 
     @Test
-    public void orderProsecutionCasesShouldPutApplicationCarriedCasesLast() {
+    void orderProsecutionCasesShouldPutApplicationCarriedCasesLast() {
         final UUID hearingOwnCaseId = randomUUID();
         final UUID applicationCaseId = randomUUID();
 
@@ -2825,7 +2825,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void orderProsecutionCasesShouldTreatCourtOrderReferencedCaseAsApplicationCarried() {
+    void orderProsecutionCasesShouldTreatCourtOrderReferencedCaseAsApplicationCarried() {
         final UUID hearingOwnCaseId = randomUUID();
         final UUID courtOrderCaseId = randomUUID();
 
@@ -2850,7 +2850,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void orderProsecutionCasesShouldLeaveOrderUntouchedWithoutApplications() {
+    void orderProsecutionCasesShouldLeaveOrderUntouchedWithoutApplications() {
         final UUID firstCaseId = randomUUID();
         final UUID secondCaseId = randomUUID();
 
@@ -2866,7 +2866,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void orderProsecutionCasesShouldStayStableWhenAllCasesAreApplicationCarried() {
+    void orderProsecutionCasesShouldStayStableWhenAllCasesAreApplicationCarried() {
         final UUID firstCaseId = randomUUID();
         final UUID secondCaseId = randomUUID();
 
@@ -2894,7 +2894,7 @@ public class HearingServiceTest {
     // ---- filterOutProsecutionCases -----------------------------------------
 
     @Test
-    public void filterOutProsecutionCasesShouldReturnUnchangedWhenNotAnApplicationHearing() {
+    void filterOutProsecutionCasesShouldReturnUnchangedWhenNotAnApplicationHearing() {
         final uk.gov.justice.core.courts.Hearing hearing = hearing()
                 .withProsecutionCases(singletonList(domainCase(randomUUID())))
                 .build();
@@ -2907,7 +2907,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void filterOutProsecutionCasesShouldReturnUnchangedWhenApplicationHasNullCourtApplicationCases() {
+    void filterOutProsecutionCasesShouldReturnUnchangedWhenApplicationHasNullCourtApplicationCases() {
         final uk.gov.justice.core.courts.Hearing hearing = hearing()
                 .withProsecutionCases(singletonList(domainCase(randomUUID())))
                 .withCourtApplications(singletonList(courtApplication().withId(randomUUID()).build()))
@@ -2921,7 +2921,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void filterOutProsecutionCasesShouldReturnUnchangedWhenApplicationCasesHaveNoOffences() {
+    void filterOutProsecutionCasesShouldReturnUnchangedWhenApplicationCasesHaveNoOffences() {
         final uk.gov.justice.core.courts.Hearing hearing = hearing()
                 .withProsecutionCases(singletonList(domainCase(randomUUID())))
                 .withCourtApplications(singletonList(courtApplication()
@@ -2942,7 +2942,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void filterOutProsecutionCasesShouldRemoveProsecutionCasesWhenApplicationHasOffences() {
+    void filterOutProsecutionCasesShouldRemoveProsecutionCasesWhenApplicationHasOffences() {
         final UUID hearingId = randomUUID();
         final uk.gov.justice.core.courts.CourtApplication courtApplication = courtApplication()
                 .withId(randomUUID())
@@ -2969,7 +2969,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldMapOffenceBailStatusesFromRepositoryForDefendant() {
+    void shouldMapOffenceBailStatusesFromRepositoryForDefendant() {
         final UUID defendantId = randomUUID();
         final UUID offenceId = randomUUID();
         final UUID bailStatusId = randomUUID();
@@ -2990,7 +2990,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnEmptyOffenceBailStatusesWhenRepositoryHasNoResultsForDefendant() {
+    void shouldReturnEmptyOffenceBailStatusesWhenRepositoryHasNoResultsForDefendant() {
         final UUID defendantId = randomUUID();
 
         when(offenceRepository.offenceBailStatuses(defendantId)).thenReturn(emptyList());
@@ -3002,7 +3002,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldMapMultipleOffenceBailStatusesPreservingOrder() {
+    void shouldMapMultipleOffenceBailStatusesPreservingOrder() {
         final UUID defendantId = randomUUID();
         final OffenceBailStatus first =
                 new OffenceBailStatus(randomUUID(), randomUUID(), "C", "Remanded into Custody");
@@ -3020,7 +3020,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldMapOffenceBailStatusWithNullBailStatusFieldsWhenNeitherOffenceNorDefendantHasOne() {
+    void shouldMapOffenceBailStatusWithNullBailStatusFieldsWhenNeitherOffenceNorDefendantHasOne() {
         final UUID defendantId = randomUUID();
         final UUID offenceId = randomUUID();
         final OffenceBailStatus repositoryResult =
