@@ -22,6 +22,30 @@
             }
           ]
         }
+      ],
+      "courtApplicationSummaries": [
+        {
+          "id": "6b1a2e2e-6e2b-4c1a-9c1a-1a2b3c4d5e6f",
+          "applicationReference": "EXAMPLE-APPLICATION-REF",
+          "applicant": {
+            "id": "8450881f-36dc-4b91-b410-1f8fce0271d0",
+            "organisationName": "Example Prosecuting Authority"
+          },
+          "subject": {
+            "id": "a385e458-c100-41d2-9397-cad24b3e10d5",
+            "firstName": "Example",
+            "lastName": "Subject"
+          },
+          "caseSummaries": [
+            {
+              "id": "5fdf2e80-ae0b-4357-b920-c85f09c9de6b",
+              "prosecutionCaseIdentifier": {
+                "caseURN": "EXAMPLE-CASE-URN",
+                "prosecutionAuthorityReference": "EXAMPLE-AUTHORITY-REF"
+              }
+            }
+          ]
+        }
       ]
     }
   ]

@@ -97,7 +97,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class InitiateHearingEventListenerTest {
+class InitiateHearingEventListenerTest {
     private static final String GUILTY = "GUILTY";
 
     private static final String CHANGE_TO_GUILTY_MAGISTRATES_COURT = "CHANGE_TO_GUILTY_MAGISTRATES_COURT";
@@ -139,14 +139,14 @@ public class InitiateHearingEventListenerTest {
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
         reset(prosecutionCaseJPAMapper, prosecutionCaseRepository, hearingJPAMapper, offenceRepository, hearingRepository, offenceRepository);
     }
 
     @Test
-    public void shouldInsertHearingWhenInitiatedWithoutApplication() {
+    void shouldInsertHearingWhenInitiatedWithoutApplication() {
 
         final InitiateHearingCommand command = minimumInitiateHearingTemplate();
 
@@ -164,7 +164,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldInsertHearingWhenInitiatedWithApplication() {
+    void shouldInsertHearingWhenInitiatedWithApplication() {
 
         final InitiateHearingCommand command = minimumInitiateHearingTemplate();
 
@@ -181,7 +181,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldExtendHearing() {
+    void shouldExtendHearing() {
 
         final List<ProsecutionCase> prosecutionCases = new ArrayList<>();
         prosecutionCases.add(ProsecutionCase.prosecutionCase().withId(UUID.randomUUID()).build());
@@ -208,7 +208,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldAddProsecutionCaseToTheExistingHearingWhenProsecutionCaseIsNotPresentInTheHearing() {
+    void shouldAddProsecutionCaseToTheExistingHearingWhenProsecutionCaseIsNotPresentInTheHearing() {
 
         final UUID hearingId = randomUUID();
         final UUID prosecutionCaseId1 = randomUUID();
@@ -274,7 +274,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldUpdateProsecutionCasesInExistingHearing() {
+    void shouldUpdateProsecutionCasesInExistingHearing() {
 
         final UUID hearingId = randomUUID();
         final UUID prosecutionCaseId = randomUUID();
@@ -337,7 +337,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void testHearingInheritedClearVerdictData() {
+    void testHearingInheritedClearVerdictData() {
 
         final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
                 .withUserId(randomUUID())
@@ -383,7 +383,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void testHearingInheritedVerdictData() {
+    void testHearingInheritedVerdictData() {
 
         final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
                 .withUserId(randomUUID())
@@ -432,7 +432,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldAddDefendantToTheExistingProsecutionCaseWhenDefendantIsNotPresentInTheProsecutionCase() {
+    void shouldAddDefendantToTheExistingProsecutionCaseWhenDefendantIsNotPresentInTheProsecutionCase() {
 
         final UUID hearingId = randomUUID();
         final UUID prosecutionCaseId = randomUUID();
@@ -500,7 +500,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldRemoveConcludedOffenceFromProsecutionSideOnHearingExtendedButKeepOthers() {
+    void shouldRemoveConcludedOffenceFromProsecutionSideOnHearingExtendedButKeepOthers() {
         final UUID hearingId = randomUUID();
         final UUID prosecutionCaseId = randomUUID();
         final UUID defendantId = randomUUID();
@@ -523,7 +523,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldPruneEmptiedDefendantAndCaseOnHearingExtendedRemoval() {
+    void shouldPruneEmptiedDefendantAndCaseOnHearingExtendedRemoval() {
         final UUID hearingId = randomUUID();
         final UUID prosecutionCaseId = randomUUID();
         final UUID defendantId = randomUUID();
@@ -577,7 +577,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldAddOffenceToTheExistingDefendantWhenOffenceIsNotPresentInTheDefendant() {
+    void shouldAddOffenceToTheExistingDefendantWhenOffenceIsNotPresentInTheDefendant() {
 
         final UUID hearingId = randomUUID();
         final UUID prosecutionCaseId = randomUUID();
@@ -668,7 +668,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldExtendHearing_whenProsecutionCaseIsNull() {
+    void shouldExtendHearing_whenProsecutionCaseIsNull() {
 
         final HearingExtended hearingExtended = new HearingExtended(UUID.randomUUID(), null, null, null,CourtApplication.courtApplication().withId(UUID.randomUUID()).build(), null, null);
 
@@ -691,7 +691,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldEDoNothing_whenThereIsNoHearing() {
+    void shouldEDoNothing_whenThereIsNoHearing() {
 
         final HearingExtended hearingExtended = new HearingExtended(UUID.randomUUID(), null, null, null,CourtApplication.courtApplication().withId(UUID.randomUUID()).build(), null, null);
 
@@ -705,7 +705,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldUpdateApplicationDetails() {
+    void shouldUpdateApplicationDetails() {
 
         final ApplicationDetailChanged applicationDetailChanged = new ApplicationDetailChanged(UUID.randomUUID(), CourtApplication.courtApplication().withId(UUID.randomUUID()).build());
 
@@ -724,7 +724,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldUpdateApplicationLaaReferenceDetails() {
+    void shouldUpdateApplicationLaaReferenceDetails() {
         final UUID applicationId = randomUUID();
         final UUID offenceId = randomUUID();
         final UUID subjectId = randomUUID();
@@ -752,7 +752,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldUpdateApplicationLaaReferenceDetailsWhenOffenceIdIsNull() {
+    void shouldUpdateApplicationLaaReferenceDetailsWhenOffenceIdIsNull() {
         final UUID applicationId = randomUUID();
         final UUID offenceId = null;
         final UUID subjectId = randomUUID();
@@ -797,7 +797,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldNotUpdateApplicationDetailsIfThereIsNoHearing() {
+    void shouldNotUpdateApplicationDetailsIfThereIsNoHearing() {
 
         final ApplicationDetailChanged applicationDetailChanged = new ApplicationDetailChanged(UUID.randomUUID(), CourtApplication.courtApplication().withId(UUID.randomUUID()).build());
 
@@ -814,7 +814,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void convictionDateUpdated_shouldUpdateTheConvictionDate() {
+    void convictionDateUpdated_shouldUpdateTheConvictionDate() {
 
         final UUID caseId = randomUUID();
         final UUID offenceId = randomUUID();
@@ -837,7 +837,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void convictionDateNotUpdated_shouldUpdateTheConvictionDateIfThereIsNoHearing() {
+    void convictionDateNotUpdated_shouldUpdateTheConvictionDateIfThereIsNoHearing() {
 
         final UUID caseId = randomUUID();
         final UUID offenceId = randomUUID();
@@ -858,7 +858,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void convictionDateUpdated_shouldUpdateTheConvictionDateToOffenceUnderCourtApplication() {
+    void convictionDateUpdated_shouldUpdateTheConvictionDateToOffenceUnderCourtApplication() {
 
         final UUID applicationId = randomUUID();
         final UUID hearingId = randomUUID();
@@ -884,7 +884,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void convictionDateUpdated_shouldUpdateTheConvictionDateToCourtApplication() {
+    void convictionDateUpdated_shouldUpdateTheConvictionDateToCourtApplication() {
 
         final UUID applicationId = randomUUID();
         final UUID hearingId = randomUUID();
@@ -917,7 +917,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void convictionDateRemoves_shouldRemoveTheConvictionDateFromCourtApplication() {
+    void convictionDateRemoves_shouldRemoveTheConvictionDateFromCourtApplication() {
 
         final UUID applicationId = randomUUID();
         final UUID hearingId = randomUUID();
@@ -949,7 +949,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void convictionDateRemoves_shouldSetNullConvictionDateToOffenceInCourtApplication() {
+    void convictionDateRemoves_shouldSetNullConvictionDateToOffenceInCourtApplication() {
 
         final UUID applicationId = randomUUID();
         final UUID hearingId = randomUUID();
@@ -974,7 +974,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void convictionDateNotRemoves_shouldSetNullConvictionDateToOffenceInCourtApplicationIfThereIsNoHearing() {
+    void convictionDateNotRemoves_shouldSetNullConvictionDateToOffenceInCourtApplicationIfThereIsNoHearing() {
 
         final UUID applicationId = randomUUID();
         final UUID hearingId = randomUUID();
@@ -998,7 +998,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void convictionDateRemoved_shouldSetConvictionDateToNull() {
+    void convictionDateRemoved_shouldSetConvictionDateToNull() {
 
         final UUID caseId = randomUUID();
         final UUID offenceId = randomUUID();
@@ -1023,7 +1023,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldPassSchemaValidationForValidPayloadOfConvictionDateAdded() {
+    void shouldPassSchemaValidationForValidPayloadOfConvictionDateAdded() {
         //given
         JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
                 createObjectBuilder()
@@ -1039,7 +1039,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldPassSchemaValidationForValidPayloadOfConvictionDateRemoved() {
+    void shouldPassSchemaValidationForValidPayloadOfConvictionDateRemoved() {
         //given
         JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
                 createObjectBuilder()
@@ -1055,7 +1055,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldFailSchemaValidationForInValidPayloadOfConvictionDateAdded() throws IOException {
+    void shouldFailSchemaValidationForInValidPayloadOfConvictionDateAdded() throws IOException {
         final ObjectMapper mapper = new ObjectMapper();
 
 
@@ -1074,7 +1074,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldFailSchemaValidationForInValidPayloadOfConvictionDateRemoved() throws IOException {
+    void shouldFailSchemaValidationForInValidPayloadOfConvictionDateRemoved() throws IOException {
         final ObjectMapper mapper = new ObjectMapper();
 
 
@@ -1094,7 +1094,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void testHearingInitiatedPleaData() {
+    void testHearingInitiatedPleaData() {
 
         final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
                 .withUserId(randomUUID())
@@ -1156,7 +1156,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void convictionDateIsUnchangedForChangeToGuiltyMagistrateCourtOnInheritedPlea() {
+    void convictionDateIsUnchangedForChangeToGuiltyMagistrateCourtOnInheritedPlea() {
 
         final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
                 .withUserId(randomUUID())
@@ -1218,7 +1218,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldSeedOffenceBailStatusFromDefendantPreHearingStatusOnCaseCreation() {
+    void shouldSeedOffenceBailStatusFromDefendantPreHearingStatusOnCaseCreation() {
         // Scenario 15: case created (MCC/SPI-IN/CPPI) with defendant pre-hearing Conditional bail
         // → all offences should inherit Conditional bail
         final BailStatus conditionalBail = BailStatus.bailStatus().withCode("B").withDescription("Conditional Bail").withId(randomUUID()).build();
@@ -1251,7 +1251,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldNotSeedOffenceBailStatusWhenNoPreHearingBailStatus() {
+    void shouldNotSeedOffenceBailStatusWhenNoPreHearingBailStatus() {
         // Scenario 16 (AC3A): case created with no pre-hearing bail status → offences remain null
         final uk.gov.justice.core.courts.Offence offence = uk.gov.justice.core.courts.Offence.offence().withId(randomUUID()).build();
         final PersonDefendant personDefendant = PersonDefendant.personDefendant().build();
@@ -1277,7 +1277,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldSeedOffenceBailStatusIndependentlyPerDefendantOnCaseCreation() {
+    void shouldSeedOffenceBailStatusIndependentlyPerDefendantOnCaseCreation() {
         // Scenario 17: CPPI multi-defendant — Def1 Conditional bail, Def2 Custody → each defendant's offences seeded independently
         final BailStatus def1Status = BailStatus.bailStatus().withCode("B").withDescription("Conditional Bail").withId(randomUUID()).build();
         final BailStatus def2Status = BailStatus.bailStatus().withCode("C").withDescription("Custody").withId(randomUUID()).build();
@@ -1313,7 +1313,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void shouldNotOverwriteExistingOffenceBailStatusOnCaseCreation() {
+    void shouldNotOverwriteExistingOffenceBailStatusOnCaseCreation() {
         // Offence already has a bail status — must not be overwritten by defendant's pre-hearing status
         final BailStatus existing = BailStatus.bailStatus().withCode("C").withDescription("Custody").withId(randomUUID()).build();
         final BailStatus preHearing = BailStatus.bailStatus().withCode("B").withDescription("Conditional Bail").withId(randomUUID()).build();
@@ -1370,7 +1370,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void inheritedPleaListenerDoesNotSetConvictionDateWhenOffenceHasNoConvictionDate() {
+    void inheritedPleaListenerDoesNotSetConvictionDateWhenOffenceHasNoConvictionDate() {
 
         final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
                 .withUserId(randomUUID())
@@ -1411,7 +1411,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void inheritedPleaListenerDoesNotClearConvictionDateForNotGuiltyPlea() {
+    void inheritedPleaListenerDoesNotClearConvictionDateForNotGuiltyPlea() {
 
         final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
                 .withUserId(randomUUID())
