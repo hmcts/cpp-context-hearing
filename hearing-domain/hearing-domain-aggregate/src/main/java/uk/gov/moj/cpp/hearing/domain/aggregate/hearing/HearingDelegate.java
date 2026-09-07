@@ -7,6 +7,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.CourtApplicationParty.courtApplicationParty;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.HearingResultsCleanerUtil.removeResultsFromHearing;
@@ -166,8 +167,10 @@ public class HearingDelegate implements Serializable {
 
                         if (nonNull(currentPC)) {
                             final ProsecutionCase mergedPC = createProsecutionCase(extendedPC, currentPC);
-                            this.momento.getHearing().getProsecutionCases().removeIf(caseToBeRemoved -> caseToBeRemoved.getId().equals(mergedPC.getId()));
-                            this.momento.getHearing().getProsecutionCases().add(mergedPC);
+                            // replace in place so an already-present case keeps its position: existing
+                            // cases stay first, newly extended-in cases are appended (CHD-2687)
+                            final List<ProsecutionCase> currentCases = this.momento.getHearing().getProsecutionCases();
+                            currentCases.set(currentCases.indexOf(currentPC), mergedPC);
                         } else {
                             this.momento.getHearing().getProsecutionCases().add(extendedPC);
                         }
@@ -175,6 +178,45 @@ public class HearingDelegate implements Serializable {
             );
         }
 
+        // concluded application offences belong on the application side only,
+        // so derive them from the court application carried by the event, strip them from the prosecution
+        // side, and prune any defendant/case left empty by the removal.
+        removeConcludedOffencesFromProsecution(collectConcludedApplicationOffenceIds(hearingExtended.getCourtApplication()));
+    }
+
+    private void removeConcludedOffencesFromProsecution(final List<UUID> offenceIdsToRemove) {
+        final Hearing hearing = this.momento.getHearing();
+        if (isNull(hearing) || isEmpty(offenceIdsToRemove) || isNull(hearing.getProsecutionCases())) {
+            return;
+        }
+        final Set<UUID> removeIds = new HashSet<>(offenceIdsToRemove);
+        final Set<UUID> emptiedDefendantIds = new HashSet<>();
+        final Set<UUID> casesRemovedFrom = new HashSet<>();
+
+        hearing.getProsecutionCases().stream()
+                .filter(prosecutionCase -> nonNull(prosecutionCase.getDefendants()))
+                .forEach(prosecutionCase -> prosecutionCase.getDefendants().stream()
+                        .filter(defendant -> nonNull(defendant.getOffences()))
+                        .forEach(defendant -> {
+                            if (defendant.getOffences().removeIf(offence -> removeIds.contains(offence.getId()))) {
+                                casesRemovedFrom.add(prosecutionCase.getId());
+                                if (defendant.getOffences().isEmpty()) {
+                                    emptiedDefendantIds.add(defendant.getId());
+                                }
+                            }
+                        }));
+
+        if (casesRemovedFrom.isEmpty()) {
+            return;
+        }
+
+        hearing.getProsecutionCases().stream()
+                .filter(prosecutionCase -> nonNull(prosecutionCase.getDefendants()))
+                .forEach(prosecutionCase -> prosecutionCase.getDefendants()
+                        .removeIf(defendant -> emptiedDefendantIds.contains(defendant.getId())));
+
+        hearing.getProsecutionCases().removeIf(prosecutionCase ->
+                casesRemovedFrom.contains(prosecutionCase.getId()) && isEmpty(prosecutionCase.getDefendants()));
     }
 
     private void updateHearingDays(HearingExtended hearingExtended) {
@@ -273,7 +315,75 @@ public class HearingDelegate implements Serializable {
                 streamBuilder.add(new HearingBreachApplicationsAdded(courtApplicationListAlreadyInHearing));
             }
         }
-        return streamBuilder.add(new HearingExtended(hearingId, hearingDays, courtCentre, jurisdictionType, courtApplication, prosecutionCases, shadowListedOffences)).build();
+        // Extended-hearing shaping. An active application offence belongs on the prosecution side, so strip
+        // it from the court application when it is present on the prosecution side of the merged hearing —
+        // whether the command handler just attached it (incoming prosecutionCases) or it was already on the
+        // existing hearing (momento). Concluded offences stay on the application (handleHearingExtended
+        // derives them from the shaped court application to strip them from the prosecution side). An active
+        // offence not on either side stays put, avoiding loss.
+        final Set<UUID> prosecutionOffenceIds = new HashSet<>(collectOffenceIdsFromCaseList(prosecutionCases));//collect incoming prosecutionCases offences
+        prosecutionOffenceIds.addAll(collectOffenceIdsFromCaseList(this.momento.getHearing().getProsecutionCases()));//collect already existing prosecutionCases offences
+        final CourtApplication shapedCourtApplication = removeActiveProsecutionOffencesFromApplication(courtApplication, prosecutionOffenceIds);
+
+        return streamBuilder.add(new HearingExtended(hearingId, hearingDays, courtCentre, jurisdictionType,
+                shapedCourtApplication, isEmpty(prosecutionCases) ? null : prosecutionCases, shadowListedOffences)).build();
+    }
+
+    private CourtApplication removeActiveProsecutionOffencesFromApplication(final CourtApplication courtApplication, final Set<UUID> prosecutionOffenceIds) {
+        if (isNull(courtApplication) || isNull(courtApplication.getCourtApplicationCases()) || prosecutionOffenceIds.isEmpty()) {
+            return courtApplication;
+        }
+        final List<CourtApplicationCase> shapedCases = courtApplication.getCourtApplicationCases().stream()
+                .map(courtApplicationCase -> removeActiveProsecutionOffencesFromCase(courtApplicationCase, prosecutionOffenceIds))
+                .collect(toList());
+        return CourtApplication.courtApplication()
+                .withValuesFrom(courtApplication)
+                .withCourtApplicationCases(shapedCases)
+                .build();
+    }
+
+    private CourtApplicationCase removeActiveProsecutionOffencesFromCase(final CourtApplicationCase courtApplicationCase, final Set<UUID> prosecutionOffenceIds) {
+        if (isNull(courtApplicationCase.getOffences())) {
+            return courtApplicationCase;
+        }
+        // Keep concluded offences (they belong on the application side); remove only active offences that
+        // are present on the prosecution side of the merged hearing.
+        final List<Offence> remainingOffences = courtApplicationCase.getOffences().stream()
+                .filter(offence -> isProceedingsConcluded(offence) || !prosecutionOffenceIds.contains(offence.getId()))
+                .collect(toList());
+        return CourtApplicationCase.courtApplicationCase()
+                .withValuesFrom(courtApplicationCase)
+                .withOffences(remainingOffences.isEmpty() ? null : remainingOffences)
+                .build();
+    }
+
+    private static Set<UUID> collectOffenceIdsFromCaseList(final List<ProsecutionCase> prosecutionCases) {
+        if (isEmpty(prosecutionCases)) {
+            return Collections.emptySet();
+        }
+        return prosecutionCases.stream()
+                .filter(prosecutionCase -> nonNull(prosecutionCase.getDefendants()))
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .filter(defendant -> nonNull(defendant.getOffences()))
+                .flatMap(defendant -> defendant.getOffences().stream())
+                .map(Offence::getId)
+                .collect(Collectors.toSet());
+    }
+
+    private static List<UUID> collectConcludedApplicationOffenceIds(final CourtApplication courtApplication) {
+        if (isNull(courtApplication) || isNull(courtApplication.getCourtApplicationCases())) {
+            return emptyList();
+        }
+        return courtApplication.getCourtApplicationCases().stream()
+                .filter(courtApplicationCase -> nonNull(courtApplicationCase.getOffences()))
+                .flatMap(courtApplicationCase -> courtApplicationCase.getOffences().stream())
+                .filter(HearingDelegate::isProceedingsConcluded)
+                .map(Offence::getId)
+                .collect(toList());
+    }
+
+    private static boolean isProceedingsConcluded(final Offence offence) {
+        return Boolean.TRUE.equals(offence.getProceedingsConcluded());
     }
 
     public Stream<Object> updateHearingDetails(final UUID id,

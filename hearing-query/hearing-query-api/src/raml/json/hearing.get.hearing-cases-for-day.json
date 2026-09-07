@@ -1,0 +1,22 @@
+{
+  "hearingCases": [
+    {
+      "courtCentreId": "135cc630-f141-40b5-ae30-7615b0faa367",
+      "courtRoomId": "50168b64-ab8e-450f-9e90-feb7c71b83cd",
+      "hearingDate": "2026-07-16",
+      "hearingId": "394f3d42-2dfb-4e45-808a-b76a62f76438",
+      "prosecutionCases": [
+        "378e4ea9-f759-4aef-af78-3a440f6b5d94"
+      ]
+    },
+    {
+      "courtCentreId": "1a5af776-f775-4328-9d93-9ab333f2ca10",
+      "courtRoomId": "649502e5-184c-44c1-9a72-fc93e85a3ff0",
+      "hearingDate": "2026-07-16",
+      "hearingId": "740aff61-6492-4030-93d1-ac4291405379",
+      "prosecutionCases": [
+        "03ede5fd-d72d-4769-aa69-5d28a831fdf3"
+      ]
+    }
+  ]
+}

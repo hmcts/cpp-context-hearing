@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -27,8 +28,10 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.LaaReference;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
@@ -494,6 +497,83 @@ public class InitiateHearingEventListenerTest {
         assertThat(prosecutionCase.getDefendants().get(1).getOffences().size(), is(1));
         assertThat(prosecutionCase.getDefendants().get(1).getOffences().get(0).getId(), is(offenceId1));
 
+    }
+
+    @Test
+    public void shouldRemoveConcludedOffenceFromProsecutionSideOnHearingExtendedButKeepOthers() {
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceToRemove = randomUUID();
+        final UUID offenceToKeep = randomUUID();
+
+        final Hearing hearing = hearingWithSingleDefendantOffences(hearingId, prosecutionCaseId, defendantId, offenceToRemove, offenceToKeep);
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity =
+                hearing.getProsecutionCases().iterator().next().getDefendants().iterator().next();
+
+        when(hearingRepository.findOptionalBy(hearingId)).thenReturn(Optional.of(hearing));
+
+        // the concluded application offence (offenceToRemove) is derived from the event's court application
+        final HearingExtended hearingExtended = new HearingExtended(hearingId, null, null, null,
+                applicationWithConcludedOffence(offenceToRemove), null, null);
+        initiateHearingEventListener.hearingExtended(envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(hearingExtended)));
+
+        assertThat(defendantEntity.getOffences().size(), is(1));
+        assertThat(defendantEntity.getOffences().iterator().next().getId().getId(), is(offenceToKeep));
+    }
+
+    @Test
+    public void shouldPruneEmptiedDefendantAndCaseOnHearingExtendedRemoval() {
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceToRemove = randomUUID();
+
+        final Hearing hearing = hearingWithSingleDefendantOffences(hearingId, prosecutionCaseId, defendantId, offenceToRemove);
+
+        when(hearingRepository.findOptionalBy(hearingId)).thenReturn(Optional.of(hearing));
+
+        final HearingExtended hearingExtended = new HearingExtended(hearingId, null, null, null,
+                applicationWithConcludedOffence(offenceToRemove), null, null);
+        initiateHearingEventListener.hearingExtended(envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(hearingExtended)));
+
+        assertThat(hearing.getProsecutionCases().isEmpty(), is(true));
+    }
+
+    private uk.gov.justice.core.courts.CourtApplication applicationWithConcludedOffence(final UUID offenceId) {
+        return uk.gov.justice.core.courts.CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withCourtApplicationCases(java.util.List.of(uk.gov.justice.core.courts.CourtApplicationCase.courtApplicationCase()
+                        .withOffences(java.util.List.of(uk.gov.justice.core.courts.Offence.offence().withId(offenceId).withProceedingsConcluded(true).build()))
+                        .build()))
+                .build();
+    }
+
+    private Hearing hearingWithSingleDefendantOffences(final UUID hearingId, final UUID prosecutionCaseId, final UUID defendantId, final UUID... offenceIds) {
+        final Set<Offence> offences = new HashSet<>();
+        for (final UUID offenceId : offenceIds) {
+            final Offence offence = new Offence();
+            offence.setId(new HearingSnapshotKey(offenceId, hearingId));
+            offences.add(offence);
+        }
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity = new uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant();
+        defendantEntity.setId(new HearingSnapshotKey(defendantId, hearingId));
+        defendantEntity.setOffences(offences);
+
+        final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant> defendants = new HashSet<>();
+        defendants.add(defendantEntity);
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCaseEntity = new uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase();
+        prosecutionCaseEntity.setId(new HearingSnapshotKey(prosecutionCaseId, hearingId));
+        prosecutionCaseEntity.setDefendants(defendants);
+
+        final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> prosecutionCases = new HashSet<>();
+        prosecutionCases.add(prosecutionCaseEntity);
+
+        final Hearing hearing = new Hearing();
+        hearing.setProsecutionCases(prosecutionCases);
+        return hearing;
     }
 
     @Test
@@ -1061,7 +1141,7 @@ public class InitiateHearingEventListenerTest {
 
         assertThat(offence, isBean(Offence.class)
                 .with(Offence::getId, is(snapshotKey))
-                .with(Offence::getConvictionDate, is(pleaPojo.getPleaDate()))
+                .with(Offence::getConvictionDate, is(convictionDate))
                 .with(Offence::getPlea, isBean(Plea.class)
                         .with(Plea::getOriginatingHearingId, is(event.getPlea().getOriginatingHearingId()))
                         .with(Plea::getPleaDate, is(event.getPlea().getPleaDate()))
@@ -1076,7 +1156,7 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
-    public void convictionDateIsSetForChangeToGuiltyMagistrateCourt() {
+    public void convictionDateIsUnchangedForChangeToGuiltyMagistrateCourtOnInheritedPlea() {
 
         final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
                 .withUserId(randomUUID())
@@ -1123,7 +1203,7 @@ public class InitiateHearingEventListenerTest {
 
         assertThat(offence, isBean(Offence.class)
                 .with(Offence::getId, is(snapshotKey))
-                .with(Offence::getConvictionDate, is(pleaPojo.getPleaDate()))
+                .with(Offence::getConvictionDate, is(convictionDate))
                 .with(Offence::getPlea, isBean(Plea.class)
                         .with(Plea::getOriginatingHearingId, is(event.getPlea().getOriginatingHearingId()))
                         .with(Plea::getPleaDate, is(event.getPlea().getPleaDate()))
@@ -1135,6 +1215,131 @@ public class InitiateHearingEventListenerTest {
                         )
                 )
         );
+    }
+
+    @Test
+    public void shouldSeedOffenceBailStatusFromDefendantPreHearingStatusOnCaseCreation() {
+        // Scenario 15: case created (MCC/SPI-IN/CPPI) with defendant pre-hearing Conditional bail
+        // → all offences should inherit Conditional bail
+        final BailStatus conditionalBail = BailStatus.bailStatus().withCode("B").withDescription("Conditional Bail").withId(randomUUID()).build();
+        final uk.gov.justice.core.courts.Offence offence1 = uk.gov.justice.core.courts.Offence.offence().withId(randomUUID()).build();
+        final uk.gov.justice.core.courts.Offence offence2 = uk.gov.justice.core.courts.Offence.offence().withId(randomUUID()).build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant().withBailStatus(conditionalBail).build();
+        final Defendant defendant = Defendant.defendant()
+                .withOffences(List.of(offence1, offence2))
+                .withPersonDefendant(personDefendant)
+                .build();
+        final uk.gov.justice.core.courts.Hearing hearing = uk.gov.justice.core.courts.Hearing.hearing()
+                .withId(randomUUID())
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(singletonList(defendant))
+                        .build()))
+                .build();
+
+        final ArgumentCaptor<uk.gov.justice.core.courts.Hearing> hearingArgumentCaptor =
+                ArgumentCaptor.forClass(uk.gov.justice.core.courts.Hearing.class);
+        when(hearingJPAMapper.toJPA(hearingArgumentCaptor.capture())).thenReturn(new Hearing());
+
+        initiateHearingEventListener.newHearingInitiated(getInitiateHearingJsonEnvelope(hearing));
+
+        // offence1 and offence2 should have had bailStatus seeded
+        final uk.gov.justice.core.courts.Hearing seededHearing = hearingArgumentCaptor.getValue();
+        assertThat(findOffenceById(seededHearing, offence1.getId()).getBailStatus(), notNullValue());
+        assertThat(findOffenceById(seededHearing, offence1.getId()).getBailStatus().getCode(), is("B"));
+        assertThat(findOffenceById(seededHearing, offence2.getId()).getBailStatus(), notNullValue());
+        assertThat(findOffenceById(seededHearing, offence2.getId()).getBailStatus().getCode(), is("B"));
+    }
+
+    @Test
+    public void shouldNotSeedOffenceBailStatusWhenNoPreHearingBailStatus() {
+        // Scenario 16 (AC3A): case created with no pre-hearing bail status → offences remain null
+        final uk.gov.justice.core.courts.Offence offence = uk.gov.justice.core.courts.Offence.offence().withId(randomUUID()).build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant().build();
+        final Defendant defendant = Defendant.defendant()
+                .withOffences(singletonList(offence))
+                .withPersonDefendant(personDefendant)
+                .build();
+        final uk.gov.justice.core.courts.Hearing hearing = uk.gov.justice.core.courts.Hearing.hearing()
+                .withId(randomUUID())
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(singletonList(defendant))
+                        .build()))
+                .build();
+
+        final ArgumentCaptor<uk.gov.justice.core.courts.Hearing> hearingArgumentCaptor =
+                ArgumentCaptor.forClass(uk.gov.justice.core.courts.Hearing.class);
+        when(hearingJPAMapper.toJPA(hearingArgumentCaptor.capture())).thenReturn(new Hearing());
+
+        initiateHearingEventListener.newHearingInitiated(getInitiateHearingJsonEnvelope(hearing));
+
+        final uk.gov.justice.core.courts.Hearing seededHearing = hearingArgumentCaptor.getValue();
+        assertThat(findOffenceById(seededHearing, offence.getId()).getBailStatus(), nullValue());
+    }
+
+    @Test
+    public void shouldSeedOffenceBailStatusIndependentlyPerDefendantOnCaseCreation() {
+        // Scenario 17: CPPI multi-defendant — Def1 Conditional bail, Def2 Custody → each defendant's offences seeded independently
+        final BailStatus def1Status = BailStatus.bailStatus().withCode("B").withDescription("Conditional Bail").withId(randomUUID()).build();
+        final BailStatus def2Status = BailStatus.bailStatus().withCode("C").withDescription("Custody").withId(randomUUID()).build();
+
+        final uk.gov.justice.core.courts.Offence def1Offence = uk.gov.justice.core.courts.Offence.offence().withId(randomUUID()).build();
+        final uk.gov.justice.core.courts.Offence def2Offence = uk.gov.justice.core.courts.Offence.offence().withId(randomUUID()).build();
+
+        final Defendant defendant1 = Defendant.defendant()
+                .withOffences(singletonList(def1Offence))
+                .withPersonDefendant(PersonDefendant.personDefendant().withBailStatus(def1Status).build())
+                .build();
+        final Defendant defendant2 = Defendant.defendant()
+                .withOffences(singletonList(def2Offence))
+                .withPersonDefendant(PersonDefendant.personDefendant().withBailStatus(def2Status).build())
+                .build();
+
+        final uk.gov.justice.core.courts.Hearing hearing = uk.gov.justice.core.courts.Hearing.hearing()
+                .withId(randomUUID())
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(List.of(defendant1, defendant2))
+                        .build()))
+                .build();
+
+        final ArgumentCaptor<uk.gov.justice.core.courts.Hearing> hearingArgumentCaptor =
+                ArgumentCaptor.forClass(uk.gov.justice.core.courts.Hearing.class);
+        when(hearingJPAMapper.toJPA(hearingArgumentCaptor.capture())).thenReturn(new Hearing());
+
+        initiateHearingEventListener.newHearingInitiated(getInitiateHearingJsonEnvelope(hearing));
+
+        final uk.gov.justice.core.courts.Hearing seededHearing = hearingArgumentCaptor.getValue();
+        assertThat(findOffenceById(seededHearing, def1Offence.getId()).getBailStatus().getCode(), is("B"));
+        assertThat(findOffenceById(seededHearing, def2Offence.getId()).getBailStatus().getCode(), is("C"));
+    }
+
+    @Test
+    public void shouldNotOverwriteExistingOffenceBailStatusOnCaseCreation() {
+        // Offence already has a bail status — must not be overwritten by defendant's pre-hearing status
+        final BailStatus existing = BailStatus.bailStatus().withCode("C").withDescription("Custody").withId(randomUUID()).build();
+        final BailStatus preHearing = BailStatus.bailStatus().withCode("B").withDescription("Conditional Bail").withId(randomUUID()).build();
+
+        final uk.gov.justice.core.courts.Offence offence = uk.gov.justice.core.courts.Offence.offence().withId(randomUUID()).withBailStatus(existing).build();
+        final Defendant defendant = Defendant.defendant()
+                .withOffences(singletonList(offence))
+                .withPersonDefendant(PersonDefendant.personDefendant().withBailStatus(preHearing).build())
+                .build();
+
+        final uk.gov.justice.core.courts.Hearing hearing = uk.gov.justice.core.courts.Hearing.hearing()
+                .withId(randomUUID())
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(singletonList(defendant))
+                        .build()))
+                .build();
+
+        final ArgumentCaptor<uk.gov.justice.core.courts.Hearing> hearingArgumentCaptor =
+                ArgumentCaptor.forClass(uk.gov.justice.core.courts.Hearing.class);
+        when(hearingJPAMapper.toJPA(hearingArgumentCaptor.capture())).thenReturn(new Hearing());
+
+        initiateHearingEventListener.newHearingInitiated(getInitiateHearingJsonEnvelope(hearing));
+
+        // existing bail status must not be overwritten
+        final uk.gov.justice.core.courts.Hearing seededHearing = hearingArgumentCaptor.getValue();
+        assertThat(findOffenceById(seededHearing, offence.getId()).getBailStatus().getCode(), is("C"));
     }
 
     private JsonEnvelope getInitiateHearingJsonEnvelope(final uk.gov.justice.core.courts.Hearing hearing) {
@@ -1153,4 +1358,98 @@ public class InitiateHearingEventListenerTest {
 
         return envelopeFrom((Metadata) null, jsonObject);
     }
+
+    private uk.gov.justice.core.courts.Offence findOffenceById(final uk.gov.justice.core.courts.Hearing hearing,
+                                                                 final java.util.UUID offenceId) {
+        return hearing.getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .flatMap(defendant -> defendant.getOffences().stream())
+                .filter(offence -> offence.getId().equals(offenceId))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("No offence found with id " + offenceId));
+    }
+
+    @Test
+    public void inheritedPleaListenerDoesNotSetConvictionDateWhenOffenceHasNoConvictionDate() {
+
+        final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
+                .withUserId(randomUUID())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .build();
+        final uk.gov.justice.core.courts.Plea pleaPojo = uk.gov.justice.core.courts.Plea.plea()
+                .withOffenceId(randomUUID())
+                .withOriginatingHearingId(randomUUID())
+                .withPleaDate(PAST_LOCAL_DATE.next())
+                .withPleaValue(GUILTY)
+                .withDelegatedPowers(delegatedPowersPojo)
+                .build();
+
+        final InheritedPlea event = new InheritedPlea()
+                .setHearingId(randomUUID())
+                .setPlea(pleaPojo);
+
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(event.getPlea().getOffenceId(), event.getHearingId());
+
+        final Offence offence = new Offence();
+        offence.setId(snapshotKey);
+        offence.setConvictionDate(null);
+        when(offenceRepository.findBy(snapshotKey)).thenReturn(offence);
+
+        final Plea plea = new Plea();
+        plea.setPleaValue(pleaPojo.getPleaValue());
+        plea.setPleaDate(pleaPojo.getPleaDate());
+        plea.setOriginatingHearingId(pleaPojo.getOriginatingHearingId());
+        when(pleaJPAMapper.toJPA(Mockito.any())).thenReturn(plea);
+
+        initiateHearingEventListener.hearingInitiatedPleaData(envelopeFrom(metadataWithRandomUUID("hearing.events.inherited-plea"),
+                objectToJsonObjectConverter.convert(event)));
+
+        verify(this.offenceRepository).save(offence);
+        assertThat(offence.getConvictionDate(), is(nullValue()));
+        assertThat(offence.getPlea().getPleaValue(), is(GUILTY));
+    }
+
+    @Test
+    public void inheritedPleaListenerDoesNotClearConvictionDateForNotGuiltyPlea() {
+
+        final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
+                .withUserId(randomUUID())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .build();
+        final uk.gov.justice.core.courts.Plea pleaPojo = uk.gov.justice.core.courts.Plea.plea()
+                .withOffenceId(randomUUID())
+                .withOriginatingHearingId(randomUUID())
+                .withPleaDate(PAST_LOCAL_DATE.next())
+                .withPleaValue("NOT_GUILTY")
+                .withDelegatedPowers(delegatedPowersPojo)
+                .build();
+
+        final InheritedPlea event = new InheritedPlea()
+                .setHearingId(randomUUID())
+                .setPlea(pleaPojo);
+
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(event.getPlea().getOffenceId(), event.getHearingId());
+
+        final Offence offence = new Offence();
+        offence.setId(snapshotKey);
+        final LocalDate existingConvictionDate = PAST_LOCAL_DATE.next();
+        offence.setConvictionDate(existingConvictionDate);
+        when(offenceRepository.findBy(snapshotKey)).thenReturn(offence);
+
+        final Plea plea = new Plea();
+        plea.setPleaValue(pleaPojo.getPleaValue());
+        plea.setPleaDate(pleaPojo.getPleaDate());
+        plea.setOriginatingHearingId(pleaPojo.getOriginatingHearingId());
+        when(pleaJPAMapper.toJPA(Mockito.any())).thenReturn(plea);
+
+        initiateHearingEventListener.hearingInitiatedPleaData(envelopeFrom(metadataWithRandomUUID("hearing.events.inherited-plea"),
+                objectToJsonObjectConverter.convert(event)));
+
+        verify(this.offenceRepository).save(offence);
+        assertThat(offence.getConvictionDate(), is(existingConvictionDate));
+        assertThat(offence.getPlea().getPleaValue(), is("NOT_GUILTY"));
+    }
+
 }

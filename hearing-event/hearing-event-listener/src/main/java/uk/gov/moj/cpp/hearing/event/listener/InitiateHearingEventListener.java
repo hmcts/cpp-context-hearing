@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
@@ -63,10 +64,6 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S2201", "squid:S134"})
 @ServiceComponent(EVENT_LISTENER)
 public class InitiateHearingEventListener {
-    private static final String GUILTY = "GUILTY";
-
-    private static final String CHANGE_TO_GUILTY_MAGISTRATES_COURT = "CHANGE_TO_GUILTY_MAGISTRATES_COURT";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(InitiateHearingEventListener.class.getName());
 
     @Inject
@@ -109,6 +106,8 @@ public class InitiateHearingEventListener {
         final JsonObject payload = event.payloadAsJsonObject();
 
         final HearingInitiated initiated = jsonObjectToObjectConverter.convert(payload, HearingInitiated.class);
+
+        seedOffenceBailStatusFromDefendant(initiated.getHearing());
 
         final Hearing hearingEntity = hearingJPAMapper.toJPA(initiated.getHearing());
 
@@ -162,6 +161,61 @@ public class InitiateHearingEventListener {
             hearingRepository.save(hearingEntity);
         }
         updateHearing(hearingEntity, hearingExtended.getProsecutionCases(), hearingExtended.getShadowListedOffences());
+
+        // Extended-hearing shaping (read-model side): concluded application offences belong on the
+        // application side only, so derive them from the court application carried by the event, strip
+        // them from the prosecution side, and prune any defendant/case left empty by the removal.
+        // Mirrors HearingDelegate so the view store matches the aggregate.
+        removeConcludedOffencesFromProsecution(hearingExtended.getHearingId(), collectConcludedApplicationOffenceIds(hearingExtended.getCourtApplication()));
+    }
+
+    private List<UUID> collectConcludedApplicationOffenceIds(final CourtApplication courtApplication) {
+        if (isNull(courtApplication) || isEmpty(courtApplication.getCourtApplicationCases())) {
+            return List.of();
+        }
+        return courtApplication.getCourtApplicationCases().stream()
+                .filter(courtApplicationCase -> nonNull(courtApplicationCase.getOffences()))
+                .flatMap(courtApplicationCase -> courtApplicationCase.getOffences().stream())
+                .filter(offence -> Boolean.TRUE.equals(offence.getProceedingsConcluded()))
+                .map(offence -> offence.getId())
+                .collect(toList());
+    }
+
+    private void removeConcludedOffencesFromProsecution(final UUID hearingId, final List<UUID> offenceIdsToRemove) {
+        if (isEmpty(offenceIdsToRemove)) {
+            return;
+        }
+        final Optional<Hearing> hearingEntityOpt = hearingRepository.findOptionalBy(hearingId);
+        if (hearingEntityOpt.isEmpty() || isNull(hearingEntityOpt.get().getProsecutionCases())) {
+            return;
+        }
+        final Hearing hearingEntity = hearingEntityOpt.get();
+        final Set<UUID> removeIds = new HashSet<>(offenceIdsToRemove);
+        final Set<UUID> emptiedDefendantIds = new HashSet<>();
+        final Set<UUID> casesRemovedFrom = new HashSet<>();
+
+        hearingEntity.getProsecutionCases().forEach(prosecutionCase ->
+                ofNullable(prosecutionCase.getDefendants()).orElseGet(HashSet::new).stream()
+                        .filter(defendant -> nonNull(defendant.getOffences()))
+                        .forEach(defendant -> {
+                            if (defendant.getOffences().removeIf(offence -> removeIds.contains(offence.getId().getId()))) {
+                                casesRemovedFrom.add(prosecutionCase.getId().getId());
+                                if (defendant.getOffences().isEmpty()) {
+                                    emptiedDefendantIds.add(defendant.getId().getId());
+                                }
+                            }
+                        }));
+
+        if (casesRemovedFrom.isEmpty()) {
+            return;
+        }
+
+        hearingEntity.getProsecutionCases().forEach(prosecutionCase ->
+                prosecutionCase.getDefendants().removeIf(defendant -> emptiedDefendantIds.contains(defendant.getId().getId())));
+        hearingEntity.getProsecutionCases().removeIf(prosecutionCase ->
+                casesRemovedFrom.contains(prosecutionCase.getId().getId()) && prosecutionCase.getDefendants().isEmpty());
+
+        hearingRepository.save(hearingEntity);
     }
 
     @Transactional
@@ -300,8 +354,6 @@ public class InitiateHearingEventListener {
 
             if (shouldSetPlea) {
                 offence.setPlea(pleaJPAMapper.toJPA(event.getPlea()));
-                final boolean IS_GUILTY_PLEA = GUILTY.equals(event.getPlea().getPleaValue()) || CHANGE_TO_GUILTY_MAGISTRATES_COURT.equals(event.getPlea().getPleaValue());
-                offence.setConvictionDate(IS_GUILTY_PLEA ? event.getPlea().getPleaDate() : null);
                 offenceRepository.save(offence);
             }
         }
@@ -376,6 +428,16 @@ public class InitiateHearingEventListener {
                     }
             );
         }
+    }
+
+    private void seedOffenceBailStatusFromDefendant(final uk.gov.justice.core.courts.Hearing hearing) {
+        ofNullable(hearing.getProsecutionCases()).stream().flatMap(Collection::stream)
+                .forEach(prosecutionCase -> ofNullable(prosecutionCase.getDefendants()).stream().flatMap(Collection::stream)
+                        .filter(defendant -> nonNull(defendant.getPersonDefendant()))
+                        .filter(defendant -> nonNull(defendant.getPersonDefendant().getBailStatus()))
+                        .forEach(defendant -> ofNullable(defendant.getOffences()).stream().flatMap(Collection::stream)
+                                .filter(offence -> isNull(offence.getBailStatus()))
+                                .forEach(offence -> offence.setBailStatus(defendant.getPersonDefendant().getBailStatus()))));
     }
 
     private List<Offence> getOffencesForHearing(final Hearing hearingEntity) {

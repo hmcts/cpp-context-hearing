@@ -46,6 +46,8 @@
         <listing.version>25.104.0-M1-SNAPSHOT</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>17.0.96</systemdocgenerator.version>
+        <results-validator-api-spec.version>26.25</results-validator-api-spec.version>
+        <openapi-generator-maven-plugin.version>7.23.0</openapi-generator-maven-plugin.version>
         <access.control.common.providers.version>25.104.0-M5</access.control.common.providers.version>
 
         <sonar.coverage.exclusions>

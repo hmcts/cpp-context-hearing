@@ -15,6 +15,15 @@ rule "Query - API - hearing.get.hearings"
     $outcome.setSuccess(true);
 end
 
+rule "Query - API - hearing.get.hearing-cases-for-day"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get.hearing-cases-for-day");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "System Users"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Query - API - hearing.get.hearings-check-in"
   when
     $outcome: Outcome();
@@ -282,6 +291,13 @@ rule "Query - API - hearing.prosecution-case-by-hearingid"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.prosecution-case-by-hearingid");
+  then
+    $outcome.setSuccess(true);
+end
+rule "Query - API - hearing.offence-bail-status-for-defendant"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.offence-bail-status-for-defendant");
   then
     $outcome.setSuccess(true);
 end

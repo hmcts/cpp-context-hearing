@@ -2,8 +2,12 @@ package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 
 import uk.gov.justice.services.common.configuration.Value;
 import uk.gov.justice.services.core.featurecontrol.FeatureControlGuard;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationRequest;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationResponse;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ValidationErrors;
 
 import java.io.InputStream;
+import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -37,6 +41,10 @@ public class ResultsValidationClient implements ResultsValidator {
     protected String timeoutMs;
 
     @Inject
+    @Value(key = "resultsvalidator.share.blocking", defaultValue = "disabled")
+    protected String shareBlocking;
+
+    @Inject
     private ObjectMapper objectMapper;
 
     @Inject
@@ -48,11 +56,12 @@ public class ResultsValidationClient implements ResultsValidator {
     public ResultsValidationClient() {
     }
 
-    public ValidationResponse validate(final ValidationRequest request, final String userId) {
+    @Override
+    public DraftValidationResponse validate(final DraftValidationRequest request, final String userId) {
         try {
             if (!featureControlGuard.isFeatureEnabled("ResultsValidation")) {
                 LOGGER.debug("ResultsValidation feature toggle is OFF, skipping validation");
-                return ValidationResponse.passThrough();
+                return passThrough();
             }
         } catch (final Exception ex) {
             LOGGER.warn("ResultsValidation feature toggle lookup failed, proceeding with validation (fail-open)", ex);
@@ -60,7 +69,7 @@ public class ResultsValidationClient implements ResultsValidator {
 
         if (!"true".equalsIgnoreCase(enabled)) {
             LOGGER.debug("Results validation is disabled, proceeding with share");
-            return ValidationResponse.passThrough();
+            return passThrough();
         }
 
         try {
@@ -72,16 +81,34 @@ public class ResultsValidationClient implements ResultsValidator {
 
             if (httpResponse.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
                 try (final InputStream content = httpResponse.getEntity().getContent()) {
-                    return objectMapper.readValue(content, ValidationResponse.class);
+                    return objectMapper.readValue(content, DraftValidationResponse.class);
                 }
             } else {
                 LOGGER.error("Results validation service returned status {}, proceeding with share (fail-open)",
                         httpResponse.getStatusLine().getStatusCode());
-                return ValidationResponse.passThrough();
+                return passThrough();
             }
         } catch (final Exception ex) {
             LOGGER.error("Results validation service call failed, proceeding with share (fail-open)", ex);
-            return ValidationResponse.passThrough();
+            return passThrough();
         }
+    }
+
+    @Override
+    public boolean isShareBlockingEnabled() {
+        return "enabled".equalsIgnoreCase(shareBlocking.trim());
+    }
+
+    /**
+     * Builds a "pass-through" response used whenever validation is skipped or the validation service is
+     * unreachable (fail-open): valid, no errors, no warnings.
+     */
+    private static DraftValidationResponse passThrough() {
+        return new DraftValidationResponse()
+                .mode("pass-through")
+                .isValid(true)
+                .rulesEvaluated(List.of())
+                .errors(new ValidationErrors().errorMessages(List.of()).validationIssues(List.of()))
+                .warnings(List.of());
     }
 }

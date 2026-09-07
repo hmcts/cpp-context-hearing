@@ -23,6 +23,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     private static final String ACTION_NAME_GET_HEARING = "hearing.get.hearing";
     private static final String ACTION_NAME_GET_HEARINGS = "hearing.get.hearings";
+    private static final String ACTION_NAME_GET_HEARING_CASES_FOR_DAY = "hearing.get.hearing-cases-for-day";
     private static final String ACTION_NAME_GET_HEARINGS_FOR_TODAY = "hearing.get.hearings-for-today";
     private static final String ACTION_NAME_GET_DRAFT_RESULT = "hearing.get-draft-result";
     private static final String ACTION_NAME_GET_RESULTS = "hearing.get-results";
@@ -70,6 +71,16 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearingsByDateV2() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "CPS", "Non CPS Prosecutors", "Advocates", "Defence Users", "Recorders", "Defence Lawyers", "Court Administrators");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedSystemUsersGroupToGetHearingCasesForDay() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_CASES_FOR_DAY, "System Users");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetHearingCasesForDay() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_CASES_FOR_DAY, "System Users");
     }
 
     @Test
