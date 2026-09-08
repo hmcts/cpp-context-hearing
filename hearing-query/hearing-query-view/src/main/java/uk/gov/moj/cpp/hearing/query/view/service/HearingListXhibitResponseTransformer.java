@@ -37,8 +37,8 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSi
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Defendant;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.PublicNotices;
-import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
-import uk.gov.moj.cpp.listing.domain.referencedata.CourtRoomMapping;
+import uk.gov.moj.cpp.hearing.listing.common.xhibit.CommonXhibitReferenceDataService;
+import uk.gov.moj.cpp.hearing.listing.domain.referencedata.CourtRoomMapping;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
