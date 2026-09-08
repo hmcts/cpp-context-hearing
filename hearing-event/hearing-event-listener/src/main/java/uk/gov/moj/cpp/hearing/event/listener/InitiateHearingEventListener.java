@@ -64,10 +64,6 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S2201", "squid:S134"})
 @ServiceComponent(EVENT_LISTENER)
 public class InitiateHearingEventListener {
-    private static final String GUILTY = "GUILTY";
-
-    private static final String CHANGE_TO_GUILTY_MAGISTRATES_COURT = "CHANGE_TO_GUILTY_MAGISTRATES_COURT";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(InitiateHearingEventListener.class.getName());
 
     @Inject
@@ -113,6 +109,8 @@ public class InitiateHearingEventListener {
         final UUID hearingId = initiated.getHearing().getId();
 
         LOGGER.debug("hearing.initiated event received for hearingId {}", hearingId);
+
+        seedOffenceBailStatusFromDefendant(initiated.getHearing());
 
         if (hearingRepository.findOptionalBy(hearingId).isEmpty()) {
             final Hearing hearingEntity = hearingJPAMapper.toJPA(initiated.getHearing());
@@ -377,8 +375,6 @@ public class InitiateHearingEventListener {
 
             if (shouldSetPlea) {
                 offence.setPlea(pleaJPAMapper.toJPA(event.getPlea()));
-                final boolean IS_GUILTY_PLEA = GUILTY.equals(event.getPlea().getPleaValue()) || CHANGE_TO_GUILTY_MAGISTRATES_COURT.equals(event.getPlea().getPleaValue());
-                offence.setConvictionDate(IS_GUILTY_PLEA ? event.getPlea().getPleaDate() : null);
                 offenceRepository.save(offence);
             }
         }
@@ -453,6 +449,16 @@ public class InitiateHearingEventListener {
                     }
             );
         }
+    }
+
+    private void seedOffenceBailStatusFromDefendant(final uk.gov.justice.core.courts.Hearing hearing) {
+        ofNullable(hearing.getProsecutionCases()).stream().flatMap(Collection::stream)
+                .forEach(prosecutionCase -> ofNullable(prosecutionCase.getDefendants()).stream().flatMap(Collection::stream)
+                        .filter(defendant -> nonNull(defendant.getPersonDefendant()))
+                        .filter(defendant -> nonNull(defendant.getPersonDefendant().getBailStatus()))
+                        .forEach(defendant -> ofNullable(defendant.getOffences()).stream().flatMap(Collection::stream)
+                                .filter(offence -> isNull(offence.getBailStatus()))
+                                .forEach(offence -> offence.setBailStatus(defendant.getPersonDefendant().getBailStatus()))));
     }
 
     private List<Offence> getOffencesForHearing(final Hearing hearingEntity) {
