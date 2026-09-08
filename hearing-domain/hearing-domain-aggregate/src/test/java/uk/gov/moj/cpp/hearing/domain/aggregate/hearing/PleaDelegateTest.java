@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -720,6 +721,218 @@ public class PleaDelegateTest {
         assertThat(indicatedPleaUpdated, is(notNullValue()));
         assertThat(indicatedPleaUpdated.getIndicatedPlea().getIndicatedPleaValue(), is(INDICATED_GUILTY));
         assertThat(indicatedPleaUpdated.getHearingId(), is(HEARING_ID));
+    }
+
+    @Test
+    public void shouldAddConvictionDateWhenInheritingGuiltyPlea() {
+        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final Plea plea = Plea.plea()
+                .withOffenceId(OFFENCE_ID)
+                .withPleaValue(GUILTY)
+                .withPleaDate(NEW_PLEA_DATE)
+                .withOriginatingHearingId(randomUUID())
+                .build();
+
+        final List<Object> events = pleaDelegate.inheritPlea(HEARING_ID, plea, guiltyPleaTypes()).collect(Collectors.toList());
+
+        assertThat(events.size(), is(2));
+        assertThat(events.get(0), instanceOf(uk.gov.moj.cpp.hearing.domain.event.InheritedPlea.class));
+        final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) events.get(1);
+        assertThat(convictionDateAdded.getOffenceId(), is(OFFENCE_ID));
+        assertThat(convictionDateAdded.getHearingId(), is(HEARING_ID));
+        assertThat(convictionDateAdded.getCaseId(), is(CASE_ID));
+        assertThat(convictionDateAdded.getConvictionDate(), is(NEW_PLEA_DATE));
+    }
+
+    @Test
+    public void shouldAddConvictionDateWhenInheritingEachGuiltyPleaType() {
+        GUILTY_PLEA_LIST.forEach(guiltyPleaValue -> {
+            final UUID offenceId = randomUUID();
+            final UUID hearingId = randomUUID();
+            final UUID caseId = randomUUID();
+            final UUID defendantId = randomUUID();
+            this.hearingAggregateMomento.setHearing(getHearing(offenceId, defendantId, caseId, hearingId));
+
+            final Plea plea = Plea.plea()
+                    .withOffenceId(offenceId)
+                    .withPleaValue(guiltyPleaValue)
+                    .withPleaDate(NEW_PLEA_DATE)
+                    .withOriginatingHearingId(randomUUID())
+                    .build();
+
+            final List<Object> events = pleaDelegate.inheritPlea(hearingId, plea, guiltyPleaTypes()).collect(Collectors.toList());
+
+            assertThat(events.size(), is(2));
+            assertThat(events.get(0), instanceOf(uk.gov.moj.cpp.hearing.domain.event.InheritedPlea.class));
+            final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) events.get(1);
+            assertThat(convictionDateAdded.getOffenceId(), is(offenceId));
+            assertThat(convictionDateAdded.getHearingId(), is(hearingId));
+            assertThat(convictionDateAdded.getCaseId(), is(caseId));
+            assertThat(convictionDateAdded.getConvictionDate(), is(NEW_PLEA_DATE));
+        });
+    }
+
+    @Test
+    public void shouldRemoveConvictionDateWhenInheritingNotGuiltyPlea() {
+        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID, NEW_PLEA_DATE);
+        this.hearingAggregateMomento.setHearing(hearing);
+        this.hearingAggregateMomento.getConvictionDates().put(OFFENCE_ID, NEW_PLEA_DATE);
+
+        final Plea plea = Plea.plea()
+                .withOffenceId(OFFENCE_ID)
+                .withPleaValue(NOT_GUILTY)
+                .withPleaDate(NEW_PLEA_DATE)
+                .withOriginatingHearingId(randomUUID())
+                .build();
+
+        final List<Object> events = pleaDelegate.inheritPlea(HEARING_ID, plea, guiltyPleaTypes()).collect(Collectors.toList());
+
+        assertThat(events.size(), is(2));
+        assertThat(events.get(0), instanceOf(uk.gov.moj.cpp.hearing.domain.event.InheritedPlea.class));
+        assertThat(events.get(1), instanceOf(ConvictionDateRemoved.class));
+        final ConvictionDateRemoved convictionDateRemoved = (ConvictionDateRemoved) events.get(1);
+        assertThat(convictionDateRemoved.getOffenceId(), is(OFFENCE_ID));
+        assertThat(convictionDateRemoved.getHearingId(), is(HEARING_ID));
+        assertThat(convictionDateRemoved.getCaseId(), is(CASE_ID));
+    }
+
+    @Test
+    public void shouldOnlyRaiseInheritedPleaWhenInheritingNotGuiltyWithoutExistingConvictionDate() {
+        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final Plea plea = Plea.plea()
+                .withOffenceId(OFFENCE_ID)
+                .withPleaValue(NOT_GUILTY)
+                .withPleaDate(NEW_PLEA_DATE)
+                .withOriginatingHearingId(randomUUID())
+                .build();
+
+        final List<Object> events = pleaDelegate.inheritPlea(HEARING_ID, plea, guiltyPleaTypes()).collect(Collectors.toList());
+
+        assertThat(events.size(), is(1));
+        assertThat(events.get(0), instanceOf(uk.gov.moj.cpp.hearing.domain.event.InheritedPlea.class));
+        assertThat(events.stream().filter(ConvictionDateAdded.class::isInstance).count(), is(0L));
+        assertThat(events.stream().filter(ConvictionDateRemoved.class::isInstance).count(), is(0L));
+    }
+
+    @Test
+    public void shouldNotAddConvictionDateWhenInheritingGuiltyPleaForCivilCase() {
+        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
+        hearing.getProsecutionCases().get(0).setIsCivil(true);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final Plea plea = Plea.plea()
+                .withOffenceId(OFFENCE_ID)
+                .withPleaValue(GUILTY)
+                .withPleaDate(NEW_PLEA_DATE)
+                .withOriginatingHearingId(randomUUID())
+                .build();
+
+        final List<Object> events = pleaDelegate.inheritPlea(HEARING_ID, plea, guiltyPleaTypes()).collect(Collectors.toList());
+
+        assertThat(events.size(), is(1));
+        assertThat(events.get(0), instanceOf(uk.gov.moj.cpp.hearing.domain.event.InheritedPlea.class));
+        assertThat(events.stream().filter(ConvictionDateAdded.class::isInstance).count(), is(0L));
+    }
+
+    @Test
+    public void shouldAddConvictionDateWhenInheritingGuiltyPleaForCourtApplicationOffence() {
+        final Hearing hearing = getHearing(OFFENCE_ID, APPLICATION_ID, HEARING_ID);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final Plea plea = Plea.plea()
+                .withOffenceId(OFFENCE_ID)
+                .withPleaValue(GUILTY)
+                .withPleaDate(NEW_PLEA_DATE)
+                .withOriginatingHearingId(randomUUID())
+                .build();
+
+        final List<Object> events = pleaDelegate.inheritPlea(HEARING_ID, plea, guiltyPleaTypes()).collect(Collectors.toList());
+
+        assertThat(events.size(), is(2));
+        assertThat(events.get(0), instanceOf(uk.gov.moj.cpp.hearing.domain.event.InheritedPlea.class));
+        final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) events.get(1);
+        assertThat(convictionDateAdded.getOffenceId(), is(OFFENCE_ID));
+        assertThat(convictionDateAdded.getHearingId(), is(HEARING_ID));
+        assertThat(convictionDateAdded.getCourtApplicationId(), is(APPLICATION_ID));
+        assertThat(convictionDateAdded.getConvictionDate(), is(NEW_PLEA_DATE));
+    }
+
+    @Test
+    public void shouldOnlyRaiseInheritedPleaWhenOffenceNotPresentOnHearing() {
+        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final Plea plea = Plea.plea()
+                .withOffenceId(randomUUID())
+                .withPleaValue(GUILTY)
+                .withPleaDate(NEW_PLEA_DATE)
+                .withOriginatingHearingId(randomUUID())
+                .build();
+
+        final List<Object> events = pleaDelegate.inheritPlea(HEARING_ID, plea, guiltyPleaTypes()).collect(Collectors.toList());
+
+        assertThat(events.size(), is(1));
+        assertThat(events.get(0), instanceOf(uk.gov.moj.cpp.hearing.domain.event.InheritedPlea.class));
+        assertThat(events.stream().filter(ConvictionDateAdded.class::isInstance).count(), is(0L));
+    }
+
+    @Test
+    public void shouldSyncAggregateConvictionDateWhenInheritedGuiltyPleaEventsAreApplied() throws Exception {
+        final Hearing hearing = hearingReadyForInherit(getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID));
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.initiate(hearing).forEach(hearingAggregate::apply);
+
+        final Plea plea = Plea.plea()
+                .withOffenceId(OFFENCE_ID)
+                .withPleaValue(GUILTY)
+                .withPleaDate(NEW_PLEA_DATE)
+                .withOriginatingHearingId(randomUUID())
+                .build();
+
+        hearingAggregate.inheritPlea(HEARING_ID, plea, guiltyPleaTypes()).collect(Collectors.toList());
+
+        final HearingAggregateMomento momento = getMemonto(hearingAggregate);
+        assertThat(momento.getPleas().get(OFFENCE_ID).getPleaValue(), is(GUILTY));
+        assertThat(momento.getConvictionDates().get(OFFENCE_ID), is(NEW_PLEA_DATE));
+        assertThat(hearingAggregate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getConvictionDate(),
+                is(NEW_PLEA_DATE));
+    }
+
+    @Test
+    public void shouldSyncAggregateConvictionDateRemovalWhenInheritedNotGuiltyPleaEventsAreApplied() throws Exception {
+        final Hearing hearing = hearingReadyForInherit(getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID, NEW_PLEA_DATE));
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.initiate(hearing).forEach(hearingAggregate::apply);
+
+        assertThat(getMemonto(hearingAggregate).getConvictionDates().get(OFFENCE_ID), is(NEW_PLEA_DATE));
+
+        final Plea plea = Plea.plea()
+                .withOffenceId(OFFENCE_ID)
+                .withPleaValue(NOT_GUILTY)
+                .withPleaDate(NEW_PLEA_DATE)
+                .withOriginatingHearingId(randomUUID())
+                .build();
+
+        hearingAggregate.inheritPlea(HEARING_ID, plea, guiltyPleaTypes()).collect(Collectors.toList());
+
+        final HearingAggregateMomento momento = getMemonto(hearingAggregate);
+        assertThat(momento.getPleas().get(OFFENCE_ID).getPleaValue(), is(NOT_GUILTY));
+        assertThat(momento.getConvictionDates().containsKey(OFFENCE_ID), is(false));
+        assertThat(hearingAggregate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getConvictionDate(),
+                is(nullValue()));
+    }
+
+    private Hearing hearingReadyForInherit(final Hearing hearing) {
+        return hearing()
+                .withValuesFrom(hearing)
+                .withHearingDays(singletonList(uk.gov.justice.core.courts.HearingDay.hearingDay()
+                        .withSittingDay(java.time.ZonedDateTime.of(NEW_PLEA_DATE.plusDays(30), java.time.LocalTime.of(10, 0), java.time.ZoneOffset.UTC))
+                        .build()))
+                .build();
     }
 
     private void shouldAddConvictionDateAddedWhenPleaIsGuiltyType(String guiltyPleaValue) {
