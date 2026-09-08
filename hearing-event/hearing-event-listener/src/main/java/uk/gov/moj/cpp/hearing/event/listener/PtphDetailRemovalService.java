@@ -23,6 +23,10 @@ import org.slf4j.LoggerFactory;
  * listeners — deleted, deleted-bdf, court-application-deleted, marked-as-duplicate and
  * unallocated. Call this immediately after removing the hearing row, never on its own.
  */
+// Field injection (java:S6813) to match every other CDI bean and listener in this context;
+// constructor injection here would also need a second no-arg constructor to keep this normal-scoped
+// bean proxyable.
+@SuppressWarnings("java:S6813")
 @ApplicationScoped
 public class PtphDetailRemovalService {
 
