@@ -602,12 +602,12 @@ public class HearingAggregate implements Aggregate {
         return apply(pleaDelegate.updatePlea(hearingId, plea, guiltyPleaTypes));
     }
 
-    public Stream<Object> inheritPlea(final UUID hearingId, final Plea plea) {
+    public Stream<Object> inheritPlea(final UUID hearingId, final Plea plea, final Set<String> guiltyPleaTypes) {
         if (this.momento.isDeletedOrDuplicated() || SHARED == this.hearingState || checkIfHearingDateHasPassedPleaDate(plea.getPleaDate())) {
             return warnEventIgnored(hearingId, "inheritPlea");
         }
 
-        return apply(this.pleaDelegate.inheritPlea(hearingId, plea));
+        return apply(this.pleaDelegate.inheritPlea(hearingId, plea, guiltyPleaTypes));
     }
 
     public Stream<Object> updateHearingWithIndicatedPlea(final UUID hearingId, final IndicatedPlea indicatedPlea) {

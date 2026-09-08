@@ -88,4 +88,61 @@ class GetHearingCaseTransformerTest {
 
         assertThat(result.getHearingDate(), is(tomorrow.toLocalDate().toString()));
     }
+
+    @Test
+    void shouldIncludeGroupMasterCaseWhenHearingIsGroupProceedings() {
+        final UUID masterCaseId = randomUUID();
+        final Hearing hearing = hearing().withId(randomUUID())
+                .withCourtCentre(courtCentre().withId(randomUUID()).withRoomId(randomUUID()).build())
+                .withIsGroupProceedings(true)
+                .withProsecutionCases(List.of(
+                        prosecutionCase().withId(masterCaseId)
+                                .withIsGroupMaster(true)
+                                .withIsGroupMember(true)
+                                .build()
+                ))
+                .build();
+
+        final HearingCases result = transformer.hearingCases(hearing, LocalDate.now()).build();
+
+        assertThat(result.getProsecutionCases(), equalTo(List.of(masterCaseId)));
+    }
+
+    @Test
+    void shouldIncludeNonGroupMemberCaseWhenHearingIsGroupProceedings() {
+        final UUID caseId = randomUUID();
+        final Hearing hearing = hearing().withId(randomUUID())
+                .withCourtCentre(courtCentre().withId(randomUUID()).withRoomId(randomUUID()).build())
+                .withIsGroupProceedings(true)
+                .withProsecutionCases(List.of(
+                        prosecutionCase().withId(caseId)
+                                .withIsGroupMaster(false)
+                                .withIsGroupMember(null)
+                                .build()
+                ))
+                .build();
+
+        final HearingCases result = transformer.hearingCases(hearing, LocalDate.now()).build();
+
+        assertThat(result.getProsecutionCases(), equalTo(List.of(caseId)));
+    }
+
+    @Test
+    void shouldExcludeGroupMemberCaseWhenHearingIsGroupProceedings() {
+        final UUID memberCaseId = randomUUID();
+        final Hearing hearing = hearing().withId(randomUUID())
+                .withCourtCentre(courtCentre().withId(randomUUID()).withRoomId(randomUUID()).build())
+                .withIsGroupProceedings(true)
+                .withProsecutionCases(List.of(
+                        prosecutionCase().withId(memberCaseId)
+                                .withIsGroupMaster(false)
+                                .withIsGroupMember(true)
+                                .build()
+                ))
+                .build();
+
+        final HearingCases result = transformer.hearingCases(hearing, LocalDate.now()).build();
+
+        assertThat(result.getProsecutionCases(), is(emptyList()));
+    }
 }

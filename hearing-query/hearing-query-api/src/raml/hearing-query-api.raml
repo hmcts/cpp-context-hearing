@@ -715,6 +715,29 @@ protocols: [ HTTP, HTTPS ]
                   example:  !include json/hearing.get-prosecutioncase-result.json
                   schema:  !include  json/schema/hearing.get-prosecutioncase-result.json
 
+/defendants/{defendantId}/offence-bail-status:
+  uriParameters:
+        defendantId:
+          description: ID of defendant to get offence bail statuses for
+          type: string
+  get:
+    description: |
+      Gets, for the given defendant, the bail status of each active offence from its most
+      recently shared hearing day, falling back to the defendant's own bail status for that
+      hearing when the offence has none.
+      ...
+      (mapping):
+          responseType: application/vnd.hearing.offence-bail-status-for-defendant+json
+          name: hearing.offence-bail-status-for-defendant
+       ...
+    responses:
+          200:
+              description: OK
+              body:
+                application/vnd.hearing.offence-bail-status-for-defendant+json:
+                  example:  !include json/hearing.offence-bail-status-for-defendant-result.json
+                  schema:  !include  json/schema/hearing.offence-bail-status-for-defendant-result.json
+
 /hearings/event-log:
     get:
         description: |
