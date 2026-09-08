@@ -225,7 +225,12 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize", "squid:CommentedOutCodeLine","squid:CallToDeprecatedMethod"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = -6059812881894748592L;
+    // Bumped for the PTPH detail state: this class gained the hearingPtphDetailDelegate field and
+    // the momento gained tier / listType / keyReason / finalised. Deserialisation does not run
+    // field initialisers, so a snapshot written before those fields existed would restore with a
+    // null delegate and NPE on the first PTPH command. A changed id makes the framework discard
+    // such a snapshot and rebuild from the event stream instead.
+    private static final long serialVersionUID = -6059812881894748593L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingAggregate.class);
 

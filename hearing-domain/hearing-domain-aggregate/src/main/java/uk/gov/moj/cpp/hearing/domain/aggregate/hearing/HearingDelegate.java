@@ -778,6 +778,7 @@ public class HearingDelegate implements Serializable {
             return;
         }
         this.momento.setDeleted(true);
+        this.momento.clearPtphDetail();
         final Set<UUID> offencesToBeRemoved = new HashSet<>(
                 Optional.ofNullable(hearingUnallocated.getOffenceIds())
                         .orElse(Collections.emptyList())

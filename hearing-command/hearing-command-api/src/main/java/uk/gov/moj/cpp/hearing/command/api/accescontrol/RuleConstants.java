@@ -29,4 +29,17 @@ public class RuleConstants {
     public static String[] getUsersForInitiateHearing() {
         return new String[]{"Probation Admin", "Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin", "System Users","Court Associate", "Magistrates"};
     }
+
+    /**
+     * The groups that may write a hearing's tier and list type — save, finalise or delete.
+     *
+     * <p>Deliberately the same five groups that may record a plea or a draft result
+     * ({@code hearing.update-plea}, {@code hearing.save-draft-result}): tier and list type are
+     * part of the formal court record, so court staff write them even though the judge decides
+     * their content. The judicial groups are therefore absent here, though they can still read
+     * the values — see the query side's equivalent.
+     */
+    public static String[] getUsersForPtphDetail() {
+        return new String[]{"Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators"};
+    }
 }

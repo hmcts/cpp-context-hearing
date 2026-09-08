@@ -44,6 +44,18 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     private static final String ACTION_NAME_GET_TIER_AND_LIST_TYPE = "hearing.get-ptph-detail";
 
+    /**
+     * Anyone who can read a plea or a draft result can read the tier and list type. Plea has no
+     * read endpoint of its own — it rides {@code hearing.get.hearing} — so this is the union of
+     * that rule's groups with those of {@code hearing.get-draft-result} and its v2, which
+     * contribute {@code System Users} and {@code Operational Delivery Admin}. Writing the values
+     * is far narrower: the five groups that may record a plea (see the command-side rules).
+     */
+    private static final String[] GROUPS_THAT_CAN_READ_PLEA_OR_DRAFT_RESULT = {
+            "Listing Officers", "Court Clerks", "Legal Advisers", "System Users", "Judiciary",
+            "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators",
+            "Operational Delivery Admin"};
+
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -224,12 +236,12 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetPtphDetail() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_TIER_AND_LIST_TYPE, "System Users", "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_TIER_AND_LIST_TYPE, GROUPS_THAT_CAN_READ_PLEA_OR_DRAFT_RESULT);
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetPtphDetail() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_TIER_AND_LIST_TYPE, "System Users", "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_TIER_AND_LIST_TYPE, GROUPS_THAT_CAN_READ_PLEA_OR_DRAFT_RESULT);
     }
 
     @Override

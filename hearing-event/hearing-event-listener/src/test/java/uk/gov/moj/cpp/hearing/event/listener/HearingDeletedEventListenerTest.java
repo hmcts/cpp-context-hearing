@@ -16,10 +16,8 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationHearingDeleted;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.PtphDetail;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
-import uk.gov.moj.cpp.hearing.repository.PtphDetailRepository;
 
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +39,7 @@ public class HearingDeletedEventListenerTest {
     private ProsecutionCaseRepository pcRepository;
 
     @Mock
-    private PtphDetailRepository ptphDetailRepository;
+    private PtphDetailRemovalService ptphDetailRemovalService;
 
     @InjectMocks
     private HearingDeletedEventListener hearingDeletedEventListener;
@@ -151,32 +149,26 @@ public class HearingDeletedEventListenerTest {
     @Test
     public void shouldRemovePtphDetailWhenHearingIsDeleted() {
         final UUID hearingId = randomUUID();
-        final PtphDetail ptphDetail = new PtphDetail();
-
         when(hearingRepository.findBy(hearingId)).thenReturn(new Hearing());
-        when(ptphDetailRepository.findBy(hearingId)).thenReturn(ptphDetail);
 
         hearingDeletedEventListener.hearingDeleted(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .build()));
 
-        verify(ptphDetailRepository).removeAndFlush(ptphDetail);
+        verify(ptphDetailRemovalService).removeFor(hearingId);
     }
 
     @Test
     public void shouldRemovePtphDetailWhenHearingIsDeletedByBdf() {
         final UUID hearingId = randomUUID();
-        final PtphDetail ptphDetail = new PtphDetail();
-
         when(hearingRepository.findProsecutionCasesByHearingId(hearingId)).thenReturn(Collections.emptyList());
         when(hearingRepository.findBy(hearingId)).thenReturn(new Hearing());
-        when(ptphDetailRepository.findBy(hearingId)).thenReturn(ptphDetail);
 
         hearingDeletedEventListener.hearingDeletedBdf(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .build()));
 
-        verify(ptphDetailRepository).removeAndFlush(ptphDetail);
+        verify(ptphDetailRemovalService).removeFor(hearingId);
     }
 
     /**
@@ -188,7 +180,6 @@ public class HearingDeletedEventListenerTest {
     public void shouldRemovePtphDetailWhenCourtApplicationHearingIsDeleted() {
         final Envelope<CourtApplicationHearingDeleted> envelope = (Envelope<CourtApplicationHearingDeleted>) mock(Envelope.class);
         final UUID hearingId = randomUUID();
-        final PtphDetail ptphDetail = new PtphDetail();
 
         given(envelope.payload()).willReturn(CourtApplicationHearingDeleted.courtApplicationHearingDeleted()
                 .withHearingId(hearingId)
@@ -196,11 +187,10 @@ public class HearingDeletedEventListenerTest {
         final Hearing hearing = new Hearing();
         hearing.setId(hearingId);
         when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
-        when(ptphDetailRepository.findBy(hearingId)).thenReturn(ptphDetail);
 
         hearingDeletedEventListener.processCourtApplicationDeleted(envelope);
 
-        verify(ptphDetailRepository).removeAndFlush(ptphDetail);
+        verify(ptphDetailRemovalService).removeFor(hearingId);
         verify(hearingRepository).remove(hearing);
     }
 
@@ -215,7 +205,7 @@ public class HearingDeletedEventListenerTest {
                 .add("hearingId", hearingId.toString())
                 .build()));
 
-        verify(ptphDetailRepository, never()).removeAndFlush(any());
+        verify(ptphDetailRemovalService, never()).removeFor(any());
     }
 
     /** And on the BDF path. */
@@ -230,7 +220,7 @@ public class HearingDeletedEventListenerTest {
                 .add("hearingId", hearingId.toString())
                 .build()));
 
-        verify(ptphDetailRepository, never()).removeAndFlush(any());
+        verify(ptphDetailRemovalService, never()).removeFor(any());
     }
 
     /**
@@ -251,23 +241,7 @@ public class HearingDeletedEventListenerTest {
 
         hearingDeletedEventListener.processCourtApplicationDeleted(envelope);
 
-        verify(ptphDetailRepository, never()).removeAndFlush(any());
+        verify(ptphDetailRemovalService, never()).removeFor(any());
     }
 
-    /** Most hearings have no ptph detail, so deletion must not fail for them. */
-    @Test
-    public void shouldDeleteHearingWithoutErrorWhenThereIsNoPtphDetail() {
-        final UUID hearingId = randomUUID();
-        final Hearing hearing = new Hearing();
-
-        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
-        when(ptphDetailRepository.findBy(hearingId)).thenReturn(null);
-
-        hearingDeletedEventListener.hearingDeleted(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
-                .add("hearingId", hearingId.toString())
-                .build()));
-
-        verify(ptphDetailRepository, never()).removeAndFlush(any());
-        verify(hearingRepository).remove(hearing);
-    }
 }
