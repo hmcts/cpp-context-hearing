@@ -1515,6 +1515,7 @@ public class InitiateHearingIT extends AbstractIT {
                 );
     }
 
+    @SuppressWarnings("java:S2699")
     @Test
     public void shouldSeedOffenceBailStatusFromDefendantPreHearingBailStatus() {
 
@@ -1542,6 +1543,7 @@ public class InitiateHearingIT extends AbstractIT {
         );
     }
 
+    @SuppressWarnings("java:S2699")
     @Test
     public void shouldLeaveOffenceBailStatusNull_whenDefendantHasNoPreHearingBailStatus() {
 
