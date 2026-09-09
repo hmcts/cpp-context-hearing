@@ -4,8 +4,10 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.ADDRESS;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIXL;
@@ -43,6 +45,7 @@ import uk.gov.moj.cpp.hearing.query.view.convertor.ReusableInformationMainConver
 import uk.gov.moj.cpp.hearing.query.view.convertor.ReusableInformationObjectTypeConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.ReusableInformationTxtConverter;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,6 +58,7 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
+import com.jayway.jsonpath.DocumentContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -179,17 +183,13 @@ public class ReusableInformationMainConverterTest {
 
         final List<JsonObject> promptJsonObjects = caseListMap.get(cases.get(0));
 
+        // TXT prompts with no matching case paths must be omitted (not emitted as blank values)
+        assertThat(promptJsonObjects.size(), is(1));
         assertThat(promptJsonObjects.get(0).getString("promptRef"), is("minorcreditornameandaddress"));
         assertThat(promptJsonObjects.get(0).getString("type"), is("NAMEADDRESS"));
         assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("minorcreditornameandaddressOrganisationName"), is("AuthorityName"));
         assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("minorcreditornameandaddressAddress1"), is("line 1"));
         assertThat(promptJsonObjects.get(0).getJsonObject("value").get("minorcreditornameandaddressAddress2"), nullValue());
-
-        assertThat(promptJsonObjects.get(1).getString("promptRef"), is("parentguardiansname"));
-        assertThat(promptJsonObjects.get(1).getString("value"), is(""));
-
-        assertThat(promptJsonObjects.get(2).getString("promptRef"), is("defendantDrivingLicenceNumber"));
-        assertThat(promptJsonObjects.get(2).getString("value"), is(""));
     }
 
 
@@ -751,5 +751,187 @@ public class ReusableInformationMainConverterTest {
                 .setPartName("EmailAddress1");
 
         return asList(prompt1, prompt2, prompt3, prompt4, prompt5);
+    }
+
+    @Test
+    public void shouldReadPromptValueFromDeeplyNestedJsonBeyondJsonSmartDefaultDepth() throws Exception {
+        final int depth = 450;
+        final StringBuilder json = new StringBuilder();
+        final StringBuilder path = new StringBuilder();
+        for (int i = 0; i < depth; i++) {
+            json.append("{\"nested\":");
+            if (i > 0) {
+                path.append('.');
+            }
+            path.append("nested");
+        }
+        json.append("{\"value\":\"deep-value\"}");
+        path.append(".value");
+        for (int i = 0; i < depth; i++) {
+            json.append('}');
+        }
+
+        final DocumentContext documentContext = parseJson(json.toString());
+        final Optional<String> value = toTxtValue(documentContext, path.toString());
+
+        assertTrue(value.isPresent());
+        assertThat(value.get(), is("deep-value"));
+    }
+
+    @Test
+    public void shouldOmitBlankTxtAndIntcPromptsForDefendantWhenPathsDoNotMatch() {
+        final Defendant defendant = Defendant.defendant()
+                .withMasterDefendantId(randomUUID())
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person().build())
+                        .build())
+                .build();
+
+        final List<Prompt> prompts = new ArrayList<>();
+        prompts.addAll(prepareTxtPrompts());
+        prompts.addAll(prepareINTCPromptsHome());
+        prompts.addAll(prepareINTCPromptsMobile());
+
+        final Map<Defendant, List<JsonObject>> defendantListMap = reusableInformationMainConverter.convertDefendant(
+                singletonList(defendant), prompts, Collections.emptyMap());
+
+        assertThat(defendantListMap.get(defendant).size(), is(0));
+    }
+
+    @Test
+    public void shouldConvertDefendantWhenCustomPromptValuesIsNull() {
+        final List<Defendant> defendants = singletonList(prepareDefendant());
+        final List<Prompt> prompts = prepareFixlmPrompts();
+
+        final Map<Defendant, List<JsonObject>> defendantListMap = reusableInformationMainConverter.convertDefendant(
+                defendants, prompts, null);
+
+        final List<JsonObject> promptJsonObjects = defendantListMap.get(defendants.get(0));
+        assertThat(promptJsonObjects.size(), is(1));
+        assertThat(promptJsonObjects.get(0).getString("value"), is("350" + DELIMITER + "460"));
+    }
+
+    @Test
+    public void shouldMapNationalityCodesViaCustomPromptValuesWithoutMutatingConverterState() {
+        final List<Defendant> defendants = singletonList(prepareDefendant());
+        final List<Prompt> prompts = prepareFixlmPrompts();
+
+        final Map<String, String> countryCodesMap = new HashMap<>();
+        countryCodesMap.put("350", "British");
+        countryCodesMap.put("460", "Irish");
+        final Map<String, Map<String, String>> customPromptValues = new HashMap<>();
+        customPromptValues.put("nationality", countryCodesMap);
+
+        final Map<Defendant, List<JsonObject>> defendantListMap = reusableInformationMainConverter.convertDefendant(
+                defendants, prompts, customPromptValues);
+
+        final List<JsonObject> promptJsonObjects = defendantListMap.get(defendants.get(0));
+        assertThat(promptJsonObjects.size(), is(1));
+        assertThat(promptJsonObjects.get(0).getString("value"), is("British" + DELIMITER + "Irish"));
+    }
+
+    @Test
+    public void shouldLeaveNationalityCodesUnchangedWhenNationalityKeyMissingFromCustomPromptValues() {
+        final List<Defendant> defendants = singletonList(prepareDefendant());
+        final List<Prompt> prompts = prepareFixlmPrompts();
+
+        final Map<String, Map<String, String>> customPromptValues = new HashMap<>();
+        customPromptValues.put("otherKey", Collections.singletonMap("350", "British"));
+
+        final Map<Defendant, List<JsonObject>> defendantListMap = reusableInformationMainConverter.convertDefendant(
+                defendants, prompts, customPromptValues);
+
+        assertThat(defendantListMap.get(defendants.get(0)).get(0).getString("value"), is("350" + DELIMITER + "460"));
+    }
+
+    @Test
+    public void shouldUseFirstMatchingCacheDataPathForApplicationPrompts() throws Exception {
+        final UUID promptId = randomUUID();
+        final List<Prompt> prompts = singletonList(new Prompt()
+                .setId(promptId)
+                .setType(NAMEADDRESS.name())
+                .setCacheable(2)
+                .setCacheDataPath("missing.path;organisationName")
+                .setReference("prosecutortobenotifiedOrganisationName")
+                .setPartName("OrganisationName"));
+
+        final DocumentContext documentContext = parseJson("{\"organisationName\":\"ABC Org\",\"fallbackName\":\"ShouldNotUse\"}");
+
+        final Method promptsToJsonObjectCacheDataPathList = ReusableInformationMainConverter.class.getDeclaredMethod(
+                "promptsToJsonObjectCacheDataPathList", List.class, DocumentContext.class,
+                uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.class);
+        promptsToJsonObjectCacheDataPathList.setAccessible(true);
+
+        final JsonObject result = (JsonObject) promptsToJsonObjectCacheDataPathList.invoke(
+                reusableInformationMainConverter, prompts, documentContext, NAMEADDRESS);
+
+        assertThat(result.getString("prosecutortobenotifiedOrganisationName"), is("ABC Org"));
+        assertFalse(result.containsKey("fallbackName"));
+    }
+
+    @Test
+    public void shouldPreferFirstMatchingPathAndIgnoreLaterPaths() throws Exception {
+        final UUID promptId = randomUUID();
+        final List<Prompt> prompts = singletonList(new Prompt()
+                .setId(promptId)
+                .setType(NAMEADDRESS.name())
+                .setCacheable(2)
+                .setCacheDataPath("firstName;secondName")
+                .setReference("prosecutortobenotifiedOrganisationName")
+                .setPartName("OrganisationName"));
+
+        final DocumentContext documentContext = parseJson("{\"firstName\":\"First\",\"secondName\":\"Second\"}");
+
+        final Method promptsToJsonObjectCacheDataPathList = ReusableInformationMainConverter.class.getDeclaredMethod(
+                "promptsToJsonObjectCacheDataPathList", List.class, DocumentContext.class,
+                uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.class);
+        promptsToJsonObjectCacheDataPathList.setAccessible(true);
+
+        final JsonObject result = (JsonObject) promptsToJsonObjectCacheDataPathList.invoke(
+                reusableInformationMainConverter, prompts, documentContext, NAMEADDRESS);
+
+        assertThat(result.getString("prosecutortobenotifiedOrganisationName"), is("First"));
+    }
+
+    @Test
+    public void shouldReturnFirstElementWhenJsonPathResolvesToCollection() throws Exception {
+        final DocumentContext documentContext = parseJson("{\"names\":[\"Alice\",\"Bob\"]}");
+
+        final Optional<String> value = toTxtValue(documentContext, "names");
+
+        assertTrue(value.isPresent());
+        assertThat(value.get(), is("Alice"));
+    }
+
+    @Test
+    public void shouldReturnEmptyOptionalWhenJsonPathIsInvalid() throws Exception {
+        final DocumentContext documentContext = parseJson("{\"name\":\"Alice\"}");
+
+        final Optional<String> value = toTxtValue(documentContext, "does.not.exist");
+
+        assertFalse(value.isPresent());
+    }
+
+    @Test
+    public void shouldReturnEmptyOptionalWhenJsonPathValueIsNull() throws Exception {
+        final DocumentContext documentContext = parseJson("{\"name\":null}");
+
+        final Optional<String> value = toTxtValue(documentContext, "name");
+
+        assertFalse(value.isPresent());
+    }
+
+    private DocumentContext parseJson(final String json) throws Exception {
+        final Method parseJson = ReusableInformationMainConverter.class.getDeclaredMethod("parseJson", String.class);
+        parseJson.setAccessible(true);
+        return (DocumentContext) parseJson.invoke(reusableInformationMainConverter, json);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Optional<String> toTxtValue(final DocumentContext documentContext, final String promptPath) throws Exception {
+        final Method toTxtValue = ReusableInformationMainConverter.class.getDeclaredMethod(
+                "toTxtValue", DocumentContext.class, String.class);
+        toTxtValue.setAccessible(true);
+        return (Optional<String>) toTxtValue.invoke(reusableInformationMainConverter, documentContext, promptPath);
     }
 }
