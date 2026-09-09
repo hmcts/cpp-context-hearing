@@ -1,19 +1,17 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared;
 
 import static java.lang.Boolean.TRUE;
+import static java.util.Collections.emptySet;
 import static java.util.Objects.isNull;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toSet;
 
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * Prompts flagged {@code hidden} on a result definition are populated by the system rather than the
@@ -30,10 +28,11 @@ public final class HiddenPromptsHelper {
     }
 
     public static Set<String> hiddenPromptReferences(final ResultDefinition resultDefinition) {
-        return ofNullable(resultDefinition)
-                .map(ResultDefinition::getPrompts)
-                .map(Collection::stream)
-                .orElseGet(Stream::empty)
+        if (resultDefinition == null || resultDefinition.getPrompts() == null) {
+            return emptySet();
+        }
+
+        return resultDefinition.getPrompts().stream()
                 .filter(prompt -> TRUE.equals(prompt.isHidden()))
                 .map(Prompt::getReference)
                 .filter(Objects::nonNull)
