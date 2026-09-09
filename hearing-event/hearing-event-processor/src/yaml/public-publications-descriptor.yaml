@@ -118,6 +118,16 @@ subscriptions_descriptor:
         - name: public.hearing.defendant-case-withdrawn-or-dismissed
           schema_uri: http://justice.gov.uk/json/schemas/hearing/public.hearing.defendant-case-withdrawn-or-dismissed.json
 
+        # PTPH Detail - tier and list type (LPT-2400-2404)
+        - name: public.hearing.ptph-detail-saved
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-ptph-detail-saved.json
+
+        - name: public.hearing.ptph-detail-finalised
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-ptph-detail-finalised.json
+
+        - name: public.hearing.ptph-detail-deleted
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-ptph-detail-deleted.json
+
         # Defense Counsel
         - name: public.hearing.defence-counsel-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-added.json

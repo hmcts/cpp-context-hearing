@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.query.api.accesscontrol;
 import uk.gov.moj.cpp.accesscontrol.drools.Outcome;
 import uk.gov.moj.cpp.accesscontrol.drools.Action;
 import java.util.Arrays;
+import uk.gov.moj.cpp.hearing.query.api.accesscontrol.RuleConstants;
 
 global uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider userAndGroupProvider;
 
@@ -331,6 +332,15 @@ rule "Query - API - Action - hearing.query.outstanding-fines"
     $outcome: Outcome();
     $action: Action(name == "hearing.query.outstanding-fines");
    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Court Clerks", "Legal Advisers", "Court Associate", "NCES", "Court Administrators"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.get-ptph-detail"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get-ptph-detail");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, RuleConstants.getUsersForPtphDetail()));
   then
     $outcome.setSuccess(true);
 end
