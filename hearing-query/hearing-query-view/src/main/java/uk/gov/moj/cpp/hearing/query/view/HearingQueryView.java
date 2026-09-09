@@ -41,6 +41,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.DraftResultRes
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
@@ -526,6 +527,17 @@ public class HearingQueryView {
 
         return envelop(prosecutionCaseResponse)
                 .withName("hearing.get-prosecutioncase-result")
+                .withMetadataFrom(envelope);
+    }
+
+    public Envelope<OffenceBailStatusResponse> getOffenceBailStatusForDefendant(final JsonEnvelope envelope) {
+        final Optional<UUID> defendantId = getUUID(envelope.payloadAsJsonObject(), FIELD_DEFENDANT_ID);
+
+        final OffenceBailStatusResponse offenceBailStatusResponse =  defendantId.map(hearingService::getOffenceBailStatusForDefendant)
+                .orElse(OffenceBailStatusResponse.builder().withOffenceBailStatuses(List.of()).build());
+
+        return envelop(offenceBailStatusResponse)
+                .withName("hearing.offence-bail-status-for-defendant-result")
                 .withMetadataFrom(envelope);
     }
 }
