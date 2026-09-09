@@ -23,6 +23,8 @@ import javax.inject.Inject;
 @ApplicationScoped
 public class DefendantJPAMapper {
 
+    private static final String MASKED_VALUE = "******";
+
     private AssociatedPersonJPAMapper associatedPersonJPAMapper;
     private OrganisationJPAMapper organisationJPAMapper;
     private OffenceJPAMapper offenceJPAMapper;
@@ -149,7 +151,41 @@ public class DefendantJPAMapper {
             return new ArrayList<>();
         }
         return entities.stream()
-                .filter(defendant -> nonNull(defendant) && (isNull(defendant.getCourtListRestricted()) || !defendant.getCourtListRestricted()))
-                .map(this::fromJPA).collect(Collectors.toList());
+                .filter(Objects::nonNull)
+                .map(this::fromJPAApplyingCourtListRestriction)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Maps a defendant entity for the XHIBIT court list feeds, masking the name of a court-list-restricted
+     * (e.g. youth) defendant instead of dropping it. This keeps the defendant present in the XHIBIT XML with a
+     * masked name, consistent with the listing court-list feed (which also masks with {@value #MASKED_VALUE}),
+     * so that a case whose defendants are all restricted no longer produces an empty {@code <defendants/>}.
+     * A restricted defendant that has no person name to mask (e.g. a legal-entity defendant) is still dropped,
+     * preserving the previous redaction behaviour for that case.
+     */
+    private uk.gov.justice.core.courts.Defendant fromJPAApplyingCourtListRestriction(final Defendant entity) {
+        final uk.gov.justice.core.courts.Defendant pojo = fromJPA(entity);
+        if (isNull(pojo) || !Boolean.TRUE.equals(entity.getCourtListRestricted())) {
+            return pojo;
+        }
+        if (!hasPersonName(pojo)) {
+            return null;
+        }
+        maskName(pojo.getPersonDefendant().getPersonDetails());
+        return pojo;
+    }
+
+    private boolean hasPersonName(final uk.gov.justice.core.courts.Defendant pojo) {
+        return nonNull(pojo.getPersonDefendant()) && nonNull(pojo.getPersonDefendant().getPersonDetails());
+    }
+
+    private void maskName(final uk.gov.justice.core.courts.Person person) {
+        person.setFirstName(MASKED_VALUE);
+        person.setLastName(MASKED_VALUE);
+        if (nonNull(person.getMiddleName())) {
+            person.setMiddleName(MASKED_VALUE);
+        }
     }
 }
