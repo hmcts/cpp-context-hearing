@@ -786,12 +786,13 @@ public class HearingService {
         if (hearing.getTrialTypeId() != null) {
 
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
-            crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
-                            trialType.getReasonCode(),
-                            trialType.getDate(),
-                            trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
-                            trialType.getId(),
-                            trialType.getTrialType()))
+            crackedIneffectiveTrialType.map(trialType -> CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                            .withCode(trialType.getReasonCode())
+                            .withDate(trialType.getDate())
+                            .withDescription(trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription())
+                            .withId(trialType.getId())
+                            .withType(trialType.getTrialType())
+                            .build())
                     .ifPresent(trialType -> hearingDetailsResponse
                             .getHearing()
                             .setCrackedIneffectiveTrial(trialType));
@@ -800,12 +801,13 @@ public class HearingService {
         } else if (isVacatedTrialRequest(hearing)) {
 
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getVacatedTrialReasonId(), crackedIneffectiveVacatedTrialTypes);
-            crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
-                            trialType.getReasonCode(),
-                            trialType.getDate(),
-                            trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
-                            trialType.getId(),
-                            trialType.getTrialType()))
+            crackedIneffectiveTrialType.map(trialType -> CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                            .withCode(trialType.getReasonCode())
+                            .withDate(trialType.getDate())
+                            .withDescription(trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription())
+                            .withId(trialType.getId())
+                            .withType(trialType.getTrialType())
+                            .build())
                     .ifPresent(trialType -> hearingDetailsResponse
                             .getHearing()
                             .setCrackedIneffectiveTrial(trialType));
@@ -872,12 +874,17 @@ public class HearingService {
                     .filter(crackedIneffectiveTrial -> crackedIneffectiveTrial.getId().equals(trialTypeId))
                     .findFirst();
 
-            return crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
-                            trialType.getReasonCode(),
-                            trialType.getDate(),
-                            trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
-                            trialType.getId(),
-                            trialType.getTrialType()))
+            // crackedIneffectiveSubReasonId is deliberately left unset, as it is everywhere this
+            // response is built: the field is captured on the set-trial-type command and stored on
+            // the aggregate, but it is not part of what hearing publishes or returns. Populating it
+            // here would diverge from the public.hearing.resulted payload, which does not carry it.
+            return crackedIneffectiveTrialType.map(trialType -> CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                            .withCode(trialType.getReasonCode())
+                            .withDate(trialType.getDate())
+                            .withDescription(trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription())
+                            .withId(trialType.getId())
+                            .withType(trialType.getTrialType())
+                            .build())
                     .orElse(null);
         }
 
