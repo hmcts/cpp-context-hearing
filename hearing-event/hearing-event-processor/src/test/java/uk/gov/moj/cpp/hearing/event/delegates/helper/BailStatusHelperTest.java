@@ -449,6 +449,157 @@ public class BailStatusHelperTest {
         assertThat(personDefendant.getBailStatus().getCode(), is("C"));
     }
 
+    @Test
+    public void shouldNotUpdateOffenceBailStatusWhenNexhIsMainResult() {
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        // NEXH as main result: parentJudicialResultId is null
+        final JudicialResult nexhMain = JudicialResult.judicialResult()
+                .withJudicialResultTypeId(UUID.fromString("f00359b5-7303-403b-b59e-0b1a1daa89bc"))
+                .withPostHearingCustodyStatus("A")
+                .build();
+
+        final Offence offence = Offence.offence()
+                .withJudicialResults(singletonList(nexhMain))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("U").build())
+                .build();
+        final ResultsShared resultsShared = ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                                .withDefendants(singletonList(Defendant.defendant()
+                                        .withOffences(singletonList(offence))
+                                        .withPersonDefendant(personDefendant)
+                                        .build()))
+                                .build()))
+                        .build())
+                .build();
+
+        bailStatusHelper.mapBailStatuses(context, resultsShared.getHearing());
+
+        assertNull(offence.getBailStatus());
+        // defendant-level retains existing
+        assertThat(personDefendant.getBailStatus().getCode(), is("U"));
+    }
+
+    @Test
+    public void shouldUpdateOffenceBailStatusWhenNexhIsChildResultAlongsideQualifyingResult() {
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        // Main result: Custody - no parentJudicialResultId
+        final JudicialResult custodyMain = getJudicialResult("C");
+
+        // NEXH as child result: parentJudicialResultId is non-null
+        final JudicialResult nexhChild = JudicialResult.judicialResult()
+                .withJudicialResultTypeId(UUID.fromString("f00359b5-7303-403b-b59e-0b1a1daa89bc"))
+                .withPostHearingCustodyStatus("A")
+                .withParentJudicialResultId(UUID.randomUUID())
+                .build();
+
+        final Offence offence = Offence.offence()
+                .withJudicialResults(Arrays.asList(custodyMain, nexhChild))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("U").build())
+                .build();
+        final ResultsShared resultsShared = ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                                .withDefendants(singletonList(Defendant.defendant()
+                                        .withOffences(singletonList(offence))
+                                        .withPersonDefendant(personDefendant)
+                                        .build()))
+                                .build()))
+                        .build())
+                .build();
+
+        bailStatusHelper.mapBailStatuses(context, resultsShared.getHearing());
+
+        assertNotNull(offence.getBailStatus());
+        assertThat(offence.getBailStatus().getCode(), is("C"));
+        assertThat(personDefendant.getBailStatus().getCode(), is("C"));
+    }
+
+    @Test
+    public void shouldNotUpdateOffenceBailStatusWhenAllResultsAreNotApplicableAndAnyIsExcludedTypeRegardlessOfParent() {
+        // shouldExcludeFromRanking short-circuits when every result on the offence is
+        // postHearingCustodyStatus "A" and at least one is an excluded type (NHCC/NHMC/NEXH) -
+        // this applies even when the excluded-type result is a child result.
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        final JudicialResult plainResult = JudicialResult.judicialResult()
+                .withPostHearingCustodyStatus("A")
+                .build();
+        final JudicialResult nexhChild = JudicialResult.judicialResult()
+                .withJudicialResultTypeId(UUID.fromString("f00359b5-7303-403b-b59e-0b1a1daa89bc"))
+                .withPostHearingCustodyStatus("A")
+                .withParentJudicialResultId(UUID.randomUUID())
+                .build();
+
+        final Offence offence = Offence.offence()
+                .withJudicialResults(Arrays.asList(plainResult, nexhChild))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("U").build())
+                .build();
+        final ResultsShared resultsShared = ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                                .withDefendants(singletonList(Defendant.defendant()
+                                        .withOffences(singletonList(offence))
+                                        .withPersonDefendant(personDefendant)
+                                        .build()))
+                                .build()))
+                        .build())
+                .build();
+
+        bailStatusHelper.mapBailStatuses(context, resultsShared.getHearing());
+
+        assertNull(offence.getBailStatus());
+        assertThat(personDefendant.getBailStatus().getCode(), is("U"));
+    }
+
+    @Test
+    public void shouldUpdateOffenceBailStatusWhenExcludedTypePresentButNotAllResultsAreNotApplicable() {
+        // Exclusion must not apply when at least one result has a status other than "A",
+        // even though an excluded type (NHMC) is present among the results.
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        final JudicialResult nhmcResult = JudicialResult.judicialResult()
+                .withJudicialResultTypeId(UUID.fromString("70c98fa6-804d-11e8-adc0-fa7ae01bbebc"))
+                .withPostHearingCustodyStatus("A")
+                .build();
+        final JudicialResult custodyResult = getJudicialResult("C");
+
+        final Offence offence = Offence.offence()
+                .withJudicialResults(Arrays.asList(nhmcResult, custodyResult))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("U").build())
+                .build();
+        final ResultsShared resultsShared = ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                                .withDefendants(singletonList(Defendant.defendant()
+                                        .withOffences(singletonList(offence))
+                                        .withPersonDefendant(personDefendant)
+                                        .build()))
+                                .build()))
+                        .build())
+                .build();
+
+        bailStatusHelper.mapBailStatuses(context, resultsShared.getHearing());
+
+        assertNotNull(offence.getBailStatus());
+        assertThat(offence.getBailStatus().getCode(), is("C"));
+        assertThat(personDefendant.getBailStatus().getCode(), is("C"));
+    }
+
     private List<BailStatus> buildFullListOfBailStatuses() {
         final List<BailStatus> list = new ArrayList<>(buildListOfBailStatuses());
         final BailStatus bs;
