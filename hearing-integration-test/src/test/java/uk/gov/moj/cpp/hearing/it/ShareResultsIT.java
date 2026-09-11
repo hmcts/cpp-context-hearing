@@ -699,7 +699,7 @@ public class ShareResultsIT extends AbstractIT {
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
-                                .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
+                                .with(Hearing::getCrackedIneffectiveTrial, is(publicEventShapeOf(expectedTrialType)))
                                 .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                         .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
                                                 .with(Defendant::getOffences, first(isBean(Offence.class)
@@ -742,7 +742,7 @@ public class ShareResultsIT extends AbstractIT {
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
-                                .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
+                                .with(Hearing::getCrackedIneffectiveTrial, is(publicEventShapeOf(expectedTrialType)))
                                 .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                         .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
                                                 .with(Defendant::getOffences, first(isBean(Offence.class)
@@ -811,7 +811,7 @@ public class ShareResultsIT extends AbstractIT {
                 .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
                         .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
-                                .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
+                                .with(Hearing::getCrackedIneffectiveTrial, is(publicEventShapeOf(expectedTrialType)))
                                 .with(Hearing::getDefendantAttendance, first(isBean(DefendantAttendance.class)
                                         .with(DefendantAttendance::getAttendanceDays, first(isBean(AttendanceDay.class)
                                                 .with(AttendanceDay::getAttendanceType, is(AttendanceType.IN_PERSON))))))
@@ -2596,6 +2596,7 @@ public class ShareResultsIT extends AbstractIT {
         final UUID crackedIneffectiveSubReasonId = randomUUID();
         CrackedIneffectiveTrial expectedTrialType = CrackedIneffectiveTrial.crackedIneffectiveTrial()
                 .withCode(crackedIneffectiveVacatedTrialType.getReasonCode())
+                .withCrackedIneffectiveSubReasonId(crackedIneffectiveSubReasonId)
                 .withDate(crackedIneffectiveVacatedTrialType.getDate())
                 .withDescription(crackedIneffectiveVacatedTrialType.getReasonFullDescription())
                 .withId(crackedIneffectiveVacatedTrialType.getId())
@@ -2771,7 +2772,7 @@ public class ShareResultsIT extends AbstractIT {
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
-                                .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
+                                .with(Hearing::getCrackedIneffectiveTrial, is(publicEventShapeOf(expectedTrialType)))
                                 .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                         .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
                                                 .with(Defendant::getOffences, first(isBean(Offence.class)
@@ -3223,6 +3224,7 @@ public class ShareResultsIT extends AbstractIT {
         final UUID crackedIneffectiveSubReasonId = randomUUID();
         final CrackedIneffectiveTrial expectedTrialType = CrackedIneffectiveTrial.crackedIneffectiveTrial()
                 .withCode(crackedIneffectiveVacatedTrialType.getReasonCode())
+                .withCrackedIneffectiveSubReasonId(crackedIneffectiveSubReasonId)
                 .withDate(crackedIneffectiveVacatedTrialType.getDate())
                 .withDescription(crackedIneffectiveVacatedTrialType.getReasonFullDescription())
                 .withId(crackedIneffectiveVacatedTrialType.getId())
@@ -3577,6 +3579,20 @@ public class ShareResultsIT extends AbstractIT {
 
     private List<Offence> getOffences(final InitiateHearingCommand initiateHearingCommand) {
         return initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences();
+    }
+
+    /**
+     * The query API returns crackedIneffectiveSubReasonId, but public.hearing.resulted does not carry it.
+     * The same expectation object drives both, so strip the sub-reason when matching the public event.
+     */
+    private CrackedIneffectiveTrial publicEventShapeOf(final CrackedIneffectiveTrial trialType) {
+        return CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                .withCode(trialType.getCode())
+                .withDate(trialType.getDate())
+                .withDescription(trialType.getDescription())
+                .withId(trialType.getId())
+                .withType(trialType.getType())
+                .build();
     }
 
     private void assertHearingHasSharedResults(final CrackedIneffectiveTrial expectedTrialType, final Hearing hearing) {
