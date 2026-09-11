@@ -200,6 +200,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -1206,6 +1207,54 @@ public class HearingServiceTest {
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
         );
+    }
+
+    @Test
+    public void shouldPopulateCrackedIneffectiveSubReasonIdOnTheCrackedIneffectiveTrialResponse() {
+
+        final Hearing entity = mock(Hearing.class);
+        final uk.gov.justice.core.courts.Hearing pojo = mock(uk.gov.justice.core.courts.Hearing.class);
+
+        final UUID hearingId = randomUUID();
+        final UUID trialTypeId = randomUUID();
+        final UUID crackedIneffectiveSubReasonId = randomUUID();
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(entity);
+        when(entity.getTrialTypeId()).thenReturn(trialTypeId);
+        when(entity.getCrackedIneffectiveSubReasonId()).thenReturn(crackedIneffectiveSubReasonId);
+        when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+        when(pojo.getCourtApplications()).thenReturn(null);
+
+        hearingService.getHearingDetailsResponseById(null, hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), prosecutionCasesIdsWithAccess, false);
+
+        final ArgumentCaptor<CrackedIneffectiveTrial> captor = ArgumentCaptor.forClass(CrackedIneffectiveTrial.class);
+        verify(pojo).setCrackedIneffectiveTrial(captor.capture());
+
+        assertThat(captor.getValue().getCrackedIneffectiveSubReasonId(), is(crackedIneffectiveSubReasonId));
+    }
+
+    @Test
+    public void shouldNotPopulateCrackedIneffectiveSubReasonIdForAVacatedTrial() {
+
+        final Hearing entity = mock(Hearing.class);
+        final uk.gov.justice.core.courts.Hearing pojo = mock(uk.gov.justice.core.courts.Hearing.class);
+
+        final UUID hearingId = randomUUID();
+        final UUID vacatedTrialReasonId = randomUUID();
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(entity);
+        when(entity.getTrialTypeId()).thenReturn(null);
+        when(entity.getIsVacatedTrial()).thenReturn(true);
+        when(entity.getVacatedTrialReasonId()).thenReturn(vacatedTrialReasonId);
+        when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+        when(pojo.getCourtApplications()).thenReturn(null);
+
+        hearingService.getHearingDetailsResponseById(null, hearingId, buildVacatedTrialTypes(vacatedTrialReasonId), prosecutionCasesIdsWithAccess, false);
+
+        final ArgumentCaptor<CrackedIneffectiveTrial> captor = ArgumentCaptor.forClass(CrackedIneffectiveTrial.class);
+        verify(pojo).setCrackedIneffectiveTrial(captor.capture());
+
+        assertThat(captor.getValue().getCrackedIneffectiveSubReasonId(), is(nullValue()));
     }
 
     @Test

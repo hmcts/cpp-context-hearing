@@ -104,6 +104,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 import uk.gov.moj.cpp.hearing.repository.NowRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
+import uk.gov.moj.cpp.hearing.repository.PtphDetailRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -792,6 +793,7 @@ public class HearingService {
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
             crackedIneffectiveTrialType.map(trialType -> CrackedIneffectiveTrial.crackedIneffectiveTrial()
                             .withCode(trialType.getReasonCode())
+                            .withCrackedIneffectiveSubReasonId(hearing.getCrackedIneffectiveSubReasonId())
                             .withDate(trialType.getDate())
                             .withDescription(trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription())
                             .withId(trialType.getId())
@@ -878,10 +880,10 @@ public class HearingService {
                     .filter(crackedIneffectiveTrial -> crackedIneffectiveTrial.getId().equals(trialTypeId))
                     .findFirst();
 
-            // crackedIneffectiveSubReasonId is deliberately left unset, as it is everywhere this
-            // response is built: the field is captured on the set-trial-type command and stored on
-            // the aggregate, but it is not part of what hearing publishes or returns. Populating it
-            // here would diverge from the public.hearing.resulted payload, which does not carry it.
+            // crackedIneffectiveSubReasonId is left unset here. It is populated only for a cracked
+            // or ineffective trial (updateTrialAttributes, where the hearing is in scope); this
+            // lookup resolves a trial type by id alone and has no hearing to read it from. The
+            // vacated-trial path leaves it unset for the same reason.
             return crackedIneffectiveTrialType.map(trialType -> CrackedIneffectiveTrial.crackedIneffectiveTrial()
                             .withCode(trialType.getReasonCode())
                             .withDate(trialType.getDate())

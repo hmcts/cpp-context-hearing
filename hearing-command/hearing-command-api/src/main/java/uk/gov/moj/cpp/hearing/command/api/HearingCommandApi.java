@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 
 
 @ServiceComponent(COMMAND_API)

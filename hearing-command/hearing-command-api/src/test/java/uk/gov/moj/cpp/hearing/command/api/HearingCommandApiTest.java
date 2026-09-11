@@ -306,7 +306,7 @@ public class HearingCommandApiTest {
         assertEnvelopeIsPassedThroughWithName(envelope.payloadAsJsonObject(), "hearing.command.save-ptph-detail");
     }
 
-    private JsonEnvelope ptphEnvelope(final javax.json.JsonObject payload) {
+    private JsonEnvelope ptphEnvelope(final jakarta.json.JsonObject payload) {
         return envelopeFrom(metadataWithRandomUUID("hearing.save-ptph-detail"), payload);
     }
 
