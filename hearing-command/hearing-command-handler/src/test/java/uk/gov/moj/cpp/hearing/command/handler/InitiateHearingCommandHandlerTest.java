@@ -8,8 +8,13 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.Defendant.defendant;
@@ -32,6 +37,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -49,8 +55,10 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.hearing.details.UpdateRelatedHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
@@ -78,6 +86,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+
+import jakarta.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -119,6 +129,8 @@ public class InitiateHearingCommandHandlerTest {
     private EventSource eventSource;
     @Mock
     private AggregateService aggregateService;
+    @Mock
+    private Requester requester;
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
     @Spy
@@ -180,6 +192,390 @@ public class InitiateHearingCommandHandlerTest {
     public void extendHearingNullInitialApplications() throws Throwable {
 
         extendHearing((h) -> h.setCourtApplications(null));
+    }
+
+    @Test
+    public void extendHearingShouldMoveActiveApplicationOffenceToProsecutionSide() throws Throwable {
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        final JsonEnvelope initCommand = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
+        this.hearingCommandHandler.initiate(initCommand);
+
+        final UUID caseId = randomUUID();
+        final UUID ownerDefendantId = randomUUID();
+        final UUID activeOffenceId = randomUUID();
+        final UUID applicationId = randomUUID();
+
+        // progression returns the full prosecution case, locating the offence's owner defendant
+        final ProsecutionCase ownerCase = ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withDefendants(singletonList(defendant().withId(ownerDefendantId)
+                        .withOffences(singletonList(Offence.offence().withId(activeOffenceId).build())).build()))
+                .build();
+        final JsonObject response = createObjectBuilder().add("prosecutionCase", objectToJsonObjectConverter.convert(ownerCase)).build();
+        final Envelope<JsonObject> responseEnvelope = mock(Envelope.class);
+        when(responseEnvelope.payload()).thenReturn(response);
+        when(this.requester.requestAsAdmin(any(), eq(JsonObject.class))).thenReturn(responseEnvelope);
+
+        final ExtendHearingCommand command = new ExtendHearingCommand();
+        command.setHearingId(hearingOne.getHearingId());
+        command.setCourtApplication(CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(caseId)
+                        .withOffences(singletonList(Offence.offence().withId(activeOffenceId).withProceedingsConcluded(false).build()))
+                        .build()))
+                .build());
+        setupMockedEventStream(applicationId, this.applicationEventStream, new ApplicationAggregate());
+        setupMockedEventStream(ownerDefendantId, this.defendantEventStream, new DefendantAggregate());
+
+        final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
+        this.hearingCommandHandler.extendHearing(commandJson);
+
+        final ArgumentCaptor<Stream> captor = ArgumentCaptor.forClass(Stream.class);
+        ((EventStream) Mockito.verify(this.hearingEventStream, times(2))).append((Stream) captor.capture());
+        final JsonEnvelope jsonEnvelope = (JsonEnvelope) captor.getAllValues().get(1).findFirst().orElse(null);
+        final HearingExtended hearingExtended = asPojo(jsonEnvelope, HearingExtended.class);
+
+        // active offence moved under its owner defendant on the prosecution side
+        assertThat(hearingExtended.getProsecutionCases().size(), is(1));
+        final ProsecutionCase movedCase = hearingExtended.getProsecutionCases().get(0);
+        assertThat(movedCase.getId(), is(caseId));
+        assertThat(movedCase.getDefendants().get(0).getId(), is(ownerDefendantId));
+        assertThat(movedCase.getDefendants().get(0).getOffences().get(0).getId(), is(activeOffenceId));
+
+        // active offence stripped from the application
+        assertThat(hearingExtended.getCourtApplication().getCourtApplicationCases().get(0).getOffences(), is(nullValue()));
+    }
+
+    @Test
+    public void extendHearingShouldNotFetchWhenActiveOffenceAlreadyPresentInProsecutionCases() throws Throwable {
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        final JsonEnvelope initCommand = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
+        this.hearingCommandHandler.initiate(initCommand);
+
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID activeOffenceId = randomUUID();
+        final UUID applicationId = randomUUID();
+
+        final ExtendHearingCommand command = new ExtendHearingCommand();
+        command.setHearingId(hearingOne.getHearingId());
+        command.setCourtApplication(CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(caseId)
+                        .withOffences(singletonList(Offence.offence().withId(activeOffenceId).withProceedingsConcluded(false).build()))
+                        .build()))
+                .build());
+        // the active offence is already attached to the incoming prosecution cases
+        command.setProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withDefendants(singletonList(defendant().withId(defendantId)
+                        .withOffences(singletonList(Offence.offence().withId(activeOffenceId).build())).build()))
+                .build()));
+        setupMockedEventStream(applicationId, this.applicationEventStream, new ApplicationAggregate());
+        setupMockedEventStream(defendantId, this.defendantEventStream, new DefendantAggregate());
+
+        final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
+        this.hearingCommandHandler.extendHearing(commandJson);
+
+        // no progression lookup is performed because the offence is already on the prosecution side
+        Mockito.verify(this.requester, never()).requestAsAdmin(any(), eq(JsonObject.class));
+
+        final ArgumentCaptor<Stream> captor = ArgumentCaptor.forClass(Stream.class);
+        ((EventStream) Mockito.verify(this.hearingEventStream, times(2))).append((Stream) captor.capture());
+        final JsonEnvelope jsonEnvelope = (JsonEnvelope) captor.getAllValues().get(1).findFirst().orElse(null);
+        final HearingExtended hearingExtended = asPojo(jsonEnvelope, HearingExtended.class);
+
+        // the pre-existing prosecution offence is retained, and stripped from the application
+        assertThat(hearingExtended.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId(), is(activeOffenceId));
+        assertThat(hearingExtended.getCourtApplication().getCourtApplicationCases().get(0).getOffences(), is(nullValue()));
+    }
+
+    @Test
+    public void extendHearingShouldMergeMovedDefendantIntoExistingProsecutionCaseRatherThanDuplicating() throws Throwable {
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        final JsonEnvelope initCommand = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
+        this.hearingCommandHandler.initiate(initCommand);
+
+        final UUID caseId = randomUUID();
+        final UUID existingDefendantId = randomUUID();
+        final UUID existingOffenceId = randomUUID();
+        final UUID movedDefendantId = randomUUID();
+        final UUID movedOffenceId = randomUUID();
+        final UUID applicationId = randomUUID();
+
+        // progression returns the same case, owned by a different defendant (the active offence's owner)
+        final ProsecutionCase ownerCase = ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withDefendants(singletonList(defendant().withId(movedDefendantId)
+                        .withOffences(singletonList(Offence.offence().withId(movedOffenceId).build())).build()))
+                .build();
+        final JsonObject response = createObjectBuilder().add("prosecutionCase", objectToJsonObjectConverter.convert(ownerCase)).build();
+        final Envelope<JsonObject> responseEnvelope = mock(Envelope.class);
+        when(responseEnvelope.payload()).thenReturn(response);
+        when(this.requester.requestAsAdmin(any(), eq(JsonObject.class))).thenReturn(responseEnvelope);
+
+        final ExtendHearingCommand command = new ExtendHearingCommand();
+        command.setHearingId(hearingOne.getHearingId());
+        command.setCourtApplication(CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(caseId)
+                        .withOffences(singletonList(Offence.offence().withId(movedOffenceId).withProceedingsConcluded(false).build()))
+                        .build()))
+                .build());
+        // the same case is already on the hearing, but for a different defendant/offence
+        command.setProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withDefendants(singletonList(defendant().withId(existingDefendantId)
+                        .withOffences(singletonList(Offence.offence().withId(existingOffenceId).build())).build()))
+                .build()));
+        setupMockedEventStream(applicationId, this.applicationEventStream, new ApplicationAggregate());
+        setupMockedEventStream(existingDefendantId, this.defendantEventStream, new DefendantAggregate());
+        setupMockedEventStream(movedDefendantId, this.defendantEventStream, new DefendantAggregate());
+
+        final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
+        this.hearingCommandHandler.extendHearing(commandJson);
+
+        final ArgumentCaptor<Stream> captor = ArgumentCaptor.forClass(Stream.class);
+        ((EventStream) Mockito.verify(this.hearingEventStream, times(2))).append((Stream) captor.capture());
+        final JsonEnvelope jsonEnvelope = (JsonEnvelope) captor.getAllValues().get(1).findFirst().orElse(null);
+        final HearingExtended hearingExtended = asPojo(jsonEnvelope, HearingExtended.class);
+
+        // single case entry (not duplicated), with both the existing and moved defendant merged in
+        assertThat(hearingExtended.getProsecutionCases().size(), is(1));
+        final ProsecutionCase mergedCase = hearingExtended.getProsecutionCases().get(0);
+        assertThat(mergedCase.getId(), is(caseId));
+        assertThat(mergedCase.getDefendants().size(), is(2));
+        final List<UUID> defendantIds = mergedCase.getDefendants().stream().map(Defendant::getId).collect(toList());
+        assertThat(defendantIds, hasItem(existingDefendantId));
+        assertThat(defendantIds, hasItem(movedDefendantId));
+    }
+
+    @Test
+    public void extendHearingShouldEmitNullProsecutionCasesWhenOwnerCaseNotResolved() throws Throwable {
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        final JsonEnvelope initCommand = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
+        this.hearingCommandHandler.initiate(initCommand);
+
+        final UUID caseId = randomUUID();
+        final UUID activeOffenceId = randomUUID();
+        final UUID applicationId = randomUUID();
+
+        // progression responds, but the payload does not contain the prosecution case (cannot be resolved)
+        final Envelope<JsonObject> responseEnvelope = mock(Envelope.class);
+        when(responseEnvelope.payload()).thenReturn(createObjectBuilder().build());
+        when(this.requester.requestAsAdmin(any(), eq(JsonObject.class))).thenReturn(responseEnvelope);
+
+        final ExtendHearingCommand command = new ExtendHearingCommand();
+        command.setHearingId(hearingOne.getHearingId());
+        command.setCourtApplication(CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(caseId)
+                        .withOffences(singletonList(Offence.offence().withId(activeOffenceId).withProceedingsConcluded(false).build()))
+                        .build()))
+                .build());
+        setupMockedEventStream(applicationId, this.applicationEventStream, new ApplicationAggregate());
+
+        final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
+        this.hearingCommandHandler.extendHearing(commandJson);
+
+        final HearingExtended hearingExtended = capturedHearingExtended();
+
+        // unresolved owner case -> nothing moved; event carries no prosecution cases (null, not empty [])
+        assertThat(hearingExtended.getProsecutionCases(), is(nullValue()));
+        // the active offence is left on the application (no data loss)
+        assertThat(hearingExtended.getCourtApplication().getCourtApplicationCases().get(0).getOffences().get(0).getId(), is(activeOffenceId));
+    }
+
+    @Test
+    public void extendHearingShouldEmitNullProsecutionCasesWhenProgressionLookupThrows() throws Throwable {
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        final JsonEnvelope initCommand = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
+        this.hearingCommandHandler.initiate(initCommand);
+
+        final UUID caseId = randomUUID();
+        final UUID activeOffenceId = randomUUID();
+        final UUID applicationId = randomUUID();
+
+        // progression lookup blows up -> handler must degrade gracefully (offence stays on the application)
+        when(this.requester.requestAsAdmin(any(), eq(JsonObject.class))).thenThrow(new RuntimeException("progression unavailable"));
+
+        final ExtendHearingCommand command = new ExtendHearingCommand();
+        command.setHearingId(hearingOne.getHearingId());
+        command.setCourtApplication(CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(caseId)
+                        .withOffences(singletonList(Offence.offence().withId(activeOffenceId).withProceedingsConcluded(false).build()))
+                        .build()))
+                .build());
+        setupMockedEventStream(applicationId, this.applicationEventStream, new ApplicationAggregate());
+
+        final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
+        this.hearingCommandHandler.extendHearing(commandJson);
+
+        final HearingExtended hearingExtended = capturedHearingExtended();
+
+        assertThat(hearingExtended.getProsecutionCases(), is(nullValue()));
+        assertThat(hearingExtended.getCourtApplication().getCourtApplicationCases().get(0).getOffences().get(0).getId(), is(activeOffenceId));
+    }
+
+    @Test
+    public void extendHearingShouldMergeActiveOffenceUnderExistingOwnerDefendant() throws Throwable {
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        final JsonEnvelope initCommand = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
+        this.hearingCommandHandler.initiate(initCommand);
+
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID existingOffenceId = randomUUID();
+        final UUID movedOffenceId = randomUUID();
+        final UUID applicationId = randomUUID();
+
+        // progression returns the same case owned by the SAME defendant who owns the active (moved) offence
+        final ProsecutionCase ownerCase = ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withDefendants(singletonList(defendant().withId(defendantId)
+                        .withOffences(singletonList(Offence.offence().withId(movedOffenceId).build())).build()))
+                .build();
+        final JsonObject response = createObjectBuilder().add("prosecutionCase", objectToJsonObjectConverter.convert(ownerCase)).build();
+        final Envelope<JsonObject> responseEnvelope = mock(Envelope.class);
+        when(responseEnvelope.payload()).thenReturn(response);
+        when(this.requester.requestAsAdmin(any(), eq(JsonObject.class))).thenReturn(responseEnvelope);
+
+        final ExtendHearingCommand command = new ExtendHearingCommand();
+        command.setHearingId(hearingOne.getHearingId());
+        command.setCourtApplication(CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(caseId)
+                        .withOffences(singletonList(Offence.offence().withId(movedOffenceId).withProceedingsConcluded(false).build()))
+                        .build()))
+                .build());
+        // the same case + same defendant is already on the hearing, owning a different (existing) offence
+        command.setProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withDefendants(singletonList(defendant().withId(defendantId)
+                        .withOffences(singletonList(Offence.offence().withId(existingOffenceId).build())).build()))
+                .build()));
+        setupMockedEventStream(applicationId, this.applicationEventStream, new ApplicationAggregate());
+        setupMockedEventStream(defendantId, this.defendantEventStream, new DefendantAggregate());
+
+        final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
+        this.hearingCommandHandler.extendHearing(commandJson);
+
+        final HearingExtended hearingExtended = capturedHearingExtended();
+
+        // single case, single (same) defendant, with the existing and moved offences merged - no duplicate defendant
+        assertThat(hearingExtended.getProsecutionCases().size(), is(1));
+        assertThat(hearingExtended.getProsecutionCases().get(0).getDefendants().size(), is(1));
+        final List<UUID> offenceIds = hearingExtended.getProsecutionCases().get(0).getDefendants().get(0).getOffences()
+                .stream().map(Offence::getId).collect(toList());
+        assertThat(offenceIds, hasItem(existingOffenceId));
+        assertThat(offenceIds, hasItem(movedOffenceId));
+    }
+
+    @Test
+    public void extendHearingShouldEmitNullProsecutionCasesWhenOwnerDefendantDoesNotOwnActiveOffence() throws Throwable {
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        final JsonEnvelope initCommand = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
+        this.hearingCommandHandler.initiate(initCommand);
+
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID ownerOffenceId = randomUUID();
+        final UUID activeOffenceId = randomUUID();
+        final UUID applicationId = randomUUID();
+
+        // progression returns the case, but its defendant owns a different offence than the active application offence
+        final ProsecutionCase ownerCase = ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withDefendants(singletonList(defendant().withId(defendantId)
+                        .withOffences(singletonList(Offence.offence().withId(ownerOffenceId).build())).build()))
+                .build();
+        final JsonObject response = createObjectBuilder().add("prosecutionCase", objectToJsonObjectConverter.convert(ownerCase)).build();
+        final Envelope<JsonObject> responseEnvelope = mock(Envelope.class);
+        when(responseEnvelope.payload()).thenReturn(response);
+        when(this.requester.requestAsAdmin(any(), eq(JsonObject.class))).thenReturn(responseEnvelope);
+
+        final ExtendHearingCommand command = new ExtendHearingCommand();
+        command.setHearingId(hearingOne.getHearingId());
+        command.setCourtApplication(CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(caseId)
+                        .withOffences(singletonList(Offence.offence().withId(activeOffenceId).withProceedingsConcluded(false).build()))
+                        .build()))
+                .build());
+        setupMockedEventStream(applicationId, this.applicationEventStream, new ApplicationAggregate());
+
+        final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
+        this.hearingCommandHandler.extendHearing(commandJson);
+
+        final HearingExtended hearingExtended = capturedHearingExtended();
+
+        // the owning defendant has none of the active offences, so nothing can be moved -> null prosecution cases
+        assertThat(hearingExtended.getProsecutionCases(), is(nullValue()));
+        assertThat(hearingExtended.getCourtApplication().getCourtApplicationCases().get(0).getOffences().get(0).getId(), is(activeOffenceId));
+    }
+
+    @Test
+    public void extendHearingShouldNotResolveConcludedOrUnlinkedApplicationOffences() throws Throwable {
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        final JsonEnvelope initCommand = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
+        this.hearingCommandHandler.initiate(initCommand);
+
+        final UUID applicationId = randomUUID();
+
+        final ExtendHearingCommand command = new ExtendHearingCommand();
+        command.setHearingId(hearingOne.getHearingId());
+        command.setCourtApplication(CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withCourtApplicationCases(asList(
+                        // concluded offence -> stays on the application, never resolved
+                        CourtApplicationCase.courtApplicationCase().withProsecutionCaseId(randomUUID())
+                                .withOffences(singletonList(Offence.offence().withId(randomUUID()).withProceedingsConcluded(true).build())).build(),
+                        // active offence but no prosecution case id -> cannot be linked
+                        CourtApplicationCase.courtApplicationCase()
+                                .withOffences(singletonList(Offence.offence().withId(randomUUID()).withProceedingsConcluded(false).build())).build(),
+                        // case with no offences
+                        CourtApplicationCase.courtApplicationCase().withProsecutionCaseId(randomUUID())
+                                .withOffences(java.util.Collections.emptyList()).build()))
+                .build());
+        setupMockedEventStream(applicationId, this.applicationEventStream, new ApplicationAggregate());
+
+        final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
+        this.hearingCommandHandler.extendHearing(commandJson);
+
+        // nothing is active+linked, so no progression lookup happens and no prosecution cases are emitted
+        Mockito.verify(this.requester, never()).requestAsAdmin(any(), eq(JsonObject.class));
+        assertThat(capturedHearingExtended().getProsecutionCases(), is(nullValue()));
+    }
+
+    private HearingExtended capturedHearingExtended() throws EventStreamException {
+        final ArgumentCaptor<Stream> captor = ArgumentCaptor.forClass(Stream.class);
+        ((EventStream) Mockito.verify(this.hearingEventStream, times(2))).append((Stream) captor.capture());
+        final JsonEnvelope jsonEnvelope = (JsonEnvelope) captor.getAllValues().get(1).findFirst().orElse(null);
+        return asPojo(jsonEnvelope, HearingExtended.class);
     }
 
     private void extendHearing(Consumer<Hearing> hearingModification) throws Throwable {

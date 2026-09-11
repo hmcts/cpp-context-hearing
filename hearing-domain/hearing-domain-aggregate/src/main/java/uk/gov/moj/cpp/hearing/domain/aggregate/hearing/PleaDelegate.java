@@ -100,10 +100,30 @@ public class PleaDelegate implements Serializable {
 
 
 
-    public Stream<Object> inheritPlea(final UUID hearingId, final Plea plea) {
-        return Stream.of(InheritedPlea.inheritedPlea()
+    public Stream<Object> inheritPlea(final UUID hearingId, final Plea plea, final Set<String> guiltyPleaTypes) {
+        final List<Object> events = new ArrayList<>();
+        events.add(InheritedPlea.inheritedPlea()
                 .setHearingId(hearingId)
                 .setPlea(plea));
+
+        if (!isCivilCase() && nonNull(plea)) {
+            final UUID offenceId = plea.getOffenceId();
+            final UUID prosecutionCaseId = ofNullable(this.momento.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                    .filter(pc -> pc.getDefendants().stream()
+                            .flatMap(de -> de.getOffences().stream())
+                            .anyMatch(o -> o.getId().equals(offenceId)))
+                    .findFirst()
+                    .map(ProsecutionCase::getId)
+                    .orElse(null);
+
+            final UUID courtApplicationId = findCourtApplicationByOffence(offenceId);
+
+            if (prosecutionCaseId != null || courtApplicationId != null) {
+                addConvictionDateEventForPlea(hearingId, guiltyPleaTypes, offenceId, prosecutionCaseId, courtApplicationId, events, plea);
+            }
+        }
+
+        return events.stream();
     }
 
     public Stream<Object> indicatedPlea(final UUID hearingId, final IndicatedPlea indicatedPlea) {

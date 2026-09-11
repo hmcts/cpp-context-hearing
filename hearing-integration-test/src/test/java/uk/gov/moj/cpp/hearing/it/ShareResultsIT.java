@@ -32,6 +32,8 @@ import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_NOT_GUILTY;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
@@ -390,6 +392,59 @@ public class ShareResultsIT extends AbstractIT {
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailReasons"), is("value1"));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("resultLabel"));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("promptLabel : value1"));
+        }
+    }
+
+    @Test
+    public void shouldCarryForwardBailStatusToApplicationMasterDefendantFromProsecutionCaseOffenceInSameHearing() {
+        final LocalDate orderDate = PAST_LOCAL_DATE.next();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+        final UUID noBailStatusResultDefId = randomUUID();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommandForApplicationCases(getUuidMapForMultipleCaseStructure());
+        final Hearing hearing = hearingCommand.getHearing();
+
+        stubCourtRoomForApplication(hearing);
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceDataRemandedOnBailCondition(orderDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                applicationBailPrompt = getMandatoryNowResultDefPrompt(orderDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand applicationBailResult = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), orderDate);
+        setPromptForSaveDraftResultCommand(applicationBailPrompt, applicationBailResult);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        try (final EventListener firstShareResultedListener = listenFor("public.hearing.resulted")
+                .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
+                        .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId())))))) {
+
+            shareResultWithCourtClerk(hearing, singletonList(applicationBailResult.getTarget()));
+
+            final JsonPath firstPublicHearingResulted = firstShareResultedListener.waitFor();
+
+            assertThat(firstPublicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.code"), is("B"));
+            assertThat(firstPublicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.description"), is("Conditional Bail"));
+        }
+
+        final LocalDate applicationResultOrderDate = PAST_LOCAL_DATE.next();
+        final AllResultDefinitionsReferenceDataHelper applicationRefData = setupResultDefinitionsReferenceDataWithoutBailStatus(applicationResultOrderDate, noBailStatusResultDefId);
+
+        final SaveDraftResultCommand applicationResult = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), applicationResultOrderDate);
+        setResultLine(applicationResult.getTarget().getResultLines().get(0), findPrompt(applicationRefData, noBailStatusResultDefId), noBailStatusResultDefId, applicationResultOrderDate);
+
+        try (final EventListener publicEventResultedListener = listenFor("public.hearing.resulted")
+                .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
+                        .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId())))))) {
+
+            shareResultWithCourtClerk(hearing, singletonList(applicationResult.getTarget()));
+
+            final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.code"), is("B"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.description"), is("Conditional Bail"));
         }
     }
 
@@ -2539,7 +2594,13 @@ public class ShareResultsIT extends AbstractIT {
     private CrackedIneffectiveTrial setCrackedIneffectiveTrial(final InitiateHearingCommandHelper hearingOne, final UpdatePleaCommandHelper pleaOne) {
         final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = INEFFECTIVE_TRIAL_TYPE;
         final UUID crackedIneffectiveSubReasonId = randomUUID();
-        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getDate(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
+        CrackedIneffectiveTrial expectedTrialType = CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                .withCode(crackedIneffectiveVacatedTrialType.getReasonCode())
+                .withDate(crackedIneffectiveVacatedTrialType.getDate())
+                .withDescription(crackedIneffectiveVacatedTrialType.getReasonFullDescription())
+                .withId(crackedIneffectiveVacatedTrialType.getId())
+                .withType(crackedIneffectiveVacatedTrialType.getTrialType())
+                .build();
 
         TrialType addTrialType = TrialType.builder()
                 .withHearingId(hearingOne.getHearingId())
@@ -2602,6 +2663,7 @@ public class ShareResultsIT extends AbstractIT {
         final Person cpd = curPd.getPersonDetails();
         Person person = new Person(cpd.getAdditionalNationalityCode(), cpd.getAdditionalNationalityDescription(), cpd.getAdditionalNationalityId(), cpd.getAddress(), cpd.getContact(), cpd.getDateOfBirth(),
                 cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), firstName, cpd.getGender(), cpd.getHearingLanguageNeeds(), cpd.getInterpreterLanguageNeeds(),
+                cpd.getIsAddressConfidential(),
                 cpd.getLastName(), cpd.getMiddleName(), cpd.getNationalInsuranceNumber(), cpd.getNationalityCode(), cpd.getNationalityDescription(), cpd.getNationalityId(),
                 cpd.getOccupation(), cpd.getOccupationCode(), cpd.getPersonMarkers(), cpd.getSpecificRequirements(), cpd.getTitle());
 
@@ -2625,6 +2687,7 @@ public class ShareResultsIT extends AbstractIT {
         final Person cpd = curPd.getPersonDetails();
         Person person = new Person(cpd.getAdditionalNationalityCode(), cpd.getAdditionalNationalityDescription(), cpd.getAdditionalNationalityId(), cpd.getAddress(), cpd.getContact(), cpd.getDateOfBirth(),
                 cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), cpd.getFirstName(), cpd.getGender(), cpd.getHearingLanguageNeeds(), cpd.getInterpreterLanguageNeeds(),
+                cpd.getIsAddressConfidential(),
                 cpd.getLastName(), cpd.getMiddleName(), cpd.getNationalInsuranceNumber(), cpd.getNationalityCode(), cpd.getNationalityDescription(), cpd.getNationalityId(),
                 cpd.getOccupation(), cpd.getOccupationCode(), cpd.getPersonMarkers(), cpd.getSpecificRequirements(), cpd.getTitle());
 
@@ -2933,6 +2996,46 @@ public class ShareResultsIT extends AbstractIT {
         return allResultDefinitions;
     }
 
+    private AllResultDefinitionsReferenceDataHelper setupResultDefinitionsReferenceDataWithoutBailStatus(final LocalDate referenceDate, final UUID resultDefinitionId) {
+        final String LISTING_OFFICER_USER_GROUP = "Listing Officer";
+
+        final AllResultDefinitionsReferenceDataHelper allResultDefinitions = h(AllResultDefinitions.allResultDefinitions()
+                .setResultDefinitions(singletonList(
+                        ResultDefinition.resultDefinition()
+                                .setId(resultDefinitionId)
+                                .setRank(1)
+                                .setIsAvailableForCourtExtract(true)
+                                .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                .setFinancial("Y")
+                                .setCategory(getCategoryForResultDefinition(resultDefinitionId))
+                                .setPrompts(singletonList(uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
+                                                .setId(resultDefinitionId)
+                                                .setMandatory(true)
+                                                .setLabel("promptLabel")
+                                                .setWelshLabel(STRING.next())
+                                                .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                                .setReference("bailConditionReason")
+                                        )
+                                )
+                                .setSecondaryCJSCodes(getSecondaryCjsCodes())
+                                .setLabel("resultLabel")
+                                .setDrivingTestStipulation(1)
+                                .setPointsDisqualificationCode("TT99")
+                                .setDvlaCode("C")
+                                .setWelshLabel(STRING.next())
+                                .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                .setCanBeSubjectOfBreach(true)
+                                .setCanBeSubjectOfVariation(true)
+                                .setLevel("O")
+                                .setResultDefinitionGroup("No Bail Status")
+                                .setCommittedToCC(true)
+                                .setSentToCC(true)
+                )));
+
+        stubGetAllResultDefinitions(referenceDate, allResultDefinitions.it());
+        return allResultDefinitions;
+    }
+
     private uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt findPrompt(final AllResultDefinitionsReferenceDataHelper refDataHelper, final UUID resultDefId) {
         final ResultDefinition resultDefinition =
                 refDataHelper.it().getResultDefinitions().stream()
@@ -3118,7 +3221,13 @@ public class ShareResultsIT extends AbstractIT {
     private CrackedIneffectiveTrial getExpectedTrialType(final InitiateHearingCommandHelper hearingOne, final UpdatePleaCommandHelper pleaOne, final LocalDate convictionDateToUse) {
         final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = INEFFECTIVE_TRIAL_TYPE;
         final UUID crackedIneffectiveSubReasonId = randomUUID();
-        final CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getDate(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
+        final CrackedIneffectiveTrial expectedTrialType = CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                .withCode(crackedIneffectiveVacatedTrialType.getReasonCode())
+                .withDate(crackedIneffectiveVacatedTrialType.getDate())
+                .withDescription(crackedIneffectiveVacatedTrialType.getReasonFullDescription())
+                .withId(crackedIneffectiveVacatedTrialType.getId())
+                .withType(crackedIneffectiveVacatedTrialType.getTrialType())
+                .build();
 
         final TrialType addTrialType = TrialType.builder()
                 .withHearingId(hearingOne.getHearingId())

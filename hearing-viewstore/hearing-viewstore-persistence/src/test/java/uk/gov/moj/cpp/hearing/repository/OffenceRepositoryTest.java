@@ -1,11 +1,13 @@
 package uk.gov.moj.cpp.hearing.repository;
 
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
+import org.junit.After;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -32,6 +34,7 @@ import uk.gov.moj.cpp.hearing.mapping.HearingCompanyRepresentativeJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingDefenceCounselJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingInterpreterIntermediaryJPAMapper;
+import uk.gov.moj.cpp.hearing.domain.OffenceBailStatus;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingProsecutionCounselJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingRespondentCounselJPAMapper;
@@ -59,12 +62,18 @@ import uk.gov.moj.cpp.hearing.mapping.DelegatedPowersJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.JurorsJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.AddressJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ContactNumberJPAMapper;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,6 +91,11 @@ class OffenceRepositoryTest {
             new HibernateTestEntityManagerProvider(PERSISTENCE_UNIT);
 
     private final List<Offence> offences = new ArrayList<>();
+
+    private static final ZonedDateTime EARLIER_DAY = ZonedDateTime.of(2026, 1, 1, 10, 0, 0, 0, ZoneId.of("UTC"));
+    private static final ZonedDateTime LATER_DAY = ZonedDateTime.of(2026, 2, 1, 10, 0, 0, 0, ZoneId.of("UTC"));
+
+    private final List<UUID> bailStatusTestHearingIds = new ArrayList<>();
 
     private HearingRepository hearingRepository;
     private OffenceRepository offenceRepository;
@@ -101,6 +115,8 @@ class OffenceRepositoryTest {
 
     @BeforeEach
     void openEntityManagerAndCreateRepositories() {
+        offences.clear();
+
         hearingRepository = new HearingRepository();
         hibernateTestEntityManagerProvider.injectEntityManagerInto(hearingRepository);
 
@@ -121,6 +137,14 @@ class OffenceRepositoryTest {
             hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
             hearingRepository.save(hearingEntity);
         });
+    }
+
+    @After
+    public void teardown() {
+        hearings.forEach(hearing -> hearingRepository.attachAndRemove(hearingRepository.findBy(hearing.getId())));
+
+        bailStatusTestHearingIds.forEach(hearingId -> hearingRepository.attachAndRemove(hearingRepository.findBy(hearingId)));
+        bailStatusTestHearingIds.clear();
     }
 
     @Test
@@ -195,5 +219,129 @@ class OffenceRepositoryTest {
                 hearingYouthCourtDefendantsRepository,
                 applicationCourtListRestrictionMapper,
                 hearingApplicationRepository);
+    }
+
+    // ── OffenceRepository#offenceBailStatuses: covers hearing.offence-bail-status-for-defendant.
+    // Exercised against a real (H2) datasource so that SQL-level bugs (wrong column aliasing,
+    // JDBC type mapping, dialect-specific syntax) are caught rather than mocked away. ──────────
+
+    @Test
+    public void shouldReturnOffenceOwnBailStatusWhenPresent() {
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        saveHearingWithDefendantAndOffence(defendantId, offenceId, LATER_DAY, true, false, "C", "Remanded into Custody", "U", "Unconditional Bail");
+
+        final List<OffenceBailStatus> result = offenceRepository.offenceBailStatuses(defendantId);
+
+        assertThat(result, hasSize(1));
+        assertThat(result.get(0).getOffenceId(), is(offenceId));
+        assertThat(result.get(0).getBailStatusCode(), is("C"));
+        assertThat(result.get(0).getBailStatusDesc(), is("Remanded into Custody"));
+    }
+
+    @Test
+    public void shouldFallBackToDefendantBailStatusWhenOffenceHasNone() {
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        saveHearingWithDefendantAndOffence(defendantId, offenceId, LATER_DAY, true, false, null, null, "U", "Unconditional Bail");
+
+        final List<OffenceBailStatus> result = offenceRepository.offenceBailStatuses(defendantId);
+
+        assertThat(result, hasSize(1));
+        assertThat(result.get(0).getOffenceId(), is(offenceId));
+        assertThat(result.get(0).getBailStatusCode(), is("U"));
+        assertThat(result.get(0).getBailStatusDesc(), is("Unconditional Bail"));
+    }
+
+    @Test
+    public void shouldReturnNoBailStatusFieldsWhenNeitherOffenceNorDefendantHasOne() {
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        saveHearingWithDefendantAndOffence(defendantId, offenceId, LATER_DAY, true, false, null, null, null, null);
+
+        final List<OffenceBailStatus> result = offenceRepository.offenceBailStatuses(defendantId);
+
+        assertThat(result, hasSize(1));
+        assertThat(result.get(0).getOffenceId(), is(offenceId));
+        assertThat(result.get(0).getBailStatusCode(), is(nullValue()));
+        assertThat(result.get(0).getBailStatusDesc(), is(nullValue()));
+    }
+
+    @Test
+    public void shouldExcludeOffencesWithConcludedProceedings() {
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        saveHearingWithDefendantAndOffence(defendantId, offenceId, LATER_DAY, true, true, "C", "Remanded into Custody", null, null);
+
+        final List<OffenceBailStatus> result = offenceRepository.offenceBailStatuses(defendantId);
+
+        assertThat(result, empty());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenDefendantHasNoOffences() {
+        final List<OffenceBailStatus> result = offenceRepository.offenceBailStatuses(randomUUID());
+
+        assertThat(result, empty());
+    }
+
+    @Test
+    public void shouldReturnOnlyOffenceFromLatestSharedHearingDayAcrossMultipleHearings() {
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        saveHearingWithDefendantAndOffence(defendantId, offenceId, EARLIER_DAY, true, false, "C", "Remanded into Custody", null, null);
+        saveHearingWithDefendantAndOffence(defendantId, offenceId, LATER_DAY, true, false, "U", "Unconditional Bail", null, null);
+
+        final List<OffenceBailStatus> result = offenceRepository.offenceBailStatuses(defendantId);
+
+        assertThat(result, hasSize(1));
+        assertThat(result.get(0).getBailStatusCode(), is("U"));
+        assertThat(result.get(0).getBailStatusDesc(), is("Unconditional Bail"));
+    }
+
+    private void saveHearingWithDefendantAndOffence(final UUID defendantId, final UUID offenceId, final ZonedDateTime sittingDay,
+                                                      final boolean hasSharedResults, final boolean proceedingsConcluded,
+                                                      final String offenceBailCode, final String offenceBailDesc,
+                                                      final String defendantBailCode, final String defendantBailDesc) {
+
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingTemplateForMagistrates();
+        final Hearing hearingEntity = hearingJPAMapper.toJPA(initiateHearingCommand.getHearing());
+
+        // h2 incorrectly maps column type TEXT to VARCHAR(255)
+        hearingEntity.setCourtApplicationsJson(hearingEntity.getCourtApplicationsJson().substring(0,
+                Math.min(255, hearingEntity.getCourtApplicationsJson().length())));
+        hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
+
+        final UUID hearingId = hearingEntity.getId();
+
+        final Defendant defendant = hearingEntity.getProsecutionCases().iterator().next().getDefendants().iterator().next();
+        defendant.setId(new HearingSnapshotKey(defendantId, hearingId));
+        // explicitly clear the template's default bail status so tests control it precisely
+        defendant.getPersonDefendant().setBailStatusId(defendantBailCode == null ? null : randomUUID());
+        defendant.getPersonDefendant().setBailStatusCode(defendantBailCode);
+        defendant.getPersonDefendant().setBailStatusDesc(defendantBailDesc);
+
+        final Offence offence = defendant.getOffences().iterator().next();
+        offence.getReportingRestrictions().clear();
+        offence.setId(new HearingSnapshotKey(offenceId, hearingId));
+        offence.setDefendantId(defendantId);
+        offence.setProceedingsConcluded(proceedingsConcluded);
+        // explicitly clear the template's default bail status so tests control it precisely
+        offence.setBailStatusId(offenceBailCode == null ? null : randomUUID());
+        offence.setBailStatusCode(offenceBailCode);
+        offence.setBailStatusDescription(offenceBailDesc);
+
+        for (final HearingDay hearingDay : hearingEntity.getHearingDays()) {
+            hearingDay.setSittingDay(sittingDay);
+            hearingDay.setHasSharedResults(hasSharedResults);
+        }
+
+        hearingRepository.save(hearingEntity);
+        bailStatusTestHearingIds.add(hearingId);
     }
 }

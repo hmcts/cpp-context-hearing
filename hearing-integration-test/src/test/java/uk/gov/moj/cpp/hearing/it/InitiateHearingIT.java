@@ -53,6 +53,7 @@ import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsU
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.AssociatedPerson;
+import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
@@ -1513,6 +1514,57 @@ public class InitiateHearingIT extends AbstractIT {
                                 withoutJsonPath("$.hearing.id")
                         ))
                 );
+    }
+
+    @Test
+    public void shouldSeedOffenceBailStatusFromDefendantPreHearingBailStatus() {
+
+        final InitiateHearingCommand initiateHearing = minimumInitiateHearingTemplate();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), initiateHearing));
+
+        final Hearing hearing = hearingOne.getHearing();
+
+        final BailStatus preHearingBailStatus = hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getBailStatus();
+
+        getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearing.getId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getBailStatus, isBean(BailStatus.class)
+                                                        .with(BailStatus::getCode, is(preHearingBailStatus.getCode()))
+                                                        .with(BailStatus::getDescription, is(preHearingBailStatus.getDescription())))
+                                        ))
+                                ))
+                        ))
+                )
+        );
+    }
+
+    @Test
+    public void shouldLeaveOffenceBailStatusNull_whenDefendantHasNoPreHearingBailStatus() {
+
+        final InitiateHearingCommand initiateHearing = minimumInitiateHearingTemplate();
+        initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().setBailStatus(null);
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), initiateHearing));
+
+        final Hearing hearing = hearingOne.getHearing();
+
+        getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearing.getId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getBailStatus, is(nullValue()))
+                                        ))
+                                ))
+                        ))
+                )
+        );
     }
 
     public Matcher<Iterable<ProsecutionCaseSummaries>> hasProsecutionSummaries(final List<ProsecutionCase> prosecutionCases) {

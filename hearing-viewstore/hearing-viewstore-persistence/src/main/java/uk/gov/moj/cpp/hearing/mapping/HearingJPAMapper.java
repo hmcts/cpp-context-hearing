@@ -181,6 +181,19 @@ public class HearingJPAMapper {
                 .build();
     }
 
+    public uk.gov.justice.core.courts.Hearing fromJPAMinimal(final Hearing entity) {
+        if (null == entity) {
+            return null;
+        }
+
+        return uk.gov.justice.core.courts.Hearing.hearing()
+                .withId(entity.getId())
+                .withHearingDays(hearingDayJPAMapper.fromJPA(entity.getHearingDays()))
+                .withCourtCentre(courtCentreJPAMapper.fromJPA(entity.getCourtCentre()))
+                .withProsecutionCases(prosecutionCaseJPAMapper.fromJPA(entity.getProsecutionCases()))
+                .build();
+    }
+
     public uk.gov.justice.core.courts.Hearing fromJPAWithCourtListRestrictions(final Hearing entity) {
         if (null == entity) {
             return null;

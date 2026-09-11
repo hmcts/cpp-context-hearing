@@ -46,7 +46,7 @@
         <xs:element ref="defendants" minOccurs="0"/>
         <xs:element ref="currentstatus"/>
         <xs:element name="timestatusset" type="xs:string" minOccurs="0"/>
-        <xs:element name="statushelpcode" minOccurs="0"/>
+			  <xs:element name="statushelpcode" minOccurs="0"/>
         <xs:element name="courtroomname" type="xs:string"/>
       </xs:sequence>
     </xs:complexType>
@@ -54,7 +54,7 @@
   <xs:element name="cases">
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="caseDetails" maxOccurs="unbounded" minOccurs="0"/>
+        <xs:element ref="caseDetails" maxOccurs="unbounded"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -71,7 +71,7 @@
   <xs:element name="defendants">
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="defendant" maxOccurs="unbounded" minOccurs="0"/>
+        <xs:element ref="defendant" maxOccurs="unbounded"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -96,16 +96,16 @@
       <xs:sequence>
         <xs:element name="time">
           <xs:simpleType>
-            <xs:restriction base="xs:string">
-              <xs:pattern value="\d{2}[:]\d{2}"/>
-            </xs:restriction>
+             <xs:restriction base="xs:string">
+                 <xs:pattern value="\d{2}[:]\d{2}"/>
+             </xs:restriction>
           </xs:simpleType>
         </xs:element>
         <xs:element name="date">
           <xs:simpleType>
-            <xs:restriction base="xs:string">
-              <xs:pattern value="\d{2}[/]\d{2}[/]\d{2}"/>
-            </xs:restriction>
+             <xs:restriction base="xs:string">
+                 <xs:pattern value="\d{2}[/]\d{2}[/]\d{2}"/>
+             </xs:restriction>
           </xs:simpleType>
         </xs:element>
         <xs:element name="hearing_id" type="xs:integer" minOccurs="0"/>

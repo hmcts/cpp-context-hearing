@@ -96,6 +96,18 @@ public class HearingRepository {
     }
 
     @SuppressWarnings("unchecked")
+    public List<Hearing> findHearings(final LocalDate date) {
+        return entityManager.createNativeQuery(
+                        "select  h.*" +
+                                "from ha_hearing_day d ,ha_hearing h where h.id = d.hearing_id and d.date = :date and coalesce(d.is_cancelled,false) !=true " +
+                                "and coalesce(h.is_box_hearing,false) != true " +
+                                "and coalesce(h.is_vacated_trial,false) != true",
+                        Hearing.class)
+                .setParameter("date", date)
+                .getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
     public List<Hearing> findHearings(final LocalDate date,
                                       final UUID courtCentreId) {
         return entityManager.createNativeQuery(

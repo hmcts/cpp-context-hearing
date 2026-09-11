@@ -80,6 +80,7 @@ import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.HearingVacatedTrialCleared;
+import uk.gov.moj.cpp.hearing.command.SavePtphDetailCommand;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
@@ -1275,5 +1276,56 @@ public class UseCases {
         );
         return firstProsecutionCounsel;
 
+    }
+
+    /**
+     * LPT-2401 / LPT-2403 — save is an upsert, so re-posting also serves editing.
+     * Note the schema requires {@code hearingId} in the body as well as the path, unlike the
+     * {@code set-trial-type} precedent this slice otherwise follows.
+     */
+    public static SavePtphDetailCommand savePtphDetail(final RequestSpecification requestSpec, final UUID hearingId,
+                                                       final SavePtphDetailCommand command) {
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.save-ptph-detail+json")
+                .withArgs(hearingId)
+                .withPayload(command)
+                .executeSuccessfully();
+
+        return command;
+    }
+
+    /**
+     * Same call, asserting a specific HTTP status. The command-API schema is validated by
+     * JsonSchemaValidationInterceptor (registered via DefaultCommonProviders) and a violation is
+     * mapped to 400 by BadRequestExceptionMapper, so bad input never reaches the command queue.
+     */
+    public static SavePtphDetailCommand savePtphDetailExpecting(final RequestSpecification requestSpec, final UUID hearingId,
+                                                                final SavePtphDetailCommand command, final int httpStatusCode) {
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.save-ptph-detail+json")
+                .withArgs(hearingId)
+                .withPayload(command)
+                .execute(httpStatusCode);
+
+        return command;
+    }
+
+    public static void finalisePtphDetail(final RequestSpecification requestSpec, final UUID hearingId) {
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.finalise-ptph-detail+json")
+                .withArgs(hearingId)
+                .withPayload("{}")
+                .executeSuccessfully();
+    }
+
+    /**
+     * LPT-2402 — empty body, same reason as finalise. Permitted in any state.
+     */
+    public static void deletePtphDetail(final RequestSpecification requestSpec, final UUID hearingId) {
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.delete-ptph-detail+json")
+                .withArgs(hearingId)
+                .withPayload("{}")
+                .executeSuccessfully();
     }
 }

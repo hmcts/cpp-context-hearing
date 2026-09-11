@@ -6,7 +6,6 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.apache.commons.io.FileUtils.readLines;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -23,16 +22,21 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingCasesForDay;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
 import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
+import uk.gov.justice.services.core.featurecontrol.FeatureControlGuard;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -61,8 +65,10 @@ import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.PtphDetailResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
 import jakarta.ws.rs.BadRequestException;
@@ -130,6 +136,8 @@ public class HearingQueryApiTest {
     @Mock
     private Envelope<TargetListResponse> mockTargetListResponseEnvelope;
     @Mock
+    private Envelope<PtphDetailResponse> mockPtphDetailEnvelope;
+    @Mock
     private Envelope<CrackedIneffectiveTrial> mockCrackedIneffectiveTrialEnvelope;
     @Mock
     private Envelope<GetShareResultsV2Response> mockGetShareResultsV2ResponseEnvelope;
@@ -139,6 +147,9 @@ public class HearingQueryApiTest {
 
     @Mock
     private Envelope<GetHearings> mockGetHearingsEnvelope;
+
+    @Mock
+    private Envelope<HearingCasesForDay> mockHearingCasesForDayEnvelope;
 
     @Mock
     private Envelope<SessionTimeResponse> mockSessionTimeResponse;
@@ -151,6 +162,9 @@ public class HearingQueryApiTest {
 
     @Mock
     private Envelope<ProsecutionCaseResponse> mockGetProsecutionCaseEnvelope;
+
+    @Mock
+    private Envelope<OffenceBailStatusResponse> mockOffenceBailStatusResponseEnvelope;
 
     @Mock
     private JsonEnvelope mockJsonEnvelope;
@@ -211,6 +225,9 @@ public class HearingQueryApiTest {
 
     @Mock
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @Mock
+    private FeatureControlGuard featureControlGuard;
 
     @Mock
     private Permissions mockPermissions;
@@ -439,6 +456,25 @@ public class HearingQueryApiTest {
     }
 
     @Test
+    public void shouldGetOffenceBailStatusForDefendant() {
+        final String defendantId = "ebdaeb99-8952-4c07-99c4-d27c39d3e63a";
+
+        when(hearingQueryView.getOffenceBailStatusForDefendant(any(JsonEnvelope.class))).thenReturn(mockOffenceBailStatusResponseEnvelope);
+        when(mockEnvelopePayloadTypeConverter.convert(any(), any(Class.class))).thenReturn(mockJsonValueEnvelope);
+        when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(mockJsonEnvelope);
+
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.offence-bail-status-for-defendant", createObjectBuilder()
+                .add("defendantId", defendantId)
+                .build());
+
+        final JsonEnvelope result = hearingQueryApi.getOffenceBailStatusForDefendant(query);
+
+        verify(hearingQueryView).getOffenceBailStatusForDefendant(query);
+        verifyNoInteractions(piEventMapperCache);
+        assertThat(result, is(mockJsonEnvelope));
+    }
+
+    @Test
     public void shouldProcessGetHearingEventLogForCdesDocument() {
         when(userGroupQueryService.doesUserBelongsToHmctsOrganisation(any())).thenReturn(true);
         when(hearingEventQueryView.getHearingEventLogForDocuments(any())).thenReturn(null);
@@ -643,6 +679,18 @@ public class HearingQueryApiTest {
     }
 
     @Test
+    public void shouldGetPtphDetail(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-ptph-detail", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .build());
+        when(hearingQueryView.getPtphDetail(query)).thenReturn(mockPtphDetailEnvelope);
+
+        hearingQueryApi.getPtphDetail(query);
+
+        verify(hearingQueryView, times(1)).getPtphDetail(query);
+    }
+
+    @Test
     public void shouldGetDraftResultV2(){
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-draft-result-v2", createObjectBuilder()
                 .add("hearingId", UUID.randomUUID().toString())
@@ -792,6 +840,51 @@ public class HearingQueryApiTest {
     public void shouldInitPIEventMapperCacheAndReturnCppHearingEventIds(){
         Set<UUID> set =  piEventMapperCache1.getCppHearingEventIds();
         assertThat(set.size(),is(32));
+    }
+
+    // ── findHearingCasesForDay ──────────────────────────────────────────────────
+    @Test
+    public void findHearingCasesForDay_shouldDelegateToViewAndReturnRepacked() {
+        final UUID userId = randomUUID();
+
+        final JsonEnvelope query = mock(JsonEnvelope.class, RETURNS_DEEP_STUBS);
+        when(query.metadata().userId()).thenReturn(Optional.of(userId.toString()));
+
+        when(featureControlGuard.isFeatureEnabled("hearingCasesForDay")).thenReturn(true);
+        when(hearingQueryView.findHearingCasesForDay(eq(query))).thenReturn(mockHearingCasesForDayEnvelope);
+        when(mockEnvelopePayloadTypeConverter.convert(any(), any(Class.class)))
+                .thenReturn(mockJsonValueEnvelope);
+        when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(mockJsonEnvelope);
+
+        final JsonEnvelope result = hearingQueryApi.findHearingCasesForDay(query);
+
+        verify(hearingQueryView).findHearingCasesForDay(eq(query));
+        verify(mockJsonEnvelopeRepacker).repack(mockJsonValueEnvelope);
+        assertThat(result, is(mockJsonEnvelope));
+    }
+
+    @Test
+    public void findHearingCasesForDay_shouldThrowBadRequestExceptionWhenNoUserIdPresent() {
+        final JsonEnvelope query = mock(JsonEnvelope.class, RETURNS_DEEP_STUBS);
+        when(query.metadata().userId()).thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class, () -> hearingQueryApi.findHearingCasesForDay(query));
+
+        verify(featureControlGuard, never()).isFeatureEnabled(anyString());
+        verify(hearingQueryView, never()).findHearingCasesForDay(any());
+    }
+
+    @Test
+    public void findHearingCasesForDay_shouldThrowAccessControlViolationExceptionWhenFeatureDisabled() {
+        final UUID userId = randomUUID();
+
+        final JsonEnvelope query = mock(JsonEnvelope.class, RETURNS_DEEP_STUBS);
+        when(query.metadata().userId()).thenReturn(Optional.of(userId.toString()));
+        when(featureControlGuard.isFeatureEnabled("hearingCasesForDay")).thenReturn(false);
+
+        assertThrows(AccessControlViolationException.class, () -> hearingQueryApi.findHearingCasesForDay(query));
+
+        verify(hearingQueryView, never()).findHearingCasesForDay(any());
     }
 
     // ── getHearingCheckIn ──────────────────────────────────────────────────

@@ -5,18 +5,19 @@ import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingCasesForDay;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -40,9 +41,11 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.DraftResultRes
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
+import uk.gov.moj.cpp.hearing.query.view.response.PtphDetailResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 import uk.gov.moj.cpp.hearing.query.view.service.ProgressionService;
 import uk.gov.moj.cpp.hearing.query.view.service.ReusableInfoService;
@@ -147,6 +150,16 @@ public class HearingQueryView {
                 .withMetadataFrom(envelope);
     }
 
+    public Envelope<HearingCasesForDay> findHearingCasesForDay(final JsonEnvelope envelope) {
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        final LocalDate date = LocalDates.from(payload.getString(FIELD_DATE));
+
+        final HearingCasesForDay hearingCasesForDay = hearingService.getHearingCasesForDay(date);
+        return envelop(hearingCasesForDay)
+                .withName("hearing.get.hearing-cases-for-day")
+                .withMetadataFrom(envelope);
+    }
+
     public Envelope<GetHearings> getHearingCheckIn(final JsonEnvelope envelope,
                                                    final List<UUID> accessibleCasesAndApplicationIds,
                                                    final boolean isDDJorRecorder) {
@@ -217,6 +230,15 @@ public class HearingQueryView {
                     .apply(draftResult.getPayload());
         }
 
+    }
+
+    public Envelope<PtphDetailResponse> getPtphDetail(final JsonEnvelope envelope) {
+        final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
+        final PtphDetailResponse response = hearingService.getPtphDetail(hearingId);
+
+        return envelop(response)
+                .withName("hearing.get-ptph-detail")
+                .withMetadataFrom(envelope);
     }
 
     public Envelope<GetShareResultsV2Response> getShareResultsV2(final JsonEnvelope envelope) {
@@ -516,6 +538,17 @@ public class HearingQueryView {
 
         return envelop(prosecutionCaseResponse)
                 .withName("hearing.get-prosecutioncase-result")
+                .withMetadataFrom(envelope);
+    }
+
+    public Envelope<OffenceBailStatusResponse> getOffenceBailStatusForDefendant(final JsonEnvelope envelope) {
+        final Optional<UUID> defendantId = getUUID(envelope.payloadAsJsonObject(), FIELD_DEFENDANT_ID);
+
+        final OffenceBailStatusResponse offenceBailStatusResponse =  defendantId.map(hearingService::getOffenceBailStatusForDefendant)
+                .orElse(OffenceBailStatusResponse.builder().withOffenceBailStatuses(List.of()).build());
+
+        return envelop(offenceBailStatusResponse)
+                .withName("hearing.offence-bail-status-for-defendant-result")
                 .withMetadataFrom(envelope);
     }
 }

@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
-import static com.google.common.io.Resources.getResource;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
@@ -11,8 +10,6 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
@@ -32,7 +29,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.ApprovalType.CHANGE;
+import static uk.gov.justice.hearing.courts.HearingCases.hearingCases;
+import static uk.gov.justice.hearing.courts.HearingCasesForDay.hearingCasesForDay;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.messaging.spi.DefaultJsonMetadata.metadataBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
@@ -54,6 +55,7 @@ import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingCasesForDay;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -1060,6 +1062,22 @@ public class HearingQueryTest {
         final Envelope<GetHearings> hearings = target.findHearings(envelope, accessibleCasesAndApplicationIds, true);
         assertThat(hearings.payload().getHearingSummaries().size(), is(2));
         assertThat(hearings.metadata().name(), is("hearing.get.hearings"));
+    }
+
+    @Test
+    public void findHearingCasesForDay() {
+        final LocalDate date = LocalDate.now();
+        final JsonEnvelope envelope = envelopeFrom(metadataBuilder().withId(randomUUID())
+                        .withName("hearing.get.hearing-cases-for-day"),
+                createObjectBuilder()
+                        .add("date", date.toString())
+                        .build());
+        when(hearingService.getHearingCasesForDay(date)).thenReturn(hearingCasesForDay().withHearingCases(List.of(hearingCases().withHearingId(randomUUID()).build())).build());
+
+        final Envelope<HearingCasesForDay> hearings = target.findHearingCasesForDay(envelope);
+
+        assertThat(hearings.payload().getHearingCases().size(), is(1));
+        assertThat(hearings.metadata().name(), is("hearing.get.hearing-cases-for-day"));
     }
 
     @Test
