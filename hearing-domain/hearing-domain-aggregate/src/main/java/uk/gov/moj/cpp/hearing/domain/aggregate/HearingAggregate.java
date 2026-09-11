@@ -83,6 +83,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefendantDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingEventDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingPtphDetailDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingTrialTypeDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.InterpreterIntermediaryDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NowDelegate;
@@ -172,6 +173,9 @@ import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationFinalisedOnTargetUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.PtphDetailDeleted;
+import uk.gov.moj.cpp.hearing.domain.event.PtphDetailFinalised;
+import uk.gov.moj.cpp.hearing.domain.event.PtphDetailSaved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAddedToHearing;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
@@ -221,7 +225,12 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize", "squid:CommentedOutCodeLine","squid:CallToDeprecatedMethod"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = -6059812881894748592L;
+    // Bumped for the PTPH detail state: this class gained the hearingPtphDetailDelegate field and
+    // the momento gained tier / listType / keyReason / finalised. Deserialisation does not run
+    // field initialisers, so a snapshot written before those fields existed would restore with a
+    // null delegate and NPE on the first PTPH command. A changed id makes the framework discard
+    // such a snapshot and rebuild from the event stream instead.
+    private static final long serialVersionUID = -6059812881894748593L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingAggregate.class);
 
@@ -230,6 +239,16 @@ public class HearingAggregate implements Aggregate {
     public static final String SHARE_RESULTS_NOT_PERMITTED_ALL_THE_TARGETS_ALREADY_SHARED_FOR_THE_HEARING_DAY_S = "Share results not permitted! all the targets already shared for the hearingDay %s";
     private static final String OFFENCE_ID = "offenceId";
     private static final String RESULT_LINES = "resultLines";
+
+    // PTPH detail command names and the rejection reasons shared across them. Only the reasons
+    // that apply to more than one command are named here; the ones specific to a single guard read
+    // better inline, next to the condition that produces them.
+    private static final String SAVE_PTPH_DETAIL = "hearing.save-ptph-detail";
+    private static final String FINALISE_PTPH_DETAIL = "hearing.finalise-ptph-detail";
+    private static final String DELETE_PTPH_DETAIL = "hearing.delete-ptph-detail";
+    private static final String HEARING_NOT_FOUND = "hearing not found";
+    private static final String HEARING_DELETED_OR_DUPLICATE = "hearing is deleted or a duplicate";
+
     private final HearingAggregateMomento momento = new HearingAggregateMomento();
 
     private final HearingDelegate hearingDelegate = new HearingDelegate(momento);
@@ -261,6 +280,7 @@ public class HearingAggregate implements Aggregate {
     private final InterpreterIntermediaryDelegate interpreterIntermediaryDelegate = new InterpreterIntermediaryDelegate(momento);
 
     private final HearingTrialTypeDelegate hearingTrialTypeDelegate = new HearingTrialTypeDelegate(momento);
+    private final HearingPtphDetailDelegate hearingPtphDetailDelegate = new HearingPtphDetailDelegate(momento);
 
     private final CompanyRepresentativeDelegate companyRepresentativeDelegate = new CompanyRepresentativeDelegate(momento);
 
@@ -365,6 +385,9 @@ public class HearingAggregate implements Aggregate {
                 when(HearingTrialType.class).apply(hearingTrialTypeDelegate::handleTrialTypeSetForHearing),
                 when(HearingEffectiveTrial.class).apply(hearingTrialTypeDelegate::handleEffectiveTrailHearing),
                 when(HearingTrialVacated.class).apply(hearingTrialTypeDelegate::handleVacateTrialTypeSetForHearing),
+                when(PtphDetailSaved.class).apply(hearingPtphDetailDelegate::handlePtphDetailSaved),
+                when(PtphDetailFinalised.class).apply(finalised -> hearingPtphDetailDelegate.handlePtphDetailFinalised()),
+                when(PtphDetailDeleted.class).apply(deleted -> hearingPtphDetailDelegate.handlePtphDetailDeleted()),
                 when(CompanyRepresentativeAdded.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeAdded),
                 when(CompanyRepresentativeUpdated.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeUpdated),
                 when(CompanyRepresentativeRemoved.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeRemoved),
@@ -1192,6 +1215,78 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> setTrialType(final HearingTrialVacated trialType) {
         return apply(this.hearingTrialTypeDelegate.setTrialType(trialType));
+    }
+
+    public Stream<Object> savePtphDetail(final PtphDetailSaved event) {
+        if (this.momento.getHearing() == null) {
+            return ptphDetailIgnored(SAVE_PTPH_DETAIL, HEARING_NOT_FOUND, event.getHearingId());
+        }
+        if (this.momento.isDeletedOrDuplicated()) {
+            return ptphDetailIgnored(SAVE_PTPH_DETAIL, HEARING_DELETED_OR_DUPLICATE, event.getHearingId());
+        }
+        if (!this.hearingPtphDetailDelegate.isEligibleForPtphDetail(this.momento.getHearing())) {
+            return ptphDetailIgnored(SAVE_PTPH_DETAIL, "hearing is not in the Crown Court", event.getHearingId());
+        }
+        if (this.momento.isPtphDetailFinalised()) {
+            return ptphDetailIgnored(SAVE_PTPH_DETAIL,
+                    "tier and list type are finalised and cannot be changed", event.getHearingId());
+        }
+        return apply(this.hearingPtphDetailDelegate.savePtphDetail(event));
+    }
+
+    public Stream<Object> finalisePtphDetail(final PtphDetailFinalised event) {
+        if (this.momento.getHearing() == null) {
+            return ptphDetailIgnored(FINALISE_PTPH_DETAIL, HEARING_NOT_FOUND, event.getHearingId());
+        }
+        if (this.momento.isDeletedOrDuplicated()) {
+            return ptphDetailIgnored(FINALISE_PTPH_DETAIL, HEARING_DELETED_OR_DUPLICATE, event.getHearingId());
+        }
+        if (this.momento.isPtphDetailFinalised()) {
+            return ptphDetailIgnored(FINALISE_PTPH_DETAIL,
+                    "tier and list type are already finalised", event.getHearingId());
+        }
+        if (isNull(this.momento.getTier()) || isNull(this.momento.getListType())) {
+            return ptphDetailIgnored(FINALISE_PTPH_DETAIL,
+                    "both tier and list type are required to finalise", event.getHearingId());
+        }
+        return apply(this.hearingPtphDetailDelegate.finalisePtphDetail(event));
+    }
+
+    public Stream<Object> deletePtphDetail(final PtphDetailDeleted event) {
+        if (this.momento.getHearing() == null) {
+            return ptphDetailIgnored(DELETE_PTPH_DETAIL, HEARING_NOT_FOUND, event.getHearingId());
+        }
+        if (this.momento.isDeletedOrDuplicated()) {
+            return ptphDetailIgnored(DELETE_PTPH_DETAIL, HEARING_DELETED_OR_DUPLICATE, event.getHearingId());
+        }
+        return apply(this.hearingPtphDetailDelegate.deletePtphDetail(event));
+    }
+
+    /**
+     * A rejected PTPH command must never throw. The command handler appends to the hearing's own
+     * event stream inside the JMS transaction, so an exception rolls that transaction back, the
+     * message is redelivered and finally dead-lettered — and because every hearing command shares
+     * the one queue, a single bad PTPH payload would stall unrelated traffic. Emitting
+     * {@code hearing.hearing-change-ignored} instead records why the command was dropped and
+     * leaves the stream healthy, which is what the other guards on this aggregate already do.
+     *
+     * <p>Only rules needing aggregate state live here. The stateless ones on a key reason —
+     * required for a fixed list type, non-blank, within its length bound — are enforced in
+     * {@code HearingCommandApi}, which rejects them with a 400 before the command is dispatched.
+     * Repeating them here would be a second copy of a check the only sender already performs.
+     *
+     * <p>Existence and deletion are separate checks on purpose: {@code handleHearingDeleted} and
+     * {@code handleHearingMarkedAsDuplicate} only raise a flag, they do not clear
+     * {@code momento.hearing}. A null-only guard therefore still accepts commands for a deleted or
+     * duplicated hearing, which would recreate an orphaned {@code ha_ptph_detail} row after
+     * {@code HearingDeletedEventListener} had removed it.
+     *
+     * <p>The {@code "... event as ..."} wording is load-bearing — it is the shape the existing
+     * ignored-message assertions match on.
+     */
+    private Stream<Object> ptphDetailIgnored(final String command, final String reason, final UUID hearingId) {
+        return Stream.of(hearingDelegate.generateHearingIgnoredMessage(
+                String.format("Rejecting '%s' event as %s", command, reason), hearingId));
     }
 
     public Stream<Object> addCompanyRepresentative(final CompanyRepresentative companyRepresentative, final UUID hearingId) {

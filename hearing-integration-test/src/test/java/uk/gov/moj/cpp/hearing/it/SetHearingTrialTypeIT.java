@@ -55,6 +55,7 @@ class SetHearingTrialTypeIT extends AbstractIT {
         final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = INEFFECTIVE_TRIAL_TYPE;
         CrackedIneffectiveTrial expectedTrialType = CrackedIneffectiveTrial.crackedIneffectiveTrial()
                 .withCode(crackedIneffectiveVacatedTrialType.getReasonCode())
+                .withCrackedIneffectiveSubReasonId(crackedIneffectiveSubReasonId)
                 .withDate(crackedIneffectiveVacatedTrialType.getDate())
                 .withDescription(crackedIneffectiveVacatedTrialType.getReasonFullDescription())
                 .withId(crackedIneffectiveVacatedTrialType.getId())
