@@ -45,6 +45,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailSta
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
+import uk.gov.moj.cpp.hearing.query.view.response.PtphDetailResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 import uk.gov.moj.cpp.hearing.query.view.service.ProgressionService;
 import uk.gov.moj.cpp.hearing.query.view.service.ReusableInfoService;
@@ -229,6 +230,15 @@ public class HearingQueryView {
                     .apply(draftResult.getPayload());
         }
 
+    }
+
+    public Envelope<PtphDetailResponse> getPtphDetail(final JsonEnvelope envelope) {
+        final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
+        final PtphDetailResponse response = hearingService.getPtphDetail(hearingId);
+
+        return envelop(response)
+                .withName("hearing.get-ptph-detail")
+                .withMetadataFrom(envelope);
     }
 
     public Envelope<GetShareResultsV2Response> getShareResultsV2(final JsonEnvelope envelope) {

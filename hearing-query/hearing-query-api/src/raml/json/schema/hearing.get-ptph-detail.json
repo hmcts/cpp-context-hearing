@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/hearing.get-ptph-detail.json",
+  "type": "object",
+  "properties": {
+    "tier": { "type": ["string", "null"] },
+    "listType": { "type": ["string", "null"] },
+    "keyReason": { "type": ["string", "null"] },
+    "finalised": { "type": "boolean" }
+  },
+  "required": ["finalised"],
+  "additionalProperties": false
+}

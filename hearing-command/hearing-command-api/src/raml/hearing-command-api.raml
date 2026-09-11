@@ -168,6 +168,15 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
             requestType: application/vnd.hearing.set-trial-type+json
             name: hearing.set-trial-type
         (mapping):
+            requestType: application/vnd.hearing.save-ptph-detail+json
+            name: hearing.save-ptph-detail
+        (mapping):
+            requestType: application/vnd.hearing.finalise-ptph-detail+json
+            name: hearing.finalise-ptph-detail
+        (mapping):
+            requestType: application/vnd.hearing.delete-ptph-detail+json
+            name: hearing.delete-ptph-detail
+        (mapping):
             requestType: application/vnd.hearing.remove-targets+json
             name: hearing.remove-targets
         (mapping):
@@ -321,6 +330,15 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.set-trial-type+json:
             example: !include json/hearing.set-trial-type.json
             schema: !include json/schema/hearing.set-trial-type.json
+        application/vnd.hearing.save-ptph-detail+json:
+            example: !include json/hearing.save-ptph-detail.json
+            schema: !include json/schema/hearing.save-ptph-detail.json
+        application/vnd.hearing.finalise-ptph-detail+json:
+            example: !include json/hearing.finalise-ptph-detail.json
+            schema: !include json/schema/hearing.finalise-ptph-detail.json
+        application/vnd.hearing.delete-ptph-detail+json:
+            example: !include json/hearing.delete-ptph-detail.json
+            schema: !include json/schema/hearing.delete-ptph-detail.json
         application/vnd.hearing.remove-targets+json:
             example: !include json/hearing.remove-targets.json
             schema: !include json/schema/hearing.remove-targets.json

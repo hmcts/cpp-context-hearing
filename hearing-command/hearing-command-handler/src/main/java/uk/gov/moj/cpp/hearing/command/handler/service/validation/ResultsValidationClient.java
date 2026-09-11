@@ -19,6 +19,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,6 +87,11 @@ public class ResultsValidationClient implements ResultsValidator {
             } else {
                 LOGGER.error("Results validation service returned status {}, proceeding with share (fail-open)",
                         httpResponse.getStatusLine().getStatusCode());
+                // The entity must be consumed even when it is not read: an unconsumed body keeps the
+                // connection leased, so a run of 4xx/5xx responses exhausts the pool. Once that
+                // happens every later call blocks until the connection-request timeout and then
+                // fails open here — results would be shared with validation silently skipped.
+                EntityUtils.consumeQuietly(httpResponse.getEntity());
                 return passThrough();
             }
         } catch (final Exception ex) {

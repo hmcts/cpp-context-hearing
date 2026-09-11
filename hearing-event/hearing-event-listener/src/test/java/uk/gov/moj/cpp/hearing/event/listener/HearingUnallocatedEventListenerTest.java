@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.event.listener;
 
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,6 +26,9 @@ public class HearingUnallocatedEventListenerTest {
     @Mock
     private HearingRepository hearingRepository;
 
+    @Mock
+    private PtphDetailRemovalService ptphDetailRemovalService;
+
     @InjectMocks
     private HearingUnallocatedEventListener hearingUnallocatedEventListener;
 
@@ -40,6 +44,7 @@ public class HearingUnallocatedEventListenerTest {
                 .build()));
 
         verify(hearingRepository).remove(hearing);
+        verify(ptphDetailRemovalService).removeFor(hearingId);
     }
 
     @Test
@@ -54,5 +59,6 @@ public class HearingUnallocatedEventListenerTest {
                 .build()));
 
         verify(hearingRepository, never()).remove(hearing);
+        verify(ptphDetailRemovalService, never()).removeFor(any());
     }
 }
