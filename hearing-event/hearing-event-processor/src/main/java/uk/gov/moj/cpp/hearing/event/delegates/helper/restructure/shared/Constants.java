@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared;
 
+import java.util.Set;
+
 public class Constants {
     public static final String RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT = "ResultDefinition not found for resultLineId: %s, resultDefinitionId: %s, hearingId: %s orderedDate: %s";
     public static final String NO_PROMPT_DEFINITION_FOUND_EXCEPTION_FORMAT = "No prompt definition found for prompt id: %s  prompt ref : %s label: %s value: %s resultDefinitionId: %s";
@@ -20,6 +22,9 @@ public class Constants {
     public static final int MINUTES_IN_A_DAY = HOURS_IN_A_DAY * MINUTES_IN_HOUR;
     public static final String START_OF_DAY_TIME = "00:00";
     public static final String EXCLUDED_PROMPT_REFERENCE = "hmiSlots";
+    // Machine-internal prompt references that must never appear in published result prompts,
+    // rolled-up prompt text, or downstream NOW/EDT documents (SPRDT-1314)
+    public static final Set<String> EXCLUDED_PROMPT_REFERENCES = Set.of(EXCLUDED_PROMPT_REFERENCE, "bookingReference");
 
     private Constants() {
     }

@@ -17,7 +17,7 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.Publishe
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RemoveNonPublishableLinesHelperV3.removeNonPublishableResults;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructureNextHearingHelperV3.restructureNextHearing;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RollUpPromptsHelperV3.filterNodesWithRollUpPrompts;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EXCLUDED_PROMPT_REFERENCE;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EXCLUDED_PROMPT_REFERENCES;
 
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.ResultLine2;
@@ -35,7 +35,7 @@ import javax.inject.Inject;
 
 public class RestructuringHelperV3 {
 
-    public static final Predicate<JudicialResultPrompt> JUDICIAL_RESULT_PROMPT_PREDICATE = p -> !EXCLUDED_PROMPT_REFERENCE.equals(p.getPromptReference());
+    public static final Predicate<JudicialResultPrompt> JUDICIAL_RESULT_PROMPT_PREDICATE = p -> p.getPromptReference() == null || !EXCLUDED_PROMPT_REFERENCES.contains(p.getPromptReference());
 
     private final ResultTreeBuilderV3 resultTreeBuilder;
     private final ResultTextConfHelper resultTextConfHelper;
