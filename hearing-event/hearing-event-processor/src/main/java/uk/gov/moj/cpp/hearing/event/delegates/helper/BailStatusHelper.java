@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
@@ -23,6 +24,7 @@ import uk.gov.moj.cpp.hearing.event.service.OffenceService;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -34,11 +36,14 @@ import javax.inject.Inject;
 
 public class BailStatusHelper {
 
+    private static final String NOT_APPLICABLE = "A";
     private final ReferenceDataService referenceDataService;
     private final OffenceService offenceService;
 
-    private static final String NHCCS_RESULT_DEFINITION_ID = "fbed768b-ee95-4434-87c8-e81cbc8d24c8";
+    private static final String NHCC_RESULT_DEFINITION_ID = "fbed768b-ee95-4434-87c8-e81cbc8d24c8";
     private static final String NHMC_RESULT_DEFINITION_ID = "70c98fa6-804d-11e8-adc0-fa7ae01bbebc";
+    private static final String NEXH_RESULT_DEFINITION_ID = "f00359b5-7303-403b-b59e-0b1a1daa89bc";
+    private static final List<String> EXCLUDE_RESULT_LIST = Arrays.asList(NHCC_RESULT_DEFINITION_ID, NHMC_RESULT_DEFINITION_ID, NEXH_RESULT_DEFINITION_ID);
 
     @Inject
     public BailStatusHelper(final ReferenceDataService referenceDataService,
@@ -172,42 +177,31 @@ public class BailStatusHelper {
         });
     }
 
-    /**
-     * Derives the remand status for a single offence from its judicial results.
-     * Returns empty if all qualifying results are NHMC/NHCC used as main result.
-     */
     private Optional<BailStatus> resolveOffenceRemandStatus(final List<JudicialResult> judicialResults, final List<BailStatus> bailStatusesFromRefData) {
-        if (isEmpty(judicialResults)) {
+        if (shouldExcludeFromRanking(judicialResults)) {
             return empty();
         }
 
-        final List<JudicialResult> effectiveResults = judicialResults.stream()
+        return judicialResults.stream()
                 .filter(jr -> nonNull(jr.getPostHearingCustodyStatus()))
                 .filter(jr -> !isExcludedMainResult(jr))
-                .toList();
-
-        if (effectiveResults.isEmpty()) {
-            return empty();
-        }
-
-        return effectiveResults.stream()
                 .map(jr -> buildRankFromJudicialResults(bailStatusesFromRefData, jr.getPostHearingCustodyStatus()))
                 .filter(Objects::nonNull)
                 .min(comparing(BailStatus::getStatusRanking));
     }
 
-    /**
-     * Returns true when the result is NHMC or NHCC used as a main result (parentJudicialResultId is null).
-     * When used as a child result (parentJudicialResultId is non-null), the exclusion does not apply.
-     */
+    private static boolean shouldExcludeFromRanking(final List<JudicialResult> judicialResults) {
+        return isEmpty(judicialResults)
+                || (judicialResults.stream().allMatch(s -> NOT_APPLICABLE.equals(s.getPostHearingCustodyStatus()))
+                    && judicialResults.stream()
+                        .filter(s -> nonNull(s.getJudicialResultTypeId()))
+                        .anyMatch(s -> EXCLUDE_RESULT_LIST.contains(s.getJudicialResultTypeId().toString())));
+    }
+
     private boolean isExcludedMainResult(final JudicialResult judicialResult) {
-        if (judicialResult.getJudicialResultTypeId() == null) {
-            return false;
-        }
-        final String typeId = judicialResult.getJudicialResultTypeId().toString();
-        final boolean isExcludedType = NHMC_RESULT_DEFINITION_ID.equals(typeId) || NHCCS_RESULT_DEFINITION_ID.equals(typeId);
-        final boolean isMainResult = judicialResult.getParentJudicialResultId() == null;
-        return isExcludedType && isMainResult;
+        return nonNull(judicialResult.getJudicialResultTypeId())
+                    && isNull(judicialResult.getParentJudicialResultId())
+                    && EXCLUDE_RESULT_LIST.contains(judicialResult.getJudicialResultTypeId().toString());
     }
 
     /**
