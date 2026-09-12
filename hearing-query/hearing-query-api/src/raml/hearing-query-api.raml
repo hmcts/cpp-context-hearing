@@ -62,6 +62,26 @@ protocols: [ HTTP, HTTPS ]
                   example:  !include json/hearing.get-draft-result.json
                   schema:  !include  json/schema/hearing.get-draft-result.json
 
+/hearings/{hearingId}/ptph-detail:
+  uriParameters:
+        hearingId:
+          description: ID of the hearing to get the tier and list type
+          type: string
+  get:
+    description: |
+      ...
+      (mapping):
+          responseType: application/vnd.hearing.get-ptph-detail+json
+          name: hearing.get-ptph-detail
+      ...
+    responses:
+          200:
+              description: OK
+              body:
+                application/vnd.hearing.get-ptph-detail+json:
+                  example: !include json/hearing.get-ptph-detail.json
+                  schema: !include json/schema/hearing.get-ptph-detail.json
+
 /hearings/{hearingId}/{hearingDay}/draft-result:
   uriParameters:
         hearingId:
