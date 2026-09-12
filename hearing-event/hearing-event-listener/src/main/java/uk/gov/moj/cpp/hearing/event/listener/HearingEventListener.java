@@ -108,6 +108,9 @@ public class HearingEventListener {
     private HearingRepository hearingRepository;
 
     @Inject
+    private PtphDetailRemovalService ptphDetailRemovalService;
+
+    @Inject
     private StringToJsonObjectConverter stringToJsonObjectConverter;
 
     @Inject
@@ -815,6 +818,7 @@ public class HearingEventListener {
 
         if (hearing != null) {
             hearingRepository.remove(hearing);
+            ptphDetailRemovalService.removeFor(hearingId);
         }
     }
 
