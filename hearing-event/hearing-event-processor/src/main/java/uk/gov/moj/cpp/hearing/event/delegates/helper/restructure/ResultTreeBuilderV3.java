@@ -250,7 +250,11 @@ public class ResultTreeBuilderV3 {
             judicialResultPromptDurationElement.ifPresent(builder::withDurationElement);
             nextHearing.ifPresent(builder::withNextHearing);
 
-            final List<JudicialResultPrompt> judicialResultPromptList = judicialResultPrompts.stream().map(prompt -> {
+            // Machine-internal prompts are excluded from the PUBLISHED list only, after
+            // getNextHearing has consumed them (bookingReference/hmiSlots feed NextHearing)
+            final List<JudicialResultPrompt> judicialResultPromptList = judicialResultPrompts.stream()
+                    .filter(RestructuringHelperV3.JUDICIAL_RESULT_PROMPT_PREDICATE)
+                    .map(prompt -> {
                 if (nonNull(prompt.getValue())) {
                     prompt.setValue(prompt.getValue().replace(SEPARATOR, REPLACEMENT_COMMA));
                 }

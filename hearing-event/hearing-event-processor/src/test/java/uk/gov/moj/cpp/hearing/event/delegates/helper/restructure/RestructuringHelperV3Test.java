@@ -146,6 +146,83 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
     }
 
     @Test
+    public void shouldRejectBookingReferenceInJudicialResultPromptPredicate() {
+        assertThat(RestructuringHelperV3.JUDICIAL_RESULT_PROMPT_PREDICATE.test(
+                uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt().withPromptReference("bookingReference").build()), is(false));
+        assertThat(RestructuringHelperV3.JUDICIAL_RESULT_PROMPT_PREDICATE.test(
+                uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt().withPromptReference("bookingType").build()), is(true));
+        assertThat(RestructuringHelperV3.JUDICIAL_RESULT_PROMPT_PREDICATE.test(
+                uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt().build()), is(true));
+    }
+
+    @Test
+    public void shouldExcludeBookingReferencePromptFromPublishedJudicialResultPrompts() throws IOException {
+        final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_NEW_REVIEW_HEARING_JSON, ResultsSharedV3.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        final ResultLine2 firstReviewResultLine = resultsShared.getTargets().get(0).getResultLines().stream()
+                .filter(rl3 -> rl3.getResultLabel().equalsIgnoreCase("First Review Hearing – Drug Rehab")).findFirst().get();
+
+        final UUID bookingReferencePromptId = UUID.randomUUID();
+        final UUID bookingTypePromptId = UUID.randomUUID();
+        firstReviewResultLine.getPrompts().add(uk.gov.justice.core.courts.Prompt.prompt()
+                .withId(bookingReferencePromptId)
+                .withLabel("Booking reference")
+                .withPromptRef("bookingReference")
+                .withValue("e1f1f3aa-633b-4180-b12c-c4490b0ecf13")
+                .build());
+        firstReviewResultLine.getPrompts().add(uk.gov.justice.core.courts.Prompt.prompt()
+                .withId(bookingTypePromptId)
+                .withLabel("Booking Type")
+                .withPromptRef("bookingType")
+                .withValue("SENTENCING")
+                .build());
+
+        final ResultDefinition firstReviewDefinition = resultDefinitions.stream()
+                .filter(resultDefinition -> resultDefinition.getId().equals(firstReviewResultLine.getResultDefinitionId())).findFirst().get();
+        firstReviewDefinition.getPrompts().add(new uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt()
+                .setId(bookingReferencePromptId)
+                .setReference("bookingReference")
+                .setLabel("Booking reference")
+                .setType("TXT")
+                .setHidden(true));
+        firstReviewDefinition.getPrompts().add(new uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt()
+                .setId(bookingTypePromptId)
+                .setReference("bookingType")
+                .setLabel("Booking Type")
+                .setType("TXT")
+                .setHidden(false));
+
+        List<UUID> resultDefinitionIds = resultsShared.getTargets().stream()
+                .flatMap(t -> t.getResultLines().stream())
+                .map(ResultLine2::getResultDefinitionId)
+                .collect(Collectors.toList());
+
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+
+        for (UUID resulDefinitionId : resultDefinitionIds) {
+            TreeNode<ResultDefinition> resultDefinitionTreeNode = new TreeNode(resulDefinitionId, resultDefinitions);
+            resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
+            resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
+            treeNodes.add(resultDefinitionTreeNode);
+        }
+        when(hearingTypeReverseLookup.getHearingTypeByName(any(), any())).thenReturn(HearingType.hearingType().withDescription("REV").build());
+        final List<TreeNode<ResultLine2>> restructuredTree = target.restructure(envelope, resultsShared, treeNodes);
+
+        final List<JudicialResultPrompt> allPublishedPrompts = restructuredTree.stream()
+                .map(TreeNode::getJudicialResult)
+                .filter(jr -> jr != null && jr.getJudicialResultPrompts() != null)
+                .flatMap(jr -> jr.getJudicialResultPrompts().stream())
+                .collect(Collectors.toList());
+
+        assertTrue(allPublishedPrompts.stream().noneMatch(p -> "bookingReference".equals(p.getPromptReference())),
+                "bookingReference prompt must not be published into judicialResultPrompts");
+        assertTrue(allPublishedPrompts.stream().noneMatch(p -> "Booking reference".equals(p.getLabel())),
+                "Booking reference label must not be published into judicialResultPrompts");
+        assertTrue(allPublishedPrompts.stream().anyMatch(p -> "Booking Type".equals(p.getLabel())),
+                "Booking Type (visible prompt) must still be published");
+    }
+
+    @Test
     public void ShouldReturnResultTextForEachOrderedDateCorrectly() throws IOException {
 
         final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_DATEORDERS_HEARING_JSON, ResultsSharedV3.class);
