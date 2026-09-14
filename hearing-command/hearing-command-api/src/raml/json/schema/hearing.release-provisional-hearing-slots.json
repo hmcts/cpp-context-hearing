@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.release-provisional-hearing-slots.json",
+  "type": "object",
+  "properties": {
+    "bookingId": {
+      "description": "The booking whose reservation is to be released.",
+      "type": "string"
+    }
+  },
+  "required": ["bookingId"],
+  "additionalProperties": false
+}

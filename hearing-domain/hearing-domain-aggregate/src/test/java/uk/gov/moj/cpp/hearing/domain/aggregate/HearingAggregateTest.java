@@ -2087,7 +2087,7 @@ public class HearingAggregateTest {
         final UUID hearingId = randomUUID();
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        final Stream<Object> stream = hearingAggregate.bookProvisionalHearingSlots(hearingId, provisionalHearingSlotInfos, null, null, null);
+        final Stream<Object> stream = hearingAggregate.bookProvisionalHearingSlots(hearingId, provisionalHearingSlotInfos, null, null, null, null);
 
         final List<Object> objectList = stream.collect(Collectors.toList());
         assertThat(objectList, hasSize(1));

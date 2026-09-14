@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
@@ -57,16 +58,26 @@ public class BookProvisionalHearingSlotsProcessor {
                 bookProvisionalHearingSlotsCommand -> {
                     final String hearingStartTimeStr = Objects.nonNull(bookProvisionalHearingSlotsCommand.getHearingStartTime()) ?
                             bookProvisionalHearingSlotsCommand.getHearingStartTime().format(DATE_TIME_FORMATTER) : StringUtils.EMPTY;
-                    arrayBuilder.add(
-                            createObjectBuilder().add("courtScheduleId", bookProvisionalHearingSlotsCommand.getCourtScheduleId().toString())
-                                    .add("hearingStartTime", hearingStartTimeStr)
-                                    .build()
-                    );
+                    final JsonObjectBuilder slotBuilder = createObjectBuilder()
+                            .add("courtScheduleId", bookProvisionalHearingSlotsCommand.getCourtScheduleId().toString())
+                            .add("hearingStartTime", hearingStartTimeStr);
+                    // Omit rather than send null: JsonObjectBuilder.add rejects nulls, and
+                    // courtscheduler treats an absent duration as "slot-based, none needed".
+                    if (Objects.nonNull(bookProvisionalHearingSlotsCommand.getDuration())) {
+                        slotBuilder.add("duration", bookProvisionalHearingSlotsCommand.getDuration());
+                    }
+                    arrayBuilder.add(slotBuilder.build());
                 }
 
         );
 
-        final JsonObject payload = createObjectBuilder().add("provisionalSlots",arrayBuilder.build()).build();
+        final JsonObjectBuilder payloadBuilder = createObjectBuilder().add("provisionalSlots", arrayBuilder.build());
+        // Omit rather than send null: JsonObjectBuilder.add rejects nulls, and courtscheduler
+        // treats an absent bookingId as "first pick, mint one".
+        if (StringUtils.isNotBlank(bookProvisionalHearingSlots.getBookingId())) {
+            payloadBuilder.add("bookingId", bookProvisionalHearingSlots.getBookingId());
+        }
+        final JsonObject payload = payloadBuilder.build();
 
         final ProvisionalBookingServiceResponse provisionalBookingServiceResponse = provisionalBookingService.bookSlots(payload);
 

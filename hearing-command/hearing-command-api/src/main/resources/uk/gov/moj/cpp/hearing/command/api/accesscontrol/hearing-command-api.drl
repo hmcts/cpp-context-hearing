@@ -467,6 +467,15 @@ rule "Command - API - Action - hearing.book-provisional-hearing-slots"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.release-provisional-hearing-slots"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.release-provisional-hearing-slots");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Associate", "Legal Advisers", "Court Clerks", "Court Administrators"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Command - API - Action - hearing.remove-targets"
   when
     $outcome: Outcome();

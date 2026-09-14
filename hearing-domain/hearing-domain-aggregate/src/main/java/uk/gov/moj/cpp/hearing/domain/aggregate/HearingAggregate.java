@@ -167,6 +167,7 @@ import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.ReleaseProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselUpdated;
@@ -1257,7 +1258,7 @@ public class HearingAggregate implements Aggregate {
                 .build()));
     }
 
-    public Stream<Object> bookProvisionalHearingSlots(final UUID hearingId, final List<ProvisionalHearingSlotInfo> slots, final String bookingType, final String priority, final List<String> specialRequirements) {
+    public Stream<Object> bookProvisionalHearingSlots(final UUID hearingId, final List<ProvisionalHearingSlotInfo> slots, final String bookingType, final String priority, final List<String> specialRequirements, final String bookingId) {
 
         return apply(Stream.of(BookProvisionalHearingSlots.bookProvisionalHearingSlots()
                 .withHearingId(hearingId)
@@ -1265,7 +1266,12 @@ public class HearingAggregate implements Aggregate {
                 .withBookingType(bookingType)
                 .withPriority(priority)
                 .withSpecialRequirements(specialRequirements)
+                .withBookingId(bookingId)
                 .build()));
+    }
+
+    public Stream<Object> releaseProvisionalHearingSlots(final UUID hearingId, final String bookingId) {
+        return apply(Stream.of(new ReleaseProvisionalHearingSlots(hearingId, bookingId)));
     }
 
 

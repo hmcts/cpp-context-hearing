@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 public class ProvisionalBookingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionalBookingService.class);
     private static final String SERVICE = "/provisionalBooking";
+    private static final String SESSIONS = "/sessions/";
 
     public static final String COURTSCHEDULER_CREATE_PROVISIONAL_BOOKING = "application/vnd.courtscheduler.create.provisional.booking+json";
     public static final String CJS_CPP_UID = "CJSCPPUID";
@@ -89,5 +91,30 @@ public class ProvisionalBookingService {
 
     private boolean isOkay(HttpResponse httpResponse) {
         return httpResponse.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode();
+    }
+
+    /**
+     * Releases the hold taken at slot-pick time. courtscheduler's DELETE performs the full
+     * three-step release, restoring the session's capacity, and is a no-op when the booking has
+     * no reservation — which is the normal case for a pre-go-live magistrates draft.
+     */
+    public void releaseSlots(final String bookingId) {
+        final UUID systemUserId = systemUserProvider.getContextSystemUserId()
+                .orElseThrow(() -> new IllegalStateException("contextSystemUserId missing!!!"));
+
+        try {
+            final HttpDelete httpDelete = new HttpDelete(new URL(baseUri + SESSIONS + bookingId).toString());
+            httpDelete.addHeader(CJS_CPP_UID, systemUserId.toString());
+
+            final HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpDelete);
+            final int status = httpResponse.getStatusLine().getStatusCode();
+            if (status == Response.Status.ACCEPTED.getStatusCode() || status == Response.Status.OK.getStatusCode()) {
+                LOGGER.info("released provisional booking {}", bookingId);
+            } else {
+                LOGGER.error("release of provisional booking {} failed with status {}", bookingId, status);
+            }
+        } catch (IOException ex) {
+            LOGGER.error("release of provisional booking {} failed", bookingId, ex);
+        }
     }
 }

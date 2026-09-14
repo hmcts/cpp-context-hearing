@@ -16,6 +16,10 @@
             "description": "The hearing date and time to store which exact hearing start time is selected for count based slots",
             "type": "string",
             "format": "date-time"
+          },
+          "duration": {
+            "description": "Hearing duration in minutes. Required by courtscheduler for duration-based sessions, which reject a reservation without it; ignored for slot-based sessions.",
+            "type": "integer"
           }
         },
         "required": [
@@ -25,6 +29,10 @@
       }
     },
     "bookingType": {
+      "type": "string"
+    },
+    "bookingId": {
+      "description": "Reuse this booking rather than minting a new one. Sent when a clerk re-picks a session for a draft that already holds a bookingReference; courtscheduler then releases the previous pick's hold before taking the new sessions. Absent on a first pick. Passed straight through — hearing never invents or validates it.",
       "type": "string"
     },
     "priority": {

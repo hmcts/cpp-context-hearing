@@ -87,6 +87,80 @@ BookProvisionalHearingSlotsProcessorTest {
 
     }
 
+    @Test
+    public void shouldSendDurationToCourtSchedulerWhenPresent() {
+        final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload("hearing.event.book-provisional-hearing-slots-with-duration.json"));
+
+        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
+
+        when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
+
+        bookProvisionalHearingSlotsProcessor.handleBookProvisionalHearingSlots(event);
+
+        verify(provisionalBookingService, times(1)).bookSlots(provisionalBookingServiceCaptor.capture());
+
+        final JsonObject sentSlot = provisionalBookingServiceCaptor.getValue().getJsonArray("provisionalSlots").getJsonObject(0);
+        assertThat(sentSlot.getInt("duration"), is(90));
+    }
+
+    @Test
+    public void shouldOmitDurationEntirelyWhenNull() {
+        final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload("hearing.event.book-provisional-hearing-slots-v2.json"));
+
+        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
+
+        when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
+
+        bookProvisionalHearingSlotsProcessor.handleBookProvisionalHearingSlots(event);
+
+        verify(provisionalBookingService, times(1)).bookSlots(provisionalBookingServiceCaptor.capture());
+
+        final JsonObject sentSlot = provisionalBookingServiceCaptor.getValue().getJsonArray("provisionalSlots").getJsonObject(0);
+        assertThat(sentSlot.containsKey("duration"), is(false));
+    }
+
+    @Test
+    public void shouldForwardBookingIdToCourtscheduler() {
+        final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload("hearing.event.book-provisional-hearing-slots-with-booking-id.json"));
+
+        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
+
+        when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
+
+        bookProvisionalHearingSlotsProcessor.handleBookProvisionalHearingSlots(event);
+
+        verify(provisionalBookingService).bookSlots(provisionalBookingServiceCaptor.capture());
+        assertThat(provisionalBookingServiceCaptor.getValue().getString("bookingId"), is("existing-booking-1"));
+    }
+
+    @Test
+    public void shouldOmitBookingIdWhenAbsent() {
+        final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload("hearing.event.book-provisional-hearing-slots-v2.json"));
+
+        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
+
+        when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
+
+        bookProvisionalHearingSlotsProcessor.handleBookProvisionalHearingSlots(event);
+
+        verify(provisionalBookingService).bookSlots(provisionalBookingServiceCaptor.capture());
+        assertThat(provisionalBookingServiceCaptor.getValue().containsKey("bookingId"), is(false));
+    }
+
+    @Test
+    public void shouldOmitBookingIdWhenBlank() {
+        final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload("hearing.event.book-provisional-hearing-slots-with-blank-booking-id.json"));
+
+        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
+
+        when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
+
+        bookProvisionalHearingSlotsProcessor.handleBookProvisionalHearingSlots(event);
+
+        verify(provisionalBookingService).bookSlots(provisionalBookingServiceCaptor.capture());
+        assertThat(provisionalBookingServiceCaptor.getValue().containsKey("bookingId"), is(false));
+    }
+
     private static ProvisionalBookingServiceResponse getNormalResponse() {
         return ProvisionalBookingServiceResponse.normal(UUID.randomUUID().toString());
     }

@@ -32,16 +32,20 @@ public class BookProvisionalHearingSlots implements Serializable {
 
     private final List<String> specialRequirements;
 
+    private final String bookingId;
+
     @JsonCreator
     public BookProvisionalHearingSlots(@JsonProperty("hearingId") final UUID hearingId,
                                        @JsonProperty("slots") final List<Object> slots,
                                        @JsonProperty("bookingType") final String bookingType,
                                        @JsonProperty("priority") final String priority,
-                                       @JsonProperty("specialRequirements") final List<String> specialRequirements) {
+                                       @JsonProperty("specialRequirements") final List<String> specialRequirements,
+                                       @JsonProperty("bookingId") final String bookingId) {
         this.hearingId = hearingId;
         this.priority = priority;
         this.bookingType = bookingType;
         this.specialRequirements = nonNull(specialRequirements) ? new ArrayList<>(specialRequirements) : specialRequirements;
+        this.bookingId = bookingId;
         this.slots = new ArrayList<>();
         if (isEmpty(slots)) {
             return;
@@ -69,9 +73,16 @@ public class BookProvisionalHearingSlots implements Serializable {
     private void addSlotInfoFromMap(final Map<String, Object> slot) {
         final Map<String, Object> provisionalHearingSlotInfoMap = slot;
         final Object hearingStartTimeObject = provisionalHearingSlotInfoMap.get("hearingStartTime");
+        final Object durationObject = provisionalHearingSlotInfoMap.get("duration");
         final UUID courtScheduleIdUUID = UUID.fromString(provisionalHearingSlotInfoMap.get("courtScheduleId").toString());
         final ZonedDateTime hearingStartTime = nonNull(hearingStartTimeObject) ? ZonedDateTime.parse(hearingStartTimeObject.toString()) : null;
-        final ProvisionalHearingSlotInfo provisionalHearingSlotInfo = new ProvisionalHearingSlotInfo().setCourtScheduleId(courtScheduleIdUUID).setHearingStartTime(hearingStartTime);
+        // Slots arrive here as raw maps on event replay, rebuilt field by field — a field not
+        // read here is silently dropped, with no deserialisation error to notice.
+        final Integer duration = nonNull(durationObject) ? Integer.valueOf(durationObject.toString()) : null;
+        final ProvisionalHearingSlotInfo provisionalHearingSlotInfo = new ProvisionalHearingSlotInfo()
+                .setCourtScheduleId(courtScheduleIdUUID)
+                .setHearingStartTime(hearingStartTime)
+                .setDuration(duration);
         slots.add(provisionalHearingSlotInfo);
     }
 
@@ -99,6 +110,10 @@ public class BookProvisionalHearingSlots implements Serializable {
         return isNotEmpty(specialRequirements) ? new ArrayList<>(specialRequirements) : null;
     }
 
+    public String getBookingId() {
+        return bookingId;
+    }
+
     @SuppressWarnings({"PMD.BeanMembersShouldSerialize", "squid:S2384"})
     public static final class BookProvisionalHearingSlotsBuilder {
         private UUID hearingId;
@@ -106,6 +121,7 @@ public class BookProvisionalHearingSlots implements Serializable {
         private String bookingType;
         private String priority;
         private List<String> specialRequirements;
+        private String bookingId;
 
         private BookProvisionalHearingSlotsBuilder() {
         }
@@ -135,8 +151,13 @@ public class BookProvisionalHearingSlots implements Serializable {
             return this;
         }
 
+        public BookProvisionalHearingSlotsBuilder withBookingId(final String bookingId) {
+            this.bookingId = bookingId;
+            return this;
+        }
+
         public BookProvisionalHearingSlots build() {
-            return new BookProvisionalHearingSlots(hearingId, new ArrayList<>(slots), bookingType, priority, specialRequirements);
+            return new BookProvisionalHearingSlots(hearingId, new ArrayList<>(slots), bookingType, priority, specialRequirements, bookingId);
         }
     }
 

@@ -422,6 +422,11 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.book-provisional-hearing-slots.json
             example: !include json/hearing.command.book-provisional-hearing-slots.json
 
+#  Release provisionally booked slots for hearing
+        application/vnd.hearing.command.release-provisional-hearing-slots+json:
+            schema: !include json/schema/hearing.command.release-provisional-hearing-slots.json
+            example: !include json/hearing.command.release-provisional-hearing-slots.json
+
 # Update Hearing days
         application/vnd.hearing.command.cancel-hearing-days+json:
             schema: !include json/schema/hearing.command.cancel-hearing-days.json
