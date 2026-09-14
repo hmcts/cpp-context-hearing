@@ -9,6 +9,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructuringHelperV3.JUDICIAL_RESULT_PROMPT_PREDICATE;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.HiddenPromptsHelper.notHiddenIn;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.convertBooleanPromptValue;
 
 import uk.gov.justice.core.courts.JudicialResult;
@@ -31,6 +32,8 @@ public class JudicialResultPromptHelperV3 {
     }
 
     public static JudicialResultPrompt makePrompt(final TreeNode<ResultLine2> resultLineTreeNode, final BigDecimal newPromptSequenceNumber) {
+        final ResultDefinition resultDefinition = requireNonNull(resultLineTreeNode).getResultDefinition().getData();
+
         final String newPromptValue =
                 ofNullable(resultLineTreeNode)
                         .map(TreeNode::getJudicialResult)
@@ -38,10 +41,9 @@ public class JudicialResultPromptHelperV3 {
                         .map(Collection::stream)
                         .orElseGet(Stream::empty)
                         .filter(JUDICIAL_RESULT_PROMPT_PREDICATE)
+                        .filter(notHiddenIn(resultDefinition))
                         .map(p -> format("%s:%s", p.getLabel(), getPromptValue(p.getValue(),p.getType())))
                         .collect(joining(lineSeparator()));
-
-        final ResultDefinition resultDefinition = requireNonNull(resultLineTreeNode).getResultDefinition().getData();
 
         final JudicialResultPrompt.Builder builder = judicialResultPrompt()
                 .withJudicialResultPromptTypeId(resultDefinition.getId())
