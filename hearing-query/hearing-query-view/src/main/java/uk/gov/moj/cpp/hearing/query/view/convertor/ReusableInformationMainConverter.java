@@ -30,6 +30,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Pr
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,14 +43,28 @@ import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.InvalidPathException;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.JsonPathException;
+import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 public class ReusableInformationMainConverter {
 
     private static final Logger LOGGER = getLogger(ReusableInformationMainConverter.class);
+
+    /**
+     * Use Jackson instead of json-smart. json-smart rejects deeply nested (but valid) case payloads
+     * with "Malicious payload, having non natural depths", which breaks reusable-info queries.
+     */
+    private static final Configuration JSON_PATH_CONFIGURATION = Configuration.builder()
+            .jsonProvider(new JacksonJsonProvider())
+            .mappingProvider(new JacksonMappingProvider())
+            .build();
 
     @Inject
     private ReusableInformationIntConverter reusableInformationIntConverter;
@@ -85,18 +100,17 @@ public class ReusableInformationMainConverter {
     public Map<Defendant, List<JsonObject>> convertDefendant(final Collection<Defendant> defendants, final List<Prompt> prompts, final Map<String, Map<String, String>> customPromptValues) {
 
         final Map<Defendant, List<JsonObject>> defendantListMap = new HashMap<>();
-        populateRequiredDetailsForCustomValueConverter(customPromptValues);
+        final Map<String, String> countryCodesMap = getCountryCodesMap(customPromptValues);
 
         defendants.forEach(defendant -> {
             final List<JsonObject> jsonObjects = new ArrayList<>();
 
-            final JsonObject defendantJsonObject = objectToJsonObjectConverter.convert(defendant);
-            final String defendantJsonObjectString = defendantJsonObject.toString();
+            final DocumentContext defendantDocumentContext = parseJson(objectToJsonObjectConverter.convert(defendant).toString());
 
-            addReusableInformationForObjectTypeIfPresent(prompts, DEFENDANT, defendant.getMasterDefendantId(), jsonObjects, defendantJsonObjectString, ADDRESS);
-            addReusableInformationForObjectTypeIfPresent(prompts, DEFENDANT, defendant.getMasterDefendantId(), jsonObjects, defendantJsonObjectString, NAMEADDRESS);
+            addReusableInformationForObjectTypeIfPresent(prompts, DEFENDANT, defendant.getMasterDefendantId(), jsonObjects, defendantDocumentContext, ADDRESS);
+            addReusableInformationForObjectTypeIfPresent(prompts, DEFENDANT, defendant.getMasterDefendantId(), jsonObjects, defendantDocumentContext, NAMEADDRESS);
 
-            addReusableInformationForNonObjectTypeIfPresent(prompts, DEFENDANT, defendant.getMasterDefendantId(), jsonObjects, defendantJsonObjectString);
+            addReusableInformationForNonObjectTypeIfPresent(prompts, DEFENDANT, defendant.getMasterDefendantId(), jsonObjects, defendantDocumentContext, countryCodesMap);
 
             defendantListMap.put(defendant, jsonObjects);
         });
@@ -111,10 +125,9 @@ public class ReusableInformationMainConverter {
         defendants.forEach(defendant -> {
             final List<JsonObject> jsonObjects = new ArrayList<>();
 
-            final JsonObject defendantJsonObject = objectToJsonObjectConverter.convert(defendant);
-            final String defendantJsonObjectString = defendantJsonObject.toString();
+            final DocumentContext defendantDocumentContext = parseJson(objectToJsonObjectConverter.convert(defendant).toString());
 
-            addReusableInformationForNonObjectTypeIfPresent(prompts, DEFENDANT, defendant.getMasterDefendantId(), jsonObjects, defendantJsonObjectString);
+            addReusableInformationForNonObjectTypeIfPresent(prompts, DEFENDANT, defendant.getMasterDefendantId(), jsonObjects, defendantDocumentContext, Collections.emptyMap());
 
             defendantListMap.put(defendant, jsonObjects);
         });
@@ -126,18 +139,17 @@ public class ReusableInformationMainConverter {
     public Map<ProsecutionCase, List<JsonObject>> convertCase(final Collection<ProsecutionCase> cases, final List<Prompt> prompts, final Map<String, Map<String, String>> customPromptValues) {
 
         final Map<ProsecutionCase, List<JsonObject>> caseListMap = new HashMap<>();
-        populateRequiredDetailsForCustomValueConverter(customPromptValues);
+        final Map<String, String> countryCodesMap = getCountryCodesMap(customPromptValues);
 
         cases.forEach(prosecutionCase -> {
             final List<JsonObject> jsonObjects = new ArrayList<>();
 
-            final JsonObject caseJsonObject = objectToJsonObjectConverter.convert(prosecutionCase);
-            final String caseJsonObjectString = caseJsonObject.toString();
+            final DocumentContext caseDocumentContext = parseJson(objectToJsonObjectConverter.convert(prosecutionCase).toString());
 
-            addReusableInformationForObjectTypeIfPresent(prompts, CASE, prosecutionCase.getId(), jsonObjects, caseJsonObjectString, ADDRESS);
-            addReusableInformationForObjectTypeIfPresent(prompts, CASE, prosecutionCase.getId(), jsonObjects, caseJsonObjectString, NAMEADDRESS);
+            addReusableInformationForObjectTypeIfPresent(prompts, CASE, prosecutionCase.getId(), jsonObjects, caseDocumentContext, ADDRESS);
+            addReusableInformationForObjectTypeIfPresent(prompts, CASE, prosecutionCase.getId(), jsonObjects, caseDocumentContext, NAMEADDRESS);
 
-            addReusableInformationForNonObjectTypeIfPresent(prompts, CASE, prosecutionCase.getId(), jsonObjects, caseJsonObjectString);
+            addReusableInformationForNonObjectTypeIfPresent(prompts, CASE, prosecutionCase.getId(), jsonObjects, caseDocumentContext, countryCodesMap);
 
             caseListMap.put(prosecutionCase, jsonObjects);
         });
@@ -151,15 +163,14 @@ public class ReusableInformationMainConverter {
         final Map<CourtApplication, List<JsonObject>> applicationListMap = new HashMap<>();
         courtApplications.forEach(courtApplication -> {
             final List<JsonObject> jsonObjects = new ArrayList<>();
-            final JsonObject applicationJsonObject = objectToJsonObjectConverter.convert(courtApplication);
-            final String applicationJsonObjectString = applicationJsonObject.toString();
+            final DocumentContext applicationDocumentContext = parseJson(objectToJsonObjectConverter.convert(courtApplication).toString());
 
             final List<Prompt> promptsByType = getPromptsByType(allPrompts, NAMEADDRESS);
 
             getPromptsGroupedByReferencePrefix(promptsByType)
                     .forEach((promptRef, promptsByReference) -> {
 
-                        final JsonObject objectTypeValueJsonObject = promptsToJsonObjectCacheDataPathList(promptsByReference, applicationJsonObjectString, NAMEADDRESS);
+                        final JsonObject objectTypeValueJsonObject = promptsToJsonObjectCacheDataPathList(promptsByReference, applicationDocumentContext, NAMEADDRESS);
                         final Integer cacheable = promptsByReference.get(0).getCacheable();
                         final String cacheDataPath = promptsByReference.get(0).getCacheDataPath();
 
@@ -172,40 +183,54 @@ public class ReusableInformationMainConverter {
         return applicationListMap;
     }
 
-    private void populateRequiredDetailsForCustomValueConverter(final Map<String, Map<String, String>> customPromptValues) {
+    private Map<String, String> getCountryCodesMap(final Map<String, Map<String, String>> customPromptValues) {
+        if (customPromptValues == null) {
+            return Collections.emptyMap();
+        }
         for (final Map.Entry<String, Map<String, String>> customPromptValue : customPromptValues.entrySet()) {
-            if (NATIONALITY.equalsIgnoreCase(customPromptValue.getKey())) {
-                customReusableInfoConverter.setCountryCodesMap(customPromptValue.getValue());
+            if (NATIONALITY.equalsIgnoreCase(customPromptValue.getKey()) && customPromptValue.getValue() != null) {
+                return customPromptValue.getValue();
             }
         }
+        return Collections.emptyMap();
     }
 
-    private void addReusableInformationForNonObjectTypeIfPresent(final List<Prompt> prompts, final IdType idType, final UUID id, final List<JsonObject> jsonObjects, final String defendantJsonObjectString) {
+    private void addReusableInformationForNonObjectTypeIfPresent(final List<Prompt> prompts,
+                                                                 final IdType idType,
+                                                                 final UUID id,
+                                                                 final List<JsonObject> jsonObjects,
+                                                                 final DocumentContext documentContext,
+                                                                 final Map<String, String> countryCodesMap) {
         prompts.stream()
                 .filter(prompt -> !StringUtils.equals(ADDRESS.name(), prompt.getType()))
                 .filter(prompt -> !StringUtils.equals(NAMEADDRESS.name(), prompt.getType()))
-                .forEach(prompt -> processReusableInformationForPrompt(idType, id, jsonObjects, defendantJsonObjectString, prompt));
+                .forEach(prompt -> processReusableInformationForPrompt(idType, id, jsonObjects, documentContext, prompt, countryCodesMap));
     }
 
-    private void processReusableInformationForPrompt(final IdType idType, final UUID id, final List<JsonObject> jsonObjects, final String defendantJsonObjectString, final Prompt prompt) {
+    private void processReusableInformationForPrompt(final IdType idType,
+                                                     final UUID id,
+                                                     final List<JsonObject> jsonObjects,
+                                                     final DocumentContext documentContext,
+                                                     final Prompt prompt,
+                                                     final Map<String, String> countryCodesMap) {
         if (TXT.name().equals(prompt.getType())) {
 
-            addReusableInformationForTxtIfPresent(idType, id, jsonObjects, defendantJsonObjectString, prompt);
+            addReusableInformationForTxtIfPresent(idType, id, jsonObjects, documentContext, prompt);
         } else if (INT.name().equals(prompt.getType())) {
 
-            addReusableInformationForIntIfPresent(idType, id, jsonObjects, defendantJsonObjectString, prompt);
+            addReusableInformationForIntIfPresent(idType, id, jsonObjects, documentContext, prompt);
         } else if (FIXL.name().equals(prompt.getType())) {
 
-            addReusableInformationForFixlIfPresent(idType, id, jsonObjects, defendantJsonObjectString, prompt);
+            addReusableInformationForFixlIfPresent(idType, id, jsonObjects, documentContext, prompt);
         } else if (FIXLM.name().equals(prompt.getType())) {
 
-            addReusableInformationForFixlm(idType, id, jsonObjects, defendantJsonObjectString, prompt);
+            addReusableInformationForFixlm(idType, id, jsonObjects, documentContext, prompt, countryCodesMap);
         } else if (FIXLOM.name().equals(prompt.getType())) {
 
-            addReusableInformationForFixlom(idType, id, jsonObjects, defendantJsonObjectString, prompt);
+            addReusableInformationForFixlom(idType, id, jsonObjects, documentContext, prompt, countryCodesMap);
         } else if (INTC.name().equals(prompt.getType())) {
 
-            addReusableInformationForINTCIfPresent(idType, id, jsonObjects, defendantJsonObjectString, prompt);
+            addReusableInformationForINTCIfPresent(idType, id, jsonObjects, documentContext, prompt);
         } else {
             LOGGER.warn("Unsupported Prompt Type for Prompt Id: {}", prompt.getId());
         }
@@ -215,13 +240,13 @@ public class ReusableInformationMainConverter {
                                                               final IdType idType,
                                                               final UUID id,
                                                               final List<JsonObject> jsonObjects,
-                                                              final String defendantJsonObjectString,
+                                                              final DocumentContext documentContext,
                                                               final ReusableInformationConverterType reusableInformationConverterType) {
 
         getPromptsGroupedByReferencePrefix(getPromptsByType(prompts, reusableInformationConverterType))
                 .forEach((promptRef, addressPrompts) -> {
 
-                    final JsonObject objectTypeValueJsonObject = promptsToJsonObject(addressPrompts, defendantJsonObjectString, reusableInformationConverterType);
+                    final JsonObject objectTypeValueJsonObject = promptsToJsonObject(addressPrompts, documentContext, reusableInformationConverterType);
                     final Integer cacheable = addressPrompts.get(0).getCacheable();
                     final String cacheDataPath = addressPrompts.get(0).getCacheDataPath();
 
@@ -230,30 +255,42 @@ public class ReusableInformationMainConverter {
                 });
     }
 
-    private void addReusableInformationForFixlom(final IdType idType, final UUID id, final List<JsonObject> jsonObjects, final String defendantJsonObjectString, final Prompt prompt) {
+    private void addReusableInformationForFixlom(final IdType idType,
+                                                 final UUID id,
+                                                 final List<JsonObject> jsonObjects,
+                                                 final DocumentContext documentContext,
+                                                 final Prompt prompt,
+                                                 final Map<String, String> countryCodesMap) {
         final JsonObject jsonObject = reusableInformationFixlomConverter.toJsonObject(getStringListReusableInformation(prompt.getReference(),
                 idType,
                 id,
                 prompt.getCacheDataPath(),
-                defendantJsonObjectString,
-                prompt.getCacheable()));
+                documentContext,
+                prompt.getCacheable(),
+                countryCodesMap));
 
         jsonObjects.add(jsonObject);
     }
 
-    private void addReusableInformationForFixlm(final IdType idType, final UUID id, final List<JsonObject> jsonObjects, final String defendantJsonObjectString, final Prompt prompt) {
+    private void addReusableInformationForFixlm(final IdType idType,
+                                                final UUID id,
+                                                final List<JsonObject> jsonObjects,
+                                                final DocumentContext documentContext,
+                                                final Prompt prompt,
+                                                final Map<String, String> countryCodesMap) {
         final JsonObject jsonObject = reusableInformationFixlmConverter.toJsonObject(getStringListReusableInformation(prompt.getReference(),
                 idType,
                 id,
                 prompt.getCacheDataPath(),
-                defendantJsonObjectString,
-                prompt.getCacheable()));
+                documentContext,
+                prompt.getCacheable(),
+                countryCodesMap));
 
         jsonObjects.add(jsonObject);
     }
 
-    private void addReusableInformationForFixlIfPresent(final IdType idType, final UUID id, final List<JsonObject> jsonObjects, final String defendantJsonObjectString, final Prompt prompt) {
-        final Optional<String> promptValueOptional = toTxtValue(defendantJsonObjectString, prompt.getCacheDataPath());
+    private void addReusableInformationForFixlIfPresent(final IdType idType, final UUID id, final List<JsonObject> jsonObjects, final DocumentContext documentContext, final Prompt prompt) {
+        final Optional<String> promptValueOptional = toTxtValue(documentContext, prompt.getCacheDataPath());
 
         promptValueOptional.ifPresent(promptValue -> jsonObjects.add(reusableInformationFixlConverter.toJsonObject(getStringReusableInformation(prompt.getReference(),
                 idType,
@@ -263,8 +300,8 @@ public class ReusableInformationMainConverter {
                 prompt.getCacheDataPath()))));
     }
 
-    private void addReusableInformationForIntIfPresent(final IdType idType, final UUID id, final List<JsonObject> jsonObjects, final String defendantJsonObjectString, final Prompt prompt) {
-        final Optional<String> promptValueOptional = toTxtValue(defendantJsonObjectString, prompt.getCacheDataPath());
+    private void addReusableInformationForIntIfPresent(final IdType idType, final UUID id, final List<JsonObject> jsonObjects, final DocumentContext documentContext, final Prompt prompt) {
+        final Optional<String> promptValueOptional = toTxtValue(documentContext, prompt.getCacheDataPath());
 
         promptValueOptional.ifPresent(promptValue -> jsonObjects.add(reusableInformationIntConverter.toJsonObject(getIntegerReusableInformation(prompt.getReference(),
                 idType,
@@ -274,15 +311,15 @@ public class ReusableInformationMainConverter {
                 prompt.getCacheDataPath()))));
     }
 
-    private void addReusableInformationForTxtIfPresent(final IdType idType, final UUID id, final List<JsonObject> jsonObjects, final String defendantJsonObjectString, final Prompt prompt) {
-        final StringBuilder promptValue = new StringBuilder(StringUtils.EMPTY);
+    private void addReusableInformationForTxtIfPresent(final IdType idType, final UUID id, final List<JsonObject> jsonObjects, final DocumentContext documentContext, final Prompt prompt) {
+        final StringBuilder promptValue = new StringBuilder();
 
         final List<String> cacheDataPathList = Arrays.asList(prompt.getCacheDataPath().split(PATH_SPLITTER));
         cacheDataPathList.forEach(promptPath ->
-                toTxtValue(defendantJsonObjectString, promptPath).ifPresent(promptValueOptional -> promptValue.append(StringUtils.SPACE + promptValueOptional))
+                toTxtValue(documentContext, promptPath).ifPresent(val -> promptValue.append(StringUtils.SPACE).append(val))
         );
 
-        if (promptValue.capacity() > 0) {
+        if (promptValue.length() > 0) {
             jsonObjects.add(reusableInformationTxtConverter.toJsonObject(getStringReusableInformation(prompt.getReference(),
                     idType,
                     id,
@@ -291,15 +328,16 @@ public class ReusableInformationMainConverter {
                     prompt.getCacheDataPath())));
         }
     }
-    private void addReusableInformationForINTCIfPresent(final IdType idType, final UUID id, final List<JsonObject> jsonObjects, final String defendantJsonObjectString, final Prompt prompt) {
-        final StringBuilder promptValue = new StringBuilder(StringUtils.EMPTY);
+
+    private void addReusableInformationForINTCIfPresent(final IdType idType, final UUID id, final List<JsonObject> jsonObjects, final DocumentContext documentContext, final Prompt prompt) {
+        final StringBuilder promptValue = new StringBuilder();
 
         final List<String> cacheDataPathList = Arrays.asList(prompt.getCacheDataPath().split(PATH_SPLITTER));
         cacheDataPathList.forEach(promptPath ->
-                toTxtValue(defendantJsonObjectString, promptPath).ifPresent(promptValueOptional -> promptValue.append(StringUtils.SPACE + promptValueOptional))
+                toTxtValue(documentContext, promptPath).ifPresent(val -> promptValue.append(StringUtils.SPACE).append(val))
         );
 
-        if (promptValue.capacity() > 0) {
+        if (promptValue.length() > 0) {
             jsonObjects.add(reusableInformationINTCConverter.toJsonObject(getStringReusableInformation(prompt.getReference(),
                     idType,
                     id,
@@ -309,11 +347,11 @@ public class ReusableInformationMainConverter {
         }
     }
 
-    private List<String> getPromptValues(final String defendantJsonObjectString, final String promptPath) {
+    private List<String> getPromptValues(final DocumentContext documentContext, final String promptPath) {
         final List<String> promptPathList = Arrays.asList(promptPath.split(PATH_SPLITTER));
 
         return promptPathList.stream()
-                .map(path -> toTxtValue(defendantJsonObjectString, path))
+                .map(path -> toTxtValue(documentContext, path))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
@@ -356,13 +394,14 @@ public class ReusableInformationMainConverter {
                                                                                final IdType idType,
                                                                                final UUID id,
                                                                                final String promptPath,
-                                                                               final String defendantJsonObjectString,
-                                                                               final Integer cacheable) {
+                                                                               final DocumentContext documentContext,
+                                                                               final Integer cacheable,
+                                                                               final Map<String, String> countryCodesMap) {
         return new ReusableInformation.Builder<List<String>>()
                 .withIdType(idType)
                 .withId(id)
                 .withPromptRef(promptReference)
-                .withValue(customReusableInfoConverter.getConvertedValues(getPromptValues(defendantJsonObjectString, promptPath), promptReference))
+                .withValue(customReusableInfoConverter.getConvertedValues(getPromptValues(documentContext, promptPath), promptReference, countryCodesMap))
                 .withCacheable(cacheable)
                 .withCacheDataPath(promptPath)
                 .build();
@@ -376,7 +415,7 @@ public class ReusableInformationMainConverter {
                                                               final String cacheDataPath,
                                                               final String promptRef) {
 
-        if (objectTypeValueJsonObject.size() == 0) {
+        if (objectTypeValueJsonObject.isEmpty()) {
             return Optional.empty();
         }
 
@@ -390,39 +429,35 @@ public class ReusableInformationMainConverter {
                 .build(), reusableInformationConverterType));
     }
 
-    private JsonObject promptsToJsonObject(final List<Prompt> prompts, final String defendantJsonObjectString, final ReusableInformationConverterType reusableInformationConverterType) {
+    private JsonObject promptsToJsonObject(final List<Prompt> prompts, final DocumentContext documentContext, final ReusableInformationConverterType reusableInformationConverterType) {
 
         final JsonObjectBuilder objectTypeValueJsonObjectBuilder = createObjectBuilder();
 
         prompts.stream()
                 .filter(prompt -> StringUtils.equalsIgnoreCase(reusableInformationConverterType.name(), prompt.getType()))
                 .forEach(prompt -> {
-                    final Optional<String> value = toTxtValue(defendantJsonObjectString, prompt.getCacheDataPath());
-                    if (value.isPresent()) {
-                        objectTypeValueJsonObjectBuilder.add(prompt.getReference(), value.get());
-                    }
-
+                    final Optional<String> value = toTxtValue(documentContext, prompt.getCacheDataPath());
+                    value.ifPresent(v -> objectTypeValueJsonObjectBuilder.add(prompt.getReference(), v));
                 });
 
         return objectTypeValueJsonObjectBuilder.build();
     }
 
-    private JsonObject promptsToJsonObjectCacheDataPathList(final List<Prompt> prompts, final String defendantJsonObjectString, final ReusableInformationConverterType reusableInformationConverterType) {
+    private JsonObject promptsToJsonObjectCacheDataPathList(final List<Prompt> prompts, final DocumentContext documentContext, final ReusableInformationConverterType reusableInformationConverterType) {
 
         final JsonObjectBuilder objectTypeValueJsonObjectBuilder = createObjectBuilder();
 
         prompts.stream()
                 .filter(prompt -> StringUtils.equalsIgnoreCase(reusableInformationConverterType.name(), prompt.getType()))
                 .forEach(prompt -> {
-                    final StringBuilder promptValue = new StringBuilder(StringUtils.EMPTY);
                     final List<String> cacheDataPathList = Arrays.asList(prompt.getCacheDataPath().split(PATH_SPLITTER));
-                    cacheDataPathList.forEach(promptPath -> {
-                        final Optional<String> value = toTxtValue(defendantJsonObjectString, promptPath.trim());
-                        if (value.isPresent() && StringUtils.EMPTY.contentEquals(promptValue)) {
-                            promptValue.append(StringUtils.SPACE).append(value.get());
-                            objectTypeValueJsonObjectBuilder.add(prompt.getReference(), promptValue.toString().trim());
+                    for (final String promptPath : cacheDataPathList) {
+                        final Optional<String> value = toTxtValue(documentContext, promptPath.trim());
+                        if (value.isPresent()) {
+                            objectTypeValueJsonObjectBuilder.add(prompt.getReference(), value.get().trim());
+                            break; // first matching path for this prompt reference
                         }
-                    });
+                    }
                 });
 
         return objectTypeValueJsonObjectBuilder.build();
@@ -454,18 +489,28 @@ public class ReusableInformationMainConverter {
         return addressTypePromptsAsGrouped;
     }
 
+    private DocumentContext parseJson(final String json) {
+        return JsonPath.using(JSON_PATH_CONFIGURATION).parse(json);
+    }
+
     @SuppressWarnings("squid:S1166")
-    private Optional<String> toTxtValue(final String defendantJsonObjectString, final String promptPath) {
+    private Optional<String> toTxtValue(final DocumentContext documentContext, final String promptPath) {
         try {
-            final Object objectValue = JsonPath.read(defendantJsonObjectString, DELIMITER + promptPath);
+            final Object objectValue = documentContext.read(DELIMITER + promptPath);
             if (objectValue instanceof Collection<?>) {
-                final List<String> values = JsonPath.read(defendantJsonObjectString, DELIMITER + promptPath);
-                return values.stream().findAny();
-            } else {
-                return Optional.of(String.valueOf(objectValue));
+                return ((Collection<?>) objectValue).stream()
+                        .findFirst()
+                        .map(String::valueOf);
             }
-        } catch (InvalidPathException e) {
-            LOGGER.debug("Cannot find path in defendantJson. Exception: {}", e.getMessage());
+            if (objectValue == null) {
+                return Optional.empty();
+            }
+            return Optional.of(String.valueOf(objectValue));
+        } catch (final InvalidPathException e) {
+            LOGGER.debug("Cannot find path in documentContext. Exception: {}", e.getMessage());
+            return Optional.empty();
+        } catch (final JsonPathException e) {
+            LOGGER.warn("Unable to evaluate JsonPath '{}'. Exception: {}", promptPath, e.getMessage());
             return Optional.empty();
         }
     }

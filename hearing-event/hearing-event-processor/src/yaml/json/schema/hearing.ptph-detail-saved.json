@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/hearing.ptph-detail-saved.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "tier": {
+      "type": "string"
+    },
+    "listType": {
+      "type": "string"
+    },
+    "keyReason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "hearingId"
+  ],
+  "additionalProperties": false
+}

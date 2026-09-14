@@ -7,6 +7,7 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
@@ -1526,6 +1527,11 @@ public class InitiateHearingIT extends AbstractIT {
 
         final BailStatus preHearingBailStatus = hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getBailStatus();
 
+        // Guards the premise: with no pre-hearing bail status to copy, the poll below would be
+        // comparing null against null and would pass without proving anything was seeded.
+        assertThat(preHearingBailStatus, is(notNullValue()));
+        assertThat(preHearingBailStatus.getCode(), is(notNullValue()));
+
         getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
@@ -1551,6 +1557,10 @@ public class InitiateHearingIT extends AbstractIT {
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), initiateHearing));
 
         final Hearing hearing = hearingOne.getHearing();
+
+        // Guards the premise: the defendant really was sent without a bail status, so a null
+        // offence bail status below reflects nothing to seed rather than a lost value.
+        assertThat(hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getBailStatus(), is(nullValue()));
 
         getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
