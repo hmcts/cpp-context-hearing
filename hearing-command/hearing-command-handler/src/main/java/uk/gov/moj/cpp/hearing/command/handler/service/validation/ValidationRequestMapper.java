@@ -94,19 +94,17 @@ public class ValidationRequestMapper {
         if (defendant.getOffences() == null) {
             return;
         }
-        final String defendantId = uuidToString(defendant.getId());
         defendant.getOffences()
-                .forEach(offence -> offences.add(toOffenceDto(offence, caseUrn, defendantId)));
+                .forEach(offence -> offences.add(toOffenceDto(offence, caseUrn)));
     }
 
-    private OffenceDto toOffenceDto(final Offence offence, final String caseUrn, final String defendantId) {
+    private OffenceDto toOffenceDto(final Offence offence, final String caseUrn) {
         return new OffenceDto()
                 .offenceId(uuidToString(offence.getId()))
                 .offenceCode(offence.getOffenceCode())
                 .offenceTitle(offence.getOffenceTitle())
                 .orderIndex(offence.getOrderIndex())
                 .caseUrn(caseUrn)
-                .defendantId(defendantId)
                 .isConvicted(offence.getConvictionDate() != null)
                 .hasExistingCtlRecord(hasExistingCustodyTimeLimit(offence));
     }
