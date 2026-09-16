@@ -280,6 +280,16 @@ subscriptions_descriptor:
         - name: hearing.hearing-effective-trial-set
           schema_uri: http://justice.gov.uk/hearing/courts/hearing.hearing-effective-trial-set.json
 
+        # PTPH Detail - tier and list type (LPT-2400-2404)
+        - name: hearing.ptph-detail-saved
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.ptph-detail-saved.json
+
+        - name: hearing.ptph-detail-finalised
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.ptph-detail-finalised.json
+
+        - name: hearing.ptph-detail-deleted
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.ptph-detail-deleted.json
+
         - name: hearing.trial-vacated
           schema_uri: http://justice.gov.uk/hearing/courts/hearing.trial-vacated.json
 

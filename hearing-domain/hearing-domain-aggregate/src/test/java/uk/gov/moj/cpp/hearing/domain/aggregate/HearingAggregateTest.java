@@ -106,8 +106,13 @@ import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantsInYouthCourtUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
+import uk.gov.moj.cpp.hearing.domain.event.PtphDetailSaved;
+import uk.gov.moj.cpp.hearing.domain.event.PtphDetailFinalised;
+import uk.gov.moj.cpp.hearing.domain.event.PtphDetailDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
+import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationHearingDeleted;
+import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
@@ -5146,6 +5151,411 @@ public class HearingAggregateTest {
         final HearingAggregateMomento momento = ReflectionUtil.getValueOfField(hearingAggregate, "momento", HearingAggregateMomento.class);
         momento.setDuplicate(true);
         momento.setDeleted(true);
+    }
+
+
+    // ---------------------------------------------------------------------------------
+    // PTPH detail (LPT-2400-2404): every command must be rejected when the hearing does not
+    // exist. The framework's getStreamById creates a stream for any UUID, so without these
+    // guards a command for an unknown id would open a new stream and record tier/list type
+    // against a hearing that was never initiated.
+    // ---------------------------------------------------------------------------------
+
+    @Test
+    public void shouldRejectSavePtphDetailWhenHearingNotFound() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+
+        final List<Object> events = hearingAggregate
+                .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
+                .collect(toList());
+
+        assertThat(events.size(), is(1));
+        assertTrue(events.get(0) instanceof HearingChangeIgnored);
+        final HearingChangeIgnored ignored = (HearingChangeIgnored) events.get(0);
+        assertThat(ignored.getHearingId(), is(hearingId));
+        assertThat(ignored.getReason(), is("Rejecting 'hearing.save-ptph-detail' event as hearing not found"));
+    }
+
+    @Test
+    public void shouldRejectFinalisePtphDetailWhenHearingNotFound() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+
+        final List<Object> events = hearingAggregate
+                .finalisePtphDetail(new PtphDetailFinalised(hearingId))
+                .collect(toList());
+
+        assertThat(events.size(), is(1));
+        assertTrue(events.get(0) instanceof HearingChangeIgnored);
+        assertThat(((HearingChangeIgnored) events.get(0)).getReason(),
+                is("Rejecting 'hearing.finalise-ptph-detail' event as hearing not found"));
+    }
+
+    @Test
+    public void shouldRejectDeletePtphDetailWhenHearingNotFound() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+
+        final List<Object> events = hearingAggregate
+                .deletePtphDetail(new PtphDetailDeleted(hearingId))
+                .collect(toList());
+
+        assertThat(events.size(), is(1));
+        assertTrue(events.get(0) instanceof HearingChangeIgnored);
+        assertThat(((HearingChangeIgnored) events.get(0)).getReason(),
+                is("Rejecting 'hearing.delete-ptph-detail' event as hearing not found"));
+    }
+
+    /**
+     * The counterpart: with an initiated hearing the command proceeds and emits its own event,
+     * so the guard cannot be satisfied by rejecting everything.
+     */
+    @Test
+    public void shouldSavePtphDetailWhenHearingExists() {
+        final HearingAggregate hearingAggregate = aggregateWithHearing(crownPtphHearing());
+        final UUID hearingId = randomUUID();
+
+        final List<Object> events = hearingAggregate
+                .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
+                .collect(toList());
+
+        assertThat(events.size(), is(1));
+        assertTrue(events.get(0) instanceof PtphDetailSaved);
+    }
+
+    // ---------------------------------------------------------------------------------
+    // PTPH detail eligibility: tier and list type are a Crown Court concept, so only a Crown
+    // hearing may acquire a record. The hearing *type* is deliberately not part of the rule -
+    // the court may record a tier at any Crown hearing. Save is the only command that creates
+    // a record, so guarding it means an ineligible hearing can never hold one at all.
+    // ---------------------------------------------------------------------------------
+
+    /** Reference-data id of hearing type PTP, "Plea and Trial Preparation". */
+    private static final UUID PTPH_TYPE_ID = fromString("06b0c2bf-3f98-46ed-ab7e-56efaf9ecced");
+
+    private static uk.gov.justice.core.courts.Hearing crownPtphHearing() {
+        return hearingOf(JurisdictionType.CROWN, PTPH_TYPE_ID);
+    }
+
+    private static uk.gov.justice.core.courts.Hearing hearingOf(final JurisdictionType jurisdictionType, final UUID typeId) {
+        final uk.gov.justice.core.courts.Hearing.Builder builder = uk.gov.justice.core.courts.Hearing.hearing()
+                .withId(randomUUID())
+                .withJurisdictionType(jurisdictionType);
+        if (typeId != null) {
+            builder.withType(uk.gov.justice.core.courts.HearingType.hearingType()
+                    .withId(typeId).withDescription("desc").build());
+        }
+        return builder.build();
+    }
+
+    private static HearingAggregate aggregateWithHearing(final uk.gov.justice.core.courts.Hearing hearing) {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final HearingAggregateMomento momento = new HearingAggregateMomento();
+        momento.setHearing(hearing);
+        setField(hearingAggregate, "momento", momento);
+        return hearingAggregate;
+    }
+
+    private static void assertRejectedAsNotCrown(final List<Object> events, final UUID hearingId) {
+        assertThat(events.size(), is(1));
+        assertTrue(events.get(0) instanceof HearingChangeIgnored);
+        final HearingChangeIgnored ignored = (HearingChangeIgnored) events.get(0);
+        assertThat(ignored.getHearingId(), is(hearingId));
+        assertThat(ignored.getReason(), is("Rejecting 'hearing.save-ptph-detail' event as hearing is not in the Crown Court"));
+    }
+
+    private static void assertSaved(final List<Object> events) {
+        assertThat(events.size(), is(1));
+        assertTrue(events.get(0) instanceof PtphDetailSaved);
+    }
+
+    @Test
+    public void shouldRejectSavePtphDetailForAMagistratesPtphHearing() {
+        final HearingAggregate hearingAggregate = aggregateWithHearing(hearingOf(JurisdictionType.MAGISTRATES, PTPH_TYPE_ID));
+        final UUID hearingId = randomUUID();
+
+        assertRejectedAsNotCrown(hearingAggregate
+                .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
+                .collect(toList()), hearingId);
+    }
+
+    /** Jurisdiction is the whole rule, so a magistrates hearing is refused whatever its type. */
+    @Test
+    public void shouldRejectSavePtphDetailForAMagistratesHearingOfAnyOtherType() {
+        final HearingAggregate hearingAggregate = aggregateWithHearing(hearingOf(JurisdictionType.MAGISTRATES, randomUUID()));
+        final UUID hearingId = randomUUID();
+
+        assertRejectedAsNotCrown(hearingAggregate
+                .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
+                .collect(toList()), hearingId);
+    }
+
+    /**
+     * The type is not part of the rule: the court may record a tier at any Crown hearing, not
+     * only at a Plea and Trial Preparation one.
+     */
+    @Test
+    public void shouldSavePtphDetailForACrownHearingThatIsNotAPtph() {
+        final HearingAggregate hearingAggregate = aggregateWithHearing(hearingOf(JurisdictionType.CROWN, randomUUID()));
+
+        assertSaved(hearingAggregate
+                .savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_2", "TYPE_1_FIXED", "reason"))
+                .collect(toList()));
+    }
+
+    /** A Crown hearing that carries no type at all is still eligible. */
+    @Test
+    public void shouldSavePtphDetailWhenTheCrownHearingHasNoType() {
+        final HearingAggregate hearingAggregate = aggregateWithHearing(hearingOf(JurisdictionType.CROWN, null));
+
+        assertSaved(hearingAggregate
+                .savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_2", "TYPE_1_FIXED", "reason"))
+                .collect(toList()));
+    }
+
+    /** A hearing with no jurisdiction cannot be confirmed as Crown, so it is not eligible. */
+    @Test
+    public void shouldRejectSavePtphDetailWhenTheHearingHasNoJurisdiction() {
+        final HearingAggregate hearingAggregate = aggregateWithHearing(hearingOf(null, PTPH_TYPE_ID));
+        final UUID hearingId = randomUUID();
+
+        assertRejectedAsNotCrown(hearingAggregate
+                .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
+                .collect(toList()), hearingId);
+    }
+
+    // ---------------------------------------------------------------------------------
+    // PTPH detail state rules. These were RuntimeExceptions thrown from the delegate, which
+    // dead-lettered the hearing's command queue for what are ordinary user actions - a double
+    // submit, finalising too early. Each must now drop the command as HearingChangeIgnored so
+    // the stream stays healthy, and each is reachable without corrupting anything.
+    // ---------------------------------------------------------------------------------
+
+    private static HearingAggregate crownAggregateWithPtphState(final String tier,
+                                                                final String listType,
+                                                                final boolean finalised) {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final HearingAggregateMomento momento = new HearingAggregateMomento();
+        momento.setHearing(crownPtphHearing());
+        momento.setTier(tier);
+        momento.setListType(listType);
+        momento.setPtphDetailFinalised(finalised);
+        setField(hearingAggregate, "momento", momento);
+        return hearingAggregate;
+    }
+
+    private static void assertIgnoredWithReason(final List<Object> events, final UUID hearingId, final String reason) {
+        assertThat(events.size(), is(1));
+        assertTrue(events.get(0) instanceof HearingChangeIgnored);
+        final HearingChangeIgnored ignored = (HearingChangeIgnored) events.get(0);
+        assertThat(ignored.getHearingId(), is(hearingId));
+        assertThat(ignored.getReason(), is(reason));
+    }
+
+    @Test
+    public void shouldIgnoreRatherThanThrowWhenSavingOverAFinalisedPtphDetail() {
+        final HearingAggregate hearingAggregate = crownAggregateWithPtphState("TIER_2", "TYPE_2_FLEXIBLE", true);
+        final UUID hearingId = randomUUID();
+
+        assertIgnoredWithReason(hearingAggregate
+                        .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_3", null, null))
+                        .collect(toList()),
+                hearingId,
+                "Rejecting 'hearing.save-ptph-detail' event as tier and list type are finalised and cannot be changed");
+    }
+
+    @Test
+    public void shouldIgnoreRatherThanThrowWhenFinalisingWithoutAListType() {
+        final HearingAggregate hearingAggregate = crownAggregateWithPtphState("TIER_2", null, false);
+        final UUID hearingId = randomUUID();
+
+        assertIgnoredWithReason(hearingAggregate
+                        .finalisePtphDetail(new PtphDetailFinalised(hearingId))
+                        .collect(toList()),
+                hearingId,
+                "Rejecting 'hearing.finalise-ptph-detail' event as both tier and list type are required to finalise");
+    }
+
+    @Test
+    public void shouldIgnoreRatherThanThrowWhenFinalisingWithoutATier() {
+        final HearingAggregate hearingAggregate = crownAggregateWithPtphState(null, "TYPE_2_FLEXIBLE", false);
+        final UUID hearingId = randomUUID();
+
+        assertIgnoredWithReason(hearingAggregate
+                        .finalisePtphDetail(new PtphDetailFinalised(hearingId))
+                        .collect(toList()),
+                hearingId,
+                "Rejecting 'hearing.finalise-ptph-detail' event as both tier and list type are required to finalise");
+    }
+
+    /** A double submit of finalise is the likeliest real cause of a dead letter. */
+    @Test
+    public void shouldIgnoreRatherThanThrowWhenFinalisingTwice() {
+        final HearingAggregate hearingAggregate = crownAggregateWithPtphState("TIER_2", "TYPE_2_FLEXIBLE", true);
+        final UUID hearingId = randomUUID();
+
+        assertIgnoredWithReason(hearingAggregate
+                        .finalisePtphDetail(new PtphDetailFinalised(hearingId))
+                        .collect(toList()),
+                hearingId,
+                "Rejecting 'hearing.finalise-ptph-detail' event as tier and list type are already finalised");
+    }
+
+    @Test
+    public void shouldFinalisePtphDetailWhenTierAndListTypeArePresent() {
+        final List<Object> events = crownAggregateWithPtphState("TIER_2", "TYPE_2_FLEXIBLE", false)
+                .finalisePtphDetail(new PtphDetailFinalised(randomUUID()))
+                .collect(toList());
+
+        assertThat(events.size(), is(1));
+        assertTrue(events.get(0) instanceof PtphDetailFinalised);
+    }
+
+    /** Delete stays unconditional on a real hearing: repeating it must not throw either. */
+    @Test
+    public void shouldDeletePtphDetailWhenAlreadyFinalisedAndWhenNothingIsRecorded() {
+        assertThat(crownAggregateWithPtphState("TIER_2", "TYPE_1_FIXED", true)
+                .deletePtphDetail(new PtphDetailDeleted(randomUUID())).collect(toList()).get(0),
+                instanceOf(PtphDetailDeleted.class));
+
+        assertThat(crownAggregateWithPtphState(null, null, false)
+                .deletePtphDetail(new PtphDetailDeleted(randomUUID())).collect(toList()).get(0),
+                instanceOf(PtphDetailDeleted.class));
+    }
+
+    // ---------------------------------------------------------------------------------
+    // A deleted or duplicated hearing keeps its momento.hearing - handleHearingDeleted and
+    // handleHearingMarkedAsDuplicate only raise a flag. The existence guard alone therefore let a
+    // late command through, and a save would recreate the ha_ptph_detail row that
+    // HearingDeletedEventListener had just removed.
+    // ---------------------------------------------------------------------------------
+
+    private static HearingAggregate crownAggregateThatIs(final boolean deleted, final boolean duplicate) {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final HearingAggregateMomento momento = new HearingAggregateMomento();
+        momento.setHearing(crownPtphHearing());
+        momento.setTier("TIER_2");
+        momento.setListType("TYPE_2_FLEXIBLE");
+        momento.setDeleted(deleted);
+        momento.setDuplicate(duplicate);
+        setField(hearingAggregate, "momento", momento);
+        return hearingAggregate;
+    }
+
+    @Test
+    public void shouldRejectSavePtphDetailForADeletedHearing() {
+        final UUID hearingId = randomUUID();
+        assertIgnoredWithReason(crownAggregateThatIs(true, false)
+                        .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_3", "TYPE_2_FLEXIBLE", null))
+                        .collect(toList()),
+                hearingId, "Rejecting 'hearing.save-ptph-detail' event as hearing is deleted or a duplicate");
+    }
+
+    @Test
+    public void shouldRejectSavePtphDetailForADuplicatedHearing() {
+        final UUID hearingId = randomUUID();
+        assertIgnoredWithReason(crownAggregateThatIs(false, true)
+                        .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_3", "TYPE_2_FLEXIBLE", null))
+                        .collect(toList()),
+                hearingId, "Rejecting 'hearing.save-ptph-detail' event as hearing is deleted or a duplicate");
+    }
+
+    @Test
+    public void shouldRejectFinalisePtphDetailForADeletedHearing() {
+        final UUID hearingId = randomUUID();
+        assertIgnoredWithReason(crownAggregateThatIs(true, false)
+                        .finalisePtphDetail(new PtphDetailFinalised(hearingId))
+                        .collect(toList()),
+                hearingId, "Rejecting 'hearing.finalise-ptph-detail' event as hearing is deleted or a duplicate");
+    }
+
+    @Test
+    public void shouldRejectDeletePtphDetailForADeletedHearing() {
+        final UUID hearingId = randomUUID();
+        assertIgnoredWithReason(crownAggregateThatIs(true, false)
+                        .deletePtphDetail(new PtphDetailDeleted(hearingId))
+                        .collect(toList()),
+                hearingId, "Rejecting 'hearing.delete-ptph-detail' event as hearing is deleted or a duplicate");
+    }
+
+    /**
+     * The view store drops ha_ptph_detail when the hearing row goes, so the aggregate must not keep
+     * claiming a tier for a hearing that no longer exists. Asserted through apply() rather than the
+     * delegate so it covers the actual replay path.
+     */
+    /**
+     * Reads the aggregate's OWN momento rather than injecting one: hearingPtphDetailDelegate
+     * captures the momento reference when the aggregate is constructed, so replacing the field by
+     * reflection leaves the delegate writing to the original and the assertions would pass
+     * vacuously against an untouched copy.
+     */
+    private static HearingAggregateMomento momentoOf(final HearingAggregate hearingAggregate) {
+        return ReflectionUtil.getValueOfField(hearingAggregate, "momento", HearingAggregateMomento.class);
+    }
+
+    @Test
+    public void shouldClearPtphDetailWhenTheHearingIsDeleted() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new PtphDetailSaved(randomUUID(), "TIER_3", "TYPE_1_FIXED", "reason"));
+        hearingAggregate.apply(new PtphDetailFinalised(randomUUID()));
+
+        assertThat(momentoOf(hearingAggregate).getTier(), is("TIER_3"));
+        assertThat(momentoOf(hearingAggregate).isPtphDetailFinalised(), is(true));
+
+        hearingAggregate.apply(new HearingDeleted(emptyList(), emptyList(), emptyList(), emptyList(), randomUUID()));
+
+        final HearingAggregateMomento momento = momentoOf(hearingAggregate);
+        assertThat(momento.getTier(), is(nullValue()));
+        assertThat(momento.getListType(), is(nullValue()));
+        assertThat(momento.getPtphDetailKeyReason(), is(nullValue()));
+        assertThat(momento.isPtphDetailFinalised(), is(false));
+    }
+
+    @Test
+    public void shouldClearPtphDetailWhenTheHearingIsMarkedAsDuplicate() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new PtphDetailSaved(randomUUID(), "TIER_3", "TYPE_1_FIXED", "reason"));
+
+        assertThat(momentoOf(hearingAggregate).getTier(), is("TIER_3"));
+
+        hearingAggregate.apply(new HearingMarkedAsDuplicate(emptyList(), emptyList(), emptyList(), randomUUID(), randomUUID(), "duplicate"));
+
+        assertThat(momentoOf(hearingAggregate).getTier(), is(nullValue()));
+        assertThat(momentoOf(hearingAggregate).getListType(), is(nullValue()));
+    }
+
+    /** The court-application deletion path shares handleHearingDeleted, so it must clear it too. */
+    @Test
+    public void shouldClearPtphDetailWhenTheCourtApplicationHearingIsDeleted() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new PtphDetailSaved(randomUUID(), "TIER_3", "TYPE_1_FIXED", "reason"));
+        hearingAggregate.apply(new PtphDetailFinalised(randomUUID()));
+
+        assertThat(momentoOf(hearingAggregate).getTier(), is("TIER_3"));
+        assertThat(momentoOf(hearingAggregate).isPtphDetailFinalised(), is(true));
+
+        hearingAggregate.apply(CourtApplicationHearingDeleted.courtApplicationHearingDeleted()
+                .withHearingId(randomUUID()).build());
+
+        assertThat(momentoOf(hearingAggregate).getTier(), is(nullValue()));
+        assertThat(momentoOf(hearingAggregate).isPtphDetailFinalised(), is(false));
+    }
+
+    /** The counterpart: a live hearing in the same state still accepts all three. */
+    @Test
+    public void shouldStillAcceptPtphDetailCommandsForALiveHearing() {
+        assertSaved(crownAggregateThatIs(false, false)
+                .savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_3", "TYPE_2_FLEXIBLE", null))
+                .collect(toList()));
+
+        assertThat(crownAggregateThatIs(false, false)
+                        .finalisePtphDetail(new PtphDetailFinalised(randomUUID())).collect(toList()).get(0),
+                instanceOf(PtphDetailFinalised.class));
+
+        assertThat(crownAggregateThatIs(false, false)
+                        .deletePtphDetail(new PtphDetailDeleted(randomUUID())).collect(toList()).get(0),
+                instanceOf(PtphDetailDeleted.class));
     }
 
     private static void checkHearingEventIgnored(final List<Object> events) {
