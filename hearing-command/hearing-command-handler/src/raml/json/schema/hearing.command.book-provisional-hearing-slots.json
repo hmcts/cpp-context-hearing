@@ -15,6 +15,10 @@
         "minItems": 1
       }
     },
+    "bookingId": {
+      "description": "Reuse this booking rather than minting a new one. Sent when a clerk re-picks a session for a draft that already holds a bookingReference; courtscheduler then releases the previous pick's hold before taking the new sessions. Absent on a first pick. Passed straight through - hearing never invents or validates it.",
+      "type": "string"
+    },
     "bookingType": {
       "type": "string"
     },
