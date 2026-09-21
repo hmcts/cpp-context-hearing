@@ -372,6 +372,7 @@ class OffenceDelegateTest {
 
     }
 
+
     @Test
     void shouldAddOffencePleasToMomento() {
         final UUID hearingId = randomUUID();
@@ -394,19 +395,19 @@ class OffenceDelegateTest {
                 .build()));
 
         final List<ProsecutionCase> prosecutionCases = singletonList(ProsecutionCase.prosecutionCase()
-                .withId(caseId2)
-                .withDefendants(singletonList(
-                        Defendant.defendant()
-                                .withId(defendantId)
-                                .withOffences(singletonList(Offence.offence()
-                                        .withId(offenceId)
-                                        .withPlea(Plea.plea().withOffenceId(offenceId).build())
-                                        .withIndicatedPlea(IndicatedPlea.indicatedPlea().withOffenceId(offenceId).build())
-                                        .withAllocationDecision(AllocationDecision.allocationDecision().withOffenceId(offenceId).build())
-                                        .withVerdict(Verdict.verdict().withOffenceId(offenceId).build())
+                        .withId(caseId2)
+                        .withDefendants(singletonList(
+                                Defendant.defendant()
+                                        .withId(defendantId)
+                                        .withOffences(singletonList(Offence.offence()
+                                                .withId(offenceId)
+                                                .withPlea(Plea.plea().withOffenceId(offenceId).build())
+                                                .withIndicatedPlea(IndicatedPlea.indicatedPlea().withOffenceId(offenceId).build())
+                                                .withAllocationDecision(AllocationDecision.allocationDecision().withOffenceId(offenceId).build())
+                                                .withVerdict(Verdict.verdict().withOffenceId(offenceId).build())
+                                                .build()))
                                         .build()))
-                                .build()))
-                .build());
+                        .build());
         hearingAggregate.apply(new ExistingHearingUpdated(hearingId, prosecutionCases, Collections.emptyList()));
 
         assertThat(hearingAggregateMomento.getPleas().size(), is(1));
