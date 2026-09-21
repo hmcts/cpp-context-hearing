@@ -10,6 +10,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
+import uk.gov.moj.cpp.hearing.domain.event.ReleaseProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
@@ -157,6 +158,10 @@ public class HearingEventListenerYamlConfigTest {
             OutstandingFinesQueried.class.getAnnotation(Event.class).value(),
             OutstandingFinesRequested.class.getAnnotation(Event.class).value(),
             BookProvisionalHearingSlots.class.getAnnotation(Event.class).value(),
+            // Consumed by ReleaseProvisionalHearingSlotsProcessor in hearing-event-processor,
+            // not by a view-store listener - same as its sibling above, so it is not in the
+            // listener yaml and must not be expected there.
+            ReleaseProvisionalHearingSlots.class.getAnnotation(Event.class).value(),
             SaveDraftResultFailed.class.getAnnotation(Event.class).value(),
             ShareResultsFailed.class.getAnnotation(Event.class).value(),
             ManageResultsFailed.class.getAnnotation(Event.class).value(),
