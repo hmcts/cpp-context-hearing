@@ -163,6 +163,10 @@ public class OffenceDelegate implements Serializable {
             this.momento.getIndicatedPlea().putIfAbsent(offenceId, offence.getIndicatedPlea());
         }
 
+        if(nonNull(offence.getConvictionDate())) {
+            this.momento.getConvictionDates().putIfAbsent(offenceId,offence.getConvictionDate());
+        }
+
         if(nonNull(offence.getVerdict())) {
             this.momento.getVerdicts().putIfAbsent(offenceId, offence.getVerdict());
         }
