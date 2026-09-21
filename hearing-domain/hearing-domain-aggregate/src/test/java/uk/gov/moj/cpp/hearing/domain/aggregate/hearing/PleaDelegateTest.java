@@ -179,7 +179,7 @@ public class PleaDelegateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregateMomento = getMemonto(hearingAggregate);
 
-        hearingAggregate.initiate(hearing);
+        hearingAggregate.initiate(hearing, Collections.emptySet());
 
         ofNullable(testData.getBeforeValue().getPlea()).ifPresent(plea -> this.hearingAggregateMomento.getPleas().put(OFFENCE_ID, Plea.plea()
                 .withOffenceId(OFFENCE_ID)
@@ -254,7 +254,7 @@ public class PleaDelegateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregateMomento = getMemonto(hearingAggregate);
 
-        hearingAggregate.initiate(hearing);
+        hearingAggregate.initiate(hearing, Collections.emptySet());
 
         hearingAggregateMomento.getVerdicts().put(OFFENCE_ID, Verdict.verdict().withVerdictType(VerdictType.verdictType().withCategoryType(GUILTY).build()).build());
 
@@ -684,7 +684,7 @@ public class PleaDelegateTest {
                 firstOffenceForFirstDefendantForFirstCase.setConvictionDate(convictionDateForFirstOffence);
 
                 final HearingAggregate hearingAggregate = new HearingAggregate();
-                final List<Object> events = hearingAggregate.initiate(hearing).collect(Collectors.toList());
+                final List<Object> events = hearingAggregate.initiate(hearing, Collections.emptySet()).collect(Collectors.toList());
                 events.forEach(hearingAggregate::apply);
 
                 final PleaModel pleaModel = getPlea(NOT_GUILTY, NEW_PLEA_DATE);
@@ -884,7 +884,7 @@ public class PleaDelegateTest {
     public void shouldSyncAggregateConvictionDateWhenInheritedGuiltyPleaEventsAreApplied() throws Exception {
         final Hearing hearing = hearingReadyForInherit(getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID));
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        hearingAggregate.initiate(hearing).forEach(hearingAggregate::apply);
+        hearingAggregate.initiate(hearing, Collections.emptySet()).forEach(hearingAggregate::apply);
 
         final Plea plea = Plea.plea()
                 .withOffenceId(OFFENCE_ID)
@@ -906,7 +906,7 @@ public class PleaDelegateTest {
     public void shouldSyncAggregateConvictionDateRemovalWhenInheritedNotGuiltyPleaEventsAreApplied() throws Exception {
         final Hearing hearing = hearingReadyForInherit(getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID, NEW_PLEA_DATE));
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        hearingAggregate.initiate(hearing).forEach(hearingAggregate::apply);
+        hearingAggregate.initiate(hearing, Collections.emptySet()).forEach(hearingAggregate::apply);
 
         assertThat(getMemonto(hearingAggregate).getConvictionDates().get(OFFENCE_ID), is(NEW_PLEA_DATE));
 
@@ -943,7 +943,7 @@ public class PleaDelegateTest {
     private void shouldAddConvictionDateAddedWhenPleaIsGuiltyType(final Hearing hearing, final String guiltyPleaValue) {
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        final List<Object> events = hearingAggregate.initiate(hearing).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.initiate(hearing, Collections.emptySet()).collect(Collectors.toList());
         events.forEach(hearingAggregate::apply);
 
         final PleaModel pleaModel = getPlea(guiltyPleaValue, NEW_PLEA_DATE);
@@ -964,7 +964,7 @@ public class PleaDelegateTest {
     private void shouldRemoveConvictionDateWhenPleaChangedFromGuiltyToNotGuilty(final String notGuiltyPleaValue) {
         final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        final List<Object> events = hearingAggregate.initiate(hearing).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.initiate(hearing, Collections.emptySet()).collect(Collectors.toList());
         events.forEach(hearingAggregate::apply);
 
         // this indicates a guilty plea was set previously

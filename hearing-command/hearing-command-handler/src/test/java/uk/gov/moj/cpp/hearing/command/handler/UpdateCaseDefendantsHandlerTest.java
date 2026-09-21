@@ -141,7 +141,7 @@ public class UpdateCaseDefendantsHandlerTest {
         final UUID defendantId = randomUUID();
         final UUID hearingId = randomUUID();
         setupMockedEventStream(hearingId, this.hearingEventStream, hearingAggregate);
-        hearingAggregate.initiate(initiateHearingCommand.getHearing());
+        hearingAggregate.initiate(initiateHearingCommand.getHearing(), java.util.Collections.emptySet());
 
         final JsonObject commandPayload = createObjectBuilder()
                 .add("prosecutionCase",createObjectBuilder()
@@ -202,7 +202,7 @@ public class UpdateCaseDefendantsHandlerTest {
         final UUID defendantId = randomUUID();
         final UUID hearingId = randomUUID();
         setupMockedEventStream(hearingId, this.hearingEventStream, hearingAggregate);
-        hearingAggregate.initiate(initiateHearingCommand.getHearing());
+        hearingAggregate.initiate(initiateHearingCommand.getHearing(), java.util.Collections.emptySet());
 
         final JsonObject commandPayload = createObjectBuilder()
                 .add("courtApplication", createObjectBuilder()

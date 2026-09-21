@@ -136,7 +136,7 @@ public class UpdateDefendantLegalAidStatusCommandHandlerTest {
         final UUID defendantId = randomUUID();
         final UUID hearingId = randomUUID();
         setupMockedEventStream(hearingId, eventStream,  hearingAggregate);
-        hearingAggregate.initiate(initiateHearingCommand.getHearing());
+        hearingAggregate.initiate(initiateHearingCommand.getHearing(), java.util.Collections.emptySet());
 
 
         final JsonObject commandPayload = createObjectBuilder()

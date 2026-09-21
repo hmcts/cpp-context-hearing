@@ -313,7 +313,7 @@ public class DuplicateHearingCommandHandlerTest {
                 .withCourtCentre(CourtCentre.courtCentre()
                         .withId(courtCentreId)
                         .build())
-                .build());
+                .build(), java.util.Collections.emptySet());
         return hearingAggregate;
     }
 

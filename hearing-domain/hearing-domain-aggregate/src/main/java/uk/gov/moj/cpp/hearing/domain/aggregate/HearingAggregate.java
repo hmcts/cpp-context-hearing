@@ -563,7 +563,7 @@ public class HearingAggregate implements Aggregate {
     }
 
 
-    public Stream<Object> initiate(final Hearing hearing) {
+    public Stream<Object> initiate(final Hearing hearing, final Set<String> guiltyPleaTypes) {
         if (hearing.getHasSharedResults() == null) {
             hearing.setHasSharedResults(false);
         }
@@ -571,11 +571,11 @@ public class HearingAggregate implements Aggregate {
         final List<UUID> underAgeDefendantIds = findUnderAgeDefendantIds(hearing);
 
         if (underAgeDefendantIds.isEmpty()) {
-            return apply(this.hearingDelegate.initiate(hearing));
+            return apply(this.hearingDelegate.initiate(hearing, guiltyPleaTypes));
         }
 
         return apply(Stream.concat(
-                this.hearingDelegate.initiate(hearing),
+                this.hearingDelegate.initiate(hearing, guiltyPleaTypes),
                 Stream.of(CourtListRestricted.courtListRestricted()
                         .withHearingId(hearing.getId())
                         .withDefendantIds(underAgeDefendantIds)
@@ -593,14 +593,17 @@ public class HearingAggregate implements Aggregate {
     }
 
 
-    public Stream<Object> updateExistingHearing(final UUID hearingId, final List<ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {
+    public Stream<Object> updateExistingHearing(final UUID hearingId, final List<ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences, final Set<String> guiltyPleaTypes) {
         if(this.momento.isDeletedOrDuplicated()){
             return warnEventIgnored(hearingId, "updateExistingHearing");
         }
         if (isNull(momento.getHearing()) ) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing / deleted / marked as duplicate' event as hearing not found", hearingId));
         }
-        return apply(Stream.of(new ExistingHearingUpdated(hearingId, prosecutionCases, shadowListedOffences)));
+        final List<Object> events = new ArrayList<>();
+        events.add(new ExistingHearingUpdated(hearingId, prosecutionCases, shadowListedOffences));
+        events.addAll(hearingDelegate.deriveConvictionDatesForOffencesEnteringHearing(hearingId, prosecutionCases, guiltyPleaTypes));
+        return apply(events.stream());
     }
 
     /**

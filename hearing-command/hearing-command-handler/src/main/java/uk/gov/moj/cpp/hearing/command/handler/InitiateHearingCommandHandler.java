@@ -21,6 +21,7 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.command.hearing.details.UpdateRelatedHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -61,14 +62,18 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
     @Inject
     private Requester requester;
 
+    @Inject
+    private ReferenceDataService referenceDataService;
+
     @Handles("hearing.initiate")
     public void initiate(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.initiate event received {}", envelope.toObfuscatedDebugString());
         }
         final InitiateHearingCommand command = convertToObject(envelope, InitiateHearingCommand.class);
+        final Set<String> guiltyPleaTypes = referenceDataService.retrieveGuiltyPleaTypes();
 
-        aggregate(HearingAggregate.class, command.getHearing().getId(), envelope, a -> a.initiate(command.getHearing()));
+        aggregate(HearingAggregate.class, command.getHearing().getId(), envelope, a -> a.initiate(command.getHearing(), guiltyPleaTypes));
 
         final Hearing hearing = command.getHearing();
         final List<CourtApplication> courtApplications = hearing.getCourtApplications();
@@ -295,7 +300,8 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
 
         final UpdateRelatedHearingCommand command = convertToObject(envelope, UpdateRelatedHearingCommand.class);
         final UUID hearingId = command.getHearingId();
-        aggregate(HearingAggregate.class, hearingId, envelope, a -> a.updateExistingHearing(hearingId, command.getProsecutionCases(), command.getShadowListedOffences()));
+        final Set<String> guiltyPleaTypes = referenceDataService.retrieveGuiltyPleaTypes();
+        aggregate(HearingAggregate.class, hearingId, envelope, a -> a.updateExistingHearing(hearingId, command.getProsecutionCases(), command.getShadowListedOffences(), guiltyPleaTypes));
 
     }
 

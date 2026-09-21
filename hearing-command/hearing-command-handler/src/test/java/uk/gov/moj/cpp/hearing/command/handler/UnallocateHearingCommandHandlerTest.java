@@ -230,7 +230,7 @@ public class UnallocateHearingCommandHandlerTest {
                                         .build()))
                                 .build()
                 ))
-                .build());
+                .build(), java.util.Collections.emptySet());
         return hearingAggregate;
     }
 }

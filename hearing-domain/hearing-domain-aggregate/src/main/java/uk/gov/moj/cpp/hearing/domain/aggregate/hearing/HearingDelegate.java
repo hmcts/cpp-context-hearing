@@ -11,6 +11,8 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.CourtApplicationParty.courtApplicationParty;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.HearingResultsCleanerUtil.removeResultsFromHearing;
+import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaVerdictUtil.isGuiltyVerdict;
+import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded.convictionDateAdded;
 
 import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
 import uk.gov.justice.core.courts.CourtApplication;
@@ -27,8 +29,10 @@ import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.LaaReference;
 import uk.gov.justice.core.courts.ListHearingRequest;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target2;
+import uk.gov.justice.core.courts.Verdict;
 
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationLaareferenceUpdated;
@@ -280,11 +284,77 @@ public class HearingDelegate implements Serializable {
                 .forEach(d -> d.setMasterDefendantId(masterDefendantId));
     }
 
-    public Stream<Object> initiate(final Hearing hearing) {
+    public Stream<Object> initiate(final Hearing hearing, final Set<String> guiltyPleaTypes) {
 
         final Hearing hearingWithoutResults = removeResultsFromHearing(hearing);
 
-        return Stream.of(new HearingInitiated(hearingWithoutResults));
+        final List<Object> events = new ArrayList<>();
+        events.add(new HearingInitiated(hearingWithoutResults));
+        // Add the conviction date if conviction found
+        events.addAll(deriveConvictionDatesForAlreadyConvictedOffences(hearingWithoutResults, guiltyPleaTypes));
+
+        return events.stream();
+    }
+
+    public List<Object> deriveConvictionDatesForOffencesEnteringHearing(final UUID hearingId, final List<ProsecutionCase> prosecutionCases, final Set<String> guiltyPleaTypes) {
+        final List<Object> events = new ArrayList<>();
+        ofNullable(prosecutionCases).map(Collection::stream).orElseGet(Stream::empty)
+                .forEach(prosecutionCase -> ofNullable(prosecutionCase.getDefendants()).map(Collection::stream).orElseGet(Stream::empty)
+                        .flatMap(defendant -> ofNullable(defendant.getOffences()).map(Collection::stream).orElseGet(Stream::empty))
+                        .forEach(offence -> addConvictionDateIfAlreadyConvicted(hearingId, offence, guiltyPleaTypes, prosecutionCase.getId(), null, events)));
+        return events;
+    }
+
+    private List<Object> deriveConvictionDatesForAlreadyConvictedOffences(final Hearing hearing, final Set<String> guiltyPleaTypes) {
+        final List<Object> events = new ArrayList<>();
+        if (isNull(hearing)) {
+            return events;
+        }
+
+        events.addAll(deriveConvictionDatesForOffencesEnteringHearing(hearing.getId(), hearing.getProsecutionCases(), guiltyPleaTypes));
+
+        ofNullable(hearing.getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
+                .forEach(courtApplication -> {
+                    ofNullable(courtApplication.getCourtApplicationCases()).map(Collection::stream).orElseGet(Stream::empty)
+                            .flatMap(courtApplicationCase -> ofNullable(courtApplicationCase.getOffences()).map(Collection::stream).orElseGet(Stream::empty))
+                            .forEach(offence -> addConvictionDateIfAlreadyConvicted(hearing.getId(), offence, guiltyPleaTypes, null, courtApplication.getId(), events));
+
+                    ofNullable(courtApplication.getCourtOrder())
+                            .map(courtOrder -> courtOrder.getCourtOrderOffences())
+                            .map(Collection::stream).orElseGet(Stream::empty)
+                            .map(CourtOrderOffence::getOffence)
+                            .forEach(offence -> addConvictionDateIfAlreadyConvicted(hearing.getId(), offence, guiltyPleaTypes, null, courtApplication.getId(), events));
+                });
+
+        return events;
+    }
+
+    private void addConvictionDateIfAlreadyConvicted(final UUID hearingId, final Offence offence, final Set<String> guiltyPleaTypes,
+                                                      final UUID prosecutionCaseId, final UUID courtApplicationId, final List<Object> events) {
+        if (isNull(offence) || nonNull(offence.getConvictionDate())) {
+            return;
+        }
+
+        final Verdict verdict = offence.getVerdict();
+        if (nonNull(verdict) && isGuiltyVerdict(verdict.getVerdictType())) {
+            events.add(convictionDateAdded()
+                    .setCaseId(prosecutionCaseId)
+                    .setHearingId(hearingId)
+                    .setOffenceId(offence.getId())
+                    .setConvictionDate(verdict.getVerdictDate())
+                    .setCourtApplicationId(courtApplicationId));
+            return;
+        }
+
+        final Plea plea = offence.getPlea();
+        if (nonNull(plea) && nonNull(plea.getPleaValue()) && guiltyPleaTypes.contains(plea.getPleaValue())) {
+            events.add(convictionDateAdded()
+                    .setCaseId(prosecutionCaseId)
+                    .setHearingId(hearingId)
+                    .setOffenceId(offence.getId())
+                    .setConvictionDate(plea.getPleaDate())
+                    .setCourtApplicationId(courtApplicationId));
+        }
     }
 
     public Stream<Object> extend(final UUID hearingId,

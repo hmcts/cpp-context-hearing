@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -60,6 +61,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.command.hearing.details.UpdateRelatedHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
@@ -83,6 +85,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -132,6 +135,8 @@ public class InitiateHearingCommandHandlerTest {
     private AggregateService aggregateService;
     @Mock
     private Requester requester;
+    @Mock
+    private ReferenceDataService referenceDataService;
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
     @Spy
@@ -149,6 +154,7 @@ public class InitiateHearingCommandHandlerTest {
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        lenient().when(this.referenceDataService.retrieveGuiltyPleaTypes()).thenReturn(Collections.emptySet());
     }
 
     /**

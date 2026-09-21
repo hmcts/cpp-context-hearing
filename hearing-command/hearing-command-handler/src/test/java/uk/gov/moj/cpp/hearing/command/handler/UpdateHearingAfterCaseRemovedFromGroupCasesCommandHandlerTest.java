@@ -199,7 +199,7 @@ public class UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandlerTest {
                 .withIsGroupProceedings(Boolean.TRUE)
                 .withProsecutionCases(asList(getProsecutionCase(groupId, groupMaster, true, true)))
                 .withProsecutionCounsels(asList(getProsecutionCounsel(groupMaster)))
-                .build());
+                .build(), java.util.Collections.emptySet());
 
         hearingAggregate.addProsecutionCounsel(prosecutionCounsel, hearingId);
 
