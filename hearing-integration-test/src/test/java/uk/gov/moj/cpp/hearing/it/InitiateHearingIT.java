@@ -7,6 +7,7 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
@@ -1526,6 +1527,14 @@ public class InitiateHearingIT extends AbstractIT {
 
         final BailStatus preHearingBailStatus = hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getBailStatus();
 
+        // Guards the poll below from passing vacuously: it compares the offence's seeded bail
+        // status against these values, so if the template ever stops supplying one the comparison
+        // becomes null-against-null and the test proves nothing.
+        assertThat("the initiate-hearing template must seed a pre-hearing bail status",
+                preHearingBailStatus, is(notNullValue()));
+        assertThat("the seeded pre-hearing bail status must carry a code to compare against",
+                preHearingBailStatus.getCode(), is(notNullValue()));
+
         getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
@@ -1551,6 +1560,12 @@ public class InitiateHearingIT extends AbstractIT {
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), initiateHearing));
 
         final Hearing hearing = hearingOne.getHearing();
+
+        // Confirms the null set up above actually reached the created hearing, so the poll below
+        // exercises the no-bail-status path rather than merely assuming it.
+        assertThat("the defendant must have no pre-hearing bail status for this test to mean anything",
+                hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getBailStatus(),
+                is(nullValue()));
 
         getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
