@@ -397,6 +397,53 @@ public class UpdateOffencesForDefendantEventListenerTest {
     }
 
     @Test
+    public void testUpdateOffenceRetainsExistingAllocationDecisionWhenSyncPayloadHasNone() {
+
+        final OffenceUpdated offenceUpdated = OffenceUpdated.offenceUpdated()
+                .withHearingId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withOffence(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(randomUUID())
+                        .build());
+
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceUpdated));
+
+        final Hearing hearing = new Hearing() {{
+            setId(offenceUpdated.getHearingId());
+        }};
+
+        when(hearingRepository.findOptionalBy(hearing.getId())).thenReturn(Optional.of(hearing));
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.AllocationDecision existingAllocationDecision =
+                new uk.gov.moj.cpp.hearing.persist.entity.ha.AllocationDecision();
+        existingAllocationDecision.setMotReasonDescription("Indictable-only offence");
+
+        final Offence offence = new Offence() {{
+            setId(new HearingSnapshotKey(offenceUpdated.getOffence().getId(), offenceUpdated.getHearingId()));
+            setAllocationDecision(existingAllocationDecision);
+        }};
+
+        final Defendant defendant = new Defendant() {{
+            setId(new HearingSnapshotKey(offenceUpdated.getDefendantId(), offenceUpdated.getHearingId()));
+            setOffences(asSet(offence));
+        }};
+
+        when(defendantRepository.findBy(defendant.getId())).thenReturn(defendant);
+
+        updateOffencesForDefendantEventListener.updateOffence(envelope);
+
+        final ArgumentCaptor<Defendant> defendantExArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
+        verify(defendantRepository).saveAndFlush(defendantExArgumentCaptor.capture());
+
+        final Offence offenceOut = defendantExArgumentCaptor.getValue().getOffences().iterator().next();
+
+        // a full offence re-sync that doesn't carry an allocation decision must not wipe out
+        // the Grounds for Sending / mode of trial already recorded by the hearing service's
+        // own plea/allocation flow
+        assertThat(offenceOut.getAllocationDecision(), is(existingAllocationDecision));
+    }
+
+    @Test
     public void testUpdateOffenceWhenDefendantNotPresentForCombinationOfHearingIdAndDefendantId() {
 
         final OffenceUpdated offenceUpdated = OffenceUpdated.offenceUpdated()
@@ -510,6 +557,50 @@ public class UpdateOffencesForDefendantEventListenerTest {
         assertThat(offenceUpdated.getOffences().get(0).getReportingRestrictions().get(0).getJudicialResultId(), is(reportingRestriction.getJudicialResultId()));
         assertThat(offenceUpdated.getOffences().get(0).getReportingRestrictions().get(0).getLabel(), is(reportingRestriction.getLabel()));
         assertThat(offenceUpdated.getOffences().get(0).getReportingRestrictions().get(0).getOrderedDate(), is(reportingRestriction.getOrderedDate()));
+    }
+
+    @Test
+    public void testUpdateOffenceV2RetainsExistingAllocationDecisionWhenSyncPayloadHasNone() {
+
+        final OffenceUpdatedV2 offenceUpdated = OffenceUpdatedV2.offenceUpdatedV2()
+                .withHearingId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withOffences(asList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(randomUUID())
+                        .build()));
+
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceUpdated));
+
+        final Hearing hearing = new Hearing() {{
+            setId(offenceUpdated.getHearingId());
+        }};
+
+        when(hearingRepository.findOptionalBy(hearing.getId())).thenReturn(Optional.of(hearing));
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.AllocationDecision existingAllocationDecision =
+                new uk.gov.moj.cpp.hearing.persist.entity.ha.AllocationDecision();
+        existingAllocationDecision.setMotReasonDescription("Either way offence");
+
+        final Offence offence = new Offence() {{
+            setId(new HearingSnapshotKey(offenceUpdated.getOffences().get(0).getId(), offenceUpdated.getHearingId()));
+            setAllocationDecision(existingAllocationDecision);
+        }};
+
+        final Defendant defendant = new Defendant() {{
+            setId(new HearingSnapshotKey(offenceUpdated.getDefendantId(), offenceUpdated.getHearingId()));
+            setOffences(asSet(offence));
+        }};
+
+        when(defendantRepository.findBy(defendant.getId())).thenReturn(defendant);
+
+        updateOffencesForDefendantEventListener.updateOffenceV2(envelope);
+
+        final ArgumentCaptor<Defendant> defendantExArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
+        verify(defendantRepository).saveAndFlush(defendantExArgumentCaptor.capture());
+
+        final Offence offenceOut = defendantExArgumentCaptor.getValue().getOffences().iterator().next();
+
+        assertThat(offenceOut.getAllocationDecision(), is(existingAllocationDecision));
     }
 
     @Test

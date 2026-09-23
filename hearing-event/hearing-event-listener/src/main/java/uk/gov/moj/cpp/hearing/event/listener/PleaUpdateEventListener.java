@@ -102,8 +102,6 @@ public class PleaUpdateEventListener {
         }
         if (Objects.nonNull(event.getPleaModel().getAllocationDecision())) {
             offence.setAllocationDecision(allocationDecisionJPAMapper.toJPA(event.getPleaModel().getAllocationDecision()));
-        } else {
-            offence.setAllocationDecision(null);
         }
         if (Objects.nonNull(event.getPleaModel().getIndicatedPlea())) {
             offence.setIndicatedPlea(indicatedPleaJPAMapper.toJPA(event.getPleaModel().getIndicatedPlea()));
