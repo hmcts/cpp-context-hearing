@@ -25,6 +25,9 @@ public class HearingUnallocatedEventListener {
     @Inject
     private HearingRepository hearingRepository;
 
+    @Inject
+    private PtphDetailRemovalService ptphDetailRemovalService;
+
     @Handles(HEARING_EVENT_HEARING_UNALLOCATED)
     public void hearingUnallocated(final JsonEnvelope event) {
 
@@ -38,6 +41,7 @@ public class HearingUnallocatedEventListener {
 
         if (hearing != null) {
             hearingRepository.remove(hearing);
+            ptphDetailRemovalService.removeFor(hearingId);
         }
     }
 }

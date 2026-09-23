@@ -17,7 +17,7 @@ import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupAllReportingRe
 @SuppressWarnings({"squid:S2384", "PMD.BeanMembersShouldSerialize"})
 public class HearingAggregateMomento implements Serializable {
 
-    private static final long serialVersionUID = -561416825201569300L;
+    private static final long serialVersionUID = -561416825201569301L;
 
     private final Map<UUID, HearingEventDelegate.HearingEvent> hearingEvents = new HashMap<>();
     private final Map<UUID, ProsecutionCounsel> prosecutionCounsels = new HashMap<>();
@@ -41,6 +41,10 @@ public class HearingAggregateMomento implements Serializable {
     private boolean duplicate = false;
     private ZonedDateTime lastSharedTime;
     private boolean deleted = false;
+    private String tier;
+    private String listType;
+    private String ptphDetailKeyReason;
+    private boolean ptphDetailFinalised = false;
     private Map<UUID, ZonedDateTime> nextHearingStartDates = new HashMap<>();
     private Map<UUID, ZonedDateTime> resultsAmendmentDateMap = new HashMap<>();
     private Map<LocalDate, Map<UUID, Target2>> multiDayTargets = new HashMap<>();
@@ -175,6 +179,38 @@ public class HearingAggregateMomento implements Serializable {
         this.deleted = deleted;
     }
 
+    public String getTier() {
+        return tier;
+    }
+
+    public void setTier(final String tier) {
+        this.tier = tier;
+    }
+
+    public String getListType() {
+        return listType;
+    }
+
+    public void setListType(final String listType) {
+        this.listType = listType;
+    }
+
+    public String getPtphDetailKeyReason() {
+        return ptphDetailKeyReason;
+    }
+
+    public void setPtphDetailKeyReason(final String ptphDetailKeyReason) {
+        this.ptphDetailKeyReason = ptphDetailKeyReason;
+    }
+
+    public boolean isPtphDetailFinalised() {
+        return ptphDetailFinalised;
+    }
+
+    public void setPtphDetailFinalised(final boolean ptphDetailFinalised) {
+        this.ptphDetailFinalised = ptphDetailFinalised;
+    }
+
     public Map<UUID, ZonedDateTime> getNextHearingStartDates() {
         return nextHearingStartDates;
     }
@@ -217,5 +253,18 @@ public class HearingAggregateMomento implements Serializable {
 
     public boolean isDeletedOrDuplicated()  {
         return this.isDeleted() || this.isDuplicate();
+    }
+
+    /**
+     * A tier and list type only ever describe a hearing, so they lose their reason to exist the
+     * moment the hearing does. Lives here rather than on HearingPtphDetailDelegate so that
+     * HearingDelegate can apply it on deletion without the delegates having to reference each
+     * other — they are all constructed as peers over this momento.
+     */
+    public void clearPtphDetail() {
+        setTier(null);
+        setListType(null);
+        setPtphDetailKeyReason(null);
+        setPtphDetailFinalised(false);
     }
 }
