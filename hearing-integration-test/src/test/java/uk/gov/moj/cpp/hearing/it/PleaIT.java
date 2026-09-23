@@ -333,6 +333,75 @@ public class PleaIT extends AbstractIT {
         );
     }
 
+    /**
+     * Regression test for the Grounds for Sending / mode of trial data-loss bug: a later plea
+     * update that doesn't itself carry an allocation decision (the normal case, since plea and
+     * allocation decision are recorded as separate actions) must not clear an allocation
+     * decision already recorded against the offence.
+     */
+    @Test
+    public void updatePlea_withoutAllocationDecision_shouldRetainExistingAllocationDecision() {
+
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+        final UUID offenceId = hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId();
+
+
+
+
+        final UpdatePleaCommandHelper pleaWithAllocationDecision =
+                getUpdatePleaCommandHelper(hearingOne, null, true, GUILTY, offenceId, true);
+
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(offenceId))
+                                                .with(Offence::getPlea, isBean(Plea.class)
+                                                        .with(Plea::getPleaValue, is(GUILTY)))
+                                                .with(Offence::getAllocationDecision, isBean(AllocationDecision.class)
+                                                        .with(AllocationDecision::getMotReasonId, is(pleaWithAllocationDecision.getFirstAllocationDecisionMotReasonId())))
+                                        ))
+                                ))
+                        ))
+                )
+        );
+
+        System.out.println("offenceId: " + offenceId + " ");
+        System.out.println("hearingOne: " + hearingOne.getHearingId() + " ");
+        System.out.println("pleaWithAllocationDecision: " + pleaWithAllocationDecision.getFirstAllocationDecisionMotReasonId() + " ");
+
+
+        // a second plea update on the same offense, this time with no allocation decision at all
+        final UpdatePleaCommandHelper pleaWithoutAllocationDecision =
+                getUpdatePleaCommandHelper(hearingOne, null, false, NOT_GUILTY, offenceId, true);
+
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(offenceId))
+                                                // the plea did change, proving the update was applied
+                                                .with(Offence::getPlea, isBean(Plea.class)
+                                                        .with(Plea::getPleaValue, is(NOT_GUILTY)))
+                                                // but the allocation decision from before must survive
+                                                .with(Offence::getAllocationDecision, isBean(AllocationDecision.class)
+                                                        .with(AllocationDecision::getMotReasonId, is(pleaWithAllocationDecision.getFirstAllocationDecisionMotReasonId())))
+                                        ))
+                                ))
+                        ))
+                )
+        );
+
+        System.out.println("offenceId2: " + offenceId + " ");
+        System.out.println("hearingOne2: " + hearingOne.getHearingId() + " ");
+
+        assertThat(pleaWithoutAllocationDecision.getPlea().getPleaValue(), is(NOT_GUILTY));
+    }
+
     @Test
     public void updateIndicatedPlea_toNotGuilty_WithAllocationDecision() {
 

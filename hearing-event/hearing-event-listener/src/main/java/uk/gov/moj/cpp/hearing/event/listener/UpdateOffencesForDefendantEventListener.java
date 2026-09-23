@@ -136,12 +136,18 @@ public class UpdateOffencesForDefendantEventListener {
         final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(offenceUpdated.getDefendantId(), offenceUpdated.getHearingId()));
 
         if (nonNull(defendant)) {
-            if (defendant.getOffences().removeIf(o -> o.getId().getId().equals(offenceUpdated.getOffence().getId()))) {
+            final Optional<Offence> existingOffence = defendant.getOffences().stream()
+                    .filter(o -> o.getId().getId().equals(offenceUpdated.getOffence().getId()))
+                    .findFirst();
+
+            if (existingOffence.isPresent()) {
+                retainAllocationDecisionIfAbsent(offence, existingOffence.get());
+                defendant.getOffences().remove(existingOffence.get());
                 defendant.getOffences().add(offence);
-            }
 
             defendantRepository.saveAndFlush(defendant);
         }
+    }
     }
 
     @Transactional
@@ -160,12 +166,30 @@ public class UpdateOffencesForDefendantEventListener {
 
         if (nonNull(defendant)) {
             offences.forEach(offence -> {
-                    if (defendant.getOffences().removeIf(o -> o.getId().getId().equals(offence.getId().getId()))) {
+                    final Optional<Offence> existingOffence = defendant.getOffences().stream()
+                            .filter(o -> o.getId().getId().equals(offence.getId().getId()))
+                            .findFirst();
+
+                    if (existingOffence.isPresent()) {
+                        retainAllocationDecisionIfAbsent(offence, existingOffence.get());
+                        defendant.getOffences().remove(existingOffence.get());
                                 defendant.getOffences().add(offence);
                     }
                 });
 
             defendantRepository.saveAndFlush(defendant);
+        }
+    }
+
+    /**
+     * The allocation decision (Grounds for Sending / mode of trial) is owned by the hearing
+     * service's own plea/allocation flow, not by whatever upstream event triggers a full
+     * offence re-sync. If that re-sync payload doesn't carry one, keep the value already
+     * recorded here rather than silently clearing it.
+     */
+    private void retainAllocationDecisionIfAbsent(final Offence incomingOffence, final Offence existingOffence) {
+        if (isNull(incomingOffence.getAllocationDecision()) && nonNull(existingOffence.getAllocationDecision())) {
+            incomingOffence.setAllocationDecision(existingOffence.getAllocationDecision());
         }
     }
 
