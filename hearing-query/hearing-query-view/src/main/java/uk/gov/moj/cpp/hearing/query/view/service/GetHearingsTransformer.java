@@ -221,6 +221,7 @@ public class GetHearingsTransformer {
 
     private Offences.Builder summaryWithReportingRestrictions(final Offence offence) {
         final Offences.Builder result = Offences.offences();
+        result.withId(offence.getId());
         result.withOffenceTitle(offence.getOffenceTitle());
         result.withWordingWelsh(offence.getWordingWelsh());
         return result;
