@@ -359,7 +359,7 @@ public class PleaUpdateEventListenerTest {
 
 
     @Test
-    public void shouldClearAllocationDecisionIfNoneProvidedInUpdatedPlea() {
+    public void shouldRetainExistingAllocationDecisionIfNoneProvidedInUpdatedPlea() {
 
         final UUID hearingId = randomUUID();
         final UUID offenceId = randomUUID();
@@ -385,8 +385,7 @@ public class PleaUpdateEventListenerTest {
         verify(this.offenceRepository).save(offence);
         verifyNoMoreInteractions(allocationDecisionJPAMapper);
 
-        final AllocationDecision offenceAllocationDecision = offencePleaUpdated.getPleaModel().getAllocationDecision();
-        assertThat(offenceAllocationDecision, is(nullValue()));
+        assertThat(offence.getAllocationDecision(), is(existingAllocationDecision));
     }
 
     @Test
