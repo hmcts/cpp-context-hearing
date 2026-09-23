@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/hearing.finalise-ptph-detail.json",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}
