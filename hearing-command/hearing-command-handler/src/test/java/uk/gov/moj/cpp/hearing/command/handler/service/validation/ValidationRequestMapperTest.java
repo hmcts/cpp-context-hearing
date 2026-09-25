@@ -9,10 +9,16 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CourtOrder;
+import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
@@ -26,6 +32,7 @@ import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationRequ
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ResultLineDto;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -584,6 +591,237 @@ class ValidationRequestMapperTest {
                 buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
 
         assertThat(request.getOffences().get(0).getHasExistingCtlRecord(), is(false));
+    }
+
+    @Test
+    void shouldMapDefendantAndOffencesFromCourtApplicationWhenNoProsecutionCases() {
+        final UUID masterDefendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final String caseUrn = "32AH9105826";
+
+        final Hearing hearing = Hearing.hearing()
+                .withCourtApplications(List.of(buildCourtApplication(masterDefendantId, offenceId, caseUrn)))
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
+
+        assertThat(request.getDefendants(), hasSize(1));
+        assertThat(request.getDefendants().get(0).getDefendantId(), is(masterDefendantId.toString()));
+        assertThat(request.getDefendants().get(0).getMasterDefendantId(), is(masterDefendantId.toString()));
+        assertThat(request.getDefendants().get(0).getFirstName(), is("Jane"));
+        assertThat(request.getDefendants().get(0).getLastName(), is("Doe"));
+        assertThat(request.getOffences(), hasSize(1));
+        assertThat(request.getOffences().get(0).getOffenceId(), is(offenceId.toString()));
+        assertThat(request.getOffences().get(0).getOffenceCode(), is("TH68001"));
+        assertThat(request.getOffences().get(0).getCaseUrn(), is(caseUrn));
+    }
+
+    @Test
+    void shouldMapCourtApplicationWhenProsecutionCasesAreEmpty() {
+        final Hearing hearing = Hearing.hearing()
+                .withProsecutionCases(emptyList())
+                .withCourtApplications(List.of(buildCourtApplication(randomUUID(), randomUUID(), null)))
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
+
+        assertThat(request.getDefendants(), hasSize(1));
+        assertThat(request.getOffences(), hasSize(1));
+    }
+
+    @Test
+    void shouldIgnoreCourtApplicationsWhenProsecutionCasesArePresent() {
+        final UUID defendantId = randomUUID();
+
+        final Hearing hearing = Hearing.hearing()
+                .withProsecutionCases(List.of(ProsecutionCase.prosecutionCase()
+                        .withDefendants(List.of(Defendant.defendant().withId(defendantId).build()))
+                        .build()))
+                .withCourtApplications(List.of(buildCourtApplication(randomUUID(), randomUUID(), null)))
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
+
+        assertThat(request.getDefendants(), hasSize(1));
+        assertThat(request.getDefendants().get(0).getDefendantId(), is(defendantId.toString()));
+        assertThat(request.getOffences(), is(empty()));
+    }
+
+    @Test
+    void shouldIgnoreCourtApplicationWithoutCourtApplicationCases() {
+        final Hearing hearing = Hearing.hearing()
+                .withCourtApplications(List.of(CourtApplication.courtApplication()
+                        .withId(randomUUID())
+                        .withSubject(CourtApplicationParty.courtApplicationParty()
+                                .withId(randomUUID())
+                                .withMasterDefendant(MasterDefendant.masterDefendant()
+                                        .withMasterDefendantId(randomUUID())
+                                        .build())
+                                .build())
+                        .build()))
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
+
+        assertThat(request.getDefendants(), is(empty()));
+        assertThat(request.getOffences(), is(empty()));
+    }
+
+    @Test
+    void shouldMapOffencesFromCourtApplicationWhenSubjectHasNoMasterDefendant() {
+        final Hearing hearing = Hearing.hearing()
+                .withCourtApplications(List.of(CourtApplication.courtApplication()
+                        .withId(randomUUID())
+                        .withSubject(CourtApplicationParty.courtApplicationParty().withId(randomUUID()).build())
+                        .withCourtApplicationCases(List.of(CourtApplicationCase.courtApplicationCase()
+                                .withOffences(List.of(Offence.offence().withId(randomUUID()).build()))
+                                .build()))
+                        .build()))
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
+
+        assertThat(request.getDefendants(), is(empty()));
+        assertThat(request.getOffences(), hasSize(1));
+    }
+
+    @Test
+    void shouldSkipNullCourtApplicationsAndNullCourtApplicationCases() {
+        final UUID offenceId = randomUUID();
+        final List<CourtApplicationCase> courtApplicationCases = new ArrayList<>();
+        courtApplicationCases.add(null);
+        courtApplicationCases.add(CourtApplicationCase.courtApplicationCase()
+                .withOffences(List.of(Offence.offence().withId(offenceId).build()))
+                .build());
+        final List<CourtApplication> courtApplications = new ArrayList<>();
+        courtApplications.add(null);
+        courtApplications.add(CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withCourtApplicationCases(courtApplicationCases)
+                .build());
+
+        final Hearing hearing = Hearing.hearing()
+                .withCourtApplications(courtApplications)
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
+
+        assertThat(request.getDefendants(), is(empty()));
+        assertThat(request.getOffences(), hasSize(1));
+        assertThat(request.getOffences().get(0).getOffenceId(), is(offenceId.toString()));
+    }
+
+    @Test
+    void shouldMapDefendantAndOffencesFromCourtOrderWhenCourtApplicationCasesAreEmpty() {
+        final UUID masterDefendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final String caseUrn = "28DI5750788";
+
+        final CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withValuesFrom(buildCourtApplication(masterDefendantId, randomUUID(), null))
+                .withCourtApplicationCases(emptyList())
+                .withCourtOrder(CourtOrder.courtOrder()
+                        .withId(randomUUID())
+                        .withCourtOrderOffences(List.of(CourtOrderOffence.courtOrderOffence()
+                                .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                                        .withCaseURN(caseUrn)
+                                        .build())
+                                .withOffence(Offence.offence()
+                                        .withId(offenceId)
+                                        .withOffenceCode("SX03191")
+                                        .build())
+                                .build()))
+                        .build())
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                Hearing.hearing().withCourtApplications(List.of(courtApplication)).build());
+
+        assertThat(request.getDefendants(), hasSize(1));
+        assertThat(request.getDefendants().get(0).getDefendantId(), is(masterDefendantId.toString()));
+        assertThat(request.getDefendants().get(0).getFirstName(), is("Jane"));
+        assertThat(request.getOffences(), hasSize(1));
+        assertThat(request.getOffences().get(0).getOffenceId(), is(offenceId.toString()));
+        assertThat(request.getOffences().get(0).getOffenceCode(), is("SX03191"));
+        assertThat(request.getOffences().get(0).getCaseUrn(), is(caseUrn));
+    }
+
+    @Test
+    void shouldSkipNullCourtOrderOffencesAndCourtOrderOffencesWithoutOffence() {
+        final UUID offenceId = randomUUID();
+        final List<CourtOrderOffence> courtOrderOffences = new ArrayList<>();
+        courtOrderOffences.add(null);
+        courtOrderOffences.add(CourtOrderOffence.courtOrderOffence().build());
+        courtOrderOffences.add(CourtOrderOffence.courtOrderOffence()
+                .withOffence(Offence.offence().withId(offenceId).build())
+                .build());
+
+        final CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withCourtOrder(CourtOrder.courtOrder()
+                        .withId(randomUUID())
+                        .withCourtOrderOffences(courtOrderOffences)
+                        .build())
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                Hearing.hearing().withCourtApplications(List.of(courtApplication)).build());
+
+        assertThat(request.getDefendants(), is(empty()));
+        assertThat(request.getOffences(), hasSize(1));
+        assertThat(request.getOffences().get(0).getOffenceId(), is(offenceId.toString()));
+        assertThat(request.getOffences().get(0).getCaseUrn(), is(nullValue()));
+    }
+
+    @Test
+    void shouldIgnoreCourtApplicationWithoutCourtApplicationCasesOrCourtOrderOffences() {
+        final CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withValuesFrom(buildCourtApplication(randomUUID(), randomUUID(), null))
+                .withCourtApplicationCases(null)
+                .withCourtOrder(CourtOrder.courtOrder().withId(randomUUID()).build())
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                Hearing.hearing().withCourtApplications(List.of(courtApplication)).build());
+
+        assertThat(request.getDefendants(), is(empty()));
+        assertThat(request.getOffences(), is(empty()));
+    }
+
+    private CourtApplication buildCourtApplication(final UUID masterDefendantId, final UUID offenceId, final String caseUrn) {
+        return CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withId(randomUUID())
+                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                .withMasterDefendantId(masterDefendantId)
+                                .withPersonDefendant(PersonDefendant.personDefendant()
+                                        .withPersonDetails(Person.person()
+                                                .withFirstName("Jane")
+                                                .withLastName("Doe")
+                                                .build())
+                                        .build())
+                                .build())
+                        .build())
+                .withCourtApplicationCases(List.of(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseIdentifier(caseUrn != null
+                                ? ProsecutionCaseIdentifier.prosecutionCaseIdentifier().withCaseURN(caseUrn).build()
+                                : null)
+                        .withOffences(List.of(Offence.offence()
+                                .withId(offenceId)
+                                .withOffenceCode("TH68001")
+                                .build()))
+                        .build()))
+                .build();
     }
 
     private ShareDaysResultsCommand buildCommand(final UUID hearingId, final LocalDate hearingDay,

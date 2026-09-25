@@ -2,8 +2,14 @@ package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 
 import static java.util.stream.Collectors.toList;
 
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CourtOrder;
+import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
@@ -59,11 +65,87 @@ public class ValidationRequestMapper {
     private void mapProsecutionCases(final Hearing hearing,
                                      final List<DefendantDto> defendants,
                                      final List<OffenceDto> offences) {
-        if (hearing.getProsecutionCases() == null) {
+        if (hearing.getProsecutionCases() == null || hearing.getProsecutionCases().isEmpty()) {
+            mapCourtApplications(hearing, defendants, offences);
             return;
         }
         hearing.getProsecutionCases()
                 .forEach(prosecutionCase -> mapProsecutionCase(prosecutionCase, defendants, offences));
+    }
+
+    private void mapCourtApplications(final Hearing hearing,
+                                      final List<DefendantDto> defendants,
+                                      final List<OffenceDto> offences) {
+        if (hearing.getCourtApplications() == null) {
+            return;
+        }
+        hearing.getCourtApplications().stream()
+                .filter(Objects::nonNull)
+                .forEach(courtApplication -> mapCourtApplication(courtApplication, defendants, offences));
+    }
+
+    private void mapCourtApplication(final CourtApplication courtApplication,
+                                     final List<DefendantDto> defendants,
+                                     final List<OffenceDto> offences) {
+        final List<CourtApplicationCase> courtApplicationCases = courtApplication.getCourtApplicationCases();
+        if (courtApplicationCases != null && !courtApplicationCases.isEmpty()) {
+            mapSubject(courtApplication.getSubject(), defendants);
+            courtApplicationCases.stream()
+                    .filter(Objects::nonNull)
+                    .forEach(courtApplicationCase -> mapOffences(courtApplicationCase, offences));
+            return;
+        }
+        final List<CourtOrderOffence> courtOrderOffences = extractCourtOrderOffences(courtApplication.getCourtOrder());
+        if (courtOrderOffences.isEmpty()) {
+            return;
+        }
+        mapSubject(courtApplication.getSubject(), defendants);
+        courtOrderOffences.stream()
+                .filter(Objects::nonNull)
+                .forEach(courtOrderOffence -> mapOffences(courtOrderOffence, offences));
+    }
+
+    private void mapSubject(final CourtApplicationParty subject, final List<DefendantDto> defendants) {
+        final MasterDefendant masterDefendant = extractMasterDefendant(subject);
+        if (masterDefendant != null) {
+            defendants.add(toDefendantDto(masterDefendant));
+        }
+    }
+
+    private List<CourtOrderOffence> extractCourtOrderOffences(final CourtOrder courtOrder) {
+        if (courtOrder == null || courtOrder.getCourtOrderOffences() == null) {
+            return List.of();
+        }
+        return courtOrder.getCourtOrderOffences();
+    }
+
+    private void mapOffences(final CourtOrderOffence courtOrderOffence, final List<OffenceDto> offences) {
+        if (courtOrderOffence.getOffence() == null) {
+            return;
+        }
+        offences.add(toOffenceDto(courtOrderOffence.getOffence(),
+                extractCaseUrn(courtOrderOffence.getProsecutionCaseIdentifier())));
+    }
+
+    private DefendantDto toDefendantDto(final MasterDefendant masterDefendant) {
+        final PersonDefendant personDefendant = masterDefendant.getPersonDefendant();
+        final Person personDetails = personDefendant != null ? personDefendant.getPersonDetails() : null;
+        final String masterDefendantId = uuidToString(masterDefendant.getMasterDefendantId());
+        return new DefendantDto()
+                .defendantId(masterDefendantId)
+                .firstName(personDetails != null ? personDetails.getFirstName() : null)
+                .lastName(personDetails != null ? personDetails.getLastName() : null)
+                .dateOfBirth(personDetails != null ? personDetails.getDateOfBirth() : null)
+                .masterDefendantId(masterDefendantId);
+    }
+
+    private void mapOffences(final CourtApplicationCase courtApplicationCase, final List<OffenceDto> offences) {
+        if (courtApplicationCase.getOffences() == null) {
+            return;
+        }
+        final String caseUrn = extractCaseUrn(courtApplicationCase.getProsecutionCaseIdentifier());
+        courtApplicationCase.getOffences()
+                .forEach(offence -> offences.add(toOffenceDto(offence, caseUrn)));
     }
 
     private void mapProsecutionCase(final ProsecutionCase prosecutionCase,
@@ -178,8 +260,15 @@ public class ValidationRequestMapper {
         return personDefendant != null ? personDefendant.getPersonDetails() : null;
     }
 
+    private MasterDefendant extractMasterDefendant(final CourtApplicationParty subject) {
+        return subject != null ? subject.getMasterDefendant() : null;
+    }
+
     private String extractCaseUrn(final ProsecutionCase prosecutionCase) {
-        final ProsecutionCaseIdentifier identifier = prosecutionCase.getProsecutionCaseIdentifier();
+        return extractCaseUrn(prosecutionCase.getProsecutionCaseIdentifier());
+    }
+
+    private String extractCaseUrn(final ProsecutionCaseIdentifier identifier) {
         return identifier != null ? identifier.getCaseURN() : null;
     }
 
