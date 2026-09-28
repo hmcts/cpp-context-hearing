@@ -8,6 +8,7 @@ import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtOrder;
 import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.DefendantCase;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
@@ -25,7 +26,9 @@ import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.Prompt;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ResultLineDto;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -41,9 +44,10 @@ public class ValidationRequestMapper {
 
     public DraftValidationRequest toValidationRequest(final ShareDaysResultsCommand command, final Hearing hearing) {
 
-        final List<DefendantDto> defendants = new ArrayList<>();
-        final List<OffenceDto> offences = new ArrayList<>();
+        final Map<String, DefendantDto> defendants = new LinkedHashMap<>();
+        final Map<String, OffenceDto> offences = new LinkedHashMap<>();
         mapProsecutionCases(hearing, defendants, offences);
+        mapCourtApplications(hearing, defendants, offences);
 
         final List<SharedResultsCommandResultLineV2> commandLines =
                 command.getResultLines() != null ? command.getResultLines() : List.of();
@@ -58,15 +62,14 @@ public class ValidationRequestMapper {
                 .courtType(toCourtType(hearing))
                 .caseId(extractCaseId(commandLines))
                 .resultLines(resultLines)
-                .offences(offences)
-                .defendants(defendants);
+                .offences(new ArrayList<>(offences.values()))
+                .defendants(new ArrayList<>(defendants.values()));
     }
 
     private void mapProsecutionCases(final Hearing hearing,
-                                     final List<DefendantDto> defendants,
-                                     final List<OffenceDto> offences) {
-        if (hearing.getProsecutionCases() == null || hearing.getProsecutionCases().isEmpty()) {
-            mapCourtApplications(hearing, defendants, offences);
+                                     final Map<String, DefendantDto> defendants,
+                                     final Map<String, OffenceDto> offences) {
+        if (hearing.getProsecutionCases() == null) {
             return;
         }
         hearing.getProsecutionCases()
@@ -74,8 +77,8 @@ public class ValidationRequestMapper {
     }
 
     private void mapCourtApplications(final Hearing hearing,
-                                      final List<DefendantDto> defendants,
-                                      final List<OffenceDto> offences) {
+                                      final Map<String, DefendantDto> defendants,
+                                      final Map<String, OffenceDto> offences) {
         if (hearing.getCourtApplications() == null) {
             return;
         }
@@ -85,80 +88,71 @@ public class ValidationRequestMapper {
     }
 
     private void mapCourtApplication(final CourtApplication courtApplication,
-                                     final List<DefendantDto> defendants,
-                                     final List<OffenceDto> offences) {
-        final List<CourtApplicationCase> courtApplicationCases = courtApplication.getCourtApplicationCases();
-        if (courtApplicationCases != null && !courtApplicationCases.isEmpty()) {
-            mapSubject(courtApplication.getSubject(), defendants);
-            courtApplicationCases.stream()
+                                     final Map<String, DefendantDto> defendants,
+                                     final Map<String, OffenceDto> offences) {
+        final MasterDefendant masterDefendant = extractMasterDefendant(courtApplication.getSubject());
+        if (masterDefendant == null) {
+            return;
+        }
+        final DefendantCase defendantCase = extractFirstDefendantCase(masterDefendant);
+        final String defendantId = defendantCase != null ? uuidToString(defendantCase.getDefendantId()) : null;
+        final String caseUrn = defendantCase != null ? defendantCase.getCaseReference() : null;
+
+        defendants.putIfAbsent(defendantId, toDefendantDto(masterDefendant, defendantId));
+        extractApplicationOffences(courtApplication)
+                .forEach(offence -> addOffence(offence, caseUrn, defendantId, offences));
+    }
+
+    private List<Offence> extractApplicationOffences(final CourtApplication courtApplication) {
+        final List<Offence> offences = new ArrayList<>();
+        if (courtApplication.getCourtApplicationCases() != null) {
+            courtApplication.getCourtApplicationCases().stream()
                     .filter(Objects::nonNull)
-                    .forEach(courtApplicationCase -> mapOffences(courtApplicationCase, offences));
-            return;
+                    .map(CourtApplicationCase::getOffences)
+                    .filter(Objects::nonNull)
+                    .forEach(offences::addAll);
         }
-        final List<CourtOrderOffence> courtOrderOffences = extractCourtOrderOffences(courtApplication.getCourtOrder());
-        if (courtOrderOffences.isEmpty()) {
-            return;
+        final CourtOrder courtOrder = courtApplication.getCourtOrder();
+        if (courtOrder != null && courtOrder.getCourtOrderOffences() != null) {
+            courtOrder.getCourtOrderOffences().stream()
+                    .filter(Objects::nonNull)
+                    .map(CourtOrderOffence::getOffence)
+                    .forEach(offences::add);
         }
-        mapSubject(courtApplication.getSubject(), defendants);
-        courtOrderOffences.stream()
-                .filter(Objects::nonNull)
-                .forEach(courtOrderOffence -> mapOffences(courtOrderOffence, offences));
+        return offences.stream().filter(Objects::nonNull).collect(toList());
     }
 
-    private void mapSubject(final CourtApplicationParty subject, final List<DefendantDto> defendants) {
-        final MasterDefendant masterDefendant = extractMasterDefendant(subject);
-        if (masterDefendant != null) {
-            defendants.add(toDefendantDto(masterDefendant));
-        }
+    private DefendantCase extractFirstDefendantCase(final MasterDefendant masterDefendant) {
+        final List<DefendantCase> defendantCases = masterDefendant.getDefendantCase();
+        return defendantCases != null && !defendantCases.isEmpty() ? defendantCases.get(0) : null;
     }
 
-    private List<CourtOrderOffence> extractCourtOrderOffences(final CourtOrder courtOrder) {
-        if (courtOrder == null || courtOrder.getCourtOrderOffences() == null) {
-            return List.of();
-        }
-        return courtOrder.getCourtOrderOffences();
-    }
-
-    private void mapOffences(final CourtOrderOffence courtOrderOffence, final List<OffenceDto> offences) {
-        if (courtOrderOffence.getOffence() == null) {
-            return;
-        }
-        offences.add(toOffenceDto(courtOrderOffence.getOffence(),
-                extractCaseUrn(courtOrderOffence.getProsecutionCaseIdentifier())));
-    }
-
-    private DefendantDto toDefendantDto(final MasterDefendant masterDefendant) {
+    private DefendantDto toDefendantDto(final MasterDefendant masterDefendant, final String defendantId) {
         final PersonDefendant personDefendant = masterDefendant.getPersonDefendant();
         final Person personDetails = personDefendant != null ? personDefendant.getPersonDetails() : null;
-        final String masterDefendantId = uuidToString(masterDefendant.getMasterDefendantId());
         return new DefendantDto()
-                .defendantId(masterDefendantId)
+                .defendantId(defendantId)
                 .firstName(personDetails != null ? personDetails.getFirstName() : null)
                 .lastName(personDetails != null ? personDetails.getLastName() : null)
                 .dateOfBirth(personDetails != null ? personDetails.getDateOfBirth() : null)
-                .masterDefendantId(masterDefendantId);
-    }
-
-    private void mapOffences(final CourtApplicationCase courtApplicationCase, final List<OffenceDto> offences) {
-        if (courtApplicationCase.getOffences() == null) {
-            return;
-        }
-        final String caseUrn = extractCaseUrn(courtApplicationCase.getProsecutionCaseIdentifier());
-        courtApplicationCase.getOffences()
-                .forEach(offence -> offences.add(toOffenceDto(offence, caseUrn)));
+                .masterDefendantId(uuidToString(masterDefendant.getMasterDefendantId()));
     }
 
     private void mapProsecutionCase(final ProsecutionCase prosecutionCase,
-                                    final List<DefendantDto> defendants,
-                                    final List<OffenceDto> offences) {
+                                    final Map<String, DefendantDto> defendants,
+                                    final Map<String, OffenceDto> offences) {
         if (prosecutionCase.getDefendants() == null) {
             return;
         }
         final String caseUrn = extractCaseUrn(prosecutionCase);
         prosecutionCase.getDefendants()
                 .forEach(defendant -> {
-                    defendants.add(toDefendantDto(defendant));
-                    mapOffences(defendant, caseUrn, offences);
+                    final String defendantId = uuidToString(defendant.getId());
+                    defendants.putIfAbsent(defendantId, toDefendantDto(defendant));
+                    if (defendant.getOffences() != null) {
+                        defendant.getOffences()
+                                .forEach(offence -> addOffence(offence, caseUrn, defendantId, offences));
+                    }
                 });
     }
 
@@ -172,21 +166,19 @@ public class ValidationRequestMapper {
                 .masterDefendantId(uuidToString(defendant.getMasterDefendantId()));
     }
 
-    private void mapOffences(final Defendant defendant, final String caseUrn, final List<OffenceDto> offences) {
-        if (defendant.getOffences() == null) {
-            return;
-        }
-        defendant.getOffences()
-                .forEach(offence -> offences.add(toOffenceDto(offence, caseUrn)));
+    private void addOffence(final Offence offence, final String caseUrn, final String defendantId,
+                            final Map<String, OffenceDto> offences) {
+        offences.putIfAbsent(uuidToString(offence.getId()), toOffenceDto(offence, caseUrn, defendantId));
     }
 
-    private OffenceDto toOffenceDto(final Offence offence, final String caseUrn) {
+    private OffenceDto toOffenceDto(final Offence offence, final String caseUrn, final String defendantId) {
         return new OffenceDto()
                 .offenceId(uuidToString(offence.getId()))
                 .offenceCode(offence.getOffenceCode())
                 .offenceTitle(offence.getOffenceTitle())
                 .orderIndex(offence.getOrderIndex())
                 .caseUrn(caseUrn)
+                .defendantId(defendantId)
                 .isConvicted(offence.getConvictionDate() != null)
                 .hasExistingCtlRecord(hasExistingCustodyTimeLimit(offence));
     }
