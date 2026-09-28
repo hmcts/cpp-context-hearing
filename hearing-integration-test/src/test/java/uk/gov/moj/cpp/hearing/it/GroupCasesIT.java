@@ -7,6 +7,7 @@ import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
@@ -183,7 +184,8 @@ public class GroupCasesIT extends AbstractIT {
                                 .with(ProsecutionCase::getIsGroupMember, equalTo(Boolean.FALSE))
                                 .with(ProsecutionCase::getIsGroupMaster, equalTo(Boolean.FALSE))))));
 
-        pollForCaseTimeline(removedCaseId, withJsonPath("$.hearingSummaries[*].hearingId", hasItem(hearingId.toString())));
+        final String timeline = pollForCaseTimeline(removedCaseId, withJsonPath("$.hearingSummaries[*].hearingId", hasItem(hearingId.toString())));
+        assertThat(timeline, isJson(withJsonPath("$.hearingSummaries[*].hearingId", hasItem(hearingId.toString()))));
     }
 
     @Test
@@ -216,7 +218,8 @@ public class GroupCasesIT extends AbstractIT {
                         .with(Hearing::getProsecutionCases, hasItem(isBean(ProsecutionCase.class)
                                 .with(ProsecutionCase::getId, equalTo(removedCaseId))))));
 
-        pollForCaseTimeline(removedCaseId, withJsonPath("$.hearingSummaries[*].hearingId", hasItem(hearingId.toString())));
+        final String timeline = pollForCaseTimeline(removedCaseId, withJsonPath("$.hearingSummaries[*].hearingId", hasItem(hearingId.toString())));
+        assertThat(timeline, isJson(withJsonPath("$.hearingSummaries[*].hearingId", hasItem(hearingId.toString()))));
     }
 
     private void extendHearingWithProsecutionCase(final UUID hearingId, final ProsecutionCase prosecutionCase) throws Exception {
@@ -236,14 +239,15 @@ public class GroupCasesIT extends AbstractIT {
                                 .with(ProsecutionCase::getId, equalTo(prosecutionCase.getId()))))));
     }
 
-    private void pollForCaseTimeline(final UUID caseId, final Matcher<? super ReadContext> timelineMatcher) {
+    private String pollForCaseTimeline(final UUID caseId, final Matcher<? super ReadContext> timelineMatcher) {
         final String timelineURL = getBaseUri() + "/" + format(ENDPOINT_PROPERTIES.getProperty("hearing.case.timeline"), caseId);
-        poll(requestParams(timelineURL, "application/vnd.hearing.case.timeline+json")
+        return poll(requestParams(timelineURL, "application/vnd.hearing.case.timeline+json")
                 .withHeader(USER_ID, getLoggedInUser()).build())
                 .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, SECONDS)
                 .until(
                         status().is(OK),
-                        payload().isJson(timelineMatcher));
+                        payload().isJson(timelineMatcher))
+                .getPayload();
     }
 
     private AddProsecutionCounsel addProsecutionCounsel(final UUID hearingId, final List<UUID> caseIds) {
