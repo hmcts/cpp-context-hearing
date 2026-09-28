@@ -178,6 +178,14 @@ public class HearingDelegate implements Serializable {
             );
         }
 
+        if (isNotEmpty(hearingExtended.getProsecutionCases())) {
+            // a group extended onto a hearing must be tracked like an initiated one, otherwise a later
+            // removal from the group is silently skipped; an existing (possibly newer) master is kept
+            hearingExtended.getProsecutionCases().stream()
+                    .filter(pc -> Boolean.TRUE.equals(pc.getIsGroupMaster()) && nonNull(pc.getGroupId()))
+                    .forEach(pc -> this.momento.getGroupAndMaster().putIfAbsent(pc.getGroupId(), pc.getId()));
+        }
+
         // concluded application offences belong on the application side only,
         // so derive them from the court application carried by the event, strip them from the prosecution
         // side, and prune any defendant/case left empty by the removal.

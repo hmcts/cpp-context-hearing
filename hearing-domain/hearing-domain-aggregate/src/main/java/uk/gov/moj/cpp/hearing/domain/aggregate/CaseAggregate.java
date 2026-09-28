@@ -11,6 +11,7 @@ import uk.gov.justice.progression.events.SendingSheetCompleted;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.CaseRegisteredForExtendedHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseRemovedFromGroupCases;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForCase;
@@ -44,7 +45,15 @@ public class CaseAggregate implements Aggregate {
                 when(HearingDeletedForProsecutionCase.class).apply(e -> hearingIds.remove(e.getHearingId())),
                 when(HearingRemovedForProsecutionCase.class).apply(e -> hearingIds.remove(e.getHearingId())),
                 when(MasterCaseUpdatedForHearing.class).apply(e -> hearingIds.add(e.getHearingId())),
+                when(CaseRemovedFromGroupCases.class).apply(e -> addHearingId(e.getHearingId())),
+                when(CaseRegisteredForExtendedHearing.class).apply(e -> addHearingId(e.getHearingId())),
                 otherwiseDoNothing());
+    }
+
+    private void addHearingId(final UUID hearingId) {
+        if (!hearingIds.contains(hearingId)) {
+            hearingIds.add(hearingId);
+        }
     }
 
     public Stream<Object> recordSendingSheetComplete(final SendingSheetCompleted sendingSheetCompleted) {
@@ -61,6 +70,16 @@ public class CaseAggregate implements Aggregate {
                         .withCaseId(caseId)
                         .withHearingId(hearingId)
                         .build()));
+    }
+
+    /* registers a hearing the case was extended onto; unlike registerHearingId, the event raised here
+    is not consumed by any listener/processor, so no public event is sent to progression
+    * */
+    public Stream<Object> registerExtendedHearing(final UUID caseId, final UUID hearingId) {
+        if (hearingIds.contains(hearingId)) {
+            return apply(Stream.empty());
+        }
+        return apply(Stream.of(new CaseRegisteredForExtendedHearing(caseId, hearingId)));
     }
 
     public Stream<Object> ejectCase(final UUID prosecutionCaseId, final List<UUID> hearingIds) {

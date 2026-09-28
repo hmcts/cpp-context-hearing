@@ -119,6 +119,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLocked;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLockedByOtherUser;
@@ -4258,6 +4259,72 @@ public class HearingAggregateTest {
         final Stream<Object> objectStream = hearingAggregate.extend(hearingId, Collections.emptyList(), null, null, null, Collections.emptyList(), Collections.emptyList());
         final List<Object> objectList = objectStream.collect(Collectors.toList());
         assertThat(objectList.size(), is(1));
+    }
+
+    @Test
+    void shouldRecordGroupMasterWhenGroupMasterCaseExtendedOntoHearing() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        final UUID groupId = randomUUID();
+        final ProsecutionCase groupMaster = groupCase(groupId, Boolean.TRUE);
+
+        hearingAggregate.apply(extendedWith(initiateHearingCommand.getHearing().getId(), groupMaster));
+
+        assertThat(hearingAggregate.getGroupAndMaster().get(groupId), is(groupMaster.getId()));
+    }
+
+    @Test
+    void shouldKeepExistingGroupMasterWhenGroupExtendedOntoHearingAgain() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        final UUID groupId = randomUUID();
+        final ProsecutionCase firstMaster = groupCase(groupId, Boolean.TRUE);
+
+        hearingAggregate.apply(extendedWith(hearingId, firstMaster));
+        hearingAggregate.apply(extendedWith(hearingId, groupCase(groupId, Boolean.TRUE)));
+
+        assertThat(hearingAggregate.getGroupAndMaster().get(groupId), is(firstMaster.getId()));
+    }
+
+    @Test
+    void shouldNotRecordGroupMasterWhenExtendedCaseIsNotGroupMaster() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        final UUID groupId = randomUUID();
+
+        hearingAggregate.apply(extendedWith(initiateHearingCommand.getHearing().getId(), groupCase(groupId, Boolean.FALSE)));
+
+        assertThat(hearingAggregate.getGroupAndMaster().containsKey(groupId), is(false));
+    }
+
+    @Test
+    void shouldNotRecordGroupMasterWhenExtendedGroupMasterHasNoGroupId() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        final Map<UUID, UUID> groupAndMasterBefore = new HashMap<>(hearingAggregate.getGroupAndMaster());
+
+        hearingAggregate.apply(extendedWith(initiateHearingCommand.getHearing().getId(), groupCase(null, Boolean.TRUE)));
+
+        assertThat(hearingAggregate.getGroupAndMaster(), is(groupAndMasterBefore));
+    }
+
+    private static ProsecutionCase groupCase(final UUID groupId, final Boolean isGroupMaster) {
+        final ProsecutionCase template = standardInitiateHearingTemplate().getHearing().getProsecutionCases().get(0);
+        return ProsecutionCase.prosecutionCase()
+                .withValuesFrom(template)
+                .withGroupId(groupId)
+                .withIsGroupMember(Boolean.TRUE)
+                .withIsGroupMaster(isGroupMaster)
+                .build();
+    }
+
+    private static HearingExtended extendedWith(final UUID hearingId, final ProsecutionCase prosecutionCase) {
+        return new HearingExtended(hearingId, emptyList(), null, null, null, new ArrayList<>(singletonList(prosecutionCase)), emptyList());
     }
 
     @Test

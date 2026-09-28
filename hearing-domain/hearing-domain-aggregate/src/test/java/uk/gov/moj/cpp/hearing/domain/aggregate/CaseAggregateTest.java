@@ -15,7 +15,10 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Interpreter;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
+import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.CaseRegisteredForExtendedHearing;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
@@ -182,5 +185,100 @@ public class CaseAggregateTest {
         ReflectionUtil.setField(caseAggregate, "hearingIds", Collections.emptyList());
         final List<Object> eventStream = caseAggregate.enrichUpdateCaseMarkersWithHearingIds(prosecutionCaseId, Collections.emptyList()).collect(toList());
         assertThat(eventStream.size(), is(0));
+    }
+
+    @Test
+    public void shouldRegisterHearingOnRemovedMemberCaseWhenRemovedFromGroupCases() {
+        final UUID hearingId = UUID.randomUUID();
+        final ProsecutionCase removedCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
+
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null).collect(toList());
+
+        assertThat(caseAggregate.getHearingIds(), is(Collections.singletonList(hearingId)));
+    }
+
+    @Test
+    public void shouldNotDuplicateHearingWhenRemovedMasterCaseAlreadyRegisteredAgainstHearing() {
+        final UUID hearingId = UUID.randomUUID();
+        final ProsecutionCase masterCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
+        caseAggregate.registerHearingId(masterCase.getId(), hearingId).collect(toList());
+
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), masterCase, null).collect(toList());
+
+        assertThat(caseAggregate.getHearingIds(), is(Collections.singletonList(hearingId)));
+    }
+
+    @Test
+    public void shouldSendDefendantUpdatesToHearingOfCaseRemovedFromGroupCases() {
+        final UUID hearingId = UUID.randomUUID();
+        final ProsecutionCase removedCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null).collect(toList());
+
+        final List<Object> events = caseAggregate.caseDefendantsUpdated(removedCase).collect(toList());
+
+        assertThat(events.size(), is(1));
+        assertThat(((CaseDefendantsUpdated) events.get(0)).getHearingIds(), is(Collections.singletonList(hearingId)));
+    }
+
+    @Test
+    public void shouldRegisterExtendedHearingOnlyOnce() {
+        final UUID caseId = UUID.randomUUID();
+        final UUID hearingId = UUID.randomUUID();
+
+        final List<Object> firstEvents = caseAggregate.registerExtendedHearing(caseId, hearingId).collect(toList());
+        final List<Object> secondEvents = caseAggregate.registerExtendedHearing(caseId, hearingId).collect(toList());
+
+        assertThat(firstEvents.size(), is(1));
+        final CaseRegisteredForExtendedHearing event = (CaseRegisteredForExtendedHearing) firstEvents.get(0);
+        assertThat(event.getCaseId(), is(caseId));
+        assertThat(event.getHearingId(), is(hearingId));
+        assertThat(secondEvents.size(), is(0));
+        assertThat(caseAggregate.getHearingIds(), is(Collections.singletonList(hearingId)));
+    }
+
+    @Test
+    public void shouldClearHearingOfRemovedMasterCaseWhenHearingLaterRemovedForCase() {
+        final UUID hearingId = UUID.randomUUID();
+        final ProsecutionCase masterCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
+        caseAggregate.registerHearingId(masterCase.getId(), hearingId).collect(toList());
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), masterCase, null).collect(toList());
+
+        caseAggregate.removeHearingForProsecutionCase(masterCase.getId(), hearingId).collect(toList());
+
+        assertThat(caseAggregate.getHearingIds().isEmpty(), is(true));
+    }
+
+    @Test
+    public void shouldClearHearingOfRemovedMemberCaseWhenHearingLaterDeletedForCase() {
+        final UUID hearingId = UUID.randomUUID();
+        final ProsecutionCase removedCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null).collect(toList());
+
+        caseAggregate.deleteHearingForProsecutionCase(removedCase.getId(), hearingId).collect(toList());
+
+        assertThat(caseAggregate.getHearingIds().isEmpty(), is(true));
+    }
+
+    @Test
+    public void shouldClearHearingOfRemovedMemberCaseWhenHearingLaterMarkedAsDuplicateForCase() {
+        final UUID hearingId = UUID.randomUUID();
+        final ProsecutionCase removedCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null).collect(toList());
+
+        caseAggregate.markHearingAsDuplicate(removedCase.getId(), hearingId).collect(toList());
+
+        assertThat(caseAggregate.getHearingIds().isEmpty(), is(true));
+    }
+
+    @Test
+    public void shouldEnrichCaseMarkersWithHearingOfCaseRemovedFromGroupCases() {
+        final UUID hearingId = UUID.randomUUID();
+        final ProsecutionCase removedCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null).collect(toList());
+
+        final List<Object> events = caseAggregate.enrichUpdateCaseMarkersWithHearingIds(removedCase.getId(), Collections.emptyList()).collect(toList());
+
+        assertThat(events.size(), is(1));
+        assertThat(((CaseMarkersEnrichedWithAssociatedHearings) events.get(0)).getHearingIds(), is(Collections.singletonList(hearingId)));
     }
 }
