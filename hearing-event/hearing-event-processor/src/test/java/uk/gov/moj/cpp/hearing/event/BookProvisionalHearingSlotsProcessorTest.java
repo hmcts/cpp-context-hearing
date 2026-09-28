@@ -59,7 +59,7 @@ BookProvisionalHearingSlotsProcessorTest {
     public void testHandleBookProvisionalHearingSlotsForV1() {
         final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload("hearing.event.book-provisional-hearing-slots-v1.json"));
 
-        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
+        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-unconfirmed-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
 
         when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
 
@@ -76,7 +76,7 @@ BookProvisionalHearingSlotsProcessorTest {
     public void testHandleBookProvisionalHearingSlotsForV2() throws UnsupportedEncodingException {
         final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload("hearing.event.book-provisional-hearing-slots-v2.json"));
 
-        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
+        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-unconfirmed-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
         when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
 
         bookProvisionalHearingSlotsProcessor.handleBookProvisionalHearingSlots(event);
@@ -91,7 +91,7 @@ BookProvisionalHearingSlotsProcessorTest {
     public void shouldSendDurationToCourtSchedulerWhenPresent() {
         final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload("hearing.event.book-provisional-hearing-slots-with-duration.json"));
 
-        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
+        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-unconfirmed-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
 
         when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
 
@@ -107,7 +107,7 @@ BookProvisionalHearingSlotsProcessorTest {
     public void shouldOmitDurationEntirelyWhenNull() {
         final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload("hearing.event.book-provisional-hearing-slots-v2.json"));
 
-        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
+        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-unconfirmed-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
 
         when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
 
@@ -123,7 +123,7 @@ BookProvisionalHearingSlotsProcessorTest {
     public void shouldForwardBookingIdToCourtscheduler() {
         final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload("hearing.event.book-provisional-hearing-slots-with-booking-id.json"));
 
-        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
+        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-unconfirmed-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
 
         when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
 
@@ -137,7 +137,7 @@ BookProvisionalHearingSlotsProcessorTest {
     public void shouldOmitBookingIdWhenAbsent() {
         final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload("hearing.event.book-provisional-hearing-slots-v2.json"));
 
-        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
+        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-unconfirmed-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
 
         when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
 
@@ -151,7 +151,7 @@ BookProvisionalHearingSlotsProcessorTest {
     public void shouldOmitBookingIdWhenBlank() {
         final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload("hearing.event.book-provisional-hearing-slots-with-blank-booking-id.json"));
 
-        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
+        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-unconfirmed-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
 
         when(provisionalBookingService.bookSlots(any())).thenReturn(getNormalResponse());
 

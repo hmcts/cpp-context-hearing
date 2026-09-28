@@ -61,7 +61,7 @@ NEW-7a's endpoint was declared in the RAML and implemented correctly, but had no
 
 Worse than a plain outage. NEW-10 fails open on any non-200, answering {status: ""UNKNOWN"", safeToShare: true}. The gate would therefore have looked like it was working while silently never checking anything — nobody notices until a clerk shares into an expired hold.
 
-Fix: one rule, modelled verbatim on the sibling courtscheduler.get.provisional.booking, using SecurityGroupConstants.systemUserRoles() — listing calls it service-to-service, not from a browser.
+Fix: one rule, modelled verbatim on the sibling courtscheduler.get.unconfirmed.booking, using SecurityGroupConstants.systemUserRoles() — listing calls it service-to-service, not from a browser.
 
 How it was missed: two code reviews examined logic and contracts; neither looked at access control on the courtscheduler side. Access control was planned and reviewed for listing in NEW-10, and the same thought was never applied to courtscheduler. Only running the endpoint end-to-end found it. TEST-2 exists so this cannot recur.
 
@@ -143,7 +143,7 @@ Branch: team/ras
 Internal ref: NEW-3
 Current state: implemented, uncommitted (courtscheduler team/ras)
 
-POST /provisionalBooking mints one bookingId and reserves every requested session under it through saveBookedSlots — the same pipeline a real booking uses — stamping expires_at and source = RESERVED_UNCONFIRMED. It no longer writes provisional_booking rows.
+POST /unconfirmedBooking mints one bookingId and reserves every requested session under it through saveBookedSlots — the same pipeline a real booking uses — stamping expires_at and source = RESERVED_UNCONFIRMED. It no longer writes provisional_booking rows.
 
 AC
 - One bookingId covers all N sessions; each session's capacity is decremented once
@@ -158,7 +158,7 @@ Branch: team/ras
 Internal ref: NEW-4
 Current state: implemented, uncommitted (courtscheduler team/ras)
 
-GET /provisionalBooking?bookingIds= resolves each id from reservations, falling back to legacy provisional_booking rows.
+GET /unconfirmedBooking?bookingIds= resolves each id from reservations, falling back to legacy provisional_booking rows.
 
 AC
 - Fallback is per booking id, not all-or-nothing across the batch — one request may legitimately mix a new booking with a legacy one
@@ -194,7 +194,7 @@ Branch: team/ras
 Internal ref: NEW-7
 Current state: implemented, uncommitted (courtscheduler team/ras)
 
-GET /provisionalBooking/status?bookingIds= → {""bookings"":[{""bookingId"":""..."",""live"":true}]}. Needed because sharing is asynchronous: the share command returns 202 and results are recorded before listing discovers the hold is gone, so the check must happen before the command is sent.
+GET /unconfirmedBooking/status?bookingIds= → {""bookings"":[{""bookingId"":""..."",""live"":true}]}. Needed because sharing is asynchronous: the share command returns 202 and results are recorded before listing discovers the hold is gone, so the check must happen before the command is sent.
 
 AC
 - A legacy provisional_booking row counts as live — otherwise every pre-go-live magistrates draft is blocked at share with a false expiry message
@@ -208,7 +208,7 @@ Branch: team/ras
 Internal ref: NEW-7a
 Current state: implemented, uncommitted (courtscheduler team/ras)
 
-NEW-7 shipped GET /provisionalBooking/status returning {""bookingId"", ""live""}, where live honestly means ""a hold exists"". The pre-share gate needs a different question answered — ""is this draft safe to share?"" — and the two diverge on exactly one case: after a share the hold is gone, so live: false, but re-sharing is perfectly safe. A gate wired to live would refuse every re-share. That was DEC-1.
+NEW-7 shipped GET /unconfirmedBooking/status returning {""bookingId"", ""live""}, where live honestly means ""a hold exists"". The pre-share gate needs a different question answered — ""is this draft safe to share?"" — and the two diverge on exactly one case: after a share the hold is gone, so live: false, but re-sharing is perfectly safe. A gate wired to live would refuse every re-share. That was DEC-1.
 
 How it is answered without tombstones. The two row shapes are structurally disjoint, so one derived finder separates them with no expires_at filter at all:
 
@@ -262,7 +262,7 @@ Current state: implemented, uncommitted (cpp-context-hearing team/ccsph2)
 
 NEW-12 was written as front-end work, but there is no release path from the browser: courtscheduler has DELETE /sessions/{bookingId}, listing does not proxy it, and hearing had no release command — so nothing between the browser and that endpoint could reach it. This ticket supplies the missing back end.
 
-hearing.release-provisional-hearing-slots → command handler → event → processor → ProvisionalBookingService.releaseSlots(bookingId) (DELETE /sessions/{bookingId}), with the subscription, event schema, Drools rule and messaging RAML that go with it.
+hearing.release-unconfirmed-hearing-slots → command handler → event → processor → ProvisionalBookingService.releaseSlots(bookingId) (DELETE /sessions/{bookingId}), with the subscription, event schema, Drools rule and messaging RAML that go with it.
 
 AC
 - Release is best-effort and never fails the caller — a connection error or a 404 is swallowed and logged, because ""nothing to release"" is a normal outcome on re-pick
@@ -468,7 +468,7 @@ Today a re-pick mints a fresh bookingId, so the previous reservation stays keyed
 
 This never mattered before reservations existed: provisional_booking rows hold no capacity, so the stale rows re-picking leaves behind were inert. Reservations take that free property away, so ""one next-hearing, one held session"" has to become deliberate.
 
-The mechanism — the re-pick comes back under the same bookingId. A reservation's hearing_id is its bookingId, and saveBookedSlots already opens with a hearing-wide releaseOldAllocatedListings(hearing_id). So reusing the id makes the existing pipeline wipe every row of the previous pick — all of them, including a multi-day Crown hold — and take the new ones, in one transaction, with the correct three-step capacity restore. No new release code anywhere. POST /provisionalBooking gains one optional bookingId: supplied means reuse this booking, absent means mint me one.
+The mechanism — the re-pick comes back under the same bookingId. A reservation's hearing_id is its bookingId, and saveBookedSlots already opens with a hearing-wide releaseOldAllocatedListings(hearing_id). So reusing the id makes the existing pipeline wipe every row of the previous pick — all of them, including a multi-day Crown hold — and take the new ones, in one transaction, with the correct three-step capacity restore. No new release code anywhere. POST /unconfirmedBooking gains one optional bookingId: supplied means reuse this booking, absent means mint me one.
 
 A first design added a separate replacesBookingId field plus an explicit release. It was built and then removed: it was a second release mechanism bolted onto a pipeline that already had one.
 
@@ -555,7 +555,7 @@ Current state: implemented, uncommitted (courtscheduler team/ras)
 
 CourtSchedulerIT.shouldPurgeAllocatedListingsWhoseExpiresAtHasAlreadyPassed asserted only that rows were deleted — never that available_slots was restored. BUG-1 was exactly that defect, so the test guarding it would have passed against it.
 
-The fix is structural, not a new assertion: the test seeded rows straight into the table, so capacity was never taken and there was nothing to restore. The reservations must be created through POST /provisionalBooking so the pipeline genuinely decrements capacity first.
+The fix is structural, not a new assertion: the test seeded rows straight into the table, so capacity was never taken and there was nothing to restore. The reservations must be created through POST /unconfirmedBooking so the pipeline genuinely decrements capacity first.
 
 AC
 - Proven by sabotage: commenting out the purge's two capacity-restore calls made the test fail on the capacity assertion with expected: <4> but was: <3>, naming BUG-1; reverting made it pass

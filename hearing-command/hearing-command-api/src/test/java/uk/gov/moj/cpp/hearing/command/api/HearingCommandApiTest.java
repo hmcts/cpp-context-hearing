@@ -339,20 +339,20 @@ public class HearingCommandApiTest {
 
     @Test
     public void shouldPassThroughBookProvisionalHearingSlotsRequestToCommandHandler() {
-        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.book-provisional-hearing-slots");
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.book-unconfirmed-hearing-slots");
 
         hearingCommandApi.bookProvisionalHearingSlots(jsonRequestEnvelope);
 
-        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.book-provisional-hearing-slots");
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.book-unconfirmed-hearing-slots");
     }
 
     @Test
     public void shouldPassThroughReleaseProvisionalHearingSlotsRequestToCommandHandler() {
-        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.release-provisional-hearing-slots");
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.release-unconfirmed-hearing-slots");
 
         hearingCommandApi.releaseProvisionalHearingSlots(jsonRequestEnvelope);
 
-        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.release-provisional-hearing-slots");
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.release-unconfirmed-hearing-slots");
     }
 
     @Test

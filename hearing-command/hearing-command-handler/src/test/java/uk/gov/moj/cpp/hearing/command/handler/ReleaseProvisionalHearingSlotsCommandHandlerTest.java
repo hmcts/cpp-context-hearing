@@ -40,7 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class ReleaseProvisionalHearingSlotsCommandHandlerTest {
 
-    private static final String HEARING_COMMAND = "hearing.command.release-provisional-hearing-slots";
+    private static final String HEARING_COMMAND = "hearing.command.release-unconfirmed-hearing-slots";
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(

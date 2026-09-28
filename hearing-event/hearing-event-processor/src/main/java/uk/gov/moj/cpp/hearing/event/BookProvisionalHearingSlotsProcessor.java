@@ -49,7 +49,7 @@ public class BookProvisionalHearingSlotsProcessor {
     public void handleBookProvisionalHearingSlots(final JsonEnvelope event) {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.book-provisional-hearing-slots event received {}", event.toObfuscatedDebugString());
+            LOGGER.debug("hearing.book-unconfirmed-hearing-slots event received {}", event.toObfuscatedDebugString());
         }
 
         final BookProvisionalHearingSlots bookProvisionalHearingSlots = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), BookProvisionalHearingSlots.class);

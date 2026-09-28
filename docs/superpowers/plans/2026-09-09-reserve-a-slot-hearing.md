@@ -4,7 +4,7 @@
 
 **Goal:** Carry the hearing's estimated `duration` from the slot-pick request through to courtscheduler, so a reservation on a duration-based session holds the right number of minutes.
 
-**Architecture:** `hearing.book-provisional-hearing-slots` already carries `courtScheduleId` and `hearingStartTime` per slot and reaches courtscheduler's `POST /provisionalBooking` through an aggregate event and an event processor. This plan threads one optional `Integer duration` along that existing path. No new command, no new endpoint, no behaviour of its own — hearing stays a pass-through.
+**Architecture:** `hearing.book-unconfirmed-hearing-slots` already carries `courtScheduleId` and `hearingStartTime` per slot and reaches courtscheduler's `POST /unconfirmedBooking` through an aggregate event and an event processor. This plan threads one optional `Integer duration` along that existing path. No new command, no new endpoint, no behaviour of its own — hearing stays a pass-through.
 
 **Tech Stack:** Java 17, **Maven**, CDI (`@Inject`), HMCTS Justice Services Framework, JUnit, Mockito.
 
@@ -42,13 +42,13 @@ The whole change is one field along one existing path, so it is one task: the sc
 **Files:**
 - Modify: `hearing-domain/hearing-domain-common/src/main/java/uk/gov/moj/cpp/hearing/command/bookprovisional/ProvisionalHearingSlotInfo.java`
 - Modify: `hearing-domain/hearing-domain-event/src/main/java/uk/gov/moj/cpp/hearing/domain/event/BookProvisionalHearingSlots.java`
-- Modify: `hearing-command/hearing-command-api/src/raml/json/schema/hearing.book-provisional-hearing-slots.json`
-- Modify: `hearing-command/hearing-command-api/src/raml/json/hearing.book-provisional-hearing-slots.json`
+- Modify: `hearing-command/hearing-command-api/src/raml/json/schema/hearing.book-unconfirmed-hearing-slots.json`
+- Modify: `hearing-command/hearing-command-api/src/raml/json/hearing.book-unconfirmed-hearing-slots.json`
 - Modify: `hearing-event/hearing-event-processor/src/main/java/uk/gov/moj/cpp/hearing/event/BookProvisionalHearingSlotsProcessor.java`
 - Test: `hearing-event/hearing-event-processor/src/test/java/uk/gov/moj/cpp/hearing/event/BookProvisionalHearingSlotsProcessorTest.java`
 
 **Interfaces:**
-- Consumes: nothing from earlier plans at the code level. It targets courtscheduler's `POST /provisionalBooking`, whose request schema gained an optional integer `duration` per slot in Plan 1 Task 4.
+- Consumes: nothing from earlier plans at the code level. It targets courtscheduler's `POST /unconfirmedBooking`, whose request schema gained an optional integer `duration` per slot in Plan 1 Task 4.
 - Produces: `ProvisionalHearingSlotInfo.getDuration()` → `Integer` (nullable), `setDuration(Integer)` returning `this` to match the existing fluent style. The outbound courtscheduler payload gains `duration` per slot **only when non-null**.
 
 **The two places this can silently break, both covered below:**
@@ -211,7 +211,7 @@ Add the `jakarta.json.JsonObjectBuilder` (or `javax.json.JsonObjectBuilder` — 
 
 - [ ] **Step 7: Add `duration` to the command-api schema and example**
 
-In `hearing-command/hearing-command-api/src/raml/json/schema/hearing.book-provisional-hearing-slots.json`, inside the `slots` item `properties`:
+In `hearing-command/hearing-command-api/src/raml/json/schema/hearing.book-unconfirmed-hearing-slots.json`, inside the `slots` item `properties`:
 
 ```json
           "duration": {
@@ -220,7 +220,7 @@ In `hearing-command/hearing-command-api/src/raml/json/schema/hearing.book-provis
           }
 ```
 
-Leave `required` as `["courtScheduleId", "hearingStartTime"]` — do **not** add `duration` to it. Add `"duration": 60` to each slot in the example file `hearing-command/hearing-command-api/src/raml/json/hearing.book-provisional-hearing-slots.json`.
+Leave `required` as `["courtScheduleId", "hearingStartTime"]` — do **not** add `duration` to it. Add `"duration": 60` to each slot in the example file `hearing-command/hearing-command-api/src/raml/json/hearing.book-unconfirmed-hearing-slots.json`.
 
 - [ ] **Step 8: Run the tests to verify they pass**
 
@@ -255,7 +255,7 @@ slot-based picks are unaffected."
 
 ## Deliberately not in scope
 
-**The command-handler-side schema is malformed and is not being fixed here.** `hearing-command/hearing-command-handler/src/raml/json/schema/hearing.command.book-provisional-hearing-slots.json` declares its `slots` item properties without a `properties` wrapper and puts `minItems` inside `items`, so it validates nothing about a slot. That is pre-existing, unrelated to this change, and fixing it could start rejecting payloads that currently pass. Raise it separately.
+**The command-handler-side schema is malformed and is not being fixed here.** `hearing-command/hearing-command-handler/src/raml/json/schema/hearing.command.book-unconfirmed-hearing-slots.json` declares its `slots` item properties without a `properties` wrapper and puts `minItems` inside `items`, so it validates nothing about a slot. That is pre-existing, unrelated to this change, and fixing it could start rejecting payloads that currently pass. Raise it separately.
 
 **`BookProvisionalHearingSlotsCommandHandler` needs no change.** It builds each slot with `convertToObject(slotsArray.getJsonObject(i), ProvisionalHearingSlotInfo.class)`, so a new field on that class is picked up by the deserialiser automatically. Confirm this holds when you run the tests rather than assuming it.
 

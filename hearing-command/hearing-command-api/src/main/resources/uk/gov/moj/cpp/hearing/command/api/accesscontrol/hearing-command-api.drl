@@ -482,19 +482,19 @@ rule "Command - API - Action - hearing.record-session-time"
     $outcome.setSuccess(true);
 end
 
-rule "Command - API - Action - hearing.book-provisional-hearing-slots"
+rule "Command - API - Action - hearing.book-unconfirmed-hearing-slots"
   when
     $outcome: Outcome();
-    $action: Action(name == "hearing.book-provisional-hearing-slots");
+    $action: Action(name == "hearing.book-unconfirmed-hearing-slots");
    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Associate", "Legal Advisers", "Court Clerks", "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
 
-rule "Command - API - Action - hearing.release-provisional-hearing-slots"
+rule "Command - API - Action - hearing.release-unconfirmed-hearing-slots"
   when
     $outcome: Outcome();
-    $action: Action(name == "hearing.release-provisional-hearing-slots");
+    $action: Action(name == "hearing.release-unconfirmed-hearing-slots");
    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Associate", "Legal Advisers", "Court Clerks", "Court Administrators"));
   then
     $outcome.setSuccess(true);

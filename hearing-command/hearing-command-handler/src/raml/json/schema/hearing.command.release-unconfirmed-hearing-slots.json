@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.release-provisional-hearing-slots.json",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.release-unconfirmed-hearing-slots.json",
   "type": "object",
   "properties": {
     "hearingId": {
