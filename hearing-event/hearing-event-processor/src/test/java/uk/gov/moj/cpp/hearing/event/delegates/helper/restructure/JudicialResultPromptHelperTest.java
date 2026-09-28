@@ -14,6 +14,7 @@ import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.math.BigDecimal;
@@ -79,6 +80,25 @@ public class JudicialResultPromptHelperTest {
         assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), notNullValue());
         assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), is(resultLineTreeNode.getResultDefinition().getData().getId()));
         assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
+    }
+
+    @Test
+    public void shouldNotFoldHiddenPromptsIntoThePublishedAsAPromptValue() {
+        final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
+        final ResultDefinition resultDefinition = resultLineTreeNode.getResultDefinition().getData();
+        resultDefinition.getPrompts().add(new Prompt().setId(randomUUID()).setReference("HDATE").setLabel(PROMPT_LABEL_1).setHidden(false));
+        resultDefinition.getPrompts().add(new Prompt().setId(randomUUID()).setReference("HTYPE").setLabel(PROMPT_LABEL_2));
+        resultDefinition.getPrompts().add(new Prompt().setId(randomUUID()).setReference("bookingReference").setLabel(PROMPT_LABEL_3).setHidden(true));
+
+        final JudicialResultPrompt visiblePrompt = createJudicialResultPromptwithHmiSlotReference(PROMPT_LABEL_1, PROMPT_VALUE_1, "TEXT", "HDATE");
+        final JudicialResultPrompt promptWithoutHiddenFlag = createJudicialResultPromptwithHmiSlotReference(PROMPT_LABEL_2, PROMPT_VALUE_2, "TEXT", "HTYPE");
+        final JudicialResultPrompt hiddenPrompt = createJudicialResultPromptwithHmiSlotReference(PROMPT_LABEL_3, PROMPT_VALUE_3, "TEXT", "bookingReference");
+
+        createJudicialResult(resultLineTreeNode, of(visiblePrompt, promptWithoutHiddenFlag, hiddenPrompt), null);
+
+        final JudicialResultPrompt judicialResultPrompt = makePrompt(resultLineTreeNode, new BigDecimal(1000));
+
+        assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1 + ":" + PROMPT_VALUE_1 + System.lineSeparator() + PROMPT_LABEL_2 + ":" + PROMPT_VALUE_2));
     }
 
     private JudicialResultPrompt createJudicialResultPrompt(final String s, final String s2, final String type) {

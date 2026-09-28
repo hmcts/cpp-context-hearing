@@ -20,6 +20,7 @@ import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.query.view.response.PtphDetailResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
 import java.time.LocalDate;
@@ -107,6 +108,49 @@ public class HearingQueryViewTest {
         final ArgumentCaptor<List<UUID>> idsCaptor = ArgumentCaptor.forClass(List.class);
         verify(hearingService).getHearingsForCheckIn(eq(HEARING_DATE), eq(COURT_CENTRE_ID), eq(ROOM_ID), idsCaptor.capture(), eq(false));
         assertThat(idsCaptor.getValue(), contains(accessibleId));
+    }
+
+
+    /**
+     * LPT-2406's enabler. A hearing with nothing saved answers with {@code finalised = false}
+     * and null values rather than an error, which is what lets the listing context treat
+     * "no record" as an ordinary response.
+     */
+    @Test
+    public void shouldGetPtphDetailForHearing() {
+        final UUID hearingId = randomUUID();
+        final PtphDetailResponse expectedResponse =
+                new PtphDetailResponse("TIER_3", "TYPE_1_FIXED", "Vulnerable witness", true);
+
+        when(hearingService.getPtphDetail(hearingId)).thenReturn(expectedResponse);
+
+        final Envelope<PtphDetailResponse> result = target.getPtphDetail(ptphDetailQuery(hearingId));
+
+        verify(hearingService).getPtphDetail(hearingId);
+        assertThat(result.metadata().name(), is("hearing.get-ptph-detail"));
+        assertThat(result.payload(), is(expectedResponse));
+        assertThat(result.payload().getTier(), is("TIER_3"));
+        assertThat(result.payload().isFinalised(), is(true));
+    }
+
+    @Test
+    public void shouldGetBlankPtphDetailWhenNothingSaved() {
+        final UUID hearingId = randomUUID();
+        final PtphDetailResponse blank = new PtphDetailResponse(null, null, null, false);
+
+        when(hearingService.getPtphDetail(hearingId)).thenReturn(blank);
+
+        final Envelope<PtphDetailResponse> result = target.getPtphDetail(ptphDetailQuery(hearingId));
+
+        assertThat(result.metadata().name(), is("hearing.get-ptph-detail"));
+        assertThat(result.payload().getTier(), is(nullValue()));
+        assertThat(result.payload().isFinalised(), is(false));
+    }
+
+    private JsonEnvelope ptphDetailQuery(final UUID hearingId) {
+        return uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom(
+                metadataWithRandomUUIDAndName(),
+                createObjectBuilder().add("hearingId", hearingId.toString()).build());
     }
 
     private JsonEnvelope envelopeFrom(final LocalDate date, final UUID courtCentreId, final UUID roomId) {

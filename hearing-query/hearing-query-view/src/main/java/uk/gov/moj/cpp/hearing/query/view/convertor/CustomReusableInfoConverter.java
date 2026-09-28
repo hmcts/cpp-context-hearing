@@ -11,22 +11,13 @@ import org.apache.commons.collections.MapUtils;
 
 public class CustomReusableInfoConverter {
 
-    private Map<String, String> countryCodesMap;
-
-    public Map<String, String> getCountryCodesMap() {
-        return countryCodesMap;
-    }
-
-    public void setCountryCodesMap(final Map<String, String> countryCodesMap) {
-        this.countryCodesMap = countryCodesMap;
-    }
-
-    public List<String> getConvertedValues(final List<String> promptValues, final String promptReference) {
+    public List<String> getConvertedValues(final List<String> promptValues,
+                                           final String promptReference,
+                                           final Map<String, String> countryCodesMap) {
         if (NATIONALITY.equalsIgnoreCase(promptReference)) {
-            return MapUtils.isNotEmpty(getCountryCodesMap()) ?
+            return MapUtils.isNotEmpty(countryCodesMap) ?
                     promptValues.stream()
-                            .map(val -> getCountryCodesMap()
-                                    .get(val))
+                            .map(countryCodesMap::get)
                             .collect(Collectors.toList()) :
                     promptValues;
         }

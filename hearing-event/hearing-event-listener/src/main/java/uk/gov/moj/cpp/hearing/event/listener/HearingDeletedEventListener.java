@@ -34,6 +34,9 @@ public class HearingDeletedEventListener {
     @Inject
     private ProsecutionCaseRepository pcRepository;
 
+    @Inject
+    private PtphDetailRemovalService ptphDetailRemovalService;
+
     @Handles(HEARING_EVENT_HEARING_DELETED)
     public void hearingDeleted(final JsonEnvelope event) {
 
@@ -47,6 +50,7 @@ public class HearingDeletedEventListener {
 
         if (hearing != null) {
             hearingRepository.remove(hearing);
+            ptphDetailRemovalService.removeFor(hearingId);
         }
     }
 
@@ -67,6 +71,7 @@ public class HearingDeletedEventListener {
 
         if (hearing != null) {
             hearingRepository.remove(hearing);
+            ptphDetailRemovalService.removeFor(hearingId);
         }
     }
 
@@ -77,6 +82,7 @@ public class HearingDeletedEventListener {
 
         if (Objects.nonNull(hearingToBeDeleted)) {
             hearingRepository.remove(hearingToBeDeleted);
+            ptphDetailRemovalService.removeFor(hearingId);
         }
     }
 }

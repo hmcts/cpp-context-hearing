@@ -1527,13 +1527,10 @@ public class InitiateHearingIT extends AbstractIT {
 
         final BailStatus preHearingBailStatus = hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getBailStatus();
 
-        // Guards the poll below from passing vacuously: it compares the offence's seeded bail
-        // status against these values, so if the template ever stops supplying one the comparison
-        // becomes null-against-null and the test proves nothing.
-        assertThat("the initiate-hearing template must seed a pre-hearing bail status",
-                preHearingBailStatus, is(notNullValue()));
-        assertThat("the seeded pre-hearing bail status must carry a code to compare against",
-                preHearingBailStatus.getCode(), is(notNullValue()));
+        // Guards the premise: with no pre-hearing bail status to copy, the poll below would be
+        // comparing null against null and would pass without proving anything was seeded.
+        assertThat(preHearingBailStatus, is(notNullValue()));
+        assertThat(preHearingBailStatus.getCode(), is(notNullValue()));
 
         getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -1561,11 +1558,9 @@ public class InitiateHearingIT extends AbstractIT {
 
         final Hearing hearing = hearingOne.getHearing();
 
-        // Confirms the null set up above actually reached the created hearing, so the poll below
-        // exercises the no-bail-status path rather than merely assuming it.
-        assertThat("the defendant must have no pre-hearing bail status for this test to mean anything",
-                hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getBailStatus(),
-                is(nullValue()));
+        // Guards the premise: the defendant really was sent without a bail status, so a null
+        // offence bail status below reflects nothing to seed rather than a lost value.
+        assertThat(hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getBailStatus(), is(nullValue()));
 
         getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
