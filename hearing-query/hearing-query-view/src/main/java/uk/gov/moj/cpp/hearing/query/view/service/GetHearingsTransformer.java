@@ -224,6 +224,7 @@ public class GetHearingsTransformer {
         result.withId(offence.getId());
         result.withOffenceTitle(offence.getOffenceTitle());
         result.withWordingWelsh(offence.getWordingWelsh());
+
         return result;
     }
 
