@@ -17,6 +17,7 @@ import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
+import uk.gov.justice.core.courts.Verdict;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
@@ -181,8 +182,16 @@ public class ValidationRequestMapper {
                 .caseUrn(caseUrn)
                 .defendantId(defendantId)
                 .bailStatus(toBailStatus(offence.getBailStatus()))
-                .isConvicted(offence.getConvictionDate() != null)
+                .isConvicted(isConvicted(offence))
                 .hasExistingCtlRecord(hasExistingCustodyTimeLimit(offence));
+    }
+
+    private boolean isConvicted(final Offence offence) {
+        return offence.getConvictionDate() != null && !isVerdictDeleted(offence.getVerdict());
+    }
+
+    private boolean isVerdictDeleted(final Verdict verdict) {
+        return verdict != null && Boolean.TRUE.equals(verdict.getIsDeleted());
     }
 
     private boolean hasExistingCustodyTimeLimit(final Offence offence) {

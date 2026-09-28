@@ -26,6 +26,7 @@ import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
+import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
@@ -516,6 +517,32 @@ class ValidationRequestMapperTest {
     }
 
     @Test
+    void shouldSetIsConvictedFalseWhenVerdictIsDeleted() {
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                buildHearingWithOffence(Offence.offence()
+                        .withId(randomUUID())
+                        .withConvictionDate(LocalDate.of(2025, 1, 10))
+                        .withVerdict(Verdict.verdict().withIsDeleted(true).build())
+                        .build()));
+
+        assertThat(request.getOffences().get(0).getIsConvicted(), is(false));
+    }
+
+    @Test
+    void shouldSetIsConvictedTrueWhenVerdictIsNotDeleted() {
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                buildHearingWithOffence(Offence.offence()
+                        .withId(randomUUID())
+                        .withConvictionDate(LocalDate.of(2025, 1, 10))
+                        .withVerdict(Verdict.verdict().withIsDeleted(false).build())
+                        .build()));
+
+        assertThat(request.getOffences().get(0).getIsConvicted(), is(true));
+    }
+
+    @Test
     void shouldSetHasExistingCtlRecordTrueWhenCustodyTimeLimitIsPresent() {
         final CustodyTimeLimit custodyTimeLimit = CustodyTimeLimit.custodyTimeLimit()
                 .withTimeLimit(LocalDate.of(2026, 6, 1))
@@ -885,14 +912,18 @@ class ValidationRequestMapperTest {
     }
 
     private Hearing buildHearingWithOffenceBailStatus(final BailStatus bailStatus) {
+        return buildHearingWithOffence(Offence.offence()
+                .withId(randomUUID())
+                .withBailStatus(bailStatus)
+                .build());
+    }
+
+    private Hearing buildHearingWithOffence(final Offence offence) {
         return Hearing.hearing()
                 .withProsecutionCases(List.of(ProsecutionCase.prosecutionCase()
                         .withDefendants(List.of(Defendant.defendant()
                                 .withId(randomUUID())
-                                .withOffences(List.of(Offence.offence()
-                                        .withId(randomUUID())
-                                        .withBailStatus(bailStatus)
-                                        .build()))
+                                .withOffences(List.of(offence))
                                 .build()))
                         .build()))
                 .build();
