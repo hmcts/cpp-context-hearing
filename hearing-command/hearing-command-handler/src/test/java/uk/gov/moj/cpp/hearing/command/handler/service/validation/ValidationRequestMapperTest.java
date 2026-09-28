@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
+import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
@@ -30,6 +31,7 @@ import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationRequest;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.OffenceDto;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ResultLineDto;
 
 import java.time.LocalDate;
@@ -853,6 +855,47 @@ class ValidationRequestMapperTest {
 
         assertThat(request.getOffences(), hasSize(1));
         assertThat(request.getOffences().get(0).getOffenceId(), is(offenceId.toString()));
+    }
+
+    @Test
+    void shouldMapBailStatusCodeFromOffence() {
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                buildHearingWithOffenceBailStatus(BailStatus.bailStatus().withId(randomUUID()).withCode("C").build()));
+
+        assertThat(request.getOffences().get(0).getBailStatus(), is(OffenceDto.BailStatusEnum.C));
+    }
+
+    @Test
+    void shouldMapNullBailStatusWhenOffenceHasNoBailStatus() {
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                buildHearingWithOffenceBailStatus(null));
+
+        assertThat(request.getOffences().get(0).getBailStatus(), is(nullValue()));
+    }
+
+    @Test
+    void shouldMapNullBailStatusWhenBailStatusCodeIsUnrecognised() {
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                buildHearingWithOffenceBailStatus(BailStatus.bailStatus().withId(randomUUID()).withCode("X").build()));
+
+        assertThat(request.getOffences().get(0).getBailStatus(), is(nullValue()));
+    }
+
+    private Hearing buildHearingWithOffenceBailStatus(final BailStatus bailStatus) {
+        return Hearing.hearing()
+                .withProsecutionCases(List.of(ProsecutionCase.prosecutionCase()
+                        .withDefendants(List.of(Defendant.defendant()
+                                .withId(randomUUID())
+                                .withOffences(List.of(Offence.offence()
+                                        .withId(randomUUID())
+                                        .withBailStatus(bailStatus)
+                                        .build()))
+                                .build()))
+                        .build()))
+                .build();
     }
 
     private CourtOrder buildCourtOrder(final UUID offenceId, final String offenceCode) {

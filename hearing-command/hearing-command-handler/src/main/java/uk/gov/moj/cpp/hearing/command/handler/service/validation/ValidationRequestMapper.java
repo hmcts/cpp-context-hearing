@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 
 import static java.util.stream.Collectors.toList;
 
+import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
@@ -179,6 +180,7 @@ public class ValidationRequestMapper {
                 .orderIndex(offence.getOrderIndex())
                 .caseUrn(caseUrn)
                 .defendantId(defendantId)
+                .bailStatus(toBailStatus(offence.getBailStatus()))
                 .isConvicted(offence.getConvictionDate() != null)
                 .hasExistingCtlRecord(hasExistingCustodyTimeLimit(offence));
     }
@@ -231,6 +233,18 @@ public class ValidationRequestMapper {
             return DraftValidationRequest.CourtTypeEnum.fromValue(courtType);
         } catch (final IllegalArgumentException ex) {
             LOGGER.warn("Unrecognised court type '{}' for results validation, sending null", courtType);
+            return null;
+        }
+    }
+
+    private static OffenceDto.BailStatusEnum toBailStatus(final BailStatus bailStatus) {
+        if (bailStatus == null || bailStatus.getCode() == null) {
+            return null;
+        }
+        try {
+            return OffenceDto.BailStatusEnum.fromValue(bailStatus.getCode());
+        } catch (final IllegalArgumentException ex) {
+            LOGGER.warn("Unrecognised bail status '{}' for results validation, sending null", bailStatus.getCode());
             return null;
         }
     }
