@@ -22,6 +22,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,22 +70,52 @@ public class ProvisionalBookingService {
                     .build()
                     .execute(httpPost);
 
+            final int status = httpResponse.getStatusLine().getStatusCode();
+            // Read the body once, before branching. Both paths need it: on OK it carries the
+            // bookingId, and on a rejection it carries courtscheduler's own explanation
+            // ({"error":["..."]}) - the only thing that says WHY. Logging the status alone made a
+            // 400 indistinguishable from a 500 or a version mismatch, and the public event
+            // downstream only ever showed "has no bookingId". It also cannot be read twice:
+            // EntityUtils.toString consumes the entity stream.
+            //
+            // getEntity() is null for a bodiless response (a gateway 502, a 204), and
+            // EntityUtils.toString(null) throws IllegalArgumentException - unchecked, so it would
+            // escape the IOException catch below and take the DLQ path the JSONException guard
+            // further down exists to prevent.
+            final String body = httpResponse.getEntity() == null
+                    ? ""
+                    : EntityUtils.toString(httpResponse.getEntity());
+
             if (isOkay(httpResponse)) {
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("create provisionalBooking completed successfully");
+                    LOGGER.info("create unconfirmedBooking completed successfully");
                 }
             } else {
-                LOGGER.error("create provisionalBooking failed with status code:{}", httpResponse.getStatusLine().getStatusCode());
+                LOGGER.error("create unconfirmedBooking failed with status code:{} body:{}", status, body);
             }
 
-            final JSONObject responseJson = new JSONObject(EntityUtils.toString(httpResponse.getEntity()));
+            // courtscheduler answers a rejection with a JSON error body, but an infrastructure
+            // failure (gateway, sidecar, empty 503) can answer with HTML or nothing at all.
+            // JSONObject would throw JSONException there - unchecked, so it would escape the
+            // IOException catch below, roll the JMS transaction back and, after the redelivery
+            // attempts, drop the command on the DLQ with no public event at all. The clerk would
+            // see the spinner never resolve. Treat an unparseable body as an ordinary error.
+            final JSONObject responseJson;
+            try {
+                responseJson = new JSONObject(body);
+            } catch (JSONException ex) {
+                LOGGER.error("create unconfirmedBooking returned an unparseable body, status:{} body:{}", status, body, ex);
+                return ProvisionalBookingServiceResponse.error(
+                        String.format("courtscheduler returned %d with an unparseable body: %s", status, body));
+            }
+
             if (responseJson.has("bookingId")) {
                 return ProvisionalBookingServiceResponse.normal(responseJson.getString("bookingId"));
-            } else {
-                return ProvisionalBookingServiceResponse.error(String.format("%s has no bookingId", responseJson));
             }
+            return ProvisionalBookingServiceResponse.error(
+                    String.format("courtscheduler returned %d: %s", status, responseJson));
         } catch (IOException ex) {
-            LOGGER.error("create provisionalBooking failed", ex);
+            LOGGER.error("create unconfirmedBooking failed", ex);
             return ProvisionalBookingServiceResponse.error(ex.getMessage());
         }
     }
