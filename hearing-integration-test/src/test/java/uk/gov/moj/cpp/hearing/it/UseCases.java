@@ -1189,7 +1189,7 @@ public class UseCases {
 
     public static void bookHearingSlots(final RequestSpecification requestSpec, final UUID hearingId, final List<ProvisionalHearingSlotInfo> hearingSlots) throws Exception {
 
-        callCommand(requestSpec, hearingId, hearingSlots, "hearing.book-provisional-hearing-slots.json");
+        callCommand(requestSpec, hearingId, hearingSlots, "hearing.book-unconfirmed-hearing-slots.json");
 
     }
 
@@ -1201,8 +1201,8 @@ public class UseCases {
                 .replace("HEARING_START_TIME1", hearingSlots.get(0).getHearingStartTime().format(DATE_TIME_FORMATTER))
                 .replace("HEARING_START_TIME2", hearingSlots.get(0).getHearingStartTime().format(DATE_TIME_FORMATTER));
 
-        makeCommand(requestSpec, "hearing.book-provisional-hearing-slots")
-                .ofType("application/vnd.hearing.book-provisional-hearing-slots+json")
+        makeCommand(requestSpec, "hearing.book-unconfirmed-hearing-slots")
+                .ofType("application/vnd.hearing.book-unconfirmed-hearing-slots+json")
                 .withArgs(hearingId)
                 .withPayload(commandPayloadString)
                 .executeSuccessfully();

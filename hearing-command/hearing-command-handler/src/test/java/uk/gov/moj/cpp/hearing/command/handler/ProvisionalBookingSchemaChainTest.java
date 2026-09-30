@@ -16,7 +16,7 @@ import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 
 /**
- * The provisional-booking commands are validated three times on their way through the service —
+ * The unconfirmed-booking commands are validated three times on their way through the service —
  * once per hop, each against its own schema, and every one of those schemas sets
  * {@code additionalProperties: false}:
  *
@@ -51,21 +51,44 @@ public class ProvisionalBookingSchemaChainTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    /** The command families that traverse all three hops. */
-    private static final List<String> FAMILIES =
-            List.of("book-provisional-hearing-slots", "release-provisional-hearing-slots");
+    /**
+     * The command families that traverse all three hops, each as (command name, event name).
+     *
+     * <p>They differ. Hops 1 and 2 — the REST action and the JMS command — were renamed to
+     * "unconfirmed"; hop 3 was not, because renaming an event breaks consumers outside this
+     * estate that cannot be enumerated from here. So the chain is deliberately asymmetric:
+     *
+     * <pre>
+     *   hearing.book-unconfirmed-hearing-slots          (hop 1, REST)
+     *   hearing.command.book-unconfirmed-hearing-slots  (hop 2, JMS)
+     *   hearing.event.book-provisional-hearing-slots    (hop 3, event — UNCHANGED)
+     * </pre>
+     *
+     * <p>Carrying both names is the whole reason this is a pair rather than a single string.
+     * A single template silently pointed hop 3 at a file that does not exist, and
+     * {@link #propertiesOf} would have failed with "schema not found" rather than comparing
+     * anything — which is the failure this test exists to prevent, not to cause.
+     */
+    private record Family(String commandName, String eventName) {
+    }
+
+    private static final List<Family> FAMILIES = List.of(
+            new Family("book-unconfirmed-hearing-slots", "book-provisional-hearing-slots"),
+            new Family("release-unconfirmed-hearing-slots", "release-provisional-hearing-slots"));
 
     @Test
     public void everyCommandApiPropertyIsAcceptedByBothDownstreamHops() throws Exception {
-        for (final String name : FAMILIES) {
-            assertCommandApiPropertiesFlowDownstream(name);
+        for (final Family family : FAMILIES) {
+            assertCommandApiPropertiesFlowDownstream(family);
         }
     }
 
-    private void assertCommandApiPropertiesFlowDownstream(final String name) throws Exception {
+    private void assertCommandApiPropertiesFlowDownstream(final Family family) throws Exception {
+        final String name = family.commandName();
         final Set<String> commandApi = propertiesOf(String.format(COMMAND_API_SCHEMA, name));
         final Set<String> commandHandler = propertiesOf(String.format(COMMAND_HANDLER_SCHEMA, name));
-        final Set<String> eventProcessor = propertiesOf(String.format(EVENT_PROCESSOR_SCHEMA, name));
+        final Set<String> eventProcessor =
+                propertiesOf(String.format(EVENT_PROCESSOR_SCHEMA, family.eventName()));
 
         assertThat("command-handler schema for " + name + " would reject these with "
                         + "'extraneous key ... is not permitted'",
@@ -82,14 +105,16 @@ public class ProvisionalBookingSchemaChainTest {
      */
     @Test
     public void bothDownstreamHopsCarryTheSameProperties() throws Exception {
-        for (final String name : FAMILIES) {
-            assertDownstreamHopsAgree(name);
+        for (final Family family : FAMILIES) {
+            assertDownstreamHopsAgree(family);
         }
     }
 
-    private void assertDownstreamHopsAgree(final String name) throws Exception {
+    private void assertDownstreamHopsAgree(final Family family) throws Exception {
+        final String name = family.commandName();
         final Set<String> commandHandler = propertiesOf(String.format(COMMAND_HANDLER_SCHEMA, name));
-        final Set<String> eventProcessor = propertiesOf(String.format(EVENT_PROCESSOR_SCHEMA, name));
+        final Set<String> eventProcessor =
+                propertiesOf(String.format(EVENT_PROCESSOR_SCHEMA, family.eventName()));
 
         assertThat("event-processor schema for " + name + " is missing properties the handler has",
                 missing(commandHandler, eventProcessor), is(empty()));
@@ -104,10 +129,14 @@ public class ProvisionalBookingSchemaChainTest {
      */
     @Test
     public void bookingIdIsCarriedByEveryHopOfTheBookCommand() throws Exception {
-        final String name = "book-provisional-hearing-slots";
-        for (final String template :
-                List.of(COMMAND_API_SCHEMA, COMMAND_HANDLER_SCHEMA, EVENT_PROCESSOR_SCHEMA)) {
-            final String path = String.format(template, name);
+        // Hop 3 keeps the old name — see Family — so the three paths cannot share one string.
+        final Family family = FAMILIES.get(0);
+        final List<String> paths = List.of(
+                String.format(COMMAND_API_SCHEMA, family.commandName()),
+                String.format(COMMAND_HANDLER_SCHEMA, family.commandName()),
+                String.format(EVENT_PROCESSOR_SCHEMA, family.eventName()));
+
+        for (final String path : paths) {
             assertThat(path + " must permit bookingId",
                     propertiesOf(path).contains("bookingId"), is(true));
         }

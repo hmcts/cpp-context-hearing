@@ -402,23 +402,23 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
       description: |
         ...
         (mapping):
-            requestType: application/vnd.hearing.book-provisional-hearing-slots+json
-            name: hearing.book-provisional-hearing-slots
+            requestType: application/vnd.hearing.book-unconfirmed-hearing-slots+json
+            name: hearing.book-unconfirmed-hearing-slots
         (mapping):
-            requestType: application/vnd.hearing.release-provisional-hearing-slots+json
-            name: hearing.release-provisional-hearing-slots
+            requestType: application/vnd.hearing.release-unconfirmed-hearing-slots+json
+            name: hearing.release-unconfirmed-hearing-slots
         ...
       body:
-        application/vnd.hearing.book-provisional-hearing-slots+json:
+        application/vnd.hearing.book-unconfirmed-hearing-slots+json:
             example:
-             !include json/hearing.book-provisional-hearing-slots.json
+             !include json/hearing.book-unconfirmed-hearing-slots.json
             schema:
-             !include json/schema/hearing.book-provisional-hearing-slots.json
-        application/vnd.hearing.release-provisional-hearing-slots+json:
+             !include json/schema/hearing.book-unconfirmed-hearing-slots.json
+        application/vnd.hearing.release-unconfirmed-hearing-slots+json:
             example:
-             !include json/hearing.release-provisional-hearing-slots.json
+             !include json/hearing.release-unconfirmed-hearing-slots.json
             schema:
-             !include json/schema/hearing.release-provisional-hearing-slots.json
+             !include json/schema/hearing.release-unconfirmed-hearing-slots.json
       responses:
             202:
                 description: OK

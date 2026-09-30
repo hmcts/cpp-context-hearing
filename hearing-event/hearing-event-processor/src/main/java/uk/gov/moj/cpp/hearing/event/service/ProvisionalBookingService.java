@@ -29,10 +29,10 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class ProvisionalBookingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionalBookingService.class);
-    private static final String SERVICE = "/provisionalBooking";
+    private static final String SERVICE = "/unconfirmedBooking";
     private static final String SESSIONS = "/sessions/";
 
-    public static final String COURTSCHEDULER_CREATE_PROVISIONAL_BOOKING = "application/vnd.courtscheduler.create.provisional.booking+json";
+    public static final String COURTSCHEDULER_CREATE_UNCONFIRMED_BOOKING = "application/vnd.courtscheduler.create.unconfirmed.booking+json";
     public static final String CJS_CPP_UID = "CJSCPPUID";
 
     @Inject
@@ -58,7 +58,7 @@ public class ProvisionalBookingService {
 
         try {
             final HttpPost httpPost = new HttpPost(new URL(baseUri + SERVICE).toString());
-            httpPost.addHeader(CONTENT_TYPE, COURTSCHEDULER_CREATE_PROVISIONAL_BOOKING);
+            httpPost.addHeader(CONTENT_TYPE, COURTSCHEDULER_CREATE_UNCONFIRMED_BOOKING);
             httpPost.addHeader(CJS_CPP_UID, contextSystemUserId);
 
             final StringEntity requestEntity = new StringEntity(this.objectMapper.writeValueAsString(payload));

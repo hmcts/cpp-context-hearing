@@ -18,10 +18,10 @@ public class ReleaseProvisionalHearingSlotsCommandHandler extends AbstractComman
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReleaseProvisionalHearingSlotsCommandHandler.class.getName());
 
-    @Handles("hearing.command.release-provisional-hearing-slots")
+    @Handles("hearing.command.release-unconfirmed-hearing-slots")
     public void releaseProvisionalHearingSlots(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.release-provisional-hearing-slots received {}", envelope.toObfuscatedDebugString());
+            LOGGER.debug("hearing.command.release-unconfirmed-hearing-slots received {}", envelope.toObfuscatedDebugString());
         }
         final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString("hearingId"));
         final String bookingId = envelope.payloadAsJsonObject().getString("bookingId");

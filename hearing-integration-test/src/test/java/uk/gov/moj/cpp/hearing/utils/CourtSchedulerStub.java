@@ -10,18 +10,18 @@ public class CourtSchedulerStub {
     private static final String COURT_SCHEDULER_BASE_URL = "/listingcourtscheduler-api/rest/courtscheduler";
     private static final String HOST = System.getProperty("INTEGRATION_HOST_KEY", "localhost");
 
-    private static final String PROVISIONAL_BOOKING = "/provisionalBooking";
+    private static final String UNCONFIRMED_BOOKING = "/unconfirmedBooking";
 
-    public static final String STUB_DATA_PROVISIONAL_BOOKING_BOOK_SLOTS_RESPONSE = "stub-data/courtscheduler.provisionalbooking-book-slots-response.json";
+    public static final String STUB_DATA_UNCONFIRMED_BOOKING_BOOK_SLOTS_RESPONSE = "stub-data/courtscheduler.provisionalbooking-book-slots-response.json";
 
     static {
         configureFor(HOST, 8080);
     }
 
     public static void stubProvisionalBookSlots() {
-        stubFor(post(urlPathMatching(format("%s", COURT_SCHEDULER_BASE_URL + PROVISIONAL_BOOKING)))
+        stubFor(post(urlPathMatching(format("%s", COURT_SCHEDULER_BASE_URL + UNCONFIRMED_BOOKING)))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
-                        .withBody(getPayload(STUB_DATA_PROVISIONAL_BOOKING_BOOK_SLOTS_RESPONSE))
+                        .withBody(getPayload(STUB_DATA_UNCONFIRMED_BOOKING_BOOK_SLOTS_RESPONSE))
                         .withHeader("Content-Type", "application/json")
                 ));
     }

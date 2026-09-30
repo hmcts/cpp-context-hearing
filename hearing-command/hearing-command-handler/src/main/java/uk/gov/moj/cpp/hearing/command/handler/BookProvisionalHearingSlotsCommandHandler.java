@@ -24,10 +24,10 @@ public class BookProvisionalHearingSlotsCommandHandler extends AbstractCommandHa
     private static final Logger LOGGER =
             LoggerFactory.getLogger(BookProvisionalHearingSlotsCommandHandler.class.getName());
 
-    @Handles("hearing.command.book-provisional-hearing-slots")
+    @Handles("hearing.command.book-unconfirmed-hearing-slots")
     public void bookProvisionalHearingSlots(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.book-provisional-hearing-slots event received {}", envelope.toObfuscatedDebugString());
+            LOGGER.debug("hearing.command.book-unconfirmed-hearing-slots event received {}", envelope.toObfuscatedDebugString());
         }
 
         final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString("hearingId"));

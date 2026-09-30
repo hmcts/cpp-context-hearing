@@ -4,7 +4,7 @@
 
 **Goal:** Give the browser a way to release a reservation, by adding a hearing command that proxies courtscheduler's existing `DELETE /sessions/{bookingId}`.
 
-**Architecture:** courtscheduler already releases correctly — `DELETE /sessions/{hearingId}` → `SlotsRemoveService.remove` → `releaseOldAllocatedListings`, the full three-step release that restores capacity. It accepts any string, so a `bookingId` works. But nothing between the browser and that endpoint can reach it: listing does not proxy it and hearing has no release command. This plan adds the missing link, mirroring the existing `book-provisional-hearing-slots` path exactly: command → aggregate → event → processor → HTTP.
+**Architecture:** courtscheduler already releases correctly — `DELETE /sessions/{hearingId}` → `SlotsRemoveService.remove` → `releaseOldAllocatedListings`, the full three-step release that restores capacity. It accepts any string, so a `bookingId` works. But nothing between the browser and that endpoint can reach it: listing does not proxy it and hearing has no release command. This plan adds the missing link, mirroring the existing `book-unconfirmed-hearing-slots` path exactly: command → aggregate → event → processor → HTTP.
 
 **Tech Stack:** Java 17, **Maven**, CDI, HMCTS Justice Services Framework (RAML-first, event-sourced), JUnit, Mockito.
 
@@ -21,7 +21,7 @@ With a same-day hold and no release, a clerk who tries three sessions before set
 
 **Fire-and-forget, no public event.** The book path emits `public.hearing.hearing-slots-provisionally-booked` because the UI must wait for the minted `bookingId`. Release returns nothing the caller needs, and there is no ordering hazard: a re-pick reserves under a *new* `bookingId`, so the old release and the new reserve are independent. The UI fires it and proceeds. If a release is lost, the 01:00 purge reclaims the capacity — the accepted backstop. Do not add a public event.
 
-**Second media type on the existing resource, not a new path.** `POST /hearings/{hearingId}/hearing-slots` gains `application/vnd.hearing.release-provisional-hearing-slots+json`. This is the framework's convention — commands are dispatched by media type, and `/hearings/{hearingId}` already carries thirty of them.
+**Second media type on the existing resource, not a new path.** `POST /hearings/{hearingId}/hearing-slots` gains `application/vnd.hearing.release-unconfirmed-hearing-slots+json`. This is the framework's convention — commands are dispatched by media type, and `/hearings/{hearingId}` already carries thirty of them.
 
 **New handler and processor classes, not additions to the Book ones.** `BookProvisionalHearingSlotsCommandHandler` and `BookProvisionalHearingSlotsProcessor` are named for what they do; hanging a release off them would make both names lies.
 
@@ -30,7 +30,7 @@ With a same-day hold and no release, a clerk who tries three sessions before set
 - Build tool is **Maven**. Never Gradle.
 - The event **must** be registered in `subscriptions-descriptor.yaml` with a matching schema file. An event published without that entry is never delivered, and nothing fails loudly — the processor simply never runs.
 - The release must be tolerant: releasing a `bookingId` with no reservation is a **no-op, not an error**. Legacy magistrates drafts have no reservation, and courtscheduler already treats absence as a no-op.
-- Do not change the existing `hearing.book-provisional-hearing-slots` command, its schema, its event, or its processor.
+- Do not change the existing `hearing.book-unconfirmed-hearing-slots` command, its schema, its event, or its processor.
 - `hearingId` is the aggregate key; `bookingId` is what gets released. Both go in the payload.
 
 **Build and test commands**
@@ -51,11 +51,11 @@ One task: the RAML that admits it, the command that carries it, the event that r
 
 **Files:**
 - Modify: `hearing-command/hearing-command-api/src/raml/hearing-command-api.raml` (the `/hearings/{hearingId}/hearing-slots` post, ~line 382)
-- Create: `hearing-command/hearing-command-api/src/raml/json/schema/hearing.release-provisional-hearing-slots.json`
-- Create: `hearing-command/hearing-command-api/src/raml/json/hearing.release-provisional-hearing-slots.json`
+- Create: `hearing-command/hearing-command-api/src/raml/json/schema/hearing.release-unconfirmed-hearing-slots.json`
+- Create: `hearing-command/hearing-command-api/src/raml/json/hearing.release-unconfirmed-hearing-slots.json`
 - Modify: `hearing-command/hearing-command-api/src/main/java/uk/gov/moj/cpp/hearing/command/api/HearingCommandApi.java`
 - Create: `hearing-command/hearing-command-handler/src/main/java/uk/gov/moj/cpp/hearing/command/handler/ReleaseProvisionalHearingSlotsCommandHandler.java`
-- Create: `hearing-command/hearing-command-handler/src/raml/json/schema/hearing.command.release-provisional-hearing-slots.json`
+- Create: `hearing-command/hearing-command-handler/src/raml/json/schema/hearing.command.release-unconfirmed-hearing-slots.json`
 - Create: `hearing-domain/hearing-domain-event/src/main/java/uk/gov/moj/cpp/hearing/domain/event/ReleaseProvisionalHearingSlots.java`
 - Modify: `hearing-domain/hearing-domain-aggregate/src/main/java/uk/gov/moj/cpp/hearing/domain/aggregate/HearingAggregate.java`
 - Modify: `hearing-event/hearing-event-processor/src/yaml/subscriptions-descriptor.yaml`
@@ -69,7 +69,7 @@ One task: the RAML that admits it, the command that carries it, the event that r
 - Consumes: courtscheduler `DELETE {courtscheduler.base.url}/sessions/{bookingId}` → 202. Already exists, already performs the full three-step release, already a no-op when nothing matches.
 - Produces, for NEW-12b (the UI ticket) to call:
   - `POST /hearing-command-api/command/api/rest/hearing/hearings/{hearingId}/hearing-slots`
-  - media type `application/vnd.hearing.release-provisional-hearing-slots+json`
+  - media type `application/vnd.hearing.release-unconfirmed-hearing-slots+json`
   - body `{ "bookingId": "<uuid>" }`
   - response `202 Accepted`, no body, no public event
 
@@ -114,7 +114,7 @@ Create `ReleaseProvisionalHearingSlotsCommandHandlerTest`, modelled on the Book 
                 .build();
 
         handler.releaseProvisionalHearingSlots(envelopeFrom(
-                metadataWithRandomUUID("hearing.command.release-provisional-hearing-slots"), payload));
+                metadataWithRandomUUID("hearing.command.release-unconfirmed-hearing-slots"), payload));
 
         // assert a ReleaseProvisionalHearingSlots event reached the stream, carrying both ids
     }
@@ -180,10 +180,10 @@ public class ReleaseProvisionalHearingSlotsCommandHandler extends AbstractComman
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReleaseProvisionalHearingSlotsCommandHandler.class.getName());
 
-    @Handles("hearing.command.release-provisional-hearing-slots")
+    @Handles("hearing.command.release-unconfirmed-hearing-slots")
     public void releaseProvisionalHearingSlots(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.release-provisional-hearing-slots received {}", envelope.toObfuscatedDebugString());
+            LOGGER.debug("hearing.command.release-unconfirmed-hearing-slots received {}", envelope.toObfuscatedDebugString());
         }
         final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString("hearingId"));
         final String bookingId = envelope.payloadAsJsonObject().getString("bookingId");
@@ -199,9 +199,9 @@ public class ReleaseProvisionalHearingSlotsCommandHandler extends AbstractComman
 Beside `bookProvisionalHearingSlots` in `HearingCommandApi`:
 
 ```java
-    @Handles("hearing.release-provisional-hearing-slots")
+    @Handles("hearing.release-unconfirmed-hearing-slots")
     public void releaseProvisionalHearingSlots(final JsonEnvelope envelope) {
-        sendEnvelopeWithName(envelope, "hearing.command.release-provisional-hearing-slots");
+        sendEnvelopeWithName(envelope, "hearing.command.release-unconfirmed-hearing-slots");
     }
 ```
 
@@ -296,24 +296,24 @@ In `hearing-command-api.raml`, under the existing `/hearings/{hearingId}/hearing
 
 ```yaml
         (mapping):
-            requestType: application/vnd.hearing.release-provisional-hearing-slots+json
-            name: hearing.release-provisional-hearing-slots
+            requestType: application/vnd.hearing.release-unconfirmed-hearing-slots+json
+            name: hearing.release-unconfirmed-hearing-slots
 ```
 
 ```yaml
-        application/vnd.hearing.release-provisional-hearing-slots+json:
+        application/vnd.hearing.release-unconfirmed-hearing-slots+json:
             example:
-             !include json/hearing.release-provisional-hearing-slots.json
+             !include json/hearing.release-unconfirmed-hearing-slots.json
             schema:
-             !include json/schema/hearing.release-provisional-hearing-slots.json
+             !include json/schema/hearing.release-unconfirmed-hearing-slots.json
 ```
 
-Schema (`json/schema/hearing.release-provisional-hearing-slots.json`) — note `hearingId` comes from the URI, so the body carries only `bookingId`:
+Schema (`json/schema/hearing.release-unconfirmed-hearing-slots.json`) — note `hearingId` comes from the URI, so the body carries only `bookingId`:
 
 ```json
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.release-provisional-hearing-slots.json",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.release-unconfirmed-hearing-slots.json",
   "type": "object",
   "properties": {
     "bookingId": {
@@ -326,7 +326,7 @@ Schema (`json/schema/hearing.release-provisional-hearing-slots.json`) — note `
 }
 ```
 
-Example (`json/hearing.release-provisional-hearing-slots.json`):
+Example (`json/hearing.release-unconfirmed-hearing-slots.json`):
 
 ```json
 {
@@ -334,7 +334,7 @@ Example (`json/hearing.release-provisional-hearing-slots.json`):
 }
 ```
 
-Add the command-handler-side schema at `hearing-command-handler/src/raml/json/schema/hearing.command.release-provisional-hearing-slots.json` with the same two properties, this time including `hearingId` — match the shape of the Book command's handler-side schema, which the framework populates from the URI parameter.
+Add the command-handler-side schema at `hearing-command-handler/src/raml/json/schema/hearing.command.release-unconfirmed-hearing-slots.json` with the same two properties, this time including `hearingId` — match the shape of the Book command's handler-side schema, which the framework populates from the URI parameter.
 
 - [ ] **Step 12: Run the tests**
 
