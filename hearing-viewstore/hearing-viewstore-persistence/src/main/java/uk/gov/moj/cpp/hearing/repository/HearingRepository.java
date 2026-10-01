@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.repository;
 import static org.apache.deltaspike.data.api.SingleResultType.OPTIONAL;
 
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.moj.cpp.hearing.dto.HearingCaseForDayRow;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
@@ -22,6 +23,21 @@ import org.apache.deltaspike.data.api.Repository;
 
 @Repository(forEntity = Hearing.class)
 public abstract class HearingRepository extends AbstractEntityRepository<Hearing, UUID> {
+
+    // every column is aliased: Hibernate rejects duplicate column names (h.id / c.id) in native query results.
+    // uuid columns are cast to varchar so they come back as the hyphenated string on both Postgres and H2.
+    private static final String HEARING_CASES_FOR_DAY = "select distinct cast(h.id as varchar) as hearing_id, " +
+            "cast(h.court_centre_id as varchar) as court_centre_id, cast(h.room_id as varchar) as court_room_id, " +
+            "h.is_group_proceedings as is_group_proceedings, cast(c.id as varchar) as case_id, " +
+            "c.is_group_master as is_group_master, c.is_group_member as is_group_member " +
+            "from ha_hearing_day d " +
+            "join ha_hearing h on h.id = d.hearing_id " +
+            "join ha_case c on c.hearing_id = h.id " +
+            "where d.date = :date " +
+            "and coalesce(d.is_cancelled,false) != true " +
+            "and coalesce(h.is_box_hearing,false) != true " +
+            "and coalesce(h.is_vacated_trial,false) != true " +
+            "and coalesce(c.case_status,'') != 'EJECTED'";
 
     @Query(value = "select  h.*" +
             "from ha_hearing_day d ,ha_hearing h   where h.id = d.hearing_id and d.date = :date and coalesce(d.is_cancelled,false) !=true " +
@@ -48,13 +64,28 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
     public abstract List<Hearing> findHearings(@QueryParam("date") final LocalDate date,
                                                @QueryParam("courtCentreId") final UUID courtCentreId);
 
-    @Query(value = "select  h.*" +
-            "from ha_hearing_day d, ha_hearing h " +
-            "where h.id = d.hearing_id and d.date = :date " +
-            "and coalesce(d.is_cancelled,false) !=true " +
-            "and coalesce(h.is_box_hearing,false) != true " +
-            "and coalesce(h.is_vacated_trial,false) != true", isNative = true)
-    public abstract List<Hearing> findHearings(@QueryParam("date") final LocalDate date);
+    /**
+     * Projection query for hearing.get.hearing-cases-for-day: returns one row per (hearing, case) sitting on the
+     * given date in a single round trip, without loading Hearing entities and their EAGER/lazy collections.
+     */
+    @SuppressWarnings("unchecked")
+    public List<HearingCaseForDayRow> findHearingCaseRowsForDay(final LocalDate date) {
+        final List<Object[]> rows = entityManager()
+                .createNativeQuery(HEARING_CASES_FOR_DAY)
+                .setParameter("date", date)
+                .getResultList();
+
+        return rows.stream()
+                .map(row -> new HearingCaseForDayRow(
+                        toUuid(row[0]),
+                        toUuid(row[1]),
+                        toUuid(row[2]),
+                        (Boolean) row[3],
+                        toUuid(row[4]),
+                        (Boolean) row[5],
+                        (Boolean) row[6]))
+                .toList();
+    }
 
     @Query(value = "SELECT distinct hearing " +
             "FROM Hearing hearing INNER JOIN hearing.hearingDays day INNER JOIN hearing.judicialRoles role " +
@@ -162,4 +193,13 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
             "AND prosecutionCase.id.id IN (:caseIds)")
     public abstract List<Hearing> findHearingsByCaseIdsLaterThan(@QueryParam("caseIds") final List<UUID> caseIds,
                                                                  @QueryParam("date") final LocalDate date);
+
+
+    private static UUID toUuid(final Object value) {
+        if (value == null || value instanceof UUID) {
+            return (UUID) value;
+        }
+        return UUID.fromString(value.toString());
+    }
+
 }

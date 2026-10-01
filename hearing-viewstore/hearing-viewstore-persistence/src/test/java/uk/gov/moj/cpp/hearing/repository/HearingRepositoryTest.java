@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -17,6 +18,7 @@ import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.dto.HearingCaseForDayRow;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
@@ -34,6 +36,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -187,34 +190,85 @@ public class HearingRepositoryTest {
     }
 
     @Test
-    public void shouldReturnNonEmptyListWhenFindHearingsForDayInvokedAndDataPresent() {
+    public void shouldReturnHearingCaseRowsWhenFindHearingCaseRowsForDayInvokedAndDataPresent() {
         final uk.gov.justice.core.courts.Hearing hearing = hearings.get(0);
-        List<Hearing> hearingList = hearingRepository.findHearings(hearing.getHearingDays().get(0).getSittingDay().toLocalDate());
-        assertThat(hearingList, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearing.getId()))));
-        assertThat(hearingList.get(0).getHearingDays(), hasItem(isBean(HearingDay.class).with(HearingDay::getHasSharedResults, is(true))));
+        final uk.gov.justice.core.courts.ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
+
+        final List<HearingCaseForDayRow> rows = hearingRepository.findHearingCaseRowsForDay(hearing.getHearingDays().get(0).getSittingDay().toLocalDate());
+
+        assertThat(rows, hasItem(isBean(HearingCaseForDayRow.class)
+                .with(HearingCaseForDayRow::getHearingId, is(hearing.getId()))
+                .with(HearingCaseForDayRow::getCourtCentreId, is(hearing.getCourtCentre().getId()))
+                .with(HearingCaseForDayRow::getCourtRoomId, is(hearing.getCourtCentre().getRoomId()))
+                .with(HearingCaseForDayRow::getCaseId, is(prosecutionCase.getId()))));
     }
 
     @Test
-    public void shouldExcludeVacatedHearingFromListWhenVacatedTrueAndFindHearingsForDayInvoked() {
+    public void shouldExcludeVacatedHearingWhenFindHearingCaseRowsForDayInvoked() {
         final uk.gov.justice.core.courts.Hearing vacatedHearing = addHearingWithVacatedStatus(Boolean.TRUE);
-        assertThat(hearingRepository.findHearings(vacatedHearing.getHearingDays().get(0).getSittingDay().toLocalDate()), empty());
+        assertThat(rowsForHearing(vacatedHearing), empty());
     }
 
     @Test
-    public void shouldRetrieveHearingFromListWhenHearingDayCancelledNullOrFalseAndFindHearingsForDayInvoked() {
+    public void shouldRetrieveHearingWhenHearingDayCancelledNullOrFalseAndFindHearingCaseRowsForDayInvoked() {
         final uk.gov.justice.core.courts.Hearing hearingWithCancelledFalse = addHearingWithCancelledStatus(Boolean.FALSE);
-        List<Hearing> hearings = hearingRepository.findHearings(hearingWithCancelledFalse.getHearingDays().get(0).getSittingDay().toLocalDate());
-        assertThat(hearings, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearingWithCancelledFalse.getId()))));
+        assertThat(rowsForHearing(hearingWithCancelledFalse), not(empty()));
 
         final uk.gov.justice.core.courts.Hearing hearingWithCancelledNull = addHearingWithCancelledStatus(null);
-        hearings = hearingRepository.findHearings(hearingWithCancelledNull.getHearingDays().get(0).getSittingDay().toLocalDate());
-        assertThat(hearings, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearingWithCancelledNull.getId()))));
+        assertThat(rowsForHearing(hearingWithCancelledNull), not(empty()));
     }
 
     @Test
-    public void shouldExcludeHearingFromListWhenHearingDayCancelledTrueAndFindHearingsForDayInvoked() {
+    public void shouldExcludeHearingWhenHearingDayCancelledTrueAndFindHearingCaseRowsForDayInvoked() {
         final uk.gov.justice.core.courts.Hearing hearingWithCancelledDays = addHearingWithCancelledStatus(true);
-        assertThat(hearingRepository.findHearings(hearingWithCancelledDays.getHearingDays().get(0).getSittingDay().toLocalDate()), empty());
+        assertThat(rowsForHearing(hearingWithCancelledDays), empty());
+    }
+
+    @Test
+    public void shouldExcludeBoxHearingWhenFindHearingCaseRowsForDayInvoked() {
+        final uk.gov.justice.core.courts.Hearing boxHearing = addSampleHearing(true);
+        assertThat(rowsForHearing(boxHearing), empty());
+    }
+
+    @Test
+    public void shouldExcludeEjectedCaseWhenFindHearingCaseRowsForDayInvoked() {
+        final uk.gov.justice.core.courts.Hearing hearing = addHearing(hearingEntity ->
+                hearingEntity.getProsecutionCases().forEach(pc -> pc.setCaseStatus("EJECTED")));
+        assertThat(rowsForHearing(hearing), empty());
+    }
+
+    @Test
+    public void shouldReturnGroupFlagsWhenFindHearingCaseRowsForDayInvoked() {
+        final uk.gov.justice.core.courts.Hearing hearing = addHearing(hearingEntity -> {
+            hearingEntity.setIsGroupProceedings(true);
+            hearingEntity.getProsecutionCases().forEach(pc -> {
+                pc.setIsGroupMaster(false);
+                pc.setIsGroupMember(true);
+            });
+        });
+
+        assertThat(rowsForHearing(hearing), hasItem(isBean(HearingCaseForDayRow.class)
+                .with(HearingCaseForDayRow::getIsGroupProceedings, is(true))
+                .with(HearingCaseForDayRow::getIsGroupMaster, is(false))
+                .with(HearingCaseForDayRow::getIsGroupMember, is(true))));
+    }
+
+    @Test
+    public void shouldReturnSingleRowPerCaseWhenHearingHasMultipleSittingsOnTheSameDay() {
+        final ZonedDateTime sittingDay = ZonedDateTime.now().plusDays(3).withHour(9).withMinute(0).withSecond(0).withNano(0);
+        final uk.gov.justice.core.courts.Hearing hearing = addSampleHearing(false, sittingDay, sittingDay.plusHours(2));
+
+        final List<HearingCaseForDayRow> rows = hearingRepository.findHearingCaseRowsForDay(sittingDay.toLocalDate()).stream()
+                .filter(row -> row.getHearingId().equals(hearing.getId()))
+                .toList();
+
+        assertThat(rows.size(), is(hearing.getProsecutionCases().size()));
+    }
+
+    private List<HearingCaseForDayRow> rowsForHearing(final uk.gov.justice.core.courts.Hearing hearing) {
+        return hearingRepository.findHearingCaseRowsForDay(hearing.getHearingDays().get(0).getSittingDay().toLocalDate()).stream()
+                .filter(row -> row.getHearingId().equals(hearing.getId()))
+                .toList();
     }
 
 
@@ -542,6 +596,18 @@ public class HearingRepositoryTest {
         }
         initiateHearingCommand.getHearing().setHearingDays(hearingDays);
         saveHearing(initiateHearingCommand);
+        return initiateHearingCommand.getHearing();
+    }
+
+    public uk.gov.justice.core.courts.Hearing addHearing(final Consumer<Hearing> entityCustomiser) {
+        final InitiateHearingCommand initiateHearingCommand = minimumInitiateHearingTemplate();
+        final Hearing hearingEntity = hearingJPAMapper.toJPA(initiateHearingCommand.getHearing());
+        // because h2 incorrectly maps column type TEXT to VARCHAR(255)
+        hearingEntity.setCourtApplicationsJson(hearingEntity.getCourtApplicationsJson().substring(0, 255));
+        hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
+        entityCustomiser.accept(hearingEntity);
+        hearingRepository.save(hearingEntity);
+        hearings.add(initiateHearingCommand.getHearing());
         return initiateHearingCommand.getHearing();
     }
 
