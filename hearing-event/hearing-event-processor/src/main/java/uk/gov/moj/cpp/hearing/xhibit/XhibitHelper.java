@@ -2,9 +2,9 @@ package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.util.UUID.fromString;
 
-import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
-import uk.gov.moj.cpp.listing.common.xhibit.exception.InvalidReferenceDataException;
-import uk.gov.moj.cpp.listing.domain.xhibit.CourtLocation;
+import uk.gov.moj.cpp.hearing.listing.common.xhibit.CommonXhibitReferenceDataService;
+import uk.gov.moj.cpp.hearing.listing.common.xhibit.exception.InvalidReferenceDataException;
+import uk.gov.moj.cpp.hearing.listing.domain.xhibit.CourtLocation;
 
 import java.util.UUID;
 

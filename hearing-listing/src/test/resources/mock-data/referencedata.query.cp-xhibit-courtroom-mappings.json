@@ -1,0 +1,17 @@
+{
+  "cpXhibitCourtRoomMappings": [
+    {
+      "id": "0c5eead7-e337-44a8-9d0e-fa3378b12fc5",
+      "courtRoomUUID": "b3c9eb70-93eb-4570-a1fa-7516a5e4e9cd",
+      "crestCourtSiteName": "BARROW-IN-FURNESS",
+      "oucode": "C01BL00",
+      "courtRoomId": 1234,
+      "crestCourtId": "428",
+      "crestCourtSiteId": "428",
+      "crestCourtSiteUUID": "af13983c-3355-4c4e-80ac-0d5d7ab53e4d",
+      "crestCourtSiteCode": "A",
+      "crestCourtRoomName": "CourtRoom 777",
+      "courtType": "MAGISTRATES_COURT"
+    }
+  ]
+}
