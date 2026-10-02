@@ -26,18 +26,18 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
 
     // every column is aliased: Hibernate rejects duplicate column names (h.id / c.id) in native query results.
     // uuid columns are cast to varchar so they come back as the hyphenated string on both Postgres and H2.
-    private static final String HEARING_CASES_FOR_DAY = "select distinct cast(h.id as varchar) as hearing_id, " +
+    private static final String HEARING_CASES_FOR_DAY = "SELECT distinct cast(h.id as varchar) as hearing_id, " +
             "cast(h.court_centre_id as varchar) as court_centre_id, cast(h.room_id as varchar) as court_room_id, " +
             "h.is_group_proceedings as is_group_proceedings, cast(c.id as varchar) as case_id, " +
             "c.is_group_master as is_group_master, c.is_group_member as is_group_member " +
-            "from ha_hearing_day d " +
-            "join ha_hearing h on h.id = d.hearing_id " +
-            "join ha_case c on c.hearing_id = h.id " +
-            "where d.date = :date " +
-            "and coalesce(d.is_cancelled,false) != true " +
-            "and coalesce(h.is_box_hearing,false) != true " +
-            "and coalesce(h.is_vacated_trial,false) != true " +
-            "and coalesce(c.case_status,'') != 'EJECTED'";
+            "FROM ha_hearing_day d " +
+            "JOIN ha_hearing h on h.id = d.hearing_id " +
+            "JOIN ha_case c on c.hearing_id = h.id " +
+            "WHERE d.date = :date " +
+            "AND coalesce(d.is_cancelled,false) != true " +
+            "AND coalesce(h.is_box_hearing,false) != true " +
+            "AND coalesce(h.is_vacated_trial,false) != true " +
+            "AND coalesce(c.case_status,'') != 'EJECTED'";
 
     @Query(value = "select  h.*" +
             "from ha_hearing_day d ,ha_hearing h   where h.id = d.hearing_id and d.date = :date and coalesce(d.is_cancelled,false) !=true " +
