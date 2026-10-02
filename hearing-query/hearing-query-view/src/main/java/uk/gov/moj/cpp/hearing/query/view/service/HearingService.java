@@ -104,6 +104,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 import uk.gov.moj.cpp.hearing.repository.NowRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
+import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
 import uk.gov.moj.cpp.hearing.repository.PtphDetailRepository;
 
 import java.time.LocalDate;
@@ -121,6 +122,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -146,6 +148,7 @@ public class HearingService {
     private static final DateTimeFormatter FORMATTER = ofPattern("ddMMyyyy");
     private static final ZoneId ZONE_ID = ZoneId.of(ZoneOffset.UTC.getId());
     private static final UtcClock UTC_CLOCK = new UtcClock();
+    private static final String INACTIVE_CASE_STATUS = "INACTIVE";
 
     @Inject
     private HearingRepository hearingRepository;
@@ -171,6 +174,8 @@ public class HearingService {
     private HearingJPAMapper hearingJPAMapper;
     @Inject
     private ProsecutionCaseJPAMapper prosecutionCaseJPAMapper;
+    @Inject
+    private ProsecutionCaseRepository prosecutionCaseRepository;
     @Inject
     private TargetJPAMapper targetJPAMapper;
     @Inject
@@ -433,9 +438,43 @@ public class HearingService {
                 .withHearingSummaries(source.stream()
                         .map(ha -> hearingJPAMapper.fromJPA(ha))
                         .filter(ha -> isNotEmpty(ha.getProsecutionCases()))
+                        .map(this::withInactiveApplicationCases)
                         .map(h -> getHearingTransformer.summaryForCheckIn(h).build())
                         .collect(toList()))
                 .build();
+    }
+
+    /**
+     * Check-in only: adds the full case (defendants etc.) for INACTIVE cases referenced by the hearing's
+     * court applications (court_application_json) that have no ha_case row for this hearing.
+     */
+    private uk.gov.justice.core.courts.Hearing withInactiveApplicationCases(final uk.gov.justice.core.courts.Hearing hearing) {
+        if (isEmpty(hearing.getCourtApplications())) {
+            return hearing;
+        }
+        final Set<UUID> existingCaseIds = ofNullable(hearing.getProsecutionCases()).orElse(emptyList()).stream()
+                .map(uk.gov.justice.core.courts.ProsecutionCase::getId)
+                .collect(toSet());
+        final Set<UUID> inactiveCaseIds = hearing.getCourtApplications().stream()
+                .filter(ca -> isNotEmpty(ca.getCourtApplicationCases()))
+                .flatMap(ca -> ca.getCourtApplicationCases().stream())
+                .filter(cac -> INACTIVE_CASE_STATUS.equalsIgnoreCase(cac.getCaseStatus()))
+                .map(uk.gov.justice.core.courts.CourtApplicationCase::getProsecutionCaseId)
+                .filter(id -> nonNull(id) && !existingCaseIds.contains(id))
+                .collect(toSet());
+        if (inactiveCaseIds.isEmpty()) {
+            return hearing;
+        }
+        final Map<UUID, uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> casesById = new HashMap<>();
+        prosecutionCaseRepository.findByCaseIds(inactiveCaseIds)
+                .forEach(pc -> casesById.putIfAbsent(pc.getId().getId(), pc));
+        if (casesById.isEmpty()) {
+            return hearing;
+        }
+        final List<uk.gov.justice.core.courts.ProsecutionCase> cases = new ArrayList<>(
+                ofNullable(hearing.getProsecutionCases()).orElse(emptyList()));
+        cases.addAll(prosecutionCaseJPAMapper.fromJPA(new HashSet<>(casesById.values())));
+        return uk.gov.justice.core.courts.Hearing.hearing().withValuesFrom(hearing).withProsecutionCases(cases).build();
     }
 
     private List<Hearing> loadAndFilterHearings(final LocalDate date, final UUID courtCentreId,
