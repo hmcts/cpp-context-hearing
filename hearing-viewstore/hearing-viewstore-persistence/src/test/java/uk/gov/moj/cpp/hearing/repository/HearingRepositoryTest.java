@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.repository;
 
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
@@ -9,7 +10,6 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static uk.gov.justice.core.courts.HearingDay.hearingDay;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
@@ -506,12 +506,12 @@ public class HearingRepositoryTest {
         final Hearing firstHearing = hearingRepository.findBy(firstHearingId);
         final UUID firstTargetId = firstHearing.getTargets().stream().findFirst().get().getId().getId();
 
-        firstHearing.getTargets().removeIf(t -> t.getId().equals(firstTargetId));
+        firstHearing.getTargets().removeIf(t -> t.getId().getId().equals(firstTargetId));
 
         hearingRepository.save(firstHearing);
 
         final Hearing firstHearingPostTargetRemoval = hearingRepository.findBy(firstHearingId);
-        assertThat(firstHearingPostTargetRemoval.getTargets().stream().noneMatch(t -> t.getId().equals(firstTargetId)), is(true));
+        assertThat(firstHearingPostTargetRemoval.getTargets().stream().noneMatch(t -> t.getId().getId().equals(firstTargetId)), is(true));
     }
 
     private void saveHearingApplication(final Hearing hearing, final UUID applicationId) {
