@@ -211,6 +211,8 @@ public class HearingServiceTest {
     @Mock
     ProsecutionCaseJPAMapper prosecutionCaseJPAMapper;
     @Mock
+    private uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository prosecutionCaseRepository;
+    @Mock
     private List<UUID> prosecutionCasesIdsWithAccess;
     @Mock
     private FilterHearingsBasedOnPermissions filterHearingsBasedOnPermissions;
@@ -2401,6 +2403,62 @@ public class HearingServiceTest {
 
         assertThat(result.getHearingSummaries(), is(empty()));
         verify(getHearingsTransformer, never()).summaryForCheckIn(any());
+    }
+
+    @Test
+    public void getHearingsForCheckIn_shouldAddInactiveApplicationCasesFromProsecutionCaseRepository() {
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+        final UUID existingCaseId = randomUUID();
+        final UUID inactiveCaseId = randomUUID();
+        final UUID activeCaseId = randomUUID();
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
+
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing()
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase().withId(existingCaseId).build()))
+                .withCourtApplications(singletonList(CourtApplication.courtApplication()
+                        .withCourtApplicationCases(asList(
+                                uk.gov.justice.core.courts.CourtApplicationCase.courtApplicationCase().withProsecutionCaseId(inactiveCaseId).withCaseStatus("inactive").build(),
+                                uk.gov.justice.core.courts.CourtApplicationCase.courtApplicationCase().withProsecutionCaseId(activeCaseId).withCaseStatus("ACTIVE").build(),
+                                uk.gov.justice.core.courts.CourtApplicationCase.courtApplicationCase().withProsecutionCaseId(existingCaseId).withCaseStatus("INACTIVE").build()))
+                        .build()))
+                .build();
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase caseEntity = new uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase();
+        caseEntity.setId(new HearingSnapshotKey(inactiveCaseId, randomUUID()));
+        when(prosecutionCaseRepository.findByCaseIds(new HashSet<>(singletonList(inactiveCaseId)))).thenReturn(singletonList(caseEntity));
+        final ProsecutionCase inactiveCase = ProsecutionCase.prosecutionCase().withId(inactiveCaseId).build();
+        when(prosecutionCaseJPAMapper.fromJPA(anySet())).thenReturn(singletonList(inactiveCase));
+        when(getHearingsTransformer.summaryForCheckIn(any(uk.gov.justice.core.courts.Hearing.class)))
+                .thenReturn(HearingSummaries.hearingSummaries());
+
+        hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
+
+        final org.mockito.ArgumentCaptor<uk.gov.justice.core.courts.Hearing> captor = org.mockito.ArgumentCaptor.forClass(uk.gov.justice.core.courts.Hearing.class);
+        verify(getHearingsTransformer).summaryForCheckIn(captor.capture());
+        assertThat(captor.getValue().getProsecutionCases().stream().map(ProsecutionCase::getId).collect(toList()),
+                is(asList(existingCaseId, inactiveCaseId)));
+    }
+
+    @Test
+    public void getHearingsForCheckIn_shouldStillExcludeHearingWithNoHaCaseEvenIfApplicationHasInactiveCase() {
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(uk.gov.justice.core.courts.Hearing.hearing()
+                .withCourtApplications(singletonList(CourtApplication.courtApplication()
+                        .withCourtApplicationCases(singletonList(uk.gov.justice.core.courts.CourtApplicationCase.courtApplicationCase()
+                                .withProsecutionCaseId(randomUUID()).withCaseStatus("INACTIVE").build()))
+                        .build()))
+                .build());
+
+        final GetHearings result = hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
+
+        assertThat(result.getHearingSummaries(), hasSize(0));
+        verify(prosecutionCaseRepository, never()).findByCaseIds(any());
     }
 
     @Test
