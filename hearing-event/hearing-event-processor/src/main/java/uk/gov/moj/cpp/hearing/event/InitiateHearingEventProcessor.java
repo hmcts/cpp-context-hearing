@@ -12,6 +12,7 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -151,7 +152,7 @@ public class InitiateHearingEventProcessor {
                                 .add("caseIds", createCaseIds(courtApplication).build())
                                 .add("hearingCourtCentreName", initiateHearingCommand.getHearing().getCourtCentre().getName())
                                 .add("hearingCourtCentreId", initiateHearingCommand.getHearing().getCourtCentre().getId().toString())
-                                .add("caseOffenceIdList", createCaseOffenceIds(courtApplication.getCourtApplicationCases()))
+                                .add("caseOffenceIdList", createCaseOffenceIds(courtApplication.getCourtApplicationCases(), prosecutionCases))
                                 .build()).withName("public.hearing.nces-email-notification-for-application").withMetadataFrom(event)));
     }
 
@@ -185,14 +186,25 @@ public class InitiateHearingEventProcessor {
         return builder;
     }
 
-    private JsonArrayBuilder createCaseOffenceIds(final List<CourtApplicationCase> courtApplicationCases) {
+    private JsonArrayBuilder createCaseOffenceIds(final List<CourtApplicationCase> courtApplicationCases, final List<ProsecutionCase> prosecutionCases) {
         final JsonArrayBuilder builder = createArrayBuilder();
         if (isNotEmpty(courtApplicationCases)) {
-            courtApplicationCases.stream()
-                    .filter(cac -> isNotEmpty(cac.getOffences()))
-                    .flatMap(cac -> cac.getOffences().stream())
-                    .map(offence -> offence.getId().toString())
-                    .forEach(builder::add);
+            final boolean isSjp = courtApplicationCases.stream().anyMatch(c -> Boolean.TRUE.equals(c.getIsSJP()));
+            if (isSjp) {
+                prosecutionCases.stream()
+                        .map(ProsecutionCase::getDefendants)
+                        .flatMap(Collection::stream)
+                        .map(Defendant::getOffences)
+                        .flatMap(Collection::stream)
+                        .map(offence -> offence.getId().toString())
+                        .forEach(builder::add);
+            } else {
+                courtApplicationCases.stream()
+                        .filter(cac -> isNotEmpty(cac.getOffences()))
+                        .flatMap(cac -> cac.getOffences().stream())
+                        .map(offence -> offence.getId().toString())
+                        .forEach(builder::add);
+            }
         }
         return builder;
     }
