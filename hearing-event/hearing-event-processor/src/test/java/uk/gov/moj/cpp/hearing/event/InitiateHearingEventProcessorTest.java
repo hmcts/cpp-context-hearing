@@ -3,6 +3,8 @@ package uk.gov.moj.cpp.hearing.event;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
+import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -20,6 +22,9 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand.initiateHearingCommand;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
 import static uk.gov.moj.cpp.hearing.test.FileUtil.getPayload;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingWithApplicationTemplate;
@@ -30,9 +35,13 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtApplicationType;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.MasterDefendant;
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -47,7 +56,9 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.event.service.ProgressionService;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -505,6 +516,95 @@ public class InitiateHearingEventProcessorTest {
                                 withJsonPath("$.caseUrns[1]", is("caseURN2")),
                                 withJsonPath("$.caseIds[0]", is(caseId1.toString())),
                                 withJsonPath("$.caseIds[1]", is(caseId2.toString())),
+                                withJsonPath("$.hearingCourtCentreName", is(notNullValue())),
+                                withJsonPath("$.hearingCourtCentreId", is(notNullValue())),
+                                withJsonPath("$.caseOffenceIdList[0]", is(offenceId1.toString())),
+                                withJsonPath("$.caseOffenceIdList[1]", is(offenceId2.toString()))
+                        ))));
+
+    }
+
+
+    @Test
+    void shouldRaiseEventForEmailWithCourtOrderOffencesWhenHearingInitiatedForASJPApplication() {
+        final UUID masterDefendantId = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+        final String caseURN1 = "caseURN1";
+        final UUID caseId = randomUUID();
+        final UUID applicationId = randomUUID();
+        final ProsecutionCaseIdentifier prosecutionCaseIdentifier = ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                .withCaseURN(caseURN1)
+                .withProsecutionAuthorityId(randomUUID())
+                .withProsecutionAuthorityCode("ABC")
+                .build();
+        final List<CourtApplicationCase> courtApplicationCases = List.of(CourtApplicationCase.courtApplicationCase()
+                .withProsecutionCaseId(caseId)
+                .withIsSJP(true)
+                .withCaseStatus("ACTIVE")
+                .withProsecutionCaseIdentifier(prosecutionCaseIdentifier)
+                .build());
+
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommand()
+                .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                                .setDefendantType(PERSON)
+                                .setHearingLanguage(ENGLISH)
+                                .setJurisdictionType(CROWN))
+                        .withProsecutionCases(List.of(ProsecutionCase.prosecutionCase()
+                                .withProsecutionCaseIdentifier(prosecutionCaseIdentifier)
+                                .withId(caseId)
+                                .withDefendants(List.of(Defendant.defendant()
+                                        .withOffences(List.of(Offence.offence()
+                                                        .withId(offenceId1)
+                                                        .build(),
+                                                Offence.offence()
+                                                        .withId(offenceId2)
+                                                        .build()))
+                                        .build()))
+                                .build()))
+                        .withCourtApplications(List.of(CourtApplication.courtApplication()
+                                .withType(CourtApplicationType.courtApplicationType()
+                                        .withCode(APPEARANCE_TO_MAKE_STATUTORY_DECLARATION_CODE).build())
+                                .withId(applicationId)
+                                .withApplicationStatus(ApplicationStatus.UN_ALLOCATED)
+                                .withCourtApplicationCases(courtApplicationCases)
+                                .withSubject(CourtApplicationParty.courtApplicationParty()
+                                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                                .withMasterDefendantId(masterDefendantId)
+                                                .withPersonDefendant(PersonDefendant.personDefendant()
+                                                        .withPersonDetails(Person.person()
+                                                                .withFirstName("John")
+                                                                .withLastName("Doe")
+                                                                .build())
+                                                        .build())
+                                                .build())
+                                        .build())
+                                .build()))
+                        .build());
+
+        when(progressionService.getApplicationDetails(any(JsonEnvelope.class), eq(applicationId)))
+                .thenReturn(Optional.of(createObjectBuilder().add("courtApplication",
+                        createObjectBuilder().add("id", applicationId.toString())
+                                .add("applicant", createObjectBuilder().add("id", randomUUID().toString()))
+                                .add("applicationStatus", "UN_ALLOCATED")
+                                .build()).build()));
+
+
+        this.initiateHearingEventProcessor.hearingInitiated(envelopeFrom(metadataWithRandomUUID("hearing.initiated"),
+                objectToJsonObjectConverter.convert(initiateHearingCommand)));
+        verify(this.sender, times(6)).send(this.envelopeArgumentCaptor.capture());
+        final Envelope<JsonObject> event = this.envelopeArgumentCaptor.getAllValues().get(5);
+
+        final JsonEnvelope allValues = envelopeFrom(event.metadata(), event.payload());
+        assertThat(allValues,
+                jsonEnvelope(
+                        metadata().withName("public.hearing.nces-email-notification-for-application"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.applicationType", is("STAT_DEC")),
+                                withJsonPath("$.masterDefendantId", is(masterDefendantId.toString())),
+                                withJsonPath("$.listingDate", is(dateTimeFormatter.format(initiateHearingCommand.getHearing().getHearingDays().get(0).getSittingDay()))),
+                                withJsonPath("$.caseUrns[0]", is(caseURN1)),
+                                withJsonPath("$.caseIds[0]", is(caseId.toString())),
                                 withJsonPath("$.hearingCourtCentreName", is(notNullValue())),
                                 withJsonPath("$.hearingCourtCentreId", is(notNullValue())),
                                 withJsonPath("$.caseOffenceIdList[0]", is(offenceId1.toString())),
