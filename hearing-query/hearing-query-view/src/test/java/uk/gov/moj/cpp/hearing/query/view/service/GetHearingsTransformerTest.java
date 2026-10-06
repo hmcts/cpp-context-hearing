@@ -702,6 +702,7 @@ class GetHearingsTransformerTest {
         final UUID hearingId = randomUUID();
         final UUID caseId = randomUUID();
         final UUID defendantId = randomUUID();
+        final UUID masterDefendantId = randomUUID();
         final String caseUrn = "63GD4414126";
         final String prosecutionAuthorityReference = "Y25D24123";
         final String firstName = "Glennie";
@@ -716,6 +717,7 @@ class GetHearingsTransformerTest {
 
         final Defendant defendant = uk.gov.justice.core.courts.Defendant.defendant()
                 .withId(defendantId)
+                .withMasterDefendantId(masterDefendantId)
                 .withPersonDefendant(PersonDefendant.personDefendant().withPersonDetails(personDetails).build())
                 .build();
 
@@ -754,8 +756,8 @@ class GetHearingsTransformerTest {
         assertThat(d.getFirstName(), is(firstName));
         assertThat(d.getMiddleName(), is(middleName));
         assertThat(d.getLastName(), is(lastName));
+        assertThat(d.getMasterDefendantId(), is(masterDefendantId));
         // fields not in check-in response must NOT be set
-        assertNull(d.getMasterDefendantId());
         assertNull(d.getSynonym());
         assertThat(d.getOffences(), is(nullValue()));
     }

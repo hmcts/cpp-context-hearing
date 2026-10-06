@@ -61,6 +61,7 @@ class HearingCheckInIT extends AbstractIT {
     private static final String DEFENDANT_FIRST_NAME = "FIRST_NAME";
     private static final String DEFENDANT_LAST_NAME = "LAST_NAME";
     private static final String APPLICATION_TYPE = "APPLICATION_TYPE";
+    private static final UUID MASTER_DEFENDANT_ID = randomUUID();
 
     @Test
     void shouldRetrieveHearingWithProsecutionCaseForCheckIn() {
@@ -79,6 +80,7 @@ class HearingCheckInIT extends AbstractIT {
                 .with(GetHearings::getHearingSummaries, hasSize(greaterThanOrEqualTo(1)))
                 .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
                         .with(HearingSummaries::getId, is(hearingId))
+                        .with(hs -> hs.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getMasterDefendantId(), is(MASTER_DEFENDANT_ID))
                         .with(hs -> hs.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getFirstName(), is(DEFENDANT_FIRST_NAME))
                         .with(hs -> hs.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getLastName(), is(DEFENDANT_LAST_NAME))
                 ))
@@ -133,6 +135,7 @@ class HearingCheckInIT extends AbstractIT {
                         .with(HearingSummaries::getId, is(hearingId))
                         .with(HearingSummaries::getProsecutionCaseSummaries, hasSize(1))
                         .with(hs -> hs.getProsecutionCaseSummaries().get(0).getId(), is(inactiveCaseId))
+                        .with(hs -> hs.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getMasterDefendantId(), is(MASTER_DEFENDANT_ID))
                         .with(hs -> hs.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getFirstName(), is(DEFENDANT_FIRST_NAME))
                         .with(hs -> hs.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getLastName(), is(DEFENDANT_LAST_NAME))
                         .with(HearingSummaries::getCourtApplicationSummaries, hasSize(1))
@@ -200,7 +203,7 @@ class HearingCheckInIT extends AbstractIT {
                                 .withDefendants(singletonList(defendant()
                                         .withId(randomUUID())
                                         .withCourtProceedingsInitiated(ZonedDateTime.now())
-                                        .withMasterDefendantId(randomUUID())
+                                        .withMasterDefendantId(MASTER_DEFENDANT_ID)
                                         .withProsecutionCaseId(prosecutionCaseId)
                                         .withPersonDefendant(personDefendant()
                                                 .withPersonDetails(person()

@@ -15,6 +15,7 @@
           "defendants": [
             {
               "id": "a385e458-c100-41d2-9397-cad24b3e10d5",
+              "masterDefendantId": "0ee6e5ab-3f8e-4b43-b5a0-6e2c2c1b7d11",
               "firstName": "Glennie",
               "middleName": "PersonGivenName20A PersonGivenName30A",
               "lastName": "Bailey",

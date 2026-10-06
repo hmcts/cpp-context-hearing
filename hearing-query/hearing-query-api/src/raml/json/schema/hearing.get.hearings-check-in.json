@@ -166,6 +166,10 @@
         "id": {
           "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
         },
+        "masterDefendantId": {
+          "description": "The master defendant id, common to the defendant across cases",
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
         "firstName": {
           "description": "The person forename",
           "type": "string"
