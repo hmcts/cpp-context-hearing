@@ -2446,12 +2446,13 @@ class HearingServiceTest {
         final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
         final UUID inactiveCaseId = randomUUID();
         final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase caseEntity = caseEntity(inactiveCaseId);
-        final ProsecutionCase mappedCase = ProsecutionCase.prosecutionCase().withId(inactiveCaseId).build();
+        final UUID offenceId = randomUUID();
+        final ProsecutionCase mappedCase = caseWithDefendants(inactiveCaseId, defendantWithOffences(offenceId));
 
         when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
         final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing()
                 .withProsecutionCases(null)
-                .withCourtApplications(singletonList(applicationWithCases(inactiveCase(inactiveCaseId))))
+                .withCourtApplications(singletonList(applicationWithCases(inactiveCaseWithOffences(inactiveCaseId, offenceId))))
                 .build();
         when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
         when(prosecutionCaseRepository.findByCaseIds(Set.of(inactiveCaseId))).thenReturn(singletonList(caseEntity));
@@ -2475,12 +2476,13 @@ class HearingServiceTest {
         final UUID inactiveCaseId = randomUUID();
         final ProsecutionCase existingCase = ProsecutionCase.prosecutionCase().withId(randomUUID()).build();
         final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase caseEntity = caseEntity(inactiveCaseId);
-        final ProsecutionCase mappedCase = ProsecutionCase.prosecutionCase().withId(inactiveCaseId).build();
+        final UUID offenceId = randomUUID();
+        final ProsecutionCase mappedCase = caseWithDefendants(inactiveCaseId, defendantWithOffences(offenceId));
 
         when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
         final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing()
                 .withProsecutionCases(singletonList(existingCase))
-                .withCourtApplications(singletonList(applicationWithCases(inactiveCase(inactiveCaseId))))
+                .withCourtApplications(singletonList(applicationWithCases(inactiveCaseWithOffences(inactiveCaseId, offenceId))))
                 .build();
         when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
         when(prosecutionCaseRepository.findByCaseIds(Set.of(inactiveCaseId))).thenReturn(singletonList(caseEntity));
@@ -2591,11 +2593,12 @@ class HearingServiceTest {
         // repository returns the most recent hearing's row first (ordered by sitting day desc)
         final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase latest = caseEntity(caseId);
         final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase older = caseEntity(caseId);
-        final ProsecutionCase mappedCase = ProsecutionCase.prosecutionCase().withId(caseId).build();
+        final UUID offenceId = randomUUID();
+        final ProsecutionCase mappedCase = caseWithDefendants(caseId, defendantWithOffences(offenceId));
 
         when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
         when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(uk.gov.justice.core.courts.Hearing.hearing()
-                .withCourtApplications(singletonList(applicationWithCases(inactiveCase(caseId))))
+                .withCourtApplications(singletonList(applicationWithCases(inactiveCaseWithOffences(caseId, offenceId))))
                 .build());
         when(prosecutionCaseRepository.findByCaseIds(Set.of(caseId))).thenReturn(asList(latest, older));
         when(prosecutionCaseJPAMapper.fromJPA(Set.of(latest))).thenReturn(singletonList(mappedCase));
@@ -2618,15 +2621,17 @@ class HearingServiceTest {
         final UUID caseId2 = randomUUID();
         final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase entity1 = caseEntity(caseId1);
         final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase entity2 = caseEntity(caseId2);
+        final UUID offenceId1 = randomUUID();
+        final UUID offenceId2 = randomUUID();
         final List<ProsecutionCase> mapped = asList(
-                ProsecutionCase.prosecutionCase().withId(caseId1).build(),
-                ProsecutionCase.prosecutionCase().withId(caseId2).build());
+                caseWithDefendants(caseId1, defendantWithOffences(offenceId1)),
+                caseWithDefendants(caseId2, defendantWithOffences(offenceId2)));
 
         when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
         when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(uk.gov.justice.core.courts.Hearing.hearing()
                 .withCourtApplications(asList(
-                        applicationWithCases(inactiveCase(caseId1), inactiveCase(caseId2)),
-                        applicationWithCases(inactiveCase(caseId1))))
+                        applicationWithCases(inactiveCaseWithOffences(caseId1, offenceId1), inactiveCaseWithOffences(caseId2, offenceId2)),
+                        applicationWithCases(inactiveCaseWithOffences(caseId1, offenceId1))))
                 .build());
         when(prosecutionCaseRepository.findByCaseIds(Set.of(caseId1, caseId2))).thenReturn(asList(entity1, entity2));
         when(prosecutionCaseJPAMapper.fromJPA(Set.of(entity1, entity2))).thenReturn(mapped);
@@ -2656,6 +2661,209 @@ class HearingServiceTest {
         hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
 
         verifyNoInteractions(prosecutionCaseRepository);
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldKeepOnlyDefendantsWithOffenceInApplicationCase() {
+        final UUID caseId = randomUUID();
+        final UUID matchingOffenceId = randomUUID();
+        final uk.gov.justice.core.courts.Defendant matching = defendantWithOffences(matchingOffenceId);
+        final List<ProsecutionCase> cases = checkInInactiveCase(caseId,
+                singletonList(applicationWithCases(inactiveCaseWithOffences(caseId, matchingOffenceId))),
+                caseWithDefendants(caseId, matching, defendantWithOffences(randomUUID()), defendantWithOffences(randomUUID())));
+
+        assertThat(cases, hasSize(1));
+        assertThat(cases.get(0).getDefendants(), is(singletonList(matching)));
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldKeepDefendantWhenOneOfSeveralOffencesMatches() {
+        final UUID caseId = randomUUID();
+        final UUID matchingOffenceId = randomUUID();
+        final uk.gov.justice.core.courts.Defendant matching = defendantWithOffences(randomUUID(), matchingOffenceId);
+        final List<ProsecutionCase> cases = checkInInactiveCase(caseId,
+                singletonList(applicationWithCases(inactiveCaseWithOffences(caseId, matchingOffenceId))),
+                caseWithDefendants(caseId, matching, defendantWithOffences(randomUUID())));
+
+        assertThat(cases.get(0).getDefendants(), is(singletonList(matching)));
+        assertThat(cases.get(0).getDefendants().get(0).getOffences(), hasSize(2));
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldDropCaseWhenApplicationCaseHasNoOffences() {
+        final UUID caseId = randomUUID();
+        final List<ProsecutionCase> cases = checkInInactiveCase(caseId,
+                singletonList(applicationWithCases(inactiveCase(caseId))),
+                caseWithDefendants(caseId, defendantWithOffences(randomUUID()), defendantWithOffences(randomUUID())));
+
+        assertThat(cases, hasSize(0));
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldRemoveDefendantsWithoutOffences() {
+        final UUID caseId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final uk.gov.justice.core.courts.Defendant noOffences = uk.gov.justice.core.courts.Defendant.defendant()
+                .withId(randomUUID()).build();
+        final uk.gov.justice.core.courts.Defendant matching = defendantWithOffences(offenceId);
+        final List<ProsecutionCase> cases = checkInInactiveCase(caseId,
+                singletonList(applicationWithCases(inactiveCaseWithOffences(caseId, offenceId))),
+                caseWithDefendants(caseId, noOffences, matching));
+
+        assertThat(cases.get(0).getDefendants(), is(singletonList(matching)));
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldNotUseOffencesOfActiveApplicationCases() {
+        final UUID caseId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final CourtApplicationCase activeCase = CourtApplicationCase.courtApplicationCase()
+                .withProsecutionCaseId(caseId).withCaseStatus("ACTIVE")
+                .withOffences(singletonList(uk.gov.justice.core.courts.Offence.offence().withId(offenceId).build())).build();
+        final List<ProsecutionCase> cases = checkInInactiveCase(caseId,
+                singletonList(applicationWithCases(inactiveCase(caseId), activeCase)),
+                caseWithDefendants(caseId, defendantWithOffences(offenceId)));
+
+        assertThat(cases, hasSize(0));
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldMatchOffenceIdsStrictlyPerCase() {
+        final UUID caseId1 = randomUUID();
+        final UUID caseId2 = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase entity1 = caseEntity(caseId1);
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase entity2 = caseEntity(caseId2);
+        final uk.gov.justice.core.courts.Defendant own1 = defendantWithOffences(offenceId1);
+        final uk.gov.justice.core.courts.Defendant own2 = defendantWithOffences(offenceId2);
+
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(uk.gov.justice.core.courts.Hearing.hearing()
+                .withCourtApplications(singletonList(applicationWithCases(
+                        inactiveCaseWithOffences(caseId1, offenceId1), inactiveCaseWithOffences(caseId2, offenceId2))))
+                .build());
+        when(prosecutionCaseRepository.findByCaseIds(Set.of(caseId1, caseId2))).thenReturn(asList(entity1, entity2));
+        when(prosecutionCaseJPAMapper.fromJPA(Set.of(entity1, entity2))).thenReturn(asList(
+                caseWithDefendants(caseId1, own1, own2), caseWithDefendants(caseId2, own1, own2)));
+        final ArgumentCaptor<uk.gov.justice.core.courts.Hearing> captor = ArgumentCaptor.forClass(uk.gov.justice.core.courts.Hearing.class);
+        when(getHearingsTransformer.summaryForCheckIn(captor.capture()))
+                .thenReturn(HearingSummaries.hearingSummaries().withId(randomUUID()));
+
+        hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
+
+        // each case keeps only defendants whose offences are listed under that case's own application case
+        final List<ProsecutionCase> result = captor.getValue().getProsecutionCases();
+        assertThat(result, hasSize(2));
+        for (final ProsecutionCase pc : result) {
+            assertThat(pc.getDefendants(), is(singletonList(pc.getId().equals(caseId1) ? own1 : own2)));
+        }
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldNotFilterDefendantsOfCasesAlreadyOnHearing() {
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+        final UUID inactiveCaseId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final ProsecutionCase existingCase = caseWithDefendants(randomUUID(), defendantWithOffences(randomUUID()));
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase caseEntity = caseEntity(inactiveCaseId);
+
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(uk.gov.justice.core.courts.Hearing.hearing()
+                .withProsecutionCases(singletonList(existingCase))
+                .withCourtApplications(singletonList(applicationWithCases(inactiveCaseWithOffences(inactiveCaseId, offenceId))))
+                .build());
+        when(prosecutionCaseRepository.findByCaseIds(Set.of(inactiveCaseId))).thenReturn(singletonList(caseEntity));
+        when(prosecutionCaseJPAMapper.fromJPA(Set.of(caseEntity)))
+                .thenReturn(singletonList(caseWithDefendants(inactiveCaseId, defendantWithOffences(offenceId))));
+        final ArgumentCaptor<uk.gov.justice.core.courts.Hearing> captor = ArgumentCaptor.forClass(uk.gov.justice.core.courts.Hearing.class);
+        when(getHearingsTransformer.summaryForCheckIn(captor.capture()))
+                .thenReturn(HearingSummaries.hearingSummaries().withId(randomUUID()));
+
+        hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
+
+        assertThat(captor.getValue().getProsecutionCases().get(0), is(existingCase));
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldDropOnlyInactiveCasesWithNoMatchingDefendants() {
+        final UUID keptCaseId = randomUUID();
+        final UUID droppedCaseId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+        final ProsecutionCase existingCase = caseWithDefendants(randomUUID(), defendantWithOffences(randomUUID()));
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase keptEntity = caseEntity(keptCaseId);
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase droppedEntity = caseEntity(droppedCaseId);
+        final uk.gov.justice.core.courts.Defendant matching = defendantWithOffences(offenceId);
+
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(uk.gov.justice.core.courts.Hearing.hearing()
+                .withProsecutionCases(singletonList(existingCase))
+                .withCourtApplications(singletonList(applicationWithCases(
+                        inactiveCaseWithOffences(keptCaseId, offenceId), inactiveCase(droppedCaseId))))
+                .build());
+        when(prosecutionCaseRepository.findByCaseIds(Set.of(keptCaseId, droppedCaseId))).thenReturn(asList(keptEntity, droppedEntity));
+        when(prosecutionCaseJPAMapper.fromJPA(Set.of(keptEntity, droppedEntity))).thenReturn(asList(
+                caseWithDefendants(keptCaseId, matching),
+                caseWithDefendants(droppedCaseId, defendantWithOffences(randomUUID()))));
+        final ArgumentCaptor<uk.gov.justice.core.courts.Hearing> captor = ArgumentCaptor.forClass(uk.gov.justice.core.courts.Hearing.class);
+        when(getHearingsTransformer.summaryForCheckIn(captor.capture()))
+                .thenReturn(HearingSummaries.hearingSummaries().withId(randomUUID()));
+
+        hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
+
+        final List<ProsecutionCase> result = captor.getValue().getProsecutionCases();
+        assertThat(result, hasSize(2));
+        assertThat(result.get(0), is(existingCase));
+        assertThat(result.get(1).getId(), is(keptCaseId));
+    }
+
+    private List<ProsecutionCase> checkInInactiveCase(final UUID caseId, final List<CourtApplication> applications,
+                                                final ProsecutionCase mappedCase) {
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase caseEntity = caseEntity(caseId);
+
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(uk.gov.justice.core.courts.Hearing.hearing()
+                .withCourtApplications(applications).build());
+        when(prosecutionCaseRepository.findByCaseIds(Set.of(caseId))).thenReturn(singletonList(caseEntity));
+        when(prosecutionCaseJPAMapper.fromJPA(Set.of(caseEntity))).thenReturn(singletonList(mappedCase));
+        final ArgumentCaptor<uk.gov.justice.core.courts.Hearing> captor = ArgumentCaptor.forClass(uk.gov.justice.core.courts.Hearing.class);
+        when(getHearingsTransformer.summaryForCheckIn(captor.capture()))
+                .thenReturn(HearingSummaries.hearingSummaries().withId(randomUUID()));
+
+        hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
+
+        return captor.getValue().getProsecutionCases();
+    }
+
+    private static CourtApplicationCase inactiveCaseWithOffences(final UUID caseId, final UUID... offenceIds) {
+        return CourtApplicationCase.courtApplicationCase().withProsecutionCaseId(caseId).withCaseStatus("INACTIVE")
+                .withOffences(java.util.Arrays.stream(offenceIds)
+                        .map(id -> uk.gov.justice.core.courts.Offence.offence().withId(id).build())
+                        .collect(toList()))
+                .build();
+    }
+
+    private static uk.gov.justice.core.courts.Defendant defendantWithOffences(final UUID... offenceIds) {
+        return uk.gov.justice.core.courts.Defendant.defendant().withId(randomUUID())
+                .withOffences(java.util.Arrays.stream(offenceIds)
+                        .map(id -> uk.gov.justice.core.courts.Offence.offence().withId(id).build())
+                        .collect(toList()))
+                .build();
+    }
+
+    private static ProsecutionCase caseWithDefendants(final UUID caseId, final uk.gov.justice.core.courts.Defendant... defendants) {
+        return ProsecutionCase.prosecutionCase().withId(caseId).withDefendants(asList(defendants)).build();
     }
 
     private static uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase caseEntity(final UUID caseId) {
