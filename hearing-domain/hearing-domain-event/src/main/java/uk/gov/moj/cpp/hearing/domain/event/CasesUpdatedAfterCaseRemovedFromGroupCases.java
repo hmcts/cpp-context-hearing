@@ -15,12 +15,15 @@ public class CasesUpdatedAfterCaseRemovedFromGroupCases implements Serializable 
     private final UUID groupId;
     private final ProsecutionCase removedCase;
     private final ProsecutionCase newGroupMaster;
+    private final Integer numberOfGroupCases;
 
-    public CasesUpdatedAfterCaseRemovedFromGroupCases(final UUID hearingId, final UUID groupId, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
+    public CasesUpdatedAfterCaseRemovedFromGroupCases(final UUID hearingId, final UUID groupId, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster,
+            final Integer numberOfGroupCases) {
         this.hearingId = hearingId;
         this.groupId = groupId;
         this.removedCase = removedCase;
         this.newGroupMaster = newGroupMaster;
+        this.numberOfGroupCases = numberOfGroupCases;
     }
 
     public UUID getHearingId() {
@@ -37,5 +40,9 @@ public class CasesUpdatedAfterCaseRemovedFromGroupCases implements Serializable 
 
     public ProsecutionCase getNewGroupMaster() {
         return newGroupMaster;
+    }
+
+    public Integer getNumberOfGroupCases() {
+        return numberOfGroupCases;
     }
 }

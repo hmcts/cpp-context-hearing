@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -19,6 +20,7 @@ import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CaseRegisteredForExtendedHearing;
+import uk.gov.moj.cpp.hearing.domain.event.CaseRemovedFromGroupCases;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
@@ -192,9 +194,34 @@ public class CaseAggregateTest {
         final UUID hearingId = UUID.randomUUID();
         final ProsecutionCase removedCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
 
-        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null).collect(toList());
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null, null).collect(toList());
 
         assertThat(caseAggregate.getHearingIds(), is(Collections.singletonList(hearingId)));
+    }
+
+    @Test
+    public void shouldCarryNumberOfGroupCasesOnCaseRemovedFromGroupCases() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID groupId = UUID.randomUUID();
+        final ProsecutionCase removedCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
+
+        final List<Object> events = caseAggregate.removeCaseFromGroupCases(hearingId, groupId, removedCase, null, 2).collect(toList());
+
+        assertThat(events.size(), is(1));
+        final CaseRemovedFromGroupCases event = (CaseRemovedFromGroupCases) events.get(0);
+        assertThat(event.getHearingId(), is(hearingId));
+        assertThat(event.getGroupId(), is(groupId));
+        assertThat(event.getNumberOfGroupCases(), is(2));
+    }
+
+    @Test
+    public void shouldLeaveNumberOfGroupCasesEmptyOnCaseRemovedFromGroupCasesWhenNotSupplied() {
+        final ProsecutionCase removedCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
+
+        final List<Object> events = caseAggregate.removeCaseFromGroupCases(UUID.randomUUID(), UUID.randomUUID(), removedCase, null, null).collect(toList());
+
+        assertThat(events.size(), is(1));
+        assertThat(((CaseRemovedFromGroupCases) events.get(0)).getNumberOfGroupCases(), is(nullValue()));
     }
 
     @Test
@@ -203,7 +230,7 @@ public class CaseAggregateTest {
         final ProsecutionCase masterCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
         caseAggregate.registerHearingId(masterCase.getId(), hearingId).collect(toList());
 
-        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), masterCase, null).collect(toList());
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), masterCase, null, null).collect(toList());
 
         assertThat(caseAggregate.getHearingIds(), is(Collections.singletonList(hearingId)));
     }
@@ -212,7 +239,7 @@ public class CaseAggregateTest {
     public void shouldSendDefendantUpdatesToHearingOfCaseRemovedFromGroupCases() {
         final UUID hearingId = UUID.randomUUID();
         final ProsecutionCase removedCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
-        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null).collect(toList());
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null, null).collect(toList());
 
         final List<Object> events = caseAggregate.caseDefendantsUpdated(removedCase).collect(toList());
 
@@ -241,7 +268,7 @@ public class CaseAggregateTest {
         final UUID hearingId = UUID.randomUUID();
         final ProsecutionCase masterCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
         caseAggregate.registerHearingId(masterCase.getId(), hearingId).collect(toList());
-        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), masterCase, null).collect(toList());
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), masterCase, null, null).collect(toList());
 
         caseAggregate.removeHearingForProsecutionCase(masterCase.getId(), hearingId).collect(toList());
 
@@ -252,7 +279,7 @@ public class CaseAggregateTest {
     public void shouldClearHearingOfRemovedMemberCaseWhenHearingLaterDeletedForCase() {
         final UUID hearingId = UUID.randomUUID();
         final ProsecutionCase removedCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
-        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null).collect(toList());
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null, null).collect(toList());
 
         caseAggregate.deleteHearingForProsecutionCase(removedCase.getId(), hearingId).collect(toList());
 
@@ -263,7 +290,7 @@ public class CaseAggregateTest {
     public void shouldClearHearingOfRemovedMemberCaseWhenHearingLaterMarkedAsDuplicateForCase() {
         final UUID hearingId = UUID.randomUUID();
         final ProsecutionCase removedCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
-        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null).collect(toList());
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null, null).collect(toList());
 
         caseAggregate.markHearingAsDuplicate(removedCase.getId(), hearingId).collect(toList());
 
@@ -274,7 +301,7 @@ public class CaseAggregateTest {
     public void shouldEnrichCaseMarkersWithHearingOfCaseRemovedFromGroupCases() {
         final UUID hearingId = UUID.randomUUID();
         final ProsecutionCase removedCase = new ProsecutionCase.Builder().withId(UUID.randomUUID()).build();
-        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null).collect(toList());
+        caseAggregate.removeCaseFromGroupCases(hearingId, UUID.randomUUID(), removedCase, null, null).collect(toList());
 
         final List<Object> events = caseAggregate.enrichUpdateCaseMarkersWithHearingIds(removedCase.getId(), Collections.emptyList()).collect(toList());
 

@@ -47,5 +47,11 @@ public class CaseRemovedFromGroupCasesEventListener {
             final ProsecutionCase newGroupMasterEntity = prosecutionCaseJPAMapper.toJPA(hearingEntity, casesUpdated.getNewGroupMaster());
             prosecutionCaseRepository.save(newGroupMasterEntity);
         }
+
+        // CAD-947: store the remaining group size sent by progression
+        if (nonNull(hearingEntity) && nonNull(casesUpdated.getNumberOfGroupCases())) {
+            hearingEntity.setNumberOfGroupCases(casesUpdated.getNumberOfGroupCases());
+            hearingRepository.save(hearingEntity);
+        }
     }
 }
