@@ -4,6 +4,7 @@ import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -25,6 +26,7 @@ import static uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCa
 import static uk.gov.justice.core.courts.SummonsTemplateType.BREACH;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand.initiateHearingCommand;
+import static uk.gov.moj.cpp.hearing.it.Queries.getHearingsCheckIn;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingsCheckInPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
@@ -197,6 +199,12 @@ class HearingCheckInIT extends AbstractIT {
                         .with(hs -> hs.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getFirstName(), is("MATCHING_DEFENDANT"))
                 ))
         );
+
+        final HearingSummaries summary = findSummary(courtCentreId, hearingId);
+        assertThat(summary.getProsecutionCaseSummaries(), hasSize(1));
+        assertThat(summary.getProsecutionCaseSummaries().get(0).getId(), is(inactiveCaseId));
+        assertThat(summary.getProsecutionCaseSummaries().get(0).getDefendants(), hasSize(1));
+        assertThat(summary.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getFirstName(), is("MATCHING_DEFENDANT"));
     }
 
     @Test
@@ -221,6 +229,17 @@ class HearingCheckInIT extends AbstractIT {
                         .with(HearingSummaries::getCourtApplicationSummaries, hasSize(1))
                 ))
         );
+
+        final HearingSummaries summary = findSummary(courtCentreId, hearingId);
+        assertThat(summary.getProsecutionCaseSummaries(), is(empty()));
+        assertThat(summary.getCourtApplicationSummaries(), hasSize(1));
+    }
+
+    private HearingSummaries findSummary(final UUID courtCentreId, final UUID hearingId) {
+        return getHearingsCheckIn(courtCentreId, now().toString()).getHearingSummaries().stream()
+                .filter(hs -> hearingId.equals(hs.getId()))
+                .findFirst()
+                .orElseThrow();
     }
 
     private InitiateHearingCommand createHearingWithCase(final UUID hearingId, final UUID courtCentreId, final UUID roomId, final List<CourtApplication> courtApplications) {

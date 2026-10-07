@@ -2850,7 +2850,7 @@ class HearingServiceTest {
         return CourtApplicationCase.courtApplicationCase().withProsecutionCaseId(caseId).withCaseStatus("INACTIVE")
                 .withOffences(java.util.Arrays.stream(offenceIds)
                         .map(id -> uk.gov.justice.core.courts.Offence.offence().withId(id).build())
-                        .collect(toList()))
+                        .toList())
                 .build();
     }
 
@@ -2858,7 +2858,7 @@ class HearingServiceTest {
         return uk.gov.justice.core.courts.Defendant.defendant().withId(randomUUID())
                 .withOffences(java.util.Arrays.stream(offenceIds)
                         .map(id -> uk.gov.justice.core.courts.Offence.offence().withId(id).build())
-                        .collect(toList()))
+                        .toList())
                 .build();
     }
 

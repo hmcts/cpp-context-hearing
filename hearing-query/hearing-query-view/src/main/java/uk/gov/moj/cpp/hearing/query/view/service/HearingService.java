@@ -507,7 +507,7 @@ public class HearingService {
         final List<uk.gov.justice.core.courts.Defendant> kept = ofNullable(prosecutionCase.getDefendants()).orElse(emptyList()).stream()
                 .filter(d -> ofNullable(d.getOffences()).orElse(emptyList()).stream()
                         .anyMatch(o -> offenceIds.contains(o.getId())))
-                .collect(toList());
+                .toList();
         return uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase()
                 .withValuesFrom(prosecutionCase).withDefendants(kept).build();
     }

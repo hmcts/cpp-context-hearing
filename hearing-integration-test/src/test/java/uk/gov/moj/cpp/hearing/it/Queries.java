@@ -19,6 +19,7 @@ import static uk.gov.moj.cpp.hearing.it.AbstractIT.print;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertTo;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_WAIT_TIME_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.JsonHelper.fromJsonString;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
 import uk.gov.justice.hearing.courts.GetHearings;
@@ -92,6 +93,17 @@ public class Queries {
                 .build();
 
         pollQueryEndpoint(jsonPayloadMatchesBean(GetHearings.class, resultMatcher), DEFAULT_POLL_TIMEOUT_IN_SEC, requestParams);
+    }
+
+    public static GetHearings getHearingsCheckIn(final UUID courtCentreId, final String date) {
+
+        final RequestParams requestParams = requestParams(getURL("hearing.get.hearings-check-in", date, courtCentreId), "application/vnd.hearing.get.hearings-check-in+json")
+                .withHeader(HeaderConstants.USER_ID, getLoggedInUser())
+                .build();
+
+        final ResponseData responseData = makeRequest(requestParams);
+        assertThat(responseData, status().is(OK));
+        return fromJsonString(responseData.getPayload(), GetHearings.class);
     }
 
     public static void getDraftResultsPollForMatch(final UUID hearingId, final BeanMatcher<TargetListResponse> resultMatcher) {
