@@ -4,6 +4,7 @@ import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -25,6 +26,7 @@ import static uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCa
 import static uk.gov.justice.core.courts.SummonsTemplateType.BREACH;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand.initiateHearingCommand;
+import static uk.gov.moj.cpp.hearing.it.Queries.getHearingsCheckIn;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingsCheckInPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
@@ -36,6 +38,7 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtApplicationType;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.InitiationCode;
 import uk.gov.justice.core.courts.Jurisdiction;
 import uk.gov.justice.core.courts.OffenceActiveOrder;
@@ -119,14 +122,15 @@ class HearingCheckInIT extends AbstractIT {
         stubUsersAndGroupsUserRoles(getLoggedInUser());
 
         final UUID inactiveCaseId = randomUUID();
+        final UUID offenceId = randomUUID();
         // the case only exists in ha_case under an earlier hearing, in a different court centre
         initiateHearing(getRequestSpec(), createHearingWithCase(randomUUID(), randomUUID(), randomUUID(), null,
-                inactiveCaseId, DEFENDANT_FIRST_NAME, ZonedDateTime.now()));
+                inactiveCaseId, DEFENDANT_FIRST_NAME, ZonedDateTime.now(), offenceId));
 
         final UUID hearingId = randomUUID();
         final UUID courtCentreId = randomUUID();
         final LocalDate hearingDate = now();
-        initiateHearing(getRequestSpec(), createHearingWithApplicationOnly(hearingId, courtCentreId, randomUUID(), inactiveCaseId));
+        initiateHearing(getRequestSpec(), createHearingWithApplicationOnly(hearingId, courtCentreId, randomUUID(), inactiveCaseId, offenceId));
 
         getHearingsCheckInPollForMatch(courtCentreId, hearingDate.toString(), isBean(GetHearings.class)
                 .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
@@ -147,17 +151,18 @@ class HearingCheckInIT extends AbstractIT {
         stubUsersAndGroupsUserRoles(getLoggedInUser());
 
         final UUID inactiveCaseId = randomUUID();
+        final UUID offenceId = randomUUID();
         final ZonedDateTime now = ZonedDateTime.now();
         initiateHearing(getRequestSpec(), createHearingWithCase(randomUUID(), randomUUID(), randomUUID(), null,
-                inactiveCaseId, "OLDER_SNAPSHOT", now.minusDays(30)));
+                inactiveCaseId, "OLDER_SNAPSHOT", now.minusDays(30), offenceId));
         initiateHearing(getRequestSpec(), createHearingWithCase(randomUUID(), randomUUID(), randomUUID(), null,
-                inactiveCaseId, "LATEST_SNAPSHOT", now.plusDays(30)));
+                inactiveCaseId, "LATEST_SNAPSHOT", now.plusDays(30), offenceId));
         initiateHearing(getRequestSpec(), createHearingWithCase(randomUUID(), randomUUID(), randomUUID(), null,
-                inactiveCaseId, "MIDDLE_SNAPSHOT", now.minusDays(5)));
+                inactiveCaseId, "MIDDLE_SNAPSHOT", now.minusDays(5), offenceId));
 
         final UUID hearingId = randomUUID();
         final UUID courtCentreId = randomUUID();
-        initiateHearing(getRequestSpec(), createHearingWithApplicationOnly(hearingId, courtCentreId, randomUUID(), inactiveCaseId));
+        initiateHearing(getRequestSpec(), createHearingWithApplicationOnly(hearingId, courtCentreId, randomUUID(), inactiveCaseId, offenceId));
 
         getHearingsCheckInPollForMatch(courtCentreId, now().toString(), isBean(GetHearings.class)
                 .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
@@ -168,12 +173,94 @@ class HearingCheckInIT extends AbstractIT {
         );
     }
 
+    @Test
+    void shouldKeepOnlyDefendantsWhoseOffenceIsListedOnTheApplicationCase() {
+        final UUID userId = randomUUID();
+        setupAsMagistrateUser(userId);
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+
+        final UUID inactiveCaseId = randomUUID();
+        final UUID matchingOffenceId = randomUUID();
+        initiateHearing(getRequestSpec(), createHearingWithCase(randomUUID(), randomUUID(), randomUUID(), null,
+                inactiveCaseId, ZonedDateTime.now(),
+                defendantWithOffence("MATCHING_DEFENDANT", matchingOffenceId, inactiveCaseId),
+                defendantWithOffence("OTHER_DEFENDANT", randomUUID(), inactiveCaseId)));
+
+        final UUID hearingId = randomUUID();
+        final UUID courtCentreId = randomUUID();
+        initiateHearing(getRequestSpec(), createHearingWithApplicationOnly(hearingId, courtCentreId, randomUUID(), inactiveCaseId, matchingOffenceId));
+
+        getHearingsCheckInPollForMatch(courtCentreId, now().toString(), isBean(GetHearings.class)
+                .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
+                        .with(HearingSummaries::getId, is(hearingId))
+                        .with(HearingSummaries::getProsecutionCaseSummaries, hasSize(1))
+                        .with(hs -> hs.getProsecutionCaseSummaries().get(0).getId(), is(inactiveCaseId))
+                        .with(hs -> hs.getProsecutionCaseSummaries().get(0).getDefendants(), hasSize(1))
+                        .with(hs -> hs.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getFirstName(), is("MATCHING_DEFENDANT"))
+                ))
+        );
+
+        final HearingSummaries summary = findSummary(courtCentreId, hearingId);
+        assertThat(summary.getProsecutionCaseSummaries(), hasSize(1));
+        assertThat(summary.getProsecutionCaseSummaries().get(0).getId(), is(inactiveCaseId));
+        assertThat(summary.getProsecutionCaseSummaries().get(0).getDefendants(), hasSize(1));
+        assertThat(summary.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getFirstName(), is("MATCHING_DEFENDANT"));
+    }
+
+    @Test
+    void shouldDropInactiveApplicationCaseWhenNoDefendantOffenceMatches() {
+        final UUID userId = randomUUID();
+        setupAsMagistrateUser(userId);
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+
+        final UUID inactiveCaseId = randomUUID();
+        initiateHearing(getRequestSpec(), createHearingWithCase(randomUUID(), randomUUID(), randomUUID(), null,
+                inactiveCaseId, DEFENDANT_FIRST_NAME, ZonedDateTime.now(), randomUUID()));
+
+        final UUID hearingId = randomUUID();
+        final UUID courtCentreId = randomUUID();
+        // the application case lists an offence that no defendant of the case has
+        initiateHearing(getRequestSpec(), createHearingWithApplicationOnly(hearingId, courtCentreId, randomUUID(), inactiveCaseId, randomUUID()));
+
+        getHearingsCheckInPollForMatch(courtCentreId, now().toString(), isBean(GetHearings.class)
+                .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
+                        .with(HearingSummaries::getId, is(hearingId))
+                        .with(HearingSummaries::getProsecutionCaseSummaries, is(empty()))
+                        .with(HearingSummaries::getCourtApplicationSummaries, hasSize(1))
+                ))
+        );
+
+        final HearingSummaries summary = findSummary(courtCentreId, hearingId);
+        assertThat(summary.getProsecutionCaseSummaries(), is(empty()));
+        assertThat(summary.getCourtApplicationSummaries(), hasSize(1));
+    }
+
+    private HearingSummaries findSummary(final UUID courtCentreId, final UUID hearingId) {
+        return getHearingsCheckIn(courtCentreId, now().toString()).getHearingSummaries().stream()
+                .filter(hs -> hearingId.equals(hs.getId()))
+                .findFirst()
+                .orElseThrow();
+    }
+
     private InitiateHearingCommand createHearingWithCase(final UUID hearingId, final UUID courtCentreId, final UUID roomId, final List<CourtApplication> courtApplications) {
         return createHearingWithCase(hearingId, courtCentreId, roomId, courtApplications, randomUUID(), DEFENDANT_FIRST_NAME, ZonedDateTime.now());
     }
 
     private InitiateHearingCommand createHearingWithCase(final UUID hearingId, final UUID courtCentreId, final UUID roomId, final List<CourtApplication> courtApplications,
                                                          final UUID prosecutionCaseId, final String defendantFirstName, final ZonedDateTime sittingDay) {
+        return createHearingWithCase(hearingId, courtCentreId, roomId, courtApplications, prosecutionCaseId, defendantFirstName, sittingDay, randomUUID());
+    }
+
+    private InitiateHearingCommand createHearingWithCase(final UUID hearingId, final UUID courtCentreId, final UUID roomId, final List<CourtApplication> courtApplications,
+                                                         final UUID prosecutionCaseId, final String defendantFirstName, final ZonedDateTime sittingDay,
+                                                         final UUID offenceId) {
+        return createHearingWithCase(hearingId, courtCentreId, roomId, courtApplications, prosecutionCaseId, sittingDay,
+                defendantWithOffence(defendantFirstName, offenceId, prosecutionCaseId));
+    }
+
+    private InitiateHearingCommand createHearingWithCase(final UUID hearingId, final UUID courtCentreId, final UUID roomId, final List<CourtApplication> courtApplications,
+                                                         final UUID prosecutionCaseId, final ZonedDateTime sittingDay,
+                                                         final Defendant... defendants) {
         return initiateHearingCommand()
                 .setHearing(hearing()
                         .withId(hearingId)
@@ -197,27 +284,7 @@ class HearingCheckInIT extends AbstractIT {
                                         .withProsecutionAuthorityCode("code")
                                         .withCaseURN("caseURN")
                                         .build())
-                                .withDefendants(singletonList(defendant()
-                                        .withId(randomUUID())
-                                        .withCourtProceedingsInitiated(ZonedDateTime.now())
-                                        .withMasterDefendantId(randomUUID())
-                                        .withProsecutionCaseId(prosecutionCaseId)
-                                        .withPersonDefendant(personDefendant()
-                                                .withPersonDetails(person()
-                                                        .withFirstName(defendantFirstName)
-                                                        .withLastName(DEFENDANT_LAST_NAME)
-                                                        .withGender(MALE)
-                                                        .build())
-                                                .build())
-                                        .withOffences(singletonList(uk.gov.justice.core.courts.Offence.offence()
-                                                .withId(randomUUID())
-                                                .withOffenceDefinitionId(randomUUID())
-                                                .withOffenceCode("code")
-                                                .withStartDate(now())
-                                                .withOffenceTitle("OFFENCE_TITLE")
-                                                .withWording("OFFENCE_WORDING")
-                                                .build()))
-                                        .build()))
+                                .withDefendants(asList(defendants))
                                 .build()))
                         .withCourtApplications(courtApplications)
                         .withJurisdictionType(MAGISTRATES)
@@ -228,19 +295,43 @@ class HearingCheckInIT extends AbstractIT {
                         .build());
     }
 
-    private InitiateHearingCommand createHearingWithApplicationOnly(final UUID hearingId, final UUID courtCentreId, final UUID roomId,
-                                                                     final LocalDate hearingDate) {
-        return createHearingWithApplicationOnly(hearingId, courtCentreId, roomId, randomUUID());
+    private Defendant defendantWithOffence(final String firstName, final UUID offenceId, final UUID prosecutionCaseId) {
+        return defendant()
+                .withId(randomUUID())
+                .withCourtProceedingsInitiated(ZonedDateTime.now())
+                .withMasterDefendantId(randomUUID())
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withPersonDefendant(personDefendant()
+                        .withPersonDetails(person()
+                                .withFirstName(firstName)
+                                .withLastName(DEFENDANT_LAST_NAME)
+                                .withGender(MALE)
+                                .build())
+                        .build())
+                .withOffences(singletonList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(offenceId)
+                        .withOffenceDefinitionId(randomUUID())
+                        .withOffenceCode("code")
+                        .withStartDate(now())
+                        .withOffenceTitle("OFFENCE_TITLE")
+                        .withWording("OFFENCE_WORDING")
+                        .build()))
+                .build();
     }
 
     private InitiateHearingCommand createHearingWithApplicationOnly(final UUID hearingId, final UUID courtCentreId, final UUID roomId,
-                                                                     final UUID inactiveCaseId) {
-        final InitiateHearingCommand command = createHearingWithCase(hearingId, courtCentreId, roomId, singletonList(createCourtApplication(inactiveCaseId)));
+                                                                     final LocalDate hearingDate) {
+        return createHearingWithApplicationOnly(hearingId, courtCentreId, roomId, randomUUID(), randomUUID());
+    }
+
+    private InitiateHearingCommand createHearingWithApplicationOnly(final UUID hearingId, final UUID courtCentreId, final UUID roomId,
+                                                                     final UUID inactiveCaseId, final UUID offenceId) {
+        final InitiateHearingCommand command = createHearingWithCase(hearingId, courtCentreId, roomId, singletonList(createCourtApplication(inactiveCaseId, offenceId)));
         command.getHearing().setProsecutionCases(null);
         return command;
     }
 
-    private CourtApplication createCourtApplication(final UUID inactiveCaseId) {
+    private CourtApplication createCourtApplication(final UUID inactiveCaseId, final UUID offenceId) {
         return CourtApplication.courtApplication()
                 .withId(randomUUID())
                 .withApplicationReceivedDate(now())
@@ -264,6 +355,14 @@ class HearingCheckInIT extends AbstractIT {
                         .withIsSJP(false)
                         .withCaseStatus("INACTIVE")
                         .withProsecutionCaseId(inactiveCaseId)
+                        .withOffences(singletonList(uk.gov.justice.core.courts.Offence.offence()
+                                .withId(offenceId)
+                                .withOffenceDefinitionId(randomUUID())
+                                .withOffenceCode("code")
+                                .withStartDate(now())
+                                .withOffenceTitle("OFFENCE_TITLE")
+                                .withWording("OFFENCE_WORDING")
+                                .build()))
                         .withProsecutionCaseIdentifier(prosecutionCaseIdentifier()
                                 .withProsecutionAuthorityId(randomUUID())
                                 .withProsecutionAuthorityCode(STRING.next())

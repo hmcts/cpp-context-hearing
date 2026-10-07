@@ -473,8 +473,43 @@ public class HearingService {
         }
         final List<uk.gov.justice.core.courts.ProsecutionCase> cases = new ArrayList<>(
                 ofNullable(hearing.getProsecutionCases()).orElse(emptyList()));
-        cases.addAll(prosecutionCaseJPAMapper.fromJPA(new HashSet<>(casesById.values())));
+        final Map<UUID, Set<UUID>> offenceIdsByCaseId = collectInactiveApplicationOffenceIdsByCase(hearing.getCourtApplications(), inactiveCaseIds);
+        prosecutionCaseJPAMapper.fromJPA(new HashSet<>(casesById.values())).stream()
+                .map(pc -> retainDefendantsWithOffences(pc, offenceIdsByCaseId.getOrDefault(pc.getId(), Collections.emptySet())))
+                .filter(pc -> isNotEmpty(pc.getDefendants()))
+                .forEach(cases::add);
         return uk.gov.justice.core.courts.Hearing.hearing().withValuesFrom(hearing).withProsecutionCases(cases).build();
+    }
+
+    /**
+     * Offence ids per prosecution case, from the court application cases that are INACTIVE and were not already on the hearing.
+     */
+    private Map<UUID, Set<UUID>> collectInactiveApplicationOffenceIdsByCase(final List<CourtApplication> applications,
+                                                                            final Set<UUID> inactiveCaseIds) {
+        final Map<UUID, Set<UUID>> offenceIdsByCaseId = new HashMap<>();
+        applications.stream()
+                .filter(ca -> isNotEmpty(ca.getCourtApplicationCases()))
+                .flatMap(ca -> ca.getCourtApplicationCases().stream())
+                .filter(cac -> INACTIVE_CASE_STATUS.equalsIgnoreCase(cac.getCaseStatus())
+                        && inactiveCaseIds.contains(cac.getProsecutionCaseId()))
+                .forEach(cac -> ofNullable(cac.getOffences()).orElse(emptyList()).stream()
+                        .map(uk.gov.justice.core.courts.Offence::getId)
+                        .filter(Objects::nonNull)
+                        .forEach(id -> offenceIdsByCaseId.computeIfAbsent(cac.getProsecutionCaseId(), k -> new HashSet<>()).add(id)));
+        return offenceIdsByCaseId;
+    }
+
+    /**
+     * Keeps only the defendants having at least one offence whose id is in offenceIds.
+     */
+    private uk.gov.justice.core.courts.ProsecutionCase retainDefendantsWithOffences(
+            final uk.gov.justice.core.courts.ProsecutionCase prosecutionCase, final Set<UUID> offenceIds) {
+        final List<uk.gov.justice.core.courts.Defendant> kept = ofNullable(prosecutionCase.getDefendants()).orElse(emptyList()).stream()
+                .filter(d -> ofNullable(d.getOffences()).orElse(emptyList()).stream()
+                        .anyMatch(o -> offenceIds.contains(o.getId())))
+                .toList();
+        return uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase()
+                .withValuesFrom(prosecutionCase).withDefendants(kept).build();
     }
 
     private List<Hearing> loadAndFilterHearings(final LocalDate date, final UUID courtCentreId,
