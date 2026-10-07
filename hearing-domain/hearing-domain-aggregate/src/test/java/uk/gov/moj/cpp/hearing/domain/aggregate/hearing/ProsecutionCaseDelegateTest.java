@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.core.courts.Address;
@@ -13,9 +14,11 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.Prosecutor;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.CasesUpdatedAfterCaseRemovedFromGroupCases;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -258,5 +261,60 @@ public class ProsecutionCaseDelegateTest {
         assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getProsecutor().getProsecutorId(), is(prosecutorId2));
         assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getProsecutor().getProsecutorCode(), is(prosecutorCode2));
         assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getProsecutor().getProsecutorName(), is(prosecutorName2));
+    }
+
+    @Test
+    public void shouldSetNumberOfGroupCasesWhenCasesUpdatedAfterCaseRemovedFromGroupCasesCarriesIt() {
+        final UUID groupId = UUID.randomUUID();
+        final UUID memberCaseId = UUID.randomUUID();
+        final HearingAggregateMomento hearingAggregateMomento = groupHearingMomento(groupId, 3, memberCaseId);
+
+        new ProsecutionCaseDelegate(hearingAggregateMomento).onCasesUpdatedAfterCaseRemovedFromGroupCases(
+                new CasesUpdatedAfterCaseRemovedFromGroupCases(UUID.randomUUID(), groupId, removedGroupCase(groupId, memberCaseId), null, 2));
+
+        assertThat(hearingAggregateMomento.getHearing().getNumberOfGroupCases(), is(2));
+    }
+
+    @Test
+    public void shouldKeepNumberOfGroupCasesWhenCasesUpdatedAfterCaseRemovedFromGroupCasesDoesNotCarryIt() {
+        final UUID groupId = UUID.randomUUID();
+        final UUID memberCaseId = UUID.randomUUID();
+        final HearingAggregateMomento hearingAggregateMomento = groupHearingMomento(groupId, 3, memberCaseId);
+
+        new ProsecutionCaseDelegate(hearingAggregateMomento).onCasesUpdatedAfterCaseRemovedFromGroupCases(
+                new CasesUpdatedAfterCaseRemovedFromGroupCases(UUID.randomUUID(), groupId, removedGroupCase(groupId, memberCaseId), null, null));
+
+        assertThat(hearingAggregateMomento.getHearing().getNumberOfGroupCases(), is(3));
+    }
+
+    @Test
+    public void shouldKeepNullNumberOfGroupCasesWhenCasesUpdatedAfterCaseRemovedFromGroupCasesDoesNotCarryIt() {
+        final UUID groupId = UUID.randomUUID();
+        final UUID memberCaseId = UUID.randomUUID();
+        final HearingAggregateMomento hearingAggregateMomento = groupHearingMomento(groupId, null, memberCaseId);
+
+        new ProsecutionCaseDelegate(hearingAggregateMomento).onCasesUpdatedAfterCaseRemovedFromGroupCases(
+                new CasesUpdatedAfterCaseRemovedFromGroupCases(UUID.randomUUID(), groupId, removedGroupCase(groupId, memberCaseId), null, null));
+
+        assertThat(hearingAggregateMomento.getHearing().getNumberOfGroupCases(), is(nullValue()));
+    }
+
+    private static HearingAggregateMomento groupHearingMomento(final UUID groupId, final Integer numberOfGroupCases, final UUID memberCaseId) {
+        final HearingAggregateMomento hearingAggregateMomento = new HearingAggregateMomento();
+        hearingAggregateMomento.setHearing(Hearing.hearing()
+                .withIsGroupProceedings(Boolean.TRUE)
+                .withNumberOfGroupCases(numberOfGroupCases)
+                .withProsecutionCases(new ArrayList<>(asList(
+                        ProsecutionCase.prosecutionCase().withId(UUID.randomUUID()).withGroupId(groupId)
+                                .withIsGroupMember(true).withIsGroupMaster(true).build(),
+                        ProsecutionCase.prosecutionCase().withId(memberCaseId).withGroupId(groupId)
+                                .withIsGroupMember(true).withIsGroupMaster(false).build())))
+                .build());
+        return hearingAggregateMomento;
+    }
+
+    private static ProsecutionCase removedGroupCase(final UUID groupId, final UUID caseId) {
+        return ProsecutionCase.prosecutionCase().withId(caseId).withGroupId(groupId)
+                .withIsGroupMember(false).withIsGroupMaster(false).build();
     }
 }

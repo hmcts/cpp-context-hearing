@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -125,6 +126,38 @@ public class UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandlerTest {
         assertHearingAggregateValues(GROUP_ID, asList(CASE1_ID, CASE3_ID), CASE3_ID);
     }
 
+    @Test
+    public void shouldUseNumberOfGroupCasesFromCommand_WhenSupplied() throws EventStreamException {
+        final ProsecutionCounsel prosecutionCounsel = getProsecutionCounsel(CASE1_ID);
+        setInitialDataIntoHearingAggregate(HEARING1_ID, GROUP_ID, prosecutionCounsel, CASE1_ID, 3);
+
+        handler.updateHearingAfterCaseRemovedFromGroupCases(getJsonEnvelopeForRemoveCommand(HEARING1_ID, GROUP_ID,
+                getProsecutionCase(GROUP_ID, CASE2_ID, Boolean.FALSE, Boolean.FALSE),
+                null, 2));
+
+        final List<JsonEnvelope> events = verifyAndGetEvents(eventStream, 2);
+        final CasesUpdatedAfterCaseRemovedFromGroupCases casesUpdated = asPojo(events.get(1), CasesUpdatedAfterCaseRemovedFromGroupCases.class);
+
+        assertThat(casesUpdated.getNumberOfGroupCases(), is(2));
+        assertThat(hearingAggregate.getHearing().getNumberOfGroupCases(), is(2));
+    }
+
+    @Test
+    public void shouldLeaveNumberOfGroupCasesUnchanged_WhenNotSuppliedInCommand() throws EventStreamException {
+        final ProsecutionCounsel prosecutionCounsel = getProsecutionCounsel(CASE1_ID);
+        setInitialDataIntoHearingAggregate(HEARING1_ID, GROUP_ID, prosecutionCounsel, CASE1_ID, 3);
+
+        handler.updateHearingAfterCaseRemovedFromGroupCases(getJsonEnvelopeForRemoveCommand(HEARING1_ID, GROUP_ID,
+                getProsecutionCase(GROUP_ID, CASE2_ID, Boolean.FALSE, Boolean.FALSE),
+                null));
+
+        final List<JsonEnvelope> events = verifyAndGetEvents(eventStream, 2);
+        final CasesUpdatedAfterCaseRemovedFromGroupCases casesUpdated = asPojo(events.get(1), CasesUpdatedAfterCaseRemovedFromGroupCases.class);
+
+        assertThat(casesUpdated.getNumberOfGroupCases(), is(nullValue()));
+        assertThat(hearingAggregate.getHearing().getNumberOfGroupCases(), is(3));
+    }
+
     private void assertProsecutionCounselUpdated(final ProsecutionCounselUpdated prosecutionCounselUpdated, final List<UUID> caseIds) {
         assertThat(prosecutionCounselUpdated.getHearingId(), is(HEARING1_ID));
         assertThat(prosecutionCounselUpdated.getProsecutionCounsel().getProsecutionCases().size(), equalTo(caseIds.size()));
@@ -175,6 +208,12 @@ public class UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandlerTest {
 
     private JsonEnvelope getJsonEnvelopeForRemoveCommand(final UUID hearingId, final UUID groupId,
                                                          final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
+        return getJsonEnvelopeForRemoveCommand(hearingId, groupId, removedCase, newGroupMaster, null);
+    }
+
+    private JsonEnvelope getJsonEnvelopeForRemoveCommand(final UUID hearingId, final UUID groupId,
+                                                         final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster,
+                                                         final Integer numberOfGroupCases) {
         JsonObjectBuilder builder = createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("groupId", groupId.toString())
@@ -182,6 +221,9 @@ public class UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandlerTest {
 
         if (nonNull(newGroupMaster)) {
             builder.add("newGroupMaster", objectToJsonObjectConverter.convert(newGroupMaster));
+        }
+        if (nonNull(numberOfGroupCases)) {
+            builder.add("numberOfGroupCases", numberOfGroupCases);
         }
 
         final JsonEnvelope envelope = JsonEnvelope.envelopeFrom(
@@ -194,9 +236,16 @@ public class UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandlerTest {
     private HearingAggregate setInitialDataIntoHearingAggregate(final UUID hearingId, final UUID groupId,
                                                                 final ProsecutionCounsel prosecutionCounsel,
                                                                 final UUID groupMaster) {
+        return setInitialDataIntoHearingAggregate(hearingId, groupId, prosecutionCounsel, groupMaster, null);
+    }
+
+    private HearingAggregate setInitialDataIntoHearingAggregate(final UUID hearingId, final UUID groupId,
+                                                                final ProsecutionCounsel prosecutionCounsel,
+                                                                final UUID groupMaster, final Integer numberOfGroupCases) {
         hearingAggregate.initiate(Hearing.hearing()
                 .withId(hearingId)
                 .withIsGroupProceedings(Boolean.TRUE)
+                .withNumberOfGroupCases(numberOfGroupCases)
                 .withProsecutionCases(asList(getProsecutionCase(groupId, groupMaster, true, true)))
                 .withProsecutionCounsels(asList(getProsecutionCounsel(groupMaster)))
                 .build());

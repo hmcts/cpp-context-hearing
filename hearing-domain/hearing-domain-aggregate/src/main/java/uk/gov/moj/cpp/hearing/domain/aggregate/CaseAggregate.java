@@ -125,8 +125,9 @@ public class CaseAggregate implements Aggregate {
         return apply(Stream.of(new HearingRemovedForProsecutionCase(prosecutionCaseId, hearingId)));
     }
 
-    public Stream<Object> removeCaseFromGroupCases(final UUID hearingId, final UUID groupId, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
-        return apply(Stream.of(new CaseRemovedFromGroupCases(hearingId, groupId, removedCase, newGroupMaster)));
+    public Stream<Object> removeCaseFromGroupCases(final UUID hearingId, final UUID groupId, final ProsecutionCase removedCase,
+                                                   final ProsecutionCase newGroupMaster, final Integer numberOfGroupCases) {
+        return apply(Stream.of(new CaseRemovedFromGroupCases(hearingId, groupId, removedCase, newGroupMaster, numberOfGroupCases)));
     }
 
     /* when the master case of a group is changed, newGroupMaster comes to hearing context for the first time
