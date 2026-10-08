@@ -7,8 +7,10 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
+import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -23,6 +25,7 @@ import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationRequest;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.OffenceDto;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ResultLineDto;
 
 import java.time.LocalDate;
@@ -288,6 +291,92 @@ class ValidationRequestMapperTest {
 
         assertThat(request.getOffences(), hasSize(1));
         assertThat(request.getOffences().get(0).getCaseUrn(), is(caseUrn));
+    }
+
+    @Test
+    void shouldMapOffenceBailStatusCode() {
+        final Offence offence = offenceWithBailStatus(BailStatus.bailStatus()
+                .withId(randomUUID())
+                .withCode("B")
+                .withDescription("Conditional Bail")
+                .build());
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearingWithOffence(offence));
+
+        assertThat(request.getOffences().get(0).getBailStatus(), is(OffenceDto.BailStatusEnum.B));
+    }
+
+    @Test
+    void shouldSendNullBailStatusWhenOffenceHasNoBailStatus() {
+        final Offence offence = offenceWithBailStatus(null);
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearingWithOffence(offence));
+
+        assertThat(request.getOffences().get(0).getBailStatus(), is(nullValue()));
+    }
+
+    @Test
+    void shouldSendNullBailStatusWhenBailStatusCodeIsNull() {
+        final Offence offence = offenceWithBailStatus(BailStatus.bailStatus()
+                .withId(randomUUID())
+                .withDescription("Conditional Bail")
+                .build());
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearingWithOffence(offence));
+
+        assertThat(request.getOffences().get(0).getBailStatus(), is(nullValue()));
+    }
+
+    @Test
+    void shouldSendNullBailStatusWhenBailStatusCodeIsUnrecognised() {
+        final Offence offence = offenceWithBailStatus(BailStatus.bailStatus()
+                .withId(randomUUID())
+                .withCode("X")
+                .withDescription("Unknown")
+                .build());
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearingWithOffence(offence));
+
+        assertThat(request.getOffences().get(0).getBailStatus(), is(nullValue()));
+    }
+
+    @Test
+    void shouldOmitBailStatusFromJsonWhenCodeIsUnrecognised() throws Exception {
+        final Offence offence = offenceWithBailStatus(BailStatus.bailStatus()
+                .withId(randomUUID())
+                .withCode("X")
+                .withDescription("Unknown")
+                .build());
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearingWithOffence(offence));
+
+        assertThat(objectMapper.writeValueAsString(request), not(containsString("bailStatus")));
+    }
+
+    private static Offence offenceWithBailStatus(final BailStatus bailStatus) {
+        return Offence.offence()
+                .withId(randomUUID())
+                .withOffenceCode("TH68001")
+                .withOffenceTitle("Theft")
+                .withBailStatus(bailStatus)
+                .build();
+    }
+
+    private static Hearing hearingWithOffence(final Offence offence) {
+        final Defendant defendant = Defendant.defendant()
+                .withId(randomUUID())
+                .withOffences(List.of(offence))
+                .build();
+        return Hearing.hearing()
+                .withProsecutionCases(List.of(ProsecutionCase.prosecutionCase()
+                        .withDefendants(List.of(defendant))
+                        .build()))
+                .build();
     }
 
     @Test
