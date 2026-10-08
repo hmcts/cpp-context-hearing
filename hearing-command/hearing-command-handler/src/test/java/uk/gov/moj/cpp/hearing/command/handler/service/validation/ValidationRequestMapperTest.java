@@ -225,6 +225,36 @@ class ValidationRequestMapperTest {
     }
 
     @Test
+    void shouldMapDefendantIdToOffence() {
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        final Offence offence = Offence.offence()
+                .withId(offenceId)
+                .withOffenceCode("TH68001")
+                .withOffenceTitle("Theft")
+                .build();
+
+        final Defendant defendant = Defendant.defendant()
+                .withId(defendantId)
+                .withOffences(List.of(offence))
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withProsecutionCases(List.of(
+                        ProsecutionCase.prosecutionCase()
+                                .withDefendants(List.of(defendant))
+                                .build()))
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
+
+        assertThat(request.getOffences(), hasSize(1));
+        assertThat(request.getOffences().get(0).getDefendantId(), is(defendantId.toString()));
+    }
+
+    @Test
     void shouldMapCaseUrnFromProsecutionCaseIdentifier() {
         final UUID offenceId = randomUUID();
         final String caseUrn = "32AH9105826";
