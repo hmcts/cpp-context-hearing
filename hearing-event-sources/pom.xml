@@ -3,7 +3,7 @@
     <parent>
         <artifactId>hearing-parent</artifactId>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
-        <version>17.104.203-CHD-3079-SNAPSHOT</version>
+        <version>17.104.204-CHD-3079-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
