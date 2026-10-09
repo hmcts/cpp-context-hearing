@@ -47,7 +47,10 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VERDICT_TYPE_GUILTY
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataResultBailStatuses;
+import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubGetProgressionProsecutionCaseDetails;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
@@ -402,6 +405,70 @@ public class ShareResultsV2IT extends AbstractIT {
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].judicialResultPrompts[0].promptReference"), is("bailConditionReason"));
         }
         assertHearingResultsAreShared(hearing);
+    }
+
+    @Test
+    void shouldUseProgressionRemandStatusForActiveOffenceNotOnHearing() {
+        final LocalDate hearingDay = PAST_LOCAL_DATE.next();
+        final UUID unconditionalBailResultDefId = randomUUID();
+        final UUID custodyResultDefId = randomUUID();
+        final UUID conditionalBailResultDefId = randomUUID();
+
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
+        caseStructure.put(caseId, toMap(defendantId, TestUtilities.asList(randomUUID())));
+
+        final InitiateHearingCommandHelper hearingCommand = getHearingCommand(caseStructure);
+        final Hearing hearing = hearingCommand.getHearing();
+        final Defendant defendant = hearing.getProsecutionCases().get(0).getDefendants().get(0);
+        final Offence offenceOnHearing = defendant.getOffences().get(0);
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
+        stubCourtRoom(hearing);
+        stubGetReferenceDataResultBailStatuses("referencedata.bail-statuses-priority-order.json");
+
+        // Progression holds a second, still active offence for the defendant (listed on another hearing) remanded in custody,
+        // plus a concluded custody offence that must be ignored.
+        stubGetProgressionProsecutionCaseDetails(caseId, createObjectBuilder()
+                .add("prosecutionCase", createObjectBuilder()
+                        .add("id", caseId.toString())
+                        .add("defendants", createArrayBuilder().add(createObjectBuilder()
+                                .add("id", defendant.getId().toString())
+                                .add("offences", createArrayBuilder()
+                                        .add(createObjectBuilder()
+                                                .add("id", offenceOnHearing.getId().toString())
+                                                .add("proceedingsConcluded", false))
+                                        .add(createObjectBuilder()
+                                                .add("id", randomUUID().toString())
+                                                .add("proceedingsConcluded", false)
+                                                .add("bailStatus", createObjectBuilder()
+                                                        .add("id", randomUUID().toString())
+                                                        .add("code", "C")
+                                                        .add("description", "Remanded into Custody")))))))
+                .build());
+
+        setupNowsReferenceDataForRemandStatuses(hearingDay, unconditionalBailResultDefId, custodyResultDefId, conditionalBailResultDefId);
+        final AllResultDefinitionsReferenceDataHelper resultDefs = setupResultDefinitionsReferenceDataWithBailStatuses(hearingDay,
+                Map.of(unconditionalBailResultDefId, "U", custodyResultDefId, "C", conditionalBailResultDefId, "B"));
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final SaveDraftResultCommand unconditionalBail = buildOffenceResult(hearingCommand.it(), hearingDay, defendant.getId(), offenceOnHearing.getId());
+        setPromptForSaveDraftResultCommand(findMandatoryPrompt(resultDefs, unconditionalBailResultDefId), unconditionalBail);
+
+        try (final Utilities.EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+                .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId())))))) {
+
+            shareDaysResultWithCourtClerk(hearing, singletonList(unconditionalBail.getTarget()), hearingDay);
+
+            final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].bailStatus.code"), is("U"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].personDefendant.bailStatus.code"), is("C"));
+        }
     }
 
     @Test

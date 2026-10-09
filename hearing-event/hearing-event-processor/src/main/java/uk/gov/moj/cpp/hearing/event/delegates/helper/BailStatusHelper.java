@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
@@ -15,15 +16,18 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.PersonDefendant;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.OffenceBailStatus;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.bailstatus.BailStatus;
-import uk.gov.moj.cpp.hearing.event.service.OffenceService;
+import uk.gov.moj.cpp.hearing.event.service.ProgressionService;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,25 +39,22 @@ import javax.inject.Inject;
 public class BailStatusHelper {
 
     private final ReferenceDataService referenceDataService;
-    private final OffenceService offenceService;
+    private final ProgressionService progressionService;
 
     private static final String NHCCS_RESULT_DEFINITION_ID = "fbed768b-ee95-4434-87c8-e81cbc8d24c8";
     private static final String NHMC_RESULT_DEFINITION_ID = "70c98fa6-804d-11e8-adc0-fa7ae01bbebc";
 
     @Inject
     public BailStatusHelper(final ReferenceDataService referenceDataService,
-                            final OffenceService offenceService) {
+                            final ProgressionService progressionService) {
         this.referenceDataService = referenceDataService;
-        this.offenceService = offenceService;
+        this.progressionService = progressionService;
     }
 
     public void mapBailStatuses(final JsonEnvelope context, final Hearing hearing) {
         final List<BailStatus> bailStatusesFromRefData = referenceDataService.getBailStatuses(context);
 
-        ofNullable(hearing.getProsecutionCases()).stream().flatMap(Collection::stream)
-                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                .filter(d -> nonNull(d.getPersonDefendant()))
-                .forEach(defendant -> updateDefendantWithBailStatus(defendant, bailStatusesFromRefData));
+        mapProsecutionCaseBailStatuses(context, hearing.getProsecutionCases(), bailStatusesFromRefData);
 
         ofNullable(hearing.getCourtApplications()).stream().flatMap(Collection::stream)
                 .filter(ca -> nonNull(ca.getSubject().getMasterDefendant()))
@@ -67,10 +68,7 @@ public class BailStatusHelper {
     public void mapBailStatuses(final JsonEnvelope context, final ResultsShared resultsShared) {
         final List<BailStatus> bailStatusesFromRefData = referenceDataService.getBailStatuses(context);
 
-        ofNullable(resultsShared.getHearing().getProsecutionCases()).stream().flatMap(Collection::stream)
-                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                .filter(d -> nonNull(d.getPersonDefendant()))
-                .forEach(defendant -> updateDefendantWithBailStatus(defendant, bailStatusesFromRefData));
+        mapProsecutionCaseBailStatuses(context, resultsShared.getHearing().getProsecutionCases(), bailStatusesFromRefData);
 
         ofNullable(resultsShared.getHearing().getCourtApplications()).stream().flatMap(Collection::stream)
                 .filter(ca -> nonNull(ca.getSubject().getMasterDefendant()))
@@ -81,10 +79,34 @@ public class BailStatusHelper {
                 });
     }
 
-    private void updateDefendantWithBailStatus(final Defendant defendant, final List<BailStatus> bailStatusesFromRefData) {
+    /**
+     * Progression is queried at most once per prosecution case; the defendants of that case are
+     * then filtered from the same response.
+     */
+    private void mapProsecutionCaseBailStatuses(final JsonEnvelope context, final List<ProsecutionCase> prosecutionCases, final List<BailStatus> bailStatusesFromRefData) {
+        final Map<UUID, Optional<ProsecutionCase>> progressionCases = new HashMap<>();
+
+        ofNullable(prosecutionCases).stream().flatMap(Collection::stream)
+                .forEach(prosecutionCase -> prosecutionCase.getDefendants().stream()
+                        .filter(d -> nonNull(d.getPersonDefendant()))
+                        .forEach(defendant -> updateDefendantWithBailStatus(defendant, bailStatusesFromRefData,
+                                getProgressionCase(context, prosecutionCase.getId(), progressionCases))));
+    }
+
+    private Optional<ProsecutionCase> getProgressionCase(final JsonEnvelope context, final UUID caseId, final Map<UUID, Optional<ProsecutionCase>> progressionCases) {
+        if (isNull(caseId)) {
+            return empty();
+        }
+        return progressionCases.computeIfAbsent(caseId, id -> progressionService.getProsecutionCaseDetails(context, id));
+    }
+
+    private void updateDefendantWithBailStatus(final Defendant defendant, final List<BailStatus> bailStatusesFromRefData, final Optional<ProsecutionCase> progressionCase) {
         setOffenceRemandStatuses(defendant.getOffences(), bailStatusesFromRefData);
 
-        final List<OffenceBailStatus> allActiveOffenceBailStatuses = buildAllActiveOffenceBailStatuses(defendant.getOffences(), defendant.getId());
+        final List<OffenceBailStatus> storedOffenceBailStatuses = progressionCase
+                .map(prosecutionCase -> fetchStoredOffencesBailStatusForDefendant(prosecutionCase, defendant.getId()))
+                .orElse(List.of());
+        final List<OffenceBailStatus> allActiveOffenceBailStatuses = buildAllActiveOffenceBailStatuses(defendant.getOffences(), storedOffenceBailStatuses);
 
         final uk.gov.justice.core.courts.BailStatus existingBailStatus = defendant.getPersonDefendant().getBailStatus();
         final Optional<BailStatus> bailStatusOptional = getHighestPriorityBailStatus(allActiveOffenceBailStatuses, bailStatusesFromRefData);
@@ -102,7 +124,8 @@ public class BailStatusHelper {
     private void updateDefendantWithBailStatus(final MasterDefendant defendant, final List<BailStatus> bailStatusesFromRefData, final List<Offence> offences) {
         setOffenceRemandStatuses(offences, bailStatusesFromRefData);
 
-        final List<OffenceBailStatus> allActiveOffenceBailStatuses = buildAllActiveOffenceBailStatuses(offences, defendant.getCpsDefendantId());
+        // No stored offences are looked up for an application subject: only the application's own offences are considered.
+        final List<OffenceBailStatus> allActiveOffenceBailStatuses = buildAllActiveOffenceBailStatuses(offences, List.of());
         final Optional<BailStatus> bailStatusOptional = getHighestPriorityBailStatus(allActiveOffenceBailStatuses, bailStatusesFromRefData);
         bailStatusOptional.ifPresent(bailStatusResult ->
                 defendant.getPersonDefendant().setBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus()
@@ -113,7 +136,7 @@ public class BailStatusHelper {
         );
     }
 
-    private List<OffenceBailStatus> buildAllActiveOffenceBailStatuses(final List<Offence> currentHearingOffences, final UUID defendantId) {
+    private List<OffenceBailStatus> buildAllActiveOffenceBailStatuses(final List<Offence> currentHearingOffences, final List<OffenceBailStatus> storedOffenceBailStatuses) {
         final Map<UUID, OffenceBailStatus> currentActiveById = currentHearingOffences.stream()
                 .filter(o -> nonNull(o.getId()) && isActiveOffence(o))
                 .collect(toMap(Offence::getId, BailStatusHelper::toOffenceBailStatus, (a, b) -> a));
@@ -122,7 +145,7 @@ public class BailStatusHelper {
                 .map(BailStatusHelper::toOffenceBailStatus)
                 .collect(toCollection(ArrayList::new));
 
-        fetchStoredOffencesBailStatusForDefendant(defendantId).stream()
+        storedOffenceBailStatuses.stream()
                 .filter(stored -> nonNull(stored.getOffenceId()))
                 .filter(stored -> !currentActiveById.containsKey(stored.getOffenceId()))
                 .forEach(merged::add);
@@ -143,17 +166,37 @@ public class BailStatusHelper {
                 bailStatus == null ? null : bailStatus.getDescription());
     }
 
-    private List<OffenceBailStatus> fetchStoredOffencesBailStatusForDefendant(final UUID defendantId) {
+    /**
+     * Bail status of each active offence of the defendant as currently held by progression, falling
+     * back to the defendant's own bail status when the offence has none.
+     */
+    private static List<OffenceBailStatus> fetchStoredOffencesBailStatusForDefendant(final ProsecutionCase progressionCase, final UUID defendantId) {
         if (defendantId == null) {
             return List.of();
         }
 
-        return offenceService.getOffenceBailStatus(defendantId);
+        return ofNullable(progressionCase.getDefendants()).stream().flatMap(Collection::stream)
+                .filter(defendant -> defendantId.equals(defendant.getId()))
+                .flatMap(defendant -> ofNullable(defendant.getOffences()).stream().flatMap(Collection::stream)
+                        .filter(BailStatusHelper::isActiveOffence)
+                        .map(offence -> toStoredOffenceBailStatus(offence, defendant)))
+                .toList();
+    }
+
+    private static OffenceBailStatus toStoredOffenceBailStatus(final Offence offence, final Defendant defendant) {
+        final Optional<uk.gov.justice.core.courts.BailStatus> bailStatus = ofNullable(offence.getBailStatus())
+                .or(() -> ofNullable(defendant.getPersonDefendant()).map(PersonDefendant::getBailStatus));
+        return new OffenceBailStatus(
+                offence.getId(),
+                bailStatus.map(uk.gov.justice.core.courts.BailStatus::getId).orElse(null),
+                bailStatus.map(uk.gov.justice.core.courts.BailStatus::getCode).orElse(null),
+                bailStatus.map(uk.gov.justice.core.courts.BailStatus::getDescription).orElse(null));
     }
 
     /**
-     * Sets offence.bailStatus on each individual offence based on that offence's own main judicial result.
-     * NHMC/NHCC suppress the update only when used as the main result (parentJudicialResultId == null).
+     * Sets offence.bailStatus on each individual offence based on that offence's own main judicial
+     * result. NHMC/NHCC suppress the update only when used as the main result
+     * (parentJudicialResultId == null).
      */
     private void setOffenceRemandStatuses(final List<Offence> offences, final List<BailStatus> bailStatusesFromRefData) {
         if (isEmpty(offences)) {
@@ -173,8 +216,8 @@ public class BailStatusHelper {
     }
 
     /**
-     * Derives the remand status for a single offence from its judicial results.
-     * Returns empty if all qualifying results are NHMC/NHCC used as main result.
+     * Derives the remand status for a single offence from its judicial results. Returns empty if
+     * all qualifying results are NHMC/NHCC used as main result.
      */
     private Optional<BailStatus> resolveOffenceRemandStatus(final List<JudicialResult> judicialResults, final List<BailStatus> bailStatusesFromRefData) {
         if (isEmpty(judicialResults)) {
@@ -197,8 +240,9 @@ public class BailStatusHelper {
     }
 
     /**
-     * Returns true when the result is NHMC or NHCC used as a main result (parentJudicialResultId is null).
-     * When used as a child result (parentJudicialResultId is non-null), the exclusion does not apply.
+     * Returns true when the result is NHMC or NHCC used as a main result (parentJudicialResultId is
+     * null). When used as a child result (parentJudicialResultId is non-null), the exclusion does
+     * not apply.
      */
     private boolean isExcludedMainResult(final JudicialResult judicialResult) {
         if (judicialResult.getJudicialResultTypeId() == null) {
@@ -211,8 +255,8 @@ public class BailStatusHelper {
     }
 
     /**
-     * Selects the highest-priority bail status from the supplied offence bail statuses.
-     * Entries with a null bail status code are skipped (no remand status recorded yet).
+     * Selects the highest-priority bail status from the supplied offence bail statuses. Entries
+     * with a null bail status code are skipped (no remand status recorded yet).
      */
     private Optional<BailStatus> getHighestPriorityBailStatus(final List<OffenceBailStatus> offenceBailStatuses, final List<BailStatus> bailStatusesFromRefData) {
         if (isEmpty(offenceBailStatuses)) {

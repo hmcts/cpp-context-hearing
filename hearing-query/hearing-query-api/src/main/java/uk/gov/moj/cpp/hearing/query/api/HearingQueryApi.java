@@ -50,7 +50,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.PtphDetailResponse;
@@ -479,12 +478,6 @@ public class HearingQueryApi {
             return getJsonEnvelope(envelope);
         }
         return query;
-    }
-
-    @Handles("hearing.offence-bail-status-for-defendant")
-    public JsonEnvelope getOffenceBailStatusForDefendant(final JsonEnvelope query) {
-        final Envelope<OffenceBailStatusResponse> envelope = this.hearingQueryView.getOffenceBailStatusForDefendant(query);
-        return getJsonEnvelope(envelope);
     }
 
     @Handles("hearing.query.outstanding-fines")
