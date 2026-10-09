@@ -38,6 +38,7 @@ import javax.inject.Inject;
 
 public class BailStatusHelper {
 
+
     private final ReferenceDataService referenceDataService;
     private final ProgressionService progressionService;
 
