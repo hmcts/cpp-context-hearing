@@ -47,7 +47,10 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VERDICT_TYPE_GUILTY
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataResultBailStatuses;
+import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubGetProgressionProsecutionCaseDetails;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
@@ -491,6 +494,56 @@ public class ShareResultsV2IT extends AbstractIT {
         getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getProsecutionCases, first(prosecutionCaseMatcher))));
+
+        // Third day: every offence on the hearing gets conditional bail. Progression holds two more offences for the
+        // defendant that are not on this hearing: one concluded in custody (must be ignored) and one still active on
+        // unconditional bail (must count, and outranks conditional bail).
+        final LocalDate thirdHearingDay = laterHearingDay.plusDays(1);
+        final UUID caseId = hearing.getProsecutionCases().get(0).getId();
+        stubGetProgressionProsecutionCaseDetails(caseId, createObjectBuilder()
+                .add("prosecutionCase", createObjectBuilder()
+                        .add("id", caseId.toString())
+                        .add("defendants", createArrayBuilder().add(createObjectBuilder()
+                                .add("id", defendant.getId().toString())
+                                .add("offences", createArrayBuilder()
+                                        .add(createObjectBuilder()
+                                                .add("id", randomUUID().toString())
+                                                .add("proceedingsConcluded", true)
+                                                .add("bailStatus", createObjectBuilder()
+                                                        .add("id", randomUUID().toString())
+                                                        .add("code", "C")
+                                                        .add("description", "Remanded into Custody")))
+                                        .add(createObjectBuilder()
+                                                .add("id", randomUUID().toString())
+                                                .add("proceedingsConcluded", false)
+                                                .add("bailStatus", createObjectBuilder()
+                                                        .add("id", randomUUID().toString())
+                                                        .add("code", "U")
+                                                        .add("description", "Unconditional Bail")))))))
+                .build());
+
+        final AllResultDefinitionsReferenceDataHelper thirdDayResultDefs = setupResultDefinitionsReferenceDataWithBailStatuses(thirdHearingDay,
+                Map.of(unconditionalBailResultDefId, "U", custodyResultDefId, "C", conditionalBailResultDefId, "B"));
+
+        final List<Target> thirdDayTargets = new ArrayList<>();
+        for (final Offence offence : asList(offence1, offence2, offence3)) {
+            final SaveDraftResultCommand conditionalBail = buildOffenceResult(hearingCommand.it(), thirdHearingDay, defendant.getId(), offence.getId());
+            setPromptForSaveDraftResultCommand(findMandatoryPrompt(thirdDayResultDefs, conditionalBailResultDefId), conditionalBail);
+            thirdDayTargets.add(conditionalBail.getTarget());
+        }
+
+        try (final Utilities.EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+                .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId())))))) {
+
+            shareDaysResultWithCourtClerk(hearing, thirdDayTargets, thirdHearingDay);
+
+            final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+
+            // C would mean the concluded offence was counted; B would mean progression was not consulted.
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].personDefendant.bailStatus.code"), is("U"));
+        }
     }
 
     private CommandHelpers.UpdateVerdictCommandHelper updateDefendantAndChangeVerdict(InitiateHearingCommandHelper initiateHearingCommandHelper) {
