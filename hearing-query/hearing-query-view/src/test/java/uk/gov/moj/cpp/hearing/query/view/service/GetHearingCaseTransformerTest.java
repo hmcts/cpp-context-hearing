@@ -3,20 +3,13 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.justice.core.courts.CourtCentre.courtCentre;
-import static uk.gov.justice.core.courts.Hearing.hearing;
-import static uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase;
-import static uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCaseIdentifier;
 
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.hearing.courts.HearingCases;
+import uk.gov.moj.cpp.hearing.dto.HearingCaseForDayRow;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,84 +19,70 @@ class GetHearingCaseTransformerTest {
 
     private final GetHearingCaseTransformer transformer = new GetHearingCaseTransformer();
 
-    @Test
-    void shouldTransformHearingWithNullProsecutionCasesAndHearingDate() {
-        final UUID hearingId = randomUUID();
-        final UUID courtCentreId = randomUUID();
-        final UUID roomId = randomUUID();
-        final Hearing hearing = hearing().withId(hearingId)
-                .withCourtCentre(courtCentre().withId(courtCentreId).withRoomId(roomId).build())
-                .withProsecutionCases(null)
-                .build();
-
-        final HearingCases result = transformer.hearingCases(hearing, LocalDate.now()).build();
-
-        assertThat(result.getHearingId(), equalTo(hearingId));
-        assertThat(result.getCourtCentreId(), equalTo(courtCentreId));
-        assertThat(result.getCourtRoomId(), equalTo(roomId));
-        assertThat(result.getHearingDate(), is(nullValue()));
-        assertThat(result.getProsecutionCases(), is(emptyList()));
-    }
+    private final UUID hearingId = randomUUID();
+    private final UUID courtCentreId = randomUUID();
+    private final UUID roomId = randomUUID();
 
     @Test
     void shouldTransformHearing() {
-        final UUID hearingId = randomUUID();
-        final UUID courtCentreId = randomUUID();
-        final UUID roomId = randomUUID();
         final UUID caseId = randomUUID();
-        final String caseUrn = "caseUrn";
-        final ZonedDateTime sittingDay = ZonedDateTime.now();
-        final Hearing hearing = hearing().withId(hearingId)
-                .withCourtCentre(courtCentre().withId(courtCentreId).withRoomId(roomId).build())
-                .withHearingDays(List.of(HearingDay.hearingDay().withSittingDay(sittingDay).build()))
-                .withProsecutionCases(List.of(
-                        prosecutionCase().withId(caseId)
-                                .withProsecutionCaseIdentifier(prosecutionCaseIdentifier().withCaseURN(caseUrn).build())
-                                .build()
-                ))
-                .build();
+        final LocalDate date = LocalDate.now();
 
-        final HearingCases result = transformer.hearingCases(hearing, sittingDay.toLocalDate()).build();
+        final HearingCases result = transformer.hearingCases(List.of(row(null, caseId, null, null)), date).build();
 
         assertThat(result.getHearingId(), equalTo(hearingId));
         assertThat(result.getCourtCentreId(), equalTo(courtCentreId));
         assertThat(result.getCourtRoomId(), equalTo(roomId));
-        assertThat(result.getHearingDate(), is(LocalDate.now().toString()));
-        assertThat(result.getProsecutionCases().get(0), equalTo(caseId));
+        assertThat(result.getHearingDate(), is(date.toString()));
+        assertThat(result.getProsecutionCases(), equalTo(List.of(caseId)));
     }
 
     @Test
-    void shouldReturnHearingDateMatchingTheQueriedDayForMultiDayHearing() {
-        final ZonedDateTime today = ZonedDateTime.now();
-        final ZonedDateTime tomorrow = today.plusDays(1);
-        final Hearing hearing = hearing().withId(randomUUID())
-                .withCourtCentre(courtCentre().withId(randomUUID()).withRoomId(randomUUID()).build())
-                .withHearingDays(List.of(
-                        HearingDay.hearingDay().withSittingDay(today).build(),
-                        HearingDay.hearingDay().withSittingDay(tomorrow).build()))
-                .withProsecutionCases(List.of())
-                .build();
+    void shouldReturnQueriedDateAsHearingDate() {
+        final LocalDate tomorrow = LocalDate.now().plusDays(1);
 
-        final HearingCases result = transformer.hearingCases(hearing, tomorrow.toLocalDate()).build();
+        final HearingCases result = transformer.hearingCases(List.of(row(false, randomUUID(), null, null)), tomorrow).build();
 
-        assertThat(result.getHearingDate(), is(tomorrow.toLocalDate().toString()));
+        assertThat(result.getHearingDate(), is(tomorrow.toString()));
+    }
+
+    @Test
+    void shouldIncludeAllCasesOfHearingInRowOrder() {
+        final UUID firstCaseId = randomUUID();
+        final UUID secondCaseId = randomUUID();
+
+        final HearingCases result = transformer.hearingCases(List.of(
+                row(false, firstCaseId, null, null),
+                row(false, secondCaseId, null, null)), LocalDate.now()).build();
+
+        assertThat(result.getProsecutionCases(), equalTo(List.of(firstCaseId, secondCaseId)));
+    }
+
+    @Test
+    void shouldDeduplicateCaseIds() {
+        final UUID caseId = randomUUID();
+
+        final HearingCases result = transformer.hearingCases(List.of(
+                row(false, caseId, null, null),
+                row(false, caseId, null, null)), LocalDate.now()).build();
+
+        assertThat(result.getProsecutionCases(), equalTo(List.of(caseId)));
+    }
+
+    @Test
+    void shouldIncludeGroupMemberCaseWhenHearingIsNotGroupProceedings() {
+        final UUID caseId = randomUUID();
+
+        final HearingCases result = transformer.hearingCases(List.of(row(false, caseId, false, true)), LocalDate.now()).build();
+
+        assertThat(result.getProsecutionCases(), equalTo(List.of(caseId)));
     }
 
     @Test
     void shouldIncludeGroupMasterCaseWhenHearingIsGroupProceedings() {
         final UUID masterCaseId = randomUUID();
-        final Hearing hearing = hearing().withId(randomUUID())
-                .withCourtCentre(courtCentre().withId(randomUUID()).withRoomId(randomUUID()).build())
-                .withIsGroupProceedings(true)
-                .withProsecutionCases(List.of(
-                        prosecutionCase().withId(masterCaseId)
-                                .withIsGroupMaster(true)
-                                .withIsGroupMember(true)
-                                .build()
-                ))
-                .build();
 
-        final HearingCases result = transformer.hearingCases(hearing, LocalDate.now()).build();
+        final HearingCases result = transformer.hearingCases(List.of(row(true, masterCaseId, true, true)), LocalDate.now()).build();
 
         assertThat(result.getProsecutionCases(), equalTo(List.of(masterCaseId)));
     }
@@ -111,18 +90,8 @@ class GetHearingCaseTransformerTest {
     @Test
     void shouldIncludeNonGroupMemberCaseWhenHearingIsGroupProceedings() {
         final UUID caseId = randomUUID();
-        final Hearing hearing = hearing().withId(randomUUID())
-                .withCourtCentre(courtCentre().withId(randomUUID()).withRoomId(randomUUID()).build())
-                .withIsGroupProceedings(true)
-                .withProsecutionCases(List.of(
-                        prosecutionCase().withId(caseId)
-                                .withIsGroupMaster(false)
-                                .withIsGroupMember(null)
-                                .build()
-                ))
-                .build();
 
-        final HearingCases result = transformer.hearingCases(hearing, LocalDate.now()).build();
+        final HearingCases result = transformer.hearingCases(List.of(row(true, caseId, false, null)), LocalDate.now()).build();
 
         assertThat(result.getProsecutionCases(), equalTo(List.of(caseId)));
     }
@@ -130,19 +99,25 @@ class GetHearingCaseTransformerTest {
     @Test
     void shouldExcludeGroupMemberCaseWhenHearingIsGroupProceedings() {
         final UUID memberCaseId = randomUUID();
-        final Hearing hearing = hearing().withId(randomUUID())
-                .withCourtCentre(courtCentre().withId(randomUUID()).withRoomId(randomUUID()).build())
-                .withIsGroupProceedings(true)
-                .withProsecutionCases(List.of(
-                        prosecutionCase().withId(memberCaseId)
-                                .withIsGroupMaster(false)
-                                .withIsGroupMember(true)
-                                .build()
-                ))
-                .build();
 
-        final HearingCases result = transformer.hearingCases(hearing, LocalDate.now()).build();
+        final HearingCases result = transformer.hearingCases(List.of(row(true, memberCaseId, false, true)), LocalDate.now()).build();
 
         assertThat(result.getProsecutionCases(), is(emptyList()));
+    }
+
+    @Test
+    void shouldKeepMasterAndDropMembersForGroupProceedings() {
+        final UUID masterCaseId = randomUUID();
+
+        final HearingCases result = transformer.hearingCases(List.of(
+                row(true, randomUUID(), false, true),
+                row(true, masterCaseId, true, true),
+                row(true, randomUUID(), null, true)), LocalDate.now()).build();
+
+        assertThat(result.getProsecutionCases(), equalTo(List.of(masterCaseId)));
+    }
+
+    private HearingCaseForDayRow row(final Boolean isGroupProceedings, final UUID caseId, final Boolean isGroupMaster, final Boolean isGroupMember) {
+        return new HearingCaseForDayRow(hearingId, courtCentreId, roomId, isGroupProceedings, caseId, isGroupMaster, isGroupMember);
     }
 }

@@ -96,6 +96,7 @@ import uk.gov.moj.cpp.hearing.query.view.service.userdata.UserDataService;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.DraftResultRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
+import uk.gov.moj.cpp.hearing.dto.HearingCaseForDayRow;
 import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
@@ -120,7 +121,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -401,17 +404,17 @@ public class HearingService {
             return new HearingCasesForDay(null);
         }
 
-        final List<Hearing> hearingsForDay = hearingRepository.findHearings(date);
-        if (isEmpty(hearingsForDay)) {
+        final List<HearingCaseForDayRow> rowsForDay = hearingRepository.findHearingCaseRowsForDay(date);
+        if (isEmpty(rowsForDay)) {
             return new HearingCasesForDay(null);
         }
 
+        final Map<UUID, List<HearingCaseForDayRow>> rowsByHearing = rowsForDay.stream()
+                .collect(Collectors.groupingBy(HearingCaseForDayRow::getHearingId, LinkedHashMap::new, toList()));
+
         return HearingCasesForDay.hearingCasesForDay()
-                .withHearingCases(hearingsForDay.stream()
-                        .map(ha -> hearingJPAMapper.fromJPAMinimal(ha))
-                        .filter(ha -> isNotEmpty(ha.getProsecutionCases()))
-                        .map(h -> getHearingCaseTransformer.hearingCases(h, date).build())
-                        .distinct()
+                .withHearingCases(rowsByHearing.values().stream()
+                        .map(rowsForHearing -> getHearingCaseTransformer.hearingCases(rowsForHearing, date).build())
                         .toList())
                 .build();
     }
