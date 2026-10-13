@@ -85,7 +85,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResult
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
@@ -103,7 +102,6 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 import uk.gov.moj.cpp.hearing.repository.NowRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
-import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 import uk.gov.moj.cpp.hearing.repository.PtphDetailRepository;
 
 import java.time.LocalDate;
@@ -149,9 +147,6 @@ public class HearingService {
 
     @Inject
     private HearingRepository hearingRepository;
-
-    @Inject
-    private OffenceRepository offenceRepository;
 
     @Inject
     private HearingEventRepository hearingEventRepository;
@@ -1207,23 +1202,6 @@ public class HearingService {
 
         return (ProsecutionCaseResponse.builder()
                 .withProsecutionCases(prosecutionCaseJPAMapper.fromJPA(Sets.newHashSet(prosecutionCases))).build());
-    }
-
-    @Transactional
-    public OffenceBailStatusResponse getOffenceBailStatusForDefendant(final UUID defendantId) {
-
-        final List<uk.gov.moj.cpp.hearing.domain.OffenceBailStatus> offenceBailStatuses = offenceRepository.offenceBailStatuses(defendantId)
-                .stream()
-                .map(bailStatus -> new uk.gov.moj.cpp.hearing.domain.OffenceBailStatus(
-                        bailStatus.getOffenceId(),
-                        bailStatus.getBailStatusId(),
-                        bailStatus.getBailStatusCode(),
-                        bailStatus.getBailStatusDesc()))
-                .toList();
-
-        return OffenceBailStatusResponse.builder()
-                .withOffenceBailStatuses(offenceBailStatuses)
-                .build();
     }
 
     public void validateUserPermissionForApplicationType(final JsonEnvelope query) {
