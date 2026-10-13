@@ -11,8 +11,8 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
-import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
-import uk.gov.moj.cpp.listing.common.xhibit.exception.InvalidReferenceDataException;
+import uk.gov.moj.cpp.hearing.listing.common.xhibit.CommonXhibitReferenceDataService;
+import uk.gov.moj.cpp.hearing.listing.common.xhibit.exception.InvalidReferenceDataException;
 
 import java.time.ZonedDateTime;
 import java.util.List;
