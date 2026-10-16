@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-slots-unconfirmed-booking-failed.json",
+  "description": "courtscheduler refused the reservation or the call to it failed. 'code' is the only field a consumer should branch on; 'reason' is courtscheduler's own text plus the HTTP status, for the operator log and for diagnostics - it is not a user-facing message and is not translated. Only NO_CAPACITY and NO_SESSION mean the chosen session is the problem; the rest are technical. Adding a code here is a public-contract change and must match ProvisionalBookingFailureCode, since the framework drops a published event whose payload fails this schema.",
+  "type": "object",
+  "properties": {
+    "error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "NO_CAPACITY",
+            "NO_SESSION",
+            "BOOKING_ALREADY_CONFIRMED",
+            "BAD_REQUEST",
+            "INTERNAL_SERVER_ERROR",
+            "BAD_GATEWAY",
+            "SERVICE_UNAVAILABLE",
+            "UNEXPECTED_RESPONSE"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "reason"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "error"
+  ],
+  "additionalProperties": false
+}

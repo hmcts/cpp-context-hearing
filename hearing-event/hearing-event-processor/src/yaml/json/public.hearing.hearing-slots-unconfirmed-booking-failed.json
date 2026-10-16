@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "NO_CAPACITY",
+    "reason": "courtscheduler returned 409: {\"error\":\"Session 7f2a... has no remaining capacity\"}"
+  }
+}

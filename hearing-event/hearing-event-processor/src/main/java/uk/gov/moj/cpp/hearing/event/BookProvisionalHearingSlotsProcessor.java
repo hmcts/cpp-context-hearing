@@ -36,6 +36,24 @@ public class BookProvisionalHearingSlotsProcessor {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
+    /**
+     * Success and failure are two events, not one event with two payload shapes.
+     *
+     * <p>Both used to be published under the booked name, discriminated only by whether the
+     * payload carried a bookingId or an error. That forced every consumer to re-inspect the
+     * payload to learn whether the command had worked - cpp-ui-hearing's commandSync resolves on
+     * the event NAME, so a refusal arrived as an ordinary success value and had to be converted
+     * back into an error by hand. It also made the published schema a {@code oneOf}, which meant
+     * neither branch could be made required and a payload carrying BOTH fields validated against
+     * neither.
+     *
+     * <p>Splitting the names lets a consumer register the failure name as commandSync's
+     * {@code errorEvent} and get an errored observable for free, and lets each schema state
+     * exactly what its payload must contain.
+     */
+    private static final String HEARING_SLOTS_PROVISIONALLY_BOOKED = "public.hearing.hearing-slots-provisionally-booked";
+    private static final String HEARING_SLOTS_UNCONFIRMED_BOOKING_FAILED = "public.hearing.hearing-slots-unconfirmed-booking-failed";
+
     @Inject
     public BookProvisionalHearingSlotsProcessor(final Sender sender,
                                                 final JsonObjectToObjectConverter jsonObjectToObjectConverter,
@@ -85,11 +103,15 @@ public class BookProvisionalHearingSlotsProcessor {
         //raise public event for UI
         if (!provisionalBookingServiceResponse.hasError()) {
             sender.send(Enveloper.envelop(createObjectBuilder().add("bookingId", provisionalBookingServiceResponse.getBookingId()).build())
-                    .withName("public.hearing.hearing-slots-provisionally-booked")
+                    .withName(HEARING_SLOTS_PROVISIONALLY_BOOKED)
                     .withMetadataFrom(event));
         } else {
-            sender.send(Enveloper.envelop(createObjectBuilder().add("error", provisionalBookingServiceResponse.getErrorMessage()).build())
-                    .withName("public.hearing.hearing-slots-provisionally-booked")
+            final JsonObject error = createObjectBuilder()
+                    .add("code", provisionalBookingServiceResponse.getErrorCode().name())
+                    .add("reason", provisionalBookingServiceResponse.getErrorMessage())
+                    .build();
+            sender.send(Enveloper.envelop(createObjectBuilder().add("error", error).build())
+                    .withName(HEARING_SLOTS_UNCONFIRMED_BOOKING_FAILED)
                     .withMetadataFrom(event));
         }
     }
