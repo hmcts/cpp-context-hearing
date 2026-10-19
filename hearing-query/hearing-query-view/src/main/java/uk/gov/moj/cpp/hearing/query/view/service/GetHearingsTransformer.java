@@ -83,6 +83,7 @@ public class GetHearingsTransformer {
         final CourtCentre courtCentre = hearing.getCourtCentre();
         return HearingSummaries.hearingSummaries()
                 .withId(hearing.getId())
+                .withType(hearing.getType())
                 .withCourtCentre(courtCentre != null
                         ? CourtCentre.courtCentre()
                                 .withRoomName(courtCentre.getRoomName())

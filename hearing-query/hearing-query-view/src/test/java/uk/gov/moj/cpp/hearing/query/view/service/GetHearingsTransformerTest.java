@@ -30,6 +30,7 @@ import uk.gov.justice.core.courts.CourtOrder;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Organisation;
@@ -692,9 +693,41 @@ class GetHearingsTransformerTest {
         // fields from full summary that must NOT be populated
         assertNull(result.getHearingDays());
         assertNull(result.getJurisdictionType());
-        assertNull(result.getType());
         assertThat(result.getCourtApplicationSummaries(), is(empty()));
         assertThat(result.getProsecutionCaseSummaries(), is(empty()));
+    }
+
+    @Test
+    void summaryForCheckIn_shouldMapHearingType() {
+        final HearingType hearingType = HearingType.hearingType()
+                .withId(randomUUID())
+                .withDescription("Trial")
+                .withWelshDescription("Treial")
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(randomUUID())
+                .withType(hearingType)
+                .withProsecutionCases(emptyList())
+                .build();
+
+        final HearingSummaries result = target.summaryForCheckIn(hearing).build();
+
+        assertThat(result.getType().getId(), is(hearingType.getId()));
+        assertThat(result.getType().getDescription(), is("Trial"));
+        assertThat(result.getType().getWelshDescription(), is("Treial"));
+    }
+
+    @Test
+    void summaryForCheckIn_shouldHandleNullHearingType() {
+        final Hearing hearing = Hearing.hearing()
+                .withId(randomUUID())
+                .withProsecutionCases(emptyList())
+                .build();
+
+        final HearingSummaries result = target.summaryForCheckIn(hearing).build();
+
+        assertNull(result.getType());
     }
 
     @Test
