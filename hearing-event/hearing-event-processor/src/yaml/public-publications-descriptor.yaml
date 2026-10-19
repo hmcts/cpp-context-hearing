@@ -103,13 +103,13 @@ subscriptions_descriptor:
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-adjourned.json
 
         # Hearing Slots Provisionally Booked - success only; a refusal is the separate
-        # unconfirmed-booking-failed event below, so consumers can tell the two apart by name
+        # provisional-booking-refused event below, so consumers can tell the two apart by name
         # rather than by re-inspecting the payload.
         - name: public.hearing.hearing-slots-provisionally-booked
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-slots-provisionally-booked.json
 
-        - name: public.hearing.hearing-slots-unconfirmed-booking-failed
-          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-slots-unconfirmed-booking-failed.json
+        - name: public.hearing.hearing-slots-provisional-booking-refused
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-slots-provisional-booking-refused.json
 
         # Hearing Adjourned
         - name: public.hearing.defendant-attendance-updated

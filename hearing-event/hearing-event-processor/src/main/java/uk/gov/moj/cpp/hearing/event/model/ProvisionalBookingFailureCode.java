@@ -1,23 +1,24 @@
 package uk.gov.moj.cpp.hearing.event.model;
 
+import static uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingFailureCode.Type.BUSINESS;
+import static uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingFailureCode.Type.TECHNICAL;
+
 /**
  * Why a reservation against courtscheduler was refused or failed, as carried by the
- * {@code public.hearing.hearing-slots-unconfirmed-booking-failed} public event.
+ * {@code public.hearing.hearing-slots-provisional-booking-refused} public event (LPT-2590).
  *
- * <p>Two jobs. First, let a consumer decide whether the clerk may be told "this session is
- * unavailable - pick another one": only {@link #NO_CAPACITY} and {@link #NO_SESSION} mean that,
- * and cpp-ui-hearing holds exactly those two in an allowlist. Second, let a consumer that cares
- * distinguish the ways the call can fail WITHOUT parsing English out of {@code reason} - our
- * request was malformed, courtscheduler fell over, we could not reach it at all. That second job
- * is why the non-refusal half is split by cause rather than being one catch-all.
+ * <p>Each code has a {@link Type}. A {@link Type#BUSINESS} code is courtscheduler deliberately
+ * refusing the booking, and the UI shows a message for that code. A {@link Type#TECHNICAL} code is
+ * the call going wrong, and the UI sends the clerk to its standard technical error page. The
+ * HTTP status and courtscheduler's own text stay in the event's {@code reason}, for the logs.
  *
  * <p>Codes are mapped from courtscheduler's HTTP answer in
  * {@link uk.gov.moj.cpp.hearing.event.service.ProvisionalBookingService#failureCodeFor}. The
  * mapping is by status alone except for 409, which has to read the message text - see
- * {@link #BOOKING_ALREADY_CONFIRMED}.
+ * {@link #CONFIRMED_BOOKING_EXISTS}.
  *
  * <p>Adding a code is a public-contract change: it must also go in the {@code code} enum of
- * {@code public.hearing.hearing-slots-unconfirmed-booking-failed.json}, or the framework drops
+ * {@code public.hearing.hearing-slots-provisional-booking-refused.json}, or the framework drops
  * the event at publication time for failing its own schema.
  */
 public enum ProvisionalBookingFailureCode {
@@ -26,30 +27,12 @@ public enum ProvisionalBookingFailureCode {
      * courtscheduler refused because the session cannot hold the booking: it is full, overbooking
      * is not allowed, or a Crown multi-day run could not be resolved. 409 Conflict, raised from
      * {@code NoCapacityException}.
-     *
-     * <p>The only code that genuinely means "try a different session".
      */
-    NO_CAPACITY,
+    NO_CAPACITY(BUSINESS),
 
     /**
-     * The request named a court schedule that does not exist or is not active. 422 Unprocessable
-     * Entity, raised from {@code NoSessionAvailableException}.
-     *
-     * <p>Usually a stale search result: the session was withdrawn between the clerk searching and
-     * picking. Re-searching, not re-picking, is the fix - but either way the clerk's next action
-     * is to choose a different session, so the UI treats it as a refusal too.
-     */
-    NO_SESSION,
-
-    /**
-     * The bookingId being reused already carries a CONFIRMED allocation, so courtscheduler will
-     * not move its hold. 409 Conflict, raised from {@code ConfirmedBookingExistsException} -
-     * {@code ReservationService#guardAgainstConfirmedAllocation}.
-     *
-     * <p>Not {@link #NO_CAPACITY}: the session may be completely free, and telling the clerk to
-     * pick another one sends them round a loop that cannot succeed. That exact confusion is what
-     * {@code ProvisionalBookingService.bookingIdToReuse} in cpp-ui-hearing was written to avoid,
-     * and this code is how a consumer recognises the case if it slips through anyway.
+     * The booking id being reused already carries a CONFIRMED allocation, so courtscheduler will
+     * not move its hold. 409 Conflict, raised from {@code ConfirmedBookingExistsException}.
      *
      * <p>CAVEAT: courtscheduler maps BOTH this and {@code NoCapacityException} to 409, and
      * normalises every refusal to {@code {"error":"<message>"}}. The status cannot separate them,
@@ -57,47 +40,38 @@ public enum ProvisionalBookingFailureCode {
      * {@code ProvisionalBookingService.CONFIRMED_ALLOCATION_MARKER} - if that message is reworded
      * upstream, this code silently degrades to {@link #NO_CAPACITY}.
      */
-    BOOKING_ALREADY_CONFIRMED,
+    CONFIRMED_BOOKING_EXISTS(BUSINESS),
 
     /**
-     * 400. courtscheduler's validator rejected the request we built - a missing duration on a
-     * duration-based session, a malformed id. This is OUR bug, not a problem with the session the
-     * clerk chose, and it will recur identically on every retry.
+     * The request named a court schedule that does not exist or is not active. 422 Unprocessable
+     * Entity, raised from {@code NoSessionAvailableException}. Usually a stale search result.
      */
-    BAD_REQUEST,
+    NO_SESSION_AVAILABLE(BUSINESS),
 
     /**
-     * 500. courtscheduler reached its own code and that code threw. The request was well formed
-     * and the session may be perfectly bookable; a retry is reasonable.
-     */
-    INTERNAL_SERVER_ERROR,
-
-    /**
-     * 502. Something between us and courtscheduler answered instead of it - or courtscheduler's
-     * own upstream call failed, which its {@code GlobalExceptionHandler} also reports as 502.
-     */
-    BAD_GATEWAY,
-
-    /**
-     * 503, 504, or an {@link java.io.IOException} on the call itself (connection refused, read
-     * timeout, DNS failure).
+     * Anything else: courtscheduler rejected our request (400), fell over (500), could not be
+     * reached (502/503/504 or no answer at all), answered with something that is not JSON, or
+     * answered success without a booking id. None of these says anything about the session.
      *
-     * <p>Distinct from {@link #INTERNAL_SERVER_ERROR} because the request never reached
-     * courtscheduler's logic at all: nothing was written, nothing was held, and retrying once the
-     * service is back is guaranteed safe. A 500 carries no such guarantee.
+     * <p>A non-JSON answer lands here whatever its status, including 409: courtscheduler's own
+     * refusals always carry a JSON body, so a non-JSON 409 came from something in front of it and
+     * is no evidence the session is full.
      */
-    SERVICE_UNAVAILABLE,
+    COURTSCHEDULER_ERROR(TECHNICAL);
 
-    /**
-     * courtscheduler answered, but not in a way the contract allows: a 2xx carrying no
-     * {@code bookingId}, a body that is not JSON at all (an HTML error page from a sidecar, an
-     * empty body), or any status not named above.
-     *
-     * <p>Also the deliberate landing place for an unparseable body at a status that WOULD
-     * otherwise be meaningful - including 409. courtscheduler's own refusals always carry the
-     * JSON error body, so a 409 that is not JSON came from something in front of it and is no
-     * evidence that the session is full. Mapping it to {@link #NO_CAPACITY} would put it in the
-     * UI's refusal allowlist and blame a session that may be free.
-     */
-    UNEXPECTED_RESPONSE
+    /** Whether the UI shows a message for the code, or its technical error page. */
+    public enum Type {
+        BUSINESS,
+        TECHNICAL
+    }
+
+    private final Type type;
+
+    ProvisionalBookingFailureCode(final Type type) {
+        this.type = type;
+    }
+
+    public Type getType() {
+        return type;
+    }
 }

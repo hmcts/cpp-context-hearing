@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-slots-provisional-booking-refused.json",
+  "description": "courtscheduler refused the booking or the call to it failed (LPT-2590). Shaped like public.hearing.manage-results-failed. 'type' says how a consumer should react: BUSINESS is a deliberate refusal, shown to the clerk by 'code'; TECHNICAL goes to the standard technical error page. 'reason' is courtscheduler's own text plus the HTTP status, for logs only - not user-facing and not translated. 'bookingId' is present only when the request carried one: a refused first pick has none. It is a plain string, not a uuid, so that an unexpected id can never make the framework drop this event for failing its schema. Adding a code is a public-contract change and must match ProvisionalBookingFailureCode.",
+  "type": "object",
+  "properties": {
+    "bookingId": {
+      "type": "string"
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "BUSINESS",
+            "TECHNICAL"
+          ]
+        },
+        "code": {
+          "type": "string",
+          "enum": [
+            "NO_CAPACITY",
+            "CONFIRMED_BOOKING_EXISTS",
+            "NO_SESSION_AVAILABLE",
+            "COURTSCHEDULER_ERROR"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "code",
+        "reason"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "error"
+  ],
+  "additionalProperties": false
+}

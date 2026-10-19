@@ -1,8 +1,10 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static java.time.ZonedDateTime.parse;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo.bookProvisionalHearingSlotsCommand;
 import static uk.gov.moj.cpp.hearing.it.UseCases.bookHearingSlots;
@@ -52,8 +54,8 @@ public class BookProvisionalHearingSlotsIT extends AbstractIT {
      * registered for its name in public-publications-descriptor.yaml - a payload the new schema
      * does not accept is dropped at publication time, which no unit test here would notice.
      *
-     * <p>409 with a capacity message is the NO_CAPACITY path: the one refusal the UI may report
-     * to the clerk as "pick another session".
+     * <p>409 with a capacity message is the NO_CAPACITY path, a BUSINESS refusal (LPT-2590). A
+     * first pick carries no booking id, so the event must carry none either.
      */
     @Test
     public void shouldPublishTheFailureEventWhenCourtSchedulerRefusesTheBooking() throws Exception {
@@ -64,8 +66,11 @@ public class BookProvisionalHearingSlotsIT extends AbstractIT {
         final ZonedDateTime hearingStartTime = parse("2020-08-25T10:00:00.000Z");
 
         final EventListener eventListener =
-                listenFor("public.hearing.hearing-slots-unconfirmed-booking-failed", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
-                        .withFilter(hasJsonPath("$.error.code", is("NO_CAPACITY")));
+                listenFor("public.hearing.hearing-slots-provisional-booking-refused", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
+                        .withFilter(allOf(
+                                hasJsonPath("$.error.type", is("BUSINESS")),
+                                hasJsonPath("$.error.code", is("NO_CAPACITY")),
+                                hasNoJsonPath("$.bookingId")));
 
         bookHearingSlots(getRequestSpec(), hearingId, Arrays.asList(
                 bookProvisionalHearingSlotsCommand().setCourtScheduleId(courtSchedulingId).setHearingStartTime(hearingStartTime)));

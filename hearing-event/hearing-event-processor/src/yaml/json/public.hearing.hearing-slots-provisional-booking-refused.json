@@ -1,5 +1,7 @@
 {
+  "bookingId": "8f3c1d2e-4b5a-4c6d-9e7f-0a1b2c3d4e5f",
   "error": {
+    "type": "BUSINESS",
     "code": "NO_CAPACITY",
     "reason": "courtscheduler returned 409: {\"error\":\"Session 7f2a... has no remaining capacity\"}"
   }

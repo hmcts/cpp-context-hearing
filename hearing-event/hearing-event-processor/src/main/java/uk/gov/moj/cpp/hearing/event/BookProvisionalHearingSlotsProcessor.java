@@ -52,7 +52,7 @@ public class BookProvisionalHearingSlotsProcessor {
      * exactly what its payload must contain.
      */
     private static final String HEARING_SLOTS_PROVISIONALLY_BOOKED = "public.hearing.hearing-slots-provisionally-booked";
-    private static final String HEARING_SLOTS_UNCONFIRMED_BOOKING_FAILED = "public.hearing.hearing-slots-unconfirmed-booking-failed";
+    private static final String HEARING_SLOTS_PROVISIONAL_BOOKING_REFUSED = "public.hearing.hearing-slots-provisional-booking-refused";
 
     @Inject
     public BookProvisionalHearingSlotsProcessor(final Sender sender,
@@ -107,11 +107,18 @@ public class BookProvisionalHearingSlotsProcessor {
                     .withMetadataFrom(event));
         } else {
             final JsonObject error = createObjectBuilder()
+                    .add("type", provisionalBookingServiceResponse.getErrorCode().getType().name())
                     .add("code", provisionalBookingServiceResponse.getErrorCode().name())
                     .add("reason", provisionalBookingServiceResponse.getErrorMessage())
                     .build();
-            sender.send(Enveloper.envelop(createObjectBuilder().add("error", error).build())
-                    .withName(HEARING_SLOTS_UNCONFIRMED_BOOKING_FAILED)
+            final JsonObjectBuilder refused = createObjectBuilder().add("error", error);
+            // Only when the request carried one. A refused first pick has no booking id at all:
+            // courtscheduler mints one on success only.
+            if (StringUtils.isNotBlank(bookProvisionalHearingSlots.getBookingId())) {
+                refused.add("bookingId", bookProvisionalHearingSlots.getBookingId());
+            }
+            sender.send(Enveloper.envelop(refused.build())
+                    .withName(HEARING_SLOTS_PROVISIONAL_BOOKING_REFUSED)
                     .withMetadataFrom(event));
         }
     }
