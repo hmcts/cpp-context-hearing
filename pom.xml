@@ -4,7 +4,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>17.104.0</version>
+        <version>17.104.5</version>
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
@@ -42,7 +42,7 @@
         <listing.version>17.103.137</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>17.0.96</systemdocgenerator.version>
-        <results-validator-api-spec.version>26.25</results-validator-api-spec.version>
+        <results-validator-api-spec.version>26.32</results-validator-api-spec.version>
         <openapi-generator-maven-plugin.version>7.23.0</openapi-generator-maven-plugin.version>
 
         <sonar.coverage.exclusions>
@@ -90,6 +90,13 @@
             **/uk/gov/moj/cpp/hearing/mapping/HearingProsecutionCounselJPAMapper.java,
             **/uk/gov/moj/cpp/hearing/mapping/HearingRespondentCounselJPAMapper.java
         </sonar.coverage.exclusions>
+        <!-- The hearing-listing domain model is a verbatim copy of listing's reference-data POJOs
+             (decoupling from listing-common). These pure data classes are structurally repetitive by
+             nature; exclude them from copy-paste detection only. Logic classes (services, cache, loader,
+             validator, session) are NOT excluded and remain fully analysed and covered. -->
+        <sonar.cpd.exclusions>
+            **/uk/gov/moj/cpp/hearing/listing/domain/**/*
+        </sonar.cpd.exclusions>
     </properties>
 
     <modules>
@@ -105,6 +112,7 @@
         <module>pojo-plugin</module>
         <module>hearing-event-sources</module>
         <module>hearing-common</module>
+        <module>hearing-listing</module>
         <module>hearing-healthchecks</module>
     </modules>
 

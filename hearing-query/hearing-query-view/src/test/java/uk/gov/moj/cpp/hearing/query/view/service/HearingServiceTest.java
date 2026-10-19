@@ -87,7 +87,6 @@ import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
 import uk.gov.justice.hearing.courts.GetHearings;
@@ -106,7 +105,6 @@ import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.messaging.spi.DefaultJsonMetadata;
 import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
-import uk.gov.moj.cpp.hearing.domain.OffenceBailStatus;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
@@ -163,11 +161,11 @@ import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
+import uk.gov.moj.cpp.hearing.dto.HearingCaseForDayRow;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 import uk.gov.moj.cpp.hearing.repository.NowRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
-import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -218,8 +216,6 @@ public class HearingServiceTest {
     private uk.gov.justice.core.courts.HearingEvent hearingEvent;
     @Mock
     private HearingRepository hearingRepository;
-    @Mock
-    private OffenceRepository offenceRepository;
     @Mock
     private ReferenceDataService referenceDataService;
     @Mock
@@ -2731,7 +2727,7 @@ public class HearingServiceTest {
     @Test
     void getHearingCasesForDay_shouldReturnEmptyWhenNoHearingsFoundForTheDate() {
         final LocalDate date = LocalDate.now();
-        when(hearingRepository.findHearings(date)).thenReturn(emptyList());
+        when(hearingRepository.findHearingCaseRowsForDay(date)).thenReturn(emptyList());
 
         final HearingCasesForDay result = hearingService.getHearingCasesForDay(date);
 
@@ -2740,35 +2736,66 @@ public class HearingServiceTest {
 
     @Test
     void getHearingCasesForDay_shouldReturnHearingCasesForTheDate() {
+        final UUID hearingId = randomUUID();
         final UUID courtCentreId = randomUUID();
         final UUID roomId = randomUUID();
         final UUID caseId = randomUUID();
-        final String caseUrn = "CASE_URN";
-
-        final Hearing hearing = HearingTestUtils.buildHearing();
-        final List<Hearing> hearings = asList(hearing);
 
         final LocalDate date = LocalDate.now();
-        when(hearingRepository.findHearings(date)).thenReturn(hearings);
-        final uk.gov.justice.core.courts.Hearing hearingPojo = hearing()
-                .withId(hearing.getId())
-                .withHearingDays(List.of(uk.gov.justice.core.courts.HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build()))
-                .withCourtCentre(uk.gov.justice.core.courts.CourtCentre.courtCentre().withId(courtCentreId)
-                        .withRoomId(roomId).build())
-                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase().withId(caseId)
-                        .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier().withCaseURN(caseUrn).build())
-                        .build()))
-                .build();
-        when(hearingJPAMapper.fromJPAMinimal(hearing)).thenReturn(hearingPojo);
+        when(hearingRepository.findHearingCaseRowsForDay(date)).thenReturn(List.of(
+                new HearingCaseForDayRow(hearingId, courtCentreId, roomId, false, caseId, null, null)));
 
         final HearingCasesForDay result = hearingService.getHearingCasesForDay(date);
 
         assertNotNull(result.getHearingCases());
-        assertThat(result.getHearingCases().get(0).getHearingId(), is(hearing.getId()));
+        assertThat(result.getHearingCases().size(), is(1));
+        assertThat(result.getHearingCases().get(0).getHearingId(), is(hearingId));
         assertThat(result.getHearingCases().get(0).getCourtCentreId(), is(courtCentreId));
         assertThat(result.getHearingCases().get(0).getCourtRoomId(), is(roomId));
-        assertThat(result.getHearingCases().get(0).getProsecutionCases().get(0), is(caseId));
-        assertThat(result.getHearingCases().get(0).getHearingDate(), is(LocalDate.now().toString()));
+        assertThat(result.getHearingCases().get(0).getProsecutionCases(), is(List.of(caseId)));
+        assertThat(result.getHearingCases().get(0).getHearingDate(), is(date.toString()));
+    }
+
+    @Test
+    void getHearingCasesForDay_shouldGroupRowsByHearingPreservingRowOrder() {
+        final UUID firstHearingId = randomUUID();
+        final UUID secondHearingId = randomUUID();
+        final UUID courtCentreId = randomUUID();
+        final UUID roomId = randomUUID();
+        final UUID firstCaseId = randomUUID();
+        final UUID secondCaseId = randomUUID();
+        final UUID thirdCaseId = randomUUID();
+
+        final LocalDate date = LocalDate.now();
+        when(hearingRepository.findHearingCaseRowsForDay(date)).thenReturn(List.of(
+                new HearingCaseForDayRow(firstHearingId, courtCentreId, roomId, false, firstCaseId, null, null),
+                new HearingCaseForDayRow(secondHearingId, courtCentreId, roomId, false, thirdCaseId, null, null),
+                new HearingCaseForDayRow(firstHearingId, courtCentreId, roomId, false, secondCaseId, null, null)));
+
+        final HearingCasesForDay result = hearingService.getHearingCasesForDay(date);
+
+        assertThat(result.getHearingCases().size(), is(2));
+        assertThat(result.getHearingCases().get(0).getHearingId(), is(firstHearingId));
+        assertThat(result.getHearingCases().get(0).getProsecutionCases(), is(List.of(firstCaseId, secondCaseId)));
+        assertThat(result.getHearingCases().get(1).getHearingId(), is(secondHearingId));
+        assertThat(result.getHearingCases().get(1).getProsecutionCases(), is(List.of(thirdCaseId)));
+    }
+
+    @Test
+    void getHearingCasesForDay_shouldApplyGroupProceedingsFilter() {
+        final UUID hearingId = randomUUID();
+        final UUID courtCentreId = randomUUID();
+        final UUID roomId = randomUUID();
+        final UUID masterCaseId = randomUUID();
+
+        final LocalDate date = LocalDate.now();
+        when(hearingRepository.findHearingCaseRowsForDay(date)).thenReturn(List.of(
+                new HearingCaseForDayRow(hearingId, courtCentreId, roomId, true, masterCaseId, true, true),
+                new HearingCaseForDayRow(hearingId, courtCentreId, roomId, true, randomUUID(), false, true)));
+
+        final HearingCasesForDay result = hearingService.getHearingCasesForDay(date);
+
+        assertThat(result.getHearingCases().get(0).getProsecutionCases(), is(List.of(masterCaseId)));
     }
 
     // ---- CHD-2687: display order of prosecution cases -----------------------------------------
@@ -2938,75 +2965,5 @@ public class HearingServiceTest {
         // other hearing values are preserved via withValuesFrom
         assertThat(result.getHearing().getId(), is(hearingId));
         assertThat(result.getHearing().getCourtApplications(), hasSize(1));
-    }
-
-    @Test
-    public void shouldMapOffenceBailStatusesFromRepositoryForDefendant() {
-        final UUID defendantId = randomUUID();
-        final UUID offenceId = randomUUID();
-        final UUID bailStatusId = randomUUID();
-        final OffenceBailStatus repositoryResult =
-                new OffenceBailStatus(offenceId, bailStatusId, "C", "Remanded into Custody");
-
-        when(offenceRepository.offenceBailStatuses(defendantId)).thenReturn(singletonList(repositoryResult));
-
-        final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse response =
-                hearingService.getOffenceBailStatusForDefendant(defendantId);
-
-        assertThat(response.getOffenceBailStatuses(), hasSize(1));
-        final uk.gov.moj.cpp.hearing.domain.OffenceBailStatus mapped = response.getOffenceBailStatuses().get(0);
-        assertThat(mapped.getOffenceId(), is(offenceId));
-        assertThat(mapped.getBailStatusId(), is(bailStatusId));
-        assertThat(mapped.getBailStatusCode(), is("C"));
-        assertThat(mapped.getBailStatusDesc(), is("Remanded into Custody"));
-    }
-
-    @Test
-    public void shouldReturnEmptyOffenceBailStatusesWhenRepositoryHasNoResultsForDefendant() {
-        final UUID defendantId = randomUUID();
-
-        when(offenceRepository.offenceBailStatuses(defendantId)).thenReturn(emptyList());
-
-        final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse response =
-                hearingService.getOffenceBailStatusForDefendant(defendantId);
-
-        assertThat(response.getOffenceBailStatuses(), empty());
-    }
-
-    @Test
-    public void shouldMapMultipleOffenceBailStatusesPreservingOrder() {
-        final UUID defendantId = randomUUID();
-        final OffenceBailStatus first =
-                new OffenceBailStatus(randomUUID(), randomUUID(), "C", "Remanded into Custody");
-        final OffenceBailStatus second =
-                new OffenceBailStatus(randomUUID(), randomUUID(), "U", "Unconditional Bail");
-
-        when(offenceRepository.offenceBailStatuses(defendantId)).thenReturn(asList(first, second));
-
-        final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse response =
-                hearingService.getOffenceBailStatusForDefendant(defendantId);
-
-        assertThat(response.getOffenceBailStatuses(), hasSize(2));
-        assertThat(response.getOffenceBailStatuses().get(0).getBailStatusCode(), is("C"));
-        assertThat(response.getOffenceBailStatuses().get(1).getBailStatusCode(), is("U"));
-    }
-
-    @Test
-    public void shouldMapOffenceBailStatusWithNullBailStatusFieldsWhenNeitherOffenceNorDefendantHasOne() {
-        final UUID defendantId = randomUUID();
-        final UUID offenceId = randomUUID();
-        final OffenceBailStatus repositoryResult =
-                new OffenceBailStatus(offenceId, null, null, null);
-
-        when(offenceRepository.offenceBailStatuses(defendantId)).thenReturn(singletonList(repositoryResult));
-
-        final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse response =
-                hearingService.getOffenceBailStatusForDefendant(defendantId);
-
-        final uk.gov.moj.cpp.hearing.domain.OffenceBailStatus mapped = response.getOffenceBailStatuses().get(0);
-        assertThat(mapped.getOffenceId(), is(offenceId));
-        assertThat(mapped.getBailStatusId(), is(nullValue()));
-        assertThat(mapped.getBailStatusCode(), is(nullValue()));
-        assertThat(mapped.getBailStatusDesc(), is(nullValue()));
     }
 }

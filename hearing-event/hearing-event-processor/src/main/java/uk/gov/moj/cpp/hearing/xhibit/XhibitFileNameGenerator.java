@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.xhibit;
 import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
 
-import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
+import uk.gov.moj.cpp.hearing.listing.common.xhibit.CommonXhibitReferenceDataService;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
