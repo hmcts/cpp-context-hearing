@@ -19,6 +19,9 @@
         "id": {
           "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
         },
+        "type": {
+          "$ref": "http://justice.gov.uk/core/courts/hearingType.json"
+        },
         "courtCentre": {
           "$ref": "#/definitions/courtCentre"
         },

@@ -2,6 +2,11 @@
   "hearingSummaries": [
     {
       "id": "5ed12bfd-7285-4996-82aa-15030327a337",
+      "type": {
+        "id": "bf8155e1-90b9-4080-b133-bfbad895d6e4",
+        "description": "Trial",
+        "welshDescription": "Treial"
+      },
       "courtCentre": {
         "roomName": "Courtroom 01"
       },

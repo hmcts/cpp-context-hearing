@@ -64,6 +64,7 @@ class HearingCheckInIT extends AbstractIT {
     private static final String DEFENDANT_FIRST_NAME = "FIRST_NAME";
     private static final String DEFENDANT_LAST_NAME = "LAST_NAME";
     private static final String APPLICATION_TYPE = "APPLICATION_TYPE";
+    private static final String HEARING_TYPE_DESCRIPTION = "Trial";
 
     @Test
     void shouldRetrieveHearingWithProsecutionCaseForCheckIn() {
@@ -82,6 +83,7 @@ class HearingCheckInIT extends AbstractIT {
                 .with(GetHearings::getHearingSummaries, hasSize(greaterThanOrEqualTo(1)))
                 .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
                         .with(HearingSummaries::getId, is(hearingId))
+                        .with(hs -> hs.getType().getDescription(), is(HEARING_TYPE_DESCRIPTION))
                         .with(hs -> hs.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getFirstName(), is(DEFENDANT_FIRST_NAME))
                         .with(hs -> hs.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getLastName(), is(DEFENDANT_LAST_NAME))
                 ))
@@ -290,7 +292,7 @@ class HearingCheckInIT extends AbstractIT {
                         .withJurisdictionType(MAGISTRATES)
                         .withType(hearingType()
                                 .withId(randomUUID())
-                                .withDescription("Trial")
+                                .withDescription(HEARING_TYPE_DESCRIPTION)
                                 .build())
                         .build());
     }
