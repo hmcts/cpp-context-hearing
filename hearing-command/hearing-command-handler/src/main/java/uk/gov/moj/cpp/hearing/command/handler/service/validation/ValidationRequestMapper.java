@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.command.handler.service.validation;
 
 import static java.util.stream.Collectors.toList;
 
+import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Offence;
@@ -94,19 +95,34 @@ public class ValidationRequestMapper {
         if (defendant.getOffences() == null) {
             return;
         }
+        final String defendantId = uuidToString(defendant.getId());
         defendant.getOffences()
-                .forEach(offence -> offences.add(toOffenceDto(offence, caseUrn)));
+                .forEach(offence -> offences.add(toOffenceDto(offence, caseUrn, defendantId)));
     }
 
-    private OffenceDto toOffenceDto(final Offence offence, final String caseUrn) {
+    private OffenceDto toOffenceDto(final Offence offence, final String caseUrn, final String defendantId) {
         return new OffenceDto()
                 .offenceId(uuidToString(offence.getId()))
                 .offenceCode(offence.getOffenceCode())
                 .offenceTitle(offence.getOffenceTitle())
                 .orderIndex(offence.getOrderIndex())
                 .caseUrn(caseUrn)
+                .defendantId(defendantId)
                 .isConvicted(offence.getConvictionDate() != null)
-                .hasExistingCtlRecord(hasExistingCustodyTimeLimit(offence));
+                .hasExistingCtlRecord(hasExistingCustodyTimeLimit(offence))
+                .bailStatus(toBailStatus(offence.getBailStatus()));
+    }
+
+    private static OffenceDto.BailStatusEnum toBailStatus(final BailStatus bailStatus) {
+        if (bailStatus == null || bailStatus.getCode() == null) {
+            return null;
+        }
+        try {
+            return OffenceDto.BailStatusEnum.fromValue(bailStatus.getCode());
+        } catch (final IllegalArgumentException ex) {
+            LOGGER.warn("Unrecognised bail status '{}' for results validation, sending null", bailStatus.getCode());
+            return null;
+        }
     }
 
     private boolean hasExistingCustodyTimeLimit(final Offence offence) {
