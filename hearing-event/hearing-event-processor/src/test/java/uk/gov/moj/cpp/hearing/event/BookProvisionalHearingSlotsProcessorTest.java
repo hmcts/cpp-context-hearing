@@ -18,19 +18,22 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
-import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingFailureCode;
 import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingServiceResponse;
 import uk.gov.moj.cpp.hearing.event.service.ProvisionalBookingService;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
+import com.networknt.schema.ValidationMessage;
 
 import javax.json.JsonObject;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -182,7 +185,7 @@ BookProvisionalHearingSlotsProcessorTest {
      */
     @Test
     public void shouldPublishTheFailureEventRatherThanTheBookedEventWhenCourtSchedulerRefuses() {
-        givenCourtSchedulerRefusesWith(ProvisionalBookingFailureCode.NO_CAPACITY, "no capacity");
+        givenCourtSchedulerRefusesWith(422, "no capacity");
 
         verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
 
@@ -190,24 +193,39 @@ BookProvisionalHearingSlotsProcessorTest {
                 is("public.hearing.hearing-slots-provisional-booking-refused"));
     }
 
+    /**
+     * courtscheduler's HTTP status goes out as is. Hearing does not interpret it: no type, no
+     * code - deciding what a status means for the clerk is the consumer's call.
+     */
     @Test
-    public void shouldCarryTypeCodeAndReasonOnTheFailureEvent() {
-        givenCourtSchedulerRefusesWith(ProvisionalBookingFailureCode.NO_CAPACITY,
-                "courtscheduler returned 409: {\"error\":\"session full\"}");
+    public void shouldCarryCourtSchedulersStatusAndTheMessageOnTheFailureEvent() {
+        givenCourtSchedulerRefusesWith(422, "courtscheduler returned 422: {\"error\":\"session full\"}");
 
         verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
 
         final JsonObject error = sentPayload().getJsonObject("error");
-        assertThat(error.getString("type"), is("BUSINESS"));
-        assertThat(error.getString("code"), is("NO_CAPACITY"));
-        assertThat(error.getString("reason"), is("courtscheduler returned 409: {\"error\":\"session full\"}"));
+        assertThat(error.getInt("status"), is(422));
+        assertThat(error.getString("message"), is("courtscheduler returned 422: {\"error\":\"session full\"}"));
+        assertThat(error.keySet(), is(Set.of("status", "message")));
+    }
+
+    /** No answer from courtscheduler at all (connection refused, timeout): there is no status to send. */
+    @Test
+    public void shouldOmitStatusFromTheFailureEventWhenCourtSchedulerNeverAnswered() {
+        givenCourtSchedulerRefusesWith(null, "Connection refused");
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+
+        final JsonObject error = sentPayload().getJsonObject("error");
+        assertThat(error.containsKey("status"), is(false));
+        assertThat(error.getString("message"), is("Connection refused"));
     }
 
     /** A refused re-pick carries the booking id it was asked to reuse. */
     @Test
     public void shouldCarryTheRequestsBookingIdOnTheFailureEventWhenItHadOne() {
         givenCourtSchedulerRefusesWith("hearing.event.book-provisional-hearing-slots-with-booking-id.json",
-                ProvisionalBookingFailureCode.NO_CAPACITY, "no capacity");
+                422, "no capacity");
 
         verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
 
@@ -217,7 +235,7 @@ BookProvisionalHearingSlotsProcessorTest {
     /** A refused first pick has no booking id at all - courtscheduler only mints one on success. */
     @Test
     public void shouldOmitBookingIdFromTheFailureEventOnAFirstPick() {
-        givenCourtSchedulerRefusesWith(ProvisionalBookingFailureCode.NO_CAPACITY, "no capacity");
+        givenCourtSchedulerRefusesWith(422, "no capacity");
 
         verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
 
@@ -227,7 +245,7 @@ BookProvisionalHearingSlotsProcessorTest {
     @Test
     public void shouldOmitBookingIdFromTheFailureEventWhenTheRequestsWasBlank() {
         givenCourtSchedulerRefusesWith("hearing.event.book-provisional-hearing-slots-with-blank-booking-id.json",
-                ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR, "courtscheduler returned 500: {}");
+                500, "courtscheduler returned 500: {}");
 
         verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
 
@@ -235,99 +253,25 @@ BookProvisionalHearingSlotsProcessorTest {
     }
 
     /**
-     * Every code must survive the hop to the event unchanged - the UI branches on it to decide
-     * whether the clerk may be told to pick another session, and a code it does not recognise
-     * is treated as technical.
-     *
-     * <p>Driven off {@code values()} rather than a hand-written list so a code added to the enum
-     * is covered the moment it exists, and one removed cannot leave a stale assertion behind.
-     */
-    @Test
-    public void shouldPublishEveryFailureCodeVerbatim() {
-        for (final ProvisionalBookingFailureCode code : ProvisionalBookingFailureCode.values()) {
-            reset(this.sender);
-            givenCourtSchedulerRefusesWith(code, "reason for " + code);
-
-            verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
-
-            final JsonObject error = sentPayload().getJsonObject("error");
-            assertThat(error.getString("type"), is(code.getType().name()));
-            assertThat(error.getString("code"), is(code.name()));
-            assertThat(error.getString("reason"), is("reason for " + code));
-        }
-    }
-
-    /**
-     * The enum and the published schema's {@code code} list must agree, in both directions.
+     * What the processor publishes must validate against the published schema.
      *
      * <p>This is the failure this test exists to prevent and it is a silent one: the framework
      * validates a published event against the schema registered for its name and DROPS it if the
-     * payload does not conform. A code added to the enum but not to the schema therefore produces
-     * no public event at all - the clerk watches a spinner until commandSync's 30s timeout, and
-     * the only evidence is in the WildFly log. The reverse direction matters less but still rots
-     * the contract, advertising codes nothing can emit.
-     *
-     * <p>Compared as sets, by name: ordering in the schema is presentational.
+     * payload does not conform. The clerk then watches a spinner until commandSync's 30s timeout,
+     * and the only evidence is in the WildFly log. Checked for both shapes the event can take:
+     * with a status, and without one.
      */
     @Test
-    public void everyFailureCodeIsDeclaredInThePublishedSchema() throws Exception {
-        final File schema = new File(FAILURE_EVENT_SCHEMA);
-        if (!schema.exists()) {
-            throw new IllegalStateException("schema not found: " + schema.getAbsolutePath()
-                    + " \u2014 if the module layout moved, update this test rather than deleting it");
-        }
+    public void shouldPublishAFailureEventThatTheSchemaAccepts() throws Exception {
+        givenCourtSchedulerRefusesWith("hearing.event.book-provisional-hearing-slots-with-booking-id.json",
+                422, "courtscheduler returned 422: {}");
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+        assertThat(schemaErrors(sentPayload()), is(Set.of()));
 
-        final JsonNode codeEnum = new ObjectMapper().readTree(schema)
-                .path("properties").path("error").path("properties").path("code").path("enum");
-        if (!codeEnum.isArray()) {
-            throw new IllegalStateException("schema has no properties.error.properties.code.enum: "
-                    + FAILURE_EVENT_SCHEMA);
-        }
-
-        final Set<String> declared = new TreeSet<>();
-        codeEnum.forEach(node -> declared.add(node.asText()));
-
-        final Set<String> actual = new TreeSet<>();
-        for (final ProvisionalBookingFailureCode code : ProvisionalBookingFailureCode.values()) {
-            actual.add(code.name());
-        }
-
-        assertThat("codes the published schema would REJECT, silently dropping the event",
-                declared.containsAll(actual), is(true));
-        assertThat("codes the schema advertises that no enum constant can emit",
-                actual.containsAll(declared), is(true));
-        assertThat(actual, is(declared));
-    }
-
-    /** Same silent-drop risk for {@code type}: every type a code can carry must be declared. */
-    @Test
-    public void everyFailureTypeIsDeclaredInThePublishedSchema() throws Exception {
-        final JsonNode typeEnum = new ObjectMapper().readTree(new File(FAILURE_EVENT_SCHEMA))
-                .path("properties").path("error").path("properties").path("type").path("enum");
-        if (!typeEnum.isArray()) {
-            throw new IllegalStateException("schema has no properties.error.properties.type.enum: "
-                    + FAILURE_EVENT_SCHEMA);
-        }
-
-        final Set<String> declared = new TreeSet<>();
-        typeEnum.forEach(node -> declared.add(node.asText()));
-
-        final Set<String> actual = new TreeSet<>();
-        for (final ProvisionalBookingFailureCode.Type type : ProvisionalBookingFailureCode.Type.values()) {
-            actual.add(type.name());
-        }
-
-        assertThat(actual, is(declared));
-    }
-
-    /** The split agreed in LPT-2590: three refusals the clerk is told about, one technical failure. */
-    @Test
-    public void everyFailureCodeHasTheAgreedType() {
-        assertThat(ProvisionalBookingFailureCode.NO_CAPACITY.getType(), is(ProvisionalBookingFailureCode.Type.BUSINESS));
-        assertThat(ProvisionalBookingFailureCode.CONFIRMED_BOOKING_EXISTS.getType(), is(ProvisionalBookingFailureCode.Type.BUSINESS));
-        assertThat(ProvisionalBookingFailureCode.NO_SESSION_AVAILABLE.getType(), is(ProvisionalBookingFailureCode.Type.BUSINESS));
-        assertThat(ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR.getType(), is(ProvisionalBookingFailureCode.Type.TECHNICAL));
-        assertThat(ProvisionalBookingFailureCode.values().length, is(4));
+        reset(this.sender);
+        givenCourtSchedulerRefusesWith(null, "Connection refused");
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+        assertThat(schemaErrors(sentPayload()), is(Set.of()));
     }
 
     /** The booked event must now be bookingId-only: its schema no longer permits an error. */
@@ -353,17 +297,31 @@ BookProvisionalHearingSlotsProcessorTest {
         return (JsonObject) envelopeArgumentCaptor.getValue().payload();
     }
 
-    private void givenCourtSchedulerRefusesWith(final ProvisionalBookingFailureCode code, final String reason) {
-        givenCourtSchedulerRefusesWith("hearing.event.book-provisional-hearing-slots-v2.json", code, reason);
+    private void givenCourtSchedulerRefusesWith(final Integer status, final String message) {
+        givenCourtSchedulerRefusesWith("hearing.event.book-provisional-hearing-slots-v2.json", status, message);
     }
 
-    private void givenCourtSchedulerRefusesWith(final String requestFixture, final ProvisionalBookingFailureCode code, final String reason) {
+    private void givenCourtSchedulerRefusesWith(final String requestFixture, final Integer status, final String message) {
         final JsonObject bookProvisionalHearingSlotsJsonObject = new StringToJsonObjectConverter().convert(getPayload(requestFixture));
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-unconfirmed-hearing-slots"), bookProvisionalHearingSlotsJsonObject);
 
-        when(provisionalBookingService.bookSlots(any())).thenReturn(ProvisionalBookingServiceResponse.error(code, reason));
+        when(provisionalBookingService.bookSlots(any())).thenReturn(ProvisionalBookingServiceResponse.error(status, message));
 
         bookProvisionalHearingSlotsProcessor.handleBookProvisionalHearingSlots(event);
+    }
+
+    private static Set<String> schemaErrors(final JsonObject payload) throws Exception {
+        final File schema = new File(FAILURE_EVENT_SCHEMA);
+        if (!schema.exists()) {
+            throw new IllegalStateException("schema not found: " + schema.getAbsolutePath()
+                    + " \u2014 if the module layout moved, update this test rather than deleting it");
+        }
+        final JsonSchema jsonSchema = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4)
+                .getSchema(Files.newInputStream(schema.toPath()));
+        final ObjectMapper mapper = new ObjectMapper();
+        return jsonSchema.validate(mapper.readTree(payload.toString())).stream()
+                .map(ValidationMessage::getMessage)
+                .collect(Collectors.toSet());
     }
 
     private static ProvisionalBookingServiceResponse getNormalResponse() {

@@ -49,17 +49,17 @@ public class BookProvisionalHearingSlotsIT extends AbstractIT {
     }
 
     /**
-     * A refusal must arrive under its OWN event name, carrying a code. Worth an IT rather than
-     * only a unit test because the framework validates every published event against the schema
-     * registered for its name in public-publications-descriptor.yaml - a payload the new schema
-     * does not accept is dropped at publication time, which no unit test here would notice.
+     * A refusal must arrive under its OWN event name, carrying courtscheduler's HTTP status as is.
+     * Worth an IT rather than only a unit test because the framework validates every published
+     * event against the schema registered for its name in public-publications-descriptor.yaml - a
+     * payload the new schema does not accept is dropped at publication time, which no unit test
+     * here would notice.
      *
-     * <p>409 with a capacity message is the NO_CAPACITY path, a BUSINESS refusal (LPT-2590). A
-     * first pick carries no booking id, so the event must carry none either.
+     * <p>A first pick carries no booking id, so the event must carry none either.
      */
     @Test
     public void shouldPublishTheFailureEventWhenCourtSchedulerRefusesTheBooking() throws Exception {
-        stubProvisionalBookSlotsRefusedWith(409, "Could not reserve sessions: no remaining capacity");
+        stubProvisionalBookSlotsRefusedWith(422, "Could not reserve sessions: no remaining capacity");
 
         final UUID hearingId = randomUUID();
         final UUID courtSchedulingId = randomUUID();
@@ -68,8 +68,9 @@ public class BookProvisionalHearingSlotsIT extends AbstractIT {
         final EventListener eventListener =
                 listenFor("public.hearing.hearing-slots-provisional-booking-refused", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
                         .withFilter(allOf(
-                                hasJsonPath("$.error.type", is("BUSINESS")),
-                                hasJsonPath("$.error.code", is("NO_CAPACITY")),
+                                hasJsonPath("$.error.status", is(422)),
+                                hasNoJsonPath("$.error.type"),
+                                hasNoJsonPath("$.error.code"),
                                 hasNoJsonPath("$.bookingId")));
 
         bookHearingSlots(getRequestSpec(), hearingId, Arrays.asList(

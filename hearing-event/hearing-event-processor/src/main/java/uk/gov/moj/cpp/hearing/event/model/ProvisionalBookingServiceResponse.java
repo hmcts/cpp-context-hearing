@@ -4,23 +4,21 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * The outcome of one call to courtscheduler's {@code POST /unconfirmedBooking}: either a
- * bookingId, or a refusal carrying BOTH a machine-readable {@link ProvisionalBookingFailureCode}
- * and the free text behind it.
+ * bookingId, or a refusal carrying courtscheduler's HTTP status as is and the free text behind it.
  *
- * <p>The code exists because the two now go to different public events with different payloads,
- * and the event processor is the wrong place to re-derive "which kind of failure was this" — only
- * the service that made the HTTP call still has the status code and courtscheduler's own message.
+ * <p>Hearing does not interpret the status. Which kind of refusal it was, and what to tell the
+ * clerk, is left to the consumer of the public failure event.
  */
 public class ProvisionalBookingServiceResponse {
     private final String bookingId;
-    private final ProvisionalBookingFailureCode errorCode;
+    private final Integer status;
     private final String errorMessage;
 
     private ProvisionalBookingServiceResponse(final String bookingId,
-                                              final ProvisionalBookingFailureCode errorCode,
+                                              final Integer status,
                                               final String errorMessage) {
         this.bookingId = bookingId;
-        this.errorCode = errorCode;
+        this.status = status;
         this.errorMessage = errorMessage;
     }
 
@@ -28,22 +26,26 @@ public class ProvisionalBookingServiceResponse {
         return new ProvisionalBookingServiceResponse(bookingId, null, null);
     }
 
-    public static ProvisionalBookingServiceResponse error(final ProvisionalBookingFailureCode errorCode,
+    /**
+     * @param status courtscheduler's HTTP status, or null when it never answered (connection
+     *               refused, timeout) and there is no status to report
+     */
+    public static ProvisionalBookingServiceResponse error(final Integer status,
                                                           final String errorMessage) {
-        return new ProvisionalBookingServiceResponse(null, errorCode, errorMessage);
+        return new ProvisionalBookingServiceResponse(null, status, errorMessage);
     }
 
     public String getBookingId() {
         return bookingId;
     }
 
-    /** Never null when {@link #hasError()} is true. */
-    public ProvisionalBookingFailureCode getErrorCode() {
-        return errorCode;
+    /** courtscheduler's HTTP status on an error; null on success or when it never answered. */
+    public Integer getStatus() {
+        return status;
     }
 
     /**
-     * Free text for the operator log and for the {@code reason} field of the failure event. It
+     * Free text for the operator log and for the {@code message} field of the failure event. It
      * deliberately carries courtscheduler's status code as well as its message: a bare message
      * made a 400 (our bug) indistinguishable from a 502 (theirs) in the WildFly log.
      */

@@ -8,12 +8,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
-import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingFailureCode;
 import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingServiceResponse;
 
 import java.io.IOException;
@@ -24,6 +24,8 @@ import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -99,66 +101,37 @@ public class ProvisionalBookingServiceTest {
         final ProvisionalBookingServiceResponse response = provisionalBookingService.bookSlots(emptyMap());
 
         assertThat(response.hasError(), is(true));
+        assertThat(response.getStatus(), is(400));
         assertThat(response.getErrorMessage(), containsString("400"));
         assertThat(response.getErrorMessage(), containsString("duration is required"));
-        // A 400 means WE built a request courtscheduler's validator rejected. Blaming the
-        // session would send the clerk off to re-pick a session that was never the problem.
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR));
     }
 
     /**
-     * 409 from {@code NoCapacityException}: the session genuinely cannot hold the booking. This
-     * is the ONE code that entitles a consumer to tell the clerk to pick another session.
+     * Whatever status courtscheduler answers with is passed on as is. Hearing does not interpret
+     * it - which refusal it was, and what to tell the clerk, is the consumer's call.
      */
-    @Test
-    public void shouldClassifyACapacityConflictAsNoCapacity() throws Exception {
-        givenCourtSchedulerResponds(409,
-                "{\"error\":\"Could not reserve sessions for booking b-1: no remaining capacity\"}");
+    @ParameterizedTest
+    @ValueSource(ints = {400, 404, 409, 422, 500, 502, 503, 504})
+    public void shouldPassCourtSchedulersStatusThroughAsIs(final int status) throws Exception {
+        givenCourtSchedulerResponds(status, "{\"error\":\"refused\"}");
 
         final ProvisionalBookingServiceResponse response = provisionalBookingService.bookSlots(emptyMap());
 
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.NO_CAPACITY));
-        assertThat(response.getErrorMessage(), containsString("409"));
+        assertThat(response.hasError(), is(true));
+        assertThat(response.getStatus(), is(status));
+        assertThat(response.getErrorMessage(), containsString(String.valueOf(status)));
+        assertThat(response.getErrorMessage(), containsString("refused"));
     }
 
-    /**
-     * The other 409. courtscheduler maps {@code ConfirmedBookingExistsException} to the SAME
-     * status as a capacity refusal and normalises both to {@code {"error":"<msg>"}}, so the only
-     * discriminator is the message text - see ProvisionalBookingService.CONFIRMED_ALLOCATION_MARKER.
-     * This test is what fails first if that message is reworded upstream.
-     */
+    /** A 200 that somehow carried no bookingId is still an error, reported with the 200 it came with. */
     @Test
-    public void shouldDistinguishAConfirmedBookingConflictFromACapacityConflict() throws Exception {
-        givenCourtSchedulerResponds(409,
-                "{\"error\":\"Booking b-1 already has a confirmed allocation \\u2014 cannot reserve\"}");
-
-        final ProvisionalBookingServiceResponse response = provisionalBookingService.bookSlots(emptyMap());
-
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.CONFIRMED_BOOKING_EXISTS));
-    }
-
-    /** 422 from {@code NoSessionAvailableException}: the session is gone, not full. */
-    @Test
-    public void shouldClassifyAnUnknownSessionAsNoSessionAvailable() throws Exception {
-        givenCourtSchedulerResponds(422, "{\"error\":\"No session found for sessionId abc\"}");
-
-        final ProvisionalBookingServiceResponse response = provisionalBookingService.bookSlots(emptyMap());
-
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.NO_SESSION_AVAILABLE));
-    }
-
-    /**
-     * A 200 that somehow carried no bookingId is a contract violation, not a refusal of the
-     * session - it must not reach the clerk as "pick another one".
-     */
-    @Test
-    public void shouldClassifyASuccessWithoutABookingIdAsCourtSchedulerError() throws Exception {
+    public void shouldReportASuccessWithoutABookingIdAsAnError() throws Exception {
         givenCourtSchedulerResponds(200, "{}");
 
         final ProvisionalBookingServiceResponse response = provisionalBookingService.bookSlots(emptyMap());
 
         assertThat(response.hasError(), is(true));
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR));
+        assertThat(response.getStatus(), is(200));
     }
 
     /**
@@ -174,6 +147,7 @@ public class ProvisionalBookingServiceTest {
 
         assertThat(response.hasError(), is(false));
         assertThat(response.getBookingId(), is(bookingId));
+        assertThat(response.getStatus(), is(nullValue()));
     }
 
     /**
@@ -181,7 +155,7 @@ public class ProvisionalBookingServiceTest {
      * throws {@link org.json.JSONException} on both — unchecked, so before the guard it escaped
      * the IOException catch, rolled the JMS transaction back and, after redelivery, dropped the
      * command on the DLQ: no public event at all, and a clerk left watching a spinner that never
-     * resolves. It must degrade to an ordinary error instead.
+     * resolves. It must degrade to an ordinary error, still carrying the status as is.
      */
     @Test
     public void shouldNotPropagateWhenBodyIsNotJson() throws Exception {
@@ -191,25 +165,9 @@ public class ProvisionalBookingServiceTest {
                 assertDoesNotThrow(() -> provisionalBookingService.bookSlots(emptyMap()));
 
         assertThat(response.hasError(), is(true));
+        assertThat(response.getStatus(), is(502));
         assertThat(response.getErrorMessage(), containsString("502"));
-        // The body is not JSON, so this is not courtscheduler answering and its status is not
-        // read as if it were - only kept in the reason for the logs.
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR));
-    }
-
-    /**
-     * An unparseable body is COURTSCHEDULER_ERROR WHATEVER the status says. courtscheduler's own
-     * refusals always carry the JSON error body, so a 409 that is not JSON came from something in
-     * front of it and is no evidence at all that the session is full. This is the case that makes
-     * the rule worth having: read as NO_CAPACITY it would tell the clerk a free session is full.
-     */
-    @Test
-    public void shouldNotReadACapacityRefusalOutOfANonJsonConflict() throws Exception {
-        givenCourtSchedulerResponds(409, "<html><body>Conflict</body></html>");
-
-        final ProvisionalBookingServiceResponse response = provisionalBookingService.bookSlots(emptyMap());
-
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR));
+        assertThat(response.getErrorMessage(), containsString("Bad Gateway"));
     }
 
     /** Same again for a bodiless response, where {@code getEntity()} itself is null. */
@@ -221,77 +179,17 @@ public class ProvisionalBookingServiceTest {
                 assertDoesNotThrow(() -> provisionalBookingService.bookSlots(emptyMap()));
 
         assertThat(response.hasError(), is(true));
+        assertThat(response.getStatus(), is(503));
         assertThat(response.getErrorMessage(), containsString("503"));
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR));
-    }
-
-    /**
-     * Every status other than 409 and 422 is one technical code (LPT-2590); the status itself is
-     * kept in the reason, so the logs still tell our bad request from their outage.
-     */
-    @Test
-    public void shouldClassifyAServerErrorAsCourtSchedulerError() throws Exception {
-        givenCourtSchedulerResponds(500, "{\"error\":\"Internal Server Error\"}");
-
-        final ProvisionalBookingServiceResponse response = provisionalBookingService.bookSlots(emptyMap());
-
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR));
-        assertThat(response.getErrorMessage(), containsString("500"));
-    }
-
-    /** 502 with a JSON body: courtscheduler's own upstream call failed. */
-    @Test
-    public void shouldClassifyAnUpstreamFailureAsCourtSchedulerError() throws Exception {
-        givenCourtSchedulerResponds(502, "{\"error\":\"Upstream service responded with 500\"}");
-
-        final ProvisionalBookingServiceResponse response = provisionalBookingService.bookSlots(emptyMap());
-
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR));
-        assertThat(response.getErrorMessage(), containsString("502"));
-    }
-
-    /** 503 and 504: the request never reached courtscheduler's logic. */
-    @Test
-    public void shouldClassifyAnUnreachableServiceAsCourtSchedulerError() throws Exception {
-        givenCourtSchedulerResponds(503, "{\"error\":\"Service Unavailable\"}");
-
-        final ProvisionalBookingServiceResponse response = provisionalBookingService.bookSlots(emptyMap());
-
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR));
-        assertThat(response.getErrorMessage(), containsString("503"));
-    }
-
-    @Test
-    public void shouldClassifyAGatewayTimeoutAsCourtSchedulerError() throws Exception {
-        givenCourtSchedulerResponds(504, "{\"error\":\"Gateway Timeout\"}");
-
-        final ProvisionalBookingServiceResponse response = provisionalBookingService.bookSlots(emptyMap());
-
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR));
-        assertThat(response.getErrorMessage(), containsString("504"));
-    }
-
-    /**
-     * A status the mapping does not name - 404 here, but equally a 401 from a misconfigured
-     * gateway. The code set has to stay closed, because it is a published schema enum.
-     */
-    @Test
-    public void shouldClassifyAnUnmappedStatusAsCourtSchedulerError() throws Exception {
-        givenCourtSchedulerResponds(404, "{\"error\":\"Not Found\"}");
-
-        final ProvisionalBookingServiceResponse response = provisionalBookingService.bookSlots(emptyMap());
-
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR));
-        assertThat(response.getErrorMessage(), containsString("404"));
     }
 
     /**
      * No answer at all. Nothing listens on port 1, so connect() is refused immediately and the
-     * real IOException path runs. The test at the top of this class proves
-     * releaseSlots SWALLOWS that exception; this one proves bookSlots CLASSIFIES it.
+     * real IOException path runs. The test at the top of this class proves releaseSlots SWALLOWS
+     * that exception; this one proves bookSlots reports it - with no status, as there was none.
      */
     @Test
-    public void shouldClassifyAConnectionFailureAsCourtSchedulerError() {
+    public void shouldReportAConnectionFailureWithoutAStatus() {
         when(systemUserProvider.getContextSystemUserId()).thenReturn(of(randomUUID()));
         setField(provisionalBookingService, "systemUserProvider", systemUserProvider);
         setField(provisionalBookingService, "objectMapper", new ObjectMapper());
@@ -301,9 +199,9 @@ public class ProvisionalBookingServiceTest {
                 assertDoesNotThrow(() -> provisionalBookingService.bookSlots(emptyMap()));
 
         assertThat(response.hasError(), is(true));
-        assertThat(response.getErrorCode(), is(ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR));
+        assertThat(response.getStatus(), is(nullValue()));
         // getMessage() is null on some IOException subclasses and the event schema requires
-        // reason, so it must never come back blank.
+        // message, so it must never come back blank.
         assertThat(response.getErrorMessage(), is(notNullValue()));
     }
 

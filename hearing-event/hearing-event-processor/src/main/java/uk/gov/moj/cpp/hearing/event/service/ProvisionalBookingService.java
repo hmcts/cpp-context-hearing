@@ -5,7 +5,6 @@ import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 
 import uk.gov.justice.services.common.configuration.Value;
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
-import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingFailureCode;
 import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingServiceResponse;
 
 import java.io.IOException;
@@ -37,29 +36,6 @@ public class ProvisionalBookingService {
 
     public static final String COURTSCHEDULER_CREATE_UNCONFIRMED_BOOKING = "application/vnd.courtscheduler.create.unconfirmed.booking+json";
     public static final String CJS_CPP_UID = "CJSCPPUID";
-
-    /**
-     * javax.ws.rs's {@code Response.Status} has no 422 constant (it was only added to JAX-RS in
-     * 3.1), so both statuses {@link #failureCodeFor} switches on are spelled out here.
-     */
-    private static final int HTTP_CONFLICT = 409;
-    private static final int HTTP_UNPROCESSABLE_ENTITY = 422;
-
-    /**
-     * courtscheduler's {@code GlobalExceptionHandler} answers BOTH {@code NoCapacityException}
-     * and {@code ConfirmedBookingExistsException} with 409, and normalises every refusal to the
-     * same {@code {"error":"<message>"}} shape. The status therefore cannot tell "this session is
-     * full" (re-pick and you may succeed) from "this booking is already confirmed" (re-picking
-     * can never succeed, it is the amend journey).
-     *
-     * <p>This substring of {@code ReservationService#guardAgainstConfirmedAllocation}'s message is
-     * the only discriminator available without a courtscheduler contract change. It is a genuine
-     * weakness: reword that message upstream and a confirmed-booking conflict quietly becomes
-     * {@link ProvisionalBookingFailureCode#NO_CAPACITY}, which is wrong but not dangerous — the
-     * clerk sees the no-capacity message rather than the confirmed-booking one. A structured {@code code} on
-     * courtscheduler's own error body is the proper fix and belongs in that service.
-     */
-    private static final String CONFIRMED_ALLOCATION_MARKER = "already has a confirmed allocation";
 
     @Inject
     @Value(key = "courtscheduler.base.url", defaultValue = "http://localhost:8080/listingcourtscheduler-api/rest/courtscheduler")
@@ -130,14 +106,8 @@ public class ProvisionalBookingService {
                 responseJson = new JSONObject(body);
             } catch (JSONException ex) {
                 LOGGER.error("create unconfirmedBooking returned an unparseable body, status:{} body:{}", status, body, ex);
-                // COURTSCHEDULER_ERROR whatever the status says, and deliberately NOT the
-                // status-derived code failureCodeFor would give. courtscheduler's own answers
-                // always carry a JSON body; a response that is not JSON came from something in
-                // front of it (gateway, sidecar, error page), so the status is not courtscheduler
-                // speaking and must not be read as if it were. A 409 is the case that matters:
-                // read as NO_CAPACITY it would tell the clerk a session is full that may be free.
                 return ProvisionalBookingServiceResponse.error(
-                        ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR,
+                        status,
                         String.format("courtscheduler returned %d with an unparseable body: %s", status, body));
             }
 
@@ -145,50 +115,20 @@ public class ProvisionalBookingService {
                 return ProvisionalBookingServiceResponse.normal(responseJson.getString("bookingId"));
             }
             return ProvisionalBookingServiceResponse.error(
-                    failureCodeFor(status, body),
+                    status,
                     String.format("courtscheduler returned %d: %s", status, responseJson));
         } catch (IOException ex) {
             LOGGER.error("create unconfirmedBooking failed", ex);
             // The call never got an answer at all (connection refused, read timeout, DNS), so
-            // courtscheduler's logic never ran, nothing was written and nothing was held.
+            // courtscheduler's logic never ran, nothing was written and nothing was held. There is
+            // no status to report.
             //
             // getMessage() is null for several IOException subclasses (a bare SocketException,
-            // for one), and the failure event's reason is a required string - fall back to the
-            // exception type rather than publishing a null or an empty reason.
+            // for one), and the failure event's message is a required string - fall back to the
+            // exception type rather than publishing a null or an empty message.
             return ProvisionalBookingServiceResponse.error(
-                    ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR,
+                    null,
                     StringUtils.defaultIfBlank(ex.getMessage(), ex.getClass().getSimpleName()));
-        }
-    }
-
-    /**
-     * Maps courtscheduler's HTTP answer onto the code set the public failure event carries. See
-     * {@link ProvisionalBookingFailureCode} for what each code means and
-     * {@link #CONFIRMED_ALLOCATION_MARKER} for why the 409 branch has to read the message text.
-     *
-     * <p>Matched against the raw body rather than a parsed {@code error} field on purpose: the
-     * handler's normalisation has had more than one shape over the migration ({@code "error"} as a
-     * string, as a list, {@code "errors"} for 422), and a marker search over the whole body
-     * survives all of them.
-     *
-     * <p>Only 409 and 422 are courtscheduler refusing the booking. Every other status is
-     * {@link ProvisionalBookingFailureCode#COURTSCHEDULER_ERROR}; the status itself is kept in the
-     * event's {@code reason}, so the logs still tell a 400 (our request) from a 503.
-     *
-     * <p>Called only for a body that PARSED as JSON: an unparseable body short-circuits to
-     * {@link ProvisionalBookingFailureCode#COURTSCHEDULER_ERROR} at the call site. A 2xx that
-     * carried no bookingId reaches the default branch here and lands on the same code.
-     */
-    private static ProvisionalBookingFailureCode failureCodeFor(final int status, final String body) {
-        switch (status) {
-            case HTTP_CONFLICT:
-                return body != null && body.contains(CONFIRMED_ALLOCATION_MARKER)
-                        ? ProvisionalBookingFailureCode.CONFIRMED_BOOKING_EXISTS
-                        : ProvisionalBookingFailureCode.NO_CAPACITY;
-            case HTTP_UNPROCESSABLE_ENTITY:
-                return ProvisionalBookingFailureCode.NO_SESSION_AVAILABLE;
-            default:
-                return ProvisionalBookingFailureCode.COURTSCHEDULER_ERROR;
         }
     }
 

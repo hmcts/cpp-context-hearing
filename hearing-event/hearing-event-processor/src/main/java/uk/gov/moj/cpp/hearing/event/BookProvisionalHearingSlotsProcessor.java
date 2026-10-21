@@ -106,12 +106,14 @@ public class BookProvisionalHearingSlotsProcessor {
                     .withName(HEARING_SLOTS_PROVISIONALLY_BOOKED)
                     .withMetadataFrom(event));
         } else {
-            final JsonObject error = createObjectBuilder()
-                    .add("type", provisionalBookingServiceResponse.getErrorCode().getType().name())
-                    .add("code", provisionalBookingServiceResponse.getErrorCode().name())
-                    .add("reason", provisionalBookingServiceResponse.getErrorMessage())
-                    .build();
-            final JsonObjectBuilder refused = createObjectBuilder().add("error", error);
+            // courtscheduler's HTTP status, as is: hearing does not interpret it. Omitted when
+            // courtscheduler never answered, as there is no status to send.
+            final JsonObjectBuilder error = createObjectBuilder();
+            if (Objects.nonNull(provisionalBookingServiceResponse.getStatus())) {
+                error.add("status", provisionalBookingServiceResponse.getStatus());
+            }
+            error.add("message", provisionalBookingServiceResponse.getErrorMessage());
+            final JsonObjectBuilder refused = createObjectBuilder().add("error", error.build());
             // Only when the request carried one. A refused first pick has no booking id at all:
             // courtscheduler mints one on success only.
             if (StringUtils.isNotBlank(bookProvisionalHearingSlots.getBookingId())) {
