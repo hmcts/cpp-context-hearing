@@ -18,7 +18,6 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.USER_ID_VALUE_AS_ADMIN;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.getRequestSpec;
-import static uk.gov.moj.cpp.hearing.it.AbstractIT.getStringFromResource;
 import static uk.gov.moj.cpp.hearing.it.MatcherUtil.getPastDate;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.Queries.pollForHearing;
@@ -104,7 +103,6 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
-import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -1189,17 +1187,17 @@ public class UseCases {
 
     public static void bookHearingSlots(final RequestSpecification requestSpec, final UUID hearingId, final List<ProvisionalHearingSlotInfo> hearingSlots) throws Exception {
 
-        callCommand(requestSpec, hearingId, hearingSlots, "hearing.book-unconfirmed-hearing-slots.json");
+        callCommand(requestSpec, hearingId, hearingSlots);
 
     }
 
-    private static void callCommand(final RequestSpecification requestSpec, final UUID hearingId, final List<ProvisionalHearingSlotInfo> hearingSlots, final String payload)
-            throws IOException {
-        final String commandPayloadString = getStringFromResource(payload)
-                .replace("UUID1", hearingSlots.get(0).getCourtScheduleId().toString())
-                .replace("UUID2", hearingSlots.get(1).getCourtScheduleId().toString())
-                .replace("HEARING_START_TIME1", hearingSlots.get(0).getHearingStartTime().format(DATE_TIME_FORMATTER))
-                .replace("HEARING_START_TIME2", hearingSlots.get(0).getHearingStartTime().format(DATE_TIME_FORMATTER));
+    /** Built from the list, so any number of slots works - a refused single pick sends just one. */
+    private static void callCommand(final RequestSpecification requestSpec, final UUID hearingId, final List<ProvisionalHearingSlotInfo> hearingSlots) {
+        final JsonArrayBuilder slots = createArrayBuilder();
+        hearingSlots.forEach(slot -> slots.add(createObjectBuilder()
+                .add("courtScheduleId", slot.getCourtScheduleId().toString())
+                .add("hearingStartTime", slot.getHearingStartTime().format(DATE_TIME_FORMATTER))));
+        final String commandPayloadString = createObjectBuilder().add("slots", slots).build().toString();
 
         makeCommand(requestSpec, "hearing.book-unconfirmed-hearing-slots")
                 .ofType("application/vnd.hearing.book-unconfirmed-hearing-slots+json")
