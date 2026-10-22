@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import uk.gov.justice.core.courts.DefenceCounsel;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
@@ -67,7 +68,10 @@ public class ProsecutionCounselDelegate implements Serializable {
         }
 
         final Map<UUID, ProsecutionCounsel> prosecutionCounsels = this.momento.getProsecutionCounsels();
-        final String caseRef = this.momento.getHearing() != null ? this.momento.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN():null;
+        final Hearing hearing = this.momento.getHearing();
+        final String caseRef = hearing != null && isNotEmpty(hearing.getProsecutionCases())
+                ? hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()
+                : CounselHearingDetails.caseReference(hearing);
 
         if (!(prosecutionCounsels.containsKey(prosecutionCounsel.getId()))) {
             return Stream.of(new ProsecutionCounselChangeIgnored(
@@ -82,8 +86,6 @@ public class ProsecutionCounselDelegate implements Serializable {
     }
 
     private String getCaseReference(Hearing hearing){
-        final String prosecutionCaseURN = hearing!= null ? hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN():null;
-        final String prosecutionAuthorityReference = hearing!= null ? hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference():null;
-        return prosecutionCaseURN != null ? prosecutionCaseURN : prosecutionAuthorityReference;
+        return CounselHearingDetails.caseReference(hearing);
     }
 }

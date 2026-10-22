@@ -1955,6 +1955,87 @@ public class HearingAggregateTest {
     }
 
     @Test
+    void shouldAddDefenceCounselForApplicationHearingOnInactiveCase() {
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(applicationOnlyHearing(caseId, defendantId, "CASEURN1")));
+        final UUID hearingId = randomUUID();
+
+        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(), singletonList(defendantId),
+                "Margaret", randomUUID(), "Brown", "H", "Y", "Ms", randomUUID());
+
+        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, hearingId).collect(Collectors.toList());
+
+        assertThat(events, hasSize(1));
+        assertThat(events.get(0), instanceOf(DefenceCounselAdded.class));
+        assertThat(((DefenceCounselAdded) events.get(0)).getHearingId(), is(hearingId));
+    }
+
+    @Test
+    void shouldNotAddDefenceCounselForApplicationHearingOnInactiveCaseWhenDefendantIsNotOnTheApplication() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(applicationOnlyHearing(randomUUID(), randomUUID(), "CASEURN1")));
+
+        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(), singletonList(randomUUID()),
+                "Margaret", randomUUID(), "Brown", "H", "Y", "Ms", randomUUID());
+
+        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, randomUUID()).collect(Collectors.toList());
+
+        assertThat(events, empty());
+    }
+
+    @Test
+    void shouldIgnoreDefenceCounselAfterHearingEndedForApplicationHearingOnInactiveCase() {
+        final UUID defendantId = randomUUID();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(applicationOnlyHearing(randomUUID(), defendantId, "CASEURN1")));
+        final LogEventCommand logEventCommand = LogEventCommand.builder()
+                .withHearingEventId(randomUUID())
+                .withHearingId(randomUUID())
+                .withEventTime(PAST_ZONED_DATE_TIME.next())
+                .withLastModifiedTime(PAST_ZONED_DATE_TIME.next())
+                .withRecordedLabel("Hearing ended")
+                .withHearingEventDefinitionId(randomUUID())
+                .withAlterable(false)
+                .build();
+        final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent = uk.gov.moj.cpp.hearing.eventlog.HearingEvent.builder()
+                .withHearingEventId(logEventCommand.getHearingEventId())
+                .withEventTime(logEventCommand.getEventTime())
+                .withLastModifiedTime(logEventCommand.getLastModifiedTime())
+                .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList());
+
+        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(), singletonList(defendantId),
+                "Leigh", randomUUID(), "Ann", "H", "Y", "Ms", randomUUID());
+
+        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
+
+        assertThat(events, hasSize(1));
+        final DefenceCounselChangeIgnored defenceCounselChangeIgnored = (DefenceCounselChangeIgnored) events.get(0);
+        assertThat(defenceCounselChangeIgnored.getHearingId(), is(logEventCommand.getHearingId()));
+        assertThat(defenceCounselChangeIgnored.getCaseURN(), is("APPREF1"));
+    }
+
+    @Test
+    void shouldIgnoreDuplicateProsecutionCounselForApplicationHearingOnInactiveCase() {
+        final UUID caseId = randomUUID();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(applicationOnlyHearing(caseId, randomUUID(), "CASEURN1")));
+        final UUID hearingId = randomUUID();
+        final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
+                singletonList(LocalDate.now()), STRING.next(), randomUUID(), STRING.next(), STRING.next(),
+                singletonList(caseId), STRING.next(), STRING.next(), randomUUID());
+
+        hearingAggregate.addProsecutionCounsel(prosecutionCounsel, hearingId).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel, hearingId).collect(Collectors.toList());
+
+        assertThat(events, hasSize(1));
+        final ProsecutionCounselChangeIgnored prosecutionCounselChangeIgnored = (ProsecutionCounselChangeIgnored) events.get(0);
+        assertThat(prosecutionCounselChangeIgnored.getCaseURN(), is("APPREF1"));
+    }
+
+    @Test
     void shouldAddProsecutionCounselBeforeHearingEnded() {
         final LogEventCommand logEventCommand = LogEventCommand.builder()
                 .withHearingEventId(randomUUID())
@@ -5131,6 +5212,40 @@ public class HearingAggregateTest {
         return DefenceCounsel.defenceCounsel()
                 .withId(defenceCounselId)
                 .withDefendants((defendantIds))
+                .build();
+    }
+
+    /**
+     * A hearing for an application whose linked case is inactive: no prosecution cases, the case's
+     * defendant is reachable only through the application subject's master defendant.
+     */
+    private static Hearing applicationOnlyHearing(final UUID caseId, final UUID defendantId, final String caseUrn) {
+        final uk.gov.justice.core.courts.CourtApplication courtApplication = uk.gov.justice.core.courts.CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withApplicationReference("APPREF1")
+                .withSubject(uk.gov.justice.core.courts.CourtApplicationParty.courtApplicationParty()
+                        .withId(randomUUID())
+                        .withMasterDefendant(uk.gov.justice.core.courts.MasterDefendant.masterDefendant()
+                                .withMasterDefendantId(randomUUID())
+                                .withDefendantCase(singletonList(uk.gov.justice.core.courts.DefendantCase.defendantCase()
+                                        .withCaseId(caseId)
+                                        .withDefendantId(defendantId)
+                                        .withCaseReference(caseUrn)
+                                        .build()))
+                                .build())
+                        .build())
+                .withCourtApplicationCases(singletonList(uk.gov.justice.core.courts.CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(caseId)
+                        .withCaseStatus("INACTIVE")
+                        .withProsecutionCaseIdentifier(uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                                .withCaseURN(caseUrn)
+                                .build())
+                        .build()))
+                .build();
+        return Hearing.hearing()
+                .withValuesFrom(standardInitiateHearingTemplate().getHearing())
+                .withProsecutionCases(null)
+                .withCourtApplications(singletonList(courtApplication))
                 .build();
     }
 
