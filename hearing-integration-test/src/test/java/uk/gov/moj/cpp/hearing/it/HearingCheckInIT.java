@@ -1,6 +1,18 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static java.time.LocalDate.now;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.moj.cpp.hearing.it.Queries.pollForHearing;
+import static uk.gov.moj.cpp.hearing.it.UseCases.addDefenceCounsel;
+import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
+import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.RECORDED_LABEL_END_HEARING;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.findEventDefinitionWithActionLabel;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsADefenceCounsel;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddDefenceCounselCommandTemplates.addDefenceCounselCommandTemplate;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
@@ -33,6 +45,13 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsMagistrateUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
+import uk.gov.justice.core.courts.DefenceCounsel;
+import uk.gov.justice.core.courts.DefendantCase;
+import uk.gov.justice.core.courts.MasterDefendant;
+import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
+import io.restassured.path.json.JsonPath;
+import java.time.ZoneId;
 import uk.gov.justice.core.courts.BreachType;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
@@ -65,6 +84,8 @@ class HearingCheckInIT extends AbstractIT {
     private static final String DEFENDANT_LAST_NAME = "LAST_NAME";
     private static final String APPLICATION_TYPE = "APPLICATION_TYPE";
     private static final String HEARING_TYPE_DESCRIPTION = "Trial";
+    private static final String INACTIVE_CASE_URN = "INACTIVECASEURN1";
+    private static final String APPLICATION_REFERENCE = "APPREF0001";
 
     @Test
     void shouldRetrieveHearingWithProsecutionCaseForCheckIn() {
@@ -235,6 +256,108 @@ class HearingCheckInIT extends AbstractIT {
         final HearingSummaries summary = findSummary(courtCentreId, hearingId);
         assertThat(summary.getProsecutionCaseSummaries(), is(empty()));
         assertThat(summary.getCourtApplicationSummaries(), hasSize(1));
+    }
+
+    @Test
+    void shouldCheckInDefenceCounselToApplicationHearingOnInactiveCase() {
+        final UUID userId = randomUUID();
+        givenAUserHasLoggedInAsADefenceCounsel(userId);
+        stubUsersAndGroupsUserRoles(userId);
+
+        final UUID hearingId = randomUUID();
+        final UUID inactiveCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        initiateHearing(getRequestSpec(), createHearingWithApplicationOnlyForDefendant(hearingId, randomUUID(), randomUUID(),
+                inactiveCaseId, defendantId, INACTIVE_CASE_URN));
+
+        final DefenceCounsel defenceCounsel = defenceCounselFor(defendantId);
+        try (EventListener defenceCounselAdded = listenFor("public.hearing.defence-counsel-added")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))))) {
+
+            addDefenceCounsel(getRequestSpec(), hearingId, addDefenceCounselCommandTemplate(hearingId, defenceCounsel));
+
+            defenceCounselAdded.waitFor();
+        }
+
+        pollForHearing(hearingId.toString(),
+                withJsonPath("$.hearing.defenceCounsels.[0].id", is(defenceCounsel.getId().toString())),
+                withJsonPath("$.hearing.defenceCounsels.[0].defendants.[0]", is(defendantId.toString())));
+    }
+
+    @Test
+    void shouldIgnoreDefenceCounselCheckInAfterHearingEndedForApplicationHearingOnInactiveCase() {
+        final UUID userId = randomUUID();
+        givenAUserHasLoggedInAsADefenceCounsel(userId);
+        stubUsersAndGroupsUserRoles(userId);
+
+        final UUID hearingId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final InitiateHearingCommand initiateHearingCommand = initiateHearing(getRequestSpec(),
+                createHearingWithApplicationOnlyForDefendant(hearingId, randomUUID(), randomUUID(), randomUUID(), defendantId, INACTIVE_CASE_URN));
+
+        final HearingEventDefinition endHearing = findEventDefinitionWithActionLabel(RECORDED_LABEL_END_HEARING);
+        logEvent(randomUUID(), getRequestSpec(), asDefault(), initiateHearingCommand, endHearing.getId(), false, randomUUID(),
+                PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC")), RECORDED_LABEL_END_HEARING, null);
+
+        final JsonPath changeIgnored;
+        try (EventListener defenceCounselChangeIgnored = listenFor("public.hearing.defence-counsel-change-ignored")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))))) {
+
+            addDefenceCounsel(getRequestSpec(), hearingId, addDefenceCounselCommandTemplate(hearingId, defenceCounselFor(defendantId)));
+
+            changeIgnored = defenceCounselChangeIgnored.waitFor();
+        }
+
+        // an application-only hearing is referenced by its application reference, as in the hearing event log
+        assertThat(changeIgnored.getString("caseURN"), is(APPLICATION_REFERENCE));
+    }
+
+    private static DefenceCounsel defenceCounselFor(final UUID defendantId) {
+        return new DefenceCounsel(singletonList(now()), singletonList(defendantId), STRING.next(), randomUUID(),
+                STRING.next(), STRING.next(), STRING.next(), STRING.next(), randomUUID());
+    }
+
+    /**
+     * An application hearing on an inactive case, as Progression sends it: no prosecution cases, and the
+     * case's defendant linked through the application subject's master defendant.
+     */
+    private InitiateHearingCommand createHearingWithApplicationOnlyForDefendant(final UUID hearingId, final UUID courtCentreId, final UUID roomId,
+                                                                               final UUID inactiveCaseId, final UUID defendantId, final String caseUrn) {
+        final CourtApplication application = createCourtApplication(inactiveCaseId, randomUUID());
+        final CourtApplication applicationForDefendant = CourtApplication.courtApplication()
+                .withValuesFrom(application)
+                .withApplicationReference(APPLICATION_REFERENCE)
+                .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withValuesFrom(application.getSubject())
+                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                .withMasterDefendantId(randomUUID())
+                                .withDefendantCase(singletonList(DefendantCase.defendantCase()
+                                        .withCaseId(inactiveCaseId)
+                                        .withDefendantId(defendantId)
+                                        .withCaseReference(caseUrn)
+                                        .build()))
+                                // the schema requires a person or legal-entity defendant on a master defendant
+                                .withPersonDefendant(personDefendant()
+                                        .withPersonDetails(person()
+                                                .withFirstName(DEFENDANT_FIRST_NAME)
+                                                .withLastName(DEFENDANT_LAST_NAME)
+                                                .withGender(MALE)
+                                                .build())
+                                        .build())
+                                .build())
+                        .build())
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withValuesFrom(application.getCourtApplicationCases().get(0))
+                        .withProsecutionCaseIdentifier(prosecutionCaseIdentifier()
+                                .withProsecutionAuthorityId(randomUUID())
+                                .withProsecutionAuthorityCode(STRING.next())
+                                .withCaseURN(caseUrn)
+                                .build())
+                        .build()))
+                .build();
+        final InitiateHearingCommand command = createHearingWithCase(hearingId, courtCentreId, roomId, singletonList(applicationForDefendant));
+        command.getHearing().setProsecutionCases(null);
+        return command;
     }
 
     private HearingSummaries findSummary(final UUID courtCentreId, final UUID hearingId) {

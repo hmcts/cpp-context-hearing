@@ -10,7 +10,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
@@ -167,7 +166,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -204,7 +202,7 @@ public class HearingAggregateTest {
     void shouldInitiateHearing() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithAllLevelJudicialResults();
 
-        final HearingInitiated result = (HearingInitiated) new HearingAggregate().initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
+        final HearingInitiated result = (HearingInitiated) new HearingAggregate().initiate(initiateHearingCommand.getHearing()).toList().get(0);
 
         assertThat(result.getHearing().getId(), is(initiateHearingCommand.getHearing().getId()));
     }
@@ -236,7 +234,7 @@ public class HearingAggregateTest {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithAllLevelJudicialResults();
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        final HearingInitiated result = (HearingInitiated) hearingAggregate.initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
+        final HearingInitiated result = (HearingInitiated) hearingAggregate.initiate(initiateHearingCommand.getHearing()).toList().get(0);
 
         final LocalDate hearingDay = result.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate();
         final UUID hearingId = result.getHearing().getId();
@@ -251,7 +249,7 @@ public class HearingAggregateTest {
                 .withHearingDay(hearingDay)
                 .build());
 
-        final SaveDraftResultFailed saveDraftResultFailed = (SaveDraftResultFailed) hearingAggregate.saveMultipleDraftResultsForHearingDay(invalidTargets, hearingDay, randomUUID()).collect(Collectors.toList()).get(0);
+        final SaveDraftResultFailed saveDraftResultFailed = (SaveDraftResultFailed) hearingAggregate.saveMultipleDraftResultsForHearingDay(invalidTargets, hearingDay, randomUUID()).toList().get(0);
 
         assertThat(saveDraftResultFailed.getTarget().getHearingId(), is(hearingId));
     }
@@ -261,14 +259,14 @@ public class HearingAggregateTest {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithAllLevelJudicialResults();
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        final HearingInitiated result = (HearingInitiated) hearingAggregate.initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
+        final HearingInitiated result = (HearingInitiated) hearingAggregate.initiate(initiateHearingCommand.getHearing()).toList().get(0);
 
         final LocalDate hearingDay = result.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate();
         final UUID hearingId = result.getHearing().getId();
 
         final List<Target> invalidTargets = Collections.emptyList();
 
-        final MultipleDraftResultsSaved multipleDraftResultsSaved = (MultipleDraftResultsSaved) hearingAggregate.saveMultipleDraftResultsForHearingDay(invalidTargets, hearingDay, randomUUID()).collect(Collectors.toList()).get(0);
+        final MultipleDraftResultsSaved multipleDraftResultsSaved = (MultipleDraftResultsSaved) hearingAggregate.saveMultipleDraftResultsForHearingDay(invalidTargets, hearingDay, randomUUID()).toList().get(0);
 
         assertThat(multipleDraftResultsSaved.getNumberOfTargets(), is(0));
     }
@@ -277,7 +275,7 @@ public class HearingAggregateTest {
     void shouldInitiateHearingWithAllResultsCleanedUp() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithAllLevelJudicialResults();
 
-        final HearingInitiated result = (HearingInitiated) new HearingAggregate().initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
+        final HearingInitiated result = (HearingInitiated) new HearingAggregate().initiate(initiateHearingCommand.getHearing()).toList().get(0);
 
         final Hearing targetHearing = result.getHearing();
         assertThat(targetHearing.getId(), is(initiateHearingCommand.getHearing().getId()));
@@ -317,7 +315,7 @@ public class HearingAggregateTest {
                                 .build())
                         .build());
 
-        final List<Object> events = HEARING_AGGREGATE.inheritPlea(initiateHearingCommand.getHearing().getId(), command.getPlea(), guiltyPleaTypes()).collect(Collectors.toList());
+        final List<Object> events = HEARING_AGGREGATE.inheritPlea(initiateHearingCommand.getHearing().getId(), command.getPlea(), guiltyPleaTypes()).toList();
 
         final InheritedPlea event = (InheritedPlea) events.get(0);
         assertThat(event.getHearingId(), is(initiateHearingCommand.getHearing().getId()));
@@ -353,7 +351,7 @@ public class HearingAggregateTest {
                 .withOriginatingHearingId(randomUUID())
                 .build();
 
-        final List<Object> events = hearingAggregate.inheritPlea(initiateHearingCommand.getHearing().getId(), plea, guiltyPleaTypes()).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.inheritPlea(initiateHearingCommand.getHearing().getId(), plea, guiltyPleaTypes()).toList();
 
         assertThat(events.size(), is(2));
         assertThat(events.get(0), instanceOf(InheritedPlea.class));
@@ -378,7 +376,7 @@ public class HearingAggregateTest {
                 .withOriginatingHearingId(randomUUID())
                 .build();
 
-        final List<Object> events = HEARING_AGGREGATE.inheritPlea(initiateHearingCommand.getHearing().getId(), plea, guiltyPleaTypes()).collect(Collectors.toList());
+        final List<Object> events = HEARING_AGGREGATE.inheritPlea(initiateHearingCommand.getHearing().getId(), plea, guiltyPleaTypes()).toList();
 
         assertThat(events.size(), is(1));
         assertThat(events.get(0), instanceOf(InheritedPlea.class));
@@ -458,7 +456,7 @@ public class HearingAggregateTest {
 
 
         final Stream<Object> eventStream = hearingAggregate.inheritPlea(hearingId, plea, guiltyPleaTypes());
-        final List<Object> events = eventStream.collect(Collectors.toList());
+        final List<Object> events = eventStream.toList();
 
         assertThat(events.size(), is(0));
 
@@ -486,7 +484,7 @@ public class HearingAggregateTest {
 
         final Stream<Object> eventStreams = hearingAggregate.updateOffence(hearing.getId(), defendantId, offenceWithOutIndicatedPlea);
 
-        final List<Object> eventCollection = eventStreams.collect(toList());
+        final List<Object> eventCollection = eventStreams.toList();
         assertThat(eventCollection.size(), Matchers.is(1));
 
         final OffenceUpdated offenceUpdated = (OffenceUpdated) eventCollection.get(0);
@@ -521,7 +519,7 @@ public class HearingAggregateTest {
 
         final Stream<Object> eventStreams = hearingAggregate.updateOffenceV2(hearing.getId(), defendantId, singletonList(offenceWithOutIndicatedPlea));
 
-        final List<Object> eventCollection = eventStreams.collect(toList());
+        final List<Object> eventCollection = eventStreams.toList();
         assertThat(eventCollection.size(), Matchers.is(1));
 
         final OffenceUpdatedV2 offenceUpdated = (OffenceUpdatedV2) eventCollection.get(0);
@@ -597,7 +595,7 @@ public class HearingAggregateTest {
 
         final Stream<Object> eventStreams = HEARING_AGGREGATE.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, emptyList(), HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1);
 
-        final List<Object> eventCollection = eventStreams.collect(toList());
+        final List<Object> eventCollection = eventStreams.toList();
         assertThat(eventCollection.size(), Matchers.is(2));
 
         final ResultsSharedSuccess resultsSharedSuccess = (ResultsSharedSuccess) eventCollection.get(0);
@@ -748,7 +746,7 @@ public class HearingAggregateTest {
 
         final Stream<Object> eventStreams = HEARING_AGGREGATE.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, emptyList(), HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1);
 
-        final List<Object> eventCollection = eventStreams.collect(toList());
+        final List<Object> eventCollection = eventStreams.toList();
         assertThat(eventCollection.size(), Matchers.is(2));
 
         final ResultsSharedSuccess resultsSharedSuccess = (ResultsSharedSuccess) eventCollection.get(0);
@@ -818,7 +816,7 @@ public class HearingAggregateTest {
 
         final Stream<Object> eventStreams = HEARING_AGGREGATE.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, emptyList(), HearingState.SHARED, youthCourt, hearingDay, USER_ID, 1);
 
-        final List<Object> eventCollection = eventStreams.collect(toList());
+        final List<Object> eventCollection = eventStreams.toList();
         assertThat(eventCollection.size(), Matchers.is(2));
 
         final ResultsSharedSuccess resultsSharedSuccess = (ResultsSharedSuccess) eventCollection.get(0);
@@ -852,7 +850,7 @@ public class HearingAggregateTest {
                 .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
 
         final HearingEventIgnored hearingEventIgnored = (HearingEventIgnored) new HearingAggregate()
-                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList().get(0);
 
         assertThat(hearingEventIgnored.getReason(), is("Hearing not found"));
         assertThat(hearingEventIgnored.getHearingId(), is(logEventCommand.getHearingId()));
@@ -888,10 +886,10 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList().get(0);
 
         final HearingEventIgnored hearingEventIgnored = (HearingEventIgnored) hearingAggregate
-                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList().get(0);
 
         assertThat(hearingEventIgnored.getReason(), is("Already logged"));
         assertThat(hearingEventIgnored.getHearingId(), is(logEventCommand.getHearingId()));
@@ -927,7 +925,7 @@ public class HearingAggregateTest {
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
         final HearingEventIgnored hearingEventIgnored = (HearingEventIgnored) hearingAggregate
-                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList().get(0);
 
         assertThat(hearingEventIgnored.getReason(), is("Hearing Event Log not allowed for Box Hearing"));
         assertThat(hearingEventIgnored.getHearingId(), is(logEventCommand.getHearingId()));
@@ -946,7 +944,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
         final HearingAmended hearingAmended = (HearingAmended) hearingAggregate
-                .amendHearing(hearingAmendCommand.getHearingId(), hearingAmendCommand.getHearingId(), hearingAmendCommand.getNewHearingState()).collect(Collectors.toList()).get(0);
+                .amendHearing(hearingAmendCommand.getHearingId(), hearingAmendCommand.getHearingId(), hearingAmendCommand.getNewHearingState()).toList().get(0);
         assertThat(hearingAmended.getHearingId(), is(hearingAmendCommand.getHearingId()));
         assertThat(hearingAmended.getNewHearingState(), is(hearingAmendCommand.getNewHearingState()));
     }
@@ -975,7 +973,7 @@ public class HearingAggregateTest {
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
         final HearingEventLogged hearingEventLogged = (HearingEventLogged) hearingAggregate
-                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList().get(0);
 
         assertHearingEventLogged(hearingEventLogged, logEventCommand, initiateHearingCommand);
     }
@@ -1030,7 +1028,7 @@ public class HearingAggregateTest {
                 correctLogEventCommand.getAlterable(),
                 correctLogEventCommand.getDefenceCounselId(),
                 hearingEventCorrection,
-                randomUUID()).collect(Collectors.toList());
+                randomUUID()).toList();
 
         final HearingEventDeleted hearingEventDeleted = (HearingEventDeleted) events.get(0);
         assertThat(hearingEventDeleted.getHearingEventId(), is(previousHearingEventId));
@@ -1162,7 +1160,7 @@ public class HearingAggregateTest {
         final ArrayList<UUID> referenceResultIds = new ArrayList<>(Arrays.asList(fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8")));
         final Stream<Object> stream = hearingAggregate.stopCustodyTimeLimitClock(referenceResultIds, hearing);
 
-        final List<Object> events = stream.collect(Collectors.toList());
+        final List<Object> events = stream.toList();
         assertThat(events.size(), Matchers.is(1));
 
         final CustodyTimeLimitClockStopped custodyTimeLimitClockStopped = (CustodyTimeLimitClockStopped) events.get(0);
@@ -1233,7 +1231,7 @@ public class HearingAggregateTest {
 
         final Stream<Object> stream = hearingAggregate.stopCustodyTimeLimitClock(referenceResultIds, hearing);
 
-        final List<Object> events = stream.collect(Collectors.toList());
+        final List<Object> events = stream.toList();
         checkHearingEventIgnored(events);
     }
 
@@ -1265,7 +1263,7 @@ public class HearingAggregateTest {
                 .withLastModifiedTime(logEventCommand.getLastModifiedTime())
                 .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
 
-        final List<Object> events = hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList();
         assertThat(events.size(), is(1));
 
     }
@@ -1303,7 +1301,7 @@ public class HearingAggregateTest {
                         correctLogEventCommand.getAlterable(),
                         correctLogEventCommand.getDefenceCounselId(),
                         hearingEventCorrection,
-                        randomUUID()).collect(Collectors.toList()).get(0);
+                        randomUUID()).toList().get(0);
 
         assertThat(hearingEventIgnored.getReason(), is("Hearing event not found"));
         assertThat(hearingEventIgnored.getHearingId(), is(correctLogEventCommand.getHearingId()));
@@ -1379,7 +1377,7 @@ public class HearingAggregateTest {
 
 
         final HearingEventIgnored hearingEventIgnored = (HearingEventIgnored) hearingAggregate
-                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList().get(0);
 
         assertThat(hearingEventIgnored.getReason(), is("Already deleted"));
         assertThat(hearingEventIgnored.getHearingId(), is(logEventCommand.getHearingId()));
@@ -1453,7 +1451,7 @@ public class HearingAggregateTest {
                         correctLogEventCommand.getAlterable(),
                         correctLogEventCommand.getDefenceCounselId(),
                         hearingEventCorrection,
-                        randomUUID()).collect(Collectors.toList()).get(0);
+                        randomUUID()).toList().get(0);
 
         assertThat(hearingEventIgnored.getReason(), is("Already deleted"));
         assertThat(hearingEventIgnored.getHearingId(), is(correctLogEventCommand.getHearingId()));
@@ -1505,7 +1503,7 @@ public class HearingAggregateTest {
 
         hearingAggregate.apply(new HearingInitiated(hearing));
 
-        final DefendantDetailsUpdated result = (DefendantDetailsUpdated) hearingAggregate.updateDefendantDetails(command.getHearingId(), command.getDefendant()).collect(Collectors.toList()).get(0);
+        final DefendantDetailsUpdated result = (DefendantDetailsUpdated) hearingAggregate.updateDefendantDetails(command.getHearingId(), command.getDefendant()).toList().get(0);
 
         assertThat(hearingAggregate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getPersonDetails().getFirstName(), Matchers.is(result.getDefendant().getPersonDefendant().getPersonDetails().getFirstName()));
         assertThat(hearingAggregate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getMasterDefendantId(), Matchers.is(result.getDefendant().getMasterDefendantId()));
@@ -1558,7 +1556,7 @@ public class HearingAggregateTest {
                 .build());
 
         final List<Object> events = hearingAggregate.updateDefendantDetails(hearingId, commandDefendant)
-                .collect(Collectors.toList());
+                .toList();
 
         assertThat(events, hasSize(2));
         assertThat(events.get(0), instanceOf(DefendantDetailsUpdated.class));
@@ -1617,7 +1615,7 @@ public class HearingAggregateTest {
                 .build());
 
         final List<Object> events = hearingAggregate.updateDefendantDetails(hearingId, commandDefendant)
-                .collect(Collectors.toList());
+                .toList();
 
         assertThat(events, hasSize(1));
         assertThat(events.get(0), instanceOf(DefendantDetailsUpdated.class));
@@ -1666,7 +1664,7 @@ public class HearingAggregateTest {
                 .build());
 
         final List<Object> events = hearingAggregate.updateDefendantDetails(hearingId, commandDefendant)
-                .collect(Collectors.toList());
+                .toList();
 
         assertThat(events, hasSize(1));
         assertThat(events.get(0), instanceOf(DefendantDetailsUpdated.class));
@@ -1722,7 +1720,7 @@ public class HearingAggregateTest {
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
         final List<Object> events = hearingAggregate
-                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList());
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList();
 
         final HearingEventLogged startHearingEventLogged = (HearingEventLogged) events.get(0);
         assertHearingEventLogged(startHearingEventLogged, logEventCommand, initiateHearingCommand);
@@ -1826,7 +1824,7 @@ public class HearingAggregateTest {
                 .build();
 
         final Stream<Object> stream = hearingAggregate.addOrUpdateCaseDefendantsForHearing(hearing.getId(), updatedProsecutionCase);
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         assertThat(objectList, hasSize(1));
 
         CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing) objectList.get(0);
@@ -1873,7 +1871,7 @@ public class HearingAggregateTest {
         final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(), defendantIds,
                 "Margaret", randomUUID(), "Brown", "H", "Y", "Ms", randomUUID());
 
-        final List<Object> events = HEARING_AGGREGATE.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
+        final List<Object> events = HEARING_AGGREGATE.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).toList();
         final DefenceCounselAdded defenceCounselAdded = (DefenceCounselAdded) events.get(0);
 
         assertThat(events, notNullValue());
@@ -1907,9 +1905,9 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList().get(0);
 
-        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).toList();
         final DefenceCounselChangeIgnored defenceCounselChangeIgnored = (DefenceCounselChangeIgnored) events.get(0);
 
         assertThat(events, notNullValue());
@@ -1944,14 +1942,95 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList().get(0);
 
-        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).toList();
         final DefenceCounselChangeIgnored defenceCounselChangeIgnored = (DefenceCounselChangeIgnored) events.get(0);
 
         assertThat(events, notNullValue());
         assertThat(defenceCounselChangeIgnored.getHearingId(), is(logEventCommand.getHearingId()));
         assertThat(defenceCounselChangeIgnored.getCaseURN(), is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference()));
+    }
+
+    @Test
+    void shouldAddDefenceCounselForApplicationHearingOnInactiveCase() {
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(applicationOnlyHearing(caseId, defendantId, "CASEURN1")));
+        final UUID hearingId = randomUUID();
+
+        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(), singletonList(defendantId),
+                "Margaret", randomUUID(), "Brown", "H", "Y", "Ms", randomUUID());
+
+        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, hearingId).toList();
+
+        assertThat(events, hasSize(1));
+        assertThat(events.get(0), instanceOf(DefenceCounselAdded.class));
+        assertThat(((DefenceCounselAdded) events.get(0)).getHearingId(), is(hearingId));
+    }
+
+    @Test
+    void shouldNotAddDefenceCounselForApplicationHearingOnInactiveCaseWhenDefendantIsNotOnTheApplication() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(applicationOnlyHearing(randomUUID(), randomUUID(), "CASEURN1")));
+
+        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(), singletonList(randomUUID()),
+                "Margaret", randomUUID(), "Brown", "H", "Y", "Ms", randomUUID());
+
+        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, randomUUID()).toList();
+
+        assertThat(events, empty());
+    }
+
+    @Test
+    void shouldIgnoreDefenceCounselAfterHearingEndedForApplicationHearingOnInactiveCase() {
+        final UUID defendantId = randomUUID();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(applicationOnlyHearing(randomUUID(), defendantId, "CASEURN1")));
+        final LogEventCommand logEventCommand = LogEventCommand.builder()
+                .withHearingEventId(randomUUID())
+                .withHearingId(randomUUID())
+                .withEventTime(PAST_ZONED_DATE_TIME.next())
+                .withLastModifiedTime(PAST_ZONED_DATE_TIME.next())
+                .withRecordedLabel("Hearing ended")
+                .withHearingEventDefinitionId(randomUUID())
+                .withAlterable(false)
+                .build();
+        final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent = uk.gov.moj.cpp.hearing.eventlog.HearingEvent.builder()
+                .withHearingEventId(logEventCommand.getHearingEventId())
+                .withEventTime(logEventCommand.getEventTime())
+                .withLastModifiedTime(logEventCommand.getLastModifiedTime())
+                .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList();
+
+        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(), singletonList(defendantId),
+                "Leigh", randomUUID(), "Ann", "H", "Y", "Ms", randomUUID());
+
+        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).toList();
+
+        assertThat(events, hasSize(1));
+        final DefenceCounselChangeIgnored defenceCounselChangeIgnored = (DefenceCounselChangeIgnored) events.get(0);
+        assertThat(defenceCounselChangeIgnored.getHearingId(), is(logEventCommand.getHearingId()));
+        assertThat(defenceCounselChangeIgnored.getCaseURN(), is("APPREF1"));
+    }
+
+    @Test
+    void shouldIgnoreDuplicateProsecutionCounselForApplicationHearingOnInactiveCase() {
+        final UUID caseId = randomUUID();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(applicationOnlyHearing(caseId, randomUUID(), "CASEURN1")));
+        final UUID hearingId = randomUUID();
+        final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
+                singletonList(LocalDate.now()), STRING.next(), randomUUID(), STRING.next(), STRING.next(),
+                singletonList(caseId), STRING.next(), STRING.next(), randomUUID());
+
+        hearingAggregate.addProsecutionCounsel(prosecutionCounsel, hearingId).toList();
+        final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel, hearingId).toList();
+
+        assertThat(events, hasSize(1));
+        final ProsecutionCounselChangeIgnored prosecutionCounselChangeIgnored = (ProsecutionCounselChangeIgnored) events.get(0);
+        assertThat(prosecutionCounselChangeIgnored.getCaseURN(), is("APPREF1"));
     }
 
     @Test
@@ -1984,7 +2063,7 @@ public class HearingAggregateTest {
 
         );
 
-        final List<Object> events = HEARING_AGGREGATE.addProsecutionCounsel(prosecutionCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
+        final List<Object> events = HEARING_AGGREGATE.addProsecutionCounsel(prosecutionCounsel, logEventCommand.getHearingId()).toList();
         final ProsecutionCounselAdded prosecutionCounselAdded = (ProsecutionCounselAdded) events.get(0);
 
         assertThat(events, notNullValue());
@@ -2026,9 +2105,9 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList().get(0);
 
-        final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel, logEventCommand.getHearingId()).toList();
         final ProsecutionCounselChangeIgnored prosecutionCounselChangeIgnored = (ProsecutionCounselChangeIgnored) events.get(0);
 
         assertThat(events, notNullValue());
@@ -2071,9 +2150,9 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList().get(0);
 
-        final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel, logEventCommand.getHearingId()).toList();
         final ProsecutionCounselChangeIgnored prosecutionCounselChangeIgnored = (ProsecutionCounselChangeIgnored) events.get(0);
 
         assertThat(events, notNullValue());
@@ -2094,7 +2173,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final Stream<Object> stream = hearingAggregate.bookProvisionalHearingSlots(hearingId, provisionalHearingSlotInfos, null, null, null);
 
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         assertThat(objectList, hasSize(1));
 
         final BookProvisionalHearingSlots bookProvisionalHearingSlots = (BookProvisionalHearingSlots) objectList.get(0);
@@ -2593,7 +2672,7 @@ public class HearingAggregateTest {
 
         HearingAggregate hearingAggregate = new HearingAggregate();
 
-        final HearingInitiated result = (HearingInitiated) hearingAggregate.initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
+        final HearingInitiated result = (HearingInitiated) hearingAggregate.initiate(initiateHearingCommand.getHearing()).toList().get(0);
         assertThat(result.getHearing(), is(initiateHearingCommand.getHearing()));
 
         final HearingDaysWithoutCourtCentreCorrected event = new HearingDaysWithoutCourtCentreCorrected();
@@ -2651,7 +2730,7 @@ public class HearingAggregateTest {
         final UUID userId = randomUUID();
         ReflectionUtil.setField(hearingAggregate, "amendingSharedHearingUserId", userId);
         ReflectionUtil.setField(hearingAggregate, "hearingState", SHARED_AMEND_LOCKED_ADMIN_ERROR);
-        final List<Object> events = hearingAggregate.approvalRequest(hearing.getId(), userId, hearingDay, version).collect(toList());
+        final List<Object> events = hearingAggregate.approvalRequest(hearing.getId(), userId, hearingDay, version).toList();
         final ApprovalRequestedV2 approvalRequestedV2 = (ApprovalRequestedV2)
                 events.get(0);
         assertThat(approvalRequestedV2, notNullValue());
@@ -2839,7 +2918,7 @@ public class HearingAggregateTest {
 
         final UUID hearingId = hearing.getId();
 
-        final List<Object> eventStream = hearingAggregate.deleteHearing(hearingId).collect(toList());
+        final List<Object> eventStream = hearingAggregate.deleteHearing(hearingId).toList();
 
         assertThat(eventStream.size(), is(1));
         final HearingDeleted hearingDeleted = (HearingDeleted) eventStream.get(0);
@@ -2949,7 +3028,7 @@ public class HearingAggregateTest {
                 .withHearing(hearing)
                 .build());
 
-        final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearing.getId(), new ArrayList<>()).collect(toList());
+        final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearing.getId(), new ArrayList<>()).toList();
 
         assertThat(eventStream.size(), is(1));
         assertThat(eventStream.get(0), instanceOf(HearingChangeIgnored.class));
@@ -3054,7 +3133,7 @@ public class HearingAggregateTest {
                 .withHearing(hearing)
                 .build());
 
-        final List<Object> eventStream = hearingAggregate.deleteHearing(hearing.getId()).collect(toList());
+        final List<Object> eventStream = hearingAggregate.deleteHearing(hearing.getId()).toList();
 
         assertThat(eventStream.size(), is(1));
         assertThat(eventStream.get(0), instanceOf(HearingChangeIgnored.class));
@@ -3065,7 +3144,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
 
-        final List<Object> eventStream = hearingAggregate.deleteHearing(hearingId).collect(toList());
+        final List<Object> eventStream = hearingAggregate.deleteHearing(hearingId).toList();
         assertThat(eventStream.size(), is(1));
         final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) eventStream.get(0);
         assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
@@ -3079,7 +3158,7 @@ public class HearingAggregateTest {
 
         final Stream<Object> stream = hearingAggregate.changeNextHearingStartDate(hearingId, randomUUID(), ZonedDateTime.now());
 
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         assertThat(objectList, hasSize(1));
         final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
         assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
@@ -3099,7 +3178,7 @@ public class HearingAggregateTest {
         final UUID caseId = hearing.getProsecutionCases().get(0).getId();
         hearingAggregate.apply(new HearingDeleted(asList(caseId), asList(defendantId), asList(offenceId), emptyList(), hearingId));
 
-        final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearingId, Arrays.asList(offenceId)).collect(toList());
+        final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearingId, Arrays.asList(offenceId)).toList();
 
        checkHearingEventIgnored(eventStream);
     }
@@ -3114,7 +3193,7 @@ public class HearingAggregateTest {
 
         final UUID hearingId = hearing.getId();
         final UUID offenceId = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
-        final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearingId, Arrays.asList(offenceId)).collect(toList());
+        final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearingId, Arrays.asList(offenceId)).toList();
 
         assertThat(eventStream.size(), is(1));
         final HearingUnallocated hearingUnallocated = (HearingUnallocated) eventStream.get(0);
@@ -3128,7 +3207,7 @@ public class HearingAggregateTest {
     void shouldRaiseHearingIgnoredForHearingUnallocatedIfNoHearingExist() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
-        final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearingId, Arrays.asList(randomUUID())).collect(toList());
+        final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearingId, Arrays.asList(randomUUID())).toList();
         checkHearingEventIgnored(eventStream);
     }
 
@@ -3149,7 +3228,7 @@ public class HearingAggregateTest {
 
         final Stream<Object> stream = hearingAggregate.courtListRestrictions(courtListRestricted);
 
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         assertThat(objectList, hasSize(1));
 
         final uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted courtListRestrictedEvent = (uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted) objectList.get(0);
@@ -3170,7 +3249,7 @@ public class HearingAggregateTest {
                 .withCaseIds(caseIds).build();
         final Stream<Object> stream = hearingAggregate.courtListRestrictions(courtListRestricted);
 
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         assertThat(objectList, hasSize(1));
         final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
         assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
@@ -3211,7 +3290,7 @@ public class HearingAggregateTest {
                 .withHasSharedResults(false)
                 .build();
 
-        final List<Object> events = new HearingAggregate().initiate(hearing).collect(Collectors.toList());
+        final List<Object> events = new HearingAggregate().initiate(hearing).toList();
 
         assertThat(events, hasSize(2));
         assertThat(events.get(0), instanceOf(HearingInitiated.class));
@@ -3260,7 +3339,7 @@ public class HearingAggregateTest {
                 .withHasSharedResults(false)
                 .build();
 
-        final List<Object> events = new HearingAggregate().initiate(hearing).collect(Collectors.toList());
+        final List<Object> events = new HearingAggregate().initiate(hearing).toList();
 
         assertThat(events, hasSize(1));
         assertThat(events.get(0), instanceOf(HearingInitiated.class));
@@ -3315,7 +3394,7 @@ public class HearingAggregateTest {
                 .withHasSharedResults(false)
                 .build();
 
-        final List<Object> events = new HearingAggregate().initiate(hearing).collect(Collectors.toList());
+        final List<Object> events = new HearingAggregate().initiate(hearing).toList();
 
         assertThat(events, hasSize(2));
         assertThat(events.get(0), instanceOf(HearingInitiated.class));
@@ -3362,7 +3441,7 @@ public class HearingAggregateTest {
                 .withHasSharedResults(false)
                 .build();
 
-        final List<Object> events = new HearingAggregate().initiate(hearing).collect(Collectors.toList());
+        final List<Object> events = new HearingAggregate().initiate(hearing).toList();
 
         assertThat(events, hasSize(1));
         assertThat(events.get(0), instanceOf(HearingInitiated.class));
@@ -3416,7 +3495,7 @@ public class HearingAggregateTest {
                 .withHasSharedResults(false)
                 .build();
 
-        final List<Object> events = new HearingAggregate().initiate(hearing).collect(Collectors.toList());
+        final List<Object> events = new HearingAggregate().initiate(hearing).toList();
 
         assertThat(events, hasSize(2));
         assertThat(events.get(0), instanceOf(HearingInitiated.class));
@@ -3456,7 +3535,7 @@ public class HearingAggregateTest {
                 .withHasSharedResults(false)
                 .build();
 
-        final List<Object> events = new HearingAggregate().initiate(hearing).collect(Collectors.toList());
+        final List<Object> events = new HearingAggregate().initiate(hearing).toList();
 
         assertThat(events, hasSize(1));
         assertThat(events.get(0), instanceOf(HearingInitiated.class));
@@ -3469,7 +3548,7 @@ public class HearingAggregateTest {
 
         final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearingId, Arrays.asList(randomUUID()), HEARING);
 
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         assertThat(objectList, hasSize(1));
         final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
         assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
@@ -3482,7 +3561,7 @@ public class HearingAggregateTest {
         final UUID hearingId = randomUUID();
 
         final Stream<Object> stream = hearingAggregate.updateHearingVacateTrialDetails(hearingId, true, randomUUID());
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         assertThat(objectList, hasSize(1));
         final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
         assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
@@ -3496,7 +3575,7 @@ public class HearingAggregateTest {
         final List<UUID> shadowListedOffences = Arrays.asList(randomUUID(),  randomUUID());
 
         final Stream<Object> stream = hearingAggregate.updateExistingHearing(hearingId, null, shadowListedOffences);
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         assertThat(objectList, hasSize(1));
         final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
         assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
@@ -3521,7 +3600,7 @@ public class HearingAggregateTest {
 
         final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id), HEARING);
 
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         assertThat(objectList, hasSize(1));
         final OffencesRemovedFromExistingHearing offencesRemovedFromExistingHearing = (OffencesRemovedFromExistingHearing) objectList.get(0);
         assertThat(offencesRemovedFromExistingHearing.getHearingId(), is(hearing.getId()));
@@ -3555,11 +3634,11 @@ public class HearingAggregateTest {
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .flatMap(defendant -> defendant.getOffences().stream())
                 .map(Offence::getId)
-                .collect(toList());
+                .toList();
 
         final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), offenceIds, HEARING);
 
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         assertThat(objectList, hasSize(1));
         final HearingDeleted hearingDeleted = (HearingDeleted) objectList.get(0);
         assertThat(hearingDeleted.getHearingId(), is(hearing.getId()));
@@ -3604,7 +3683,7 @@ public class HearingAggregateTest {
                 targetDraft.getDefendantId(),
                 resultLineIn.getResultDefinitionId(),
                 resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
-                        p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(Collectors.toList()),
+                        p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).toList(),
                 resultLineIn.getResultLabel(),
                 resultLineIn.getLevel().name(),
                 resultLineIn.getIsModified(),
@@ -3622,7 +3701,7 @@ public class HearingAggregateTest {
                 targetDraft.getDraftResult()
         );
         final ResultsShared resultsShared = (ResultsShared) hearingAggregate.shareResults(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine), HearingState.SHARED, null)
-                .collect(Collectors.toList()).get(0);
+                .toList().get(0);
 
         assertEquals(1, resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().size());
         assertEquals(1, resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().size());
@@ -3664,7 +3743,7 @@ public class HearingAggregateTest {
                 targetDraft.getDefendantId(),
                 resultLineIn.getResultDefinitionId(),
                 resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
-                        p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(Collectors.toList()),
+                        p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).toList(),
                 resultLineIn.getResultLabel(),
                 resultLineIn.getLevel().name(),
                 resultLineIn.getIsModified(),
@@ -3682,7 +3761,7 @@ public class HearingAggregateTest {
                 targetDraft.getDraftResult()
         );
         final ShareResultsFailed resultsSharedFailed = (ShareResultsFailed) hearingAggregate.shareResults(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine), INITIALISED, null)
-                .collect(Collectors.toList()).get(0);
+                .toList().get(0);
 
         assertEquals(SHARED, resultsSharedFailed.getHearingState());
     }
@@ -3732,7 +3811,7 @@ public class HearingAggregateTest {
                 randomUUID(),
                 resultLineIn.getResultDefinitionId(),
                 resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
-                        p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(Collectors.toList()),
+                        p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).toList(),
                 resultLineIn.getResultLabel(),
                 resultLineIn.getLevel().name(),
                 resultLineIn.getIsModified(),
@@ -3785,7 +3864,7 @@ public class HearingAggregateTest {
         targetDraft.setResultLines(null);
         final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine = getSharedResultsCommandResultLineV2(resultLineIn, targetDraft, "I", false);
         final ResultsSharedSuccess resultsShared = (ResultsSharedSuccess) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine), emptyList(), HearingState.SHARED, null, LocalDate.now(), USER_ID, 1)
-                .collect(Collectors.toList()).get(0);
+                .toList().get(0);
 
         assertEquals(hearing.getId(), resultsShared.getHearingId());
 
@@ -3801,7 +3880,7 @@ public class HearingAggregateTest {
 
 
         final Stream<Object> objectStream = hearingAggregate.inheritVerdict(hearing.getId(), verdict, Collections.emptySet());
-        final List<Object> objectList = objectStream.collect(Collectors.toList());
+        final List<Object> objectList = objectStream.toList();
         assertThat(objectList, hasSize(0));
 
 
@@ -3836,7 +3915,7 @@ public class HearingAggregateTest {
 
 
         final Stream<Object> objectStream = hearingAggregate.inheritVerdict(hearing.getId(), verdict, Collections.emptySet());
-        final List<Object> objectList = objectStream.collect(Collectors.toList());
+        final List<Object> objectList = objectStream.toList();
 
         assertThat(objectList, hasSize(1));
         final InheritedVerdictAdded inheritedVerdictAdded = (InheritedVerdictAdded) objectList.get(0);
@@ -3878,7 +3957,7 @@ public class HearingAggregateTest {
         targetDraft.setResultLines(null);
         final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine = getSharedResultsCommandResultLineV2(resultLineIn, targetDraft, "A", true);
         final ManageResultsFailed resultsShared = (ManageResultsFailed) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), newArrayList(sharedResultsCommandResultLine), emptyList(), INITIALISED, null, LocalDate.now(), USER_ID, 1)
-                .collect(Collectors.toList()).get(0);
+                .toList().get(0);
 
         assertEquals(hearing.getId(), resultsShared.getHearingId());
 
@@ -3943,7 +4022,7 @@ public class HearingAggregateTest {
         final UUID hearingId = randomUUID();
 
         final Stream<Object> stream = hearingAggregate.addOffence(hearingId, randomUUID(), randomUUID(), Offence.offence().build());
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         assertThat(objectList, hasSize(1));
         final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
         assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
@@ -3961,7 +4040,7 @@ public class HearingAggregateTest {
         hearingAggregate.deleteHearing(hearingId);
 
         final Stream<Object> stream = hearingAggregate.addOffence(hearingId, randomUUID(), randomUUID(), Offence.offence().build());
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         checkHearingEventIgnored(objectList);
     }
 
@@ -3971,7 +4050,7 @@ public class HearingAggregateTest {
         final UUID hearingId = randomUUID();
 
         final Stream<Object> stream = hearingAggregate.addOffenceV2(hearingId, randomUUID(), randomUUID(), singletonList(Offence.offence().build()));
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         assertThat(objectList, hasSize(1));
         final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
         assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
@@ -3989,7 +4068,7 @@ public class HearingAggregateTest {
         hearingAggregate.deleteHearing(hearingId);
 
         final Stream<Object> stream = hearingAggregate.addOffenceV2(hearingId, randomUUID(), randomUUID(), singletonList(Offence.offence().build()));
-        final List<Object> objectList = stream.collect(Collectors.toList());
+        final List<Object> objectList = stream.toList();
         checkHearingEventIgnored(objectList);
 
     }
@@ -4005,7 +4084,7 @@ public class HearingAggregateTest {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         HEARING_AGGREGATE.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        final IndicatedPleaUpdated event = (IndicatedPleaUpdated) HEARING_AGGREGATE.updateHearingWithIndicatedPlea(indicatedPlea.getOriginatingHearingId(), indicatedPlea).collect(Collectors.toList()).get(0);
+        final IndicatedPleaUpdated event = (IndicatedPleaUpdated) HEARING_AGGREGATE.updateHearingWithIndicatedPlea(indicatedPlea.getOriginatingHearingId(), indicatedPlea).toList().get(0);
 
         assertThat(event.getIndicatedPlea().getIndicatedPleaValue(), is(IndicatedPleaValue.INDICATED_GUILTY));
         assertThat(event.getHearingId(), is(indicatedPlea.getOriginatingHearingId()));
@@ -4049,7 +4128,7 @@ public class HearingAggregateTest {
         hearingAggregate.apply(new ProsecutionCounselAdded(prosecutionCounsel, hearingId));
 
         final Stream<Object> objectStream = hearingAggregate.removeProsecutionCounsel(prosecutionCounselId, hearingId);
-        final List<Object> objectList = objectStream.collect(Collectors.toList());
+        final List<Object> objectList = objectStream.toList();
         assertThat(objectList.size(), is(1));
     }
 
@@ -4083,7 +4162,7 @@ public class HearingAggregateTest {
                 new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN, STRING.next(), randomUUID()));
 
         // Act
-        List<Object> events = hearingAggregate.removeDefenceCounsel(prosecutionCounselId, hearingId).collect(Collectors.toList());
+        List<Object> events = hearingAggregate.removeDefenceCounsel(prosecutionCounselId, hearingId).toList();
 
         // Assert
         assertThat(events, hasSize(0));
@@ -4105,7 +4184,7 @@ public class HearingAggregateTest {
                 STRING.next(),
                 randomUUID());
         final Stream<Object> objectStream = hearingAggregate.updateProsecutionCounsel(prosecutionCounsel, hearingId);
-        final List<Object> objectList = objectStream.collect(Collectors.toList());
+        final List<Object> objectList = objectStream.toList();
         assertThat(objectList.size(), is(1));
     }
 
@@ -4131,7 +4210,7 @@ public class HearingAggregateTest {
         hearingAggregate.apply(new DefenceCounselAdded(defenceCounsel, hearingId));
 
         final Stream<Object> objectStream = hearingAggregate.removeDefenceCounsel(defenceCounselId, hearingId);
-        final List<Object> objectList = objectStream.collect(Collectors.toList());
+        final List<Object> objectList = objectStream.toList();
         assertThat(objectList.size(), is(1));
     }
 
@@ -4155,7 +4234,7 @@ public class HearingAggregateTest {
         HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(standardInitiateHearingTemplate().getHearing()));
 
-        hearingAggregate.addDefenceCounsel(defenceCounsel, hearingId).collect(Collectors.toList());
+        hearingAggregate.addDefenceCounsel(defenceCounsel, hearingId).toList();
 
         hearingAggregate.apply(new HearingEventLogged(randomUUID(), null, randomUUID(), randomUUID(),
                 randomUUID(), RECORDED_LABEL_HEARING_END, convertZonedDate(PAST_ZONED_DATE_TIME.next()), convertZonedDate(PAST_ZONED_DATE_TIME.next()), BOOLEAN.next(),
@@ -4163,7 +4242,7 @@ public class HearingAggregateTest {
                 new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN, STRING.next(), randomUUID()));
 
         // Act
-        List<Object> events = hearingAggregate.removeDefenceCounsel(defenceCounselId, hearingId).collect(Collectors.toList());
+        List<Object> events = hearingAggregate.removeDefenceCounsel(defenceCounselId, hearingId).toList();
 
         // Assert
         assertThat(events, hasSize(0));
@@ -4198,7 +4277,7 @@ public class HearingAggregateTest {
                 new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN, STRING.next(), randomUUID()));
 
         // Act
-        List<Object> events = hearingAggregate.updateProsecutionCounsel(prosecutionCounsel, hearingId).collect(Collectors.toList());
+        List<Object> events = hearingAggregate.updateProsecutionCounsel(prosecutionCounsel, hearingId).toList();
 
         // Assert
         assertThat(events, hasSize(0));
@@ -4225,7 +4304,7 @@ public class HearingAggregateTest {
         HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(standardInitiateHearingTemplate().getHearing()));
 
-        hearingAggregate.addDefenceCounsel(defenceCounsel, hearingId).collect(Collectors.toList());
+        hearingAggregate.addDefenceCounsel(defenceCounsel, hearingId).toList();
 
         hearingAggregate.apply(new HearingEventLogged(randomUUID(), null, randomUUID(), randomUUID(),
                 randomUUID(), RECORDED_LABEL_HEARING_END, convertZonedDate(PAST_ZONED_DATE_TIME.next()), convertZonedDate(PAST_ZONED_DATE_TIME.next()), BOOLEAN.next(),
@@ -4233,7 +4312,7 @@ public class HearingAggregateTest {
                 new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN, STRING.next(), randomUUID()));
 
         // Act
-        List<Object> events = hearingAggregate.updateDefenceCounsel(defenceCounsel, hearingId).collect(Collectors.toList());
+        List<Object> events = hearingAggregate.updateDefenceCounsel(defenceCounsel, hearingId).toList();
 
         // Assert
         assertThat(events, hasSize(0));
@@ -4247,7 +4326,7 @@ public class HearingAggregateTest {
         final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(), new ArrayList<>(),
                 "Margaret", randomUUID(), "Brown", "H", "Y", "Ms", randomUUID());
         final Stream<Object> objectStream = hearingAggregate.updateDefenceCounsel(defenceCounsel, hearingId);
-        final List<Object> objectList = objectStream.collect(Collectors.toList());
+        final List<Object> objectList = objectStream.toList();
         assertThat(objectList.size(), is(1));
     }
 
@@ -4256,7 +4335,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final Stream<Object> objectStream = hearingAggregate.extend(hearingId, Collections.emptyList(), null, null, null, Collections.emptyList(), Collections.emptyList());
-        final List<Object> objectList = objectStream.collect(Collectors.toList());
+        final List<Object> objectList = objectStream.toList();
         assertThat(objectList.size(), is(1));
     }
 
@@ -4294,7 +4373,7 @@ public class HearingAggregateTest {
         when(hearingAggregateMomento.getSharedTargets()).thenReturn(existingTargets);
 
         final Stream<Object> objectStream = hearingAggregate.cancelAmendmentsSincePreviousShare(hearingId, userId, true, hearingDay);
-        final ResultAmendmentsCancelledV2 resultAmendmentsCancelledV2 = (ResultAmendmentsCancelledV2) objectStream.collect(toList()).get(0);
+        final ResultAmendmentsCancelledV2 resultAmendmentsCancelledV2 = (ResultAmendmentsCancelledV2) objectStream.toList().get(0);
         assertThat(resultAmendmentsCancelledV2.getHearingId(), is(hearingId));
         assertThat(resultAmendmentsCancelledV2.getUserId(), is(userId));
         assertThat(resultAmendmentsCancelledV2.getLatestSharedTargets().size(), is(1));
@@ -4324,7 +4403,7 @@ public class HearingAggregateTest {
         when(hearingAggregateMomento.getSharedTargets()).thenReturn(existingTargets);
 
         final Stream<Object> objectStream = hearingAggregate.cancelAmendmentsSincePreviousShare(hearingId, userId, false, hearingDay);
-        final ResultAmendmentsCancelledV2 resultAmendmentsCancelledV2 = (ResultAmendmentsCancelledV2) objectStream.collect(toList()).get(0);
+        final ResultAmendmentsCancelledV2 resultAmendmentsCancelledV2 = (ResultAmendmentsCancelledV2) objectStream.toList().get(0);
         assertThat(resultAmendmentsCancelledV2.getHearingId(), is(hearingId));
         assertThat(resultAmendmentsCancelledV2.getUserId(), is(userId));
         assertThat(resultAmendmentsCancelledV2.getLatestSharedTargets().size(), is(1));
@@ -4392,7 +4471,7 @@ public class HearingAggregateTest {
         targetList.add(target);
         targetList.add(invalidTarget);
         final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList, randomUUID());
-        final List<Object> eventList = eventStream.collect(toList());
+        final List<Object> eventList = eventStream.toList();
         final HearingLockedByOtherUser hearingLockedByOtherUser = (HearingLockedByOtherUser) eventList.get(0);
         assertThat(hearingLockedByOtherUser.getHearingId(), is(hearingId));
     }
@@ -4422,7 +4501,7 @@ public class HearingAggregateTest {
         targetList.add(target);
         targetList.add(invalidTarget);
         final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList, randomUUID());
-        final List<Object> eventList = eventStream.collect(toList());
+        final List<Object> eventList = eventStream.toList();
         final HearingLocked hearingLocked = (HearingLocked) eventList.get(0);
         assertThat(hearingLocked.getHearingId(), is(hearingId));
     }
@@ -4438,7 +4517,7 @@ public class HearingAggregateTest {
         final UUID hearingId = randomUUID();
         final UUID userId = randomUUID();
         final Stream<Object> eventStream = hearingAggregate.saveDraftResultV2(userId, null, hearingId, LocalDate.now(), version, emptyMap(), null);
-        final List<Object> eventList = eventStream.collect(toList());
+        final List<Object> eventList = eventStream.toList();
         final ManageResultsFailed manageResultsFailed = (ManageResultsFailed) eventList.get(0);
         assertThat(manageResultsFailed.getHearingId(), is(hearingId));
     }
@@ -4470,7 +4549,7 @@ public class HearingAggregateTest {
         final UUID hearingId = randomUUID();
         final UUID userId = randomUUID();
         final Stream<Object> eventStream = hearingAggregate.saveDraftResultV2(userId, null, hearingId, LocalDate.now(), version, emptyMap(), null);
-        final List<Object> eventList = eventStream.collect(toList());
+        final List<Object> eventList = eventStream.toList();
         final DraftResultSavedV2 draftResultSavedV2 = (DraftResultSavedV2) eventList.get(0);
         assertThat(draftResultSavedV2.getHearingId(), is(hearingId));
     }
@@ -4762,7 +4841,7 @@ public class HearingAggregateTest {
                 .withOffenceId(offenceId)
                 .build();
         final Stream<Object> eventStream = hearingAggregate.saveDraftResultForHearingDay(userId, target);
-        final List<Object> eventList = eventStream.collect(toList());
+        final List<Object> eventList = eventStream.toList();
         final HearingLocked hearingLocked = (HearingLocked) eventList.get(0);
         assertThat(hearingLocked.getHearingId(), is(hearingId));
     }
@@ -4786,7 +4865,7 @@ public class HearingAggregateTest {
                 .withOffenceId(offenceId)
                 .build();
         final Stream<Object> eventStream = hearingAggregate.saveDraftResultForHearingDay(userId, target);
-        final List<Object> eventList = eventStream.collect(toList());
+        final List<Object> eventList = eventStream.toList();
         final HearingLockedByOtherUser hearingLockedByOtherUser = (HearingLockedByOtherUser) eventList.get(0);
         assertThat(hearingLockedByOtherUser.getHearingId(), is(hearingId));
     }
@@ -4796,7 +4875,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final Stream<Object> objectStream = hearingAggregate.setTrialType(new HearingEffectiveTrial(hearingId, false));
-        final HearingEffectiveTrial hearingEffectiveTrial = (HearingEffectiveTrial) objectStream.collect(toList()).get(0);
+        final HearingEffectiveTrial hearingEffectiveTrial = (HearingEffectiveTrial) objectStream.toList().get(0);
         assertThat(hearingEffectiveTrial.getHearingId(), is(hearingId));
         assertThat(hearingEffectiveTrial.getIsEffectiveTrial(), is(false));
     }
@@ -4816,7 +4895,7 @@ public class HearingAggregateTest {
         final UUID hearingId = randomUUID();
         ReflectionUtil.setField(hearingAggregate, "hearingState", SHARED);
         final Stream<Object> objectStream = hearingAggregate.cancelHearingDays(hearingId, Collections.emptyList());
-        assertThat(objectStream.collect(toList()).size(), is(1));
+        assertThat(objectStream.toList().size(), is(1));
     }
 
     @Test
@@ -4834,7 +4913,7 @@ public class HearingAggregateTest {
                 cpUserId,
                 hearingId,
                 id);
-        assertThat(((HearingUserAddedToJudiciary) objectStream.collect(toList()).get(0)).getHearingId(), is(hearingId));
+        assertThat(((HearingUserAddedToJudiciary) objectStream.toList().get(0)).getHearingId(), is(hearingId));
     }
 
     @Test
@@ -4842,7 +4921,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
         final Stream<Object> objectStream = hearingAggregate.saveReusableInfo(hearingId, Collections.emptyList(), Collections.emptyList());
-        assertThat(((ReusableInfoSaved) objectStream.collect(toList()).get(0)).getHearingId(), is(hearingId));
+        assertThat(((ReusableInfoSaved) objectStream.toList().get(0)).getHearingId(), is(hearingId));
     }
 
     @Test
@@ -4853,7 +4932,7 @@ public class HearingAggregateTest {
         ReflectionUtil.setField(hearingAggregate, "momento", hearingAggregateMomento);
         when(hearingAggregateMomento.getHearing()).thenReturn(new Hearing.Builder().withId(hearingId).build());
         final Stream<Object> objectStream = hearingAggregate.receiveDefendantsPartOfYouthCourtHearing(Arrays.asList(randomUUID(), randomUUID()));
-        assertThat(((DefendantsInYouthCourtUpdated)objectStream.collect(toList()).get(0)).getHearingId(), is(hearingId));
+        assertThat(((DefendantsInYouthCourtUpdated)objectStream.toList().get(0)).getHearingId(), is(hearingId));
     }
 
     @Test
@@ -4864,7 +4943,7 @@ public class HearingAggregateTest {
         ReflectionUtil.setField(hearingAggregate, "momento", hearingAggregateMomento);
         when(hearingAggregateMomento.getHearing()).thenReturn(new Hearing.Builder().withId(hearingId).build());
         final Stream<Object> objectStream = hearingAggregate.addWitnessToHearing(hearingId, "Test witness");
-        final Object event = objectStream.collect(toList()).get(0);
+        final Object event = objectStream.toList().get(0);
         assertThat(((WitnessAddedToHearing) event).getHearingId(), is(hearingId));
         assertThat(((WitnessAddedToHearing) event).getWitness(), is("Test witness"));
     }
@@ -5036,9 +5115,9 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).toList().get(0);
 
-        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).toList();
         assertThat(events, empty());
     }
 
@@ -5072,7 +5151,7 @@ public class HearingAggregateTest {
         assertThat(target2.getApplicationFinalised(), nullValue());
         hearingAggregate.apply(resultsSharedV3);
 
-        final  List<Object> events = hearingAggregate.updateApplicationFinalisedOnTarget(targetId, hearing.getId(), hearingDay, true).collect(toList());;
+        final  List<Object> events = hearingAggregate.updateApplicationFinalisedOnTarget(targetId, hearing.getId(), hearingDay, true).toList();;
         assertThat(events.size(), Matchers.is(1));
         final ApplicationFinalisedOnTargetUpdated event = (ApplicationFinalisedOnTargetUpdated) events.get(0);
         assertThat(event.getHearingDay(), is(hearingDay));
@@ -5112,7 +5191,7 @@ public class HearingAggregateTest {
         assertThat(target2.getApplicationFinalised(), nullValue());
         hearingAggregate.apply(resultsSharedV3);
 
-        final  List<Object> events = hearingAggregate.updateApplicationFinalisedOnTarget(targetId, hearing.getId(), hearingDay1, true).collect(toList());;
+        final  List<Object> events = hearingAggregate.updateApplicationFinalisedOnTarget(targetId, hearing.getId(), hearingDay1, true).toList();;
         assertThat(events.size(), Matchers.is(1));
         final ApplicationFinalisedOnTargetUpdated event = (ApplicationFinalisedOnTargetUpdated) events.get(0);
         assertThat(event.getHearingDay(), is(hearingDay1));
@@ -5134,11 +5213,45 @@ public class HearingAggregateTest {
                 .build();
     }
 
+    /**
+     * A hearing for an application whose linked case is inactive: no prosecution cases, the case's
+     * defendant is reachable only through the application subject's master defendant.
+     */
+    private static Hearing applicationOnlyHearing(final UUID caseId, final UUID defendantId, final String caseUrn) {
+        final uk.gov.justice.core.courts.CourtApplication courtApplication = uk.gov.justice.core.courts.CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withApplicationReference("APPREF1")
+                .withSubject(uk.gov.justice.core.courts.CourtApplicationParty.courtApplicationParty()
+                        .withId(randomUUID())
+                        .withMasterDefendant(uk.gov.justice.core.courts.MasterDefendant.masterDefendant()
+                                .withMasterDefendantId(randomUUID())
+                                .withDefendantCase(singletonList(uk.gov.justice.core.courts.DefendantCase.defendantCase()
+                                        .withCaseId(caseId)
+                                        .withDefendantId(defendantId)
+                                        .withCaseReference(caseUrn)
+                                        .build()))
+                                .build())
+                        .build())
+                .withCourtApplicationCases(singletonList(uk.gov.justice.core.courts.CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(caseId)
+                        .withCaseStatus("INACTIVE")
+                        .withProsecutionCaseIdentifier(uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                                .withCaseURN(caseUrn)
+                                .build())
+                        .build()))
+                .build();
+        return Hearing.hearing()
+                .withValuesFrom(standardInitiateHearingTemplate().getHearing())
+                .withProsecutionCases(null)
+                .withCourtApplications(singletonList(courtApplication))
+                .build();
+    }
+
     private List<UUID> getDefendantIdsOnHearing(final Hearing hearing) {
         return hearing.getProsecutionCases().stream()
                 .map(ProsecutionCase::getDefendants)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList()).stream().map(Defendant::getId).collect(toList());
+                .toList().stream().map(Defendant::getId).toList();
     }
 
     private static ZonedDateTime convertZonedDate(final ZonedDateTime datetime)
@@ -5168,7 +5281,7 @@ public class HearingAggregateTest {
 
         final List<Object> events = hearingAggregate
                 .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
-                .collect(toList());
+                .toList();
 
         assertThat(events.size(), is(1));
         assertTrue(events.get(0) instanceof HearingChangeIgnored);
@@ -5184,7 +5297,7 @@ public class HearingAggregateTest {
 
         final List<Object> events = hearingAggregate
                 .finalisePtphDetail(new PtphDetailFinalised(hearingId))
-                .collect(toList());
+                .toList();
 
         assertThat(events.size(), is(1));
         assertTrue(events.get(0) instanceof HearingChangeIgnored);
@@ -5199,7 +5312,7 @@ public class HearingAggregateTest {
 
         final List<Object> events = hearingAggregate
                 .deletePtphDetail(new PtphDetailDeleted(hearingId))
-                .collect(toList());
+                .toList();
 
         assertThat(events.size(), is(1));
         assertTrue(events.get(0) instanceof HearingChangeIgnored);
@@ -5218,7 +5331,7 @@ public class HearingAggregateTest {
 
         final List<Object> events = hearingAggregate
                 .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
-                .collect(toList());
+                .toList();
 
         assertThat(events.size(), is(1));
         assertTrue(events.get(0) instanceof PtphDetailSaved);
@@ -5277,7 +5390,7 @@ public class HearingAggregateTest {
 
         assertRejectedAsNotCrown(hearingAggregate
                 .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
-                .collect(toList()), hearingId);
+                .toList(), hearingId);
     }
 
     /** Jurisdiction is the whole rule, so a magistrates hearing is refused whatever its type. */
@@ -5288,7 +5401,7 @@ public class HearingAggregateTest {
 
         assertRejectedAsNotCrown(hearingAggregate
                 .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
-                .collect(toList()), hearingId);
+                .toList(), hearingId);
     }
 
     /**
@@ -5301,7 +5414,7 @@ public class HearingAggregateTest {
 
         assertSaved(hearingAggregate
                 .savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_2", "TYPE_1_FIXED", "reason"))
-                .collect(toList()));
+                .toList());
     }
 
     /** A Crown hearing that carries no type at all is still eligible. */
@@ -5311,7 +5424,7 @@ public class HearingAggregateTest {
 
         assertSaved(hearingAggregate
                 .savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_2", "TYPE_1_FIXED", "reason"))
-                .collect(toList()));
+                .toList());
     }
 
     /** A hearing with no jurisdiction cannot be confirmed as Crown, so it is not eligible. */
@@ -5322,7 +5435,7 @@ public class HearingAggregateTest {
 
         assertRejectedAsNotCrown(hearingAggregate
                 .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_2", "TYPE_1_FIXED", "reason"))
-                .collect(toList()), hearingId);
+                .toList(), hearingId);
     }
 
     // ---------------------------------------------------------------------------------
@@ -5360,7 +5473,7 @@ public class HearingAggregateTest {
 
         assertIgnoredWithReason(hearingAggregate
                         .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_3", null, null))
-                        .collect(toList()),
+                        .toList(),
                 hearingId,
                 "Rejecting 'hearing.save-ptph-detail' event as tier and list type are finalised and cannot be changed");
     }
@@ -5372,7 +5485,7 @@ public class HearingAggregateTest {
 
         assertIgnoredWithReason(hearingAggregate
                         .finalisePtphDetail(new PtphDetailFinalised(hearingId))
-                        .collect(toList()),
+                        .toList(),
                 hearingId,
                 "Rejecting 'hearing.finalise-ptph-detail' event as both tier and list type are required to finalise");
     }
@@ -5384,7 +5497,7 @@ public class HearingAggregateTest {
 
         assertIgnoredWithReason(hearingAggregate
                         .finalisePtphDetail(new PtphDetailFinalised(hearingId))
-                        .collect(toList()),
+                        .toList(),
                 hearingId,
                 "Rejecting 'hearing.finalise-ptph-detail' event as both tier and list type are required to finalise");
     }
@@ -5397,7 +5510,7 @@ public class HearingAggregateTest {
 
         assertIgnoredWithReason(hearingAggregate
                         .finalisePtphDetail(new PtphDetailFinalised(hearingId))
-                        .collect(toList()),
+                        .toList(),
                 hearingId,
                 "Rejecting 'hearing.finalise-ptph-detail' event as tier and list type are already finalised");
     }
@@ -5406,7 +5519,7 @@ public class HearingAggregateTest {
     public void shouldFinalisePtphDetailWhenTierAndListTypeArePresent() {
         final List<Object> events = crownAggregateWithPtphState("TIER_2", "TYPE_2_FLEXIBLE", false)
                 .finalisePtphDetail(new PtphDetailFinalised(randomUUID()))
-                .collect(toList());
+                .toList();
 
         assertThat(events.size(), is(1));
         assertTrue(events.get(0) instanceof PtphDetailFinalised);
@@ -5416,11 +5529,11 @@ public class HearingAggregateTest {
     @Test
     public void shouldDeletePtphDetailWhenAlreadyFinalisedAndWhenNothingIsRecorded() {
         assertThat(crownAggregateWithPtphState("TIER_2", "TYPE_1_FIXED", true)
-                .deletePtphDetail(new PtphDetailDeleted(randomUUID())).collect(toList()).get(0),
+                .deletePtphDetail(new PtphDetailDeleted(randomUUID())).toList().get(0),
                 instanceOf(PtphDetailDeleted.class));
 
         assertThat(crownAggregateWithPtphState(null, null, false)
-                .deletePtphDetail(new PtphDetailDeleted(randomUUID())).collect(toList()).get(0),
+                .deletePtphDetail(new PtphDetailDeleted(randomUUID())).toList().get(0),
                 instanceOf(PtphDetailDeleted.class));
     }
 
@@ -5448,7 +5561,7 @@ public class HearingAggregateTest {
         final UUID hearingId = randomUUID();
         assertIgnoredWithReason(crownAggregateThatIs(true, false)
                         .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_3", "TYPE_2_FLEXIBLE", null))
-                        .collect(toList()),
+                        .toList(),
                 hearingId, "Rejecting 'hearing.save-ptph-detail' event as hearing is deleted or a duplicate");
     }
 
@@ -5457,7 +5570,7 @@ public class HearingAggregateTest {
         final UUID hearingId = randomUUID();
         assertIgnoredWithReason(crownAggregateThatIs(false, true)
                         .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_3", "TYPE_2_FLEXIBLE", null))
-                        .collect(toList()),
+                        .toList(),
                 hearingId, "Rejecting 'hearing.save-ptph-detail' event as hearing is deleted or a duplicate");
     }
 
@@ -5466,7 +5579,7 @@ public class HearingAggregateTest {
         final UUID hearingId = randomUUID();
         assertIgnoredWithReason(crownAggregateThatIs(true, false)
                         .finalisePtphDetail(new PtphDetailFinalised(hearingId))
-                        .collect(toList()),
+                        .toList(),
                 hearingId, "Rejecting 'hearing.finalise-ptph-detail' event as hearing is deleted or a duplicate");
     }
 
@@ -5475,7 +5588,7 @@ public class HearingAggregateTest {
         final UUID hearingId = randomUUID();
         assertIgnoredWithReason(crownAggregateThatIs(true, false)
                         .deletePtphDetail(new PtphDetailDeleted(hearingId))
-                        .collect(toList()),
+                        .toList(),
                 hearingId, "Rejecting 'hearing.delete-ptph-detail' event as hearing is deleted or a duplicate");
     }
 
@@ -5547,14 +5660,14 @@ public class HearingAggregateTest {
     public void shouldStillAcceptPtphDetailCommandsForALiveHearing() {
         assertSaved(crownAggregateThatIs(false, false)
                 .savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_3", "TYPE_2_FLEXIBLE", null))
-                .collect(toList()));
+                .toList());
 
         assertThat(crownAggregateThatIs(false, false)
-                        .finalisePtphDetail(new PtphDetailFinalised(randomUUID())).collect(toList()).get(0),
+                        .finalisePtphDetail(new PtphDetailFinalised(randomUUID())).toList().get(0),
                 instanceOf(PtphDetailFinalised.class));
 
         assertThat(crownAggregateThatIs(false, false)
-                        .deletePtphDetail(new PtphDetailDeleted(randomUUID())).collect(toList()).get(0),
+                        .deletePtphDetail(new PtphDetailDeleted(randomUUID())).toList().get(0),
                 instanceOf(PtphDetailDeleted.class));
     }
 

@@ -1,22 +1,18 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import uk.gov.justice.core.courts.DefenceCounsel;
-import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpdated;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DefenceCounselDelegate implements Serializable {
@@ -61,10 +57,8 @@ public class DefenceCounselDelegate implements Serializable {
     }
 
     private boolean isNoDfendantsOnTheHearing(final DefenceCounsel defenceCounsel, final Hearing hearing) {
-        final Set<UUID> defendantIds = hearing.getProsecutionCases().stream()
-                .map(ProsecutionCase::getDefendants)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList()).stream().map(Defendant::getId).collect(toSet());
+        // includes the case defendants of applications on inactive cases, which have no prosecution cases on the hearing
+        final Set<UUID> defendantIds = CounselHearingDetails.defendantIds(hearing);
 
         return defenceCounsel.getDefendants().stream().filter(aDefId -> defendantIds.contains(aDefId)).findFirst().isPresent() ? false:true;
     }
@@ -84,7 +78,10 @@ public class DefenceCounselDelegate implements Serializable {
         if (defenceCounsel == null || isHearingEnded ) {
             return Stream.empty();
         }
-        final String caseRef = this.momento.getHearing() != null ? this.momento.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN():null;
+        final Hearing hearing = this.momento.getHearing();
+        final String caseRef = hearing != null && isNotEmpty(hearing.getProsecutionCases())
+                ? hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()
+                : CounselHearingDetails.caseReference(hearing);
 
         if (!(defenceCounsels.containsKey(defenceCounsel.getId()))) {
             return Stream.of(new DefenceCounselChangeIgnored(
@@ -99,8 +96,6 @@ public class DefenceCounselDelegate implements Serializable {
     }
 
     private String getCaseReference(Hearing hearing){
-        final String prosecutionCaseURN = hearing!= null ? hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN():null;
-        final String prosecutionAuthorityReference = hearing!= null ? hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference():null;
-        return prosecutionCaseURN != null ? prosecutionCaseURN : prosecutionAuthorityReference;
+        return CounselHearingDetails.caseReference(hearing);
     }
 }
