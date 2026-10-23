@@ -11,7 +11,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EXCLUDED_PROMPT_REFERENCE;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EXCLUDED_PROMPT_REFERENCES;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.convertBooleanPromptValue;
 
 
@@ -31,7 +31,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 @SuppressWarnings({"squid:S1612"})
 public class ResultTextHelper {
 
-    public static final Predicate<Prompt> PROMPT_PREDICATE = p -> !EXCLUDED_PROMPT_REFERENCE.equals(p.getPromptRef());
+    public static final Predicate<Prompt> PROMPT_PREDICATE = p -> p.getPromptRef() == null || !EXCLUDED_PROMPT_REFERENCES.contains(p.getPromptRef());
     public static final String CHAR_DASH = " - ";
     public static final String CHAR_EMPTY = "";
 
