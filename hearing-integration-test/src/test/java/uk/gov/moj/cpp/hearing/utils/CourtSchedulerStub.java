@@ -2,8 +2,14 @@ package uk.gov.moj.cpp.hearing.utils;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.lang.String.format;
+import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static javax.ws.rs.core.Response.Status.OK;
 import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import io.restassured.path.json.JsonPath;
 
 public class CourtSchedulerStub {
 
@@ -11,6 +17,7 @@ public class CourtSchedulerStub {
     private static final String HOST = System.getProperty("INTEGRATION_HOST_KEY", "localhost");
 
     private static final String UNCONFIRMED_BOOKING = "/unconfirmedBooking";
+    private static final String RELEASE_UNCONFIRMED_BOOKINGS = UNCONFIRMED_BOOKING + "/release";
 
     public static final String STUB_DATA_UNCONFIRMED_BOOKING_BOOK_SLOTS_RESPONSE = "stub-data/courtscheduler.provisionalbooking-book-slots-response.json";
 
@@ -43,5 +50,16 @@ public class CourtSchedulerStub {
                 ));
     }
 
+    /** courtscheduler's bulk release of unconfirmed holds, answering 202 with no body as it does. */
+    public static void stubReleaseUnconfirmedBookings() {
+        stubFor(post(urlPathEqualTo(COURT_SCHEDULER_BASE_URL + RELEASE_UNCONFIRMED_BOOKINGS))
+                .willReturn(aResponse().withStatus(ACCEPTED.getStatusCode())));
+    }
 
+    /** The bookingIds of every bulk release courtscheduler has received, flattened. */
+    public static List<String> releasedBookingIds() {
+        return findAll(postRequestedFor(urlPathEqualTo(COURT_SCHEDULER_BASE_URL + RELEASE_UNCONFIRMED_BOOKINGS))).stream()
+                .flatMap(request -> JsonPath.from(request.getBodyAsString()).<String>getList("bookingIds").stream())
+                .collect(Collectors.toList());
+    }
 }

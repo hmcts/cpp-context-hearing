@@ -6,9 +6,19 @@
     "hearingId": {
       "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
     },
-    "bookingId": {
-      "type": "string"
+    "bookingIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "reason": {
+      "type": "string",
+      "enum": ["RELEASED_BY_USER", "DROPPED_FROM_DRAFT"]
     }
   },
-  "required": ["hearingId", "bookingId"]
+  "required": ["hearingId", "bookingIds", "reason"],
+  "additionalProperties": false
 }

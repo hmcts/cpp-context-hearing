@@ -9,6 +9,8 @@ import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingServiceResponse;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -18,7 +20,6 @@ import javax.ws.rs.core.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -32,9 +33,10 @@ import org.slf4j.LoggerFactory;
 public class ProvisionalBookingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionalBookingService.class);
     private static final String SERVICE = "/unconfirmedBooking";
-    private static final String SESSIONS = "/sessions/";
+    private static final String RELEASE = "/release";
 
     public static final String COURTSCHEDULER_CREATE_UNCONFIRMED_BOOKING = "application/vnd.courtscheduler.create.unconfirmed.booking+json";
+    public static final String COURTSCHEDULER_RELEASE_UNCONFIRMED_BOOKINGS = "application/vnd.courtscheduler.release.unconfirmed.bookings+json";
     public static final String CJS_CPP_UID = "CJSCPPUID";
 
     @Inject
@@ -137,27 +139,37 @@ public class ProvisionalBookingService {
     }
 
     /**
-     * Releases the hold taken at slot-pick time. courtscheduler's DELETE performs the full
-     * three-step release, restoring the session's capacity, and is a no-op when the booking has
-     * no reservation — which is the normal case for a pre-go-live magistrates draft.
+     * Gives back the unconfirmed holds taken under these bookingIds, in one call and one
+     * courtscheduler transaction. courtscheduler releases only holds no share has confirmed, and
+     * never anything keyed by hearing_id, so a booking already listed survives whatever is named
+     * here. Unknown ids are no-ops.
+     *
+     * <p>Best effort: a failure is logged and swallowed. Rolling the event back would only retry a
+     * release the overnight purge makes anyway, and would hold up the processor in the meantime.
      */
-    public void releaseSlots(final String bookingId) {
+    public void releaseUnconfirmedBookings(final List<String> bookingIds) {
+        if (bookingIds.isEmpty()) {
+            return;
+        }
         final UUID systemUserId = systemUserProvider.getContextSystemUserId()
                 .orElseThrow(() -> new IllegalStateException("contextSystemUserId missing!!!"));
 
         try {
-            final HttpDelete httpDelete = new HttpDelete(new URL(baseUri + SESSIONS + bookingId).toString());
-            httpDelete.addHeader(CJS_CPP_UID, systemUserId.toString());
+            final HttpPost httpPost = new HttpPost(new URL(baseUri + SERVICE + RELEASE).toString());
+            httpPost.addHeader(CONTENT_TYPE, COURTSCHEDULER_RELEASE_UNCONFIRMED_BOOKINGS);
+            httpPost.addHeader(CJS_CPP_UID, systemUserId.toString());
+            httpPost.setEntity(new StringEntity(objectMapper.writeValueAsString(Map.of("bookingIds", bookingIds))));
 
-            final HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpDelete);
+            final HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
             final int status = httpResponse.getStatusLine().getStatusCode();
-            if (status == Response.Status.ACCEPTED.getStatusCode() || status == Response.Status.OK.getStatusCode()) {
-                LOGGER.info("released provisional booking {}", bookingId);
+            if (status == Response.Status.ACCEPTED.getStatusCode()) {
+                LOGGER.info("released unconfirmed bookings {}", bookingIds);
             } else {
-                LOGGER.error("release of provisional booking {} failed with status {}", bookingId, status);
+                final String body = httpResponse.getEntity() == null ? "" : EntityUtils.toString(httpResponse.getEntity());
+                LOGGER.error("release of unconfirmed bookings {} failed with status {} body {}", bookingIds, status, body);
             }
         } catch (IOException ex) {
-            LOGGER.error("release of provisional booking {} failed", bookingId, ex);
+            LOGGER.error("release of unconfirmed bookings {} failed", bookingIds, ex);
         }
     }
 }

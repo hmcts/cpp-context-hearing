@@ -6,10 +6,13 @@ import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
@@ -18,6 +21,8 @@ import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingServiceResponse;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
@@ -66,23 +71,45 @@ public class ProvisionalBookingServiceTest {
         // deterministic IOException without needing a real courtscheduler double.
         setField(provisionalBookingService, "baseUri", "http://127.0.0.1:1");
 
-        assertDoesNotThrow(() -> provisionalBookingService.releaseSlots(randomUUID().toString()));
+        setField(provisionalBookingService, "objectMapper", new ObjectMapper());
+
+        assertDoesNotThrow(() -> provisionalBookingService.releaseUnconfirmedBookings(List.of(randomUUID().toString())));
     }
 
     @Test
     public void shouldLogRatherThanThrowOnNonAcceptedResponse() throws Exception {
-        httpServer = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        httpServer.createContext("/sessions", exchange -> {
-            exchange.sendResponseHeaders(404, -1);
-            exchange.close();
-        });
-        httpServer.start();
+        givenCourtSchedulerReleaseResponds(400);
 
-        when(systemUserProvider.getContextSystemUserId()).thenReturn(of(randomUUID()));
-        setField(provisionalBookingService, "systemUserProvider", systemUserProvider);
-        setField(provisionalBookingService, "baseUri", "http://127.0.0.1:" + httpServer.getAddress().getPort());
+        assertDoesNotThrow(() -> provisionalBookingService.releaseUnconfirmedBookings(List.of(randomUUID().toString())));
+    }
 
-        assertDoesNotThrow(() -> provisionalBookingService.releaseSlots(randomUUID().toString()));
+    /**
+     * The bulk release, never DELETE /sessions/{id}: that one also releases by hearing_id and
+     * takes confirmed listings with it. This endpoint gives back only unconfirmed holds.
+     */
+    @Test
+    public void shouldPostEveryBookingIdToCourtSchedulersBulkReleaseInOneRequest() throws Exception {
+        givenCourtSchedulerReleaseResponds(202);
+        final String bookingA = randomUUID().toString();
+        final String bookingB = randomUUID().toString();
+
+        provisionalBookingService.releaseUnconfirmedBookings(List.of(bookingA, bookingB));
+
+        assertThat(receivedRequests, hasSize(1));
+        final ReceivedRequest request = receivedRequests.get(0);
+        assertThat(request.method(), is("POST"));
+        assertThat(request.contentType(), is("application/vnd.courtscheduler.release.unconfirmed.bookings+json"));
+        assertThat(new ObjectMapper().readTree(request.body()),
+                is(new ObjectMapper().readTree("{\"bookingIds\":[\"" + bookingA + "\",\"" + bookingB + "\"]}")));
+    }
+
+    @Test
+    public void shouldNotCallCourtSchedulerWithNothingToRelease() throws Exception {
+        givenCourtSchedulerReleaseResponds(202);
+
+        provisionalBookingService.releaseUnconfirmedBookings(List.of());
+
+        assertThat(receivedRequests, is(empty()));
     }
 
     /**
@@ -185,7 +212,7 @@ public class ProvisionalBookingServiceTest {
 
     /**
      * No answer at all. Nothing listens on port 1, so connect() is refused immediately and the
-     * real IOException path runs. The test at the top of this class proves releaseSlots SWALLOWS
+     * real IOException path runs. The test at the top of this class proves releaseUnconfirmedBookings SWALLOWS
      * that exception; this one proves bookSlots reports it - with no status, as there was none.
      */
     @Test
@@ -203,6 +230,31 @@ public class ProvisionalBookingServiceTest {
         // getMessage() is null on some IOException subclasses and the event schema requires
         // message, so it must never come back blank.
         assertThat(response.getErrorMessage(), is(notNullValue()));
+    }
+
+    private record ReceivedRequest(String method, String contentType, String body) {
+    }
+
+    private final List<ReceivedRequest> receivedRequests = new CopyOnWriteArrayList<>();
+
+    /** A local courtscheduler double on {@code /unconfirmedBooking/release} that records what it was sent. */
+    private void givenCourtSchedulerReleaseResponds(final int status) throws IOException {
+        httpServer = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        httpServer.createContext("/unconfirmedBooking/release", exchange -> {
+            receivedRequests.add(new ReceivedRequest(
+                    exchange.getRequestMethod(),
+                    exchange.getRequestHeaders().getFirst("Content-Type"),
+                    new String(exchange.getRequestBody().readAllBytes(), UTF_8)));
+            exchange.sendResponseHeaders(status, -1);
+            exchange.close();
+        });
+        httpServer.start();
+
+        // lenient: a call with nothing to release must not even look the system user up
+        lenient().when(systemUserProvider.getContextSystemUserId()).thenReturn(of(randomUUID()));
+        setField(provisionalBookingService, "systemUserProvider", systemUserProvider);
+        setField(provisionalBookingService, "objectMapper", new ObjectMapper());
+        setField(provisionalBookingService, "baseUri", "http://127.0.0.1:" + httpServer.getAddress().getPort());
     }
 
     /**

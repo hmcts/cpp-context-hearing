@@ -68,13 +68,23 @@ public class ProvisionalBookingSchemaChainTest {
      * A single template silently pointed hop 3 at a file that does not exist, and
      * {@link #propertiesOf} would have failed with "schema not found" rather than comparing
      * anything — which is the failure this test exists to prevent, not to cause.
+     *
+     * <p>{@code eventName} is null where the event is not the command passed on. The release
+     * event is built by the aggregate - {@code bookingIds} and a {@code reason}, raised on draft
+     * saves as well as by this command - so only hops 1 and 2 are compared for it, and
+     * ReleaseProvisionalHearingSlotsSchemaTest in hearing-event-processor checks what the
+     * aggregate writes against hop 3.
      */
     private record Family(String commandName, String eventName) {
+
+        boolean eventMirrorsCommand() {
+            return eventName != null;
+        }
     }
 
     private static final List<Family> FAMILIES = List.of(
             new Family("book-unconfirmed-hearing-slots", "book-provisional-hearing-slots"),
-            new Family("release-unconfirmed-hearing-slots", "release-provisional-hearing-slots"));
+            new Family("release-unconfirmed-hearing-slots", null));
 
     @Test
     public void everyCommandApiPropertyIsAcceptedByBothDownstreamHops() throws Exception {
@@ -87,13 +97,16 @@ public class ProvisionalBookingSchemaChainTest {
         final String name = family.commandName();
         final Set<String> commandApi = propertiesOf(String.format(COMMAND_API_SCHEMA, name));
         final Set<String> commandHandler = propertiesOf(String.format(COMMAND_HANDLER_SCHEMA, name));
-        final Set<String> eventProcessor =
-                propertiesOf(String.format(EVENT_PROCESSOR_SCHEMA, family.eventName()));
 
         assertThat("command-handler schema for " + name + " would reject these with "
                         + "'extraneous key ... is not permitted'",
                 missing(commandApi, commandHandler), is(empty()));
 
+        if (!family.eventMirrorsCommand()) {
+            return;
+        }
+        final Set<String> eventProcessor =
+                propertiesOf(String.format(EVENT_PROCESSOR_SCHEMA, family.eventName()));
         assertThat("event-processor schema for " + name + " would reject these with "
                         + "'extraneous key ... is not permitted'",
                 missing(commandApi, eventProcessor), is(empty()));
@@ -106,7 +119,9 @@ public class ProvisionalBookingSchemaChainTest {
     @Test
     public void bothDownstreamHopsCarryTheSameProperties() throws Exception {
         for (final Family family : FAMILIES) {
-            assertDownstreamHopsAgree(family);
+            if (family.eventMirrorsCommand()) {
+                assertDownstreamHopsAgree(family);
+            }
         }
     }
 

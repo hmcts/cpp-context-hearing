@@ -86,6 +86,8 @@ public class ReleaseProvisionalHearingSlotsCommandHandlerTest {
         assertThat(events, hasSize(1));
         assertThat(events.get(0).metadata().name(), is("hearing.event.release-provisional-hearing-slots"));
         assertThat(events.get(0).asJsonObject().getString("hearingId"), is(hearingId.toString()));
-        assertThat(events.get(0).asJsonObject().getString("bookingId"), is(bookingId));
+        assertThat(events.get(0).asJsonObject().getJsonArray("bookingIds").getString(0), is(bookingId));
+        assertThat(events.get(0).asJsonObject().getJsonArray("bookingIds").size(), is(1));
+        assertThat(events.get(0).asJsonObject().getString("reason"), is("RELEASED_BY_USER"));
     }
 }
