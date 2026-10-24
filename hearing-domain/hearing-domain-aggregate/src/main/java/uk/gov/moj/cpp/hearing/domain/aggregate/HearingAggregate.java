@@ -253,6 +253,7 @@ public class HearingAggregate implements Aggregate {
     private static final String PROMPT_REF = "promptRef";
     private static final String PROMPT_VALUE = "value";
     private static final String BOOKING_REFERENCE_PROMPT_REF = "bookingReference";
+    private static final String DELETED = "deleted";
 
     // PTPH detail command names and the rejection reasons shared across them. Only the reasons
     // that apply to more than one command are named here; the ones specific to a single guard read
@@ -1425,7 +1426,12 @@ public class HearingAggregate implements Aggregate {
                 : Stream.of(new ReleaseProvisionalHearingSlots(hearingId, droppedBookingIds, DROPPED_FROM_DRAFT));
     }
 
-    /** The bookingReference prompt values of a saved draft; resultLines is a map today, an array in older drafts. */
+    /**
+     * The bookingReference prompt values of a saved draft's live lines; resultLines is a map
+     * today, an array in older drafts. A line flagged deleted does not count: a shared line
+     * deleted during an amendment stays in the draft, prompts and all, so the re-share can
+     * withdraw it, but the booking it carries is no longer wanted.
+     */
     private static Set<String> bookingReferencesIn(final JsonObject draftResult) {
         if (isNull(draftResult)) {
             return new HashSet<>();
@@ -1441,7 +1447,9 @@ public class HearingAggregate implements Aggregate {
         }
         return lines.stream()
                 .filter(JsonObject.class::isInstance)
-                .map(line -> ((JsonObject) line).get(RESULT_PROMPTS))
+                .map(JsonObject.class::cast)
+                .filter(line -> !line.getBoolean(DELETED, false))
+                .map(line -> line.get(RESULT_PROMPTS))
                 .filter(JsonArray.class::isInstance)
                 .flatMap(prompts -> ((JsonArray) prompts).stream())
                 .filter(JsonObject.class::isInstance)
