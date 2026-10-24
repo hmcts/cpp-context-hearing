@@ -168,6 +168,32 @@ class HearingAggregateDraftBookingReleaseTest {
         assertThat(releasesIn(save(hearingDay, draft())), is(empty()));
     }
 
+    /**
+     * A shared line deleted during an amendment is not removed from the draft: the UI keeps it,
+     * prompts and all, flagged {@code deleted} so the re-share can withdraw it. Its booking is no
+     * longer wanted - e.g. one picked by re-listing the line during the amendment - so it must be
+     * released all the same. (A booking a share confirmed is untouched: courtscheduler releases
+     * only unconfirmed holds.)
+     */
+    @Test
+    void shouldReleaseTheBookingOfALineDeletedDuringAnAmendment() {
+        save(hearingDay, draft(line("line-1", BOOKING_A)));
+
+        final List<ReleaseProvisionalHearingSlots> releases =
+                releasesIn(save(hearingDay, draft(deleted(line("line-1", BOOKING_A)))));
+
+        assertThat(releases, hasSize(1));
+        assertThat(releases.get(0).getBookingIds(), contains(BOOKING_A));
+    }
+
+    @Test
+    void shouldKeepABookingADeletedLineSharesWithALiveOne() {
+        save(hearingDay, draft(line("line-1", BOOKING_A), line("line-2", BOOKING_A)));
+
+        assertThat(releasesIn(save(hearingDay, draft(deleted(line("line-1", BOOKING_A)), line("line-2", BOOKING_A)))),
+                is(empty()));
+    }
+
     @Test
     void shouldReleaseEveryBookingOfTheDayWhenItsDraftIsDeleted() {
         save(hearingDay, draft(line("line-1", BOOKING_A), line("line-2", BOOKING_B)));
@@ -239,6 +265,13 @@ class HearingAggregateDraftBookingReleaseTest {
 
     private static JsonObject line(final String resultLineId, final String bookingReference) {
         return lineJson(resultLineId, bookingReference);
+    }
+
+    /** What omitResultLine does to a shared line: it stays in the draft, flagged deleted. */
+    private static JsonObject deleted(final JsonObject line) {
+        final JsonObjectBuilder builder = createObjectBuilder();
+        line.forEach(builder::add);
+        return builder.add("deleted", true).build();
     }
 
     /** What related-hearings.container.ts leaves behind: the prompts are replaced, the reference is gone. */
