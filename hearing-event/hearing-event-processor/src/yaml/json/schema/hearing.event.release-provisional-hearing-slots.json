@@ -16,7 +16,7 @@
     },
     "reason": {
       "type": "string",
-      "enum": ["RELEASED_BY_USER", "DROPPED_FROM_DRAFT"]
+      "enum": ["DROPPED_FROM_DRAFT"]
     }
   },
   "required": ["hearingId", "bookingIds", "reason"],

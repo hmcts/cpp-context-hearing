@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class ProvisionalBookingService {
+    private static final String RELEASE_REASON_DROPPED_FROM_DRAFT = "DROPPED_FROM_DRAFT";
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionalBookingService.class);
     private static final String SERVICE = "/unconfirmedBooking";
     private static final String RELEASE = "/release";
@@ -158,7 +159,10 @@ public class ProvisionalBookingService {
             final HttpPost httpPost = new HttpPost(new URL(baseUri + SERVICE + RELEASE).toString());
             httpPost.addHeader(CONTENT_TYPE, COURTSCHEDULER_RELEASE_UNCONFIRMED_BOOKINGS);
             httpPost.addHeader(CJS_CPP_UID, systemUserId.toString());
-            httpPost.setEntity(new StringEntity(objectMapper.writeValueAsString(Map.of("bookingIds", bookingIds))));
+            // LPT-2611: the only caller is hearing's release on draft save, so every booking here was
+            // dropped from the draft; courtscheduler records that reason in its booking log.
+            httpPost.setEntity(new StringEntity(objectMapper.writeValueAsString(
+                    Map.of("bookingIds", bookingIds, "reason", RELEASE_REASON_DROPPED_FROM_DRAFT))));
 
             final HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
             final int status = httpResponse.getStatusLine().getStatusCode();

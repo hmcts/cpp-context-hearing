@@ -21,8 +21,6 @@ public class ReleaseProvisionalHearingSlots implements Serializable {
     private static final long serialVersionUID = 2L;
 
     public enum Reason {
-        /** The UI asked for it: the clerk deleted the line or reset the results. */
-        RELEASED_BY_USER,
         /** A draft save, or the deletion of the draft, left no line carrying the booking. */
         DROPPED_FROM_DRAFT
     }

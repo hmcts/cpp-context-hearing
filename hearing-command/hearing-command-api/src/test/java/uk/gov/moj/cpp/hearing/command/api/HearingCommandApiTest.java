@@ -65,7 +65,7 @@ public class HearingCommandApiTest {
             "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel", "addCompanyRepresentative", "updateCompanyRepresentative", "removeCompanyRepresentative",
             "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel", "addInterpreterIntermediary",
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts","publishHearingListsForCrownCourtsWithIds",
-            "computeOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "releaseProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant", "cancelAmendments",
+            "computeOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant", "cancelAmendments",
             "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing","markAsDuplicateHearingV2", "markAsDuplicateHearingWithReason", "saveMultipleDraftResult", "updateResultLineSharedDates", "reusableInfo", "hearing.youth-court-defendants",
             "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "addWitnessToHearing","saveDraftResultsForHearingDay", "removeOffences", "saveDraftResultV2", "deleteDraftResultV2", "amendHearing", "amendHearingSupport", "unlockHearing", "replicateHearingResults", "deleteHearingBdf", "patchApplicationFinalisedOnTarget", "updateHearingDayBdf",
             "savePtphDetail", "finalisePtphDetail", "deletePtphDetail");
@@ -344,15 +344,6 @@ public class HearingCommandApiTest {
         hearingCommandApi.bookProvisionalHearingSlots(jsonRequestEnvelope);
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.book-unconfirmed-hearing-slots");
-    }
-
-    @Test
-    public void shouldPassThroughReleaseProvisionalHearingSlotsRequestToCommandHandler() {
-        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.release-unconfirmed-hearing-slots");
-
-        hearingCommandApi.releaseProvisionalHearingSlots(jsonRequestEnvelope);
-
-        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.release-unconfirmed-hearing-slots");
     }
 
     @Test

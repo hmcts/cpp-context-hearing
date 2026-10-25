@@ -100,7 +100,10 @@ public class ProvisionalBookingServiceTest {
         assertThat(request.method(), is("POST"));
         assertThat(request.contentType(), is("application/vnd.courtscheduler.release.unconfirmed.bookings+json"));
         assertThat(new ObjectMapper().readTree(request.body()),
-                is(new ObjectMapper().readTree("{\"bookingIds\":[\"" + bookingA + "\",\"" + bookingB + "\"]}")));
+                is(new ObjectMapper().readTree("{\"bookingIds\":[\"" + bookingA + "\",\"" + bookingB + "\"],"
+                        // LPT-2611: courtscheduler records why, so the booking log can tell a line
+                        // dropped from the draft from a hold a share made surplus.
+                        + "\"reason\":\"DROPPED_FROM_DRAFT\"}")));
     }
 
     @Test

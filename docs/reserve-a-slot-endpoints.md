@@ -6,25 +6,31 @@ out. Written for front-end developers working in `cpp-ui-hearing`.
 A clerk picks a court session while recording a result. From the moment they pick it, the
 session is genuinely **held** — real capacity is taken off it — until the result is shared. If
 the result is never shared, a purge at 01:00 releases the hold and the session goes back in the
-pool. That is the whole feature, and it is why these calls exist.
+pool. If the clerk shares after that, the pre-share check takes the same session again when it
+still has room (LPT-2611), so the clerk only re-picks when it is really gone. That is the whole
+feature, and it is why these calls exist.
 
 Contracts below come from the specs on `team/ras` (hearing's RAML, listing's RAML), not from
 observed traffic.
 
 ---
 
-## You make three calls
+## You make two calls
 
 ```
 ①  POST /hearings/{hearingId}/hearing-slots     hold a session      (async — see below)
-②  POST /hearings/{hearingId}/hearing-slots     give it back        (fire and forget)
-③  POST /bookingStatus                          is the hold alive?  (before sharing)
+③  POST /bookingStatus                          is the hold alive?  (before sharing; re-books an
+                                                                     expired hold if it can)
 ```
 
-There are two more endpoints in this feature — `POST /unconfirmedBooking` and
-`GET /unconfirmedBooking/status` on courtscheduler. **You never call those.** They are
-service-to-service, behind ① and ③. They appear here only because their errors surface to you
-through ①, and their names changed in the rename.
+② — giving a hold back — is **no longer the UI's job** (LPT-2617): hearing compares each saved
+draft with the previous one and releases every booking no line carries any more. See ② below.
+
+There are three more endpoints in this feature on courtscheduler — `POST /unconfirmedBooking`,
+`POST /unconfirmedBooking/status` and `POST /unconfirmedBooking/release`. **You never call those.**
+They are service-to-service: the first two behind ① and ③, the release called by hearing (on draft
+save) and progression (surplus holds after a share). They appear here only because their errors
+surface to you through ① and ③.
 
 ### What was renamed
 
@@ -74,9 +80,10 @@ Summary:
 | `vnd.hearing.book-provisional-hearing-slots+json` | `vnd.hearing.book-unconfirmed-hearing-slots+json` | **you** (①) |
 | `POST /provisionalBooking` | `POST /unconfirmedBooking` | hearing's event processor |
 | `GET /provisionalBooking` | `GET /unconfirmedBooking` | listing |
-| — | `GET /unconfirmedBooking/status` | listing (behind ③) — **new** |
+| — | `POST /unconfirmedBooking/status` | listing (behind ③) — **new** (an earlier, unreleased `GET` form was removed) |
+| — | `POST /unconfirmedBooking/release` | hearing (on draft save), progression — **new** |
 | — | `POST /bookingStatus` | **you** (③) — **new** |
-| — | `vnd.hearing.release-unconfirmed-hearing-slots+json` | **you** (②) — **new** |
+| — | `vnd.hearing.release-unconfirmed-hearing-slots+json` | ~~you (②)~~ — **removed** (hearing releases on draft save) |
 
 A courtscheduler that has not been redeployed still serves `/provisionalBooking` only, so a caller
 on the new path gets a **500** — Spring renders an unmatched path as 500, not 404, which makes a
@@ -204,42 +211,17 @@ the UI uses `commandSync` rather than `command` here.
 
 ---
 
-## ② Give a hold back
+## ② Give a hold back — removed
 
-```
-POST {hearingWriteBase}/hearings/{hearingId}/hearing-slots
-Content-Type: application/vnd.hearing.release-unconfirmed-hearing-slots+json
-→ 202 Accepted
-```
+**There is no release call for the UI any more** (LPT-2617). Hearing releases a booking itself when
+a saved draft no longer carries it — a deleted line, a line attached to an existing hearing, a
+reset — through courtscheduler's `POST /unconfirmedBooking/release`. You do not need to do anything
+on a re-pick either: courtscheduler gives back the old session as part of taking the new one.
 
-Same path as ①; the media type picks the action. **New** in this feature — there was no release
-call before.
-
-```json
-{ "bookingId": "4e29c1fa-7d3b-4f21-9c88-1a2b3c4d7ac1" }
-```
-
-`bookingId` is required; `additionalProperties: false`.
-
-**Fire and forget.** An unknown or already-released id is a no-op, never an error, and **no public
-event is published** — so use `command`, not `commandSync`, or you will wait forever for an event
-that never comes.
-
-Call it when a hold is abandoned with no new pick to carry the reference forward: the clerk
-deletes a booked slot, or the whole draft is discarded. You do **not** need to call it when the
-clerk simply re-picks a different session under the same `bookingId` — courtscheduler releases the
-old one itself as part of taking the new one.
-
-A booking that has already been **shared** is never released by this call. Only a share may change
-a confirmed booking. Check with ③ first — see `isUnconfirmedBooking` in
-`results/core/helpers/provisional-booking.ts`.
-
-```bash
-curl -i -X POST "$STE/api/hearing-command-api/command/api/rest/hearing/hearings/$HEARING_ID/hearing-slots" \
-  -H "Content-Type: application/vnd.hearing.release-unconfirmed-hearing-slots+json" \
-  -H "CJSCPPUID: $UID" \
-  --data-raw '{"bookingId":"4e29c1fa-7d3b-4f21-9c88-1a2b3c4d7ac1"}'
-```
+The browser's release command (`vnd.hearing.release-unconfirmed-hearing-slots+json` on
+`POST /hearings/{hearingId}/hearing-slots`) has been **removed** from hearing; sending it now fails
+as an unknown action. A booking that has already been shared is never released by either path —
+only a share may change a confirmed booking.
 
 ---
 
@@ -257,10 +239,13 @@ goes through `api.command`, not `api.query`. That detail causes bug ③ below.
 ### Request
 
 ```json
-{ "bookingIds": ["f8254db1-1683-483e-afb3-b87fde5a0a26"] }
+{ "bookingIds": ["f8254db1-1683-483e-afb3-b87fde5a0a26"], "reserveIfExpired": true }
 ```
 
-`bookingIds` is required, `minItems: 1`, `additionalProperties: false`.
+`bookingIds` is required, `minItems: 1`, `additionalProperties: false`. `reserveIfExpired` is
+optional (LPT-2611): with it, a booking whose hold expired is first re-reserved under the same id on
+the session it was on, if that session still has room, and comes back `REBOOKED`. The pre-share
+gate always sends it. Without it the call only reads.
 
 ### Response
 
@@ -277,7 +262,8 @@ goes through `api.command`, not `api.query`. That detail causes bug ③ below.
 |---|---|---|
 | `RESERVED` | true | a live hold — safe to share, and safe to release if abandoned |
 | `SHARED` | true | already a real listing — **do not** resend this id on a new booking (see below) |
-| `NOT_FOUND` | **false** | the hold expired and was purged — block the share, tell the clerk to re-pick |
+| `REBOOKED` | true | the hold had expired, and this call took the same session again — share |
+| `NOT_FOUND` | **false** | the hold expired and could not be re-booked (session full, gone or past) — block the share, tell the clerk to re-pick |
 | `UNKNOWN` | true | listing could not reach courtscheduler |
 
 **`safeToShare` is false only for `NOT_FOUND`.**
@@ -293,7 +279,7 @@ will go through. Do not "fix" this by failing closed without a conversation.
 curl -s "$STE/api/listing-query-api/query/api/rest/listing/bookingStatus" \
   -H "Content-Type: application/vnd.listing.query.booking.status+json" \
   -H "CJSCPPUID: $UID" \
-  --data-raw '{"bookingIds":["f8254db1-1683-483e-afb3-b87fde5a0a26"]}'
+  --data-raw '{"bookingIds":["f8254db1-1683-483e-afb3-b87fde5a0a26"],"reserveIfExpired":true}'
 ```
 
 ---
@@ -330,7 +316,7 @@ a purged hold — twice on STE. An allowlist fails *silently*: a missing entry l
 
 | Thing | File |
 |---|---|
-| ① and ② | `results/hearing-details/allocation/services/provisionalBooking.service.ts` |
+| ① | `results/hearing-details/allocation/services/provisionalBooking.service.ts` |
 | ③ | `core/services/listing/listing.service.ts` |
 | status predicates, reference extraction | `results/core/helpers/provisional-booking.ts` |
 | pre-share gate | `results/share-results/session-availability.helper.ts` |

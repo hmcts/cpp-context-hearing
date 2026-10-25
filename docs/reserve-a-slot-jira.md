@@ -813,3 +813,31 @@ LPT-2506 — independent of the FE work; only needs BUG-1
 **Two defects reached review approval today and neither was caught by reading code** — BUG-5 (an endpoint unreachable for every caller) and BUG-1's guard (a test that would have passed against the defect it guarded). Both were found by running things. TEST-1, TEST-2 and TEST-3 exist so that neither shape can recur. That is the single most useful thing to carry out of this work.
 
 Everything marked *implemented, uncommitted* exists as unstaged working-tree changes in `cpp-context-listing-courtscheduler` (`team/ras`) and `cpp-context-hearing` (`team/ccsph2`). Nothing has been committed or pushed, so none of it is visible to anyone else yet. Statuses should not move to READY FOR TEST until the work is committed and raised as PRs.
+
+## Later changes (25 October 2026) — what supersedes what
+
+Recorded here so the entries above can be read in context; they describe the design as it was on
+10 September and are not edited.
+
+- **Release on draft save (LPT-2617).** The browser no longer releases holds. Hearing compares
+  each saved draft with the previous one and releases every booking no line carries any more,
+  through courtscheduler's `POST /unconfirmedBooking/release` (one batch call, with a `reason`).
+  NEW-12 and NEW-12a are superseded, and the release command (`hearing.release-unconfirmed-hearing-slots`)
+  is removed from hearing, with its `RELEASED_BY_USER` reason (STE02 and STE13 are cleared, so no
+  stored event carries it). Every release is now `DROPPED_FROM_DRAFT`.
+- **Booking status is a POST (LPT-2611).** `GET /unconfirmedBooking/status`
+  (`courtscheduler.get.booking-status`, NEW-7 / NEW-7a / BUG-5) is removed; it was never released.
+  The pre-share check is `POST /unconfirmedBooking/status`
+  (`courtscheduler.query.booking.status`), and listing always posts. Statuses are `RESERVED`,
+  `SHARED`, `NOT_FOUND` and, new, `REBOOKED`.
+- **Re-book at share (LPT-2611).** With `reserveIfExpired`, a booking whose hold the purge removed is
+  re-reserved under the same id on the same session if it still has room, so the clerk re-picks
+  only when the session is really gone or full.
+- **Booking log (LPT-2611).** New `booking_log` table (changeset 054): every state a booking enters
+  (`RESERVED`, `REPICK_RELEASED`, `DRAFT_RELEASED`, `SURPLUS_RELEASED`, `RELEASED`, `EXPIRED`,
+  `CONFIRMED`, `REBOOKED`), cleared after `courtscheduler.booking-log.retention-days` (90).
+- **Capacity counters are no longer maintained.** `court_schedule.available_slot` and
+  `available_duration_mins` are not written by any booking path, and every capacity decision counts
+  `allocated_listings`. BUG-1's "restore capacity" step and TEST-3's counter assertions are
+  superseded: releasing or purging a hold gives capacity back simply by deleting its row. Dropping
+  the columns is a separate change.

@@ -314,11 +314,6 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.book-unconfirmed-hearing-slots");
     }
 
-    @Handles("hearing.release-unconfirmed-hearing-slots")
-    public void releaseProvisionalHearingSlots(final JsonEnvelope envelope) {
-        sendEnvelopeWithName(envelope, "hearing.command.release-unconfirmed-hearing-slots");
-    }
-
     @Handles("hearing.change-hearing-detail")
     public void updateHearingDetails(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.change-hearing-detail");

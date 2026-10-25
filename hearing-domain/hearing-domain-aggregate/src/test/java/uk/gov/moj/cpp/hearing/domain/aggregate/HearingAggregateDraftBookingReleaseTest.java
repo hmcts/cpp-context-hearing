@@ -12,7 +12,6 @@ import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.moj.cpp.hearing.domain.event.ReleaseProvisionalHearingSlots.Reason.DROPPED_FROM_DRAFT;
-import static uk.gov.moj.cpp.hearing.domain.event.ReleaseProvisionalHearingSlots.Reason.RELEASED_BY_USER;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
 import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
@@ -219,17 +218,6 @@ class HearingAggregateDraftBookingReleaseTest {
         final List<Object> events = hearingAggregate.deleteDraftResultV2(userId, hearingId, hearingDay).collect(toList());
 
         assertThat(releasesIn(events), is(empty()));
-    }
-
-    @Test
-    void shouldReleaseABookingTheUserGaveUp() {
-        final List<Object> events = hearingAggregate.releaseProvisionalHearingSlots(hearingId, BOOKING_A).collect(toList());
-
-        assertThat(events, hasSize(1));
-        final ReleaseProvisionalHearingSlots release = (ReleaseProvisionalHearingSlots) events.get(0);
-        assertThat(release.getHearingId(), is(hearingId));
-        assertThat(release.getBookingIds(), contains(BOOKING_A));
-        assertThat(release.getReason(), is(RELEASED_BY_USER));
     }
 
     private List<Object> save(final LocalDate day, final JsonObject draftResult) {

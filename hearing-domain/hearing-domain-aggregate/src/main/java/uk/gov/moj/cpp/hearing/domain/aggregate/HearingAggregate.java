@@ -5,7 +5,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.isNull;
@@ -22,7 +21,6 @@ import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_USER_ERROR;
 import static uk.gov.moj.cpp.hearing.domain.event.ReleaseProvisionalHearingSlots.Reason.DROPPED_FROM_DRAFT;
-import static uk.gov.moj.cpp.hearing.domain.event.ReleaseProvisionalHearingSlots.Reason.RELEASED_BY_USER;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.VALIDATED;
 import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.CANCEL_AMENDMENTS_NOT_PERMITTED;
 import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.HEARING_LOCKED;
@@ -1390,9 +1388,6 @@ public class HearingAggregate implements Aggregate {
                 .build()));
     }
 
-    public Stream<Object> releaseProvisionalHearingSlots(final UUID hearingId, final String bookingId) {
-        return apply(Stream.of(new ReleaseProvisionalHearingSlots(hearingId, singletonList(bookingId), RELEASED_BY_USER)));
-    }
 
     /**
      * The bookingIds the last accepted draft of {@code hearingDay} carried that no line of the

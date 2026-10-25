@@ -69,11 +69,10 @@ public class ProvisionalBookingSchemaChainTest {
      * {@link #propertiesOf} would have failed with "schema not found" rather than comparing
      * anything — which is the failure this test exists to prevent, not to cause.
      *
-     * <p>{@code eventName} is null where the event is not the command passed on. The release
-     * event is built by the aggregate - {@code bookingIds} and a {@code reason}, raised on draft
-     * saves as well as by this command - so only hops 1 and 2 are compared for it, and
-     * ReleaseProvisionalHearingSlotsSchemaTest in hearing-event-processor checks what the
-     * aggregate writes against hop 3.
+     * <p>{@code eventName} is null where the event is not the command passed on. There is no
+     * release command any more (LPT-2617: hearing releases on draft save, and the browser's release
+     * command was removed); ReleaseProvisionalHearingSlotsSchemaTest in hearing-event-processor
+     * checks what the aggregate writes for the release event.
      */
     private record Family(String commandName, String eventName) {
 
@@ -83,8 +82,7 @@ public class ProvisionalBookingSchemaChainTest {
     }
 
     private static final List<Family> FAMILIES = List.of(
-            new Family("book-unconfirmed-hearing-slots", "book-provisional-hearing-slots"),
-            new Family("release-unconfirmed-hearing-slots", null));
+            new Family("book-unconfirmed-hearing-slots", "book-provisional-hearing-slots"));
 
     @Test
     public void everyCommandApiPropertyIsAcceptedByBothDownstreamHops() throws Exception {
