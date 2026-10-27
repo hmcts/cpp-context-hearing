@@ -10,6 +10,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -25,9 +26,11 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationType;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.LinkType;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.AffectedOffence;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationRequest;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationResponse;
@@ -577,6 +580,33 @@ public class ShareResultsCommandHandlerTest {
 
         shareResultsCommandHandler.shareResultForDay(envelope);
 
+        verify(hearingEventStream).append(any());
+    }
+
+    @Test
+    public void shouldShareDaysResultsWithoutValidationWhenHearingHasStandaloneApplication() throws Exception {
+        final ShareDaysResultsCommand command = TestTemplates.ShareResultsCommandTemplates
+                .standardShareResultsPerDaysCommandTemplate(initiateHearingCommand.getHearing().getId())
+                .setResultLines(List.of());
+        command.setHearingDay(LocalDate.now());
+        final Hearing hearing = mock(Hearing.class);
+        when(hearing.getCourtApplications()).thenReturn(List.of(CourtApplication.courtApplication()
+                .withType(CourtApplicationType.courtApplicationType().withLinkType(LinkType.STANDALONE).build())
+                .build()));
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.getHearing()).thenReturn(hearing);
+        when(mockAggregate.shareResultForDay(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(Stream.empty());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+        when(clock.now()).thenReturn(sharedTime);
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.share-days-results").withUserId(randomUUID().toString()),
+                objectToJsonObjectConverter.convert(command));
+
+        shareResultsCommandHandler.shareResultForDay(envelope);
+
+        verify(validationRequestMapper, never()).toValidationRequest(any(), any());
+        verify(resultsValidationClient, never()).validate(any(), any());
         verify(hearingEventStream).append(any());
     }
 

@@ -418,6 +418,35 @@ class ValidationRequestMapperTest {
     }
 
     @Test
+    void shouldExcludeApplicationResultLines() {
+        final UUID offenceResultLineId = randomUUID();
+
+        final SharedResultsCommandResultLineV2 offenceResultLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(offenceResultLineId)
+                .withShortCode("IMP")
+                .withResultLabel("Imprisonment")
+                .withDefendantId(randomUUID())
+                .withOffenceId(randomUUID())
+                .build();
+
+        final SharedResultsCommandResultLineV2 applicationResultLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(randomUUID())
+                .withShortCode("G")
+                .withResultLabel("Granted")
+                .withApplicationIds(randomUUID())
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(),
+                List.of(offenceResultLine, applicationResultLine));
+        final DraftValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+
+        assertThat(request.getResultLines(), hasSize(1));
+        assertThat(request.getResultLines().get(0).getResultLineId(), is(offenceResultLineId.toString()));
+    }
+
+    @Test
     void shouldMapCategoryFromResultLine() {
         final SharedResultsCommandResultLineV2 resultLine = SharedResultsCommandResultLineV2
                 .sharedResultsCommandResultLine()
