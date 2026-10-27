@@ -7,6 +7,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.LinkType;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.YouthCourt;
 import uk.gov.justice.services.common.util.Clock;
@@ -198,22 +199,26 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final EventStream eventStream = eventSource.getStreamById(command.getHearingId());
         final HearingAggregate hearingAggregate = aggregateService.get(eventStream, HearingAggregate.class);
 
-        final DraftValidationRequest validationRequest = validationRequestMapper.toValidationRequest(command, hearingAggregate.getHearing());
-        final String userIdString = userId != null ? userId.toString() : "";
+        if (hasStandaloneApplication(hearingAggregate.getHearing())) {
+            LOGGER.info("Skipping results validation for hearing {} as it has a standalone court application", command.getHearingId());
+        } else {
+            final DraftValidationRequest validationRequest = validationRequestMapper.toValidationRequest(command, hearingAggregate.getHearing());
+            final String userIdString = userId != null ? userId.toString() : "";
 
-        final DraftValidationResponse validationResponse = resultsValidationClient.validate(validationRequest, userIdString);
-        long end = System.currentTimeMillis();
-        LOGGER.info("Validation API call took {} ms for userId={} and for hearingId={}", end - start, userIdString, validationRequest.getHearingId());
+            final DraftValidationResponse validationResponse = resultsValidationClient.validate(validationRequest, userIdString);
+            long end = System.currentTimeMillis();
+            LOGGER.info("Validation API call took {} ms for userId={} and for hearingId={}", end - start, userIdString, validationRequest.getHearingId());
 
-        if (!Boolean.TRUE.equals(validationResponse.getIsValid())) {
-            if (resultsValidationClient.isShareBlockingEnabled()) {
-                LOGGER.info("Share blocked by validation errors for hearing {}", command.getHearingId());
-                final ResultsValidationFailed failedEvent = buildValidationFailedEvent(command, userIdString, validationResponse);
-                eventStream.append(Stream.of(failedEvent).map(enveloper.withMetadataFrom(envelope)));
-                return;
+            if (!Boolean.TRUE.equals(validationResponse.getIsValid())) {
+                if (resultsValidationClient.isShareBlockingEnabled()) {
+                    LOGGER.info("Share blocked by validation errors for hearing {}", command.getHearingId());
+                    final ResultsValidationFailed failedEvent = buildValidationFailedEvent(command, userIdString, validationResponse);
+                    eventStream.append(Stream.of(failedEvent).map(enveloper.withMetadataFrom(envelope)));
+                    return;
+                }
+                LOGGER.warn("Results validation failed for hearing {} but share-blocking is disabled (JNDI resultsvalidator.share.blocking); proceeding with share. Validation errors: {}",
+                        command.getHearingId(), validationResponse.getErrors());
             }
-            LOGGER.warn("Results validation failed for hearing {} but share-blocking is disabled (JNDI resultsvalidator.share.blocking); proceeding with share. Validation errors: {}",
-                    command.getHearingId(), validationResponse.getErrors());
         }
 
         eventStream.append(
@@ -254,6 +259,15 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString("hearingId"));
         aggregate(HearingAggregate.class, hearingId, envelope,
                 aggregate -> aggregate.replicateSharedResultsForHearing(hearingId));
+    }
+
+    private static boolean hasStandaloneApplication(final Hearing hearing) {
+        return hearing != null && hearing.getCourtApplications() != null
+                && hearing.getCourtApplications().stream()
+                .filter(Objects::nonNull)
+                .map(CourtApplication::getType)
+                .filter(Objects::nonNull)
+                .anyMatch(type -> type.getLinkType() == LinkType.STANDALONE);
     }
 
     private ResultsValidationFailed buildValidationFailedEvent(final ShareDaysResultsCommand command,
