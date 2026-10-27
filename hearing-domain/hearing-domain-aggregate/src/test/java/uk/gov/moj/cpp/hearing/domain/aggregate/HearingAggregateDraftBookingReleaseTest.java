@@ -220,6 +220,26 @@ class HearingAggregateDraftBookingReleaseTest {
         assertThat(releasesIn(events), is(empty()));
     }
 
+    @Test
+    void shouldRefuseAStaleCopyOfTheDraftThatStillCarriesAReleasedBooking() {
+        // Two copies of the same draft (two tabs, two clerks) loaded at the same version. Copy A
+        // drops the line and its hold is released. Copy B was loaded before that and still has the
+        // line: if its save were accepted the draft would carry a booking courtscheduler no longer
+        // holds, and the pre-share gate would refuse the share as NOT_FOUND.
+        save(hearingDay, draft(line("line-1", BOOKING_A)));
+        final Integer loadedVersion = versions.get(hearingDay);
+
+        final List<Object> copyA = hearingAggregate.saveDraftResultV2(userId, draft(attachedLine("line-1")),
+                hearingId, hearingDay, loadedVersion + 1, Collections.emptyMap(), null).collect(toList());
+        assertThat(releasesIn(copyA).get(0).getBookingIds(), contains(BOOKING_A));
+
+        final List<Object> copyB = hearingAggregate.saveDraftResultV2(userId, draft(line("line-1", BOOKING_A)),
+                hearingId, hearingDay, loadedVersion + 1, Collections.emptyMap(), null).collect(toList());
+
+        assertThat(copyB, hasSize(1));
+        assertThat(copyB.get(0), instanceOf(ManageResultsFailed.class));
+    }
+
     private List<Object> save(final LocalDate day, final JsonObject draftResult) {
         final Integer version = versions.merge(day, 1, Integer::sum);
         return hearingAggregate.saveDraftResultV2(userId, draftResult, hearingId, day, version, Collections.emptyMap(), null)

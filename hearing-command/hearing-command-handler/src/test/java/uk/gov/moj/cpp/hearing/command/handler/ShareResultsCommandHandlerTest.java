@@ -76,6 +76,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.command.handler.service.validation.ResultsValidator;
+import uk.gov.moj.cpp.hearing.command.handler.service.validation.SessionAvailabilityValidator;
 import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationRequestMapper;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -138,6 +139,8 @@ public class ShareResultsCommandHandlerTest {
     private ResultsValidator resultsValidationClient;
     @Mock
     private ValidationRequestMapper validationRequestMapper;
+    @Mock
+    private SessionAvailabilityValidator sessionAvailabilityValidator;
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
     @Spy
@@ -568,6 +571,7 @@ public class ShareResultsCommandHandlerTest {
                 .hearingId(command.getHearingId().toString())
                 .hearingDay(command.getHearingDay());
         when(validationRequestMapper.toValidationRequest(any(), any())).thenReturn(validationRequest);
+        when(sessionAvailabilityValidator.validate(any(), any())).thenReturn(new ValidationErrors());
         when(resultsValidationClient.validate(any(), any())).thenReturn(new DraftValidationResponse().isValid(true));
         when(clock.now()).thenReturn(sharedTime);
 
@@ -594,6 +598,7 @@ public class ShareResultsCommandHandlerTest {
                 .hearingId(command.getHearingId().toString())
                 .hearingDay(command.getHearingDay());
         when(validationRequestMapper.toValidationRequest(any(), any())).thenReturn(validationRequest);
+        when(sessionAvailabilityValidator.validate(any(), any())).thenReturn(new ValidationErrors());
         when(resultsValidationClient.isShareBlockingEnabled()).thenReturn(true);
         final ValidationIssue error = new ValidationIssue()
                 .ruleId("RULE1")
@@ -651,6 +656,7 @@ public class ShareResultsCommandHandlerTest {
                 .hearingId(command.getHearingId().toString())
                 .hearingDay(command.getHearingDay());
         when(validationRequestMapper.toValidationRequest(any(), any())).thenReturn(validationRequest);
+        when(sessionAvailabilityValidator.validate(any(), any())).thenReturn(new ValidationErrors());
         when(resultsValidationClient.validate(any(), any())).thenReturn(new DraftValidationResponse().isValid(false));
         when(resultsValidationClient.isShareBlockingEnabled()).thenReturn(false);
         when(clock.now()).thenReturn(sharedTime);
@@ -665,6 +671,115 @@ public class ShareResultsCommandHandlerTest {
         final boolean anyValidationFailed = appended
                 .anyMatch(e -> "hearing.events.results-validation-failed".equals(e.metadata().name()));
         assertThat(anyValidationFailed, is(false));
+    }
+
+    // The session check reports in the validator's shape, so an expired session blocks the share
+    // even when the results validator itself found nothing.
+    @Test
+    public void shouldRaiseValidationFailedEventWhenASessionIsNoLongerHeld() throws Exception {
+        final ShareDaysResultsCommand command = shareDaysCommand();
+        givenTheHearing();
+        when(resultsValidationClient.validate(any(), any())).thenReturn(new DraftValidationResponse()
+                .isValid(true)
+                .rulesEvaluated(List.of())
+                .errors(new ValidationErrors().errorMessages(List.of()).validationIssues(List.of())));
+        when(sessionAvailabilityValidator.validate(any(), any())).thenReturn(sessionNotHeld("off-1"));
+        when(resultsValidationClient.isShareBlockingEnabled()).thenReturn(true);
+
+        shareResultsCommandHandler.shareResultForDay(shareDaysEnvelope(command));
+
+        final ResultsValidationFailed event = validationFailedEventFrom(verifyAppendAndGetArgumentFrom(hearingEventStream));
+        assertThat(event.isValid(), is(false));
+        assertThat(event.getRulesEvaluated(), is(List.of(SessionAvailabilityValidator.RULE_ID)));
+        final ValidationIssue issue = event.getErrors().getValidationIssues().get(0);
+        assertThat(issue.getRuleId(), is(SessionAvailabilityValidator.RULE_ID));
+        assertThat(issue.getAffectedOffences().get(0).getOffenceId(), is("off-1"));
+        assertThat(issue.getAffectedOffences().get(0).getMessage(), is(SessionAvailabilityValidator.EXPIRED_MESSAGE));
+    }
+
+    @Test
+    public void shouldReportSessionIssuesAlongsideTheValidatorsOwn() throws Exception {
+        final ShareDaysResultsCommand command = shareDaysCommand();
+        givenTheHearing();
+        final ValidationIssue validatorIssue = new ValidationIssue()
+                .ruleId("RULE1")
+                .severity(ValidationIssue.SeverityEnum.ERROR)
+                .affectedOffences(List.of(new AffectedOffence().offenceId("off-2").message("Validation error")))
+                .validationLevel(ValidationIssue.ValidationLevelEnum.OFFENCE);
+        when(resultsValidationClient.validate(any(), any())).thenReturn(new DraftValidationResponse()
+                .isValid(false)
+                .rulesEvaluated(List.of("RULE1"))
+                .errors(new ValidationErrors().errorMessages(List.of("Validation error")).validationIssues(List.of(validatorIssue))));
+        when(sessionAvailabilityValidator.validate(any(), any())).thenReturn(sessionNotHeld("off-1"));
+        when(resultsValidationClient.isShareBlockingEnabled()).thenReturn(true);
+
+        shareResultsCommandHandler.shareResultForDay(shareDaysEnvelope(command));
+
+        final ResultsValidationFailed event = validationFailedEventFrom(verifyAppendAndGetArgumentFrom(hearingEventStream));
+        assertThat(event.getRulesEvaluated(), is(List.of("RULE1", SessionAvailabilityValidator.RULE_ID)));
+        assertThat(event.getErrors().getValidationIssues().stream().map(ValidationIssue::getRuleId).toList(),
+                is(List.of("RULE1", SessionAvailabilityValidator.RULE_ID)));
+        assertThat(event.getErrors().getErrorMessages(), is(List.of("Validation error")));
+    }
+
+    // Decision: the session check obeys resultsvalidator.share.blocking, like every other validation.
+    @Test
+    public void shouldShareWhenASessionIsNoLongerHeldButShareBlockingDisabled() throws Exception {
+        final ShareDaysResultsCommand command = shareDaysCommand();
+        final HearingAggregate mockAggregate = givenTheHearing();
+        when(mockAggregate.shareResultForDay(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(Stream.empty());
+        when(resultsValidationClient.validate(any(), any())).thenReturn(new DraftValidationResponse().isValid(true));
+        when(sessionAvailabilityValidator.validate(any(), any())).thenReturn(sessionNotHeld("off-1"));
+        when(resultsValidationClient.isShareBlockingEnabled()).thenReturn(false);
+        when(clock.now()).thenReturn(sharedTime);
+
+        shareResultsCommandHandler.shareResultForDay(shareDaysEnvelope(command));
+
+        assertThat(verifyAppendAndGetArgumentFrom(hearingEventStream)
+                .anyMatch(e -> "hearing.events.results-validation-failed".equals(e.metadata().name())), is(false));
+    }
+
+    private ShareDaysResultsCommand shareDaysCommand() {
+        final ShareDaysResultsCommand command = TestTemplates.ShareResultsCommandTemplates
+                .standardShareResultsPerDaysCommandTemplate(initiateHearingCommand.getHearing().getId())
+                .setResultLines(List.of());
+        command.setHearingDay(LocalDate.now());
+        return command;
+    }
+
+    private HearingAggregate givenTheHearing() {
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.getHearing()).thenReturn(initiateHearingCommand.getHearing());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+        when(validationRequestMapper.toValidationRequest(any(), any())).thenReturn(new DraftValidationRequest());
+        return mockAggregate;
+    }
+
+    private JsonEnvelope shareDaysEnvelope(final ShareDaysResultsCommand command) {
+        return envelopeFrom(
+                metadataOf(metadataId, "hearing.command.share-days-results").withUserId(randomUUID().toString()),
+                objectToJsonObjectConverter.convert(command));
+    }
+
+    private static ValidationErrors sessionNotHeld(final String offenceId) {
+        return new ValidationErrors()
+                .errorMessages(List.of())
+                .validationIssues(List.of(new ValidationIssue()
+                        .ruleId(SessionAvailabilityValidator.RULE_ID)
+                        .severity(ValidationIssue.SeverityEnum.ERROR)
+                        .validationLevel(ValidationIssue.ValidationLevelEnum.OFFENCE)
+                        .affectedResultCodes(List.of("NHMC"))
+                        .affectedOffences(List.of(new AffectedOffence()
+                                .offenceId(offenceId)
+                                .message(SessionAvailabilityValidator.EXPIRED_MESSAGE)))));
+    }
+
+    private ResultsValidationFailed validationFailedEventFrom(final Stream<JsonEnvelope> appended) {
+        final JsonEnvelope failed = appended
+                .filter(e -> "hearing.events.results-validation-failed".equals(e.metadata().name()))
+                .findFirst()
+                .orElseThrow();
+        return jsonObjectToObjectConverter.convert(failed.payloadAsJsonObject(), ResultsValidationFailed.class);
     }
 
     @Test

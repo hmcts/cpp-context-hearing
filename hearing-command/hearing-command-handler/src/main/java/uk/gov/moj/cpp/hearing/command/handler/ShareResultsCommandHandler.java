@@ -27,15 +27,18 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.command.result.UpdateDaysResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.command.handler.service.validation.ResultsValidator;
+import uk.gov.moj.cpp.hearing.command.handler.service.validation.SessionAvailabilityValidator;
 import uk.gov.moj.cpp.hearing.command.handler.service.validation.ValidationRequestMapper;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationRequest;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationResponse;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ValidationErrors;
+import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ValidationIssue;
 import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsValidationFailed;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -74,6 +77,9 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
     @Inject
     private ValidationRequestMapper validationRequestMapper;
+
+    @Inject
+    private SessionAvailabilityValidator sessionAvailabilityValidator;
 
 
     @Handles("hearing.command.save-draft-result")
@@ -201,7 +207,11 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final DraftValidationRequest validationRequest = validationRequestMapper.toValidationRequest(command, hearingAggregate.getHearing());
         final String userIdString = userId != null ? userId.toString() : "";
 
-        final DraftValidationResponse validationResponse = resultsValidationClient.validate(validationRequest, userIdString);
+        // The session check reports in the validator's own shape, so a session that is no longer held
+        // blocks the share - or, with blocking off, is logged - exactly like any other validation error.
+        final DraftValidationResponse validationResponse = withSessionAvailability(
+                resultsValidationClient.validate(validationRequest, userIdString),
+                sessionAvailabilityValidator.validate(command.getResultLines(), hearingAggregate.getHearing()));
         long end = System.currentTimeMillis();
         LOGGER.info("Validation API call took {} ms for userId={} and for hearingId={}", end - start, userIdString, validationRequest.getHearingId());
 
@@ -254,6 +264,29 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString("hearingId"));
         aggregate(HearingAggregate.class, hearingId, envelope,
                 aggregate -> aggregate.replicateSharedResultsForHearing(hearingId));
+    }
+
+    /**
+     * The validator's answer with the session check's issues added. Copies rather than appends: a
+     * skipped validator answers with immutable empty lists.
+     */
+    private static DraftValidationResponse withSessionAvailability(final DraftValidationResponse validationResponse,
+                                                                   final ValidationErrors sessionErrors) {
+        if (SessionAvailabilityValidator.isEmpty(sessionErrors)) {
+            return validationResponse;
+        }
+        final ValidationErrors errors = validationResponse.getErrors() != null ? validationResponse.getErrors() : new ValidationErrors();
+        final List<ValidationIssue> issues = new ArrayList<>(errors.getValidationIssues() != null ? errors.getValidationIssues() : List.of());
+        issues.addAll(sessionErrors.getValidationIssues());
+        final List<String> errorMessages = new ArrayList<>(errors.getErrorMessages() != null ? errors.getErrorMessages() : List.of());
+        errorMessages.addAll(sessionErrors.getErrorMessages());
+        final List<String> rulesEvaluated = new ArrayList<>(
+                validationResponse.getRulesEvaluated() != null ? validationResponse.getRulesEvaluated() : List.of());
+        rulesEvaluated.add(SessionAvailabilityValidator.RULE_ID);
+        return validationResponse
+                .isValid(false)
+                .rulesEvaluated(rulesEvaluated)
+                .errors(new ValidationErrors().validationIssues(issues).errorMessages(errorMessages));
     }
 
     private ResultsValidationFailed buildValidationFailedEvent(final ShareDaysResultsCommand command,

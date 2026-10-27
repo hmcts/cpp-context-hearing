@@ -836,8 +836,8 @@ Recorded here so the entries above can be read in context; they describe the des
 - **Booking log (LPT-2611).** New `booking_log` table (changeset 054): every state a booking enters
   (`RESERVED`, `REPICK_RELEASED`, `DRAFT_RELEASED`, `SURPLUS_RELEASED`, `RELEASED`, `EXPIRED`,
   `CONFIRMED`, `REBOOKED`), cleared after `courtscheduler.booking-log.retention-days` (90).
-- **Capacity counters are no longer maintained.** `court_schedule.available_slot` and
-  `available_duration_mins` are not written by any booking path, and every capacity decision counts
-  `allocated_listings`. BUG-1's "restore capacity" step and TEST-3's counter assertions are
-  superseded: releasing or purging a hold gives capacity back simply by deleting its row. Dropping
-  the columns is a separate change.
+- **Capacity counters are no longer used for decisions.** Every capacity decision counts
+  `allocated_listings`. `court_schedule.available_slot` and `available_duration_mins` are maintained
+  only by the paths that predate reserve-a-slot (confirmed listings), for the MI export, until
+  SPRDT-1406 drops them. Holds never touch them, so BUG-1's "restore capacity on purge" step and
+  TEST-3's counter assertions are superseded: the purge gives capacity back by deleting the row.
