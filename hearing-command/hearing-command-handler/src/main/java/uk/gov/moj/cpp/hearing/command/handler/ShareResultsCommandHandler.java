@@ -207,23 +207,27 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final DraftValidationRequest validationRequest = validationRequestMapper.toValidationRequest(command, hearingAggregate.getHearing());
         final String userIdString = userId != null ? userId.toString() : "";
 
-        // The session check reports in the validator's own shape, so a session that is no longer held
-        // blocks the share - or, with blocking off, is logged - exactly like any other validation error.
-        final DraftValidationResponse validationResponse = withSessionAvailability(
-                resultsValidationClient.validate(validationRequest, userIdString),
-                sessionAvailabilityValidator.validate(command.getResultLines(), hearingAggregate.getHearing()));
+        final DraftValidationResponse resultsValidation = resultsValidationClient.validate(validationRequest, userIdString);
+        final ValidationErrors sessionErrors = sessionAvailabilityValidator.validate(command.getResultLines(), hearingAggregate.getHearing());
         long end = System.currentTimeMillis();
         LOGGER.info("Validation API call took {} ms for userId={} and for hearingId={}", end - start, userIdString, validationRequest.getHearingId());
 
+        // The validator's own rules block only with resultsvalidator.share.blocking on; otherwise they are
+        // logged and left out of the failure. A session that is no longer held always blocks the share,
+        // reported in the validator's own shape.
+        final boolean shareBlocking = resultsValidationClient.isShareBlockingEnabled();
+        if (!shareBlocking && !Boolean.TRUE.equals(resultsValidation.getIsValid())) {
+            LOGGER.warn("Results validation failed for hearing {} but share-blocking is disabled (JNDI resultsvalidator.share.blocking); not blocking on it. Validation errors: {}",
+                    command.getHearingId(), resultsValidation.getErrors());
+        }
+        final DraftValidationResponse validationResponse = withSessionAvailability(
+                shareBlocking ? resultsValidation : new DraftValidationResponse().isValid(true), sessionErrors);
+
         if (!Boolean.TRUE.equals(validationResponse.getIsValid())) {
-            if (resultsValidationClient.isShareBlockingEnabled()) {
-                LOGGER.info("Share blocked by validation errors for hearing {}", command.getHearingId());
-                final ResultsValidationFailed failedEvent = buildValidationFailedEvent(command, userIdString, validationResponse);
-                eventStream.append(Stream.of(failedEvent).map(enveloper.withMetadataFrom(envelope)));
-                return;
-            }
-            LOGGER.warn("Results validation failed for hearing {} but share-blocking is disabled (JNDI resultsvalidator.share.blocking); proceeding with share. Validation errors: {}",
-                    command.getHearingId(), validationResponse.getErrors());
+            LOGGER.info("Share blocked by validation errors for hearing {}", command.getHearingId());
+            final ResultsValidationFailed failedEvent = buildValidationFailedEvent(command, userIdString, validationResponse);
+            eventStream.append(Stream.of(failedEvent).map(enveloper.withMetadataFrom(envelope)));
+            return;
         }
 
         eventStream.append(

@@ -722,21 +722,47 @@ public class ShareResultsCommandHandlerTest {
         assertThat(event.getErrors().getErrorMessages(), is(List.of("Validation error")));
     }
 
-    // Decision: the session check obeys resultsvalidator.share.blocking, like every other validation.
+    // Decision: the session check always blocks, whatever resultsvalidator.share.blocking says.
     @Test
-    public void shouldShareWhenASessionIsNoLongerHeldButShareBlockingDisabled() throws Exception {
+    public void shouldRaiseValidationFailedEventWhenASessionIsNoLongerHeldEvenWithShareBlockingDisabled() throws Exception {
         final ShareDaysResultsCommand command = shareDaysCommand();
-        final HearingAggregate mockAggregate = givenTheHearing();
-        when(mockAggregate.shareResultForDay(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(Stream.empty());
+        givenTheHearing();
         when(resultsValidationClient.validate(any(), any())).thenReturn(new DraftValidationResponse().isValid(true));
         when(sessionAvailabilityValidator.validate(any(), any())).thenReturn(sessionNotHeld("off-1"));
         when(resultsValidationClient.isShareBlockingEnabled()).thenReturn(false);
-        when(clock.now()).thenReturn(sharedTime);
 
         shareResultsCommandHandler.shareResultForDay(shareDaysEnvelope(command));
 
-        assertThat(verifyAppendAndGetArgumentFrom(hearingEventStream)
-                .anyMatch(e -> "hearing.events.results-validation-failed".equals(e.metadata().name())), is(false));
+        final ResultsValidationFailed event = validationFailedEventFrom(verifyAppendAndGetArgumentFrom(hearingEventStream));
+        assertThat(event.isValid(), is(false));
+        assertThat(event.getErrors().getValidationIssues().get(0).getRuleId(), is(SessionAvailabilityValidator.RULE_ID));
+        assertThat(event.getErrors().getValidationIssues().get(0).getAffectedOffences().get(0).getOffenceId(), is("off-1"));
+    }
+
+    // With blocking off the validator's own issues are only logged, so they stay out of the session failure.
+    @Test
+    public void shouldReportOnlySessionIssuesWhenShareBlockingDisabled() throws Exception {
+        final ShareDaysResultsCommand command = shareDaysCommand();
+        givenTheHearing();
+        final ValidationIssue validatorIssue = new ValidationIssue()
+                .ruleId("RULE1")
+                .severity(ValidationIssue.SeverityEnum.ERROR)
+                .affectedOffences(List.of(new AffectedOffence().offenceId("off-2").message("Validation error")))
+                .validationLevel(ValidationIssue.ValidationLevelEnum.OFFENCE);
+        when(resultsValidationClient.validate(any(), any())).thenReturn(new DraftValidationResponse()
+                .isValid(false)
+                .rulesEvaluated(List.of("RULE1"))
+                .errors(new ValidationErrors().errorMessages(List.of("Validation error")).validationIssues(List.of(validatorIssue))));
+        when(sessionAvailabilityValidator.validate(any(), any())).thenReturn(sessionNotHeld("off-1"));
+        when(resultsValidationClient.isShareBlockingEnabled()).thenReturn(false);
+
+        shareResultsCommandHandler.shareResultForDay(shareDaysEnvelope(command));
+
+        final ResultsValidationFailed event = validationFailedEventFrom(verifyAppendAndGetArgumentFrom(hearingEventStream));
+        assertThat(event.getRulesEvaluated(), is(List.of(SessionAvailabilityValidator.RULE_ID)));
+        assertThat(event.getErrors().getValidationIssues().stream().map(ValidationIssue::getRuleId).toList(),
+                is(List.of(SessionAvailabilityValidator.RULE_ID)));
+        assertThat(event.getErrors().getErrorMessages(), is(List.of()));
     }
 
     private ShareDaysResultsCommand shareDaysCommand() {
