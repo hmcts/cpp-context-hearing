@@ -31,7 +31,7 @@
         <results.version>17.104.116</results.version>
         <notification.notify.version>17.0.1</notification.notify.version>
         <stagingenforcement.version>17.104.81</stagingenforcement.version>
-        <progression.version>17.0.286</progression.version>
+        <progression.version>17.104.306</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
@@ -40,7 +40,7 @@
         <usersgroups.version>17.104.48</usersgroups.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>17.0.96</systemdocgenerator.version>
-        <results-validator-api-spec.version>26.25</results-validator-api-spec.version>
+        <results-validator-api-spec.version>26.32</results-validator-api-spec.version>
         <openapi-generator-maven-plugin.version>7.23.0</openapi-generator-maven-plugin.version>
 
         <sonar.coverage.exclusions>
