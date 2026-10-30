@@ -469,6 +469,7 @@ public class ShareResultsV2IT extends AbstractIT {
 
         try (final Utilities.EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
                 .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearingDay, is(laterHearingDay))
                         .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearing.getId())))))) {
 
@@ -535,6 +536,7 @@ public class ShareResultsV2IT extends AbstractIT {
 
         try (final Utilities.EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
                 .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearingDay, is(thirdHearingDay))
                         .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearing.getId())))))) {
 

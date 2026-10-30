@@ -950,10 +950,18 @@ public class ShareResultsIT extends AbstractIT {
 
             //when
             // Hearing result shared first with time with first offence as Dismissed and second offence result as withdrawn.
-            shareResults(getRequestSpec(), initiateHearingCommandHelper.getHearingId(), with(
-                    basicShareResultsCommandTemplate(),
-                    command -> command.setCourtClerk(getCourtClerk())
-            ), targets);
+            // Wait for the first share to be processed: its offence results must reach the defendant before the second
+            // share's, otherwise they overwrite the second share's dismissal and the case is never all dismissed.
+            try (final EventListener firstShareResultedListener = listenFor("public.hearing.resulted")
+                    .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
+                            .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
+                                    .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId())))))) {
+                shareResults(getRequestSpec(), initiateHearingCommandHelper.getHearingId(), with(
+                        basicShareResultsCommandTemplate(),
+                        command -> command.setCourtClerk(getCourtClerk())
+                ), targets);
+                firstShareResultedListener.waitFor();
+            }
 
             //Test data creation for another hearing result shared
             //given
