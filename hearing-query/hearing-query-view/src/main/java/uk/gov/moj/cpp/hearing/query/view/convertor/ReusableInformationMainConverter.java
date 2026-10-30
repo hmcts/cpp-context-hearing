@@ -201,10 +201,31 @@ public class ReusableInformationMainConverter {
                                                                  final List<JsonObject> jsonObjects,
                                                                  final DocumentContext documentContext,
                                                                  final Map<String, String> countryCodesMap) {
-        prompts.stream()
+        final List<Prompt> applicablePrompts = prompts.stream()
                 .filter(prompt -> !StringUtils.equals(ADDRESS.name(), prompt.getType()))
                 .filter(prompt -> !StringUtils.equals(NAMEADDRESS.name(), prompt.getType()))
-                .forEach(prompt -> processReusableInformationForPrompt(idType, id, jsonObjects, documentContext, prompt, countryCodesMap));
+                .toList();
+
+        final int resolvedBefore = jsonObjects.size();
+
+        applicablePrompts.forEach(prompt ->
+                processReusableInformationForPrompt(idType, id, jsonObjects, documentContext, prompt, countryCodesMap));
+
+        // A single path resolving to nothing is routine and is deliberately swallowed at DEBUG by
+        // toTxtValue: a prompt with no value must be omitted, not reported. What is NOT routine is
+        // EVERY configured prompt resolving to nothing — the caller then gets an empty
+        // reusablePrompts array with no way to tell a genuinely empty record from a cacheDataPath
+        // that no longer matches the document shape. That is exactly how SNI-9141's integration
+        // failure presents, and it is undiagnosable from a CI log because the only trace is DEBUG.
+        // Name the paths once, here, where "none of them matched" is distinguishable from "this
+        // one was blank".
+        if (!applicablePrompts.isEmpty() && jsonObjects.size() == resolvedBefore) {
+            LOGGER.warn("No reusable information resolved for {} {} from {} configured prompt(s). "
+                            + "cacheDataPaths tried: {}. Either the record genuinely holds none of "
+                            + "these values, or the paths no longer match the document shape.",
+                    idType, id, applicablePrompts.size(),
+                    applicablePrompts.stream().map(Prompt::getCacheDataPath).toList());
+        }
     }
 
     private void processReusableInformationForPrompt(final IdType idType,

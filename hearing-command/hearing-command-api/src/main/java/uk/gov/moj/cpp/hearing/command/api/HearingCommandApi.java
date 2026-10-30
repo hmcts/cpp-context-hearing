@@ -309,9 +309,9 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.publish-hearing-lists-for-crown-courts-with-ids");
     }
 
-    @Handles("hearing.book-provisional-hearing-slots")
+    @Handles("hearing.book-unconfirmed-hearing-slots")
     public void bookProvisionalHearingSlots(final JsonEnvelope envelope) {
-        sendEnvelopeWithName(envelope, "hearing.command.book-provisional-hearing-slots");
+        sendEnvelopeWithName(envelope, "hearing.command.book-unconfirmed-hearing-slots");
     }
 
     @Handles("hearing.change-hearing-detail")

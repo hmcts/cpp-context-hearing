@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reserve a Slot API</title>
+<style>
+  :root {
+    color-scheme: light;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  body { margin: 0; font: 14px system-ui, sans-serif; background: #fafaf9; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+
+<style>
+/* Layout: single reading column with a sticky contents rail on wide screens; the rail
+   drops above the content below 900px. One type family (IBM Plex) in three roles,
+   because half this page is code and the mono deserves to be designed with the prose. */
+:root {
+  --bg:        #f7f7f5;
+  --surface:   #ffffff;
+  --sunken:    #ececeb;
+  --fg:        #1b1c1e;
+  --fg-muted:  #5c6066;
+  --rule:      #dcdcda;
+  --accent:    #1d3f73;
+  --accent-sl: #e8edf5;
+  --ok:        #2d6a3f;
+  --ok-bg:     #e6f0e8;
+  --warn:      #8a5a12;
+  --warn-bg:   #f8eedb;
+  --bad:       #9a2c2c;
+  --bad-bg:    #f6e4e4;
+  --neutral:   #4a5058;
+  --neutral-bg:#e9eaec;
+
+  --font-head: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:        #15171a;
+    --surface:   #1d2024;
+    --sunken:    #24272c;
+    --fg:        #e8e9ea;
+    --fg-muted:  #9ba1a9;
+    --rule:      #32363c;
+    --accent:    #9db8e3;
+    --accent-sl: #222c3b;
+    --ok:        #7fbd92;
+    --ok-bg:     #1c2b21;
+    --warn:      #d9ab63;
+    --warn-bg:   #2e2616;
+    --bad:       #e08a8a;
+    --bad-bg:    #2f1d1d;
+    --neutral:   #a3abb5;
+    --neutral-bg:#262a2f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:        #15171a;
+  --surface:   #1d2024;
+  --sunken:    #24272c;
+  --fg:        #e8e9ea;
+  --fg-muted:  #9ba1a9;
+  --rule:      #32363c;
+  --accent:    #9db8e3;
+  --accent-sl: #222c3b;
+  --ok:        #7fbd92;
+  --ok-bg:     #1c2b21;
+  --warn:      #d9ab63;
+  --warn-bg:   #2e2616;
+  --bad:       #e08a8a;
+  --bad-bg:    #2f1d1d;
+  --neutral:   #a3abb5;
+  --neutral-bg:#262a2f;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.65;
+  -webkit-text-size-adjust: 100%;
+}
+.shell {
+  max-width: none;
+  margin: 0;
+  padding-inline: 20px;
+  padding-block: 44px 80px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+@media (min-width: 900px) {
+  .shell { grid-template-columns: 250px minmax(0, 1fr); gap: 64px; align-items: start; padding-inline: 40px; }
+}
+main { min-width: 0; }
+
+/* ---- masthead ---- */
+.masthead { grid-column: 1 / -1; border-bottom: 2px solid var(--fg); padding-bottom: 20px; }
+.eyebrow {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--fg-muted); margin: 0 0 10px;
+}
+h1 {
+  font-family: var(--font-head); font-weight: 600; font-size: clamp(34px, 5.4vw, 54px);
+  line-height: 1.1; letter-spacing: -.015em; margin: 0 0 12px; text-wrap: balance;
+}
+.standfirst { font-size: 20px; color: var(--fg-muted); margin: 0; }
+.audience {
+  margin-top: 18px; font-family: var(--font-mono); font-size: 14px; color: var(--fg-muted);
+}
+.audience strong { color: var(--fg); font-weight: 500; }
+
+/* ---- contents rail ---- */
+.rail { font-size: 15px; }
+@media (min-width: 900px) {
+  .rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 28px); }
+}
+.rail h2 {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--fg-muted); margin: 0 0 14px;
+}
+.rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.rail a {
+  display: block; padding: 5px 10px; border-radius: 4px; color: var(--fg-muted);
+  text-decoration: none; border-left: 2px solid transparent;
+}
+.rail a:hover { color: var(--fg); background: var(--sunken); }
+.rail a .num { font-family: var(--font-mono); color: var(--accent); margin-right: 7px; }
+
+/* ---- typography ---- */
+h2.sec {
+  font-family: var(--font-head); font-weight: 600; font-size: 30px; line-height: 1.2;
+  margin: 52px 0 6px; padding-top: 22px; border-top: 1px solid var(--rule);
+  letter-spacing: -.01em; text-wrap: balance; scroll-margin-top: 24px;
+}
+h2.sec:first-of-type { margin-top: 8px; border-top: 0; padding-top: 0; }
+h2.sec .num {
+  font-family: var(--font-mono); font-size: 24px; font-weight: 600; color: var(--accent);
+  margin-right: 10px;
+}
+h3 {
+  font-family: var(--font-body); font-weight: 600; font-size: 18px; letter-spacing: .01em;
+  margin: 30px 0 10px; color: var(--fg);
+}
+p { margin: 0 0 16px; }
+.lede { font-size: 21px; color: var(--fg-muted); }
+a { color: var(--accent); text-underline-offset: 2px; }
+code:not(pre code) {
+  font-family: var(--font-mono); font-size: .875em; background: var(--sunken);
+  padding: .1em .36em; border-radius: 3px; overflow-wrap: anywhere;
+}
+strong { font-weight: 600; }
+
+/* ---- code blocks ---- */
+.code { position: relative; margin: 0 0 18px; }
+.code pre {
+  margin: 0; padding: 16px 18px; background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 6px; overflow-x: auto; font-family: var(--font-mono); font-size: 15px;
+  line-height: 1.7; tab-size: 2;
+}
+.code.has-label pre { padding-top: 38px; }
+.code .label {
+  position: absolute; top: 10px; left: 18px; font-family: var(--font-mono); font-size: 11px;
+  font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-muted);
+}
+.copy {
+  position: absolute; top: 7px; right: 7px; font-family: var(--font-mono); font-size: 12px;
+  padding: 5px 10px; border: 1px solid var(--rule); border-radius: 4px;
+  background: var(--sunken); color: var(--fg-muted); cursor: pointer; line-height: 1.4;
+}
+.copy:hover { color: var(--fg); border-color: var(--fg-muted); }
+.copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.code pre .add { color: var(--ok); }
+.code pre .del { color: var(--bad); }
+.code pre .cm  { color: var(--fg-muted); }
+
+/* ---- endpoint banner ---- */
+.endpoint {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px;
+  background: var(--accent-sl); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 14px 18px; margin: 0 0 20px; font-family: var(--font-mono); font-size: 15px;
+}
+.endpoint .verb { font-weight: 600; color: var(--accent); }
+.endpoint .path { overflow-wrap: anywhere; min-width: 0; }
+.endpoint .meta { width: 100%; font-size: 14px; color: var(--fg-muted); }
+
+/* ---- tables ---- */
+.tablewrap { overflow-x: auto; margin: 0 0 20px; }
+table { border-collapse: collapse; width: 100%; font-size: 16px; min-width: 460px; }
+caption {
+  text-align: left; font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--fg-muted); padding-bottom: 8px;
+}
+th, td { text-align: left; padding: 9px 14px 9px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--fg-muted); border-bottom-color: var(--fg-muted);
+}
+td code { white-space: nowrap; }
+td.wrap code { white-space: normal; }
+
+/* ---- status pills ---- */
+.pill {
+  display: inline-block; font-family: var(--font-mono); font-size: 13px; font-weight: 500;
+  padding: 3px 9px; border-radius: 3px; letter-spacing: .04em; white-space: nowrap;
+}
+.pill.ok      { background: var(--ok-bg);      color: var(--ok); }
+.pill.warn    { background: var(--warn-bg);    color: var(--warn); }
+.pill.bad     { background: var(--bad-bg);     color: var(--bad); }
+.pill.neutral { background: var(--neutral-bg); color: var(--neutral); }
+
+/* ---- callouts ---- */
+.note {
+  border-left: 3px solid var(--rule); padding: 2px 0 2px 18px; margin: 0 0 20px;
+  color: var(--fg-muted); font-size: 17px;
+}
+.note strong { color: var(--fg); }
+.note.warn { border-left-color: var(--warn); }
+.note.bad  { border-left-color: var(--bad); }
+.note p:last-child { margin-bottom: 0; }
+
+/* ---- the three-calls panel ---- */
+.calls { display: flex; flex-direction: column; gap: 10px; margin: 0 0 18px; }
+.call {
+  display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: baseline;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 13px 16px;
+}
+.call .n { font-family: var(--font-mono); font-size: 18px; font-weight: 600; color: var(--accent); }
+.call .what { min-width: 0; }
+.call .sig { font-family: var(--font-mono); font-size: 15px; overflow-wrap: anywhere; }
+.call .desc { font-size: 15px; color: var(--fg-muted); margin-top: 4px; }
+
+/* ---- incidents ---- */
+.incident { border-top: 1px solid var(--rule); padding-top: 18px; margin-top: 18px; }
+.incident:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+.incident h3 { margin-top: 0; }
+.incident h3 .n {
+  font-family: var(--font-mono); color: var(--bad); margin-right: 8px; font-weight: 600;
+}
+
+footer {
+  grid-column: 1 / -1; border-top: 1px solid var(--rule); margin-top: 56px; padding-top: 20px;
+  font-size: 15px; color: var(--fg-muted);
+}
+footer p { max-width: none; }
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <p class="eyebrow">Crime Common Platform · Listing / Hearing</p>
+    <h1>Reserve a slot — endpoints for the front end</h1>
+    <p class="standfirst">What the browser calls, what comes back, and the three things that have
+    already caught people out.</p>
+    <p class="audience">Written for <strong>front-end developers working in cpp-ui-hearing</strong>.
+    Contracts taken from the specs on <code>team/ras</code>, not from observed traffic.</p>
+  </header>
+
+  <nav class="rail" aria-label="Contents">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#calls">You make three calls</a></li>
+      <li><a href="#renamed">What was renamed</a></li>
+      <li><a href="#base">Base URL and headers</a></li>
+      <li><a href="#hold"><span class="num">①</span>Hold a session</a></li>
+      <li><a href="#release"><span class="num">②</span>Give a hold back</a></li>
+      <li><a href="#status"><span class="num">③</span>Is the hold alive?</a></li>
+      <li><a href="#incidents">What went wrong</a></li>
+      <li><a href="#files">Where this lives</a></li>
+      <li><a href="#naming">On the naming</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <p class="lede">A clerk picks a court session while recording a result. From the moment they
+    pick it, the session is genuinely <strong>held</strong> — real capacity is taken off it —
+    until the result is shared. If the result is never shared, a purge at 01:00 releases the hold
+    and the session goes back in the pool. That is the whole feature, and it is why these calls
+    exist.</p>
+
+    <h2 class="sec" id="calls">You make three calls</h2>
+
+    <div class="calls">
+      <div class="call">
+        <span class="n">①</span>
+        <span class="what">
+          <span class="sig">POST /hearings/{hearingId}/hearing-slots</span>
+          <span class="desc">Hold a session — asynchronous, see below</span>
+        </span>
+      </div>
+      <div class="call">
+        <span class="n">②</span>
+        <span class="what">
+          <span class="sig">POST /hearings/{hearingId}/hearing-slots</span>
+          <span class="desc">Give it back — fire and forget</span>
+        </span>
+      </div>
+      <div class="call">
+        <span class="n">③</span>
+        <span class="what">
+          <span class="sig">POST /bookingStatus</span>
+          <span class="desc">Is the hold still alive? Call before sharing</span>
+        </span>
+      </div>
+    </div>
+
+    <p>There are two more endpoints in this feature — <code>POST /unconfirmedBooking</code> and
+    <code>GET /unconfirmedBooking/status</code> on courtscheduler. <strong>You never call
+    those.</strong> They are service-to-service, behind ① and ③. They appear here only because
+    their errors surface to you through ①, and because their names changed in the rename.</p>
+
+    <h2 class="sec" id="renamed">What was renamed</h2>
+
+    <p>Everything below is <code>main</code> → <code>team/ras</code>. <strong>Only the media type
+    on ① affects you</strong> — the two courtscheduler entries are listed because you will meet
+    the old names in logs, in older branches and in the API tests.</p>
+
+    <h3>① Hold a session — path unchanged, media type and command name changed</h3>
+    <div class="code has-label">
+      <span class="label">diff</span>
+      <button class="copy" type="button">Copy</button>
+<pre><code>  POST /hearing-command-api/command/api/rest/hearing/hearings/{hearingId}/hearing-slots
+
+<span class="del">- Content-Type: application/vnd.hearing.book-provisional-hearing-slots+json</span>
+<span class="add">+ Content-Type: application/vnd.hearing.book-unconfirmed-hearing-slots+json</span>
+
+<span class="del">- command name: hearing.book-provisional-hearing-slots</span>
+<span class="add">+ command name: hearing.book-unconfirmed-hearing-slots</span></code></pre>
+    </div>
+
+    <p>A client still sending the old media type gets <strong>415 Unsupported Media Type</strong>.
+    There is no aliasing and no deprecation window — the old name is simply gone.</p>
+
+    <h3>courtscheduler — path <em>and</em> media types changed (you do not call these)</h3>
+    <div class="code has-label">
+      <span class="label">diff</span>
+      <button class="copy" type="button">Copy</button>
+<pre><code><span class="del">- POST /listingcourtscheduler-api/rest/courtscheduler/provisionalBooking</span>
+<span class="add">+ POST /listingcourtscheduler-api/rest/courtscheduler/unconfirmedBooking</span>
+
+<span class="del">- Content-Type: application/vnd.courtscheduler.create.provisional.booking+json</span>
+<span class="add">+ Content-Type: application/vnd.courtscheduler.create.unconfirmed.booking+json</span>
+<span class="del">- Accept:       application/vnd.courtscheduler.create.provisional.booking.response+json</span>
+<span class="add">+ Accept:       application/vnd.courtscheduler.create.unconfirmed.booking.response+json</span></code></pre>
+    </div>
+    <div class="code has-label">
+      <span class="label">diff</span>
+      <button class="copy" type="button">Copy</button>
+<pre><code><span class="del">- GET /listingcourtscheduler-api/rest/courtscheduler/provisionalBooking?bookingIds=…</span>
+<span class="add">+ GET /listingcourtscheduler-api/rest/courtscheduler/unconfirmedBooking?bookingIds=…</span>
+
+<span class="del">- Accept: application/vnd.courtscheduler.get.provisional.booking+json</span>
+<span class="add">+ Accept: application/vnd.courtscheduler.get.unconfirmed.booking+json</span></code></pre>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <caption>Summary</caption>
+        <thead>
+          <tr><th>Old</th><th>New</th><th>Who calls it</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="wrap"><code>vnd.hearing.book-provisional-hearing-slots+json</code></td>
+            <td class="wrap"><code>vnd.hearing.book-unconfirmed-hearing-slots+json</code></td>
+            <td><strong>you</strong> (①)</td>
+          </tr>
+          <tr>
+            <td><code>POST /provisionalBooking</code></td>
+            <td><code>POST /unconfirmedBooking</code></td>
+            <td>hearing's event processor</td>
+          </tr>
+          <tr>
+            <td><code>GET /provisionalBooking</code></td>
+            <td><code>GET /unconfirmedBooking</code></td>
+            <td>listing</td>
+          </tr>
+          <tr>
+            <td>—</td>
+            <td><code>GET /unconfirmedBooking/status</code></td>
+            <td>listing, behind ③ · <span class="pill ok">new</span></td>
+          </tr>
+          <tr>
+            <td>—</td>
+            <td><code>POST /bookingStatus</code></td>
+            <td><strong>you</strong> (③) · <span class="pill ok">new</span></td>
+          </tr>
+          <tr>
+            <td>—</td>
+            <td class="wrap"><code>vnd.hearing.release-unconfirmed-hearing-slots+json</code></td>
+            <td><strong>you</strong> (②) · <span class="pill ok">new</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note warn">
+      <p>A courtscheduler that has not been redeployed still serves <code>/provisionalBooking</code>
+      only, so a caller on the new path gets a <strong>500</strong> — Spring renders an unmatched
+      path as 500, not 404, which makes a version mismatch look like a server fault. If ① starts
+      failing right after a deploy, check that before anything else.</p>
+    </div>
+
+    <h2 class="sec" id="base">Base URL and headers</h2>
+
+    <div class="code">
+      <button class="copy" type="button">Copy</button>
+<pre><code>const STE = 'https://steccm02.ingress01.ste.nl.cjscp.org.uk';
+<span class="cm">// every request carries the caller identity</span>
+headers: { CJSCPPUID: '&lt;user id&gt;' }</code></pre>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <tbody>
+          <tr><td>hearing commands (①, ②)</td><td class="wrap"><code>/hearing-command-api/command/api/rest/hearing</code></td></tr>
+          <tr><td>listing queries (③)</td><td class="wrap"><code>/listing-query-api/query/api/rest/listing</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="sec" id="hold"><span class="num">①</span>Hold a session</h2>
+
+    <div class="endpoint">
+      <span class="verb">POST</span>
+      <span class="path">{hearingWriteBase}/hearings/{hearingId}/hearing-slots</span>
+      <span class="meta">Content-Type: application/vnd.hearing.book-unconfirmed-hearing-slots+json → 202 Accepted</span>
+    </div>
+
+    <div class="note">
+      <p><strong>Renamed.</strong> Was
+      <code>application/vnd.hearing.book-provisional-hearing-slots+json</code>; old clients get a
+      415.</p>
+    </div>
+
+    <h3>Request</h3>
+    <div class="code has-label">
+      <span class="label">json</span>
+      <button class="copy" type="button">Copy</button>
+<pre><code>{
+  "slots": [
+    {
+      "courtScheduleId": "8322f37a-ed45-4757-8de7-da3dc12545a1",
+      "hearingStartTime": "2026-10-07T09:00:00.000Z",
+      "duration": 60
+    }
+  ],
+  "bookingId": "4eb0975d-84b4-4510-8c79-f2366e69863d"
+}</code></pre>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Field</th><th>Required</th><th>What to send</th></tr></thead>
+        <tbody>
+          <tr><td><code>slots</code></td><td><strong>yes</strong></td><td>at least one</td></tr>
+          <tr><td><code>slots[].courtScheduleId</code></td><td><strong>yes</strong></td><td>the session the clerk picked</td></tr>
+          <tr><td><code>slots[].hearingStartTime</code></td><td><strong>yes</strong></td><td>ISO date-time</td></tr>
+          <tr><td><code>slots[].duration</code></td><td>see below</td><td>minutes</td></tr>
+          <tr><td><code>bookingId</code></td><td>no</td><td>the <code>bookingReference</code> already on the result line, when re-picking. Omit on a first pick and one is minted for you.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note bad">
+      <p><strong><code>duration</code> is not optional in practice.</strong> The JSON schema says
+      it is, but a <em>duration-based</em> session is rejected without it:</p>
+      <p><code>400 duration is required and must be greater than zero for duration-based session
+      &lt;id&gt;</code></p>
+      <p>Slot-based sessions ignore it. The slot search tells you which kind you have
+      (<code>slotBased</code>), so send <code>duration</code> whenever you have it and always for a
+      duration-based pick. Send it as a number, or omit the key entirely — <strong>never
+      <code>null</code></strong>.</p>
+    </div>
+
+    <p>The schema is <code>additionalProperties: false</code>, and so are the two schemas behind
+    it. An extra field is not ignored; the command is rejected part-way down the chain, which
+    surfaces to you as a timeout rather than a validation error.</p>
+
+    <h3>Response — the part that catches people</h3>
+
+    <p>The <strong>202 tells you nothing about success</strong>. The outcome arrives
+    asynchronously on the public event
+    <code>public.hearing.hearing-slots-provisionally-booked</code>, and that event has two
+    shapes:</p>
+
+    <div class="code has-label">
+      <span class="label">success</span>
+      <button class="copy" type="button">Copy</button>
+<pre><code>{ "bookingId": "4eb0975d-84b4-4510-8c79-f2366e69863d" }</code></pre>
+    </div>
+    <div class="code has-label">
+      <span class="label">refusal</span>
+      <button class="copy" type="button">Copy</button>
+<pre><code>{ "error": "courtscheduler returned 400: {\"error\":[\"duration is required …\"]}" }</code></pre>
+    </div>
+
+    <p><code>CppHttp.commandSync</code> resolves on the <strong>event name</strong>, which is the
+    same for both — so a refusal arrives as an ordinary value, not an error.
+    <code>ProvisionalBookingService</code> converts it:</p>
+
+    <div class="code has-label">
+      <span class="label">typescript</span>
+      <button class="copy" type="button">Copy</button>
+<pre><code>switchMap(response =&gt;
+  response.bookingId
+    ? of(response as { bookingId: string })
+    : throwError(() =&gt; new BookingRefusedError(response.error || '…'))
+)</code></pre>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <caption>Keep this distinction when handling failures</caption>
+        <thead><tr><th>Error</th><th>Means</th><th>Tell the clerk</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>BookingRefusedError</code></td>
+            <td>the backend deliberately refused — e.g. the session filled up between search and pick</td>
+            <td>“pick another session”</td>
+          </tr>
+          <tr>
+            <td>anything else</td>
+            <td>HTTP error, rejected command, timeout waiting for the event</td>
+            <td>a technical failure — <strong>not</strong> that the session is unavailable</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Blaming the session for a technical failure sends the clerk off to re-pick a session that
+    was never the problem. That has happened on STE.</p>
+
+    <p>On success, write the returned <code>bookingId</code> into the result line's
+    <code>bookingReference</code> prompt, and tell the clerk the hold dies at midnight — that is
+    the only point in the flow where the rule is stated.</p>
+
+    <h3>curl</h3>
+    <div class="code has-label">
+      <span class="label">bash</span>
+      <button class="copy" type="button">Copy</button>
+<pre><code>curl -i -X POST "$STE/api/hearing-command-api/command/api/rest/hearing/hearings/$HEARING_ID/hearing-slots" \
+  -H "Content-Type: application/vnd.hearing.book-unconfirmed-hearing-slots+json" \
+  -H "CJSCPPUID: $UID" \
+  --data-raw '{
+    "slots": [
+      {
+        "courtScheduleId": "8322f37a-ed45-4757-8de7-da3dc12545a1",
+        "hearingStartTime": "2026-10-07T09:00:00.000Z",
+        "duration": 60
+      }
+    ]
+  }'</code></pre>
+    </div>
+
+    <p>You get <code>202</code> immediately. To see what actually happened you need the public
+    event — which is why the UI uses <code>commandSync</code> rather than <code>command</code>
+    here.</p>
+
+    <h2 class="sec" id="release"><span class="num">②</span>Give a hold back</h2>
+
+    <div class="endpoint">
+      <span class="verb">POST</span>
+      <span class="path">{hearingWriteBase}/hearings/{hearingId}/hearing-slots</span>
+      <span class="meta">Content-Type: application/vnd.hearing.release-unconfirmed-hearing-slots+json → 202 Accepted</span>
+    </div>
+
+    <p>Same path as ①; the media type picks the action. <span class="pill ok">new</span> in this
+    feature — there was no release call before.</p>
+
+    <div class="code has-label">
+      <span class="label">json</span>
+      <button class="copy" type="button">Copy</button>
+<pre><code>{ "bookingId": "4e29c1fa-7d3b-4f21-9c88-1a2b3c4d7ac1" }</code></pre>
+    </div>
+
+    <p><code>bookingId</code> is required; <code>additionalProperties: false</code>.</p>
+
+    <div class="note warn">
+      <p><strong>Fire and forget.</strong> An unknown or already-released id is a no-op, never an
+      error, and <strong>no public event is published</strong> — so use <code>command</code>, not
+      <code>commandSync</code>, or you will wait forever for an event that never comes.</p>
+    </div>
+
+    <p>Call it when a hold is abandoned with no new pick to carry the reference forward: the clerk
+    deletes a booked slot, or the whole draft is discarded. You do <strong>not</strong> need to
+    call it when the clerk simply re-picks a different session under the same
+    <code>bookingId</code> — courtscheduler releases the old one itself as part of taking the
+    new one.</p>
+
+    <p>A booking that has already been <strong>shared</strong> is never released by this call. Only
+    a share may change a confirmed booking. Check with ③ first — see
+    <code>isUnconfirmedBooking</code> in <code>results/core/helpers/provisional-booking.ts</code>.</p>
+
+    <div class="code has-label">
+      <span class="label">bash</span>
+      <button class="copy" type="button">Copy</button>
+<pre><code>curl -i -X POST "$STE/api/hearing-command-api/command/api/rest/hearing/hearings/$HEARING_ID/hearing-slots" \
+  -H "Content-Type: application/vnd.hearing.release-unconfirmed-hearing-slots+json" \
+  -H "CJSCPPUID: $UID" \
+  --data-raw '{"bookingId":"4e29c1fa-7d3b-4f21-9c88-1a2b3c4d7ac1"}'</code></pre>
+    </div>
+
+    <h2 class="sec" id="status"><span class="num">③</span>Is the hold still alive?</h2>
+
+    <div class="endpoint">
+      <span class="verb">POST</span>
+      <span class="path">{listingReadBase}/bookingStatus</span>
+      <span class="meta">Content-Type: application/vnd.listing.query.booking.status+json → 200 OK</span>
+    </div>
+
+    <p><span class="pill ok">new</span> in this feature. Note it is a <strong>POST on the query
+    API</strong> — the ids go in the body, so it goes through <code>api.command</code>, not
+    <code>api.query</code>. That detail causes incident 1 below.</p>
+
+    <h3>Request</h3>
+    <div class="code has-label">
+      <span class="label">json</span>
+      <button class="copy" type="button">Copy</button>
+<pre><code>{ "bookingIds": ["f8254db1-1683-483e-afb3-b87fde5a0a26"] }</code></pre>
+    </div>
+
+    <p><code>bookingIds</code> is required, <code>minItems: 1</code>,
+    <code>additionalProperties: false</code>.</p>
+
+    <h3>Response</h3>
+    <div class="code has-label">
+      <span class="label">json</span>
+      <button class="copy" type="button">Copy</button>
+<pre><code>{
+  "bookings": [
+    { "bookingId": "f8254db1-1683-483e-afb3-b87fde5a0a26", "safeToShare": true,  "status": "RESERVED" },
+    { "bookingId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8", "safeToShare": false, "status": "NOT_FOUND" }
+  ]
+}</code></pre>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>status</th><th>safeToShare</th><th>What it means for the UI</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="pill ok">RESERVED</span></td><td><code>true</code></td>
+            <td>a live hold — safe to share, and safe to release if abandoned</td>
+          </tr>
+          <tr>
+            <td><span class="pill neutral">SHARED</span></td><td><code>true</code></td>
+            <td>already a real listing — <strong>do not</strong> resend this id on a new booking</td>
+          </tr>
+          <tr>
+            <td><span class="pill bad">NOT_FOUND</span></td><td><strong><code>false</code></strong></td>
+            <td>the hold expired and was purged — block the share, tell the clerk to re-pick</td>
+          </tr>
+          <tr>
+            <td><span class="pill warn">UNKNOWN</span></td><td><code>true</code></td>
+            <td>listing could not reach courtscheduler</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong><code>safeToShare</code> is false only for <code>NOT_FOUND</code>.</strong></p>
+
+    <div class="note warn">
+      <p><code>UNKNOWN</code> is listing's own value; courtscheduler never emits it. It resolves to
+      <code>true</code> because the gate <strong>fails open</strong> by design — an advisory check
+      must not block every share in the building over a transient fault. While
+      <code>UNKNOWN</code> persists the gate is blind and a share into a purged hold will go
+      through. Do not “fix” this by failing closed without a conversation.</p>
+    </div>
+
+    <h3>curl</h3>
+    <div class="code has-label">
+      <span class="label">bash</span>
+      <button class="copy" type="button">Copy</button>
+<pre><code>curl -s "$STE/api/listing-query-api/query/api/rest/listing/bookingStatus" \
+  -H "Content-Type: application/vnd.listing.query.booking.status+json" \
+  -H "CJSCPPUID: $UID" \
+  --data-raw '{"bookingIds":["f8254db1-1683-483e-afb3-b87fde5a0a26"]}'</code></pre>
+    </div>
+
+    <h2 class="sec" id="incidents">Three things that have already gone wrong</h2>
+
+    <div class="incident">
+      <h3><span class="n">1</span>The response is an <code>HttpResponse</code>, not the body</h3>
+      <p><code>CppHttp.command</code> is built with
+      <code>{ observe: 'response', responseType: 'text' }</code>, so the payload arrives as an
+      <strong>unparsed string on <code>.body</code></strong> and the object itself has no
+      <code>bookings</code>. It is also typed <code>Observable&lt;any&gt;</code>, so returning it
+      raw satisfies any declared type and the compiler says nothing. The pre-share gate once read
+      <code>response?.bookings</code>, got <code>undefined</code>, and its <code>?? []</code>
+      turned that into “nothing unsafe” — the correct <code>safeToShare: false</code> came back
+      over the wire and nothing acted on it.</p>
+      <p><code>ListingService.getBookingStatus</code> now parses once, centrally, and
+      <strong>throws</strong> on a body it cannot read rather than returning
+      <code>{ bookings: [] }</code> — an empty list is indistinguishable from “all fine”. Each
+      caller picks its own direction: the pre-share gate fails open, the release effects fail
+      closed.</p>
+    </div>
+
+    <div class="incident">
+      <h3><span class="n">2</span>Never resend a <code>SHARED</code> bookingId</h3>
+      <p>courtscheduler refuses to reserve against an id that already carries a confirmed
+      allocation. That is the amend journey — share a result, amend it, pick a different session —
+      and before this was handled the clerk was told <em>“this session is fully booked”</em> about
+      a session that was free. <code>ProvisionalBookingService.bookingIdToReuse</code> now checks
+      the status first and omits the id when it is <code>SHARED</code>, so a fresh one is
+      minted.</p>
+    </div>
+
+    <div class="incident">
+      <h3><span class="n">3</span>Don't gate on result short codes</h3>
+      <p>The pre-share check once collected booking references behind an allowlist of short codes
+      (<code>NHCCS</code>, later <code>NHCCS</code> + <code>NHMC</code>). <code>NHMC</code> was
+      missing, so a magistrates-only draft produced <code>[]</code>, the gate skipped the call
+      entirely, and a clerk shared into a purged hold — twice on STE. An allowlist fails
+      <em>silently</em>: a missing entry looks exactly like “nothing to check”. Use the shared
+      predicate in <code>provisional-booking.ts</code>.</p>
+    </div>
+
+    <h2 class="sec" id="files">Where this lives in cpp-ui-hearing</h2>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Thing</th><th>File</th></tr></thead>
+        <tbody>
+          <tr><td>① and ②</td><td class="wrap"><code>results/hearing-details/allocation/services/provisionalBooking.service.ts</code></td></tr>
+          <tr><td>③</td><td class="wrap"><code>core/services/listing/listing.service.ts</code></td></tr>
+          <tr><td>status predicates, reference extraction</td><td class="wrap"><code>results/core/helpers/provisional-booking.ts</code></td></tr>
+          <tr><td>pre-share gate</td><td class="wrap"><code>results/share-results/session-availability.helper.ts</code></td></tr>
+          <tr><td>the pickers that call ①</td><td class="wrap"><code>results/hearing-details/allocation/containers/{magistrates,crown-scheduling}.container.ts</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="sec" id="naming">On the naming</h2>
+
+    <p>You will see <strong>provisional</strong> and <strong>unconfirmed</strong> used for the same
+    thing. The rename was scoped deliberately to the wire contract — REST paths, media types,
+    command names — and stops there. Domain events, DB columns and class names still say
+    <em>provisional</em>, including the public event
+    <code>public.hearing.hearing-slots-provisionally-booked</code> that ① resolves on. That is
+    intentional: events are a cross-estate contract with consumers outside these repos. Don't tidy
+    them to match.</p>
+  </main>
+
+  <footer>
+    <p>Source of truth is the specs themselves:
+    <code>hearing-command-api.raml</code> and <code>listing-query-api.raml</code> on
+    <code>team/ras</code>. Where this page and a spec disagree, the spec wins.</p>
+  </footer>
+
+</div>
+
+<script>
+document.querySelectorAll('.copy').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var pre = btn.parentElement.querySelector('pre');
+    if (!pre) return;
+    var text = pre.innerText;
+    var done = function () {
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = 'Copy'; }, 1600);
+    };
+    try {
+      navigator.clipboard.writeText(text).then(done, function () { select(pre, btn); });
+    } catch (e) {
+      select(pre, btn);
+    }
+  });
+});
+
+function select(pre, btn) {
+  try {
+    var range = document.createRange();
+    range.selectNodeContents(pre);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    btn.textContent = 'Selected';
+    setTimeout(function () { btn.textContent = 'Copy'; }, 1600);
+  } catch (e) {
+    btn.textContent = 'Select manually';
+    setTimeout(function () { btn.textContent = 'Copy'; }, 2200);
+  }
+}
+</script>
+
+</body>
+</html>
