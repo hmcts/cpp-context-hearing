@@ -17,9 +17,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;

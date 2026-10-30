@@ -1,16 +1,21 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xmlns="http://java.sun.com/xml/ns/persistence"
-             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
- http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
-             version="1.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+                                 https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
 
     <persistence-unit name="hearing-persistence-unit">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <jta-data-source>java:/DS.hearing</jta-data-source>
-        <class>uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing</class>
-        <class>uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote</class>
-        <class>uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome</class>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+            <!-- Hibernate 6+ is stricter about lazy collection access outside an active session/transaction. The query
+                 response path walks lazy collections (e.g. Hearing.prosecutionCases, Hearing.hearingDefenceCounsels) after
+                 the tx has ended, which now throws LazyInitializationException. Enable temporary-session lazy loading to
+                 preserve the previous behaviour. Longer-term the hearing team may prefer fetch-joins / DTOs. -->
+            <property name="hibernate.enable_lazy_load_no_trans" value="true"/>
+        </properties>
     </persistence-unit>
 
 </persistence>

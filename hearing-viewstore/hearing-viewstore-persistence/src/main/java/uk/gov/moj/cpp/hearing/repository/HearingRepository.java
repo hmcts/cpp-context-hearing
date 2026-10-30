@@ -1,7 +1,5 @@
 package uk.gov.moj.cpp.hearing.repository;
 
-import static org.apache.deltaspike.data.api.SingleResultType.OPTIONAL;
-
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.moj.cpp.hearing.dto.HearingCaseForDayRow;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
@@ -13,16 +11,16 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.deltaspike.data.api.AbstractEntityRepository;
-import org.apache.deltaspike.data.api.Query;
-import org.apache.deltaspike.data.api.QueryParam;
-import org.apache.deltaspike.data.api.Repository;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 
-@Repository(forEntity = Hearing.class)
-public abstract class HearingRepository extends AbstractEntityRepository<Hearing, UUID> {
+@ApplicationScoped
+public class HearingRepository {
 
     // every column is aliased: Hibernate rejects duplicate column names (h.id / c.id) in native query results.
     // uuid columns are cast to varchar so they come back as the hyphenated string on both Postgres and H2.
@@ -39,30 +37,94 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
             "AND coalesce(h.is_vacated_trial,false) != true " +
             "AND coalesce(c.case_status,'') != 'EJECTED'";
 
-    @Query(value = "select  h.*" +
-            "from ha_hearing_day d ,ha_hearing h   where h.id = d.hearing_id and d.date = :date and coalesce(d.is_cancelled,false) !=true " +
-            "and coalesce(d.court_centre_id,h.court_centre_id) = :courtCentreId and " +
-            "coalesce(d.court_room_id,h.room_id) = :roomId and " +
-            "coalesce(h.is_box_hearing,false) != true and "  +
-            "coalesce(h.is_vacated_trial,false) != true", isNative = true)
-    public abstract List<Hearing> findByFilters(@QueryParam("date") final LocalDate date,
-                                                @QueryParam("courtCentreId") final UUID courtCentreId,
-                                                @QueryParam("roomId") final UUID roomId);
+    @PersistenceContext(unitName = "hearing-persistence-unit")
+    EntityManager entityManager;
 
-    @Query(value = "SELECT hearing FROM Hearing hearing INNER JOIN hearing.hearingDays day " +
-            "WHERE hearing.courtCentre.id IN (:courtCentreList) " +
-            "AND " +
-            "day.date = :date ")
-    public abstract List<Hearing> findHearingsByDateAndCourtCentreList(@QueryParam("date") final LocalDate date,
-                                                                       @QueryParam("courtCentreList") List<UUID> courtCentreList);
+    public Hearing findBy(final UUID id) {
+        return entityManager.find(Hearing.class, id);
+    }
 
-    @Query(value = "select  h.*" +
-            "from ha_hearing_day d ,ha_hearing h   where h.id = d.hearing_id and d.date = :date and coalesce(d.is_cancelled,false) !=true " +
-            "and coalesce(d.court_centre_id,h.court_centre_id) = :courtCentreId and " +
-            "coalesce(h.is_box_hearing,false) != true " +
-            "and coalesce(h.is_vacated_trial,false) != true", isNative = true)
-    public abstract List<Hearing> findHearings(@QueryParam("date") final LocalDate date,
-                                               @QueryParam("courtCentreId") final UUID courtCentreId);
+    public Optional<Hearing> findOptionalBy(final UUID id) {
+        return Optional.ofNullable(entityManager.find(Hearing.class, id));
+    }
+
+    public Hearing save(final Hearing entity) {
+        return entityManager.merge(entity);
+    }
+
+    public Hearing saveAndFlush(final Hearing entity) {
+        final Hearing merged = entityManager.merge(entity);
+        entityManager.flush();
+        return merged;
+    }
+
+    public void flush() {
+        entityManager.flush();
+    }
+
+    public void remove(final Hearing entity) {
+        final Hearing managed = entityManager.contains(entity) ? entity : entityManager.merge(entity);
+        entityManager.remove(managed);
+    }
+
+    public void attachAndRemove(final Hearing entity) {
+        final Hearing managed = entityManager.contains(entity) ? entity : entityManager.merge(entity);
+        entityManager.remove(managed);
+    }
+
+    public List<Hearing> findAll() {
+        return entityManager.createQuery("SELECT e FROM Hearing e", Hearing.class).getResultList();
+    }
+
+    public long count() {
+        return entityManager.createQuery("SELECT COUNT(e) FROM Hearing e", Long.class).getSingleResult();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Hearing> findByFilters(final LocalDate date,
+                                       final UUID courtCentreId,
+                                       final UUID roomId) {
+        return entityManager.createNativeQuery(
+                "select  h.*" +
+                "from ha_hearing_day d ,ha_hearing h   where h.id = d.hearing_id and d.date = :date and coalesce(d.is_cancelled,false) !=true " +
+                "and coalesce(d.court_centre_id,h.court_centre_id) = :courtCentreId and " +
+                "coalesce(d.court_room_id,h.room_id) = :roomId and " +
+                "coalesce(h.is_box_hearing,false) != true and " +
+                "coalesce(h.is_vacated_trial,false) != true",
+                Hearing.class)
+                .setParameter("date", date)
+                .setParameter("courtCentreId", courtCentreId)
+                .setParameter("roomId", roomId)
+                .getResultList();
+    }
+
+    public List<Hearing> findHearingsByDateAndCourtCentreList(final LocalDate date,
+                                                              final List<UUID> courtCentreList) {
+        return entityManager.createQuery(
+                "SELECT hearing FROM Hearing hearing INNER JOIN hearing.hearingDays hd " +
+                "WHERE hearing.courtCentre.id IN (:courtCentreList) " +
+                "AND " +
+                "hd.date = :date ",
+                Hearing.class)
+                .setParameter("courtCentreList", courtCentreList)
+                .setParameter("date", date)
+                .getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Hearing> findHearings(final LocalDate date,
+                                      final UUID courtCentreId) {
+        return entityManager.createNativeQuery(
+                "select  h.*" +
+                "from ha_hearing_day d ,ha_hearing h   where h.id = d.hearing_id and d.date = :date and coalesce(d.is_cancelled,false) !=true " +
+                "and coalesce(d.court_centre_id,h.court_centre_id) = :courtCentreId and " +
+                "coalesce(h.is_box_hearing,false) != true " +
+                "and coalesce(h.is_vacated_trial,false) != true",
+                Hearing.class)
+                .setParameter("date", date)
+                .setParameter("courtCentreId", courtCentreId)
+                .getResultList();
+    }
 
     /**
      * Projection query for hearing.get.hearing-cases-for-day: returns one row per (hearing, case) sitting on the
@@ -70,7 +132,7 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
      */
     @SuppressWarnings("unchecked")
     public List<HearingCaseForDayRow> findHearingCaseRowsForDay(final LocalDate date) {
-        final List<Object[]> rows = entityManager()
+        final List<Object[]> rows = entityManager
                 .createNativeQuery(HEARING_CASES_FOR_DAY)
                 .setParameter("date", date)
                 .getResultList();
@@ -87,79 +149,144 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
                 .toList();
     }
 
-    @Query(value = "SELECT distinct hearing " +
-            "FROM Hearing hearing INNER JOIN hearing.hearingDays day INNER JOIN hearing.judicialRoles role " +
-            "WHERE role.userId = :userId " +
-            "AND day.date = :date " +
-            "AND (hearing.isBoxHearing IS null OR hearing.isBoxHearing != true) " +
-            "AND (hearing.isVacatedTrial IS null OR hearing.isVacatedTrial != true) ")
-    public abstract List<Hearing> findByUserFilters(@QueryParam("date") final LocalDate date,
-                                                    @QueryParam("userId") final UUID userId);
+    public List<Hearing> findByUserFilters(final LocalDate date,
+                                           final UUID userId) {
+        return entityManager.createQuery(
+                "SELECT distinct hearing " +
+                "FROM Hearing hearing INNER JOIN hearing.hearingDays hd INNER JOIN hearing.judicialRoles role " +
+                "WHERE role.userId = :userId " +
+                "AND hd.date = :date " +
+                "AND (hearing.isBoxHearing IS null OR hearing.isBoxHearing != true) " +
+                "AND (hearing.isVacatedTrial IS null OR hearing.isVacatedTrial != true) ",
+                Hearing.class)
+                .setParameter("userId", userId)
+                .setParameter("date", date)
+                .getResultList();
+    }
 
-    @Query(value = "SELECT hearing " +
-            "FROM Hearing hearing " +
-            "inner join hearing.prosecutionCases prosecutionCase " +
-            "inner join prosecutionCase.defendants defendant " +
-            "inner join hearing.hearingDays day " +
-            "where defendant.id.id = :defendantId " +
-            "and day.date > :date "
+    public List<Hearing> findByDefendantAndHearingType(final LocalDate date,
+                                                       final UUID defendantId) {
+        return entityManager.createQuery(
+                "SELECT hearing " +
+                "FROM Hearing hearing " +
+                "inner join hearing.prosecutionCases prosecutionCase " +
+                "inner join prosecutionCase.defendants defendant " +
+                "inner join hearing.hearingDays hd " +
+                "where defendant.id.id = :defendantId " +
+                "and hd.date > :date ",
+                Hearing.class)
+                .setParameter("date", date)
+                .setParameter("defendantId", defendantId)
+                .getResultList();
+    }
 
-    )
-    public abstract List<Hearing> findByDefendantAndHearingType(@QueryParam("date") final LocalDate date,
-                                                                @QueryParam("defendantId") final UUID defendantId);
+    public Hearing findByHearingIdAndJurisdictionType(final UUID hearingId, final JurisdictionType jurisdictionType) {
+        return entityManager.createQuery(
+                "SELECT hearing FROM Hearing hearing  " +
+                "WHERE hearing.id = :hearingId " +
+                "AND  hearing.jurisdictionType = :jurisdictionType",
+                Hearing.class)
+                .setParameter("hearingId", hearingId)
+                .setParameter("jurisdictionType", jurisdictionType)
+                .getSingleResult();
+    }
 
-    @Query(value = "SELECT hearing FROM Hearing hearing  " +
-            "WHERE hearing.id = :hearingId " +
-            "AND  hearing.jurisdictionType = :jurisdictionType")
-    public abstract Hearing findByHearingIdAndJurisdictionType(@QueryParam("hearingId") final UUID hearingId, @QueryParam("jurisdictionType") final JurisdictionType jurisdictionType);
+    public List<Hearing> findByCaseId(final UUID caseId) {
+        return entityManager.createQuery(
+                "SELECT hearing FROM Hearing hearing INNER JOIN hearing.prosecutionCases prosecutionCase " +
+                "WHERE prosecutionCase.id.id = :caseId",
+                Hearing.class)
+                .setParameter("caseId", caseId)
+                .getResultList();
+    }
 
-    @Query(value = "SELECT hearing FROM Hearing hearing INNER JOIN hearing.prosecutionCases prosecutionCase " +
-            "WHERE prosecutionCase.id.id = :caseId")
-    public abstract List<Hearing> findByCaseId(@QueryParam("caseId") final UUID caseId);
+    public List<Hearing> findByCaseIdAndJurisdictionType(final UUID caseId, final JurisdictionType jurisdictionType) {
+        return entityManager.createQuery(
+                "SELECT hearing FROM Hearing hearing INNER JOIN hearing.prosecutionCases prosecutionCase " +
+                "WHERE prosecutionCase.id.id = :caseId " +
+                "AND  hearing.jurisdictionType = :jurisdictionType",
+                Hearing.class)
+                .setParameter("caseId", caseId)
+                .setParameter("jurisdictionType", jurisdictionType)
+                .getResultList();
+    }
 
-    @Query(value = "SELECT hearing FROM Hearing hearing INNER JOIN hearing.prosecutionCases prosecutionCase " +
-            "WHERE prosecutionCase.id.id = :caseId " +
-            "AND  hearing.jurisdictionType = :jurisdictionType")
-    public abstract List<Hearing> findByCaseIdAndJurisdictionType(@QueryParam("caseId") final UUID caseId, @QueryParam("jurisdictionType") final JurisdictionType jurisdictionType);
+    public List<Hearing> findAllHearingsByApplicationId(final UUID applicationId) {
+        return entityManager.createQuery(
+                "SELECT hearing FROM Hearing hearing INNER JOIN hearing.hearingApplications hearingApplication " +
+                "WHERE hearingApplication.id.applicationId = :applicationId",
+                Hearing.class)
+                .setParameter("applicationId", applicationId)
+                .getResultList();
+    }
 
-    @Query(value = "SELECT hearing FROM Hearing hearing INNER JOIN hearing.hearingApplications hearingApplication " +
-            "WHERE hearingApplication.id.applicationId = :applicationId")
-    public abstract List<Hearing> findAllHearingsByApplicationId(@QueryParam("applicationId") final UUID applicationId);
+    public List<Hearing> findAllHearingsByApplicationIdAndJurisdictionType(final UUID applicationId, final JurisdictionType jurisdictionType) {
+        return entityManager.createQuery(
+                "SELECT hearing FROM Hearing hearing INNER JOIN hearing.hearingApplications hearingApplication " +
+                "WHERE hearingApplication.id.applicationId = :applicationId " +
+                "AND  hearing.jurisdictionType = :jurisdictionType",
+                Hearing.class)
+                .setParameter("applicationId", applicationId)
+                .setParameter("jurisdictionType", jurisdictionType)
+                .getResultList();
+    }
 
-    @Query(value = "SELECT hearing FROM Hearing hearing INNER JOIN hearing.hearingApplications hearingApplication " +
-            "WHERE hearingApplication.id.applicationId = :applicationId " +
-            "AND  hearing.jurisdictionType = :jurisdictionType")
-    public abstract List<Hearing> findAllHearingsByApplicationIdAndJurisdictionType(@QueryParam("applicationId") final UUID applicationId, @QueryParam("jurisdictionType") final JurisdictionType jurisdictionType);
+    public List<Hearing> findByFilters(final LocalDate date,
+                                       final UUID courtCentreId,
+                                       final List<UUID> roomIds) {
+        return entityManager.createQuery(
+                "SELECT hearing " +
+                "FROM Hearing hearing INNER JOIN hearing.hearingDays hd " +
+                "WHERE hearing.courtCentre.id = :courtCentreId " +
+                "AND hearing.courtCentre.roomId in :roomIds " +
+                "AND hd.date = :date " +
+                "AND (hearing.isBoxHearing IS null OR hearing.isBoxHearing != true) ",
+                Hearing.class)
+                .setParameter("date", date)
+                .setParameter("courtCentreId", courtCentreId)
+                .setParameter("roomIds", roomIds)
+                .getResultList();
+    }
 
+    public List<Hearing> findByHearingDate(final LocalDate date) {
+        return entityManager.createQuery(
+                "SELECT hearing " +
+                "FROM Hearing hearing INNER JOIN hearing.hearingDays hd " +
+                "WHERE hd.date = :date " +
+                "AND (hearing.isBoxHearing IS null OR hearing.isBoxHearing != true) ",
+                Hearing.class)
+                .setParameter("date", date)
+                .getResultList();
+    }
 
-    @Query(value = "SELECT hearing " +
-            "FROM Hearing hearing INNER JOIN hearing.hearingDays day " +
-            "WHERE hearing.courtCentre.id = :courtCentreId " +
-            "AND hearing.courtCentre.roomId in :roomIds " +
-            "AND day.date = :date " +
-            "AND (hearing.isBoxHearing IS null OR hearing.isBoxHearing != true) ")
-    public abstract List<Hearing> findByFilters(@QueryParam("date") final LocalDate date,
-                                                @QueryParam("courtCentreId") final UUID courtCentreId,
-                                                @QueryParam("roomIds") final List<UUID> roomIds);
+    public CourtCentre findCourtCenterByHearingId(final UUID hearingId) {
+        return entityManager.createQuery(
+                "SELECT hearing.courtCentre FROM Hearing hearing " +
+                "WHERE hearing.id = :hearingId",
+                CourtCentre.class)
+                .setParameter("hearingId", hearingId)
+                .getResultList().stream().findFirst().orElse(null);
+    }
 
-    @Query(value = "SELECT hearing " +
-            "FROM Hearing hearing INNER JOIN hearing.hearingDays day " +
-            "WHERE day.date = :date " +
-            "AND (hearing.isBoxHearing IS null OR hearing.isBoxHearing != true) ")
-    public abstract List<Hearing> findByHearingDate(@QueryParam("date") final LocalDate date);
+    public HearingDay findHearingDayByHearingIdAndDate(final UUID hearingId,
+                                                       final LocalDate date) {
+        return entityManager.createQuery(
+                "SELECT hd FROM Hearing hearing INNER JOIN hearing.hearingDays hd " +
+                "WHERE hearing.id = :hearingId AND hd.date = :date",
+                HearingDay.class)
+                .setParameter("hearingId", hearingId)
+                .setParameter("date", date)
+                .getResultList().stream().findFirst().orElse(null);
+    }
 
-    @Query(value = "SELECT hearing.courtCentre FROM Hearing hearing " +
-            "WHERE hearing.id = :hearingId", singleResult = OPTIONAL)
-    public abstract CourtCentre findCourtCenterByHearingId(@QueryParam("hearingId") final UUID hearingId);
-
-    @Query(value = "SELECT day FROM Hearing hearing INNER JOIN hearing.hearingDays day " +
-            "WHERE hearing.id = :hearingId AND day.date = :date", singleResult = OPTIONAL)
-    public abstract HearingDay findHearingDayByHearingIdAndDate(@QueryParam("hearingId") final UUID hearingId,
-                                                                @QueryParam("date") final LocalDate date);
-
-    @Query(value = "SELECT target FROM Target target " +
-            "WHERE target.hearing.id = :hearingId")
-    public abstract List<Target> findTargetsByHearingId(@QueryParam("hearingId") final UUID hearingId);
+    public List<Target> findTargetsByHearingId(final UUID hearingId) {
+        return entityManager.createQuery(
+                "SELECT target FROM Target target " +
+                "WHERE target.hearing.id = :hearingId",
+                Target.class)
+                .setParameter("hearingId", hearingId)
+                .getResultList();
+    }
 
     /**
      * <code>hearingDay</code> is introduced with DD-3426.
@@ -171,29 +298,50 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
      * @return A list of targets against the given hearing id and hearing day. If no result is
      * found, returns empty list.
      */
-    @Query(value = "SELECT target FROM Target target " +
-            "WHERE target.hearing.id = :hearingId " +
-            "AND (target.hearingDay = :hearingDay OR target.hearingDay IS NULL)")
-    public abstract List<Target> findTargetsByFilters(@QueryParam("hearingId") final UUID hearingId,
-                                                      @QueryParam("hearingDay") final String hearingDay);
+    public List<Target> findTargetsByFilters(final UUID hearingId,
+                                             final String hearingDay) {
+        return entityManager.createQuery(
+                "SELECT target FROM Target target " +
+                "WHERE target.hearing.id = :hearingId " +
+                "AND (target.hearingDay = :hearingDay OR target.hearingDay IS NULL)",
+                Target.class)
+                .setParameter("hearingId", hearingId)
+                .setParameter("hearingDay", hearingDay)
+                .getResultList();
+    }
 
-    @Query(value = "SELECT hearing.applicationDraftResults FROM Hearing hearing " +
-            "WHERE hearing.id = :hearingId")
-    public abstract List<ApplicationDraftResult> findApplicationDraftResultsByHearingId(@QueryParam("hearingId") final UUID hearingId);
+    public List<ApplicationDraftResult> findApplicationDraftResultsByHearingId(final UUID hearingId) {
+        return entityManager.createQuery(
+                "SELECT hearing.applicationDraftResults FROM Hearing hearing " +
+                "WHERE hearing.id = :hearingId",
+                ApplicationDraftResult.class)
+                .setParameter("hearingId", hearingId)
+                .getResultList();
+    }
 
-    @Query(value = "SELECT prosecutionCase FROM ProsecutionCase prosecutionCase " +
-            "WHERE prosecutionCase.hearing.id = :hearingId")
-    public abstract List<ProsecutionCase> findProsecutionCasesByHearingId(@QueryParam("hearingId") final UUID hearingId);
+    public List<ProsecutionCase> findProsecutionCasesByHearingId(final UUID hearingId) {
+        return entityManager.createQuery(
+                "SELECT prosecutionCase FROM ProsecutionCase prosecutionCase " +
+                "WHERE prosecutionCase.hearing.id = :hearingId",
+                ProsecutionCase.class)
+                .setParameter("hearingId", hearingId)
+                .getResultList();
+    }
 
-    @Query(value = "SELECT distinct hearing " +
-            "FROM Hearing hearing INNER JOIN hearing.hearingDays day INNER JOIN hearing.prosecutionCases prosecutionCase " +
-            "WHERE (hearing.isBoxHearing IS null OR hearing.isBoxHearing != true) " +
-            "AND (hearing.isVacatedTrial IS null OR hearing.isVacatedTrial != true) " +
-            "AND day.date > :date " +
-            "AND prosecutionCase.id.id IN (:caseIds)")
-    public abstract List<Hearing> findHearingsByCaseIdsLaterThan(@QueryParam("caseIds") final List<UUID> caseIds,
-                                                                 @QueryParam("date") final LocalDate date);
-
+    public List<Hearing> findHearingsByCaseIdsLaterThan(final List<UUID> caseIds,
+                                                        final LocalDate date) {
+        return entityManager.createQuery(
+                "SELECT distinct hearing " +
+                "FROM Hearing hearing INNER JOIN hearing.hearingDays hd INNER JOIN hearing.prosecutionCases prosecutionCase " +
+                "WHERE (hearing.isBoxHearing IS null OR hearing.isBoxHearing != true) " +
+                "AND (hearing.isVacatedTrial IS null OR hearing.isVacatedTrial != true) " +
+                "AND hd.date > :date " +
+                "AND prosecutionCase.id.id IN (:caseIds)",
+                Hearing.class)
+                .setParameter("caseIds", caseIds)
+                .setParameter("date", date)
+                .getResultList();
+    }
 
     private static UUID toUuid(final Object value) {
         if (value == null || value instanceof UUID) {
@@ -201,5 +349,4 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
         }
         return UUID.fromString(value.toString());
     }
-
 }

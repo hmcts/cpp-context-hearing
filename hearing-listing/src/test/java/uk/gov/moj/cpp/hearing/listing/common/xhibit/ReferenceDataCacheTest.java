@@ -1,17 +1,19 @@
 package uk.gov.moj.cpp.hearing.listing.common.xhibit;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
+import static org.mockito.Mockito.*;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.getValueOfField;
 import static uk.gov.moj.cpp.hearing.listing.common.utils.FileUtil.givenPayload;
 
@@ -33,15 +35,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import uk.gov.justice.services.messaging.JsonObjects;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -70,6 +73,10 @@ public class ReferenceDataCacheTest {
     private static final String COURT_ROOM_ID_FIELD = "courtroomId";
     private static final String COURT_ROOM_NAME_FIELD = "courtroomName";
 
+    private static final String CROWN_COURT = "CROWN_COURT";
+    private static final String MAGISTRATES_COURT = "MAGISTRATES_COURT";
+    private static final String COURT_ROOM_MAPPINGS_PAYLOAD = "/mock-data/referencedata.query.cp-xhibit-courtroom-mappings.json";
+
 
     @Test
     public void shouldPopulateOrganisationUnitsCache() {
@@ -93,7 +100,7 @@ public class ReferenceDataCacheTest {
         initializeTestData();
         referenceDataCache.initReferenceData();
 
-        final CourtMapping expectedCourtMapping = getCourtMapping("CROWN_COURT");
+        final CourtMapping expectedCourtMapping = getCourtMapping(CROWN_COURT);
         when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
 
         assertThat(referenceDataCache.getCrownCourtLocationsCache(COURT_ID).get(0).getCourtSiteCode(), is(expectedCourtMapping.getCrestCourtSiteCode()));
@@ -106,7 +113,7 @@ public class ReferenceDataCacheTest {
         initializeTestData();
         referenceDataCache.initReferenceData();
 
-        final JsonObject courtRoomMappingJson = givenPayload("/mock-data/referencedata.query.cp-xhibit-courtroom-mappings.json");
+        final JsonObject courtRoomMappingJson = givenPayload(COURT_ROOM_MAPPINGS_PAYLOAD);
         final Optional<CourtRoomMappingsList> expectedCourtRoomMappingsList =  Optional.of(jsonObjectConverter.convert(courtRoomMappingJson, CourtRoomMappingsList.class));
 
         when(referenceDataLoader.getCourtRoomMappingsList(courtCentreId)).thenReturn(expectedCourtRoomMappingsList);
@@ -139,7 +146,7 @@ public class ReferenceDataCacheTest {
         referenceDataCache.initReferenceData();
 
 
-        final JsonObject courtRoomMappingJson = givenPayload("/mock-data/referencedata.query.cp-xhibit-courtroom-mappings.json");
+        final JsonObject courtRoomMappingJson = givenPayload(COURT_ROOM_MAPPINGS_PAYLOAD);
         final CourtRoomMappingsList courtRoomMappingsList = jsonObjectConverter.convert(courtRoomMappingJson, CourtRoomMappingsList.class);
 
         when(referenceDataLoader.getCourtRoomMappingsList(courtCentreId)).thenReturn(Optional.of(courtRoomMappingsList));
@@ -161,7 +168,7 @@ public class ReferenceDataCacheTest {
         initializeTestData();
         referenceDataCache.initReferenceData();
 
-        final JsonObject courtRoomMappingJson = givenPayload("/mock-data/referencedata.query.cp-xhibit-courtroom-mappings.json");
+        final JsonObject courtRoomMappingJson = givenPayload(COURT_ROOM_MAPPINGS_PAYLOAD);
         final CourtRoomMappingsList courtRoomMappingsList = jsonObjectConverter.convert(courtRoomMappingJson, CourtRoomMappingsList.class);
 
         when(referenceDataLoader.getCourtRoomMappingsList(courtCentreId)).thenReturn(Optional.of(courtRoomMappingsList));
@@ -214,13 +221,42 @@ public class ReferenceDataCacheTest {
         when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
 
         referenceDataCache.initReferenceData();
-        final List<CourtMapping> expectedCourtMappingList = asList(getCourtMapping("CROWN_COURT"));
+        final List<CourtMapping> expectedCourtMappingList = asList(getCourtMapping(CROWN_COURT));
         final Optional<List<CourtMapping>> actualCourtMappingList = referenceDataCache.getCrownCourtMappingsMapCache(COURT_CENTRE_ID);
 
         assertThat(actualCourtMappingList.isPresent(), is(true));
         assertThat(actualCourtMappingList.get().size(), is(expectedCourtMappingList.size()));
         assertThat(actualCourtMappingList.get().get(0).getId(), is(expectedCourtMappingList.get(0).getId()));
         assertThat(actualCourtMappingList.get().get(0).getOucode(), is(expectedCourtMappingList.get(0).getOucode()));
+    }
+
+    @Test
+    public void shouldLazyLoadCrownCourtMappingsWhenNotInStartupCache() {
+        final UUID manchesterCourtCentreId = fromString("e3e762ed-8271-3454-b59b-8a13f7cc8870");
+        final String manchesterOuCode = "C06MC00";
+        final CourtMapping manchesterCourtMapping = getManchesterCourtMapping();
+
+        organisationUnitList = Optional.of(new OrganisationUnitList(asList(
+                new OrganisationUnit.Builder()
+                        .withId(manchesterCourtCentreId)
+                        .withOucode(manchesterOuCode)
+                        .build())));
+
+        hearingTypesListTestData();
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(Optional.of(new CourtMappingsList(emptyList())));
+        when(referenceDataLoader.getXhibitCrownCourtMappings(manchesterCourtCentreId))
+                .thenReturn(Optional.of(new CourtMappingsList(asList(manchesterCourtMapping))));
+
+        referenceDataCache.initReferenceData();
+
+        final Optional<List<CourtMapping>> actualCourtMappingList =
+                referenceDataCache.getCrownCourtMappingsMapCache(manchesterCourtCentreId);
+
+        assertThat(actualCourtMappingList.isPresent(), is(true));
+        assertThat(actualCourtMappingList.get().get(0).getOucode(), is(manchesterOuCode));
+        assertThat(actualCourtMappingList.get().get(0).getCrestCourtId(), is("435"));
     }
 
     @Test
@@ -235,7 +271,7 @@ public class ReferenceDataCacheTest {
 
         referenceDataCache.initReferenceData();
 
-        final List<CourtMapping> expectedCourtMappingList = asList(getCourtMapping("MAGISTRATES_COURT"));
+        final List<CourtMapping> expectedCourtMappingList = asList(getCourtMapping(MAGISTRATES_COURT));
 
         final Optional<List<CourtMapping>> actualCourtMappingList = referenceDataCache.getMagsCourtMappingsMapCache(COURT_CENTRE_ID);
 
@@ -244,6 +280,410 @@ public class ReferenceDataCacheTest {
         assertThat(actualCourtMappingList.get().get(0).getId(), is(expectedCourtMappingList.get(0).getId()));
         assertThat(actualCourtMappingList.get().get(0).getOucode(), is(expectedCourtMappingList.get(0).getOucode()));
     }
+
+    @Test
+    public void shouldPopulateCpXhibitCourtMappingsMapCacheFromMagsQueryWhenMagsSucceeds() {
+
+        initializeTestData();
+
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(magsCourtMappingsList);
+
+        referenceDataCache.initReferenceData();
+
+        final CourtMapping magsMapping = getCourtMapping(MAGISTRATES_COURT);
+
+        final Optional<List<CourtMapping>> actualCourtMappingList = referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+
+        assertThat(actualCourtMappingList.isPresent(), is(true));
+        assertThat(actualCourtMappingList.get().size(), is(1));
+        assertThat(actualCourtMappingList.get().get(0).getCourtType(), is(magsMapping.getCourtType()));
+        assertThat(actualCourtMappingList.get().get(0).getOucode(), is(magsMapping.getOucode()));
+    }
+
+    @Test
+    public void shouldFallbackToCrownCourtMappingsWhenMagsReturnsEmpty() {
+
+        initializeTestData();
+
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(Optional.empty());
+        when(referenceDataLoader.getXhibitCrownCourtMappings(eq(COURT_CENTRE_ID))).thenReturn(crownCourtMappingsList);
+
+        referenceDataCache.initReferenceData();
+
+        final CourtMapping crownMapping = getCourtMapping(CROWN_COURT);
+
+        final Optional<List<CourtMapping>> actualCourtMappingList = referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+
+        assertThat(actualCourtMappingList.isPresent(), is(true));
+        assertThat(actualCourtMappingList.get().size(), is(1));
+        assertThat(actualCourtMappingList.get().get(0).getCourtType(), is(crownMapping.getCourtType()));
+    }
+
+    @Test
+    public void shouldReturnEmptyForGetCrownCourtMappingsWhenCourtCentreIdUnknown() {
+        initializeTestData();
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        referenceDataCache.initReferenceData();
+
+        assertThat(referenceDataCache.getCrownCourtMappingsMapCache(randomUUID()).isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldReturnEmptyForGetCrownCourtMappingsWhenOucodeNotInCrownCache() {
+        initializeTestData();
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(Optional.of(new CourtMappingsList(emptyList())));
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        referenceDataCache.initReferenceData();
+
+        assertThat(referenceDataCache.getCrownCourtMappingsMapCache(COURT_CENTRE_ID).isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldReturnEmptyForGetMagsCourtMappingsWhenCourtCentreIdUnknown() {
+        initializeTestData();
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        referenceDataCache.initReferenceData();
+
+        assertThat(referenceDataCache.getMagsCourtMappingsMapCache(randomUUID()).isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldReturnEmptyForGetMagsCourtMappingsWhenLoaderReturnsEmptyOptional() {
+        initializeTestData();
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(Optional.empty());
+        referenceDataCache.initReferenceData();
+
+        assertThat(referenceDataCache.getMagsCourtMappingsMapCache(COURT_CENTRE_ID).isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldReturnEmptyForGetMagsCourtMappingsWhenCpMappingListIsNull() {
+        initializeTestData();
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(Optional.of(new CourtMappingsList(null)));
+        referenceDataCache.initReferenceData();
+
+        assertThat(referenceDataCache.getMagsCourtMappingsMapCache(COURT_CENTRE_ID).isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldReturnPresentWithEmptyListForGetMagsWhenMagsReturnsEmptyCpList() {
+        initializeTestData();
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(Optional.of(new CourtMappingsList(emptyList())));
+        referenceDataCache.initReferenceData();
+
+        final Optional<List<CourtMapping>> actual = referenceDataCache.getMagsCourtMappingsMapCache(COURT_CENTRE_ID);
+        assertThat(actual.isPresent(), is(true));
+        assertThat(actual.get().isEmpty(), is(true));
+    }
+
+    @Test
+    public void shouldHitMagsLoaderOnlyOncePerOucodeWhenGetMagsCalledTwice() {
+        initializeTestData();
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(magsCourtMappingsList);
+        referenceDataCache.initReferenceData();
+
+        referenceDataCache.getMagsCourtMappingsMapCache(COURT_CENTRE_ID);
+        referenceDataCache.getMagsCourtMappingsMapCache(COURT_CENTRE_ID);
+
+        verify(referenceDataLoader, times(1)).getXhibitMagsCourtMappings(eq(OU_CODE));
+    }
+
+    @Test
+    public void shouldReturnEmptyForCpXhibitCourtMappingsWhenCourtCentreIdUnknown() {
+        initializeTestData();
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        referenceDataCache.initReferenceData();
+
+        assertThat(referenceDataCache.getCpXhibitCourtMappingsMapCache(randomUUID()).isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldFallbackCpXhibitToCrownWhenMagsReturnsEmptyCpMappingList() {
+        initializeTestData();
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(Optional.of(new CourtMappingsList(emptyList())));
+        when(referenceDataLoader.getXhibitCrownCourtMappings(eq(COURT_CENTRE_ID))).thenReturn(crownCourtMappingsList);
+        referenceDataCache.initReferenceData();
+
+        final CourtMapping crownMapping = getCourtMapping(CROWN_COURT);
+        final Optional<List<CourtMapping>> actual = referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+
+        assertThat(actual.isPresent(), is(true));
+        assertThat(actual.get().size(), is(1));
+        assertThat(actual.get().get(0).getCourtType(), is(crownMapping.getCourtType()));
+        verify(referenceDataLoader, times(1)).getXhibitCrownCourtMappings(eq(COURT_CENTRE_ID));
+    }
+
+    @Test
+    public void shouldReturnPresentEmptyListForCpXhibitWhenMagsAndCrownBothYieldNoMappings() {
+        initializeTestData();
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(Optional.of(new CourtMappingsList(emptyList())));
+        when(referenceDataLoader.getXhibitCrownCourtMappings(eq(COURT_CENTRE_ID))).thenReturn(Optional.of(new CourtMappingsList(emptyList())));
+        referenceDataCache.initReferenceData();
+
+        final Optional<List<CourtMapping>> actual = referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+
+        assertThat(actual.isPresent(), is(true));
+        assertThat(actual.get().isEmpty(), is(true));
+    }
+
+    @Test
+    public void shouldLazyCacheCpXhibitPerCourtCentreId() {
+        initializeTestData();
+        when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+        when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+        when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+        when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(magsCourtMappingsList);
+        referenceDataCache.initReferenceData();
+
+        referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+        referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+
+        verify(referenceDataLoader, times(1)).getXhibitMagsCourtMappings(eq(OU_CODE));
+        verify(referenceDataLoader, never()).getXhibitCrownCourtMappings(eq(COURT_CENTRE_ID));
+    }
+
+
+
+        /**
+         * When the mags endpoint returns a non-empty list, every CourtMapping field
+         * from the source must be carried over to the rebuilt mapping AND the
+         * courtType must be forced to "MAGISTRATES_COURT" regardless of whatever
+         * value the source had.
+         */
+        @Test
+        public void shouldCopyAllFieldsFromMagsMappingAndOverrideCourtTypeToMagistratesCourt() {
+            final UUID mappingId    = randomUUID();
+            final String oucode    = "C01BL00";
+            final String courtIdVal        = "432";
+            final String courtSiteId       = "433";
+            final String courtName         = "BLACKFRIARS CROWN";
+            final String welshCourtName    = "CORON BLACKFRIARS";
+            final String courtShortName    = "BLF";
+            final String courtSiteName     = "BLACKFRIARS SITE";
+            final String welshCourtSiteName = "SAFLE BLACKFRIARS";
+            final String welshCourtFullName = "LLYS Y GORON BLACKFRIARS";
+            final String courtSiteCode     = "B";
+
+            final CourtMapping sourceMapping = new CourtMapping.Builder()
+                    .withId(mappingId)
+                    .withOucode(oucode)
+                    .withCrestCourtId(courtIdVal)
+                    .withCrestCourtSiteId(courtSiteId)
+                    .withCrestCourtName(courtName)
+                    .withWelshCrestCourtName(welshCourtName)
+                    .withCrestCourtShortName(courtShortName)
+                    .withCrestCourtSiteName(courtSiteName)
+                    .withWelshCrestCourtSiteName(welshCourtSiteName)
+                    .withWelshCrestCourtFullName(welshCourtFullName)
+                    .withCrestCourtSiteCode(courtSiteCode)
+                    .withCourtType(CROWN_COURT)   // original type – must be overridden
+                    .build();
+
+            final CourtMappingsList magsList = new CourtMappingsList(asList(sourceMapping));
+
+            initializeTestData();
+            when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+            when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+            when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+            when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(Optional.of(magsList));
+            referenceDataCache.initReferenceData();
+
+            final Optional<List<CourtMapping>> result = referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+
+            assertThat(result.isPresent(), is(true));
+            assertThat(result.get(), hasSize(1));
+
+            final CourtMapping rebuilt = result.get().get(0);
+            assertThat(rebuilt.getId(),                 is(mappingId));
+            assertThat(rebuilt.getOucode(),             is(oucode));
+            assertThat(rebuilt.getCrestCourtId(),       is(courtIdVal));
+            assertThat(rebuilt.getCrestCourtSiteId(),   is(courtSiteId));
+            assertThat(rebuilt.getCrestCourtName(),     is(courtName));
+            assertThat(rebuilt.getWelshCrestCourtName(), is(welshCourtName));
+            assertThat(rebuilt.getCrestCourtShortName(), is(courtShortName));
+            assertThat(rebuilt.getCrestCourtSiteName(), is(courtSiteName));
+            assertThat(rebuilt.getWelshCrestCourtSiteName(), is(welshCourtSiteName));
+            assertThat(rebuilt.getWelshCrestCourtFullName(), is(welshCourtFullName));
+            assertThat(rebuilt.getCrestCourtSiteCode(), is(courtSiteCode));
+            // *** The key assertion: courtType must ALWAYS be MAGISTRATES_COURT ***
+            assertThat(rebuilt.getCourtType(), is(MAGISTRATES_COURT));
+        }
+
+        /**
+         * When mags returns multiple mappings, every entry must be rebuilt with
+         * MAGISTRATES_COURT courtType and the list size must match.
+         */
+        @Test
+        public void shouldRebuildAllMagsMappingsWithMagistratesCourtType() {
+            final CourtMapping mapping1 = new CourtMapping.Builder()
+                    .withId(randomUUID())
+                    .withOucode(OU_CODE)
+                    .withCrestCourtId("111")
+                    .withCourtType(CROWN_COURT)
+                    .build();
+            final CourtMapping mapping2 = new CourtMapping.Builder()
+                    .withId(randomUUID())
+                    .withOucode(OU_CODE)
+                    .withCrestCourtId("222")
+                    .withCourtType(CROWN_COURT)
+                    .build();
+
+            final CourtMappingsList magsList = new CourtMappingsList(asList(mapping1, mapping2));
+
+            initializeTestData();
+            when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+            when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+            when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+            when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(Optional.of(magsList));
+            referenceDataCache.initReferenceData();
+
+            final Optional<List<CourtMapping>> result = referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+
+            assertThat(result.isPresent(), is(true));
+            assertThat(result.get(), hasSize(2));
+            result.get().forEach(m -> assertThat(m.getCourtType(), is(MAGISTRATES_COURT)));
+            // Crown endpoint must never have been consulted
+            verify(referenceDataLoader, never()).getXhibitCrownCourtMappings(eq(COURT_CENTRE_ID));
+        }
+
+        /**
+         * When mags returns a CourtMappingsList whose inner list is null
+         * the filter step treats it as empty → fallback to crown.
+         */
+        @Test
+        public void shouldFallbackToCrownWhenMagsReturnsNullInnerList() {
+            initializeTestData();
+            when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+            when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+            when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+            // null inner list – getCpXhibitCourtMappings() returns null
+            when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE)))
+                    .thenReturn(Optional.of(new CourtMappingsList(null)));
+            when(referenceDataLoader.getXhibitCrownCourtMappings(eq(COURT_CENTRE_ID)))
+                    .thenReturn(crownCourtMappingsList);
+            referenceDataCache.initReferenceData();
+
+            final Optional<List<CourtMapping>> result = referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+
+            assertThat(result.isPresent(), is(true));
+            assertThat(result.get(), hasSize(1));
+            assertThat(result.get().get(0).getCourtType(), is(CROWN_COURT));
+            verify(referenceDataLoader, times(1)).getXhibitCrownCourtMappings(eq(COURT_CENTRE_ID));
+        }
+
+        /**
+         * When mags is absent (Optional.empty()) AND crown returns Optional.empty(),
+         * the result must be present with an empty list (not Optional.empty()).
+         */
+        @Test
+        public void shouldReturnPresentEmptyListWhenMagsAbsentAndCrownReturnsEmptyOptional() {
+            initializeTestData();
+            when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+            when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+            when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+            when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(Optional.empty());
+            when(referenceDataLoader.getXhibitCrownCourtMappings(eq(COURT_CENTRE_ID))).thenReturn(Optional.empty());
+            referenceDataCache.initReferenceData();
+
+            final Optional<List<CourtMapping>> result = referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+
+            assertThat(result.isPresent(), is(true));
+            assertThat(result.get().isEmpty(), is(true));
+        }
+
+        /**
+         * When mags is absent AND crown returns a CourtMappingsList with a null
+         * inner list, the filter drops it and the result must be an empty list.
+         */
+        @Test
+        public void shouldReturnPresentEmptyListWhenMagsAbsentAndCrownReturnsNullInnerList() {
+            initializeTestData();
+            when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+            when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+            when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+            when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(Optional.empty());
+            when(referenceDataLoader.getXhibitCrownCourtMappings(eq(COURT_CENTRE_ID)))
+                    .thenReturn(Optional.of(new CourtMappingsList(null)));
+            referenceDataCache.initReferenceData();
+
+            final Optional<List<CourtMapping>> result = referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+
+            assertThat(result.isPresent(), is(true));
+            assertThat(result.get().isEmpty(), is(true));
+        }
+
+        /**
+         * The resolved list is stored in the lazy cache: regardless of how many
+         * times getCpXhibitCourtMappingsMapCache is called, the mags loader must
+         * only be consulted once per court-centre.
+         */
+        @Test
+        public void shouldCallMagsLoaderOnlyOncePerCourtCentreIdOnRepeatedLookups() {
+            initializeTestData();
+            when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+            when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+            when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+            when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(magsCourtMappingsList);
+            referenceDataCache.initReferenceData();
+
+            // Call three times
+            referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+            referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+            referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+
+            verify(referenceDataLoader, times(1)).getXhibitMagsCourtMappings(eq(OU_CODE));
+            verify(referenceDataLoader, never()).getXhibitCrownCourtMappings(eq(COURT_CENTRE_ID));
+        }
+
+        /**
+         * When mags succeeds (non-empty list) the crown-by-COURT_CENTRE_ID endpoint
+         * must never be invoked at all.
+         */
+        @Test
+        public void shouldNeverCallCrownLoaderWhenMagsSucceeds() {
+            initializeTestData();
+            when(referenceDataLoader.getAllHearingTypesList()).thenReturn(hearingTypesList);
+            when(referenceDataLoader.getXhibitCrownCourtMappings()).thenReturn(crownCourtMappingsList);
+            when(referenceDataLoader.getOrganisationUnitList()).thenReturn(organisationUnitList);
+            when(referenceDataLoader.getXhibitMagsCourtMappings(eq(OU_CODE))).thenReturn(magsCourtMappingsList);
+            referenceDataCache.initReferenceData();
+
+            referenceDataCache.getCpXhibitCourtMappingsMapCache(COURT_CENTRE_ID);
+
+            verify(referenceDataLoader, never()).getXhibitCrownCourtMappings(eq(COURT_CENTRE_ID));
+        }
+
 
     @Test
     public void shouldPopulateJudiciariesCache() {
@@ -357,8 +797,21 @@ public class ReferenceDataCacheTest {
     }
 
     private void courtMappingsListTestData() {
-        crownCourtMappingsList = Optional.of(new CourtMappingsList(asList(getCourtMapping("CROWN_COURT"))));
-        magsCourtMappingsList = Optional.of(new CourtMappingsList(asList(getCourtMapping("MAGISTRATES_COURT"))));
+        crownCourtMappingsList = Optional.of(new CourtMappingsList(asList(getCourtMapping(CROWN_COURT))));
+        magsCourtMappingsList = Optional.of(new CourtMappingsList(asList(getCourtMapping(MAGISTRATES_COURT))));
+    }
+
+    private CourtMapping getManchesterCourtMapping() {
+        return new CourtMapping.Builder()
+                .withOucode("C06MC00")
+                .withCrestCourtId("435")
+                .withCrestCourtSiteId("435")
+                .withCrestCourtName("MANCHESTER")
+                .withCrestCourtSiteName("MANCHESTER")
+                .withCrestCourtShortName("MANCH")
+                .withCrestCourtSiteCode("A")
+                .withCourtType(CROWN_COURT)
+                .build();
     }
 
     private CourtMapping getCourtMapping(final String courtType) {
@@ -381,7 +834,7 @@ public class ReferenceDataCacheTest {
     }
 
     private JsonObject getPayloadForCourtRooms(String id) {
-        return Json.createObjectBuilder()
+        return JsonObjects.createObjectBuilder()
                 .add("id", id)
                 .add("oucode", "B01LY00")
                 .add("oucodeL3Name", "South Western (Lavender Hill)")

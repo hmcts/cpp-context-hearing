@@ -5,7 +5,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.OffenceFacts;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class OffenceFactsJPAMapper {

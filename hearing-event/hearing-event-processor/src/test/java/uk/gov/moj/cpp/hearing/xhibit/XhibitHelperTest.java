@@ -53,7 +53,7 @@ public class XhibitHelperTest {
     @Test
     public void shouldGetCrestCourtIdFromMagsCourtCacheWhenGetCrownCourtCacheThrowsAnException() {
         when(commonXhibitReferenceDataService.getCrownCourtDetails(any())).thenThrow(InvalidReferenceDataException.class);
-        when(commonXhibitReferenceDataService.getMagsCourtDetails(any())).thenReturn(courtLocation);
+        when(commonXhibitReferenceDataService.getCriminalCourtDetails(any())).thenReturn(courtLocation);
 
         final String crestCourtId = xhibitHelper.getCrestCourtId(courtCentreId);
         assertThat(crestCourtId, is("12345"));
@@ -62,7 +62,7 @@ public class XhibitHelperTest {
     @Test
     public void shouldThrowInvalidReferenceDataExceptionWhenCourtCenterIdIsNotAvailableInBothCourts() {
         when(commonXhibitReferenceDataService.getCrownCourtDetails(any())).thenThrow(InvalidReferenceDataException.class);
-        when(commonXhibitReferenceDataService.getMagsCourtDetails(any())).thenThrow(InvalidReferenceDataException.class);
+        when(commonXhibitReferenceDataService.getCriminalCourtDetails(any())).thenThrow(InvalidReferenceDataException.class);
 
         assertThrows(InvalidReferenceDataException.class, () -> xhibitHelper.getCrestCourtId(courtCentreId));
     }

@@ -1,9 +1,12 @@
 package uk.gov.moj.cpp.hearing.repository;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.core.courts.FundingType;
+import uk.gov.justice.services.test.utils.persistence.HibernateTestEntityManagerProvider;
 import uk.gov.moj.cpp.hearing.dto.DefendantSearch;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.AssociatedDefenceOrganisation;
@@ -14,49 +17,45 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
 
-import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 
-//TODO:remove ignore
-@RunWith(CdiTestRunner.class)
-public class DefendantRepositoryTest {
+class DefendantRepositoryTest {
 
-    @Inject
-    private DefendantRepository defendantRepository;
+    private static final String PERSISTENCE_UNIT = "hearing-test-persistence-unit";
+
+    @RegisterExtension
+    static HibernateTestEntityManagerProvider hibernateTestEntityManagerProvider =
+            new HibernateTestEntityManagerProvider(PERSISTENCE_UNIT);
 
     private static final UUID hearingId = UUID.randomUUID();
     private static final UUID id = UUID.randomUUID();
 
-  @After
-    public void tearDown() throws Exception {
-        List<Defendant> defendantList = defendantRepository.findAll();
-        defendantList.forEach(defendant -> defendantRepository.remove(defendant));
+    private DefendantRepository defendantRepository;
+
+    @BeforeEach
+    void openEntityManagerAndCreateRepository() {
+        defendantRepository = new DefendantRepository();
+        hibernateTestEntityManagerProvider.injectEntityManagerInto(defendantRepository);
     }
 
     @Test
-    public void shouldPersistDefendant() {
+    void shouldPersistDefendant() {
         final Defendant defendant = buildDefendant();
 
         defendantRepository.save(defendant);
         final Defendant actual = defendantRepository.findBy(new HearingSnapshotKey(id, hearingId));
 
         assertThat(actual, notNullValue());
-
     }
 
     @Test
-    public void testDefendantDetailsForSearching() {
-
+    void testDefendantDetailsForSearching() {
         final Defendant defendant1 = buildDefendant();
         final Defendant defendant2 = buildDefendant();
         defendant2.getId().setId(UUID.randomUUID());
@@ -69,11 +68,10 @@ public class DefendantRepositoryTest {
         DefendantSearch defendantDetailsForSearching = defendantRepository.getDefendantDetailsForSearching(defendant1.getId().getId());
 
         assertThat(defendantDetailsForSearching, notNullValue());
-
     }
 
     @Test
-    public void testDuplicateDefendantDetailsForSearching() {
+    void testDuplicateDefendantDetailsForSearching() {
         final Defendant defendant = buildDefendant();
         final Defendant defendantDupli = buildDefendant();
         defendantDupli.getId().setHearingId(UUID.randomUUID());
@@ -85,13 +83,11 @@ public class DefendantRepositoryTest {
         DefendantSearch defendantDetailsForSearching = defendantRepository.getDefendantDetailsForSearching(defendant.getId().getId());
 
         assertThat(defendantDetailsForSearching, notNullValue());
-
     }
 
-
-    @Test(expected = NoResultException.class)
-    public void testDefendantDetailsForSearchingNoResultFound() {
-        defendantRepository.getDefendantDetailsForSearching(UUID.randomUUID());
+    @Test
+    void testDefendantDetailsForSearchingNoResultFound() {
+        assertThat(defendantRepository.getDefendantDetailsForSearching(UUID.randomUUID()), is(nullValue()));
     }
 
     private Defendant buildDefendant() {
@@ -128,7 +124,6 @@ public class DefendantRepositoryTest {
         organisation.setContact(contact);
         return organisation;
     }
-
 
     private AssociatedDefenceOrganisation buildAssociatedDefenceOrganisation() {
         final AssociatedDefenceOrganisation associatedDefenceOrganisation = new AssociatedDefenceOrganisation();

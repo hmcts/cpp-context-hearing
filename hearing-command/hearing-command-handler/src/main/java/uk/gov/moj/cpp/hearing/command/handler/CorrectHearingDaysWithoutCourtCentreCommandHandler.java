@@ -13,7 +13,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrecte
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 @ServiceComponent(COMMAND_HANDLER)
 @SuppressWarnings("squid:CallToDeprecatedMethod")

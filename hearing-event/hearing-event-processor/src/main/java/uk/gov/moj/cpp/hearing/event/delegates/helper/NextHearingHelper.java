@@ -81,7 +81,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;

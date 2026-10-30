@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.listing.common.xhibit;
 
 import uk.gov.justice.services.common.configuration.Value;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @SuppressWarnings({"java:S2068", "squid:S2068"})
 public class XhibitSessionConnectionParameters {

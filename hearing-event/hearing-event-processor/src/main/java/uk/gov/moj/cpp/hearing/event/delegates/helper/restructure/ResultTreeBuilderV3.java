@@ -56,7 +56,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @SuppressWarnings("pmd:NullAssignment")
 public class ResultTreeBuilderV3 {
@@ -222,8 +222,7 @@ public class ResultTreeBuilderV3 {
                 .withPreserveActiveOrder(getBooleanValue(resultDefinition.getPreserveActiveOrder(), false))
                 .withCanExtendActiveOrder(getBooleanValue(resultDefinition.getCanExtendActiveOrder(), false))
                 .withCommittedToCC(getBooleanValue(resultDefinition.getCommittedToCC(), false))
-                .withSentToCC(getBooleanValue(resultDefinition.getSentToCC(), false))
-                .withIsDeemedServed(resultDefinition.getIsDeemedServed());
+                .withSentToCC(getBooleanValue(resultDefinition.getSentToCC(), false));
         if(resultTextConfHelper.isOldResultDefinition(resultLine.getOrderedDate())) {
             judicialResult.withResultText(ResultTextHelperV3.getResultText(resultDefinition, resultLine));
         }

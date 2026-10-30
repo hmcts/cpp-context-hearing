@@ -23,6 +23,9 @@ import org.slf4j.Logger;
 @ExtendWith(MockitoExtension.class)
 public class XhibitSessionTest {
 
+    private static final String FILENAME = "filename";
+    private static final String OUTBOUND_FILE_URL = "http://outbound.com/filename";
+
     @Mock
     private Sardine client;
 
@@ -49,32 +52,32 @@ public class XhibitSessionTest {
     @Test
     public void shouldPutFileToOutboundUrlOnArchive() throws Exception {
 
-        final String filename = "filename";
+        final String filename = FILENAME;
         xhibitSession.exportFile(filename, fileContents);
 
-        verify(client).put("http://outbound.com/filename", fileContents);
+        verify(client).put(OUTBOUND_FILE_URL, fileContents);
     }
 
     @Test
     public void shouldHandleTrailingSlashWhenPuttingFileToOutboundUrlOnArchive() throws Exception {
 
-        final String filename = "filename";
+        final String filename = FILENAME;
         xhibitSession.exportFile(filename, fileContents);
 
-        verify(client).put("http://outbound.com/filename", fileContents);
+        verify(client).put(OUTBOUND_FILE_URL, fileContents);
     }
 
     @Test
     public void shouldThrowAExportToLibraFailedExceptionIfExportingFileThrowsAnHttpResponseException() throws Exception {
 
         final HttpResponseException httpResponseException = new HttpResponseException(404, "Ooops");
-        final String filename = "filename";
+        final String filename = FILENAME;
 
         final String expectedMessage = "CPF01: Failed to put file 'filename' " +
                 "to 'http://outbound.com/filename'. " +
                 "Response status: 404";
 
-        doThrow(httpResponseException).when(client).put("http://outbound.com/filename", fileContents);
+        doThrow(httpResponseException).when(client).put(OUTBOUND_FILE_URL, fileContents);
 
         try {
             xhibitSessionSpy.exportFile(filename, fileContents);
@@ -91,11 +94,11 @@ public class XhibitSessionTest {
     public void shouldThrowAExportToLibraFailedExceptionIfExportingFileThrowsAnIOException() throws Exception {
 
         final IOException ioException = new IOException("Ooops");
-        final String filename = "filename";
+        final String filename = FILENAME;
 
         final String expectedMessage = "CPF01: Failed to put file 'filename' to 'http://outbound.com/filename'";
 
-        doThrow(ioException).when(client).put("http://outbound.com/filename", fileContents);
+        doThrow(ioException).when(client).put(OUTBOUND_FILE_URL, fileContents);
 
         try {
             xhibitSessionSpy.exportFile(filename, fileContents);

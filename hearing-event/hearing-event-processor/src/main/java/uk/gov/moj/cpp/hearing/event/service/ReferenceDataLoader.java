@@ -14,8 +14,8 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
+import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 
 public class ReferenceDataLoader {
 

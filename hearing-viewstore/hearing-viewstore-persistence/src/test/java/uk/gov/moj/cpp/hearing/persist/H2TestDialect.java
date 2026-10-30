@@ -18,8 +18,11 @@ import org.hibernate.dialect.HSQLDialect;
  */
 public class H2TestDialect extends HSQLDialect {
 
-    public H2TestDialect() {
-        super();
-        registerColumnType(Types.BINARY, "uuid");
+    @Override
+    protected String columnType(final int sqlTypeCode) {
+        if (sqlTypeCode == Types.BINARY) {
+            return "uuid";
+        }
+        return super.columnType(sqlTypeCode);
     }
 }

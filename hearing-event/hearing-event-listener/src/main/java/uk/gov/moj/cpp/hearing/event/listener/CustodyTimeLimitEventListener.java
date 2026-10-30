@@ -15,7 +15,7 @@ import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import java.util.UUID;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @ServiceComponent(EVENT_LISTENER)
 public class CustodyTimeLimitEventListener {

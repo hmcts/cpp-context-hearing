@@ -6,7 +6,7 @@ import static io.restassured.RestAssured.given;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
-import static javax.ws.rs.core.Response.Status.OK;
+import static jakarta.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -33,8 +33,8 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;

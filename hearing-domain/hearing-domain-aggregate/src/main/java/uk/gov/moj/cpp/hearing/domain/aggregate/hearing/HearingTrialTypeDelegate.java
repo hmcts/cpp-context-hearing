@@ -50,7 +50,6 @@ public class HearingTrialTypeDelegate implements Serializable {
                     .withCode(hearingTrialType.getCode())
                     .withDescription(hearingTrialType.getDescription())
                     .withType(hearingTrialType.getType())
-                    .withCrackedIneffectiveSubReasonId(hearingTrialType.getCrackedIneffectiveSubReasonId())
                     .build());
             this.momento.getHearing().setIsVacatedTrial(false);
             this.momento.getHearing().setIsEffectiveTrial(null);

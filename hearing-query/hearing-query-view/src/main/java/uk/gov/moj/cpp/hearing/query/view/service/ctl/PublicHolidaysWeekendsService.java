@@ -10,7 +10,7 @@ import uk.gov.moj.cpp.hearing.query.view.service.ctl.model.PublicHoliday;
 import java.time.LocalDate;
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class PublicHolidaysWeekendsService {
     private static final String ENGLAND_AND_WALES_DIVISION = "england-and-wales";

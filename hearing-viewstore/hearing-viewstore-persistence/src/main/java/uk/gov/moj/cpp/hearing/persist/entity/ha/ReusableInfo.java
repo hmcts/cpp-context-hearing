@@ -3,22 +3,17 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.vladmihalcea.hibernate.type.json.JsonNodeBinaryType;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "ha_reusable_info")
-@TypeDef(
-        name = "jsonb-node",
-        typeClass = JsonNodeBinaryType.class
-)
 public class ReusableInfo {
 
     @Id
@@ -26,7 +21,7 @@ public class ReusableInfo {
     private UUID masterDefendantId;
 
     @Column(name = "payload", columnDefinition = "jsonb")
-    @Type(type = "jsonb-node")
+    @JdbcTypeCode(SqlTypes.JSON)
     private JsonNode payload;
 
     @Column(name = "last_updated_dt")

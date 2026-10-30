@@ -14,7 +14,7 @@ import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
 import java.text.MessageFormat;
 import java.util.UUID;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 public class ProgressionStub {
 

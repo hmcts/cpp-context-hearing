@@ -13,7 +13,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.hearing.details.RecordNextHearingDayUpdatedCommand;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @SuppressWarnings("squid:S3655")
 @ServiceComponent(EVENT_PROCESSOR)

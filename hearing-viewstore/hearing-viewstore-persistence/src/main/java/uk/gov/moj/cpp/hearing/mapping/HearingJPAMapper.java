@@ -4,8 +4,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static org.apache.deltaspike.core.util.CollectionUtils.isEmpty;
 import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
 
 import uk.gov.justice.core.courts.ApplicationStatus;
@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @SuppressWarnings({"squid:S00107", "squid:S3655", "squid:CommentedOutCodeLine", "squid:S1172"})
 @ApplicationScoped

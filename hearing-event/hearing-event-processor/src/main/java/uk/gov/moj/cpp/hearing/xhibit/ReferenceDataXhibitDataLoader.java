@@ -15,8 +15,8 @@ import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 import uk.gov.moj.cpp.hearing.common.exception.ReferenceDataNotFoundException;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @SuppressWarnings("squid:S1168")
 @ApplicationScoped

@@ -10,7 +10,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.UUID;
 
 import static java.util.UUID.fromString;

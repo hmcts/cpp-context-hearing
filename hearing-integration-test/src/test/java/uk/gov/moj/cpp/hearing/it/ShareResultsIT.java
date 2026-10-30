@@ -10,7 +10,9 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static javax.ws.rs.core.Response.Status.OK;
+import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static jakarta.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -193,9 +195,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import javax.jms.MessageConsumer;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import jakarta.jms.MessageConsumer;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 import io.restassured.path.json.JsonPath;
 import org.apache.commons.lang3.tuple.Pair;
@@ -696,7 +699,7 @@ public class ShareResultsIT extends AbstractIT {
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
-                                .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
+                                .with(Hearing::getCrackedIneffectiveTrial, is(publicEventShapeOf(expectedTrialType)))
                                 .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                         .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
                                                 .with(Defendant::getOffences, first(isBean(Offence.class)
@@ -739,7 +742,7 @@ public class ShareResultsIT extends AbstractIT {
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
-                                .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
+                                .with(Hearing::getCrackedIneffectiveTrial, is(publicEventShapeOf(expectedTrialType)))
                                 .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                         .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
                                                 .with(Defendant::getOffences, first(isBean(Offence.class)
@@ -808,7 +811,7 @@ public class ShareResultsIT extends AbstractIT {
                 .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
                         .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
-                                .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
+                                .with(Hearing::getCrackedIneffectiveTrial, is(publicEventShapeOf(expectedTrialType)))
                                 .with(Hearing::getDefendantAttendance, first(isBean(DefendantAttendance.class)
                                         .with(DefendantAttendance::getAttendanceDays, first(isBean(AttendanceDay.class)
                                                 .with(AttendanceDay::getAttendanceType, is(AttendanceType.IN_PERSON))))))
@@ -2591,7 +2594,14 @@ public class ShareResultsIT extends AbstractIT {
     private CrackedIneffectiveTrial setCrackedIneffectiveTrial(final InitiateHearingCommandHelper hearingOne, final UpdatePleaCommandHelper pleaOne) {
         final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = INEFFECTIVE_TRIAL_TYPE;
         final UUID crackedIneffectiveSubReasonId = randomUUID();
-        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveSubReasonId, crackedIneffectiveVacatedTrialType.getDate(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
+        CrackedIneffectiveTrial expectedTrialType = CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                .withCode(crackedIneffectiveVacatedTrialType.getReasonCode())
+                .withCrackedIneffectiveSubReasonId(crackedIneffectiveSubReasonId)
+                .withDate(crackedIneffectiveVacatedTrialType.getDate())
+                .withDescription(crackedIneffectiveVacatedTrialType.getReasonFullDescription())
+                .withId(crackedIneffectiveVacatedTrialType.getId())
+                .withType(crackedIneffectiveVacatedTrialType.getTrialType())
+                .build();
 
         TrialType addTrialType = TrialType.builder()
                 .withHearingId(hearingOne.getHearingId())
@@ -2653,7 +2663,8 @@ public class ShareResultsIT extends AbstractIT {
         final PersonDefendant curPd = currentDefendant.getPersonDefendant();
         final Person cpd = curPd.getPersonDetails();
         Person person = new Person(cpd.getAdditionalNationalityCode(), cpd.getAdditionalNationalityDescription(), cpd.getAdditionalNationalityId(), cpd.getAddress(), cpd.getContact(), cpd.getDateOfBirth(),
-                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), firstName, cpd.getGender(), cpd.getHearingLanguageNeeds(), cpd.getInterpreterLanguageNeeds(), cpd.getIsAddressConfidential(),
+                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), firstName, cpd.getGender(), cpd.getHearingLanguageNeeds(), cpd.getInterpreterLanguageNeeds(),
+                cpd.getIsAddressConfidential(),
                 cpd.getLastName(), cpd.getMiddleName(), cpd.getNationalInsuranceNumber(), cpd.getNationalityCode(), cpd.getNationalityDescription(), cpd.getNationalityId(),
                 cpd.getOccupation(), cpd.getOccupationCode(), cpd.getPersonMarkers(), cpd.getSpecificRequirements(), cpd.getTitle());
 
@@ -2676,7 +2687,8 @@ public class ShareResultsIT extends AbstractIT {
         final PersonDefendant curPd = currentDefendant.getPersonDefendant();
         final Person cpd = curPd.getPersonDetails();
         Person person = new Person(cpd.getAdditionalNationalityCode(), cpd.getAdditionalNationalityDescription(), cpd.getAdditionalNationalityId(), cpd.getAddress(), cpd.getContact(), cpd.getDateOfBirth(),
-                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), cpd.getFirstName(), cpd.getGender(), cpd.getHearingLanguageNeeds(), cpd.getInterpreterLanguageNeeds(),cpd.getIsAddressConfidential(),
+                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), cpd.getFirstName(), cpd.getGender(), cpd.getHearingLanguageNeeds(), cpd.getInterpreterLanguageNeeds(),
+                cpd.getIsAddressConfidential(),
                 cpd.getLastName(), cpd.getMiddleName(), cpd.getNationalInsuranceNumber(), cpd.getNationalityCode(), cpd.getNationalityDescription(), cpd.getNationalityId(),
                 cpd.getOccupation(), cpd.getOccupationCode(), cpd.getPersonMarkers(), cpd.getSpecificRequirements(), cpd.getTitle());
 
@@ -2760,7 +2772,7 @@ public class ShareResultsIT extends AbstractIT {
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
-                                .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
+                                .with(Hearing::getCrackedIneffectiveTrial, is(publicEventShapeOf(expectedTrialType)))
                                 .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                         .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
                                                 .with(Defendant::getOffences, first(isBean(Offence.class)
@@ -3210,7 +3222,14 @@ public class ShareResultsIT extends AbstractIT {
     private CrackedIneffectiveTrial getExpectedTrialType(final InitiateHearingCommandHelper hearingOne, final UpdatePleaCommandHelper pleaOne, final LocalDate convictionDateToUse) {
         final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = INEFFECTIVE_TRIAL_TYPE;
         final UUID crackedIneffectiveSubReasonId = randomUUID();
-        final CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveSubReasonId, crackedIneffectiveVacatedTrialType.getDate(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
+        final CrackedIneffectiveTrial expectedTrialType = CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                .withCode(crackedIneffectiveVacatedTrialType.getReasonCode())
+                .withCrackedIneffectiveSubReasonId(crackedIneffectiveSubReasonId)
+                .withDate(crackedIneffectiveVacatedTrialType.getDate())
+                .withDescription(crackedIneffectiveVacatedTrialType.getReasonFullDescription())
+                .withId(crackedIneffectiveVacatedTrialType.getId())
+                .withType(crackedIneffectiveVacatedTrialType.getTrialType())
+                .build();
 
         final TrialType addTrialType = TrialType.builder()
                 .withHearingId(hearingOne.getHearingId())
@@ -3260,7 +3279,7 @@ public class ShareResultsIT extends AbstractIT {
                                 .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))
                                 .with(CourtCentre::getName, is(hearing.getCourtCentre().getName())))
                         .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
-                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneOffset.UTC)))
                                 .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
                                 .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
                         .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(prosecutionCases))
@@ -3560,6 +3579,20 @@ public class ShareResultsIT extends AbstractIT {
 
     private List<Offence> getOffences(final InitiateHearingCommand initiateHearingCommand) {
         return initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences();
+    }
+
+    /**
+     * The query API returns crackedIneffectiveSubReasonId, but public.hearing.resulted does not carry it.
+     * The same expectation object drives both, so strip the sub-reason when matching the public event.
+     */
+    private CrackedIneffectiveTrial publicEventShapeOf(final CrackedIneffectiveTrial trialType) {
+        return CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                .withCode(trialType.getCode())
+                .withDate(trialType.getDate())
+                .withDescription(trialType.getDescription())
+                .withId(trialType.getId())
+                .withType(trialType.getType())
+                .build();
     }
 
     private void assertHearingHasSharedResults(final CrackedIneffectiveTrial expectedTrialType, final Hearing hearing) {

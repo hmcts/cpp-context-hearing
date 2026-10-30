@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 
+import uk.gov.justice.services.test.utils.persistence.HibernateTestEntityManagerProvider;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
@@ -15,18 +16,19 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 import java.util.List;
 import java.util.UUID;
 
-import javax.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+class NowsRepositoryTest {
 
-@SuppressWarnings("CdiInjectionPointsInspection")
-@RunWith(CdiTestRunner.class)
-public class NowsRepositoryTest {
-
+    private static final String PERSISTENCE_UNIT = "hearing-test-persistence-unit";
     private static final String language = "wales";
+
+    @RegisterExtension
+    static HibernateTestEntityManagerProvider hibernateTestEntityManagerProvider =
+            new HibernateTestEntityManagerProvider(PERSISTENCE_UNIT);
+
     UUID id;
     UUID hearingId;
     UUID defendantId;
@@ -35,11 +37,13 @@ public class NowsRepositoryTest {
     UUID sharedResultId;
     private NowsMaterial nowsMaterial;
 
-    @Inject
     private NowsRepository nowsRepository;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void openEntityManagerAndCreateRepository() {
+        nowsRepository = new NowsRepository();
+        hibernateTestEntityManagerProvider.injectEntityManagerInto(nowsRepository);
+
         id = randomUUID();
         hearingId = randomUUID();
         defendantId = randomUUID();
@@ -68,13 +72,13 @@ public class NowsRepositoryTest {
         nowsResult.setNowsMaterial(nowsMaterial);
         nowsMaterial.getNowResult().add(nowsResult);
 
-        this.nowsRepository.save(nows);
+        nowsRepository.save(nows);
     }
 
 
     @Test
-    public void findAllTest() {
-        final Nows nows = this.nowsRepository.findAll().stream().filter(n -> n.getId().equals(id)).findFirst().get();
+    void findAllTest() {
+        final Nows nows = nowsRepository.findAll().stream().filter(n -> n.getId().equals(id)).findFirst().get();
         assertThat(nows.getDefendantId(), is(this.defendantId));
         assertThat(nows.getHearingId(), is(this.hearingId));
         assertThat(nows.getNowsTypeId(), is(this.nowsTypeId));
@@ -86,13 +90,11 @@ public class NowsRepositoryTest {
 
         assertThat(nows.getMaterial().iterator().next().getNowResult().iterator().next().getSharedResultId(), is(sharedResultId));
         assertThat(nows.getMaterial().iterator().next().getNowResult().iterator().next().getSequence(), is(1));
-
-
     }
 
     @Test
-    public void findByHearingIdTest() {
-        final List<Nows> nows = this.nowsRepository.findByHearingId(hearingId);
+    void findByHearingIdTest() {
+        final List<Nows> nows = nowsRepository.findByHearingId(hearingId);
         assertThat(nows.get(0).getId(), is(this.id));
         assertThat(nows.get(0).getDefendantId(), is(this.defendantId));
         assertThat(nows.get(0).getHearingId(), is(this.hearingId));
@@ -106,5 +108,4 @@ public class NowsRepositoryTest {
         assertThat(nows.get(0).getMaterial().iterator().next().getNowResult().iterator().next().getSharedResultId(), is(sharedResultId));
         assertThat(nows.get(0).getMaterial().iterator().next().getNowResult().iterator().next().getSequence(), is(1));
     }
-
 }

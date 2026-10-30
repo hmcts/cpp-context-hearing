@@ -2,10 +2,12 @@ package uk.gov.moj.cpp.hearing.repository;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
+import uk.gov.justice.services.test.utils.persistence.HibernateTestEntityManagerProvider;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
 
@@ -15,31 +17,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+class DocumentRepositoryTest {
 
-//TODO: remove ignore
-@RunWith(CdiTestRunner.class)
-public class DocumentRepositoryTest {
+    private static final String PERSISTENCE_UNIT = "hearing-test-persistence-unit";
 
-    @Inject
+    @RegisterExtension
+    static HibernateTestEntityManagerProvider hibernateTestEntityManagerProvider =
+            new HibernateTestEntityManagerProvider(PERSISTENCE_UNIT);
+
     private DocumentRepository documentRepository;
 
-    @After
-    public void tearDown() {
-
-        final List<Document> documents = documentRepository.findAll();
-
-        documents.forEach(document -> documentRepository.remove(document));
+    @BeforeEach
+    void openEntityManagerAndCreateRepository() {
+        documentRepository = new DocumentRepository();
+        hibernateTestEntityManagerProvider.injectEntityManagerInto(documentRepository);
     }
 
     @Test
-    public void testPersistDocument() {
+    void shouldPersistDocument() {
 
         final Document document = buildDocument();
 
@@ -47,11 +46,11 @@ public class DocumentRepositoryTest {
 
         final Document expected = documentRepository.findBy(document.getId());
 
-        assertEquals(document.getId(), expected.getId());
+        assertThat(expected.getId(), is(document.getId()));
     }
 
     @Test
-    public void findAllByOrderByStartDateAsc() {
+    void shouldFindAllByOrderByStartDateAsc() {
 
         final Document document1 = new Document();
         document1.setId(randomUUID());
@@ -79,8 +78,7 @@ public class DocumentRepositoryTest {
 
         final List<Document> results = documentRepository.findAllByOrderByStartDateAsc();
 
-        assertEquals(3, results.size());
-
+        assertThat(results.size(), is(3));
     }
 
     private Document buildDocument() {

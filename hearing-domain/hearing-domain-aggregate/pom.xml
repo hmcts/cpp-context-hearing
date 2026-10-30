@@ -3,14 +3,14 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-domain</artifactId>
-        <version>17.104.210-SNAPSHOT</version>
+        <version>25.104.10-M4-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-domain-aggregate</artifactId>
     <dependencies>
 
         <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
             <scope>provided</scope>
         </dependency>
 

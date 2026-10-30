@@ -8,8 +8,8 @@ import uk.gov.moj.cpp.hearing.listing.domain.xhibit.CourtLocation;
 
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,9 @@ public class XhibitHelper {
                 LOGGER.debug("Unable to find crest court center id {} in crown court reference cache so trying " +
                         "in mags court cache. Exception message is {}", courtCentreId, referenceDataException);
             }
-            courtDetails = commonXhibitReferenceDataService.getMagsCourtDetails(courtCentreUUID);
+            // listing-common refactored getMagsCourtDetails(UUID) -> getCriminalCourtDetails(UUID) (mags/committing-court
+            // lookup via the cp-xhibit court-mappings cache); same InvalidReferenceDataException + CourtLocation contract.
+            courtDetails = commonXhibitReferenceDataService.getCriminalCourtDetails(courtCentreUUID);
             return courtDetails.getCrestCourtId();
         }
     }

@@ -2,8 +2,8 @@ package uk.gov.moj.cpp.hearing.listing.common.xhibit;
 
 import java.net.URL;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import com.github.sardine.Sardine;
 import org.slf4j.Logger;

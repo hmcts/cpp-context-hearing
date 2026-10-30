@@ -8,8 +8,8 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRo
 
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
 

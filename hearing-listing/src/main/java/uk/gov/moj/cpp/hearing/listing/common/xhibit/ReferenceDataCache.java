@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.listing.common.xhibit;
 import uk.gov.moj.cpp.hearing.listing.common.xhibit.exception.InvalidReferenceDataException;
 import uk.gov.moj.cpp.hearing.listing.common.xhibit.model.CourtCentreRoomKey;
 import uk.gov.moj.cpp.hearing.listing.domain.referencedata.CourtMapping;
+import uk.gov.moj.cpp.hearing.listing.domain.referencedata.CourtMappingsList;
 import uk.gov.moj.cpp.hearing.listing.domain.referencedata.CourtRoomMapping;
 import uk.gov.moj.cpp.hearing.listing.domain.referencedata.CourtRoomMappingsList;
 import uk.gov.moj.cpp.hearing.listing.domain.referencedata.HearingType;
@@ -12,6 +13,8 @@ import uk.gov.moj.cpp.hearing.listing.domain.referencedata.OrganisationUnit;
 import uk.gov.moj.cpp.hearing.listing.domain.referencedata.OrganisationUnitList;
 import uk.gov.moj.cpp.hearing.listing.domain.xhibit.CourtLocation;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,11 +22,12 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.json.JsonObject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 
 @ApplicationScoped
 public class ReferenceDataCache {
@@ -36,6 +40,15 @@ public class ReferenceDataCache {
     private final Map<String, List<CourtMapping>> crownCourtMappingListMapCache = new ConcurrentHashMap<>();
 
     private final Map<String, List<CourtMapping>> magsCourtMappingListMapCache = new ConcurrentHashMap<>();
+
+    private static final String MAGISTRATES_COURT_TYPE = "MAGISTRATES_COURT";
+
+    /**
+     * CP Xhibit court mappings for committing court (lazy per court centre): mags from
+     * {@code referencedata.query.cp-xhibit-mags-court-mapping}, else
+     * {@code referencedata.query.cp-xhibit-court-mappings} by court centre id.
+     */
+    private final Map<UUID, List<CourtMapping>> lazyCpXhibitCourtMappingsByCourtCentreId = new ConcurrentHashMap<>();
 
     private final Map<UUID, HearingType> hearingTypesMapCache = new ConcurrentHashMap<>();
 
@@ -67,9 +80,23 @@ public class ReferenceDataCache {
 
     public Optional<List<CourtMapping>> getCrownCourtMappingsMapCache(final UUID courtCentreId) {
         OrganisationUnit organisationUnit = organisationUnitMapByIdCache.get(courtCentreId);
-        return organisationUnit == null
-                ? Optional.empty()
-                : Optional.ofNullable(crownCourtMappingListMapCache.get(organisationUnit.getOucode()));
+        if (organisationUnit == null) {
+            return Optional.empty();
+        }
+
+        final String oucode = organisationUnit.getOucode();
+        final List<CourtMapping> cachedMappings = crownCourtMappingListMapCache.get(oucode);
+        if (cachedMappings != null && !cachedMappings.isEmpty()) {
+            return Optional.of(cachedMappings);
+        }
+
+        return referenceDataLoader.getXhibitCrownCourtMappings(courtCentreId)
+                .map(CourtMappingsList::getCpXhibitCourtMappings)
+                .filter(mappings -> !mappings.isEmpty())
+                .map(mappings -> {
+                    cacheCrownCourtMappings(mappings);
+                    return crownCourtMappingListMapCache.get(oucode);
+                });
     }
 
     public Optional<List<CourtMapping>> getMagsCourtMappingsMapCache(final UUID courtCentreId) {
@@ -87,6 +114,60 @@ public class ReferenceDataCache {
                                 .map(m -> m.getCpXhibitCourtMappings())
                                 .orElse(null))
         );
+    }
+
+    /**
+     * Xhibit court mappings for committing court: magistrates via
+     * {@code referencedata.query.cp-xhibit-mags-court-mapping} (including HTTP 200 with empty {@code {}}),
+     * then if absent or empty — {@code referencedata.query.cp-xhibit-court-mappings} by court centre id.
+     */
+    public Optional<List<CourtMapping>> getCpXhibitCourtMappingsMapCache(final UUID courtCentreId) {
+        if (organisationUnitMapByIdCache.get(courtCentreId) == null) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                lazyCpXhibitCourtMappingsByCourtCentreId.computeIfAbsent(courtCentreId, this::resolveCpXhibitCourtMappingsWithMagsFirst)
+        );
+    }
+
+    private List<CourtMapping> resolveCpXhibitCourtMappingsWithMagsFirst(final UUID courtCentreId) {
+        final OrganisationUnit organisationUnit = organisationUnitMapByIdCache.get(courtCentreId);
+        if (organisationUnit == null) {
+            return Collections.emptyList();
+        }
+        final String oucode = organisationUnit.getOucode();
+
+        final List<CourtMapping> magsMappings = referenceDataLoader.getXhibitMagsCourtMappings(oucode)
+                .map(CourtMappingsList::getCpXhibitCourtMappings)
+                .filter(list -> list != null && !list.isEmpty())
+                .orElse(Collections.emptyList());
+
+        if (!magsMappings.isEmpty()) {
+            List<CourtMapping> updatedMappings = magsMappings.stream()
+                    .map(mapping -> new CourtMapping.Builder()
+                            .withId(mapping.getId())
+                            .withOucode(mapping.getOucode())
+                            .withCrestCourtId(mapping.getCrestCourtId())
+                            .withCrestCourtSiteId(mapping.getCrestCourtSiteId())
+                            .withCrestCourtName(mapping.getCrestCourtName())
+                            .withWelshCrestCourtName(mapping.getWelshCrestCourtName())
+                            .withCrestCourtShortName(mapping.getCrestCourtShortName())
+                            .withWelshCrestCourtShortName(mapping.getWelshCrestCourtShortName())
+                            .withCrestCourtSiteName(mapping.getCrestCourtSiteName())
+                            .withWelshCrestCourtSiteName(mapping.getWelshCrestCourtSiteName())
+                            .withWelshCrestCourtFullName(mapping.getWelshCrestCourtFullName())
+                            .withCrestCourtSiteCode(mapping.getCrestCourtSiteCode())
+                            .withCourtType(MAGISTRATES_COURT_TYPE)
+                            .build())
+                    .collect(Collectors.toList());
+            return new ArrayList<>(updatedMappings);
+        }
+
+
+        return referenceDataLoader.getXhibitCrownCourtMappings(courtCentreId)
+                .map(CourtMappingsList::getCpXhibitCourtMappings)
+                .filter(list -> list != null && !list.isEmpty())
+                .orElse(Collections.emptyList());
     }
 
     public Optional<Judiciary> getJudiciariesMapCache(final UUID judiciaryId) {
@@ -165,16 +246,20 @@ public class ReferenceDataCache {
     }
 
     private void initCrownCourtMappingsList() {
-        referenceDataLoader.getXhibitCrownCourtMappings().ifPresent(courtMappingsList -> {
-            courtMappingsList.getCpXhibitCourtMappings().forEach(courtMapping -> {
-                crownCourtLocationListMapCache
-                        .computeIfAbsent(courtMapping.getCrestCourtId(), k -> new java.util.concurrent.CopyOnWriteArrayList<>())
-                        .add(createCourtLocation(courtMapping));
+        referenceDataLoader.getXhibitCrownCourtMappings()
+                .map(CourtMappingsList::getCpXhibitCourtMappings)
+                .ifPresent(this::cacheCrownCourtMappings);
+    }
 
-                crownCourtMappingListMapCache
-                        .computeIfAbsent(courtMapping.getOucode(), k -> new java.util.concurrent.CopyOnWriteArrayList<>())
-                        .add(courtMapping);
-            });
+    private void cacheCrownCourtMappings(final List<CourtMapping> courtMappings) {
+        courtMappings.forEach(courtMapping -> {
+            crownCourtLocationListMapCache
+                    .computeIfAbsent(courtMapping.getCrestCourtId(), k -> new java.util.concurrent.CopyOnWriteArrayList<>())
+                    .add(createCourtLocation(courtMapping));
+
+            crownCourtMappingListMapCache
+                    .computeIfAbsent(courtMapping.getOucode(), k -> new java.util.concurrent.CopyOnWriteArrayList<>())
+                    .add(courtMapping);
         });
     }
 

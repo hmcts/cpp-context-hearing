@@ -33,7 +33,7 @@ import uk.gov.moj.cpp.hearing.test.HearingFactory;
 
 import java.util.UUID;
 
-import javax.json.Json;
+import jakarta.json.Json;
 
 import io.restassured.path.json.JsonPath;
 

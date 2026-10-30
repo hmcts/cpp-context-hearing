@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.it;
 
 import io.restassured.path.json.JsonPath;
 import java.time.LocalDate;
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;

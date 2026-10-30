@@ -7,13 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import uk.gov.moj.cpp.hearing.listing.common.xhibit.exception.InvalidReferenceDataException;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
 
 public class XhibitReferenceDataValidatorTest {
+
+    private static final String LAST_NAME = "lastName";
 
     private XhibitReferenceDataValidator xhibitReferenceDataValidator = new XhibitReferenceDataValidator();
 
@@ -26,12 +28,12 @@ public class XhibitReferenceDataValidatorTest {
 
         final JsonObject payload = Json.createObjectBuilder()
                 .add("firstName", "Joe")
-                .add("lastName", "")
+                .add(LAST_NAME, "")
                 .build();
 
         final InvalidReferenceDataException invalidReferenceDataException = assertThrows(
                 InvalidReferenceDataException.class,
-                () -> xhibitReferenceDataValidator.validate("lastName", payload.getString("lastName"), payload));
+                () -> xhibitReferenceDataValidator.validate(LAST_NAME, payload.getString(LAST_NAME), payload));
 
         assertThat(invalidReferenceDataException.getMessage(), is("Invalid value '' for 'lastName' in '{\"firstName\":\"Joe\",\"lastName\":\"\"}'"));
     }
@@ -39,7 +41,7 @@ public class XhibitReferenceDataValidatorTest {
 
     @Test
     public void shouldThrowErrorWhenValidate() {
-        assertThrows(InvalidReferenceDataException.class, () -> xhibitReferenceDataValidator.validate("lastName", ""));
+        assertThrows(InvalidReferenceDataException.class, () -> xhibitReferenceDataValidator.validate(LAST_NAME, ""));
     }
 
 
@@ -47,13 +49,13 @@ public class XhibitReferenceDataValidatorTest {
     public void shouldValidateWhenDataExist() {
 
 
-        xhibitReferenceDataValidator.validate("lastName", "Smith");
+        xhibitReferenceDataValidator.validate(LAST_NAME, "Smith");
     }
 
 
     @Test
     public void shouldThrowErrorWhenValidateJsonArrayIsEmpty() {
-        assertThrows(InvalidReferenceDataException.class, () -> xhibitReferenceDataValidator.validateJsonArray("lastName", Json.createArrayBuilder().build()));
+        assertThrows(InvalidReferenceDataException.class, () -> xhibitReferenceDataValidator.validateJsonArray(LAST_NAME, Json.createArrayBuilder().build()));
     }
 
     @Test
@@ -62,11 +64,11 @@ public class XhibitReferenceDataValidatorTest {
         final JsonArray jsonArray = Json.createArrayBuilder()
                 .add(Json.createObjectBuilder()
                         .add("firstName", "Joe")
-                        .add("lastName", "Smith")
+                        .add(LAST_NAME, "Smith")
 
                         .build())
                 .build();
 
-        xhibitReferenceDataValidator.validateJsonArray("lastName", jsonArray);
+        xhibitReferenceDataValidator.validateJsonArray(LAST_NAME, jsonArray);
     }
 }

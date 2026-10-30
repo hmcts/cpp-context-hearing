@@ -9,19 +9,17 @@ import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
+import uk.gov.justice.services.test.utils.persistence.HibernateTestEntityManagerProvider;
 
 import java.util.UUID;
 
-import javax.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+class NowsMaterialRepositoryTest {
 
-@SuppressWarnings("CdiInjectionPointsInspection")
-@RunWith(CdiTestRunner.class)
-public class NowsMaterialRepositoryTest {
+    private static final String PERSISTENCE_UNIT = "hearing-test-persistence-unit";
 
     private static final UUID nowsId = randomUUID();
     private static final UUID hearingId = randomUUID();
@@ -31,13 +29,21 @@ public class NowsMaterialRepositoryTest {
     private static final UUID sharedResultId = randomUUID();
     private static final String language = "wales";
 
-    @Inject
+    @RegisterExtension
+    static HibernateTestEntityManagerProvider hibernateTestEntityManagerProvider =
+            new HibernateTestEntityManagerProvider(PERSISTENCE_UNIT);
+
     private NowsRepository nowsRepository;
-    @Inject
     private NowsMaterialRepository nowsMaterialRepository;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void openEntityManagerAndCreateRepositories() {
+        nowsRepository = new NowsRepository();
+        nowsMaterialRepository = new NowsMaterialRepository();
+
+        hibernateTestEntityManagerProvider.injectEntityManagerInto(nowsRepository);
+        hibernateTestEntityManagerProvider.injectEntityManagerInto(nowsMaterialRepository);
+
         final Nows nows = Nows.builder()
                 .withId(nowsId)
                 .withDefendantId(defendantId)
@@ -60,18 +66,18 @@ public class NowsMaterialRepositoryTest {
         nows.getMaterial().iterator().next().setNows(nows);
         nows.getMaterial().iterator().next().getNowResult().iterator().next().setNowsMaterial(nows.getMaterial().iterator().next());
 
-        this.nowsRepository.save(nows);
+        nowsRepository.save(nows);
     }
 
     @Test
-    public void shouldUpdateNowsMaterialStatusToGenerated() {
-        final int result = this.nowsMaterialRepository.updateStatus(materialId, "generated");
+    void shouldUpdateNowsMaterialStatusToGenerated() {
+        final int result = nowsMaterialRepository.updateStatus(materialId, "generated");
         assertThat(result, is(1));
     }
 
     @Test
-    public void shouldNotUpdateNowsMaterialStatusToGenerated() {
-        final int result = this.nowsMaterialRepository.updateStatus(randomUUID(), "generated");
+    void shouldNotUpdateNowsMaterialStatusToGenerated() {
+        final int result = nowsMaterialRepository.updateStatus(randomUUID(), "generated");
         assertThat(result, is(0));
     }
 }

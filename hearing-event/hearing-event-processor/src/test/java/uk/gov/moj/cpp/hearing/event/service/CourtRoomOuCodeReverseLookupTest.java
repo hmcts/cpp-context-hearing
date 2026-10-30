@@ -19,8 +19,8 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Random;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import static java.util.Arrays.asList;
-import static org.apache.deltaspike.core.util.ArraysUtils.asSet;
+import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
@@ -191,7 +191,7 @@ public class DefendantJPAMapperTest {
         defendantEntity2.setPersonDefendant(personDefendant2);
         defendantEntity2.setCourtListRestricted(false);
 
-        final List<Defendant> results = defendantJPAMapper.fromJPAWithCourtListRestrictions(asSet(defendantEntity1, defendantEntity2));
+        final List<Defendant> results = defendantJPAMapper.fromJPAWithCourtListRestrictions(Set.of(defendantEntity1, defendantEntity2));
 
         // Both defendants are retained - the restricted one is masked, not dropped (consistent with the listing court-list feed)
         Assert.assertEquals(2, results.size());

@@ -10,7 +10,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.common.YouthCourtDefendantsInHearing;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 

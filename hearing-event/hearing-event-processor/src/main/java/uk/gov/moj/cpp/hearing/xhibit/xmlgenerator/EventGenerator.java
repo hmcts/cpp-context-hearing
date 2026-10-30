@@ -10,8 +10,8 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRo
 import uk.gov.moj.cpp.hearing.utils.DateUtils;
 import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class EventGenerator {

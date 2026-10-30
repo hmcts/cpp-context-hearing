@@ -67,6 +67,7 @@ import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -214,7 +215,7 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
             publicEventResulted.waitFor();
         }
 
-        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), firstHearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
+        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), firstHearingDay.getSittingDay().withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
                                 .with(HearingSummaries::getId, is(hearing.getId()))
@@ -223,7 +224,7 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
                                 ))))
         );
 
-        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), secondHearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
+        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), secondHearingDay.getSittingDay().withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
                                 .with(HearingSummaries::getId, is(hearing.getId()))

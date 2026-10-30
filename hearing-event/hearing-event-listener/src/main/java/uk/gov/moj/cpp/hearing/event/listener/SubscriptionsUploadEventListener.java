@@ -20,8 +20,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 @SuppressWarnings("squid:S3864")
 @ServiceComponent(EVENT_LISTENER)

@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-domain</artifactId>
-        <version>17.104.210-SNAPSHOT</version>
+        <version>25.104.10-M4-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-domain-common</artifactId>
 
@@ -20,6 +20,11 @@
             <artifactId>javax.annotation-api</artifactId>
             <version>1.3.2</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- JSR-305 nullness annotations (javax.annotation.Nullable/Nonnull); no Jakarta successor exists. Version from common-bom. -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.utils</groupId>

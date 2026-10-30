@@ -17,8 +17,8 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
+import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 
 public class CourtRoomOuCodeReverseLookup {
 

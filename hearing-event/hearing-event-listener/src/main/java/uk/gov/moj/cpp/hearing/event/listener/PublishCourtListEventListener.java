@@ -15,7 +15,7 @@ import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListRequested;
 import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatus;
 import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @ServiceComponent(EVENT_LISTENER)
 public class PublishCourtListEventListener {

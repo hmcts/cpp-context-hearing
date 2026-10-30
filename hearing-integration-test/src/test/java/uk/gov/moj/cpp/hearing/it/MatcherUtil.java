@@ -12,6 +12,7 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Random;
@@ -42,7 +43,7 @@ public class MatcherUtil {
         return isBean(Defendant.class)
                 .with(Defendant::getId, is(defendant.getId()))
                 .with(Defendant::getMasterDefendantId, is(defendant.getMasterDefendantId()))
-                .with(Defendant::getCourtProceedingsInitiated, is(defendant.getCourtProceedingsInitiated().withZoneSameLocal(ZoneId.of("UTC"))))
+                .with(Defendant::getCourtProceedingsInitiated, is(defendant.getCourtProceedingsInitiated().withZoneSameLocal(ZoneOffset.UTC)))
                 .with(Defendant::getOffences, hasItems(defendant.getOffences().stream().map(
                         offence -> isBean(Offence.class)
                                 .with(Offence::getId, is(offence.getId()))

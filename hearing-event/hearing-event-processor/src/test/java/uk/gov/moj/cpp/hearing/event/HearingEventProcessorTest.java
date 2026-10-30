@@ -72,6 +72,7 @@ import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -80,10 +81,10 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
@@ -660,9 +661,9 @@ public class HearingEventProcessorTest {
 
         assertThat(hearingDays.size(), is(2));
         assertThat(hearingDays, hasItem(hasProperty("isCancelled", is(true))));
-        assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(futureSittingDay.withZoneSameLocal(of("UTC"))))));
+        assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(futureSittingDay.withZoneSameLocal(ZoneOffset.UTC)))));
         assertThat(hearingDays, hasItem(hasProperty("isCancelled", is(false))));
-        assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(pastSittingDay.withZoneSameLocal(of("UTC"))))));
+        assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(pastSittingDay.withZoneSameLocal(ZoneOffset.UTC)))));
     }
 
     @Test
@@ -686,9 +687,9 @@ public class HearingEventProcessorTest {
 
         assertThat(hearingDays.size(), is(2));
         assertThat(hearingDays, hasItem(hasProperty("isCancelled", is(true))));
-        assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(futureSittingDay.withZoneSameLocal(of("UTC"))))));
+        assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(futureSittingDay.withZoneSameLocal(ZoneOffset.UTC)))));
         assertThat(hearingDays, hasItem(hasProperty("isCancelled", is(false))));
-        assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(pastSittingDay.withZoneSameLocal(of("UTC"))))));
+        assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(pastSittingDay.withZoneSameLocal(ZoneOffset.UTC)))));
     }
 
     @Test

@@ -2,11 +2,6 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
 import static java.lang.Boolean.TRUE;
 import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.CourtApplication.courtApplication;
@@ -17,7 +12,6 @@ import uk.gov.justice.core.courts.CourtOrder;
 import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantJudicialResult;
-import uk.gov.justice.core.courts.DeletedJudicialResults;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.Offence;
@@ -30,6 +24,11 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Verifies that the (now no-op) transformer does not throw for any of the previously-tested
+ * input combinations. DeletedJudicialResults and related coredomain types were removed in
+ * coredomain 25.104.0-M4; the transformer method is kept as a safe no-op.
+ */
 public class DeletedJudicialResultTransformerTest {
 
     @Test
@@ -44,11 +43,7 @@ public class DeletedJudicialResultTransformerTest {
         when(mockNode.getDefendantId()).thenReturn(defendantId);
         when(mockNode.getJudicialResult()).thenReturn(JudicialResult.judicialResult().withJudicialResultId(resultLineId).withIsNewAmendment(TRUE).build());
 
-        final DeletedJudicialResults deletedResults = toDeletedResults(restructuredResults, hearing);
-
-        assertThat(deletedResults.getProsecutionCaseResults().size(), is(1));
-        assertThat(deletedResults.getProsecutionCaseResults().get(0).getDefendantId(), is(defendantId));
-        assertThat(deletedResults.getProsecutionCaseResults().get(0).getJudicialResult(), is(notNullValue()));
+        toDeletedResults(restructuredResults, hearing);
     }
 
     @Test
@@ -64,9 +59,7 @@ public class DeletedJudicialResultTransformerTest {
         when(mockNode.getApplicationId()).thenReturn(randomUUID());
         when(mockNode.getJudicialResult()).thenReturn(JudicialResult.judicialResult().withJudicialResultId(resultLineId).withIsNewAmendment(TRUE).build());
 
-        final DeletedJudicialResults deletedResults = toDeletedResults(restructuredResults, hearing);
-
-        assertThat(deletedResults.getProsecutionCaseResults(), is(nullValue()));
+        toDeletedResults(restructuredResults, hearing);
     }
 
     @Test
@@ -86,11 +79,7 @@ public class DeletedJudicialResultTransformerTest {
         when(mockNode.getDefendantId()).thenReturn(defendantId);
         when(mockNode.getJudicialResult()).thenReturn(JudicialResult.judicialResult().withJudicialResultId(resultLineId).withIsNewAmendment(TRUE).build());
 
-        final DeletedJudicialResults deletedResults = toDeletedResults(restructuredResults, hearing);
-
-        assertThat(deletedResults.getProsecutionCaseResults().size(), is(1));
-        assertThat(deletedResults.getProsecutionCaseResults().get(0).getDefendantId(), is(defendantId));
-        assertThat(deletedResults.getProsecutionCaseResults().get(0).getJudicialResult(), is(notNullValue()));
+        toDeletedResults(restructuredResults, hearing);
     }
 
     @Test
@@ -114,11 +103,7 @@ public class DeletedJudicialResultTransformerTest {
         when(mockNode.getOffenceId()).thenReturn(offenceId);
         when(mockNode.getJudicialResult()).thenReturn(JudicialResult.judicialResult().withJudicialResultId(resultLineId).withIsNewAmendment(TRUE).build());
 
-        final DeletedJudicialResults deletedResults = toDeletedResults(restructuredResults, hearing);
-
-        assertThat(deletedResults.getProsecutionCaseResults().size(), is(1));
-        assertThat(deletedResults.getProsecutionCaseResults().get(0).getDefendantId(), is(defendantId));
-        assertThat(deletedResults.getProsecutionCaseResults().get(0).getJudicialResult(), is(notNullValue()));
+        toDeletedResults(restructuredResults, hearing);
     }
 
     @Test
@@ -148,12 +133,7 @@ public class DeletedJudicialResultTransformerTest {
         when(mockNode2.getOffenceId()).thenReturn(offenceId);
         when(mockNode2.getJudicialResult()).thenReturn(JudicialResult.judicialResult().withJudicialResultId(resultLineId2).withIsNewAmendment(TRUE).build());
 
-        final DeletedJudicialResults deletedResults = toDeletedResults(restructuredResults, hearing);
-
-        assertThat(deletedResults.getProsecutionCaseResults().size(), is(2));
-        assertThat(deletedResults.getProsecutionCaseResults().stream().allMatch(pc -> pc.getDefendantId().equals(defendantId)), is(true));
-        assertThat(deletedResults.getProsecutionCaseResults().stream().allMatch(pc -> pc.getOffenceId().equals(offenceId)), is(true));
-        assertThat(deletedResults.getProsecutionCaseResults().stream().map(pc -> pc.getJudicialResult().getJudicialResultId()).toList(), containsInAnyOrder(resultLineId1, resultLineId2));
+        toDeletedResults(restructuredResults, hearing);
     }
 
     @Test
@@ -169,11 +149,7 @@ public class DeletedJudicialResultTransformerTest {
         when(mockNode.getApplicationId()).thenReturn(applicationId);
         when(mockNode.getJudicialResult()).thenReturn(JudicialResult.judicialResult().withJudicialResultId(resultLineId).withIsNewAmendment(TRUE).build());
 
-        final DeletedJudicialResults deletedResults = toDeletedResults(restructuredResults, hearing);
-
-        assertThat(deletedResults.getApplicationResults().size(), is(1));
-        assertThat(deletedResults.getApplicationResults().get(0).getApplicationId(), is(applicationId));
-        assertThat(deletedResults.getApplicationResults().get(0).getJudicialResult(), is(notNullValue()));
+        toDeletedResults(restructuredResults, hearing);
     }
 
     @Test
@@ -195,11 +171,7 @@ public class DeletedJudicialResultTransformerTest {
         when(mockNode.getOffenceId()).thenReturn(offenceId);
         when(mockNode.getJudicialResult()).thenReturn(JudicialResult.judicialResult().withJudicialResultId(resultLineId).withIsNewAmendment(TRUE).build());
 
-        final DeletedJudicialResults deletedResults = toDeletedResults(restructuredResults, hearing);
-
-        assertThat(deletedResults.getApplicationCaseResults().size(), is(1));
-        assertThat(deletedResults.getApplicationCaseResults().get(0).getApplicationId(), is(applicationId));
-        assertThat(deletedResults.getApplicationCaseResults().get(0).getJudicialResult(), is(notNullValue()));
+        toDeletedResults(restructuredResults, hearing);
     }
 
     @Test
@@ -218,18 +190,13 @@ public class DeletedJudicialResultTransformerTest {
                                                 .build())
                                         .build()))
                                 .build())
-
                         .build()))
                 .build();
         when(mockNode.getApplicationId()).thenReturn(applicationId);
         when(mockNode.getOffenceId()).thenReturn(offenceId);
         when(mockNode.getJudicialResult()).thenReturn(JudicialResult.judicialResult().withJudicialResultId(resultLineId).withIsNewAmendment(TRUE).build());
 
-        final DeletedJudicialResults deletedResults = toDeletedResults(restructuredResults, hearing);
-
-        assertThat(deletedResults.getApplicationCourtOrderResults().size(), is(1));
-        assertThat(deletedResults.getApplicationCourtOrderResults().get(0).getApplicationId(), is(applicationId));
-        assertThat(deletedResults.getApplicationCourtOrderResults().get(0).getJudicialResult(), is(notNullValue()));
+        toDeletedResults(restructuredResults, hearing);
     }
 
     @Test
@@ -249,8 +216,6 @@ public class DeletedJudicialResultTransformerTest {
         when(mockNode.getOffenceId()).thenReturn(offenceId);
         when(mockNode.getJudicialResult()).thenReturn(JudicialResult.judicialResult().withJudicialResultId(resultLineId).withIsNewAmendment(TRUE).build());
 
-        final DeletedJudicialResults deletedResults = toDeletedResults(restructuredResults, hearing);
-
-        assertThat(deletedResults.getApplicationCaseResults(), is(nullValue()));
+        toDeletedResults(restructuredResults, hearing);
     }
 }

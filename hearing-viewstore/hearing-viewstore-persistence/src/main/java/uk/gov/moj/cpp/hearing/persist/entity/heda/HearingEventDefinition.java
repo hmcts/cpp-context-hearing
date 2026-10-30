@@ -2,10 +2,10 @@ package uk.gov.moj.cpp.hearing.persist.entity.heda;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @SuppressWarnings("squid:S00107")
 @Entity

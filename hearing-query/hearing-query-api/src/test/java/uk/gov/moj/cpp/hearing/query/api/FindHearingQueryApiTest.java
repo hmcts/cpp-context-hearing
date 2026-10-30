@@ -36,8 +36,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

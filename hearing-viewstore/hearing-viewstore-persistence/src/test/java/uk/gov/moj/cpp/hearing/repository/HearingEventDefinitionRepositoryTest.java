@@ -9,22 +9,21 @@ import static org.hamcrest.core.IsNull.nullValue;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.LONG;
 
-import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
+import uk.gov.justice.services.test.utils.persistence.HibernateTestEntityManagerProvider;
 import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import javax.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+class HearingEventDefinitionRepositoryTest {
 
-@SuppressWarnings("CdiInjectionPointsInspection")
-@RunWith(CdiTestRunner.class)
-public class HearingEventDefinitionRepositoryTest extends BaseTransactionalTest {
+    private static final String PERSISTENCE_UNIT = "hearing-test-persistence-unit";
+
     private static final String ID_1 = "b71e7d2a-d3b3-4a55-a393-6d451767fc05";
     private static final String RECORDED_LABEL_1 = "Hearing Started";
     private static final String ACTION_LABEL_1 = "Start";
@@ -74,14 +73,22 @@ public class HearingEventDefinitionRepositoryTest extends BaseTransactionalTest 
     private static final String GROUP_LABEL_8 = "Defendant";
     private static final Integer GROUP_SEQUENCE_8 = 2;
 
-
     private static final boolean ALTERABLE = BOOLEAN.next();
 
-    @Inject
+    @RegisterExtension
+    static HibernateTestEntityManagerProvider hibernateTestEntityManagerProvider =
+            new HibernateTestEntityManagerProvider(PERSISTENCE_UNIT);
+
     private HearingEventDefinitionRepository hearingEventDefinitionRepository;
 
+    @BeforeEach
+    void openEntityManagerAndCreateRepository() {
+        hearingEventDefinitionRepository = new HearingEventDefinitionRepository();
+        hibernateTestEntityManagerProvider.injectEntityManagerInto(hearingEventDefinitionRepository);
+    }
+
     @Test
-    public void shouldSaveAndRetrieveAHearingEventDefinition() {
+    void shouldSaveAndRetrieveAHearingEventDefinition() {
         final HearingEventDefinition eventDefinition = new HearingEventDefinition(UUID.fromString(ID_1), RECORDED_LABEL_1, ACTION_LABEL_1,
                 ACTION_SEQUENCE_1, null, GROUP_LABEL_1, GROUP_SEQUENCE_1, ALTERABLE);
 
@@ -98,7 +105,7 @@ public class HearingEventDefinitionRepositoryTest extends BaseTransactionalTest 
     }
 
     @Test
-    public void shouldAlwaysGetHearingEventDefinitionsWhichIsActive() {
+    void shouldAlwaysGetHearingEventDefinitionsWhichIsActive() {
         givenSequencedHearingEventDefinitionsExistInRandomOrder();
 
         List<HearingEventDefinition> actualEventDefinitions = hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel();
@@ -108,7 +115,7 @@ public class HearingEventDefinitionRepositoryTest extends BaseTransactionalTest 
     }
 
     @Test
-    public void shouldGetHearingEventDefinitionsInSequentialOrder() {
+    void shouldGetHearingEventDefinitionsInSequentialOrder() {
         givenSequencedHearingEventDefinitionsExistInRandomOrder();
 
         final List<HearingEventDefinition> actualEventDefinitions = hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel();
@@ -121,7 +128,7 @@ public class HearingEventDefinitionRepositoryTest extends BaseTransactionalTest 
     }
 
     @Test
-    public void shouldGetHearingEventDefinitionsOrderedByActionSequenceAndActionLabel() {
+    void shouldGetHearingEventDefinitionsOrderedByActionSequenceAndActionLabel() {
         givenSequencedHearingEventDefinitionsExistInRandomOrder();
 
         final List<HearingEventDefinition> actualEventDefinitions = hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel();
@@ -136,7 +143,7 @@ public class HearingEventDefinitionRepositoryTest extends BaseTransactionalTest 
     }
 
     @Test
-    public void shouldGetHearingEventDefinitionsOrderedBySequenceTypeSequenceNumberAndActionLabel() {
+    void shouldGetHearingEventDefinitionsOrderedBySequenceTypeSequenceNumberAndActionLabel() {
         givenSequencedHearingEventDefinitionsExistInRandomOrder();
         final List<HearingEventDefinition> actualEventDefinitions = hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel();
 
@@ -172,5 +179,4 @@ public class HearingEventDefinitionRepositoryTest extends BaseTransactionalTest 
 
         assertThat(hearingEventDefinitionRepository.findAll(), hasSize(hearingEventDefinitions.size()));
     }
-
 }

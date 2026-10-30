@@ -4,7 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -29,10 +29,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -145,7 +145,22 @@ public class ReferenceDataLoader {
 
         final Envelope<CourtMapping> response = requester.requestAsAdmin(requestEnvelope, CourtMapping.class);
 
-        return Objects.isNull(response) ? empty() : of((new CourtMappingsList(asList(response.payload()))));
+        if (Objects.isNull(response) || Objects.isNull(response.payload())) {
+            return empty();
+        }
+        final CourtMapping payload = response.payload();
+        if (isEmptyMagsCourtMappingPayload(payload)) {
+            return empty();
+        }
+        return of(new CourtMappingsList(asList(payload)));
+    }
+
+    /**
+     * Referencedata returns HTTP 200 with {@code {}} when no mags mapping exists; that deserialises to a
+     * {@link CourtMapping} with no id/oucode.
+     */
+    private static boolean isEmptyMagsCourtMappingPayload(final CourtMapping payload) {
+        return payload.getId() == null && payload.getOucode() == null;
     }
 
     public Optional<CourtRoomMappingsList> getCourtRoomMappingsList(UUID courtCentreId) {

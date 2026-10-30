@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -209,7 +209,7 @@ public class ReferenceDataServiceTest {
                         .withName("referencedata.query.judiciaries")
                         .withId(randomUUID()),
                 createObjectBuilder()
-                        .add("judiciaries", javax.json.Json.createArrayBuilder().add(judiciary).build())
+                        .add("judiciaries", jakarta.json.Json.createArrayBuilder().add(judiciary).build())
                         .build());
 
         when(requester.request(any(), any(Class.class))).thenReturn(judiciaryEnvelope);
@@ -220,7 +220,7 @@ public class ReferenceDataServiceTest {
                                        final String forenames,
                                        final String surname,
                                        final String titleSuffix) {
-        final javax.json.JsonObjectBuilder builder = createObjectBuilder().add("id", JUDICIAL_ID);
+        final jakarta.json.JsonObjectBuilder builder = createObjectBuilder().add("id", JUDICIAL_ID);
         if (titleJudicialPrefix != null) {
             builder.add("titleJudicialPrefix", titleJudicialPrefix);
         }

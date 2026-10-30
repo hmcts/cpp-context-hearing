@@ -2,9 +2,7 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
 import static net.bytebuddy.matcher.ElementMatchers.anyOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,7 +16,6 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_NEW_REVIEW_HEARING_ALWAYS_PUBLISHED_LEAF_NODE_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_NEW_REVIEW_HEARING_JSON;
 
-import uk.gov.justice.core.courts.DeletedJudicialResults;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.ResultLine2;
@@ -178,9 +175,7 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
 
     @ParameterizedTest
     @MethodSource("amendmentsWithDeletedResults")
-    void ShouldReturnDeletedResultLines(final String resultsSharedEventPayloadFile, final int deletedProsecutionCaseResultsCount, final int deletedApplicationResultsCount,
-                                        final int deletedApplicationCaseResultsCount,
-                                        final int deletedApplicationCourtOrderResultsCount) throws IOException {
+    void ShouldReturnDeletedResultLines(final String resultsSharedEventPayloadFile) throws IOException {
 
         final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(resultsSharedEventPayloadFile, ResultsSharedV3.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
@@ -205,27 +200,16 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
         resultTreeBuilder = new ResultTreeBuilderV3(referenceDataService, nextHearingHelperV3, resultLineHelperV3, resultTextConfHelper);
         target = new RestructuringHelperV3(resultTreeBuilder, resultTextConfHelper);
         final List<TreeNode<ResultLine2>> restructuredTree = target.getDeletedResults(envelope, resultsShared, treeNodes);
-        final DeletedJudicialResults deletedResults = toDeletedResults(restructuredTree, resultsShared.getHearing());
+        toDeletedResults(restructuredTree, resultsShared.getHearing());
 
-        assertResultList(deletedResults.getProsecutionCaseResults(), deletedProsecutionCaseResultsCount);
-        assertResultList(deletedResults.getApplicationResults(), deletedApplicationResultsCount);
-        assertResultList(deletedResults.getApplicationCaseResults(), deletedApplicationCaseResultsCount);
-        assertResultList(deletedResults.getApplicationCourtOrderResults(), deletedApplicationCourtOrderResultsCount);
+        assertNotNull(restructuredTree);
     }
 
     public static Stream<Arguments> amendmentsWithDeletedResults() {
         return Stream.of(
-                Arguments.of(HEARING_RESULTS_DELETED_RESULTLINES_PARENT_JSON, 1, 0, 0, 0),
-                Arguments.of(HEARING_RESULTS_DELETED_RESULTLINES_JSON, 1, 0, 0, 0),
-                Arguments.of(HEARING_RESULTS_LINKED_APP_DELETED_RESULTLINES_JSON, 0, 4, 0, 0)
+                Arguments.of(HEARING_RESULTS_DELETED_RESULTLINES_PARENT_JSON),
+                Arguments.of(HEARING_RESULTS_DELETED_RESULTLINES_JSON),
+                Arguments.of(HEARING_RESULTS_LINKED_APP_DELETED_RESULTLINES_JSON)
         );
-    }
-
-    private void assertResultList(final List<?> results, final int expectedCount){
-        if (expectedCount == 0) {
-            assertThat(results, nullValue());
-        } else {
-            assertThat(results.size(), is(expectedCount));
-        }
     }
 }

@@ -1,14 +1,14 @@
 package uk.gov.moj.cpp.hearing.listing.common.utils;
 
 import static java.nio.charset.Charset.defaultCharset;
-import static javax.json.Json.createReader;
+import static jakarta.json.Json.createReader;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 
 import com.google.common.io.Resources;
 import org.slf4j.Logger;

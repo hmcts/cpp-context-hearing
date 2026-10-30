@@ -16,8 +16,8 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 @ServiceComponent(EVENT_LISTENER)
 public class ChangeHearingDetailEventListener {

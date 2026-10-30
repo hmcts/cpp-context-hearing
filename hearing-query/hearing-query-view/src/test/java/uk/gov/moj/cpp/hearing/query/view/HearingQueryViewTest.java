@@ -110,7 +110,6 @@ public class HearingQueryViewTest {
         assertThat(idsCaptor.getValue(), contains(accessibleId));
     }
 
-
     /**
      * LPT-2406's enabler. A hearing with nothing saved answers with {@code finalised = false}
      * and null values rather than an error, which is what lets the listing context treat

@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class EthnicityJPAMapper {

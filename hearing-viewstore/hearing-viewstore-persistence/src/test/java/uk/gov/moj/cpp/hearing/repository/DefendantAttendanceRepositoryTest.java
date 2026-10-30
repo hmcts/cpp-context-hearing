@@ -4,6 +4,8 @@ package uk.gov.moj.cpp.hearing.repository;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 
 import uk.gov.justice.core.courts.AttendanceType;
@@ -18,48 +20,53 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import uk.gov.justice.services.test.utils.persistence.HibernateTestEntityManagerProvider;
 
-@SuppressWarnings("CdiInjectionPointsInspection")
-@RunWith(CdiTestRunner.class)
-public class DefendantAttendanceRepositoryTest {
+@ExtendWith(MockitoExtension.class)
+class DefendantAttendanceRepositoryTest {
 
-    @Inject
-    private HearingRepository hearingRepository;
+    private static final String PERSISTENCE_UNIT = "hearing-test-persistence-unit";
 
-    @Inject
-    private DefendantAttendanceRepository defendantAttendanceRepository;
+    @RegisterExtension
+    static HibernateTestEntityManagerProvider hibernateTestEntityManagerProvider =
+            new HibernateTestEntityManagerProvider(PERSISTENCE_UNIT);
 
-    @Inject
+    @Mock
     private HearingJPAMapper hearingJPAMapper;
 
+    private HearingRepository hearingRepository;
+    private DefendantAttendanceRepository defendantAttendanceRepository;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void openEntityManagerAndCreateRepository() {
+        hearingRepository = new HearingRepository();
+        hibernateTestEntityManagerProvider.injectEntityManagerInto(hearingRepository);
 
-    }
-
-    @After
-    public void teardown() {
-        //hearings.forEach(hearing -> hearingRepository.attachAndRemove(hearingRepository.findBy(hearing.getId())));
+        defendantAttendanceRepository = new DefendantAttendanceRepository();
+        hibernateTestEntityManagerProvider.injectEntityManagerInto(defendantAttendanceRepository);
     }
 
     @Test
-    public void saveDefendantAttendance() {
+    void saveDefendantAttendance() {
 
         List<uk.gov.justice.core.courts.Hearing> hearings = new ArrayList<>();
         final InitiateHearingCommand initiateHearingCommand = minimumInitiateHearingTemplate();
         hearings.add(initiateHearingCommand.getHearing());
         uk.gov.justice.core.courts.Hearing hearing = hearings.get(0);
-        Hearing hearingEntity = hearingJPAMapper.toJPA(hearing);
-        hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
-        hearingRepository.save(hearingEntity);
+
+        final Hearing hearingEntity = new Hearing();
+        hearingEntity.setId(hearing.getId());
+        when(hearingJPAMapper.toJPA(any(uk.gov.justice.core.courts.Hearing.class))).thenReturn(hearingEntity);
+
+        Hearing mappedHearingEntity = hearingJPAMapper.toJPA(hearing);
+        hearingRepository.save(mappedHearingEntity);
 
         final UUID id = randomUUID();
         final UUID hearingId = hearing.getId();
@@ -73,7 +80,7 @@ public class DefendantAttendanceRepositoryTest {
         defendantAttendance.setDay(date);
         defendantAttendance.setAttendanceType(isInAttendance);
 
-        this.defendantAttendanceRepository.saveAndFlush(defendantAttendance);
+        this.defendantAttendanceRepository.save(defendantAttendance);
 
         DefendantAttendance entity = defendantAttendanceRepository.findByHearingIdDefendantIdAndDate(hearingId, defendantId, date);
 
@@ -81,6 +88,5 @@ public class DefendantAttendanceRepositoryTest {
         assertThat(entity.getDefendantId(), is(defendantId));
         assertThat(entity.getDay(), is(date));
         assertThat(entity.getAttendanceType(), is(isInAttendance));
-
     }
 }

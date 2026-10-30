@@ -6,8 +6,8 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.moj.cpp.hearing.query.view.response.SessionTimeResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.SessionTimeService;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
+import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 
 
 public class SessionTimeQueryView {

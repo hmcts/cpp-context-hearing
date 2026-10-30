@@ -129,11 +129,11 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.transaction.Transactional;
+import jakarta.inject.Inject;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.transaction.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
@@ -272,14 +272,13 @@ public class HearingService {
 
     private ZonedDateTime convertToZonedDateTime(Object obj) {
         if (obj == null) return null;
-        if (obj instanceof ZonedDateTime) return (ZonedDateTime) obj;
-        if (obj instanceof String) {
-            return ZonedDateTime.parse((String) obj);
-        }
-        if (obj instanceof java.sql.Timestamp) {
-            return ((java.sql.Timestamp) obj).toInstant()
-                    .atZone(ZoneId.of("Europe/London"));
-        }
+        // All times are held in UTC; any display-local (e.g. Europe/London) conversion happens downstream at render time.
+        if (obj instanceof ZonedDateTime) return ((ZonedDateTime) obj).withZoneSameInstant(ZoneOffset.UTC);
+        // The PostgreSQL JDBC driver (Java 25 / Hibernate 6+) returns timestamptz columns as OffsetDateTime.
+        if (obj instanceof java.time.OffsetDateTime) return ((java.time.OffsetDateTime) obj).atZoneSameInstant(ZoneOffset.UTC);
+        if (obj instanceof java.time.Instant) return ((java.time.Instant) obj).atZone(ZoneOffset.UTC);
+        if (obj instanceof String) return ZonedDateTime.parse((String) obj).withZoneSameInstant(ZoneOffset.UTC);
+        if (obj instanceof java.sql.Timestamp) return ((java.sql.Timestamp) obj).toInstant().atZone(ZoneOffset.UTC);
         return null;
     }
 
@@ -790,13 +789,14 @@ public class HearingService {
         if (hearing.getTrialTypeId() != null) {
 
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
-            crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
-                            trialType.getReasonCode(),
-                            hearing.getCrackedIneffectiveSubReasonId(),
-                            trialType.getDate(),
-                            trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
-                            trialType.getId(),
-                            trialType.getTrialType()))
+            crackedIneffectiveTrialType.map(trialType -> CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                            .withCode(trialType.getReasonCode())
+                            .withCrackedIneffectiveSubReasonId(hearing.getCrackedIneffectiveSubReasonId())
+                            .withDate(trialType.getDate())
+                            .withDescription(trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription())
+                            .withId(trialType.getId())
+                            .withType(trialType.getTrialType())
+                            .build())
                     .ifPresent(trialType -> hearingDetailsResponse
                             .getHearing()
                             .setCrackedIneffectiveTrial(trialType));
@@ -805,13 +805,13 @@ public class HearingService {
         } else if (isVacatedTrialRequest(hearing)) {
 
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getVacatedTrialReasonId(), crackedIneffectiveVacatedTrialTypes);
-            crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
-                            trialType.getReasonCode(),
-                            null,
-                            trialType.getDate(),
-                            trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
-                            trialType.getId(),
-                            trialType.getTrialType()))
+            crackedIneffectiveTrialType.map(trialType -> CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                            .withCode(trialType.getReasonCode())
+                            .withDate(trialType.getDate())
+                            .withDescription(trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription())
+                            .withId(trialType.getId())
+                            .withType(trialType.getTrialType())
+                            .build())
                     .ifPresent(trialType -> hearingDetailsResponse
                             .getHearing()
                             .setCrackedIneffectiveTrial(trialType));
@@ -878,13 +878,17 @@ public class HearingService {
                     .filter(crackedIneffectiveTrial -> crackedIneffectiveTrial.getId().equals(trialTypeId))
                     .findFirst();
 
-            return crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
-                            trialType.getReasonCode(),
-                            null,
-                            trialType.getDate(),
-                            trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
-                            trialType.getId(),
-                            trialType.getTrialType()))
+            // crackedIneffectiveSubReasonId is left unset here. It is populated only for a cracked
+            // or ineffective trial (updateTrialAttributes, where the hearing is in scope); this
+            // lookup resolves a trial type by id alone and has no hearing to read it from. The
+            // vacated-trial path leaves it unset for the same reason.
+            return crackedIneffectiveTrialType.map(trialType -> CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                            .withCode(trialType.getReasonCode())
+                            .withDate(trialType.getDate())
+                            .withDescription(trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription())
+                            .withId(trialType.getId())
+                            .withType(trialType.getTrialType())
+                            .build())
                     .orElse(null);
         }
 

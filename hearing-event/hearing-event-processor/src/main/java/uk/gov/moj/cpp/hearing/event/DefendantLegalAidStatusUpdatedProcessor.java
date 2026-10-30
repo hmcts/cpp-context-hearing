@@ -12,11 +12,11 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonString;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.HEARING_ID;

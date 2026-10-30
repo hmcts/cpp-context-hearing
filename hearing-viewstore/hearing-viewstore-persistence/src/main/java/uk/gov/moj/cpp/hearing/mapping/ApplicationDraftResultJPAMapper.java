@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.mapping;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.UUID;
 
 @SuppressWarnings("squid:S1186")

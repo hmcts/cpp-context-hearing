@@ -183,10 +183,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
@@ -197,6 +198,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -1201,6 +1203,54 @@ public class HearingServiceTest {
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
         );
+    }
+
+    @Test
+    public void shouldPopulateCrackedIneffectiveSubReasonIdOnTheCrackedIneffectiveTrialResponse() {
+
+        final Hearing entity = mock(Hearing.class);
+        final uk.gov.justice.core.courts.Hearing pojo = mock(uk.gov.justice.core.courts.Hearing.class);
+
+        final UUID hearingId = randomUUID();
+        final UUID trialTypeId = randomUUID();
+        final UUID crackedIneffectiveSubReasonId = randomUUID();
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(entity);
+        when(entity.getTrialTypeId()).thenReturn(trialTypeId);
+        when(entity.getCrackedIneffectiveSubReasonId()).thenReturn(crackedIneffectiveSubReasonId);
+        when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+        when(pojo.getCourtApplications()).thenReturn(null);
+
+        hearingService.getHearingDetailsResponseById(null, hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), prosecutionCasesIdsWithAccess, false);
+
+        final ArgumentCaptor<CrackedIneffectiveTrial> captor = ArgumentCaptor.forClass(CrackedIneffectiveTrial.class);
+        verify(pojo).setCrackedIneffectiveTrial(captor.capture());
+
+        assertThat(captor.getValue().getCrackedIneffectiveSubReasonId(), is(crackedIneffectiveSubReasonId));
+    }
+
+    @Test
+    public void shouldNotPopulateCrackedIneffectiveSubReasonIdForAVacatedTrial() {
+
+        final Hearing entity = mock(Hearing.class);
+        final uk.gov.justice.core.courts.Hearing pojo = mock(uk.gov.justice.core.courts.Hearing.class);
+
+        final UUID hearingId = randomUUID();
+        final UUID vacatedTrialReasonId = randomUUID();
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(entity);
+        when(entity.getTrialTypeId()).thenReturn(null);
+        when(entity.getIsVacatedTrial()).thenReturn(true);
+        when(entity.getVacatedTrialReasonId()).thenReturn(vacatedTrialReasonId);
+        when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+        when(pojo.getCourtApplications()).thenReturn(null);
+
+        hearingService.getHearingDetailsResponseById(null, hearingId, buildVacatedTrialTypes(vacatedTrialReasonId), prosecutionCasesIdsWithAccess, false);
+
+        final ArgumentCaptor<CrackedIneffectiveTrial> captor = ArgumentCaptor.forClass(CrackedIneffectiveTrial.class);
+        verify(pojo).setCrackedIneffectiveTrial(captor.capture());
+
+        assertThat(captor.getValue().getCrackedIneffectiveSubReasonId(), is(nullValue()));
     }
 
     @Test
@@ -2965,5 +3015,28 @@ public class HearingServiceTest {
         // other hearing values are preserved via withValuesFrom
         assertThat(result.getHearing().getId(), is(hearingId));
         assertThat(result.getHearing().getCourtApplications(), hasSize(1));
+    }
+
+    @Test
+    void shouldConvertHearingEventTimesToUtcRegardlessOfJdbcType() throws Exception {
+        // The PostgreSQL JDBC driver (Java 25 / Hibernate 6+) returns timestamptz columns as OffsetDateTime;
+        // convertToZonedDateTime must handle it (and java.sql.Timestamp) and normalise everything to UTC.
+        final java.lang.reflect.Method method =
+                HearingService.class.getDeclaredMethod("convertToZonedDateTime", Object.class);
+        method.setAccessible(true);
+
+        final java.time.OffsetDateTime offsetDateTime =
+                java.time.OffsetDateTime.of(2026, 7, 13, 12, 30, 0, 0, java.time.ZoneOffset.ofHours(2));
+
+        final ZonedDateTime fromOffset = (ZonedDateTime) method.invoke(hearingService, offsetDateTime);
+        assertThat(fromOffset.getZone(), is(java.time.ZoneOffset.UTC));
+        assertThat(fromOffset.toInstant(), is(offsetDateTime.toInstant()));
+
+        final java.sql.Timestamp timestamp = java.sql.Timestamp.from(offsetDateTime.toInstant());
+        final ZonedDateTime fromTimestamp = (ZonedDateTime) method.invoke(hearingService, timestamp);
+        assertThat(fromTimestamp.getZone(), is(java.time.ZoneOffset.UTC));
+        assertThat(fromTimestamp.toInstant(), is(offsetDateTime.toInstant()));
+
+        assertNull(method.invoke(hearingService, new Object[]{null}));
     }
 }

@@ -56,7 +56,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import com.jayway.jsonpath.DocumentContext;
 import org.junit.jupiter.api.BeforeEach;

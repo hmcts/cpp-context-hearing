@@ -16,6 +16,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -36,7 +37,7 @@ public class ChangeNextHearingDateIT extends AbstractIT {
         final UUID seedingHearingId = initiateHearingCommand.getHearing().getId();
         final UUID hearingId = UUID.randomUUID();
 
-        final ZonedDateTime nextHearingStartDate = ZonedDateTime.of(2022, 01, 01, 0, 0, 0, 0, ZoneId.of("UTC"));
+        final ZonedDateTime nextHearingStartDate = ZonedDateTime.of(2022, 01, 01, 0, 0, 0, 0, ZoneOffset.UTC);
 
         changeNextHearingDate(seedingHearingId, hearingId, nextHearingStartDate);
 

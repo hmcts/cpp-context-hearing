@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.mapping;
 
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtIndicatedSentence;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class CourtIndicatedSentenceJPAMapper {

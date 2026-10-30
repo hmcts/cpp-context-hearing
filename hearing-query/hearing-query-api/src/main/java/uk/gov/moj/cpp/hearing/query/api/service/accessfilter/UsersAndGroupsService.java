@@ -16,9 +16,9 @@ import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.UserRole;
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 public class UsersAndGroupsService {
     private static final String GET_LOGGED_IN_USER_PERMISSIONS = "usersgroups.get-logged-in-user-permissions";

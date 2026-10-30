@@ -29,7 +29,7 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 @ExtendWith(MockitoExtension.class)
 public class NextHearingEventProcessorTest {

@@ -5,7 +5,7 @@ import static java.util.UUID.nameUUIDFromBytes;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class SessionTimeUUIDService {

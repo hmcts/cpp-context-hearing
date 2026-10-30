@@ -13,7 +13,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

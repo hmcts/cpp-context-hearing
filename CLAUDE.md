@@ -248,3 +248,33 @@ cd hearing-performance-test && mvn jmeter:gui -Pscheduling-performance-test    #
 - Access control enforced by `HearingQueryService.validateIfUserHasAccessToHearing()` — never bypass.
 - Welsh language support is first-class: `hearing.save-defendants-welsh-translations` command exists.
 - Custody Time Limit (CTL) calculations are safety-critical: `CTLExpiryDateCalculatorService`.
+
+## Liquibase 5 (25.104.1 onwards)
+
+`liquibase.properties` here is on Liquibase **5.0.3** (from `maven-super-pom` via the consolidated
+`liquibase.version`, which drives both liquibase-core and the maven plugin).
+
+- `liquibase.hub.mode` is **removed** — 4.10.0 ships 48 Hub classes, 5.0.3 ships none.
+- `liquibase.analytics.enabled: false` is **required** — analytics is on by default from 4.30.0 and
+  this shaded jar runs the migrations in the Helm pre-install job.
+- `liquibase.headless` stays. It is still valid in Liquibase 5. The `NoSuchFieldException` in build
+  logs is the maven plugin failing to map any dotted key onto a Mojo field; it is harmless.
+
+## crackedIneffectiveSubReasonId — query API vs public event
+
+There is a deliberate asymmetry, and the integration tests enforce it:
+
+- the **query API** returns `crackedIneffectiveSubReasonId` (production behaviour since CCT-2371),
+  populated in `updateTrialAttributes` for a cracked/ineffective trial only;
+- **`public.hearing.resulted` does not carry it**, nor does the vacated-trial path, nor the
+  id-only `fetchCrackedIneffectiveTrial` lookup.
+
+`ShareResultsIT` uses one expectation object for both, so `publicEventShapeOf()` rebuilds it without
+the sub-reason for the public-event listener filters. If you add a trial-type assertion, pick the
+right shape for the side you are asserting on.
+
+## Known flaky
+
+`ShareResultsIT` intermittently fails with "Expected 'public.hearing.resulted' ... message to emit
+on the public.event topic" — a different test each run, never an assertion mismatch. Re-run the
+class on its own before believing it.
