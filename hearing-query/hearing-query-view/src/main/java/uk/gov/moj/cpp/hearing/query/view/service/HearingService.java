@@ -146,6 +146,7 @@ public class HearingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingService.class);
     private static final DateTimeFormatter FORMATTER = ofPattern("ddMMyyyy");
     private static final ZoneId ZONE_ID = ZoneId.of(ZoneOffset.UTC.getId());
+    private static final ZoneId EUROPE_LONDON = ZoneId.of("Europe/London");
     private static final UtcClock UTC_CLOCK = new UtcClock();
 
     @Inject
@@ -272,13 +273,22 @@ public class HearingService {
 
     private ZonedDateTime convertToZonedDateTime(Object obj) {
         if (obj == null) return null;
-        // All times are held in UTC; any display-local (e.g. Europe/London) conversion happens downstream at render time.
-        if (obj instanceof ZonedDateTime) return ((ZonedDateTime) obj).withZoneSameInstant(ZoneOffset.UTC);
-        // The PostgreSQL JDBC driver (Java 25 / Hibernate 6+) returns timestamptz columns as OffsetDateTime.
-        if (obj instanceof java.time.OffsetDateTime) return ((java.time.OffsetDateTime) obj).atZoneSameInstant(ZoneOffset.UTC);
-        if (obj instanceof java.time.Instant) return ((java.time.Instant) obj).atZone(ZoneOffset.UTC);
-        if (obj instanceof String) return ZonedDateTime.parse((String) obj).withZoneSameInstant(ZoneOffset.UTC);
-        if (obj instanceof java.sql.Timestamp) return ((java.sql.Timestamp) obj).toInstant().atZone(ZoneOffset.UTC);
+        if (obj instanceof ZonedDateTime) return (ZonedDateTime) obj;
+        if (obj instanceof String) {
+            return ZonedDateTime.parse((String) obj);
+        }
+        if (obj instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) obj).toInstant()
+                    .atZone(EUROPE_LONDON);
+        }
+        // Hibernate 6+ returns timestamptz columns from native queries as OffsetDateTime (or Instant)
+        // rather than java.sql.Timestamp; convert them the same way as a Timestamp.
+        if (obj instanceof java.time.OffsetDateTime) {
+            return ((java.time.OffsetDateTime) obj).atZoneSameInstant(EUROPE_LONDON);
+        }
+        if (obj instanceof java.time.Instant) {
+            return ((java.time.Instant) obj).atZone(EUROPE_LONDON);
+        }
         return null;
     }
 

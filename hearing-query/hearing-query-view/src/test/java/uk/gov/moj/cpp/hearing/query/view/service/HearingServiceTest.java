@@ -3018,9 +3018,9 @@ public class HearingServiceTest {
     }
 
     @Test
-    void shouldConvertHearingEventTimesToUtcRegardlessOfJdbcType() throws Exception {
-        // The PostgreSQL JDBC driver (Java 25 / Hibernate 6+) returns timestamptz columns as OffsetDateTime;
-        // convertToZonedDateTime must handle it (and java.sql.Timestamp) and normalise everything to UTC.
+    void shouldConvertHearingEventTimesToEuropeLondonRegardlessOfJdbcType() throws Exception {
+        // Hibernate 6+ returns timestamptz columns from native queries as OffsetDateTime; convertToZonedDateTime
+        // must handle it as well as java.sql.Timestamp, and convert both to Europe/London as on Java 17.
         final java.lang.reflect.Method method =
                 HearingService.class.getDeclaredMethod("convertToZonedDateTime", Object.class);
         method.setAccessible(true);
@@ -3029,12 +3029,12 @@ public class HearingServiceTest {
                 java.time.OffsetDateTime.of(2026, 7, 13, 12, 30, 0, 0, java.time.ZoneOffset.ofHours(2));
 
         final ZonedDateTime fromOffset = (ZonedDateTime) method.invoke(hearingService, offsetDateTime);
-        assertThat(fromOffset.getZone(), is(java.time.ZoneOffset.UTC));
+        assertThat(fromOffset.getZone(), is(java.time.ZoneId.of("Europe/London")));
         assertThat(fromOffset.toInstant(), is(offsetDateTime.toInstant()));
 
         final java.sql.Timestamp timestamp = java.sql.Timestamp.from(offsetDateTime.toInstant());
         final ZonedDateTime fromTimestamp = (ZonedDateTime) method.invoke(hearingService, timestamp);
-        assertThat(fromTimestamp.getZone(), is(java.time.ZoneOffset.UTC));
+        assertThat(fromTimestamp.getZone(), is(java.time.ZoneId.of("Europe/London")));
         assertThat(fromTimestamp.toInstant(), is(offsetDateTime.toInstant()));
 
         assertNull(method.invoke(hearingService, new Object[]{null}));
