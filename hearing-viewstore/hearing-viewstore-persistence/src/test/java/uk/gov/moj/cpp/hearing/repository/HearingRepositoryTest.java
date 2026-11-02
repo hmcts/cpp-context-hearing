@@ -10,6 +10,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.HearingDay.hearingDay;
@@ -42,6 +43,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+
+import jakarta.persistence.NonUniqueResultException;
 
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeAll;
@@ -330,6 +333,15 @@ class HearingRepositoryTest {
     void shouldReturnNullForFindHearingDayByHearingIdAndDate_whenHearingIdIsUnknown() {
         final LocalDate anyDate = hearings.get(0).getHearingDays().get(0).getSittingDay().toLocalDate();
         assertThat(hearingRepository.findHearingDayByHearingIdAndDate(randomUUID(), anyDate), is(nullValue()));
+    }
+
+    @Test
+    void shouldThrowNonUniqueResultForFindHearingDayByHearingIdAndDate_whenHearingHasTwoSittingsOnTheDate() {
+        final ZonedDateTime sittingDay = ZonedDateTime.now().plusDays(4).withHour(9).withMinute(0).withSecond(0).withNano(0);
+        final uk.gov.justice.core.courts.Hearing hearing = addSampleHearing(false, sittingDay, sittingDay.plusHours(2));
+
+        assertThrows(NonUniqueResultException.class,
+                () -> hearingRepository.findHearingDayByHearingIdAndDate(hearing.getId(), sittingDay.toLocalDate()));
     }
 
     @Test

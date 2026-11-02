@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NonUniqueResultException;
 import jakarta.persistence.PersistenceContext;
 
 
@@ -260,23 +261,25 @@ public class HearingRepository {
     }
 
     public CourtCentre findCourtCenterByHearingId(final UUID hearingId) {
-        return entityManager.createQuery(
+        return singleResultOrNull(entityManager.createQuery(
                 "SELECT hearing.courtCentre FROM Hearing hearing " +
                 "WHERE hearing.id = :hearingId",
                 CourtCentre.class)
                 .setParameter("hearingId", hearingId)
-                .getResultList().stream().findFirst().orElse(null);
+                .setMaxResults(2)
+                .getResultList());
     }
 
     public HearingDay findHearingDayByHearingIdAndDate(final UUID hearingId,
                                                        final LocalDate date) {
-        return entityManager.createQuery(
+        return singleResultOrNull(entityManager.createQuery(
                 "SELECT hd FROM Hearing hearing INNER JOIN hearing.hearingDays hd " +
                 "WHERE hearing.id = :hearingId AND hd.date = :date",
                 HearingDay.class)
                 .setParameter("hearingId", hearingId)
                 .setParameter("date", date)
-                .getResultList().stream().findFirst().orElse(null);
+                .setMaxResults(2)
+                .getResultList());
     }
 
     public List<Target> findTargetsByHearingId(final UUID hearingId) {
@@ -341,6 +344,17 @@ public class HearingRepository {
                 .setParameter("caseIds", caseIds)
                 .setParameter("date", date)
                 .getResultList();
+    }
+
+    // Same as DeltaSpike's SingleResultType.OPTIONAL: null when nothing matches, NonUniqueResultException when more than one row does.
+    private static <T> T singleResultOrNull(final List<T> results) {
+        if (results.isEmpty()) {
+            return null;
+        }
+        if (results.size() > 1) {
+            throw new NonUniqueResultException();
+        }
+        return results.getFirst();
     }
 
     private static UUID toUuid(final Object value) {
