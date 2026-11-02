@@ -55,7 +55,7 @@ public class ValidationRequestMapper {
                 command.getResultLines() != null ? command.getResultLines() : List.of();
 
         final List<ResultLineDto> resultLines = commandLines.stream()
-                .filter(line -> line.getApplicationId() == null)
+                .filter(line -> line.getDefendantId() != null && line.getOffenceId() != null)
                 .map(this::toResultLineDto)
                 .collect(toList());
 

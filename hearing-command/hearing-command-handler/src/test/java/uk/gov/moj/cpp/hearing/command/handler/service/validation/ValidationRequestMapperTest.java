@@ -418,7 +418,7 @@ class ValidationRequestMapperTest {
     }
 
     @Test
-    void shouldExcludeApplicationResultLines() {
+    void shouldExcludeResultLinesWithoutDefendantIdOrOffenceId() {
         final UUID offenceResultLineId = randomUUID();
 
         final SharedResultsCommandResultLineV2 offenceResultLine = SharedResultsCommandResultLineV2
@@ -430,6 +430,22 @@ class ValidationRequestMapperTest {
                 .withOffenceId(randomUUID())
                 .build();
 
+        final SharedResultsCommandResultLineV2 missingDefendantIdLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(randomUUID())
+                .withShortCode("FO")
+                .withResultLabel("Fine")
+                .withOffenceId(randomUUID())
+                .build();
+
+        final SharedResultsCommandResultLineV2 missingOffenceIdLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(randomUUID())
+                .withShortCode("REMC")
+                .withResultLabel("Remanded in custody")
+                .withDefendantId(randomUUID())
+                .build();
+
         final SharedResultsCommandResultLineV2 applicationResultLine = SharedResultsCommandResultLineV2
                 .sharedResultsCommandResultLine()
                 .withResultLineId(randomUUID())
@@ -439,11 +455,37 @@ class ValidationRequestMapperTest {
                 .build();
 
         final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(),
-                List.of(offenceResultLine, applicationResultLine));
+                List.of(offenceResultLine, missingDefendantIdLine, missingOffenceIdLine, applicationResultLine));
         final DraftValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
 
         assertThat(request.getResultLines(), hasSize(1));
         assertThat(request.getResultLines().get(0).getResultLineId(), is(offenceResultLineId.toString()));
+    }
+
+    @Test
+    void shouldIncludeApplicationResultLinesThatHaveDefendantIdAndOffenceId() {
+        final UUID resultLineId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        final SharedResultsCommandResultLineV2 applicationOffenceResultLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(resultLineId)
+                .withShortCode("IMP")
+                .withResultLabel("Imprisonment")
+                .withApplicationIds(randomUUID())
+                .withDefendantId(defendantId)
+                .withOffenceId(offenceId)
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(),
+                List.of(applicationOffenceResultLine));
+        final DraftValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+
+        assertThat(request.getResultLines(), hasSize(1));
+        assertThat(request.getResultLines().get(0).getResultLineId(), is(resultLineId.toString()));
+        assertThat(request.getResultLines().get(0).getDefendantId(), is(defendantId.toString()));
+        assertThat(request.getResultLines().get(0).getOffenceId(), is(offenceId.toString()));
     }
 
     @Test
