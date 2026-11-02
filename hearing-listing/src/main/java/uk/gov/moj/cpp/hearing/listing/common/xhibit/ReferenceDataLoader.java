@@ -145,22 +145,7 @@ public class ReferenceDataLoader {
 
         final Envelope<CourtMapping> response = requester.requestAsAdmin(requestEnvelope, CourtMapping.class);
 
-        if (Objects.isNull(response) || Objects.isNull(response.payload())) {
-            return empty();
-        }
-        final CourtMapping payload = response.payload();
-        if (isEmptyMagsCourtMappingPayload(payload)) {
-            return empty();
-        }
-        return of(new CourtMappingsList(asList(payload)));
-    }
-
-    /**
-     * Referencedata returns HTTP 200 with {@code {}} when no mags mapping exists; that deserialises to a
-     * {@link CourtMapping} with no id/oucode.
-     */
-    private static boolean isEmptyMagsCourtMappingPayload(final CourtMapping payload) {
-        return payload.getId() == null && payload.getOucode() == null;
+        return Objects.isNull(response) ? empty() : of((new CourtMappingsList(asList(response.payload()))));
     }
 
     public Optional<CourtRoomMappingsList> getCourtRoomMappingsList(UUID courtCentreId) {

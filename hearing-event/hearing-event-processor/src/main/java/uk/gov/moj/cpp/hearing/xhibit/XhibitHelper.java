@@ -44,9 +44,7 @@ public class XhibitHelper {
                 LOGGER.debug("Unable to find crest court center id {} in crown court reference cache so trying " +
                         "in mags court cache. Exception message is {}", courtCentreId, referenceDataException);
             }
-            // listing-common refactored getMagsCourtDetails(UUID) -> getCriminalCourtDetails(UUID) (mags/committing-court
-            // lookup via the cp-xhibit court-mappings cache); same InvalidReferenceDataException + CourtLocation contract.
-            courtDetails = commonXhibitReferenceDataService.getCriminalCourtDetails(courtCentreUUID);
+            courtDetails = commonXhibitReferenceDataService.getMagsCourtDetails(courtCentreUUID);
             return courtDetails.getCrestCourtId();
         }
     }
