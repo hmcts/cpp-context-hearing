@@ -10,12 +10,11 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit.courtCentreOrganisationUnit;
 import static uk.gov.justice.hearing.courts.referencedata.Courtrooms.courtrooms;
 import static uk.gov.justice.services.messaging.JsonObjects.createReader;
@@ -57,15 +56,18 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class NextHearingHelperV3Test  {
 
     private static final String DEFAULT_VALUE = "DefaultValue";
@@ -119,9 +121,8 @@ public class NextHearingHelperV3Test  {
     protected List<ResultDefinition> resultDefinitions;
     protected static final FileResourceObjectMapper fileResourceObjectMapper = new FileResourceObjectMapper();
 
-    @Before
+    @BeforeEach
     public void setUp()  throws IOException {
-        initMocks(this);
         resultDefinitions = fileResourceObjectMapper.convertFromFile(RESULT_DEFINITIONS_JSON, AllResultDefinitions.class).getResultDefinitions();
     }
     @Test

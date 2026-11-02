@@ -7,6 +7,8 @@ import static java.util.UUID.fromString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
+import org.junit.jupiter.api.Assumptions;
+import org.hamcrest.MatcherAssert;
 import uk.gov.moj.cpp.hearing.nces.ApplicationDetailsForDefendant;
 import uk.gov.moj.cpp.hearing.nces.DefendantUpdateWithApplicationDetails;
 import uk.gov.moj.cpp.hearing.nces.DefendantUpdateWithFinancialOrderDetails;
@@ -22,8 +24,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -114,11 +114,11 @@ public class NCESNotificationDecisionDelegateTest {
         Stream<Object> stream = ncesNotificationDecisionDelegateUnderTest.updateDefendantWithApplicationDetails(expectedApplicationDetailsForDefendant);
 
         List<Object> events = stream.collect(Collectors.toList());
-        Assert.assertThat(events.size(), is(1));
+        MatcherAssert.assertThat(events.size(), is(1));
 
         ApplicationDetailsForDefendant actualApplicationDetailsForDefendant = getApplicationDetailsForDefendantFromTheFirstEvent(events.get(0));
-        Assert.assertThat(actualApplicationDetailsForDefendant.getApplicationTypeId(), is(expectedApplicationDetailsForDefendant.getApplicationTypeId()));
-        Assert.assertThat(actualApplicationDetailsForDefendant.getApplicationOutcomeTypeId(), is(expectedApplicationDetailsForDefendant.getApplicationOutcomeTypeId()));
+        MatcherAssert.assertThat(actualApplicationDetailsForDefendant.getApplicationTypeId(), is(expectedApplicationDetailsForDefendant.getApplicationTypeId()));
+        MatcherAssert.assertThat(actualApplicationDetailsForDefendant.getApplicationOutcomeTypeId(), is(expectedApplicationDetailsForDefendant.getApplicationOutcomeTypeId()));
     }
 
     @ParameterizedTest
@@ -126,7 +126,7 @@ public class NCESNotificationDecisionDelegateTest {
     public void should_notify_NCES_with_defendant_and_application_details_when_refused_or_withdrawn(final String scenarioType,final  UUID applicationTypeId,final  UUID applicationOutcomeTypeId,
                                                                                                     final String amendmentType, final String scenarioName) {
 
-        Assume.assumeTrue(WITHDRAWN_SCENARIO_TYPE.equals(scenarioType) || REFUSED_SCENARIO_TYPE.equals(scenarioType));
+        Assumptions.assumeTrue(WITHDRAWN_SCENARIO_TYPE.equals(scenarioType) || REFUSED_SCENARIO_TYPE.equals(scenarioType));
         ApplicationDetailsForDefendant expectedApplicationDetailsForDefendant = createAppDetailsForDefendant(applicationTypeId, applicationOutcomeTypeId);
 
         Optional<String> noOldGobAccountNumber = empty();
@@ -137,15 +137,15 @@ public class NCESNotificationDecisionDelegateTest {
         Stream<Object> stream = ncesNotificationDecisionDelegateUnderTest.updateDefendantWithApplicationDetails(expectedApplicationDetailsForDefendant);
 
         List<Object> events = stream.collect(Collectors.toList());
-        Assert.assertThat(events.size(), is(2));
+        MatcherAssert.assertThat(events.size(), is(2));
 
         ApplicationDetailsForDefendant actualApplicationDetailsForDefendantFromTheFirstEvent = getApplicationDetailsForDefendantFromTheFirstEvent(events.get(0));
-        Assert.assertThat(actualApplicationDetailsForDefendantFromTheFirstEvent.getApplicationTypeId(), is(expectedApplicationDetailsForDefendant.getApplicationTypeId()));
-        Assert.assertThat(actualApplicationDetailsForDefendantFromTheFirstEvent.getApplicationOutcomeTypeId(), is(expectedApplicationDetailsForDefendant.getApplicationOutcomeTypeId()));
+        MatcherAssert.assertThat(actualApplicationDetailsForDefendantFromTheFirstEvent.getApplicationTypeId(), is(expectedApplicationDetailsForDefendant.getApplicationTypeId()));
+        MatcherAssert.assertThat(actualApplicationDetailsForDefendantFromTheFirstEvent.getApplicationOutcomeTypeId(), is(expectedApplicationDetailsForDefendant.getApplicationOutcomeTypeId()));
 
         FinancialOrderForDefendant actualFinancialOrderForDefendantFromTheSecondEvent = getFinancialOrderForDefendantFromTheSecondEvent(events.get(1));
         checkTheEvent(actualFinancialOrderForDefendantFromTheSecondEvent, existingFinancialOrderForDefendantWithoutOldGobAccountNumber);
-        Assert.assertThat(actualFinancialOrderForDefendantFromTheSecondEvent.getDocumentContent().getAmendmentType(), is(amendmentType));
+        MatcherAssert.assertThat(actualFinancialOrderForDefendantFromTheSecondEvent.getDocumentContent().getAmendmentType(), is(amendmentType));
     }
 
     @ParameterizedTest
@@ -162,7 +162,7 @@ public class NCESNotificationDecisionDelegateTest {
 
 
         List<Object> events = stream.collect(Collectors.toList());
-        Assert.assertThat(events.size(), is(1));
+        MatcherAssert.assertThat(events.size(), is(1));
 
         FinancialOrderForDefendant actualFinancialOrderForDefendantFromTheFirstEvent = getFinancialOrderForDefendantFromTheFirstEvent(events.get(0));
         checkTheEvent(expectedSharedFinancialOrderForDefendant, actualFinancialOrderForDefendantFromTheFirstEvent);
@@ -182,14 +182,14 @@ public class NCESNotificationDecisionDelegateTest {
         Stream<Object> stream = ncesNotificationDecisionDelegateUnderTest.updateDefendantWithFinancialOrder(expectedSharedFinancialOrderForDefendant);
 
         List<Object> events = stream.collect(Collectors.toList());
-        Assert.assertThat(events.size(), is(2));
+        MatcherAssert.assertThat(events.size(), is(2));
 
         FinancialOrderForDefendant actualFinancialOrderForDefendantFromTheFirstEvent = getFinancialOrderForDefendantFromTheFirstEvent(events.get(0));
         checkTheEvent(expectedSharedFinancialOrderForDefendant, actualFinancialOrderForDefendantFromTheFirstEvent);
 
         FinancialOrderForDefendant actualFinancialOrderForDefendantFromTheSecondEvent = getFinancialOrderForDefendantFromTheSecondEvent(events.get(1));
         checkTheEvent(expectedSharedFinancialOrderForDefendant, actualFinancialOrderForDefendantFromTheSecondEvent);
-        Assert.assertThat(actualFinancialOrderForDefendantFromTheSecondEvent.getDocumentContent().getAmendmentType(), is("Write off one day deemed served"));
+        MatcherAssert.assertThat(actualFinancialOrderForDefendantFromTheSecondEvent.getDocumentContent().getAmendmentType(), is("Write off one day deemed served"));
     }
 
     @ParameterizedTest
@@ -197,7 +197,7 @@ public class NCESNotificationDecisionDelegateTest {
     public void should_notify_NCES_when_we_reshare_with_an_existing_application(final String scenarioType,final  UUID applicationTypeId,final  UUID applicationOutcomeTypeId,
                                                                                 final String amendmentType, final String scenarioName) {
 
-        Assume.assumeTrue(GRANTED_SCENARIO_TYPE.equals(scenarioType));
+        Assumptions.assumeTrue(GRANTED_SCENARIO_TYPE.equals(scenarioType));
 
         FinancialOrderForDefendant expectedReshareFinancialOrderForDefendant = createFinancialOrderForDefendant(empty(), Optional.of(DEEMED_SERVED_RESULTS));
 
@@ -208,16 +208,16 @@ public class NCESNotificationDecisionDelegateTest {
         Stream<Object> stream = ncesNotificationDecisionDelegateUnderTest.updateDefendantWithFinancialOrder(expectedReshareFinancialOrderForDefendant);
 
         List<Object> events = stream.collect(Collectors.toList());
-        Assert.assertThat(events.size(), is(3));
+        MatcherAssert.assertThat(events.size(), is(3));
 
         FinancialOrderForDefendant actualFinancialOrderForDefendantFromTheFirstEvent = getFinancialOrderForDefendantFromTheFirstEvent(events.get(0));
         checkTheEvent(expectedReshareFinancialOrderForDefendant, actualFinancialOrderForDefendantFromTheFirstEvent);
 
         FinancialOrderForDefendant actualFinancialOrderForDefendantFromTheSecondEvent = getFinancialOrderForDefendantFromTheSecondEvent(events.get(1));
         checkTheEvent(expectedReshareFinancialOrderForDefendant, actualFinancialOrderForDefendantFromTheFirstEvent);
-        Assert.assertThat(actualFinancialOrderForDefendantFromTheSecondEvent.getDocumentContent().getAmendmentType(), is(amendmentType));
+        MatcherAssert.assertThat(actualFinancialOrderForDefendantFromTheSecondEvent.getDocumentContent().getAmendmentType(), is(amendmentType));
 
-        Assert.assertThat(events.get(2), instanceOf(RemoveGrantedApplicationDetailsForDefendant.class));
+        MatcherAssert.assertThat(events.get(2), instanceOf(RemoveGrantedApplicationDetailsForDefendant.class));
 
     }
 
@@ -226,7 +226,7 @@ public class NCESNotificationDecisionDelegateTest {
     public void should_notify_NCES_when_we_reshare_having_NO_deemed_served_results_without_an_existing_application(final String scenarioType,final  UUID applicationTypeId,final  UUID applicationOutcomeTypeId,
                                                                                                                    final String amendmentType, final String scenarioName) {
 
-        Assume.assumeTrue(GRANTED_SCENARIO_TYPE.equals(scenarioType));
+        Assumptions.assumeTrue(GRANTED_SCENARIO_TYPE.equals(scenarioType));
 
         Optional<List<UUID>> noDeemedServedResults = empty();
         FinancialOrderForDefendant expectedFinancialOrderForDefendant = createFinancialOrderForDefendant(empty(), noDeemedServedResults);
@@ -240,14 +240,14 @@ public class NCESNotificationDecisionDelegateTest {
         Stream<Object> stream = ncesNotificationDecisionDelegateUnderTest.updateDefendantWithFinancialOrder(expectedFinancialOrderForDefendant);
 
         List<Object> events = stream.collect(Collectors.toList());
-        Assert.assertThat(events.size(), is(2));
+        MatcherAssert.assertThat(events.size(), is(2));
 
         FinancialOrderForDefendant actualApplicationDetailsForDefendantFromTheFirstEvent = getFinancialOrderForDefendantFromTheFirstEvent(events.get(0));
         checkTheEvent(expectedFinancialOrderForDefendant, actualApplicationDetailsForDefendantFromTheFirstEvent);
 
         FinancialOrderForDefendant actualFinancialOrderForDefendantFromTheSecondEvent = getFinancialOrderForDefendantFromTheSecondEvent(events.get(1));
         checkTheEvent(expectedFinancialOrderForDefendant, actualFinancialOrderForDefendantFromTheSecondEvent);
-        Assert.assertThat(actualFinancialOrderForDefendantFromTheSecondEvent.getDocumentContent().getAmendmentType(), is("Amend result"));
+        MatcherAssert.assertThat(actualFinancialOrderForDefendantFromTheSecondEvent.getDocumentContent().getAmendmentType(), is("Amend result"));
     }
 
 
@@ -257,7 +257,7 @@ public class NCESNotificationDecisionDelegateTest {
     public void should_notify_NCES_when_we_reshare_having_deemed_served_results_without_an_existing_application(final String scenarioType,final  UUID applicationTypeId,final  UUID applicationOutcomeTypeId,
                                                                                                                 final String amendmentType, final String scenarioName) {
 
-        Assume.assumeTrue(GRANTED_SCENARIO_TYPE.equals(scenarioType));
+        Assumptions.assumeTrue(GRANTED_SCENARIO_TYPE.equals(scenarioType));
 
         FinancialOrderForDefendant expectedResharedFinancialOrderForDefendant = createFinancialOrderForDefendant(empty(), Optional.of(DEEMED_SERVED_RESULTS));
         FinancialOrderForDefendant existingFinancialOrderForDefendantForMomento = createFinancialOrderForDefendant(empty(), empty());
@@ -269,7 +269,7 @@ public class NCESNotificationDecisionDelegateTest {
         Stream<Object> stream = ncesNotificationDecisionDelegateUnderTest.updateDefendantWithFinancialOrder(expectedResharedFinancialOrderForDefendant);
 
         List<Object> events = stream.collect(Collectors.toList());
-        Assert.assertThat(events.size(), is(2));
+        MatcherAssert.assertThat(events.size(), is(2));
 
         FinancialOrderForDefendant actualApplicationDetailsForDefendantFromTheFirstEvent = getFinancialOrderForDefendantFromTheFirstEvent(events.get(0));
         checkTheEvent(expectedResharedFinancialOrderForDefendant, actualApplicationDetailsForDefendantFromTheFirstEvent);
@@ -277,14 +277,14 @@ public class NCESNotificationDecisionDelegateTest {
 
         FinancialOrderForDefendant actualFinancialOrderForDefendantFromTheSecondEvent = getFinancialOrderForDefendantFromTheSecondEvent(events.get(1));
         checkTheEvent(expectedResharedFinancialOrderForDefendant, actualFinancialOrderForDefendantFromTheSecondEvent);
-        Assert.assertThat(actualFinancialOrderForDefendantFromTheSecondEvent.getDocumentContent().getAmendmentType(), is("Amend result"));
+        MatcherAssert.assertThat(actualFinancialOrderForDefendantFromTheSecondEvent.getDocumentContent().getAmendmentType(), is("Amend result"));
 
     }
 
     private void checkTheEvent(FinancialOrderForDefendant expectedFinancialOrderForDefendant, FinancialOrderForDefendant actualApplicationDetailsForDefendantFromTheFirstEvent) {
-        Assert.assertThat(actualApplicationDetailsForDefendantFromTheFirstEvent.getHearingId(), is(expectedFinancialOrderForDefendant.getHearingId()));
-        Assert.assertThat(actualApplicationDetailsForDefendantFromTheFirstEvent.getDefendantId(), is(expectedFinancialOrderForDefendant.getDefendantId()));
-        Assert.assertThat(actualApplicationDetailsForDefendantFromTheFirstEvent.getCaseId(), is(expectedFinancialOrderForDefendant.getCaseId()));
+        MatcherAssert.assertThat(actualApplicationDetailsForDefendantFromTheFirstEvent.getHearingId(), is(expectedFinancialOrderForDefendant.getHearingId()));
+        MatcherAssert.assertThat(actualApplicationDetailsForDefendantFromTheFirstEvent.getDefendantId(), is(expectedFinancialOrderForDefendant.getDefendantId()));
+        MatcherAssert.assertThat(actualApplicationDetailsForDefendantFromTheFirstEvent.getCaseId(), is(expectedFinancialOrderForDefendant.getCaseId()));
     }
 
 

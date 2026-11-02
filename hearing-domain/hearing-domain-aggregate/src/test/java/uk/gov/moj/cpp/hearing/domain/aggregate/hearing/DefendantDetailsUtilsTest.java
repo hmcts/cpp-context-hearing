@@ -18,22 +18,18 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-import org.junit.experimental.theories.DataPoints;
-import org.junit.experimental.theories.Theories;
-import org.junit.experimental.theories.Theory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Theories.class)
 public class DefendantDetailsUtilsTest {
 
     private UUID offenceId;
     private UUID prosecutionCaseId;
     private UUID defendantId;
 
-    @DataPoints
-    public static Address[] CHANNELS = {
+    private static final Address[] CHANNELS = {
 
             Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build(), //Line 1
             Address.address().withAddress1("address1").withAddress2("address22").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build(), //Line 2
@@ -49,6 +45,10 @@ public class DefendantDetailsUtilsTest {
             Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address55").withPostcode("xyz").build(), //Line 1 and 5
     };
 
+    static Address[] changedAddresses() {
+        return CHANNELS;
+    }
+
     @BeforeEach
     public void init() {
         offenceId = randomUUID();
@@ -56,7 +56,8 @@ public class DefendantDetailsUtilsTest {
         defendantId = randomUUID();
     }
 
-    @Theory
+    @ParameterizedTest
+    @MethodSource("changedAddresses")
     public void whenThereIsAChangeInAddressForDefendantHearingShouldListDefendantForDDCH(final Address changedAddress) {
 
         final Address address = Address.address().withAddress1("address1").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
@@ -175,7 +176,8 @@ public class DefendantDetailsUtilsTest {
         assertThat(defendantDetailsUtils.verifyDDCHOnRequiredAttributes(defendant, updatedDefendantDetails), is(false));
     }
 
-    @Theory
+    @ParameterizedTest
+    @MethodSource("changedAddresses")
     public void shouldListDefendantForDDCHWhenThereIsAChangeInOrganisationAddressForDefendantHearing(final Address changedAddress) {
 
         final Address address = Address.address().withAddress1("address1").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();

@@ -1,10 +1,11 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import static java.util.Arrays.asList;
+import org.junit.jupiter.api.Assertions;
 import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.moj.cpp.hearing.mapping.AssociatedPersonJPAMapperTest.whenFirstAssociatedPerson;
 import static uk.gov.moj.cpp.hearing.mapping.OffenceJPAMapperTest.whenFirstOffence;
 import static uk.gov.moj.cpp.hearing.mapping.OrganisationJPAMapperTest.whenOrganization;
@@ -28,7 +29,6 @@ import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 public class DefendantJPAMapperTest {
@@ -150,8 +150,8 @@ public class DefendantJPAMapperTest {
         organisation.setName("ABC LTD");
         defendantEntity.setLegalEntityOrganisation(organisation);
         Defendant results = defendantJPAMapper.fromJPA(defendantEntity);
-        Assert.assertEquals("ABC LTD", results.getLegalEntityDefendant().getOrganisation().getName());
-        Assert.assertNull(results.getPersonDefendant());
+        Assertions.assertEquals("ABC LTD", results.getLegalEntityDefendant().getOrganisation().getName());
+        Assertions.assertNull(results.getPersonDefendant());
     }
 
     @Test
@@ -160,7 +160,7 @@ public class DefendantJPAMapperTest {
         uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant personDefendant = new uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant();
         defendantEntity.setPersonDefendant(personDefendant);
         Defendant results = defendantJPAMapper.fromJPA(defendantEntity);
-        Assert.assertNull(results.getLegalEntityDefendant());
+        Assertions.assertNull(results.getLegalEntityDefendant());
         assertNotNull(results.getPersonDefendant());
     }
 
@@ -194,21 +194,21 @@ public class DefendantJPAMapperTest {
         final List<Defendant> results = defendantJPAMapper.fromJPAWithCourtListRestrictions(Set.of(defendantEntity1, defendantEntity2));
 
         // Both defendants are retained - the restricted one is masked, not dropped (consistent with the listing court-list feed)
-        Assert.assertEquals(2, results.size());
+        Assertions.assertEquals(2, results.size());
 
         final Defendant restricted = results.stream()
                 .filter(d -> "******".equals(d.getPersonDefendant().getPersonDetails().getFirstName()))
                 .findFirst().orElse(null);
-        assertNotNull("Restricted defendant should be present with a masked name, not dropped", restricted);
-        Assert.assertEquals("******", restricted.getPersonDefendant().getPersonDetails().getFirstName());
-        Assert.assertEquals("******", restricted.getPersonDefendant().getPersonDetails().getMiddleName());
-        Assert.assertEquals("******", restricted.getPersonDefendant().getPersonDetails().getLastName());
+        assertNotNull(restricted, "Restricted defendant should be present with a masked name, not dropped");
+        Assertions.assertEquals("******", restricted.getPersonDefendant().getPersonDetails().getFirstName());
+        Assertions.assertEquals("******", restricted.getPersonDefendant().getPersonDetails().getMiddleName());
+        Assertions.assertEquals("******", restricted.getPersonDefendant().getPersonDetails().getLastName());
 
         final Defendant unrestricted = results.stream()
                 .filter(d -> "Jane".equals(d.getPersonDefendant().getPersonDetails().getFirstName()))
                 .findFirst().orElse(null);
-        assertNotNull("Non-restricted defendant should be present with its real name", unrestricted);
-        Assert.assertEquals("Doe", unrestricted.getPersonDefendant().getPersonDetails().getLastName());
+        assertNotNull(unrestricted, "Non-restricted defendant should be present with its real name");
+        Assertions.assertEquals("Doe", unrestricted.getPersonDefendant().getPersonDetails().getLastName());
     }
 
     @Test
@@ -228,8 +228,8 @@ public class DefendantJPAMapperTest {
         assertNotNull(results.getAssociatedDefenceOrganisation().getDefenceOrganisation());
 
         final uk.gov.justice.core.courts.DefenceOrganisation defenceOrganisationPojo = results.getAssociatedDefenceOrganisation().getDefenceOrganisation();
-        Assert.assertEquals("ABC LTD", defenceOrganisationPojo.getOrganisation().getName());
-        Assert.assertEquals("LAA123123", defenceOrganisationPojo.getLaaContractNumber());
+        Assertions.assertEquals("ABC LTD", defenceOrganisationPojo.getOrganisation().getName());
+        Assertions.assertEquals("LAA123123", defenceOrganisationPojo.getLaaContractNumber());
     }
 
     private void setupTestData() {

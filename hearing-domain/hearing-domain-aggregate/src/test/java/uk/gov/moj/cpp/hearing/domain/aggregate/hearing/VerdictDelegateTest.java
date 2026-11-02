@@ -7,7 +7,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -68,10 +68,8 @@ import java.util.stream.Stream;
 import com.google.common.collect.Lists;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -84,9 +82,6 @@ public class VerdictDelegateTest {
 
     @Mock
     private HearingAggregateMomento momento;
-
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
 
     private final Set<String> GUILTY_TYPES = new HashSet<>(Arrays.asList("GUILTY", "NOT_GUILTY", "NO_VERDICT"));
 

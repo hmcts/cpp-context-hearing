@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportFailed;
 import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportSuccessful;
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +32,7 @@ public class CourtListAggregateTest {
         courtListAggregate = new CourtListAggregate();
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         try {
             // ensure aggregate is serializable

@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendant;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
@@ -15,8 +15,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.After;
-import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +39,7 @@ public class MagistratesCourtHearingAggregateTest {
     @InjectMocks
     private MagistratesCourtHearingAggregate magistratesCourtHearingAggregate;
 
-    @After
+    @AfterEach
     public void teardown() {
         try {
             // ensure aggregate is serializable
@@ -62,18 +62,18 @@ public class MagistratesCourtHearingAggregateTest {
 
 
         Object event = lEvents.get(0);
-        Assert.assertEquals(1, lEvents.size());
-        Assert.assertEquals(event.getClass(), MagsCourtHearingRecorded.class);
+        Assertions.assertEquals(1, lEvents.size());
+        Assertions.assertEquals(event.getClass(), MagsCourtHearingRecorded.class);
 
         final MagsCourtHearingRecorded magsCourtHearingRecorded = (MagsCourtHearingRecorded) event;
-        Assert.assertEquals(CONVICTION_DATE, magsCourtHearingRecorded.getConvictionDate());
-        Assert.assertEquals(HEARING_ID, magsCourtHearingRecorded.getHearingId());
-        Assert.assertEquals(CASE_ID, magsCourtHearingRecorded.getOriginatingHearing().getCaseId());
-        Assert.assertEquals(CASE_URN, magsCourtHearingRecorded.getOriginatingHearing().getCaseUrn());
-        Assert.assertEquals(COURT_CENTRE_ID, magsCourtHearingRecorded.getOriginatingHearing().getCourtCentreId());
-        Assert.assertEquals(COURT_CENTRE_NAME, magsCourtHearingRecorded.getOriginatingHearing().getCourtCentreName());
-        Assert.assertEquals(SENDING_COMMITTAL_DATE, magsCourtHearingRecorded.getOriginatingHearing().getSendingCommittalDate());
-        Assert.assertEquals(TYPE, magsCourtHearingRecorded.getOriginatingHearing().getType());
+        Assertions.assertEquals(CONVICTION_DATE, magsCourtHearingRecorded.getConvictionDate());
+        Assertions.assertEquals(HEARING_ID, magsCourtHearingRecorded.getHearingId());
+        Assertions.assertEquals(CASE_ID, magsCourtHearingRecorded.getOriginatingHearing().getCaseId());
+        Assertions.assertEquals(CASE_URN, magsCourtHearingRecorded.getOriginatingHearing().getCaseUrn());
+        Assertions.assertEquals(COURT_CENTRE_ID, magsCourtHearingRecorded.getOriginatingHearing().getCourtCentreId());
+        Assertions.assertEquals(COURT_CENTRE_NAME, magsCourtHearingRecorded.getOriginatingHearing().getCourtCentreName());
+        Assertions.assertEquals(SENDING_COMMITTAL_DATE, magsCourtHearingRecorded.getOriginatingHearing().getSendingCommittalDate());
+        Assertions.assertEquals(TYPE, magsCourtHearingRecorded.getOriginatingHearing().getType());
 
     }
 

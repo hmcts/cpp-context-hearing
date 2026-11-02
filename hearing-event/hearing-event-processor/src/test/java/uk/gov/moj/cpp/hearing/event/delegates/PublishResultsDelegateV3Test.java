@@ -3,9 +3,9 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -350,7 +350,9 @@ public class PublishResultsDelegateV3Test  extends AbstractRestructuringTest {
         final List<TreeNode<ResultLine2>> resultTree = resultTreeBuilder.build(envelope, resultsShared, treeNodes);
         assertTrue(resultTree.stream().anyMatch(node ->
                         node.getData().getResultDefinitionId().equals(resultDefinitionWithDeemedServed.getId())));
-        assertNotNull(resultTree.get(0).getJudicialResult());
+        final TreeNode<ResultLine2> treeNode = resultTree.get(0);
+        final JudicialResult judicialResult = treeNode.getJudicialResult();
+        assertTrue(judicialResult.getIsDeemedServed());
     }
     
     private ResultsSharedV3 resultsSharedWithDeemedServed() {

@@ -7,7 +7,7 @@ ARG mavenArtifactBaseUrl
 ARG framework_version
 ARG eventstore_version
 ARG framework_libraries_version
-ARG activiti_version=17.21.1
+ARG activiti_version=25.104.0
 
 
 ARG wildfly_home=/opt/jboss/wildfly

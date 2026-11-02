@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-event</artifactId>
-        <version>25.104.10-M4-SNAPSHOT</version>
+        <version>25.104.210-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-event-listener</artifactId>
     <packaging>war</packaging>
@@ -80,11 +80,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>test-utils-core</artifactId>
             <scope>test</scope>
@@ -120,6 +115,8 @@
                             <goal>unpack</goal>
                         </goals>
                         <configuration>
+                            <!-- RELEASE still resolves to a javax (17.0.x) jar; skip until MI publishes a Jakarta one -->
+                            <skip>true</skip>
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>uk.gov.moj.cpp.mi.reportdata</groupId>

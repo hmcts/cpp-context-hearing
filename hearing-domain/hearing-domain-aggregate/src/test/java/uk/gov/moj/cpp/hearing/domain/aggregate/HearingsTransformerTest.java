@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.justice.progression.events.SendingSheetCompleted;
@@ -88,55 +88,55 @@ public class HearingsTransformerTest {
     }
 
     private void assertEqual(Plea expected, Plea actual) {
-        Assert.assertEquals(expected.getId(), actual.getId());
-        Assert.assertEquals(expected.getPleaDate(), actual.getPleaDate());
-        Assert.assertEquals(expected.getValue(), actual.getValue());
+        Assertions.assertEquals(expected.getId(), actual.getId());
+        Assertions.assertEquals(expected.getPleaDate(), actual.getPleaDate());
+        Assertions.assertEquals(expected.getValue(), actual.getValue());
 
     }
 
     private void assertEqual(Offence expected, Offence actual) {
-        Assert.assertEquals(expected.getId(), actual.getId());
-        Assert.assertEquals(expected.getCategory(), actual.getCategory());
-        Assert.assertEquals(expected.getConvictionDate(), actual.getConvictionDate());
-        Assert.assertEquals(expected.getDescription(), actual.getDescription());
-        Assert.assertEquals(expected.getEndDate(), actual.getEndDate());
-        Assert.assertEquals(expected.getOffenceCode(), actual.getOffenceCode());
-        Assert.assertEquals(expected.getSection(), actual.getSection());
-        Assert.assertEquals(expected.getReason(), actual.getReason());
-        Assert.assertEquals(expected.getWording(), actual.getWording());
-        Assert.assertEquals(expected.getSection(), actual.getSection());
+        Assertions.assertEquals(expected.getId(), actual.getId());
+        Assertions.assertEquals(expected.getCategory(), actual.getCategory());
+        Assertions.assertEquals(expected.getConvictionDate(), actual.getConvictionDate());
+        Assertions.assertEquals(expected.getDescription(), actual.getDescription());
+        Assertions.assertEquals(expected.getEndDate(), actual.getEndDate());
+        Assertions.assertEquals(expected.getOffenceCode(), actual.getOffenceCode());
+        Assertions.assertEquals(expected.getSection(), actual.getSection());
+        Assertions.assertEquals(expected.getReason(), actual.getReason());
+        Assertions.assertEquals(expected.getWording(), actual.getWording());
+        Assertions.assertEquals(expected.getSection(), actual.getSection());
         assertEqual(expected.getPlea(), actual.getPlea());
     }
 
     private void assertEqual(Address expected, Address actual) {
-        Assert.assertEquals(expected.getAddress1(), actual.getAddress1());
-        Assert.assertEquals(expected.getAddress2(), actual.getAddress2());
-        Assert.assertEquals(expected.getAddress3(), actual.getAddress3());
-        Assert.assertEquals(expected.getAddress4(), actual.getAddress4());
-        Assert.assertEquals(expected.getPostcode(), actual.getPostcode());
+        Assertions.assertEquals(expected.getAddress1(), actual.getAddress1());
+        Assertions.assertEquals(expected.getAddress2(), actual.getAddress2());
+        Assertions.assertEquals(expected.getAddress3(), actual.getAddress3());
+        Assertions.assertEquals(expected.getAddress4(), actual.getAddress4());
+        Assertions.assertEquals(expected.getPostcode(), actual.getPostcode());
     }
 
 
     private void assertEqual(Defendant expected, Defendant actual) {
-        Assert.assertEquals(expected.getId(), actual.getId());
-        Assert.assertEquals(expected.getFirstName(), expected.getFirstName());
-        Assert.assertEquals(expected.getLastName(), expected.getLastName());
-        Assert.assertEquals(expected.getGender(), expected.getGender());
-        Assert.assertEquals(expected.getBailStatus(), expected.getBailStatus());
-        Assert.assertEquals(expected.getCustodyTimeLimitDate(), expected.getCustodyTimeLimitDate());
-        Assert.assertEquals(expected.getDateOfBirth(), expected.getDateOfBirth());
-        Assert.assertEquals(expected.getDefenceOrganisation(), expected.getDefenceOrganisation());
+        Assertions.assertEquals(expected.getId(), actual.getId());
+        Assertions.assertEquals(expected.getFirstName(), expected.getFirstName());
+        Assertions.assertEquals(expected.getLastName(), expected.getLastName());
+        Assertions.assertEquals(expected.getGender(), expected.getGender());
+        Assertions.assertEquals(expected.getBailStatus(), expected.getBailStatus());
+        Assertions.assertEquals(expected.getCustodyTimeLimitDate(), expected.getCustodyTimeLimitDate());
+        Assertions.assertEquals(expected.getDateOfBirth(), expected.getDateOfBirth());
+        Assertions.assertEquals(expected.getDefenceOrganisation(), expected.getDefenceOrganisation());
         assertEqual(expected.getAddress(), actual.getAddress());
     }
 
     private void assertEqual(Hearing expected, Hearing actual) {
-        Assert.assertEquals(expected.getCaseId(), actual.getCaseId());
-        Assert.assertEquals(expected.getCourtCentreId(), actual.getCourtCentreId());
+        Assertions.assertEquals(expected.getCaseId(), actual.getCaseId());
+        Assertions.assertEquals(expected.getCourtCentreId(), actual.getCourtCentreId());
         String expectedHearingType = expected.getType() == null ? HearingTransformer.DEFAULT_HEARING_TYPE : expected.getType();
-        Assert.assertEquals(expectedHearingType, actual.getType());
-        Assert.assertEquals(expected.getCourtCentreName(), actual.getCourtCentreName());
-        Assert.assertEquals(expected.getCaseUrn(), actual.getCaseUrn());
-        Assert.assertEquals(expected.getSendingCommittalDate(), actual.getSendingCommittalDate());
+        Assertions.assertEquals(expectedHearingType, actual.getType());
+        Assertions.assertEquals(expected.getCourtCentreName(), actual.getCourtCentreName());
+        Assertions.assertEquals(expected.getCaseUrn(), actual.getCaseUrn());
+        Assertions.assertEquals(expected.getSendingCommittalDate(), actual.getSendingCommittalDate());
     }
 
     @Test
@@ -155,14 +155,14 @@ public class HearingsTransformerTest {
         }, defendantOffenceIndex2Plea, hearingType);
         final List<MagsCourtHearingRecorded> events = hearingTransformer.transform(sendingSheet.getHearing());
 
-        Assert.assertEquals(1, events.size());
+        Assertions.assertEquals(1, events.size());
         final MagsCourtHearingRecorded event = events.get(0);
 
         assertEqual(sendingSheet.getHearing(), event.getOriginatingHearing());
 
-        Assert.assertEquals(1, event.getOriginatingHearing().getDefendants().size());
+        Assertions.assertEquals(1, event.getOriginatingHearing().getDefendants().size());
         final Defendant defendantOut = event.getOriginatingHearing().getDefendants().get(0);
-        Assert.assertEquals(1, defendantOut.getOffences().size());
+        Assertions.assertEquals(1, defendantOut.getOffences().size());
         final Offence offenceOut = defendantOut.getOffences().get(0);
 
         Defendant defendantIn = sendingSheet.getHearing().getDefendants().get(guiltyDefendantIndex);
@@ -189,7 +189,7 @@ public class HearingsTransformerTest {
         }, defendantOffenceIndex2Plea, hearingType);
         List<MagsCourtHearingRecorded> events = hearingTransformer.transform(sendingSheet.getHearing());
 
-        Assert.assertEquals(defendantCount, events.size());
+        Assertions.assertEquals(defendantCount, events.size());
 
         for (int done = 0; done < events.size(); done++) {
             MagsCourtHearingRecorded event = events.get(done);
@@ -198,7 +198,7 @@ public class HearingsTransformerTest {
             Defendant defendantIn = sendingSheet.getHearing().getDefendants().get(done);
             Defendant defendantOut = event.getOriginatingHearing().getDefendants().get(0);
             assertEqual(defendantIn, defendantOut);
-            Assert.assertEquals(defendantIn.getId(), defendantOut.getId());
+            Assertions.assertEquals(defendantIn.getId(), defendantOut.getId());
             Offence offenceIn = defendantIn.getOffences().get(guiltyOffenceIndex);
             Offence offenceOut = defendantOut.getOffences().get(0);
             assertEqual(offenceIn, offenceOut);
@@ -219,7 +219,7 @@ public class HearingsTransformerTest {
             return offencesPerDefendant;
         }, defendantOffenceIndex2Plea, hearingType);
         List<MagsCourtHearingRecorded> events = hearingTransformer.transform(sendingSheet.getHearing());
-        Assert.assertEquals(0, events.size());
+        Assertions.assertEquals(0, events.size());
 
     }
 
@@ -239,7 +239,7 @@ public class HearingsTransformerTest {
             return offencesPerDefendant;
         }, defendantOffenceIndex2Plea, hearingType);
         List<MagsCourtHearingRecorded> events = hearingTransformer.transform(sendingSheet.getHearing());
-        Assert.assertEquals(guiltyPleaDateCount, events.size());
+        Assertions.assertEquals(guiltyPleaDateCount, events.size());
 
         for (int done = 0; done < events.size(); done++) {
             MagsCourtHearingRecorded event = events.get(done);
@@ -247,7 +247,7 @@ public class HearingsTransformerTest {
             Defendant defendantIn = sendingSheet.getHearing().getDefendants().get(done / defendantCount);
             Defendant defendantOut = event.getOriginatingHearing().getDefendants().get(0);
             assertEqual(defendantIn, defendantOut);
-            Assert.assertEquals(defendantIn.getId(), defendantOut.getId());
+            Assertions.assertEquals(defendantIn.getId(), defendantOut.getId());
             Offence offenceIn = defendantIn.getOffences().get(done % offencesPerDefendant);
             Offence offenceOut = defendantOut.getOffences().get(0);
             assertEqual(offenceIn, offenceOut);

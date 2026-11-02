@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -126,7 +126,7 @@ class OffenceRepositoryTest {
         });
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         hearings.forEach(hearing -> hearingRepository.attachAndRemove(hearingRepository.findBy(hearing.getId())));
     }

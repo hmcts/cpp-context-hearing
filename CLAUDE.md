@@ -260,18 +260,19 @@ cd hearing-performance-test && mvn jmeter:gui -Pscheduling-performance-test    #
 - `liquibase.headless` stays. It is still valid in Liquibase 5. The `NoSuchFieldException` in build
   logs is the maven plugin failing to map any dotted key onto a Mojo field; it is harmless.
 
-## crackedIneffectiveSubReasonId — query API vs public event
+## crackedIneffectiveSubReasonId — query API and public event
 
-There is a deliberate asymmetry, and the integration tests enforce it:
+Both sides carry it, as on `main` (CCT-2371):
 
-- the **query API** returns `crackedIneffectiveSubReasonId` (production behaviour since CCT-2371),
-  populated in `updateTrialAttributes` for a cracked/ineffective trial only;
-- **`public.hearing.resulted` does not carry it**, nor does the vacated-trial path, nor the
-  id-only `fetchCrackedIneffectiveTrial` lookup.
+- the **query API** returns it, populated in `HearingService.updateTrialAttributes` for a
+  cracked/ineffective trial;
+- **`public.hearing.resulted`** carries it because `HearingTrialTypeDelegate` keeps it on the
+  aggregate's `CrackedIneffectiveTrial`;
+- the vacated-trial path and the id-only `fetchCrackedIneffectiveTrial` lookup leave it null.
 
-`ShareResultsIT` uses one expectation object for both, so `publicEventShapeOf()` rebuilds it without
-the sub-reason for the public-event listener filters. If you add a trial-type assertion, pick the
-right shape for the side you are asserting on.
+The first Java 25 commit dropped it from the aggregate (and `isDeemedServed` and the deleted judicial
+results) because `coredomain` 25.104.0-M4 lacked those types. 25.104.5 has them again, so all three
+were restored from `main`. `ShareResultsIT` asserts the same expectation object on both sides.
 
 ## Known flaky
 
