@@ -226,7 +226,7 @@ cd hearing-performance-test && mvn jmeter:gui -Pscheduling-performance-test    #
 | `referencedata` | `17.103.131` |
 | `material` | `17.0.57` |
 | `results` | `17.0.58` |
-| `progression` | `17.0.249` |
+| `progression` | `17.104.306` |
 | `usersgroups` | `17.104.46` |
 | `stagingenforcement` | `17.103.77` |
 | `junit-dataprovider` | `1.13.1` |
