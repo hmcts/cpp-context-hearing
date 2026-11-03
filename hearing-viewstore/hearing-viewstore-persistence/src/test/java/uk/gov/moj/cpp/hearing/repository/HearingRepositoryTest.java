@@ -1,5 +1,11 @@
 package uk.gov.moj.cpp.hearing.repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import javax.persistence.NonUniqueResultException;
+import javax.persistence.NoResultException;
+import javax.persistence.EntityManager;
+import static org.junit.Assert.assertThrows;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -618,5 +624,120 @@ public class HearingRepositoryTest {
         hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
         hearingRepository.save(hearingEntity);
         hearings.add(initiateHearingCommand.getHearing());
+    }
+
+    @Test
+    public void chd08_findHearingDayByHearingIdAndDateThrowsNonUniqueResultWhenTheHearingHasTwoSittingsOnTheDate() {
+        final ZonedDateTime sittingDay = ZonedDateTime.now().plusDays(4).withHour(9).withMinute(0).withSecond(0).withNano(0);
+        final uk.gov.justice.core.courts.Hearing hearing = addSampleHearing(false, sittingDay, sittingDay.plusHours(2));
+
+        assertThrows(NonUniqueResultException.class,
+                () -> hearingRepository.findHearingDayByHearingIdAndDate(hearing.getId(), sittingDay.toLocalDate()));
+    }
+
+    @Test
+    public void chd01_lazyCollectionsOfAHearingAreReadableAfterTheSessionThatLoadedItHasEnded() {
+        final uk.gov.justice.core.courts.Hearing domainHearing = minimumInitiateHearingTemplate().getHearing();
+
+        final Hearing loaded = loadInASessionThatThenEnds(domainHearing);
+
+        assertThat(loaded.getProsecutionCases().size(), is(domainHearing.getProsecutionCases().size()));
+    }
+
+    @Test
+    public void chd05_jsonColumnRoundTripsNestedObjectsNumbersAndNullFields() throws Exception {
+        final JsonNode payload = new ObjectMapper().readTree(
+                "{\"text\":\"note\",\"count\":12,\"ratio\":1.5,\"absent\":null,\"nested\":{\"values\":[1,2]}}");
+
+        final HearingCaseNote reloaded = saveAndReloadCaseNoteWithPayload(payload);
+
+        assertThat(reloaded.getPayload(), is(payload));
+    }
+
+    @Test
+    public void chd06_saveOfANewHearingLeavesThePassedInstanceManaged() {
+        final Hearing newHearing = newHearingEntity();
+
+        hearingRepository.save(newHearing);
+
+        assertThat(entityManager().contains(newHearing), is(true));
+    }
+
+    @Test
+    public void chd06_saveOfANewHearingStoresItsChildren() {
+        final Hearing newHearing = newHearingEntity();
+        final int prosecutionCaseCount = newHearing.getProsecutionCases().size();
+
+        hearingRepository.save(newHearing);
+        flushAndClear();
+
+        assertThat(hearingRepository.findBy(newHearing.getId()).getProsecutionCases().size(), is(prosecutionCaseCount));
+    }
+
+    @Test
+    public void chd07_findByHearingIdAndJurisdictionTypeThrowsNoResultWhenNothingMatches() {
+        assertThrows(NoResultException.class,
+                () -> hearingRepository.findByHearingIdAndJurisdictionType(randomUUID(), JurisdictionType.CROWN));
+    }
+
+    // ── CHD harness (Java 17: DeltaSpike repositories, request-scoped EntityManager, each repository call commits) ──
+
+    @Inject
+    private EntityManager entityManager;
+
+    private final List<UUID> chdHearingIds = new ArrayList<>();
+
+    @After
+    public void removeChdHearings() {
+        chdHearingIds.forEach(id -> {
+            final Hearing hearing = hearingRepository.findBy(id);
+            if (hearing != null) {
+                hearingRepository.attachAndRemove(hearing);
+            }
+        });
+        chdHearingIds.clear();
+    }
+
+    private EntityManager entityManager() {
+        return entityManager;
+    }
+
+    // Each repository call has already committed, so only the persistence context needs clearing.
+    private void flushAndClear() {
+        entityManager.clear();
+    }
+
+    private Hearing newHearingEntity() {
+        final Hearing hearing = hearingJPAMapper.toJPA(minimumInitiateHearingTemplate().getHearing());
+        hearing.setCourtApplicationsJson(hearing.getCourtApplicationsJson().substring(0, 255));
+        hearing.getProsecutionCases().iterator().next().setMarkers(null);
+        chdHearingIds.add(hearing.getId());
+        return hearing;
+    }
+
+    private HearingCaseNote saveAndReloadCaseNoteWithPayload(final JsonNode payload) {
+        final Hearing hearing = hearingRepository.findBy(hearings.get(0).getId());
+        final HearingSnapshotKey key = new HearingSnapshotKey(randomUUID(), hearing.getId());
+        final HearingCaseNote hearingCaseNote = new HearingCaseNote();
+        hearingCaseNote.setId(key);
+        hearingCaseNote.setHearing(hearing);
+        hearingCaseNote.setPayload(payload);
+        hearingCaseNoteRepository.save(hearingCaseNote);
+        flushAndClear();
+        return entityManager.find(HearingCaseNote.class, key);
+    }
+
+    /**
+     * Java 17: the repository call commits and ends its transaction, but the request-scoped EntityManager that
+     * loaded the hearing stays open for the rest of the request.
+     */
+    private Hearing loadInASessionThatThenEnds(final uk.gov.justice.core.courts.Hearing domainHearing) {
+        final Hearing entity = hearingJPAMapper.toJPA(domainHearing);
+        entity.setCourtApplicationsJson(entity.getCourtApplicationsJson().substring(0, 255));
+        entity.getProsecutionCases().iterator().next().setMarkers(null);
+        chdHearingIds.add(entity.getId());
+        hearingRepository.save(entity);
+        flushAndClear();
+        return hearingRepository.findBy(domainHearing.getId());
     }
 }

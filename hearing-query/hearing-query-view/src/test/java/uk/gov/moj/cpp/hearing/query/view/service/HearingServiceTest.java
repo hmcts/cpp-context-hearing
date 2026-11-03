@@ -2966,4 +2966,29 @@ public class HearingServiceTest {
         assertThat(result.getHearing().getId(), is(hearingId));
         assertThat(result.getHearing().getCourtApplications(), hasSize(1));
     }
+
+    @Test
+    void chd09_convertToZonedDateTimeConvertsATimestampToTheSameInstantInEuropeLondon() throws Exception {
+        final java.sql.Timestamp timestamp = java.sql.Timestamp.from(java.time.Instant.parse("2026-07-13T10:30:00Z"));
+
+        final ZonedDateTime converted = (ZonedDateTime) invokeHearingServiceConverter("convertToZonedDateTime", timestamp);
+
+        assertThat(converted.getZone(), is(java.time.ZoneId.of("Europe/London")));
+        assertThat(converted.toInstant(), is(timestamp.toInstant()));
+    }
+
+    @Test
+    void chd10_convertToLocalDateConvertsASqlDateToTheSameLocalDate() throws Exception {
+        final java.sql.Date date = java.sql.Date.valueOf(java.time.LocalDate.of(2026, 7, 13));
+
+        assertThat(invokeHearingServiceConverter("convertToLocalDate", date), is(java.time.LocalDate.of(2026, 7, 13)));
+    }
+
+    // ── CHD harness ──────────────────────────────────────────────────────────────────────────────────────────────
+
+    private Object invokeHearingServiceConverter(final String converterName, final Object value) throws Exception {
+        final java.lang.reflect.Method method = HearingService.class.getDeclaredMethod(converterName, Object.class);
+        method.setAccessible(true);
+        return method.invoke(hearingService, value);
+    }
 }

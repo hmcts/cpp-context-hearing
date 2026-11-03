@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.repository;
 
+import javax.persistence.NonUniqueResultException;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThrows;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -82,5 +85,53 @@ public class DefendantAttendanceRepositoryTest {
         assertThat(entity.getDay(), is(date));
         assertThat(entity.getAttendanceType(), is(isInAttendance));
 
+    }
+
+    @Test
+    public void chd08_findByHearingIdDefendantIdAndDateThrowsNonUniqueResultWhenTwoRowsMatch() {
+        final UUID hearingId = savedHearingId();
+        final UUID defendantId = randomUUID();
+        final LocalDate day = LocalDate.of(2017, 12, 13);
+        saveAttendance(hearingId, defendantId, day, AttendanceType.IN_PERSON);
+        saveAttendance(hearingId, defendantId, day, AttendanceType.NOT_PRESENT);
+
+        assertThrows(NonUniqueResultException.class,
+                () -> defendantAttendanceRepository.findByHearingIdDefendantIdAndDate(hearingId, defendantId, day));
+    }
+
+    @Test
+    public void chd08_findByHearingIdDefendantIdAndDateReturnsNullWhenNothingMatches() {
+        assertThat(defendantAttendanceRepository.findByHearingIdDefendantIdAndDate(savedHearingId(), randomUUID(), LocalDate.of(2017, 12, 13)),
+                is(nullValue()));
+    }
+
+    @Test
+    public void chd11_findByHearingIdDefendantIdAndDateMatchesOnlyTheRequestedDay() {
+        final UUID hearingId = savedHearingId();
+        final UUID defendantId = randomUUID();
+        saveAttendance(hearingId, defendantId, LocalDate.of(2017, 12, 13), AttendanceType.IN_PERSON);
+        saveAttendance(hearingId, defendantId, LocalDate.of(2017, 12, 14), AttendanceType.NOT_PRESENT);
+
+        final DefendantAttendance found = defendantAttendanceRepository.findByHearingIdDefendantIdAndDate(hearingId, defendantId, LocalDate.of(2017, 12, 14));
+
+        assertThat(found.getAttendanceType(), is(AttendanceType.NOT_PRESENT));
+    }
+
+    // ── CHD harness ──────────────────────────────────────────────────────────────────────────────────────────────
+
+    private UUID savedHearingId() {
+        final Hearing hearingEntity = hearingJPAMapper.toJPA(minimumInitiateHearingTemplate().getHearing());
+        hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
+        hearingRepository.save(hearingEntity);
+        return hearingEntity.getId();
+    }
+
+    private void saveAttendance(final UUID hearingId, final UUID defendantId, final LocalDate day, final AttendanceType attendanceType) {
+        final DefendantAttendance defendantAttendance = new DefendantAttendance();
+        defendantAttendance.setId(new HearingSnapshotKey(randomUUID(), hearingId));
+        defendantAttendance.setDefendantId(defendantId);
+        defendantAttendance.setDay(day);
+        defendantAttendance.setAttendanceType(attendanceType);
+        defendantAttendanceRepository.save(defendantAttendance);
     }
 }
