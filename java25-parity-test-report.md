@@ -33,7 +33,7 @@ Parity tests by runtime (15 methods; same names and bodies in both copies):
 
 | ID | Severity | What could change | Parity test | Java 25 result | Suggested fix / decision |
 |---|---|---|---|---|---|
-| CHD-01 | Medium | Lazy collections read after the session ends | `HearingRepositoryTest.chd01_lazyCollectionsOfAHearingAreReadableAfterTheSessionThatLoadedItHasEnded` | Pass (with production's `enable_lazy_load_no_trans=true`) | Stage 5 design fix: remove the flag, add `@Transactional` to query-view entry points. This repository-level test will then go red by design; replace it with a service-level test of those entry points |
+| CHD-01 | Medium | Lazy collections read after the session ends | Was `HearingRepositoryTest.chd01_lazyCollectionsOfAHearingAreReadableAfterTheSessionThatLoadedItHasEnded` (passed on Java 17 and on Java 25 with the flag); now `HearingQueryViewTest.chd01_queryViewEntryPointsRunInATransaction` | Pass | **Fixed (design)** in this commit: removed `hibernate.enable_lazy_load_no_trans`; `HearingQueryView`, `HearingEventQueryView` and `SessionTimeQueryView` (every query-view entry point the query API calls) are `@Transactional`, so one session spans each query as Java 17's request-scoped EntityManager did. The interceptor only runs in the container, so the new test guards the annotations and the **Stage 6 Java 25 ITs prove the behaviour** (any missed path shows as `LazyInitializationException`). Needs sign-off as a design change |
 | CHD-02 | Medium | Runtime Hibernate 7.3.2 vs tests on 6.6.1 | Whole persistence module with `-Phibernate-7.3.2` | Same results as 6.6.1 | None. The profile needs `hibernate-scan-jandex` (test scope) because Hibernate 7 moved classpath scanning out of core; WildFly discovers entities itself |
 | CHD-03 | Medium | `UnspecifiedUuidUserType` parses `ha_defendant`'s `text` column with `UUID.fromString` | Not written: H2 can't hold non-UUID text in a column mapped as `uuid`, so a unit test can't reproduce it | — | Needs a PostgreSQL-level check (IT or a query against NFT data for non-UUID `nationality_id` values) |
 | CHD-04 | Low–Medium | `ZonedDateTime` zone after reading `…Z` | `ObjectMapperProducerTest.chd04_writesAUtcZonedDateTimeWithAZSuffix`; `.chd04_readsAZSuffixedTimeAsTheSameInstantWithZoneOffsetUtc` (was `…WithTheUtcZoneId`) | Write: same as Java 17. Read: zone `Z` (`ZoneOffset.UTC`) where Java 17 gave `UTC` (confirmed in Stage 4) | **Accepted.** Framework behaviour (BC-08): same instant, same JSON; only the zone object differs, which already required 77 IT expectations to change. Test now asserts the Java 25 behaviour |
@@ -57,7 +57,8 @@ Parity tests by runtime (15 methods; same names and bodies in both copies):
 |---|---|---|---|
 | CHD-17 | Fixed | `5046ba6c4e` | Restores Java 17's `NoResultException`, so the outstanding-fines query returns an empty payload for an unknown defendant instead of failing. Only `chd17` went from red to green (persistence module: 237 tests before and after) |
 | CHD-06 | Accepted, provisional | `ef6dd8a1fc` | No production caller uses an entity after `save`; pending owner review, as asked. Reverting `ef6dd8a1fc` restores the Java 17 assertion |
-| CHD-04 | Accepted | this commit | Framework serialisation (BC-08): identical instant and JSON; the zone object is `ZoneOffset.UTC` instead of `ZoneId.of("UTC")`, so only `equals`/`toString` on `ZonedDateTime` differ |
+| CHD-04 | Accepted | `20c3ac50a9` | Framework serialisation (BC-08): identical instant and JSON; the zone object is `ZoneOffset.UTC` instead of `ZoneId.of("UTC")`, so only `equals`/`toString` on `ZonedDateTime` differ |
+| CHD-01 | Fixed (design) | this commit | Replaces the context-wide lazy-loading flag with a transaction per query-view entry point, matching Java 17's one session per request; confirmed only by the Stage 6 ITs |
 
 ## How to run
 
@@ -70,5 +71,5 @@ mvn test -pl hearing-viewstore/hearing-viewstore-persistence -Phibernate-7.3.2
 
 ## Still to do
 
-- Stage 5: the CHD-01 design fix; owner review of the provisional CHD-06 acceptance.
-- Stage 6: integration tests on both JDKs.
+- Stage 5: owner review of the provisional CHD-06 acceptance and sign-off for CHD-01 and CHD-04.
+- Stage 6: integration tests on both JDKs; the Java 25 run confirms CHD-01 (no `LazyInitializationException` in `server.log`).
