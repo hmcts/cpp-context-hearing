@@ -1,69 +1,81 @@
 # hearing: Java 17 → Java 25 parity test report
 
-Process: [Java 25 upgrade with parity tests (team CHD)](https://hmcts.atlassian.net/wiki/spaces/CHD/pages/366839818).
-Risks come from `java25-stage2-risk-review.md` (Stage 2). Branch: `dev/25.104-chd-j25-j17-parity`, from
-`dev/25.104-chd-j25` (`c1e5322d8e`).
+Process: [Java 25 upgrade with parity tests (team CHD)](https://hmcts.atlassian.net/wiki/spaces/CHD/pages/366839818);
+catalogue: [Parity Testing Java17 → Java25](https://hmcts.atlassian.net/wiki/spaces/CTP/pages/279752455).
+Risks and the list of non-mechanical changes: `java25-stage2-risk-review.md`.
 
-Each parity test asserts the **Java 17** behaviour, so a failure on Java 25 is a behaviour change to triage in Stage 5.
-Stage 4 ran the same tests (identical method names and bodies, harness changed only) on `main` with JDK 17, on
-`dev/CHD-2864-chd-parity-with-j25` (not merged). Every expectation was confirmed there, apart from CHD-05, which can't run on
-Java 17 with H2 (see the table).
+| Branch | JDK | Role |
+|---|---|---|
+| `dev/25.104-chd-j25` | 25 | Java 25 upgrade (squash of `team/25.104.x` onto `main`, plus Stage 1 fixes) |
+| `dev/25.104-chd-j25-j17-parity` | 25 | This branch: parity tests, Stage 5 fixes, this report. PR 2 → `dev/25.104-chd-j25` |
+| `dev/CHD-2864-chd-parity-with-j25` | 17 | Java 17 copy of the parity tests on `main`. Never merged; establishes the Java 17 behaviour |
+
+Each parity test (`chdNN_…`) asserts the **Java 17** behaviour, so a Java 25 failure is a behaviour change. Both copies use
+the same method names and bodies; only the test harness differs. Where Java 25 behaviour was accepted, the Java 25 copy was
+changed to assert it (CHD-04, CHD-06) and the Java 17 copy keeps the original assertion.
 
 ## Results
 
-| Run | Classes | Tests | Failures | Errors | Skipped |
-|---|---|---|---|---|---|
-| Java 25 unit tests (Hibernate 6.6.1, BOM default) | 420 | 2,876 | 3 | 0 | 40 |
-| Java 25 persistence tests on Hibernate 7.3.2 (`-Phibernate-7.3.2`) | — | 237 | 2 | 0 | 4 |
-| Java 17 unit tests (`main` + parity tests, JDK 17.0.9; Stage 4) | 417 | 2,777 | 0 | 1 (CHD-05, can't run on H2) | 38 |
-| Java 25 integration tests (`dev/25.104-chd-j25-j17-parity`, `cpp-developers-docker` `java-25`; Stage 6) | 61 | 263 | 0 | 0 | 23 |
-| Java 17 integration tests (`dev/CHD-2864-chd-parity-with-j25`, `cpp-developers-docker` `java-17`; Stage 6) | 61 | 263 | 2 | 0 | 23 |
+All numbers below are from actual runs, read from the surefire/failsafe reports those runs wrote.
 
-All unit-test failures are parity tests (below); no other test fails on either Hibernate version.
+| Run | Commit | Classes | Tests | Failures | Errors | Skipped |
+|---|---|---|---|---|---|---|
+| `main`, JDK 17 (baseline, before parity tests) | `6683b26770` | 416 | 2,762 | 0 | 0 | 38 |
+| Java 17 unit tests (`main` + parity tests, JDK 17.0.9) | `d523e25780` | 417 | 2,777 | 0 | 0 | 39 |
+| Java 25 unit tests (JDK 25.0.3, Hibernate 6.6.1) | `f498097729` | 420 | 2,876 | 0 | 0 | 40 |
+| Java 25 persistence tests on Hibernate 7.3.2 (`-Phibernate-7.3.2`) | `f498097729` | 64 | 236 | 0 | 0 | 4 |
+| Java 17 integration tests (`cpp-developers-docker` `java-17`) | `d523e25780` | 61 | 263 | 0 | 0 | 23 |
+| Java 25 integration tests (`cpp-developers-docker` `java-25`) | `f498097729`* | 61 | 263 | 0 | 0 | 23 |
 
-Integration tests: both runs deployed the WAR and passed all healthchecks, and ran the same 61 classes with the same
-counts. The only differences are the two Java 17 failures, `CaseMarkerIT.shouldUpdateCaseMarkers` and
-`ShareResultsV2IT.shouldRetainHigherPriorityOffenceRemandStatusFromOutsideLaterHearingDay`: event-ordering races in the
-tests themselves, fixed on the Java 25 branch in `ec13040048` and not on `main`. They have since been cherry-picked to the
-Java 17 copy (`d523e25780`). Server-side exceptions are the same types and counts on both JDKs (null reference-data
-payloads, identical schema rejections, one Xhibit XML error, and an NPE in `HearingService.getHearingDetailsResponseById`
-for DDJ polls that arrive before the hearing exists, present on `main`). No `LazyInitializationException`,
-`TransactionRequiredException`, strict-JPQL or alias errors on Java 25. The 7.3.2 run fails the same two
-persistence parity tests as 6.6.1 and nothing else.
+\* The Java 25 IT run was on `c38e7749a2`; `f498097729` only changes this report.
 
-Parity tests by runtime (15 methods; same names and bodies in both copies):
+- **Unit tests:** Java 17 has one more skipped test than the baseline (`chd05`, which can't run on Java 17; see CHD-05).
+  Java 25 has 3 more classes and 99 more tests than Java 17: the newer JUnit 5 Theories counting, the Java 25-only tests
+  (`UnspecifiedUuidUserTypeTest`, `PtphDetailRepositoryTest`, two `AccessControlRuleCountTest`s) and team's additions,
+  less the 19 MI contract tests that don't run on Java 25 (CHD-16). Per-class differences are explained in
+  `java25-stage2-risk-review.md`.
+- **Hibernate 7.3.2:** the persistence module gives the same results as on 6.6.1.
+- **Integration tests:** both JDKs deployed the WAR, passed 5/5 healthchecks, and ran the same 61 classes with identical
+  per-class counts. Server-side exceptions were the same types and counts on both (null reference-data payloads,
+  identical JSON-schema rejections, one Xhibit XML error, and an NPE in `HearingService.getHearingDetailsResponseById`
+  when a DDJ poll arrives before its hearing exists, also on `main`). Java 25 had no `LazyInitializationException`,
+  `TransactionRequiredException`, strict-JPQL or alias errors.
+- An earlier Java 17 IT run, before the flaky-test fixes were cherry-picked (`d523e25780`), failed
+  `CaseMarkerIT.shouldUpdateCaseMarkers` and `ShareResultsV2IT.shouldRetainHigherPriorityOffenceRemandStatusFromOutsideLaterHearingDay`:
+  event-ordering races in the tests themselves, fixed on the Java 25 branch in `ec13040048`.
 
-| | Pass | Fail | Can't run |
+### Parity tests by runtime
+
+| | Pass | Fail | Skipped |
 |---|---|---|---|
-| Java 17 (`main` + parity tests, JDK 17.0.9) | 14 | 0 | 1 (CHD-05) |
-| Java 25 (JDK 25.0.3, Hibernate 6.6.1) | 12 | 3 (CHD-04 read, CHD-06 managed, CHD-17) | 0 |
+| Java 17 copy (15 tests) | 14 | 0 | 1 (`chd05`) |
+| Java 25 copy (15 tests) | 15 | 0 | 0 |
 
 ## Findings
 
-| ID | Severity | What could change | Parity test | Java 25 result | Suggested fix / decision |
-|---|---|---|---|---|---|
-| CHD-01 | Medium | Lazy collections read after the session ends | Was `HearingRepositoryTest.chd01_lazyCollectionsOfAHearingAreReadableAfterTheSessionThatLoadedItHasEnded` (passed on Java 17 and on Java 25 with the flag); now `HearingQueryViewTest.chd01_queryViewEntryPointsRunInATransaction` | Pass | **Fixed (design)** in this commit: removed `hibernate.enable_lazy_load_no_trans`; `HearingQueryView`, `HearingEventQueryView` and `SessionTimeQueryView` (every query-view entry point the query API calls) are `@Transactional`, so one session spans each query as Java 17's request-scoped EntityManager did. The interceptor only runs in the container, so the new test guards the annotations and the **Stage 6 Java 25 ITs prove the behaviour** (any missed path shows as `LazyInitializationException`). Needs sign-off as a design change |
-| CHD-02 | Medium | Runtime Hibernate 7.3.2 vs tests on 6.6.1 | Whole persistence module with `-Phibernate-7.3.2` | Same results as 6.6.1 | None. The profile needs `hibernate-scan-jandex` (test scope) because Hibernate 7 moved classpath scanning out of core; WildFly discovers entities itself |
-| CHD-03 | Medium | `UnspecifiedUuidUserType` parses `ha_defendant`'s `text` column with `UUID.fromString` | Not a unit test: H2 can't hold non-UUID text in a column mapped as `uuid`. Checked against real data instead, with the query under "CHD-03 data check" | Pending: query not yet run | If the count is 0, no fix needed. If not, decide per value: clean the data with a Liquibase changeset, or make `nullSafeGet` tolerate it, whichever matches Java 17's outcome for that value |
-| CHD-04 | Low–Medium | `ZonedDateTime` zone after reading `…Z` | `ObjectMapperProducerTest.chd04_writesAUtcZonedDateTimeWithAZSuffix`; `.chd04_readsAZSuffixedTimeAsTheSameInstantWithZoneOffsetUtc` (was `…WithTheUtcZoneId`) | Write: same as Java 17. Read: zone `Z` (`ZoneOffset.UTC`) where Java 17 gave `UTC` (confirmed in Stage 4) | **Accepted.** Framework behaviour (BC-08): same instant, same JSON; only the zone object differs, which already required 77 IT expectations to change. Test now asserts the Java 25 behaviour |
-| CHD-05 | Low–Medium | JSON column mapping changed | `HearingRepositoryTest.chd05_jsonColumnRoundTripsNestedObjectsNumbersAndNullFields` | Pass | None. **Can't run on Java 17**: hibernate-types' `JsonNodeBinaryType` can't read H2's column (`JsonParseException: Unrecognized token 'B'`), the reason `main`'s own case-note tests are `@Ignore`d. Parity rests on the Stage 6 ITs: green on both JDKs |
-| CHD-06 | Low | `save` is always `merge`; DeltaSpike persisted new entities (checked in its bytecode: `persist` when the ID has no row and the entity isn't managed) | `HearingRepositoryTest.chd06_saveOfANewHearingReturnsAManagedCopyAndLeavesThePassedInstanceDetached` (was `…LeavesThePassedInstanceManaged`); `.chd06_saveOfANewHearingStoresItsChildren` | Managed instance differs from Java 17 (managed there, confirmed in Stage 4); children: pass | **Accepted (provisional, pending owner review).** No production code changes an entity after `save`, so nothing relies on the passed instance being managed. Test changed to assert the Java 25 behaviour. Alternative if rejected: persist-if-new in `save` |
-| CHD-07 | Low | Not-found behaviour of `findByHearingIdAndJurisdictionType` | `HearingRepositoryTest.chd07_findByHearingIdAndJurisdictionTypeThrowsNoResultWhenNothingMatches` | Pass | None for parity. Existing bug on both branches: the caller expects `null` |
-| CHD-08 | Low | Duplicate rows in the three `OPTIONAL` finders | `HearingRepositoryTest.chd08_findHearingDayByHearingIdAndDateThrowsNonUniqueResultWhenTheHearingHasTwoSittingsOnTheDate`; `DefendantAttendanceRepositoryTest.chd08_…ThrowsNonUniqueResultWhenTwoRowsMatch`, `chd08_…ReturnsNullWhenNothingMatches` | Pass | None (fixed in `cfbba01970`) |
-| CHD-09 | Low | `Timestamp` → `ZonedDateTime` conversion | `HearingServiceTest.chd09_convertToZonedDateTimeConvertsATimestampToTheSameInstantInEuropeLondon` | Pass | None |
-| CHD-10 | Low | `java.sql.Date` → `LocalDate` conversion | `HearingServiceTest.chd10_convertToLocalDateConvertsASqlDateToTheSameLocalDate` | Pass | None |
-| CHD-11 | Low | Quoted `day` column | `DefendantAttendanceRepositoryTest.chd11_findByHearingIdDefendantIdAndDateMatchesOnlyTheRequestedDay` | Pass | None |
-| CHD-12 | Low | `DefendantSearchMapper` no longer a DeltaSpike mapper | `DefendantRepositoryTest.chd12_getDefendantDetailsForSearchingMapsTheDefendantIdAndOrganisationName` | Pass | None |
-| CHD-13 | Low | Stricter JSON schema validation | Stage 6 ITs on both JDKs | Parity: the same three schema rejections, 20 times each, with identical messages on Java 17 and Java 25 | None |
-| CHD-14 | Fixed | `coredomain` stale base (BC-15) | Restored tests: `DeletedJudicialResultTransformerTest`, `RestructuringHelperV3Test`, `PublishResultsDelegateV3Test`, `ShareResultsIT` | Pass | None |
-| CHD-15 | Fixed | Drools 0-rule harness (BC-20) | `AccessControlRuleCountTest` ×2 | Pass | None |
-| CHD-16 | Medium (coverage) | MI contract tests not run | — | 19 tests not run | Re-enable when MI publishes a Jakarta test jar |
-| **CHD-17** | **High** | **New in Stage 3 (BC-01).** `DefendantRepository.getDefendantDetailsForSearching` returns `null` for an unknown defendant; on `main` (DeltaSpike `@Query(max = 1)`, default single-result mode) it threw `NoResultException`, which `HearingQueryView.getOutstandingFinesQueryFromDefendantId` catches to return an empty payload. On Java 25 `convertToOutstandingFinesQuery(null)` throws a `NullPointerException`: the outstanding-fines query fails instead of returning empty | `DefendantRepositoryTest.chd17_getDefendantDetailsForSearchingThrowsNoResultWhenTheDefendantIsUnknown` | **Fails**: nothing thrown (Java 17 throws `NoResultException`, confirmed in Stage 4) | **Fixed** in `5046ba6c4e`: ends the finder with `setMaxResults(1).getSingleResult()` and restores `main`'s `testDefendantDetailsForSearchingNoResultFound` expectation. `chd17` now passes on Hibernate 6.6.1 and 7.3.2 |
+| ID | Severity | What changed (Java 17 → Java 25) | Parity test | Decision |
+|---|---|---|---|---|
+| CHD-01 | Medium | Lazy collections: Java 17 kept one session open per request (the framework's request-scoped `EntityManager` with DeltaSpike); the upgrade replaced it with `hibernate.enable_lazy_load_no_trans` | `HearingQueryViewTest.chd01_queryViewEntryPointsRunInATransaction` (Java 25); Java 17 copy: `HearingRepositoryTest.chd01_lazyCollectionsOfAHearingAreReadableAfterTheSessionThatLoadedItHasEnded` | **Fixed (design)**, `1f8da5305c`: flag removed; `HearingQueryView`, `HearingEventQueryView` and `SessionTimeQueryView` are `@Transactional`. Java 25 ITs: no `LazyInitializationException`. Needs sign-off as a design change |
+| CHD-02 | Medium | WildFly 40.0.1 runs Hibernate 7.3.2; unit tests use 6.6.1 | Persistence module with `-Phibernate-7.3.2` | **No change needed**: same results on 7.3.2 |
+| CHD-03 | Medium | `UnspecifiedUuidUserType` parses `ha_defendant`'s `text` nationality columns with `UUID.fromString` | Not testable on H2; data check below | **Open**: run the data check |
+| CHD-04 | Low–Medium | Reading `…Z` gives zone `ZoneOffset.UTC`; Java 17 gave `ZoneId.of("UTC")`. Same instant and JSON | `ObjectMapperProducerTest.chd04_writesAUtcZonedDateTimeWithAZSuffix`; `.chd04_readsAZSuffixedTimeAsTheSameInstantWithZoneOffsetUtc` (Java 17 copy: `…WithTheUtcZoneId`) | **Accepted**, `20c3ac50a9`: framework serialisation (BC-08); needs sign-off |
+| CHD-05 | Low–Medium | JSON columns mapped with `@JdbcTypeCode(SqlTypes.JSON)` instead of hibernate-types | `HearingRepositoryTest.chd05_jsonColumnRoundTripsNestedObjectsNumbersAndNullFields` | **No change needed**: passes on Java 25; can't run on Java 17 (hibernate-types' `jsonb` on H2, as for `main`'s own `@Ignore`d case-note tests); ITs green on both |
+| CHD-06 | Low | `save` always merges; DeltaSpike persisted new entities, leaving the passed instance managed | `HearingRepositoryTest.chd06_saveOfANewHearingReturnsAManagedCopyAndLeavesThePassedInstanceDetached` (Java 17 copy: `…LeavesThePassedInstanceManaged`); `.chd06_saveOfANewHearingStoresItsChildren` | **Accepted, provisional**, `ef6dd8a1fc`: no production code uses an entity after `save`. Pending owner review; revert to restore the Java 17 assertion, then make `save` persist new entities |
+| CHD-07 | Low | None: `findByHearingIdAndJurisdictionType` throws `NoResultException` on both | `HearingRepositoryTest.chd07_findByHearingIdAndJurisdictionTypeThrowsNoResultWhenNothingMatches` | **Parity.** Existing bug on `main` (out of scope) |
+| CHD-08 | Low | Three DeltaSpike `OPTIONAL` finders had become first-row | `HearingRepositoryTest.chd08_findHearingDayByHearingIdAndDateThrowsNonUniqueResultWhenTheHearingHasTwoSittingsOnTheDate`; `DefendantAttendanceRepositoryTest.chd08_…` ×2 | **Fixed**, `cfbba01970` (Stage 1) |
+| CHD-09 | Low | `Timestamp` → Europe/London conversion | `HearingServiceTest.chd09_…` | **Parity** |
+| CHD-10 | Low | `java.sql.Date` → `LocalDate` conversion | `HearingServiceTest.chd10_…` | **Parity** |
+| CHD-11 | Low | `day` column quoted | `DefendantAttendanceRepositoryTest.chd11_…` | **Parity** |
+| CHD-12 | Low | `DefendantSearchMapper` no longer a DeltaSpike mapper | `DefendantRepositoryTest.chd12_…` | **Parity** |
+| CHD-13 | Low | Stricter JSON schema validation (BC-13) | Both IT runs | **Parity**: identical schema rejections on both JDKs |
+| CHD-14 | High | `coredomain` 25.104.0-M4 lacked deleted judicial results, `isDeemedServed`, `crackedIneffectiveSubReasonId` (BC-15) | `DeletedJudicialResultTransformerTest`, `RestructuringHelperV3Test`, `PublishResultsDelegateV3Test`, `ShareResultsIT` | **Fixed** (restored from `main` on 25.104.5, Stage 1) |
+| CHD-15 | Medium | Drools harness could load 0 rules (BC-20) | `AccessControlRuleCountTest` ×2 | **Fixed** (team) |
+| CHD-16 | Medium (coverage) | `HearingSchemaContractValidationTest` (19 tests) doesn't run: the MI contract jar is still `javax` | — | **Open, external**: re-enable when MI publishes a Jakarta test jar |
+| CHD-17 | High | `getDefendantDetailsForSearching` returned `null` for an unknown defendant where Java 17 threw `NoResultException`; the outstanding-fines query then failed with a `NullPointerException` instead of returning an empty payload | `DefendantRepositoryTest.chd17_getDefendantDetailsForSearchingThrowsNoResultWhenTheDefendantIsUnknown` | **Fixed**, `5046ba6c4e`: `setMaxResults(1).getSingleResult()`; `main`'s test expectation restored |
 
 ## CHD-03 data check
 
-`UnspecifiedUuidUserType.nullSafeGet` fails to load a defendant whose `nationality_id` or `additional_nationality_id` in
-`ha_defendant` (a `text` column) isn't a UUID. Run against NFT or SIT, read-only:
+Run against NFT or SIT, read-only. Both counts 0 means no exposure; otherwise list the values before deciding.
 
 ```sql
 SELECT 'nationality_id' AS column_name, count(*) AS non_uuid_rows
@@ -77,27 +89,48 @@ WHERE additional_nationality_id IS NOT NULL
   AND additional_nationality_id !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$';
 ```
 
-Both counts 0: no exposure. Otherwise list the values (`SELECT DISTINCT nationality_id … LIMIT 20`) before deciding.
 Result: _not yet run_.
 
-## Stage 5 decisions
+## Checked and unchanged
 
-| ID | Decision | Commit | Why |
-|---|---|---|---|
-| CHD-17 | Fixed | `5046ba6c4e` | Restores Java 17's `NoResultException`, so the outstanding-fines query returns an empty payload for an unknown defendant instead of failing. Only `chd17` went from red to green (persistence module: 237 tests before and after) |
-| CHD-06 | Accepted, provisional | `ef6dd8a1fc` | No production caller uses an entity after `save`; pending owner review, as asked. Reverting `ef6dd8a1fc` restores the Java 17 assertion |
-| CHD-04 | Accepted | `20c3ac50a9` | Framework serialisation (BC-08): identical instant and JSON; the zone object is `ZoneOffset.UTC` instead of `ZoneId.of("UTC")`, so only `equals`/`toString` on `ZonedDateTime` differ |
-| CHD-01 | Fixed (design) | this commit | Replaces the context-wide lazy-loading flag with a transaction per query-view entry point, matching Java 17's one session per request; confirmed by the Stage 6 Java 25 ITs: 263 tests, 0 failures, no `LazyInitializationException` |
+- **Catalogue items not applicable or already handled:** BC-01/02 (every other `getSingleResult()` is a COUNT;
+  `CourtListRepository` identical to `main`), BC-04 (primitive `boolean` fields throw on NULL on both runtimes), BC-05 (no
+  JPQL `!= null`), BC-07 (Liquibase 5 properties done), BC-09/10 (no Activiti engine), BC-12 (WAR deploys, ITs pass),
+  BC-16 (no `/internal/metrics`), BC-17/18 (framework level), BC-19/22 (not used), BC-03/11/14/23 (refuted in the
+  catalogue).
+- **Restored to `main`'s behaviour in Stage 1:** Xhibit court lookups, `convertToZonedDateTime` (Europe/London), the
+  three `coredomain` features (CHD-14), the three `OPTIONAL` finders (CHD-08).
+- **Repositories:** all 29 use `@PersistenceContext(unitName = "hearing-persistence-unit")`; all 25 relationships cascade
+  `ALL`; no production code changes an entity after `save`.
 
 ## How to run
 
 ```shell
-# parity tests only, JDK 25
+# Java 25 (this branch): parity tests, then the persistence module on WildFly's Hibernate
 mvn test -pl hearing-viewstore/hearing-viewstore-persistence,hearing-query/hearing-query-view -Dtest='*Test#chd*' -Dsurefire.failIfNoSpecifiedTests=false
-# persistence tests on the Hibernate version WildFly 40.0.1 runs
 mvn test -pl hearing-viewstore/hearing-viewstore-persistence -Phibernate-7.3.2
+
+# Java 17 (dev/CHD-2864-chd-parity-with-j25); main's enforcer rejects progression 17.0.286
+JAVA_HOME=<jdk-17> mvn verify -Dprogression.version=17.104.306
+
+# Integration tests, one JDK at a time (shared Docker stack)
+CPP_DOCKER_DIR=<cpp-developers-docker on java-25> ./runIntegrationTests.sh </dev/null                      # Java 25
+CPP_DOCKER_DIR=<cpp-developers-docker on java-17> MAVEN_ARGS="-Dprogression.version=17.104.306" \
+  ./runIntegrationTests.sh </dev/null                                                                       # Java 17
 ```
 
-## Still to do
+## Out of scope
 
-- Stage 5: owner review of the provisional CHD-06 acceptance and sign-off for CHD-01 and CHD-04.
+- **CHD-07:** `HearingEventQueryView.getHearingEventLogForDocuments` fails for a non-Crown hearing on both branches
+  (`findByHearingIdAndJurisdictionType` throws where the caller expects `null`). Existing bug on `main`.
+- **NPE in `HearingService.getHearingDetailsResponseById`** when a DDJ poll arrives before its hearing exists. Seen in
+  both IT runs; existing on `main`.
+- **CHD-16:** MI's contract-test jar; owned by the MI team.
+- **Time zones:** 14 production files use default-zone or Europe/London times, kept for parity with `main` despite the
+  upgrade skill's UTC rule.
+- **Other `ShareResultsIT` races:** only the test that failed was fixed; CLAUDE.md still lists the class as flaky.
+
+## Still needed before Stage 8
+
+- Run the CHD-03 data check.
+- Sign-off: CHD-01 (design fix), CHD-04 (accepted), CHD-06 (provisional acceptance).
