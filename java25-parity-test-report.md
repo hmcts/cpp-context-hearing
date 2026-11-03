@@ -8,7 +8,7 @@ Risks and the list of non-mechanical changes: `java25-stage2-risk-review.md`.
 |---|---|---|
 | `dev/25.104-chd-j25` | 25 | Java 25 upgrade (squash of `team/25.104.x` onto `main`, plus Stage 1 fixes) |
 | `dev/25.104-chd-j25-j17-parity` | 25 | This branch: parity tests, Stage 5 fixes, this report. PR 2 → `dev/25.104-chd-j25` |
-| `dev/CHD-2864-chd-parity-with-j25` | 17 | Java 17 copy of the parity tests on `main`. Never merged; establishes the Java 17 behaviour |
+| [`dev/CHD-2864-chd-parity-with-j25`](https://github.com/hmcts/cpp-context-hearing/tree/dev/CHD-2864-chd-parity-with-j25) | 17 | Java 17 copy of the parity tests on `main`. Never merged; establishes the Java 17 behaviour |
 
 Each parity test (`chdNN_…`) asserts the **Java 17** behaviour, so a Java 25 failure is a behaviour change. Both copies use
 the same method names and bodies; only the test harness differs. Where Java 25 behaviour was accepted, the Java 25 copy was
