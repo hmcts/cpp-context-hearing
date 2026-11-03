@@ -57,7 +57,7 @@ All numbers below are from actual runs, read from the surefire/failsafe reports 
 |---|---|---|---|---|
 | CHD-01 | Medium | Lazy collections: Java 17 kept one session open per request (the framework's request-scoped `EntityManager` with DeltaSpike); the upgrade replaced it with `hibernate.enable_lazy_load_no_trans` | `HearingQueryViewTest.chd01_queryViewEntryPointsRunInATransaction` (Java 25); Java 17 copy: `HearingRepositoryTest.chd01_lazyCollectionsOfAHearingAreReadableAfterTheSessionThatLoadedItHasEnded` | **Fixed (design)**, `1f8da5305c`: flag removed; `HearingQueryView`, `HearingEventQueryView` and `SessionTimeQueryView` are `@Transactional`. Java 25 ITs: no `LazyInitializationException`. Needs sign-off as a design change |
 | CHD-02 | Medium | WildFly 40.0.1 runs Hibernate 7.3.2; unit tests use 6.6.1 | Persistence module with `-Phibernate-7.3.2` | **No change needed**: same results on 7.3.2 |
-| CHD-03 | Medium | `UnspecifiedUuidUserType` parses `ha_defendant`'s `text` nationality columns with `UUID.fromString` | Not testable on H2; data check below | **No change needed**: no non-UUID values in NFT (both counts 0). Re-run the check against production before release if NFT's data may not be representative |
+| CHD-03 | Medium | `UnspecifiedUuidUserType` parses `ha_defendant`'s `text` nationality columns with `UUID.fromString` | Not testable on H2; data check below | **No change needed**: no non-UUID values in NFT or SIT (both counts 0 in each). Re-run the check against production before release if those environments may not be representative |
 | CHD-04 | Low–Medium | Reading `…Z` gives zone `ZoneOffset.UTC`; Java 17 gave `ZoneId.of("UTC")`. Same instant and JSON | `ObjectMapperProducerTest.chd04_writesAUtcZonedDateTimeWithAZSuffix`; `.chd04_readsAZSuffixedTimeAsTheSameInstantWithZoneOffsetUtc` (Java 17 copy: `…WithTheUtcZoneId`) | **Accepted**, `20c3ac50a9`: framework serialisation (BC-08); needs sign-off |
 | CHD-05 | Low–Medium | JSON columns mapped with `@JdbcTypeCode(SqlTypes.JSON)` instead of hibernate-types | `HearingRepositoryTest.chd05_jsonColumnRoundTripsNestedObjectsNumbersAndNullFields` | **No change needed**: passes on Java 25; can't run on Java 17 (hibernate-types' `jsonb` on H2, as for `main`'s own `@Ignore`d case-note tests); ITs green on both |
 | CHD-06 | Low | `save` always merges; DeltaSpike persisted new entities, leaving the passed instance managed | `HearingRepositoryTest.chd06_saveOfANewHearingReturnsAManagedCopyAndLeavesThePassedInstanceDetached` (Java 17 copy: `…LeavesThePassedInstanceManaged`); `.chd06_saveOfANewHearingStoresItsChildren` | **Accepted, provisional**, `ef6dd8a1fc`: no production code uses an entity after `save`. Pending owner review; revert to restore the Java 17 assertion, then make `save` persist new entities |
@@ -89,7 +89,8 @@ WHERE additional_nationality_id IS NOT NULL
   AND additional_nationality_id !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$';
 ```
 
-Result (NFT, 2026-11-03): `nationality_id` 0, `additional_nationality_id` 0. No exposure in NFT. The query scans the
+Results (2026-11-03): NFT `nationality_id` 0, `additional_nationality_id` 0; SIT `nationality_id` 0,
+`additional_nationality_id` 0. No exposure in either. The query scans the
 whole table (regex conditions can't use an index), so expect it to be slow on large data.
 
 ## Checked and unchanged
