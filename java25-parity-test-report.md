@@ -38,7 +38,7 @@ Parity tests by runtime (15 methods; same names and bodies in both copies):
 | CHD-03 | Medium | `UnspecifiedUuidUserType` parses `ha_defendant`'s `text` column with `UUID.fromString` | Not written: H2 can't hold non-UUID text in a column mapped as `uuid`, so a unit test can't reproduce it | — | Needs a PostgreSQL-level check (IT or a query against NFT data for non-UUID `nationality_id` values) |
 | CHD-04 | Low–Medium | `ZonedDateTime` zone after reading `…Z` | `ObjectMapperProducerTest.chd04_writesAUtcZonedDateTimeWithAZSuffix`; `.chd04_readsAZSuffixedTimeWithTheUtcZoneId` | Write passes; read **fails**: zone is `Z`, Java 17 gives `UTC` (confirmed in Stage 4) | Framework behaviour (BC-08): same instant and same JSON, different zone identity. Likely accept with sign-off |
 | CHD-05 | Low–Medium | JSON column mapping changed | `HearingRepositoryTest.chd05_jsonColumnRoundTripsNestedObjectsNumbersAndNullFields` | Pass | None. **Can't run on Java 17**: hibernate-types' `JsonNodeBinaryType` can't read H2's column (`JsonParseException: Unrecognized token 'B'`), the reason `main`'s own case-note tests are `@Ignore`d. Parity rests on the Stage 6 ITs |
-| CHD-06 | Low | `save` is always `merge`; DeltaSpike persisted new entities (checked in its bytecode: `persist` when the ID has no row and the entity isn't managed) | `HearingRepositoryTest.chd06_saveOfANewHearingLeavesThePassedInstanceManaged`; `.chd06_saveOfANewHearingStoresItsChildren` | Managed: **fails** (passed instance stays detached; managed on Java 17, confirmed in Stage 4). Children: pass | Accept, or persist-if-new in `save`. No production code changes an entity after `save`, so nothing relies on it today |
+| CHD-06 | Low | `save` is always `merge`; DeltaSpike persisted new entities (checked in its bytecode: `persist` when the ID has no row and the entity isn't managed) | `HearingRepositoryTest.chd06_saveOfANewHearingReturnsAManagedCopyAndLeavesThePassedInstanceDetached` (was `…LeavesThePassedInstanceManaged`); `.chd06_saveOfANewHearingStoresItsChildren` | Managed instance differs from Java 17 (managed there, confirmed in Stage 4); children: pass | **Accepted (provisional, pending owner review).** No production code changes an entity after `save`, so nothing relies on the passed instance being managed. Test changed to assert the Java 25 behaviour. Alternative if rejected: persist-if-new in `save` |
 | CHD-07 | Low | Not-found behaviour of `findByHearingIdAndJurisdictionType` | `HearingRepositoryTest.chd07_findByHearingIdAndJurisdictionTypeThrowsNoResultWhenNothingMatches` | Pass | None for parity. Existing bug on both branches: the caller expects `null` |
 | CHD-08 | Low | Duplicate rows in the three `OPTIONAL` finders | `HearingRepositoryTest.chd08_findHearingDayByHearingIdAndDateThrowsNonUniqueResultWhenTheHearingHasTwoSittingsOnTheDate`; `DefendantAttendanceRepositoryTest.chd08_…ThrowsNonUniqueResultWhenTwoRowsMatch`, `chd08_…ReturnsNullWhenNothingMatches` | Pass | None (fixed in `cfbba01970`) |
 | CHD-09 | Low | `Timestamp` → `ZonedDateTime` conversion | `HearingServiceTest.chd09_convertToZonedDateTimeConvertsATimestampToTheSameInstantInEuropeLondon` | Pass | None |
@@ -49,7 +49,14 @@ Parity tests by runtime (15 methods; same names and bodies in both copies):
 | CHD-14 | Fixed | `coredomain` stale base (BC-15) | Restored tests: `DeletedJudicialResultTransformerTest`, `RestructuringHelperV3Test`, `PublishResultsDelegateV3Test`, `ShareResultsIT` | Pass | None |
 | CHD-15 | Fixed | Drools 0-rule harness (BC-20) | `AccessControlRuleCountTest` ×2 | Pass | None |
 | CHD-16 | Medium (coverage) | MI contract tests not run | — | 19 tests not run | Re-enable when MI publishes a Jakarta test jar |
-| **CHD-17** | **High** | **New in Stage 3 (BC-01).** `DefendantRepository.getDefendantDetailsForSearching` returns `null` for an unknown defendant; on `main` (DeltaSpike `@Query(max = 1)`, default single-result mode) it threw `NoResultException`, which `HearingQueryView.getOutstandingFinesQueryFromDefendantId` catches to return an empty payload. On Java 25 `convertToOutstandingFinesQuery(null)` throws a `NullPointerException`: the outstanding-fines query fails instead of returning empty | `DefendantRepositoryTest.chd17_getDefendantDetailsForSearchingThrowsNoResultWhenTheDefendantIsUnknown` | **Fails**: nothing thrown (Java 17 throws `NoResultException`, confirmed in Stage 4) | **Fix**: end the finder with `getSingleResult()` (as the catalogue's BC-01 fix says) and restore `main`'s `testDefendantDetailsForSearchingNoResultFound` expectation |
+| **CHD-17** | **High** | **New in Stage 3 (BC-01).** `DefendantRepository.getDefendantDetailsForSearching` returns `null` for an unknown defendant; on `main` (DeltaSpike `@Query(max = 1)`, default single-result mode) it threw `NoResultException`, which `HearingQueryView.getOutstandingFinesQueryFromDefendantId` catches to return an empty payload. On Java 25 `convertToOutstandingFinesQuery(null)` throws a `NullPointerException`: the outstanding-fines query fails instead of returning empty | `DefendantRepositoryTest.chd17_getDefendantDetailsForSearchingThrowsNoResultWhenTheDefendantIsUnknown` | **Fails**: nothing thrown (Java 17 throws `NoResultException`, confirmed in Stage 4) | **Fixed** in `5046ba6c4e`: ends the finder with `setMaxResults(1).getSingleResult()` and restores `main`'s `testDefendantDetailsForSearchingNoResultFound` expectation. `chd17` now passes on Hibernate 6.6.1 and 7.3.2 |
+
+## Stage 5 decisions
+
+| ID | Decision | Commit | Why |
+|---|---|---|---|
+| CHD-17 | Fixed | `5046ba6c4e` | Restores Java 17's `NoResultException`, so the outstanding-fines query returns an empty payload for an unknown defendant instead of failing. Only `chd17` went from red to green (persistence module: 237 tests before and after) |
+| CHD-06 | Accepted, provisional | this commit | No production caller uses an entity after `save`; pending owner review, as asked. Reverting this commit restores the Java 17 assertion |
 
 ## How to run
 
@@ -62,5 +69,5 @@ mvn test -pl hearing-viewstore/hearing-viewstore-persistence -Phibernate-7.3.2
 
 ## Still to do
 
-- Stage 5: decisions for CHD-04, CHD-06 and CHD-17; the CHD-01 design fix.
+- Stage 5: decision for CHD-04; the CHD-01 design fix; owner review of the provisional CHD-06 acceptance.
 - Stage 6: integration tests on both JDKs.

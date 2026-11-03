@@ -385,12 +385,16 @@ class HearingRepositoryTest {
     }
 
     @Test
-    void chd06_saveOfANewHearingLeavesThePassedInstanceManaged() {
+    // Accepted (provisional, pending owner review): Java 17's DeltaSpike save persisted a new entity, so the passed
+    // instance became managed; Java 25's merge returns a managed copy and leaves the passed instance detached.
+    // No production code uses an entity after saving it. See CHD-06 in java25-parity-test-report.md.
+    void chd06_saveOfANewHearingReturnsAManagedCopyAndLeavesThePassedInstanceDetached() {
         final Hearing newHearing = newHearingEntity();
 
-        hearingRepository.save(newHearing);
+        final Hearing saved = hearingRepository.save(newHearing);
 
-        assertThat(entityManager().contains(newHearing), is(true));
+        assertThat(entityManager().contains(saved), is(true));
+        assertThat(entityManager().contains(newHearing), is(false));
     }
 
     @Test
