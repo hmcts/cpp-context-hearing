@@ -35,7 +35,7 @@ Parity tests by runtime (15 methods; same names and bodies in both copies):
 |---|---|---|---|---|---|
 | CHD-01 | Medium | Lazy collections read after the session ends | Was `HearingRepositoryTest.chd01_lazyCollectionsOfAHearingAreReadableAfterTheSessionThatLoadedItHasEnded` (passed on Java 17 and on Java 25 with the flag); now `HearingQueryViewTest.chd01_queryViewEntryPointsRunInATransaction` | Pass | **Fixed (design)** in this commit: removed `hibernate.enable_lazy_load_no_trans`; `HearingQueryView`, `HearingEventQueryView` and `SessionTimeQueryView` (every query-view entry point the query API calls) are `@Transactional`, so one session spans each query as Java 17's request-scoped EntityManager did. The interceptor only runs in the container, so the new test guards the annotations and the **Stage 6 Java 25 ITs prove the behaviour** (any missed path shows as `LazyInitializationException`). Needs sign-off as a design change |
 | CHD-02 | Medium | Runtime Hibernate 7.3.2 vs tests on 6.6.1 | Whole persistence module with `-Phibernate-7.3.2` | Same results as 6.6.1 | None. The profile needs `hibernate-scan-jandex` (test scope) because Hibernate 7 moved classpath scanning out of core; WildFly discovers entities itself |
-| CHD-03 | Medium | `UnspecifiedUuidUserType` parses `ha_defendant`'s `text` column with `UUID.fromString` | Not written: H2 can't hold non-UUID text in a column mapped as `uuid`, so a unit test can't reproduce it | — | Needs a PostgreSQL-level check (IT or a query against NFT data for non-UUID `nationality_id` values) |
+| CHD-03 | Medium | `UnspecifiedUuidUserType` parses `ha_defendant`'s `text` column with `UUID.fromString` | Not a unit test: H2 can't hold non-UUID text in a column mapped as `uuid`. Checked against real data instead, with the query under "CHD-03 data check" | Pending: query not yet run | If the count is 0, no fix needed. If not, decide per value: clean the data with a Liquibase changeset, or make `nullSafeGet` tolerate it, whichever matches Java 17's outcome for that value |
 | CHD-04 | Low–Medium | `ZonedDateTime` zone after reading `…Z` | `ObjectMapperProducerTest.chd04_writesAUtcZonedDateTimeWithAZSuffix`; `.chd04_readsAZSuffixedTimeAsTheSameInstantWithZoneOffsetUtc` (was `…WithTheUtcZoneId`) | Write: same as Java 17. Read: zone `Z` (`ZoneOffset.UTC`) where Java 17 gave `UTC` (confirmed in Stage 4) | **Accepted.** Framework behaviour (BC-08): same instant, same JSON; only the zone object differs, which already required 77 IT expectations to change. Test now asserts the Java 25 behaviour |
 | CHD-05 | Low–Medium | JSON column mapping changed | `HearingRepositoryTest.chd05_jsonColumnRoundTripsNestedObjectsNumbersAndNullFields` | Pass | None. **Can't run on Java 17**: hibernate-types' `JsonNodeBinaryType` can't read H2's column (`JsonParseException: Unrecognized token 'B'`), the reason `main`'s own case-note tests are `@Ignore`d. Parity rests on the Stage 6 ITs |
 | CHD-06 | Low | `save` is always `merge`; DeltaSpike persisted new entities (checked in its bytecode: `persist` when the ID has no row and the entity isn't managed) | `HearingRepositoryTest.chd06_saveOfANewHearingReturnsAManagedCopyAndLeavesThePassedInstanceDetached` (was `…LeavesThePassedInstanceManaged`); `.chd06_saveOfANewHearingStoresItsChildren` | Managed instance differs from Java 17 (managed there, confirmed in Stage 4); children: pass | **Accepted (provisional, pending owner review).** No production code changes an entity after `save`, so nothing relies on the passed instance being managed. Test changed to assert the Java 25 behaviour. Alternative if rejected: persist-if-new in `save` |
@@ -50,6 +50,26 @@ Parity tests by runtime (15 methods; same names and bodies in both copies):
 | CHD-15 | Fixed | Drools 0-rule harness (BC-20) | `AccessControlRuleCountTest` ×2 | Pass | None |
 | CHD-16 | Medium (coverage) | MI contract tests not run | — | 19 tests not run | Re-enable when MI publishes a Jakarta test jar |
 | **CHD-17** | **High** | **New in Stage 3 (BC-01).** `DefendantRepository.getDefendantDetailsForSearching` returns `null` for an unknown defendant; on `main` (DeltaSpike `@Query(max = 1)`, default single-result mode) it threw `NoResultException`, which `HearingQueryView.getOutstandingFinesQueryFromDefendantId` catches to return an empty payload. On Java 25 `convertToOutstandingFinesQuery(null)` throws a `NullPointerException`: the outstanding-fines query fails instead of returning empty | `DefendantRepositoryTest.chd17_getDefendantDetailsForSearchingThrowsNoResultWhenTheDefendantIsUnknown` | **Fails**: nothing thrown (Java 17 throws `NoResultException`, confirmed in Stage 4) | **Fixed** in `5046ba6c4e`: ends the finder with `setMaxResults(1).getSingleResult()` and restores `main`'s `testDefendantDetailsForSearchingNoResultFound` expectation. `chd17` now passes on Hibernate 6.6.1 and 7.3.2 |
+
+## CHD-03 data check
+
+`UnspecifiedUuidUserType.nullSafeGet` fails to load a defendant whose `nationality_id` or `additional_nationality_id` in
+`ha_defendant` (a `text` column) isn't a UUID. Run against NFT or SIT, read-only:
+
+```sql
+SELECT 'nationality_id' AS column_name, count(*) AS non_uuid_rows
+FROM ha_defendant
+WHERE nationality_id IS NOT NULL
+  AND nationality_id !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+UNION ALL
+SELECT 'additional_nationality_id', count(*)
+FROM ha_defendant
+WHERE additional_nationality_id IS NOT NULL
+  AND additional_nationality_id !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$';
+```
+
+Both counts 0: no exposure. Otherwise list the values (`SELECT DISTINCT nationality_id … LIMIT 20`) before deciding.
+Result: _not yet run_.
 
 ## Stage 5 decisions
 
