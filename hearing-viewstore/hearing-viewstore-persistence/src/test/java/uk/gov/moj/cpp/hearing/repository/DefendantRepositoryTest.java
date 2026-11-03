@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.repository;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -90,7 +89,7 @@ class DefendantRepositoryTest {
 
     @Test
     void testDefendantDetailsForSearchingNoResultFound() {
-        assertThat(defendantRepository.getDefendantDetailsForSearching(UUID.randomUUID()), is(nullValue()));
+        assertThrows(NoResultException.class, () -> defendantRepository.getDefendantDetailsForSearching(UUID.randomUUID()));
     }
 
     @Test

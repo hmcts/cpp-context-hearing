@@ -17,15 +17,15 @@ public class DefendantRepository {
     @PersistenceContext(unitName = "hearing-persistence-unit")
     EntityManager entityManager;
 
+    // As DeltaSpike's @Query(max = 1) did on Java 17: throws NoResultException when nothing matches, which
+    // HearingQueryView.getOutstandingFinesQueryFromDefendantId catches to return an empty payload.
     public DefendantSearch getDefendantDetailsForSearching(final UUID defendantId) {
         final Defendant defendant = entityManager
                 .createQuery("SELECT d FROM Defendant d WHERE d.id.id = :defendantId", Defendant.class)
                 .setParameter("defendantId", defendantId)
-                .getResultList()
-                .stream()
-                .findFirst()
-                .orElse(null);
-        return defendant != null ? new DefendantSearchMapper().toDto(defendant) : null;
+                .setMaxResults(1)
+                .getSingleResult();
+        return new DefendantSearchMapper().toDto(defendant);
     }
 
     public Defendant findBy(final HearingSnapshotKey id) {
