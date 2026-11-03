@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,10 +29,14 @@ class ObjectMapperProducerTest {
         assertThat(objectMapper.writeValueAsString(utc), is(UTC_JSON));
     }
 
+    // Accepted: Java 17 read "…Z" with zone ZoneId.of("UTC"); the 25.104.x framework gives ZoneOffset.UTC. Same instant
+    // and same JSON either way; only the zone object (and so ZonedDateTime.equals/toString) differs. See CHD-04 in
+    // java25-parity-test-report.md.
     @Test
-    void chd04_readsAZSuffixedTimeWithTheUtcZoneId() throws Exception {
+    void chd04_readsAZSuffixedTimeAsTheSameInstantWithZoneOffsetUtc() throws Exception {
         final ZonedDateTime read = objectMapper.readValue(UTC_JSON, ZonedDateTime.class);
 
-        assertThat(read.getZone(), is(ZoneId.of("UTC")));
+        assertThat(read.getZone(), is(ZoneOffset.UTC));
+        assertThat(read.toInstant(), is(ZonedDateTime.of(2026, 7, 13, 12, 30, 0, 0, ZoneId.of("UTC")).toInstant()));
     }
 }

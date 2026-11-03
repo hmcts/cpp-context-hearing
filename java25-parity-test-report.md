@@ -36,7 +36,7 @@ Parity tests by runtime (15 methods; same names and bodies in both copies):
 | CHD-01 | Medium | Lazy collections read after the session ends | `HearingRepositoryTest.chd01_lazyCollectionsOfAHearingAreReadableAfterTheSessionThatLoadedItHasEnded` | Pass (with production's `enable_lazy_load_no_trans=true`) | Stage 5 design fix: remove the flag, add `@Transactional` to query-view entry points. This repository-level test will then go red by design; replace it with a service-level test of those entry points |
 | CHD-02 | Medium | Runtime Hibernate 7.3.2 vs tests on 6.6.1 | Whole persistence module with `-Phibernate-7.3.2` | Same results as 6.6.1 | None. The profile needs `hibernate-scan-jandex` (test scope) because Hibernate 7 moved classpath scanning out of core; WildFly discovers entities itself |
 | CHD-03 | Medium | `UnspecifiedUuidUserType` parses `ha_defendant`'s `text` column with `UUID.fromString` | Not written: H2 can't hold non-UUID text in a column mapped as `uuid`, so a unit test can't reproduce it | — | Needs a PostgreSQL-level check (IT or a query against NFT data for non-UUID `nationality_id` values) |
-| CHD-04 | Low–Medium | `ZonedDateTime` zone after reading `…Z` | `ObjectMapperProducerTest.chd04_writesAUtcZonedDateTimeWithAZSuffix`; `.chd04_readsAZSuffixedTimeWithTheUtcZoneId` | Write passes; read **fails**: zone is `Z`, Java 17 gives `UTC` (confirmed in Stage 4) | Framework behaviour (BC-08): same instant and same JSON, different zone identity. Likely accept with sign-off |
+| CHD-04 | Low–Medium | `ZonedDateTime` zone after reading `…Z` | `ObjectMapperProducerTest.chd04_writesAUtcZonedDateTimeWithAZSuffix`; `.chd04_readsAZSuffixedTimeAsTheSameInstantWithZoneOffsetUtc` (was `…WithTheUtcZoneId`) | Write: same as Java 17. Read: zone `Z` (`ZoneOffset.UTC`) where Java 17 gave `UTC` (confirmed in Stage 4) | **Accepted.** Framework behaviour (BC-08): same instant, same JSON; only the zone object differs, which already required 77 IT expectations to change. Test now asserts the Java 25 behaviour |
 | CHD-05 | Low–Medium | JSON column mapping changed | `HearingRepositoryTest.chd05_jsonColumnRoundTripsNestedObjectsNumbersAndNullFields` | Pass | None. **Can't run on Java 17**: hibernate-types' `JsonNodeBinaryType` can't read H2's column (`JsonParseException: Unrecognized token 'B'`), the reason `main`'s own case-note tests are `@Ignore`d. Parity rests on the Stage 6 ITs |
 | CHD-06 | Low | `save` is always `merge`; DeltaSpike persisted new entities (checked in its bytecode: `persist` when the ID has no row and the entity isn't managed) | `HearingRepositoryTest.chd06_saveOfANewHearingReturnsAManagedCopyAndLeavesThePassedInstanceDetached` (was `…LeavesThePassedInstanceManaged`); `.chd06_saveOfANewHearingStoresItsChildren` | Managed instance differs from Java 17 (managed there, confirmed in Stage 4); children: pass | **Accepted (provisional, pending owner review).** No production code changes an entity after `save`, so nothing relies on the passed instance being managed. Test changed to assert the Java 25 behaviour. Alternative if rejected: persist-if-new in `save` |
 | CHD-07 | Low | Not-found behaviour of `findByHearingIdAndJurisdictionType` | `HearingRepositoryTest.chd07_findByHearingIdAndJurisdictionTypeThrowsNoResultWhenNothingMatches` | Pass | None for parity. Existing bug on both branches: the caller expects `null` |
@@ -56,7 +56,8 @@ Parity tests by runtime (15 methods; same names and bodies in both copies):
 | ID | Decision | Commit | Why |
 |---|---|---|---|
 | CHD-17 | Fixed | `5046ba6c4e` | Restores Java 17's `NoResultException`, so the outstanding-fines query returns an empty payload for an unknown defendant instead of failing. Only `chd17` went from red to green (persistence module: 237 tests before and after) |
-| CHD-06 | Accepted, provisional | this commit | No production caller uses an entity after `save`; pending owner review, as asked. Reverting this commit restores the Java 17 assertion |
+| CHD-06 | Accepted, provisional | `ef6dd8a1fc` | No production caller uses an entity after `save`; pending owner review, as asked. Reverting `ef6dd8a1fc` restores the Java 17 assertion |
+| CHD-04 | Accepted | this commit | Framework serialisation (BC-08): identical instant and JSON; the zone object is `ZoneOffset.UTC` instead of `ZoneId.of("UTC")`, so only `equals`/`toString` on `ZonedDateTime` differ |
 
 ## How to run
 
@@ -69,5 +70,5 @@ mvn test -pl hearing-viewstore/hearing-viewstore-persistence -Phibernate-7.3.2
 
 ## Still to do
 
-- Stage 5: decision for CHD-04; the CHD-01 design fix; owner review of the provisional CHD-06 acceptance.
+- Stage 5: the CHD-01 design fix; owner review of the provisional CHD-06 acceptance.
 - Stage 6: integration tests on both JDKs.
