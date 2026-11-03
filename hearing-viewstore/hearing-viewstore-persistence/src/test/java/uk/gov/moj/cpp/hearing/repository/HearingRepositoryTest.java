@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.repository;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -36,17 +37,34 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.JudicialRole;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.Persistence;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -60,6 +78,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class HearingRepositoryTest {
 
     private static final String PERSISTENCE_UNIT = "hearing-test-persistence-unit";
+    private static final String LAZY_LOAD_NO_TRANS = "hibernate.enable_lazy_load_no_trans";
 
     private static final List<uk.gov.justice.core.courts.Hearing> hearings = new ArrayList<>();
     private static final List<uk.gov.justice.core.courts.Hearing> hearingsWithHearingDay = new ArrayList<>();
@@ -73,6 +92,8 @@ class HearingRepositoryTest {
     private HearingJPAMapper hearingJPAMapper;
 
     private HearingRepository hearingRepository;
+    private EntityManagerFactory separateFactory;
+    private UUID separateFactoryHearingId;
     private HearingCaseNoteRepository hearingCaseNoteRepository;
     private HearingProsecutionCounselRepository hearingProsecutionCounselRepository;
     private HearingApplicationRepository hearingApplicationRepository;
@@ -336,12 +357,57 @@ class HearingRepositoryTest {
     }
 
     @Test
-    void shouldThrowNonUniqueResultForFindHearingDayByHearingIdAndDate_whenHearingHasTwoSittingsOnTheDate() {
+    void chd08_findHearingDayByHearingIdAndDateThrowsNonUniqueResultWhenTheHearingHasTwoSittingsOnTheDate() {
         final ZonedDateTime sittingDay = ZonedDateTime.now().plusDays(4).withHour(9).withMinute(0).withSecond(0).withNano(0);
         final uk.gov.justice.core.courts.Hearing hearing = addSampleHearing(false, sittingDay, sittingDay.plusHours(2));
 
         assertThrows(NonUniqueResultException.class,
                 () -> hearingRepository.findHearingDayByHearingIdAndDate(hearing.getId(), sittingDay.toLocalDate()));
+    }
+
+    @Test
+    void chd01_lazyCollectionsOfAHearingAreReadableAfterTheSessionThatLoadedItHasEnded() {
+        final uk.gov.justice.core.courts.Hearing domainHearing = minimumInitiateHearingTemplate().getHearing();
+
+        final Hearing loaded = loadInASessionThatThenEnds(domainHearing);
+
+        assertThat(loaded.getProsecutionCases().size(), is(domainHearing.getProsecutionCases().size()));
+    }
+
+    @Test
+    void chd05_jsonColumnRoundTripsNestedObjectsNumbersAndNullFields() throws Exception {
+        final JsonNode payload = new ObjectMapper().readTree(
+                "{\"text\":\"note\",\"count\":12,\"ratio\":1.5,\"absent\":null,\"nested\":{\"values\":[1,2]}}");
+
+        final HearingCaseNote reloaded = saveAndReloadCaseNoteWithPayload(payload);
+
+        assertThat(reloaded.getPayload(), is(payload));
+    }
+
+    @Test
+    void chd06_saveOfANewHearingLeavesThePassedInstanceManaged() {
+        final Hearing newHearing = newHearingEntity();
+
+        hearingRepository.save(newHearing);
+
+        assertThat(entityManager().contains(newHearing), is(true));
+    }
+
+    @Test
+    void chd06_saveOfANewHearingStoresItsChildren() {
+        final Hearing newHearing = newHearingEntity();
+        final int prosecutionCaseCount = newHearing.getProsecutionCases().size();
+
+        hearingRepository.save(newHearing);
+        flushAndClear();
+
+        assertThat(hearingRepository.findBy(newHearing.getId()).getProsecutionCases().size(), is(prosecutionCaseCount));
+    }
+
+    @Test
+    void chd07_findByHearingIdAndJurisdictionTypeThrowsNoResultWhenNothingMatches() {
+        assertThrows(NoResultException.class,
+                () -> hearingRepository.findByHearingIdAndJurisdictionType(randomUUID(), JurisdictionType.CROWN));
     }
 
     @Test
@@ -633,6 +699,100 @@ class HearingRepositoryTest {
      * Builds a JPA Hearing entity from a domain Hearing POJO, mapping the fields needed
      * by all repository queries exercised in this test class.
      */
+    // ── CHD harness ──────────────────────────────────────────────────────────────────────────────────────────────
+
+    private EntityManager entityManager() {
+        return hibernateTestEntityManagerProvider.getEntityManager();
+    }
+
+    private void flushAndClear() {
+        entityManager().flush();
+        entityManager().clear();
+    }
+
+    private static Hearing newHearingEntity() {
+        final Hearing hearing = buildHearingEntity(minimumInitiateHearingTemplate().getHearing());
+        hearing.setCourtApplicationsJson(hearing.getCourtApplicationsJson().substring(0, 255));
+        return hearing;
+    }
+
+    private HearingCaseNote saveAndReloadCaseNoteWithPayload(final JsonNode payload) {
+        final Hearing hearing = hearingRepository.findBy(hearings.get(0).getId());
+        final HearingSnapshotKey key = new HearingSnapshotKey(randomUUID(), hearing.getId());
+        final HearingCaseNote hearingCaseNote = new HearingCaseNote();
+        hearingCaseNote.setId(key);
+        hearingCaseNote.setHearing(hearing);
+        hearingCaseNote.setPayload(payload);
+        hearingCaseNoteRepository.save(hearingCaseNote);
+        flushAndClear();
+        return entityManager().find(HearingCaseNote.class, key);
+    }
+
+    /**
+     * Commits the hearing, loads it in a new session and ends that session, as a transaction-scoped persistence context
+     * does when the transaction commits. Uses its own factory over the same H2 database (the provider's transaction is
+     * rolled back, so its rows aren't visible to another session) with production's lazy-loading setting. The factory
+     * stays open until {@link #closeSeparateFactory()} so that lazy loading outside the session can still use it.
+     */
+    private Hearing loadInASessionThatThenEnds(final uk.gov.justice.core.courts.Hearing domainHearing) {
+        separateFactory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT, productionLazyLoadingSettings());
+        separateFactoryHearingId = domainHearing.getId();
+        final Hearing entity = buildHearingEntity(domainHearing);
+        entity.setCourtApplicationsJson(entity.getCourtApplicationsJson().substring(0, 255));
+        inTransaction(separateFactory, em -> em.merge(entity));
+
+        final EntityManager readSession = separateFactory.createEntityManager();
+        final Hearing loaded = readSession.find(Hearing.class, domainHearing.getId());
+        readSession.close();
+        return loaded;
+    }
+
+    @AfterEach
+    void closeSeparateFactory() {
+        if (separateFactory != null) {
+            inTransaction(separateFactory, em -> em.remove(em.find(Hearing.class, separateFactoryHearingId)));
+            separateFactory.close();
+            separateFactory = null;
+        }
+    }
+
+    private static void inTransaction(final EntityManagerFactory factory, final Consumer<EntityManager> work) {
+        final EntityManager em = factory.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            work.accept(em);
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
+
+    private static Map<String, Object> productionLazyLoadingSettings() {
+        final Map<String, Object> settings = new HashMap<>();
+        settings.put("hibernate.hbm2ddl.auto", "none");
+        settings.put("hibernate.jpa.compliance.query", "true");
+        productionPersistenceProperty(LAZY_LOAD_NO_TRANS).ifPresent(value -> settings.put(LAZY_LOAD_NO_TRANS, value));
+        return settings;
+    }
+
+    private static Optional<String> productionPersistenceProperty(final String name) {
+        try {
+            final Enumeration<URL> persistenceXmls = HearingRepositoryTest.class.getClassLoader().getResources("META-INF/persistence.xml");
+            while (persistenceXmls.hasMoreElements()) {
+                try (InputStream in = persistenceXmls.nextElement().openStream()) {
+                    final String xml = new String(in.readAllBytes(), UTF_8);
+                    if (xml.contains("name=\"hearing-persistence-unit\"")) {
+                        final Matcher matcher = Pattern.compile("name=\"" + Pattern.quote(name) + "\"\\s+value=\"([^\"]*)\"").matcher(xml);
+                        return matcher.find() ? Optional.of(matcher.group(1)) : Optional.empty();
+                    }
+                }
+            }
+            return Optional.empty();
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     private static Hearing buildHearingEntity(final uk.gov.justice.core.courts.Hearing domainHearing) {
         final Hearing hearing = new Hearing();
         hearing.setId(domainHearing.getId());
