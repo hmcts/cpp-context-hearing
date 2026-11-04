@@ -21,8 +21,10 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantCase;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -157,9 +159,97 @@ class ValidationRequestMapperTest {
         final DraftValidationRequest request = mapper.toValidationRequest(command, hearing);
 
         assertThat(request.getDefendants(), hasSize(1));
-        assertThat(request.getDefendants().get(0).getFirstName(), is(nullValue()));
-        assertThat(request.getDefendants().get(0).getLastName(), is(nullValue()));
+        assertThat(request.getDefendants().get(0).getFirstName(), is(""));
+        assertThat(request.getDefendants().get(0).getLastName(), is(""));
         assertThat(request.getDefendants().get(0).getDateOfBirth(), is(nullValue()));
+    }
+
+    @Test
+    void shouldMapNullPersonNamesToEmptyStrings() {
+        final Defendant defendant = Defendant.defendant()
+                .withId(randomUUID())
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person().build())
+                        .build())
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearingWithDefendant(defendant));
+
+        assertThat(request.getDefendants().get(0).getFirstName(), is(""));
+        assertThat(request.getDefendants().get(0).getLastName(), is(""));
+    }
+
+    @Test
+    void shouldMapOrganisationNameAsFirstNameForLegalEntityDefendant() {
+        final Defendant defendant = Defendant.defendant()
+                .withId(randomUUID())
+                .withLegalEntityDefendant(legalEntityDefendant("ACME LTD"))
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearingWithDefendant(defendant));
+
+        assertThat(request.getDefendants(), hasSize(1));
+        assertThat(request.getDefendants().get(0).getFirstName(), is("ACME LTD"));
+        assertThat(request.getDefendants().get(0).getLastName(), is(""));
+        assertThat(request.getDefendants().get(0).getDateOfBirth(), is(nullValue()));
+    }
+
+    @Test
+    void shouldMapEmptyNamesForLegalEntityDefendantWithoutOrganisationName() {
+        final Defendant defendant = Defendant.defendant()
+                .withId(randomUUID())
+                .withLegalEntityDefendant(legalEntityDefendant(null))
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearingWithDefendant(defendant));
+
+        assertThat(request.getDefendants().get(0).getFirstName(), is(""));
+        assertThat(request.getDefendants().get(0).getLastName(), is(""));
+    }
+
+    @Test
+    void shouldMapOrganisationNameAsFirstNameForLegalEntityApplicationSubject() {
+        final UUID defendantId = randomUUID();
+        final CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withId(randomUUID())
+                .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withId(randomUUID())
+                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                .withMasterDefendantId(randomUUID())
+                                .withDefendantCase(List.of(DefendantCase.defendantCase()
+                                        .withDefendantId(defendantId)
+                                        .withCaseId(randomUUID())
+                                        .build()))
+                                .withLegalEntityDefendant(legalEntityDefendant("ACME LTD"))
+                                .build())
+                        .build())
+                .build();
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                Hearing.hearing().withCourtApplications(List.of(courtApplication)).build());
+
+        assertThat(request.getDefendants(), hasSize(1));
+        assertThat(request.getDefendants().get(0).getDefendantId(), is(defendantId.toString()));
+        assertThat(request.getDefendants().get(0).getFirstName(), is("ACME LTD"));
+        assertThat(request.getDefendants().get(0).getLastName(), is(""));
+    }
+
+    private static LegalEntityDefendant legalEntityDefendant(final String organisationName) {
+        return LegalEntityDefendant.legalEntityDefendant()
+                .withOrganisation(Organisation.organisation().withName(organisationName).build())
+                .build();
+    }
+
+    private static Hearing hearingWithDefendant(final Defendant defendant) {
+        return Hearing.hearing()
+                .withProsecutionCases(List.of(ProsecutionCase.prosecutionCase()
+                        .withDefendants(List.of(defendant))
+                        .build()))
+                .build();
     }
 
     @Test
@@ -413,6 +503,113 @@ class ValidationRequestMapperTest {
         assertThat(request.getResultLines().get(0).getResultLineId(), is(resultLineId.toString()));
         assertThat(request.getResultLines().get(0).getShortCode(), is("IMP"));
         assertThat(request.getResultLines().get(0).getLabel(), is("Imprisonment"));
+        assertThat(request.getResultLines().get(0).getDefendantId(), is(defendantId.toString()));
+        assertThat(request.getResultLines().get(0).getOffenceId(), is(offenceId.toString()));
+    }
+
+    @Test
+    void shouldExcludeResultLinesWithoutDefendantIdOrOffenceId() {
+        final UUID offenceResultLineId = randomUUID();
+
+        final SharedResultsCommandResultLineV2 offenceResultLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(offenceResultLineId)
+                .withShortCode("IMP")
+                .withResultLabel("Imprisonment")
+                .withDefendantId(randomUUID())
+                .withOffenceId(randomUUID())
+                .build();
+
+        final SharedResultsCommandResultLineV2 missingDefendantIdLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(randomUUID())
+                .withShortCode("FO")
+                .withResultLabel("Fine")
+                .withOffenceId(randomUUID())
+                .build();
+
+        final SharedResultsCommandResultLineV2 missingOffenceIdLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(randomUUID())
+                .withShortCode("REMC")
+                .withResultLabel("Remanded in custody")
+                .withDefendantId(randomUUID())
+                .build();
+
+        final SharedResultsCommandResultLineV2 applicationResultLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(randomUUID())
+                .withShortCode("G")
+                .withResultLabel("Granted")
+                .withApplicationIds(randomUUID())
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(),
+                List.of(offenceResultLine, missingDefendantIdLine, missingOffenceIdLine, applicationResultLine));
+        final DraftValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+
+        assertThat(request.getResultLines(), hasSize(1));
+        assertThat(request.getResultLines().get(0).getResultLineId(), is(offenceResultLineId.toString()));
+    }
+
+    @Test
+    void shouldExcludeDeletedResultLinesAndKeepTheirReplacementsOnTheSameOffence() {
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final UUID deletedLineId = randomUUID();
+        final UUID replacementLineId = randomUUID();
+
+        final SharedResultsCommandResultLineV2 deletedLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(deletedLineId)
+                .withShortCode("RCBV")
+                .withResultLabel("Variation of bail conditions")
+                .withDefendantId(defendantId)
+                .withOffenceId(offenceId)
+                .withIsDeleted(true)
+                .build();
+
+        final SharedResultsCommandResultLineV2 replacementLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(replacementLineId)
+                .withShortCode("RCBV")
+                .withResultLabel("Variation of bail conditions")
+                .withDefendantId(defendantId)
+                .withOffenceId(offenceId)
+                .withIsDeleted(false)
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(),
+                List.of(deletedLine, replacementLine));
+        final DraftValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+
+        assertThat(request.getResultLines(), hasSize(1));
+        assertThat(request.getResultLines().get(0).getResultLineId(), is(replacementLineId.toString()));
+        assertThat(request.getResultLines().get(0).getOffenceId(), is(offenceId.toString()));
+    }
+
+    @Test
+    void shouldIncludeApplicationResultLinesThatHaveDefendantIdAndOffenceId() {
+        final UUID resultLineId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        final SharedResultsCommandResultLineV2 applicationOffenceResultLine = SharedResultsCommandResultLineV2
+                .sharedResultsCommandResultLine()
+                .withResultLineId(resultLineId)
+                .withShortCode("IMP")
+                .withResultLabel("Imprisonment")
+                .withApplicationIds(randomUUID())
+                .withDefendantId(defendantId)
+                .withOffenceId(offenceId)
+                .build();
+
+        final ShareDaysResultsCommand command = buildCommand(randomUUID(), LocalDate.now(),
+                List.of(applicationOffenceResultLine));
+        final DraftValidationRequest request = mapper.toValidationRequest(command, Hearing.hearing().build());
+
+        assertThat(request.getResultLines(), hasSize(1));
+        assertThat(request.getResultLines().get(0).getResultLineId(), is(resultLineId.toString()));
         assertThat(request.getResultLines().get(0).getDefendantId(), is(defendantId.toString()));
         assertThat(request.getResultLines().get(0).getOffenceId(), is(offenceId.toString()));
     }

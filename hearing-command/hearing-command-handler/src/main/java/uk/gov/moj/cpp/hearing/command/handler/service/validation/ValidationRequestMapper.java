@@ -11,8 +11,10 @@ import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantCase;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -43,6 +45,7 @@ import org.slf4j.LoggerFactory;
 public class ValidationRequestMapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ValidationRequestMapper.class);
+    private static final String EMPTY_NAME = "";
 
     public DraftValidationRequest toValidationRequest(final ShareDaysResultsCommand command, final Hearing hearing) {
 
@@ -55,6 +58,8 @@ public class ValidationRequestMapper {
                 command.getResultLines() != null ? command.getResultLines() : List.of();
 
         final List<ResultLineDto> resultLines = commandLines.stream()
+                .filter(line -> !line.getIsDeleted())
+                .filter(line -> line.getDefendantId() != null && line.getOffenceId() != null)
                 .map(this::toResultLineDto)
                 .collect(toList());
 
@@ -130,14 +135,8 @@ public class ValidationRequestMapper {
     }
 
     private DefendantDto toDefendantDto(final MasterDefendant masterDefendant, final String defendantId) {
-        final PersonDefendant personDefendant = masterDefendant.getPersonDefendant();
-        final Person personDetails = personDefendant != null ? personDefendant.getPersonDetails() : null;
-        return new DefendantDto()
-                .defendantId(defendantId)
-                .firstName(personDetails != null ? personDetails.getFirstName() : null)
-                .lastName(personDetails != null ? personDetails.getLastName() : null)
-                .dateOfBirth(personDetails != null ? personDetails.getDateOfBirth() : null)
-                .masterDefendantId(uuidToString(masterDefendant.getMasterDefendantId()));
+        return toDefendantDto(defendantId, uuidToString(masterDefendant.getMasterDefendantId()),
+                masterDefendant.getPersonDefendant(), masterDefendant.getLegalEntityDefendant());
     }
 
     private void mapProsecutionCase(final ProsecutionCase prosecutionCase,
@@ -159,13 +158,40 @@ public class ValidationRequestMapper {
     }
 
     private DefendantDto toDefendantDto(final Defendant defendant) {
-        final Person personDetails = extractPersonDetails(defendant);
+        return toDefendantDto(uuidToString(defendant.getId()), uuidToString(defendant.getMasterDefendantId()),
+                defendant.getPersonDefendant(), defendant.getLegalEntityDefendant());
+    }
+
+    /**
+     * Mirrors cpp-ui-hearing: person defendants use their names, organisation defendants send the
+     * organisation name as firstName, and any missing name is sent as "" because the validator
+     * requires both fields.
+     */
+    private DefendantDto toDefendantDto(final String defendantId,
+                                        final String masterDefendantId,
+                                        final PersonDefendant personDefendant,
+                                        final LegalEntityDefendant legalEntityDefendant) {
+        final Person personDetails = personDefendant != null ? personDefendant.getPersonDetails() : null;
+        final String firstName;
+        final String lastName;
+        if (personDetails != null) {
+            firstName = personDetails.getFirstName();
+            lastName = personDetails.getLastName();
+        } else {
+            firstName = extractOrganisationName(legalEntityDefendant);
+            lastName = null;
+        }
         return new DefendantDto()
-                .defendantId(uuidToString(defendant.getId()))
-                .firstName(personDetails != null ? personDetails.getFirstName() : null)
-                .lastName(personDetails != null ? personDetails.getLastName() : null)
+                .defendantId(defendantId)
+                .firstName(firstName != null ? firstName : EMPTY_NAME)
+                .lastName(lastName != null ? lastName : EMPTY_NAME)
                 .dateOfBirth(personDetails != null ? personDetails.getDateOfBirth() : null)
-                .masterDefendantId(uuidToString(defendant.getMasterDefendantId()));
+                .masterDefendantId(masterDefendantId);
+    }
+
+    private static String extractOrganisationName(final LegalEntityDefendant legalEntityDefendant) {
+        final Organisation organisation = legalEntityDefendant != null ? legalEntityDefendant.getOrganisation() : null;
+        return organisation != null ? organisation.getName() : null;
     }
 
     private void addOffence(final Offence offence, final String caseUrn, final String defendantId,
@@ -268,11 +294,6 @@ public class ValidationRequestMapper {
             LOGGER.warn("Unrecognised result line category '{}' for results validation, sending null", category);
             return null;
         }
-    }
-
-    private Person extractPersonDetails(final Defendant defendant) {
-        final PersonDefendant personDefendant = defendant.getPersonDefendant();
-        return personDefendant != null ? personDefendant.getPersonDetails() : null;
     }
 
     private MasterDefendant extractMasterDefendant(final CourtApplicationParty subject) {

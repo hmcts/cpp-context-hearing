@@ -4,10 +4,13 @@ import static com.google.common.collect.ImmutableList.of;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -25,9 +28,11 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationType;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.LinkType;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.AffectedOffence;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationRequest;
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationResponse;
@@ -577,6 +582,43 @@ public class ShareResultsCommandHandlerTest {
 
         shareResultsCommandHandler.shareResultForDay(envelope);
 
+        verify(hearingEventStream).append(any());
+    }
+
+    @Test
+    public void shouldValidateShareDaysResultsWhenHearingHasProsecutionCaseAndStandaloneApplication() throws Exception {
+        final ShareDaysResultsCommand command = TestTemplates.ShareResultsCommandTemplates
+                .standardShareResultsPerDaysCommandTemplate(initiateHearingCommand.getHearing().getId())
+                .setResultLines(List.of());
+        command.setHearingDay(LocalDate.now());
+        final Hearing caseHearing = initiateHearingCommand.getHearing();
+        final Hearing hearing = Hearing.hearing()
+                .withValuesFrom(caseHearing)
+                .withCourtApplications(List.of(CourtApplication.courtApplication()
+                        .withId(randomUUID())
+                        .withType(CourtApplicationType.courtApplicationType().withLinkType(LinkType.STANDALONE).build())
+                        .build()))
+                .build();
+        final HearingAggregate mockAggregate = mock(HearingAggregate.class);
+        when(mockAggregate.getHearing()).thenReturn(hearing);
+        when(mockAggregate.shareResultForDay(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(Stream.empty());
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(mockAggregate);
+        final DraftValidationRequest validationRequest = new DraftValidationRequest()
+                .hearingId(command.getHearingId().toString())
+                .hearingDay(command.getHearingDay());
+        when(validationRequestMapper.toValidationRequest(any(), eq(hearing))).thenReturn(validationRequest);
+        when(resultsValidationClient.validate(any(), any())).thenReturn(new DraftValidationResponse().isValid(true));
+        when(clock.now()).thenReturn(sharedTime);
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataOf(metadataId, "hearing.command.share-days-results").withUserId(randomUUID().toString()),
+                objectToJsonObjectConverter.convert(command));
+
+        shareResultsCommandHandler.shareResultForDay(envelope);
+
+        assertThat(hearing.getProsecutionCases(), is(not(empty())));
+        verify(validationRequestMapper).toValidationRequest(any(), eq(hearing));
+        verify(resultsValidationClient).validate(eq(validationRequest), any());
         verify(hearingEventStream).append(any());
     }
 

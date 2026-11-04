@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -131,6 +132,40 @@ class ResultsValidationClientTest {
     }
 
     @Test
+    void shouldReadAndConsumeErrorBodyAndReturnPassThroughWhenServiceReturns400() throws Exception {
+        final String errorBody = """
+                {"status":400,"errors":[{"field":"defendants[0].firstName","message":"must not be null"}]}
+                """;
+        final HttpEntity entity = mockHttpResponse(400, errorBody);
+
+        final DraftValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+
+        assertThat(response.getIsValid(), is(true));
+        assertThat(response.getMode(), is("pass-through"));
+        verify(entity, atLeastOnce()).getContent();
+    }
+
+    @Test
+    void shouldReturnPassThroughWhenErrorBodyCannotBeRead() throws Exception {
+        final HttpEntity entity = mockHttpResponse(400, "");
+        when(entity.getContent()).thenThrow(new IOException("stream closed"));
+
+        final DraftValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+
+        assertThat(response.getIsValid(), is(true));
+        assertThat(response.getMode(), is("pass-through"));
+    }
+
+    @Test
+    void shouldReturnPassThroughWhenErrorBodyIsLargerThanLogLimit() throws Exception {
+        mockHttpResponse(400, "x".repeat(10_000));
+
+        final DraftValidationResponse response = resultsValidationClient.validate(buildRequest(), "user-123");
+
+        assertThat(response.getIsValid(), is(true));
+    }
+
+    @Test
     void shouldReturnPassThroughWithoutHttpCallWhenDisabled() throws Exception {
         setField(resultsValidationClient, "enabled", "false");
 
@@ -215,7 +250,7 @@ class ResultsValidationClientTest {
         assertThat(resultsValidationClient.isShareBlockingEnabled(), is(true));
     }
 
-    private void mockHttpResponse(final int statusCode, final String body) throws IOException {
+    private HttpEntity mockHttpResponse(final int statusCode, final String body) throws IOException {
         final HttpResponse httpResponse = mock(HttpResponse.class);
         final StatusLine statusLine = mock(StatusLine.class);
         final HttpEntity entity = mock(HttpEntity.class);
@@ -225,6 +260,7 @@ class ResultsValidationClientTest {
         when(httpResponse.getEntity()).thenReturn(entity);
         when(entity.getContent()).thenReturn(new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
         when(httpClient.execute(any(HttpPost.class))).thenReturn(httpResponse);
+        return entity;
     }
 
     private DraftValidationRequest buildRequest() {
