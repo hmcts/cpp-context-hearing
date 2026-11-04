@@ -203,10 +203,6 @@
             <artifactId>hearing-domain-event</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>uk.gov.moj.cpp.hearing</groupId>
