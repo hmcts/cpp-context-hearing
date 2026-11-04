@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-event</artifactId>
-        <version>25.104.210-SNAPSHOT</version>
+        <version>25.104.210-CHD-2864-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-event-listener</artifactId>
     <packaging>war</packaging>
@@ -50,7 +50,6 @@
         <dependency>
             <groupId>io.github.lukehutch</groupId>
             <artifactId>fast-classpath-scanner</artifactId>
-            <version>2.0.8</version>
             <scope>test</scope>
         </dependency>
 
@@ -77,11 +76,6 @@
             <groupId>com.networknt</groupId>
             <artifactId>json-schema-validator</artifactId>
             <version>1.0.74</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>test-utils-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
