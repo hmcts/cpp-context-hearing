@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.utils;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.reset;
+import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubDefaultProgressionProsecutionCaseDetails;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubFixedListForWelshValues;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubForReferenceDataResults;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
@@ -39,6 +40,7 @@ public class StubPerExecution {
         stubResultsValidatorValidate();
         stubOrganisationUnit();
         stubReferenceDataResultDefinitionWithCategory();
+        stubDefaultProgressionProsecutionCaseDetails();
     }
 
     public static void main(String[] args) {
