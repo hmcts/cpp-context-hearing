@@ -7,6 +7,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.empty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Offence;
@@ -40,6 +42,8 @@ public class OffenceDelegate implements Serializable {
     private static final long serialVersionUID = 5L;
 
     private final HearingAggregateMomento momento;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OffenceDelegate.class);
 
     public OffenceDelegate(final HearingAggregateMomento momento) {
         this.momento = momento;
@@ -161,6 +165,12 @@ public class OffenceDelegate implements Serializable {
 
         if(nonNull(offence.getIndicatedPlea())) {
             this.momento.getIndicatedPlea().putIfAbsent(offenceId, offence.getIndicatedPlea());
+        }
+
+        LOGGER.info ("existingHearingUpdated updating ConvictionDate on offence {}", offence.getConvictionDate());
+        if(nonNull(offence.getConvictionDate())) {
+            this.momento.getConvictionDates().putIfAbsent(offenceId,offence.getConvictionDate());
+            LOGGER.info ("existingHearingUpdated updated ConvictionDate on offence");
         }
 
         if(nonNull(offence.getVerdict())) {

@@ -85,7 +85,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResult
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.OffenceBailStatusResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
@@ -96,6 +95,7 @@ import uk.gov.moj.cpp.hearing.query.view.service.userdata.UserDataService;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.DraftResultRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
+import uk.gov.moj.cpp.hearing.dto.HearingCaseForDayRow;
 import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
@@ -121,6 +121,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -406,17 +407,17 @@ public class HearingService {
             return new HearingCasesForDay(null);
         }
 
-        final List<Hearing> hearingsForDay = hearingRepository.findHearings(date);
-        if (isEmpty(hearingsForDay)) {
+        final List<HearingCaseForDayRow> rowsForDay = hearingRepository.findHearingCaseRowsForDay(date);
+        if (isEmpty(rowsForDay)) {
             return new HearingCasesForDay(null);
         }
 
+        final Map<UUID, List<HearingCaseForDayRow>> rowsByHearing = rowsForDay.stream()
+                .collect(Collectors.groupingBy(HearingCaseForDayRow::getHearingId, LinkedHashMap::new, toList()));
+
         return HearingCasesForDay.hearingCasesForDay()
-                .withHearingCases(hearingsForDay.stream()
-                        .map(ha -> hearingJPAMapper.fromJPAMinimal(ha))
-                        .filter(ha -> isNotEmpty(ha.getProsecutionCases()))
-                        .map(h -> getHearingCaseTransformer.hearingCases(h, date).build())
-                        .distinct()
+                .withHearingCases(rowsByHearing.values().stream()
+                        .map(rowsForHearing -> getHearingCaseTransformer.hearingCases(rowsForHearing, date).build())
                         .toList())
                 .build();
     }
@@ -1281,23 +1282,6 @@ public class HearingService {
 
         return (ProsecutionCaseResponse.builder()
                 .withProsecutionCases(prosecutionCaseJPAMapper.fromJPA(Sets.newHashSet(prosecutionCases))).build());
-    }
-
-    @Transactional
-    public OffenceBailStatusResponse getOffenceBailStatusForDefendant(final UUID defendantId) {
-
-        final List<uk.gov.moj.cpp.hearing.domain.OffenceBailStatus> offenceBailStatuses = offenceRepository.offenceBailStatuses(defendantId)
-                .stream()
-                .map(bailStatus -> new uk.gov.moj.cpp.hearing.domain.OffenceBailStatus(
-                        bailStatus.getOffenceId(),
-                        bailStatus.getBailStatusId(),
-                        bailStatus.getBailStatusCode(),
-                        bailStatus.getBailStatusDesc()))
-                .toList();
-
-        return OffenceBailStatusResponse.builder()
-                .withOffenceBailStatuses(offenceBailStatuses)
-                .build();
     }
 
     public void validateUserPermissionForApplicationType(final JsonEnvelope query) {
