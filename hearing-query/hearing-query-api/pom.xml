@@ -136,7 +136,6 @@
         <dependency>
             <groupId>uk.gov.moj.cpp.access-control</groupId>
             <artifactId>access-control-common-providers</artifactId>
-            <version>${access.control.common.providers.version}</version>
             <scope>test</scope>
         </dependency>
 

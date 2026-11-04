@@ -45,9 +45,5 @@
             <groupId>uk.gov.justice.utils</groupId>
             <artifactId>utilities-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>uk.gov.justice.framework-api</groupId>
-            <artifactId>framework-api-core</artifactId>
-        </dependency>
     </dependencies>
 </project>

@@ -37,7 +37,6 @@
         <dependency>
             <groupId>com.github.lookfirst</groupId>
             <artifactId>sardine</artifactId>
-            <version>${sardine.version}</version>
         </dependency>
 
         <dependency>

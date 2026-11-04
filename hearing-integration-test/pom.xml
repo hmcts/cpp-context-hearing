@@ -11,7 +11,6 @@
     <artifactId>hearing-integration-test</artifactId>
 
     <properties>
-        <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
     </properties>
 
     <dependencies>
@@ -126,7 +125,6 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>${exec-maven-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>pre-integration</id>
