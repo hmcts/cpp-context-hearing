@@ -103,7 +103,6 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 import uk.gov.moj.cpp.hearing.repository.NowRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
-import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
 import uk.gov.moj.cpp.hearing.repository.PtphDetailRepository;
 
@@ -153,9 +152,6 @@ public class HearingService {
 
     @Inject
     private HearingRepository hearingRepository;
-
-    @Inject
-    private OffenceRepository offenceRepository;
 
     @Inject
     private HearingEventRepository hearingEventRepository;
