@@ -3,7 +3,9 @@ package uk.gov.moj.cpp.hearing.repository;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
@@ -19,6 +21,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import jakarta.persistence.NonUniqueResultException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,5 +92,53 @@ class DefendantAttendanceRepositoryTest {
         assertThat(entity.getDefendantId(), is(defendantId));
         assertThat(entity.getDay(), is(date));
         assertThat(entity.getAttendanceType(), is(isInAttendance));
+    }
+
+    @Test
+    void chd08_findByHearingIdDefendantIdAndDateThrowsNonUniqueResultWhenTwoRowsMatch() {
+        final UUID hearingId = savedHearingId();
+        final UUID defendantId = randomUUID();
+        final LocalDate day = LocalDate.of(2017, 12, 13);
+        saveAttendance(hearingId, defendantId, day, AttendanceType.IN_PERSON);
+        saveAttendance(hearingId, defendantId, day, AttendanceType.NOT_PRESENT);
+
+        assertThrows(NonUniqueResultException.class,
+                () -> defendantAttendanceRepository.findByHearingIdDefendantIdAndDate(hearingId, defendantId, day));
+    }
+
+    @Test
+    void chd08_findByHearingIdDefendantIdAndDateReturnsNullWhenNothingMatches() {
+        assertThat(defendantAttendanceRepository.findByHearingIdDefendantIdAndDate(savedHearingId(), randomUUID(), LocalDate.of(2017, 12, 13)),
+                is(nullValue()));
+    }
+
+    @Test
+    void chd11_findByHearingIdDefendantIdAndDateMatchesOnlyTheRequestedDay() {
+        final UUID hearingId = savedHearingId();
+        final UUID defendantId = randomUUID();
+        saveAttendance(hearingId, defendantId, LocalDate.of(2017, 12, 13), AttendanceType.IN_PERSON);
+        saveAttendance(hearingId, defendantId, LocalDate.of(2017, 12, 14), AttendanceType.NOT_PRESENT);
+
+        final DefendantAttendance found = defendantAttendanceRepository.findByHearingIdDefendantIdAndDate(hearingId, defendantId, LocalDate.of(2017, 12, 14));
+
+        assertThat(found.getAttendanceType(), is(AttendanceType.NOT_PRESENT));
+    }
+
+    // ── CHD harness ──────────────────────────────────────────────────────────────────────────────────────────────
+
+    private UUID savedHearingId() {
+        final Hearing hearingEntity = new Hearing();
+        hearingEntity.setId(minimumInitiateHearingTemplate().getHearing().getId());
+        hearingRepository.save(hearingEntity);
+        return hearingEntity.getId();
+    }
+
+    private void saveAttendance(final UUID hearingId, final UUID defendantId, final LocalDate day, final AttendanceType attendanceType) {
+        final DefendantAttendance defendantAttendance = new DefendantAttendance();
+        defendantAttendance.setId(new HearingSnapshotKey(randomUUID(), hearingId));
+        defendantAttendance.setDefendantId(defendantId);
+        defendantAttendance.setDay(day);
+        defendantAttendance.setAttendanceType(attendanceType);
+        defendantAttendanceRepository.save(defendantAttendance);
     }
 }

@@ -44,8 +44,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -336,12 +340,52 @@ class HearingRepositoryTest {
     }
 
     @Test
-    void shouldThrowNonUniqueResultForFindHearingDayByHearingIdAndDate_whenHearingHasTwoSittingsOnTheDate() {
+    void chd08_findHearingDayByHearingIdAndDateThrowsNonUniqueResultWhenTheHearingHasTwoSittingsOnTheDate() {
         final ZonedDateTime sittingDay = ZonedDateTime.now().plusDays(4).withHour(9).withMinute(0).withSecond(0).withNano(0);
         final uk.gov.justice.core.courts.Hearing hearing = addSampleHearing(false, sittingDay, sittingDay.plusHours(2));
 
         assertThrows(NonUniqueResultException.class,
                 () -> hearingRepository.findHearingDayByHearingIdAndDate(hearing.getId(), sittingDay.toLocalDate()));
+    }
+
+    @Test
+    void chd05_jsonColumnRoundTripsNestedObjectsNumbersAndNullFields() throws Exception {
+        final JsonNode payload = new ObjectMapper().readTree(
+                "{\"text\":\"note\",\"count\":12,\"ratio\":1.5,\"absent\":null,\"nested\":{\"values\":[1,2]}}");
+
+        final HearingCaseNote reloaded = saveAndReloadCaseNoteWithPayload(payload);
+
+        assertThat(reloaded.getPayload(), is(payload));
+    }
+
+    @Test
+    // Accepted (provisional, pending owner review): Java 17's DeltaSpike save persisted a new entity, so the passed
+    // instance became managed; Java 25's merge returns a managed copy and leaves the passed instance detached.
+    // No production code uses an entity after saving it. See CHD-06 in java25-parity-test-report.md.
+    void chd06_saveOfANewHearingReturnsAManagedCopyAndLeavesThePassedInstanceDetached() {
+        final Hearing newHearing = newHearingEntity();
+
+        final Hearing saved = hearingRepository.save(newHearing);
+
+        assertThat(entityManager().contains(saved), is(true));
+        assertThat(entityManager().contains(newHearing), is(false));
+    }
+
+    @Test
+    void chd06_saveOfANewHearingStoresItsChildren() {
+        final Hearing newHearing = newHearingEntity();
+        final int prosecutionCaseCount = newHearing.getProsecutionCases().size();
+
+        hearingRepository.save(newHearing);
+        flushAndClear();
+
+        assertThat(hearingRepository.findBy(newHearing.getId()).getProsecutionCases().size(), is(prosecutionCaseCount));
+    }
+
+    @Test
+    void chd07_findByHearingIdAndJurisdictionTypeThrowsNoResultWhenNothingMatches() {
+        assertThrows(NoResultException.class,
+                () -> hearingRepository.findByHearingIdAndJurisdictionType(randomUUID(), JurisdictionType.CROWN));
     }
 
     @Test
@@ -627,6 +671,35 @@ class HearingRepositoryTest {
         hearingApplication.setId(hearingApplicationKey);
         hearingApplication.setHearing(hearing);
         hearingApplicationRepository.save(hearingApplication);
+    }
+
+    // ── CHD harness ──────────────────────────────────────────────────────────────────────────────────────────────
+
+    private EntityManager entityManager() {
+        return hibernateTestEntityManagerProvider.getEntityManager();
+    }
+
+    private void flushAndClear() {
+        entityManager().flush();
+        entityManager().clear();
+    }
+
+    private static Hearing newHearingEntity() {
+        final Hearing hearing = buildHearingEntity(minimumInitiateHearingTemplate().getHearing());
+        hearing.setCourtApplicationsJson(hearing.getCourtApplicationsJson().substring(0, 255));
+        return hearing;
+    }
+
+    private HearingCaseNote saveAndReloadCaseNoteWithPayload(final JsonNode payload) {
+        final Hearing hearing = hearingRepository.findBy(hearings.get(0).getId());
+        final HearingSnapshotKey key = new HearingSnapshotKey(randomUUID(), hearing.getId());
+        final HearingCaseNote hearingCaseNote = new HearingCaseNote();
+        hearingCaseNote.setId(key);
+        hearingCaseNote.setHearing(hearing);
+        hearingCaseNote.setPayload(payload);
+        hearingCaseNoteRepository.save(hearingCaseNote);
+        flushAndClear();
+        return entityManager().find(HearingCaseNote.class, key);
     }
 
     /**

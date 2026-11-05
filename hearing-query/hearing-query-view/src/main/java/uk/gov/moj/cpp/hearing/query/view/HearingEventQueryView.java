@@ -62,6 +62,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
@@ -71,6 +72,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.ZonedDateTime;
 
+// One transaction per query, so the persistence context stays open while the response is built from lazy collections
+// (as Java 17's request-scoped EntityManager did). Replaces hibernate.enable_lazy_load_no_trans (CHD-01).
+@Transactional
 @SuppressWarnings({"CdiInjectionPointsInspection", "WeakerAccess", "squid:S1172", "squid:CommentedOutCodeLine", "squid:S1481", "squid:S1854"})
 public class HearingEventQueryView {
 

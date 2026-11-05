@@ -52,6 +52,7 @@ Severity: how likely the change is to alter behaviour that callers or users see,
 | CHD-13 | BC-13 | JSON schema validation (everit) | Stricter validation could reject borderline payloads. ITs green; the one schema rejection seen in the IT log is identical on `main` | Low | Verify on both IT runs (Stage 6) |
 | CHD-14 | BC-15 | `coredomain` | 25.104.0-M4 lacked deleted-judicial-result types, `isDeemedServed`, `crackedIneffectiveSubReasonId`; all three restored from `main` on 25.104.5 | Fixed | Restored unit tests; `ShareResultsIT` trial-type checks |
 | CHD-15 | BC-20 | Drools `COMMAND_API`, `QUERY_API` | A harness loading 0 rules would let deny-tests pass vacuously | Fixed | `AccessControlRuleCountTest` (×2) |
+| CHD-17 | BC-01 | `DefendantRepository.getDefendantDetailsForSearching` → `HearingQueryView.getOutstandingFinesQueryFromDefendantId` | Found in Stage 3. Returns `null` for an unknown defendant where `main` threw `NoResultException`; the caller's `catch` no longer fires, so the outstanding-fines query fails with a `NullPointerException` instead of returning an empty payload. Team changed the test to expect `null` | High | `DefendantRepositoryTest.chd17_getDefendantDetailsForSearchingThrowsNoResultWhenTheDefendantIsUnknown` |
 | CHD-16 | — | `hearing-event-listener` | `HearingSchemaContractValidationTest` (19 tests) no longer runs: the MI contract jar is still javax. Coverage gap, not a behaviour change | Medium (coverage) | Re-enable once MI publishes a Jakarta test jar |
 
 ## Catalogue items that don't apply, or are already covered

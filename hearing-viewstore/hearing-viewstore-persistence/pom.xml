@@ -127,4 +127,31 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <!-- Runs the persistence tests on the Hibernate version WildFly 40.0.1 ships, rather than the BOM's.
+             Opt-in: mvn test -pl hearing-viewstore/hearing-viewstore-persistence -Phibernate-7.3.2 -->
+        <profile>
+            <id>hibernate-7.3.2</id>
+            <dependencyManagement>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.hibernate.orm</groupId>
+                        <artifactId>hibernate-core</artifactId>
+                        <version>7.3.2.Final</version>
+                    </dependency>
+                </dependencies>
+            </dependencyManagement>
+            <dependencies>
+                <!-- Hibernate 7 moved classpath scanning (the test unit's <jar-file>) into its own module. On WildFly the
+                     JPA subsystem discovers entities itself, so production doesn't need it. -->
+                <dependency>
+                    <groupId>org.hibernate.orm</groupId>
+                    <artifactId>hibernate-scan-jandex</artifactId>
+                    <version>7.3.2.Final</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

@@ -2,8 +2,8 @@ package uk.gov.moj.cpp.hearing.repository;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import uk.gov.justice.core.courts.FundingType;
 import uk.gov.justice.services.test.utils.persistence.HibernateTestEntityManagerProvider;
@@ -18,6 +18,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
 
 import java.time.LocalDate;
 import java.util.UUID;
+
+import jakarta.persistence.NoResultException;
 
 
 import org.junit.jupiter.api.BeforeEach;
@@ -87,7 +89,18 @@ class DefendantRepositoryTest {
 
     @Test
     void testDefendantDetailsForSearchingNoResultFound() {
-        assertThat(defendantRepository.getDefendantDetailsForSearching(UUID.randomUUID()), is(nullValue()));
+        assertThrows(NoResultException.class, () -> defendantRepository.getDefendantDetailsForSearching(UUID.randomUUID()));
+    }
+
+    @Test
+    void chd12_getDefendantDetailsForSearchingMapsTheDefendantIdAndOrganisationName() {
+        final Defendant defendant = buildDefendant();
+        defendantRepository.save(defendant);
+
+        final DefendantSearch defendantSearch = defendantRepository.getDefendantDetailsForSearching(defendant.getId().getId());
+
+        assertThat(defendantSearch.getDefendantId(), is(defendant.getId().getId()));
+        assertThat(defendantSearch.getLegalEntityOrganizationName(), is(defendant.getLegalEntityOrganisation().getName()));
     }
 
     private Defendant buildDefendant() {
