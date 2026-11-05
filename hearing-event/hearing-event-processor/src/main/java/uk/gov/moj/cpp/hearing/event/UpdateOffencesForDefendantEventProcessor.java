@@ -10,7 +10,7 @@ import static uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstOffe
 
 
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -20,7 +20,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstOffenceCommand;
 import uk.gov.moj.cpp.hearing.command.offence.AddOffenceCommand;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 

@@ -248,3 +248,34 @@ cd hearing-performance-test && mvn jmeter:gui -Pscheduling-performance-test    #
 - Access control enforced by `HearingQueryService.validateIfUserHasAccessToHearing()` — never bypass.
 - Welsh language support is first-class: `hearing.save-defendants-welsh-translations` command exists.
 - Custody Time Limit (CTL) calculations are safety-critical: `CTLExpiryDateCalculatorService`.
+
+## Liquibase 5 (25.104.1 onwards)
+
+`liquibase.properties` here is on Liquibase **5.0.3** (from `maven-super-pom` via the consolidated
+`liquibase.version`, which drives both liquibase-core and the maven plugin).
+
+- `liquibase.hub.mode` is **removed** — 4.10.0 ships 48 Hub classes, 5.0.3 ships none.
+- `liquibase.analytics.enabled: false` is **required** — analytics is on by default from 4.30.0 and
+  this shaded jar runs the migrations in the Helm pre-install job.
+- `liquibase.headless` stays. It is still valid in Liquibase 5. The `NoSuchFieldException` in build
+  logs is the maven plugin failing to map any dotted key onto a Mojo field; it is harmless.
+
+## crackedIneffectiveSubReasonId — query API and public event
+
+Both sides carry it, as on `main` (CCT-2371):
+
+- the **query API** returns it, populated in `HearingService.updateTrialAttributes` for a
+  cracked/ineffective trial;
+- **`public.hearing.resulted`** carries it because `HearingTrialTypeDelegate` keeps it on the
+  aggregate's `CrackedIneffectiveTrial`;
+- the vacated-trial path and the id-only `fetchCrackedIneffectiveTrial` lookup leave it null.
+
+The first Java 25 commit dropped it from the aggregate (and `isDeemedServed` and the deleted judicial
+results) because `coredomain` 25.104.0-M4 lacked those types. 25.104.5 has them again, so all three
+were restored from `main`. `ShareResultsIT` asserts the same expectation object on both sides.
+
+## Known flaky
+
+`ShareResultsIT` intermittently fails with "Expected 'public.hearing.resulted' ... message to emit
+on the public.event topic" — a different test each run, never an assertion mismatch. Re-run the
+class on its own before believing it.

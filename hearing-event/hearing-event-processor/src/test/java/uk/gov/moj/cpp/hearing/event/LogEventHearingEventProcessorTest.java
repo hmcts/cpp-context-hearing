@@ -54,6 +54,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCas
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -154,8 +155,8 @@ public class LogEventHearingEventProcessorTest {
                 .with(PublicHearingEventLogged::getHearingEvent, isBean(uk.gov.moj.cpp.hearing.eventlog.HearingEvent.class)
                         .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getHearingEventId, Matchers.is(hearingEventLogged.getHearingEventId()))
                         .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getRecordedLabel, Matchers.is(hearingEventLogged.getRecordedLabel()))
-                        .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getEventTime, Matchers.is(hearingEventLogged.getEventTime().toLocalDateTime().atZone(ZoneId.of("UTC"))))
-                        .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getLastModifiedTime, Matchers.is(hearingEventLogged.getLastModifiedTime().toLocalDateTime().atZone(ZoneId.of("UTC")))))
+                        .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getEventTime, Matchers.is(hearingEventLogged.getEventTime().toLocalDateTime().atZone(ZoneOffset.UTC)))
+                        .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getLastModifiedTime, Matchers.is(hearingEventLogged.getLastModifiedTime().toLocalDateTime().atZone(ZoneOffset.UTC))))
                 .with(PublicHearingEventLogged::getHearing, isBean(uk.gov.moj.cpp.hearing.eventlog.Hearing.class)
                         .with(uk.gov.moj.cpp.hearing.eventlog.Hearing::getCourtCentre, isBean(uk.gov.moj.cpp.hearing.eventlog.CourtCentre.class)
                                 .with(uk.gov.moj.cpp.hearing.eventlog.CourtCentre::getCourtCentreId, Matchers.is(hearingEventLogged.getCourtCentre().getId()))
@@ -227,8 +228,8 @@ public class LogEventHearingEventProcessorTest {
                 .with(PublicHearingEventLogged::getHearingEvent, isBean(uk.gov.moj.cpp.hearing.eventlog.HearingEvent.class)
                         .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getHearingEventId, Matchers.is(hearingEventLogged.getHearingEventId()))
                         .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getRecordedLabel, Matchers.is(hearingEventLogged.getRecordedLabel()))
-                        .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getEventTime, Matchers.is(hearingEventLogged.getEventTime().toLocalDateTime().atZone(ZoneId.of("UTC"))))
-                        .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getLastModifiedTime, Matchers.is(hearingEventLogged.getLastModifiedTime().toLocalDateTime().atZone(ZoneId.of("UTC")))))
+                        .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getEventTime, Matchers.is(hearingEventLogged.getEventTime().toLocalDateTime().atZone(ZoneOffset.UTC)))
+                        .with(uk.gov.moj.cpp.hearing.eventlog.HearingEvent::getLastModifiedTime, Matchers.is(hearingEventLogged.getLastModifiedTime().toLocalDateTime().atZone(ZoneOffset.UTC))))
                 .with(PublicHearingEventLogged::getHearing, isBean(uk.gov.moj.cpp.hearing.eventlog.Hearing.class)
                         .with(uk.gov.moj.cpp.hearing.eventlog.Hearing::getCourtCentre, isBean(uk.gov.moj.cpp.hearing.eventlog.CourtCentre.class)
                                 .with(uk.gov.moj.cpp.hearing.eventlog.CourtCentre::getCourtCentreId, Matchers.is(hearingEventLogged.getCourtCentre().getId()))

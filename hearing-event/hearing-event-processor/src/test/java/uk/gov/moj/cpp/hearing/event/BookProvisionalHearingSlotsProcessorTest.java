@@ -20,7 +20,7 @@ import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
 import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingServiceResponse;
 import uk.gov.moj.cpp.hearing.event.service.ProvisionalBookingService;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 

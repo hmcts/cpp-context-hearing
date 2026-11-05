@@ -6,7 +6,7 @@ import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import uk.gov.moj.cpp.hearing.common.ReusableInformation;
 import uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType;
 
-import javax.json.JsonObjectBuilder;
+import jakarta.json.JsonObjectBuilder;
 
 public abstract class ReusableInformationBaseConverter<T> {
 

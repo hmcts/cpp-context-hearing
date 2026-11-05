@@ -22,8 +22,8 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.util.List;
 import java.util.UUID;
 
-import javax.json.JsonObject;
-import javax.json.JsonString;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

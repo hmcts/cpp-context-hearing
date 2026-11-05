@@ -56,7 +56,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class ResultTreeBuilder {
     private final ReferenceDataService referenceDataService;

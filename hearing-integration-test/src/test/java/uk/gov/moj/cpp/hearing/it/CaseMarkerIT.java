@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static java.time.ZonedDateTime.now;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
@@ -38,8 +39,14 @@ public class CaseMarkerIT extends AbstractIT {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final UUID prosecutionCaseId = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getId();
 
-        // Add one case marker to update to existing prosecution case
-        final List<Marker> markers = hearingOne.getFirstCase().getCaseMarkers();
+        // Replace the template's case marker with a new one, so the poll below only matches once this update is applied;
+        // otherwise the removal can overtake it under load and the marker reappears
+        final List<Marker> markers = List.of(Marker.marker()
+                .withId(randomUUID())
+                .withMarkerTypeid(randomUUID())
+                .withMarkerTypeCode("MT" + randomUUID().toString().substring(0, 6))
+                .withMarkerTypeDescription("Marker updated by CaseMarkerIT")
+                .build());
         updateCaseMarkers(prosecutionCaseId, hearingId, markers);
         // Matching Hearing Object with Case Marker
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)

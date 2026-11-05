@@ -12,7 +12,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
 import java.util.UUID;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

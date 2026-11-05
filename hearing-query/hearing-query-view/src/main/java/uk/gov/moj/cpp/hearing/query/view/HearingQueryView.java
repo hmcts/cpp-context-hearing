@@ -64,17 +64,22 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.persistence.NoResultException;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.persistence.NoResultException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+// One transaction per query, so the persistence context stays open while the response is built from lazy collections
+// (as Java 17's request-scoped EntityManager did). Replaces hibernate.enable_lazy_load_no_trans (CHD-01).
+@Transactional
 @SuppressWarnings({"squid:S3655", "squid:CallToDeprecatedMethod"})
 public class HearingQueryView {
 

@@ -9,7 +9,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.justice.core.courts.Defendant.defendant;
 import static uk.gov.justice.core.courts.Hearing.hearing;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
@@ -24,11 +24,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 
 import java.lang.reflect.Field;
 
-import org.junit.experimental.theories.DataPoints;
-import org.junit.experimental.theories.FromDataPoints;
-import org.junit.experimental.theories.Theories;
-import org.junit.experimental.theories.Theory;
-import org.junit.runner.RunWith;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
@@ -60,10 +55,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Theories.class)
 public class PleaDelegateTest {
     private static final String NOT_GUILTY = "NOT_GUILTY";
     private static final String GUILTY = "GUILTY";
@@ -114,8 +110,7 @@ public class PleaDelegateTest {
     private static final UUID APPLICATION_ID = randomUUID();
 
 
-    @DataPoints("testData")
-    public static PleaTestData[] testData = {
+    private static final PleaTestData[] testData = {
         new PleaTestData(EMPTY_MODEL,PAYLOAD_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
         new PleaTestData(EMPTY_MODEL, PAYLOAD_PLEA_NOT_GUILTY, null, false, false),
         new PleaTestData(EMPTY_MODEL, PAYLOAD_INDICATED_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
@@ -159,22 +154,30 @@ public class PleaDelegateTest {
         new PleaTestData(BEFORE_INDICATED_PLEA_NOT_GUILTY,PAYLOAD_PLEA_NOT_GUILTY, null, false, false),
     } ;
 
-    @DataPoints("verdictTestData")
-    public static PleaTestData[] verdictTestData = {
+    private static final PleaTestData[] verdictTestData = {
             new PleaTestData(BEFORE_PLEA_GUILTY,PAYLOAD_PLEA_NOT_GUILTY, OLD_PLEA_DATE, false, false),
             new PleaTestData(BEFORE_INDICATED_PLEA_GUILTY,PAYLOAD_INDICATED_PLEA_NOT_GUILTY, OLD_PLEA_DATE, false, false),
             new PleaTestData(BEFORE_PLEA_GUILTY,EMPTY_MODEL, OLD_PLEA_DATE, false, false),
             new PleaTestData(BEFORE_INDICATED_PLEA_GUILTY,EMPTY_MODEL, OLD_PLEA_DATE, false, false),
     };
 
-    @Before
+    static PleaTestData[] testDataSource() {
+        return testData;
+    }
+
+    static PleaTestData[] verdictTestDataSource() {
+        return verdictTestData;
+    }
+
+    @BeforeEach
     public void setup() {
         hearingAggregateMomento = new HearingAggregateMomento();
         pleaDelegate  = new PleaDelegate(hearingAggregateMomento);
     }
 
-    @Theory
-    public void shouldProcessPleaAndIndicatorPleaCases(@FromDataPoints("testData") final PleaTestData testData) throws NoSuchFieldException, IllegalAccessException {
+    @ParameterizedTest
+    @MethodSource("testDataSource")
+    public void shouldProcessPleaAndIndicatorPleaCases(final PleaTestData testData) throws NoSuchFieldException, IllegalAccessException {
         final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregateMomento = getMemonto(hearingAggregate);
@@ -248,8 +251,9 @@ public class PleaDelegateTest {
         assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().stream().filter(offence -> offence.getId().equals(OFFENCE_ID)).findFirst().get().getIndicatedPlea(), is(testData.getPayload().getIndicatedPlea()));
     }
 
-    @Theory
-    public void shouldNotRemoveConvictionDateWhenThereIsVerdict(@FromDataPoints("verdictTestData") final PleaTestData testData) throws NoSuchFieldException, IllegalAccessException {
+    @ParameterizedTest
+    @MethodSource("verdictTestDataSource")
+    public void shouldNotRemoveConvictionDateWhenThereIsVerdict(final PleaTestData testData) throws NoSuchFieldException, IllegalAccessException {
         final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID, OLD_PLEA_DATE);
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregateMomento = getMemonto(hearingAggregate);

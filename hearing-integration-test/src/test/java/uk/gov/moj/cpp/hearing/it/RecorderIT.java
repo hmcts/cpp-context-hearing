@@ -45,6 +45,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -104,7 +105,7 @@ public class RecorderIT extends AbstractIT {
                                 .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))
                                 .with(CourtCentre::getName, is(hearing.getCourtCentre().getName())))
                         .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
-                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneOffset.UTC)))
                                 .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
                                 .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
                         .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
@@ -118,7 +119,7 @@ public class RecorderIT extends AbstractIT {
                         .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(hearingOne.getHearing().getProsecutionCases()))
                 )
         );
-        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
+        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
                                 .with(HearingSummaries::getId, is(hearing.getId()))
@@ -128,7 +129,7 @@ public class RecorderIT extends AbstractIT {
                                         .withValue(HearingType::getId, hearing.getType().getId())
                                         .withValue(HearingType::getDescription, hearing.getType().getDescription()))
                                 .with(HearingSummaries::getHearingDays, first(isBean(HearingDay.class)
-                                        .withValue(HearingDay::getSittingDay, hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC")))
+                                        .withValue(HearingDay::getSittingDay, hearingDay.getSittingDay().withZoneSameLocal(ZoneOffset.UTC))
                                         .withValue(HearingDay::getListedDurationMinutes, hearingDay.getListedDurationMinutes())
                                         .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearing.getProsecutionCases()))
@@ -194,7 +195,7 @@ public class RecorderIT extends AbstractIT {
                                 .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))
                                 .with(CourtCentre::getName, is(hearing.getCourtCentre().getName())))
                         .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
-                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneOffset.UTC)))
                                 .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
                                 .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
                         .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
@@ -209,7 +210,7 @@ public class RecorderIT extends AbstractIT {
         );
         stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCasesForRecorder(case1, getLoggedInUser());
 
-        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
+        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
                                 .with(HearingSummaries::getId, is(hearing.getId()))
@@ -219,7 +220,7 @@ public class RecorderIT extends AbstractIT {
                                         .withValue(HearingType::getId, hearing.getType().getId())
                                         .withValue(HearingType::getDescription, hearing.getType().getDescription()))
                                 .with(HearingSummaries::getHearingDays, first(isBean(HearingDay.class)
-                                        .withValue(HearingDay::getSittingDay, hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC")))
+                                        .withValue(HearingDay::getSittingDay, hearingDay.getSittingDay().withZoneSameLocal(ZoneOffset.UTC))
                                         .withValue(HearingDay::getListedDurationMinutes, hearingDay.getListedDurationMinutes())
                                         .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearing.getProsecutionCases()))
@@ -275,7 +276,7 @@ public class RecorderIT extends AbstractIT {
                                 .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))
                                 .with(CourtCentre::getName, is(hearing.getCourtCentre().getName())))
                         .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
-                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneOffset.UTC)))
                                 .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
                                 .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
                         .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
@@ -293,7 +294,7 @@ public class RecorderIT extends AbstractIT {
         stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForRecorder();
 
         getHearingsByDatePollForMatch(
-                hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
+                hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class).with(GetHearings::getHearingSummaries, is(nullValue()))
         );
     }
@@ -342,7 +343,7 @@ public class RecorderIT extends AbstractIT {
                                 .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))
                                 .with(CourtCentre::getName, is(hearing.getCourtCentre().getName())))
                         .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
-                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneOffset.UTC)))
                                 .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
                                 .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
                         .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
@@ -355,7 +356,7 @@ public class RecorderIT extends AbstractIT {
                         .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(hearingOne.getHearing().getProsecutionCases()))
                 )
         );
-        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59",
+        getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toString(), "00:00", "23:59",
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
                                 .with(HearingSummaries::getId, is(hearing.getId()))
@@ -365,7 +366,7 @@ public class RecorderIT extends AbstractIT {
                                         .withValue(HearingType::getId, hearing.getType().getId())
                                         .withValue(HearingType::getDescription, hearing.getType().getDescription()))
                                 .with(HearingSummaries::getHearingDays, first(isBean(HearingDay.class)
-                                        .withValue(HearingDay::getSittingDay, hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC")))
+                                        .withValue(HearingDay::getSittingDay, hearingDay.getSittingDay().withZoneSameLocal(ZoneOffset.UTC))
                                         .withValue(HearingDay::getListedDurationMinutes, hearingDay.getListedDurationMinutes())
                                         .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearing.getProsecutionCases()))

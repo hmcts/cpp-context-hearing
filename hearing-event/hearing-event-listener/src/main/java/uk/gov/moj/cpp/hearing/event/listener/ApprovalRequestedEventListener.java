@@ -11,8 +11,8 @@ import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 @ServiceComponent(EVENT_LISTENER)
 public class ApprovalRequestedEventListener {

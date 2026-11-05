@@ -4,38 +4,45 @@ import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.notNullValue;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.COURT_LIST_REQUESTED;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_SUCCESSFUL;
 
-import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
+import uk.gov.justice.services.test.utils.persistence.HibernateTestEntityManagerProvider;
 import uk.gov.moj.cpp.hearing.publishing.events.PublishStatus;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.inject.Inject;
-
-import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 
-@RunWith(CdiTestRunner.class)
-public class CourtListRepositoryTest extends BaseTransactionalTest {
+class CourtListRepositoryTest {
 
-    @Inject
+    private static final String PERSISTENCE_UNIT = "hearing-test-persistence-unit";
+
+    @RegisterExtension
+    static HibernateTestEntityManagerProvider hibernateTestEntityManagerProvider =
+            new HibernateTestEntityManagerProvider(PERSISTENCE_UNIT);
+
     private CourtListRepository courtListRepository;
 
+    @BeforeEach
+    void openEntityManagerAndCreateRepository() {
+        courtListRepository = new CourtListRepository();
+        hibernateTestEntityManagerProvider.injectEntityManagerInto(courtListRepository);
+    }
+
     @Test
-    public void shouldReturnLatestSuccessPublishStatus() {
+    void shouldReturnLatestSuccessPublishStatus() {
         final UUID courtCentreId = randomUUID();
 
         final PublishStatus publishStatus = EXPORT_SUCCESSFUL;
         final String courtListFileName1 = "c1";
-        final ZonedDateTime lastUpdated1 = now().minusMinutes(10l);
+        final ZonedDateTime lastUpdated1 = now().minusMinutes(10L);
         final CourtListPublishStatus courtList1 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated1, courtListFileName1, "");
 
         final String courtListFileName2 = "c2";
@@ -45,31 +52,28 @@ public class CourtListRepositoryTest extends BaseTransactionalTest {
         courtListRepository.save(courtList1);
         courtListRepository.save(courtList2);
 
-
         final Optional<CourtListPublishStatusResult> courtListPublishStatus =
                 courtListRepository.courtListPublishStatuses(courtCentreId);
 
-        assertTrue(courtListPublishStatus.isPresent());
+        assertThat(courtListPublishStatus.isPresent(), is(true));
         assertThat(courtListPublishStatus.get().getPublishStatus(), is(publishStatus));
         assertThat(courtListPublishStatus.get().getLastUpdated(), is(lastUpdated2));
     }
 
     @Test
-    public void shouldNotReturnPublishStatus() {
+    void shouldNotReturnPublishStatus() {
         final UUID courtCentreId = randomUUID();
 
         final PublishStatus publishStatus = COURT_LIST_REQUESTED;
         final String courtListFileName1 = "c1";
-        final ZonedDateTime lastUpdated1 = now().minusMinutes(10l);
+        final ZonedDateTime lastUpdated1 = now().minusMinutes(10L);
         final CourtListPublishStatus courtList1 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated1, courtListFileName1, "");
 
-
         courtListRepository.save(courtList1);
-
 
         final Optional<CourtListPublishStatusResult> courtListPublishStatus =
                 courtListRepository.courtListPublishStatuses(courtCentreId);
 
-        assertFalse(courtListPublishStatus.isPresent());
+        assertThat(courtListPublishStatus.isPresent(), is(false));
     }
 }

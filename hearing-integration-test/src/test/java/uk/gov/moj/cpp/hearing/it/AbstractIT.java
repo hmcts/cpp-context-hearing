@@ -49,8 +49,8 @@ import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 
 import com.google.common.io.Resources;
 import io.restassured.builder.RequestSpecBuilder;

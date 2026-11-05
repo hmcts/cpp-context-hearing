@@ -5,7 +5,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 public class JsonHelper {
 

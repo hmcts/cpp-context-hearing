@@ -22,7 +22,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import java.util.UUID;
 
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

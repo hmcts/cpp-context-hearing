@@ -3,13 +3,14 @@ package uk.gov.moj.cpp.hearing.listing.domain.referencedata;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class JudiciariesList {
 
     private List<Judiciary> judiciaries;
 
     @JsonCreator
-    public JudiciariesList(final List<Judiciary> judiciaries) {
+    public JudiciariesList(@JsonProperty("judiciaries") final List<Judiciary> judiciaries) {
         this.judiciaries = judiciaries;
     }
 

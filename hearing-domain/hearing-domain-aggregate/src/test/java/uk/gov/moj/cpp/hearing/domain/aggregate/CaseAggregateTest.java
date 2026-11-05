@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.progression.events.SendingSheetCompleted;
@@ -32,8 +32,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.After;
-import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +46,7 @@ public class CaseAggregateTest {
     @InjectMocks
     private CaseAggregate caseAggregate;
 
-    @After
+    @AfterEach
     public void teardown() {
         try {
             // ensure aggregate is serializable
@@ -62,24 +62,24 @@ public class CaseAggregateTest {
 
         Stream<Object> events = caseAggregate.recordSendingSheetComplete(sendingSheetCompleted);
         List<Object> lEvents = events.collect(Collectors.toList());
-        Assert.assertEquals(1, lEvents.size());
+        Assertions.assertEquals(1, lEvents.size());
         Object event;
 
         event = lEvents.get(0);
-        Assert.assertEquals(event.getClass(), SendingSheetCompletedRecorded.class);
+        Assertions.assertEquals(event.getClass(), SendingSheetCompletedRecorded.class);
         final SendingSheetCompletedRecorded typedEvent = (SendingSheetCompletedRecorded) event;
-        Assert.assertEquals(typedEvent.getCrownCourtHearing(), sendingSheetCompleted.getCrownCourtHearing());
-        Assert.assertEquals(typedEvent.getHearing(), sendingSheetCompleted.getHearing());
+        Assertions.assertEquals(typedEvent.getCrownCourtHearing(), sendingSheetCompleted.getCrownCourtHearing());
+        Assertions.assertEquals(typedEvent.getHearing(), sendingSheetCompleted.getHearing());
 
         //check that the second call does not result in another recording !
         events = caseAggregate.recordSendingSheetComplete(sendingSheetCompleted);
         lEvents = events.collect(Collectors.toList());
-        Assert.assertEquals(1, lEvents.size());
+        Assertions.assertEquals(1, lEvents.size());
         event = lEvents.get(0);
-        Assert.assertEquals(event.getClass(), SendingSheetCompletedPreviouslyRecorded.class);
+        Assertions.assertEquals(event.getClass(), SendingSheetCompletedPreviouslyRecorded.class);
         final SendingSheetCompletedPreviouslyRecorded typedNonEvent = (SendingSheetCompletedPreviouslyRecorded) event;
-        Assert.assertEquals(typedNonEvent.getCrownCourtHearing(), typedNonEvent.getCrownCourtHearing());
-        Assert.assertEquals(typedNonEvent.getHearing(), sendingSheetCompleted.getHearing());
+        Assertions.assertEquals(typedNonEvent.getCrownCourtHearing(), typedNonEvent.getCrownCourtHearing());
+        Assertions.assertEquals(typedNonEvent.getHearing(), sendingSheetCompleted.getHearing());
 
     }
 

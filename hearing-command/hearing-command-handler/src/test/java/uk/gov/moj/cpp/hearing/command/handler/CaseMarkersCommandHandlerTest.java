@@ -28,7 +28,7 @@ import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;

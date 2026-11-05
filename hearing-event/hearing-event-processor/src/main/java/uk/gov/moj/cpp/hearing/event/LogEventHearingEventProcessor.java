@@ -28,7 +28,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCas
 
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;

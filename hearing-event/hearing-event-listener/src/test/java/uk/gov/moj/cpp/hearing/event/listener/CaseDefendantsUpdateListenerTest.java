@@ -28,7 +28,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.Arrays;
 import java.util.UUID;
 

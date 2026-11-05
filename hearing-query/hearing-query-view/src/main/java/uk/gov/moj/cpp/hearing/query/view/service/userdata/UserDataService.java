@@ -10,11 +10,11 @@ import uk.gov.justice.services.messaging.MetadataBuilder;
 import uk.gov.moj.cpp.hearing.query.view.model.Permission;
 import uk.gov.moj.cpp.hearing.query.view.model.PermissionList;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;

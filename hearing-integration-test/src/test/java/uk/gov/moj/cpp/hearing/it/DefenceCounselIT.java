@@ -37,6 +37,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -48,7 +49,7 @@ import org.junit.jupiter.api.Test;
 @NotThreadSafe
 class DefenceCounselIT extends AbstractIT {
 
-    private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC"));
+    private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneOffset.UTC);
 
     @SuppressWarnings("squid:S2699")
     @Test

@@ -20,7 +20,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;

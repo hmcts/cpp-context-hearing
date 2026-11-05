@@ -4,10 +4,10 @@ import uk.gov.justice.core.courts.NotifiedPleaValue;
 
 import java.time.LocalDate;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Embeddable
 public class NotifiedPlea {

@@ -2,8 +2,8 @@ package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.lang.String.format;
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
-import static javax.xml.bind.JAXBContext.newInstance;
-import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
+import static jakarta.xml.bind.JAXBContext.newInstance;
+import static jakarta.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
 import static uk.gov.moj.cpp.hearing.XmlProducerType.PUBLIC_DISPLAY;
 import static uk.gov.moj.cpp.hearing.XmlProducerType.WEB_PAGE;
 
@@ -15,10 +15,10 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;

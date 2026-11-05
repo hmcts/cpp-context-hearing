@@ -7,8 +7,8 @@ import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toMap;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.apache.deltaspike.core.util.CollectionUtils.isEmpty;
 import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromApplication;
 
 import uk.gov.justice.core.courts.Defendant;
@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class BailStatusHelper {
 

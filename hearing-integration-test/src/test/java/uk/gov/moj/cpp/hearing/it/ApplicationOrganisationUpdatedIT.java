@@ -33,7 +33,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetails
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.HearingFactory;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

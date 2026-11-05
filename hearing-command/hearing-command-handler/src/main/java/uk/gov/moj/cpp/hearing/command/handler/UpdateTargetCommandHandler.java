@@ -12,7 +12,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 @ServiceComponent(COMMAND_HANDLER)
 public class UpdateTargetCommandHandler extends AbstractCommandHandler {

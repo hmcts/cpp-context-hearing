@@ -27,7 +27,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Current
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

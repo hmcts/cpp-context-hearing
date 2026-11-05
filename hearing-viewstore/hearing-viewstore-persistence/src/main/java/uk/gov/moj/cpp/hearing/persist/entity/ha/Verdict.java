@@ -3,9 +3,9 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
 
 @Embeddable
 public class Verdict {

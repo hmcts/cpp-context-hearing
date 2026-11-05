@@ -24,7 +24,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import java.time.LocalDate;
 import java.util.UUID;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.MockedStatic;

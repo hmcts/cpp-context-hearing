@@ -141,7 +141,7 @@ class PtphDetailCommandHandlerTest {
         handler.savePtphDetail(envelope);
 
         final List<JsonEnvelope> appended = verifyAppendAndGetArgumentFrom(eventStream).collect(Collectors.toList());
-        final javax.json.JsonObject payload = appended.get(0).payloadAsJsonObject();
+        final jakarta.json.JsonObject payload = appended.get(0).payloadAsJsonObject();
         // Definite, not "absent or null": the framework's ObjectMapperProducer sets
         // JsonInclude.Include.NON_ABSENT, so a null field is omitted rather than serialised as
         // JSON null. That matters because hearing.ptph-detail-saved declares keyReason as

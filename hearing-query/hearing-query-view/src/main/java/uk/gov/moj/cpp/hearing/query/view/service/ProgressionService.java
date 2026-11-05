@@ -19,11 +19,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.faces.bean.ApplicationScoped;
-import javax.inject.Inject;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 @ApplicationScoped
 public class ProgressionService {

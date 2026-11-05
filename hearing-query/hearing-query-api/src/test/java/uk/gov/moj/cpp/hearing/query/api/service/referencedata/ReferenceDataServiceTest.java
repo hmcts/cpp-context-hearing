@@ -39,7 +39,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import com.google.common.cache.LoadingCache;
 import org.junit.jupiter.api.BeforeEach;

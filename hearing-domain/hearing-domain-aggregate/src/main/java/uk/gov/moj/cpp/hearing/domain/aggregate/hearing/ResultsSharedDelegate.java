@@ -73,7 +73,7 @@ import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.core.courts.Target2.target2;
 import static uk.gov.moj.cpp.util.DuplicateApplicationsHelper.dedupAllApplications;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

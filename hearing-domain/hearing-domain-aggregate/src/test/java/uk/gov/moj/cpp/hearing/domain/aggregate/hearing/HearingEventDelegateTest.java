@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Hearing;
@@ -102,7 +102,7 @@ public class HearingEventDelegateTest {
                 .build());
 
         String reference = hearingDelegate.getReference();
-        Assert.assertNull(reference);
+        Assertions.assertNull(reference);
     }
 
 

@@ -21,8 +21,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
+import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 
 public class UpdateDefendantWithApplicationDetailsDelegate {
 

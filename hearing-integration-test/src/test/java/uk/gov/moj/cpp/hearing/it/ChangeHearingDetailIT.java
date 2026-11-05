@@ -40,6 +40,7 @@ import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.io.IOException;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -161,7 +162,7 @@ public class ChangeHearingDetailIT extends AbstractIT {
                         .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
                                 .with(HearingDay::getListedDurationMinutes, is(hearingDetailsUpdateCommand.getHearing().getHearingDays().get(0).getListedDurationMinutes()))
                                 .with(HearingDay::getListingSequence, is(hearingDetailsUpdateCommand.getHearing().getHearingDays().get(0).getListingSequence()))
-                                .with(HearingDay::getSittingDay, is(hearingDetailsUpdateCommand.getHearing().getHearingDays().get(0).getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getSittingDay, is(hearingDetailsUpdateCommand.getHearing().getHearingDays().get(0).getSittingDay().withZoneSameLocal(ZoneOffset.UTC)))
                         ))
                         .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
                                 .with(JudicialRole::getJudicialId, is(hearingDetailsUpdateCommand.getHearing().getJudiciary().get(0).getJudicialId()))

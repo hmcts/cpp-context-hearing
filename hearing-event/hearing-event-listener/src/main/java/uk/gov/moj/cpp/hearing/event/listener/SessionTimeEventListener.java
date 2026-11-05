@@ -10,7 +10,7 @@ import uk.gov.moj.cpp.hearing.domain.event.sessiontime.SessionTimeRecorded;
 import uk.gov.moj.cpp.hearing.persist.entity.sessiontime.SessionTime;
 import uk.gov.moj.cpp.hearing.repository.SessionTimeRepository;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;

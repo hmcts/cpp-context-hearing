@@ -22,8 +22,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.After;
-import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,7 +36,7 @@ public class ApplicationAggregateTest {
     @InjectMocks
     private ApplicationAggregate applicationAggregate;
 
-    @After
+    @AfterEach
     public void teardown() {
         try {
             // ensure aggregate is serializable
@@ -60,25 +60,25 @@ public class ApplicationAggregateTest {
 
         Stream<Object> events = applicationAggregate.registerHearingId(registeredHearingAgainstApplication.getApplicationId(), registeredHearingAgainstApplication.getHearingId());
         List<Object> lEvents = events.collect(Collectors.toList());
-        Assert.assertEquals(1, lEvents.size());
+        Assertions.assertEquals(1, lEvents.size());
         Object event;
 
         event = lEvents.get(0);
-        Assert.assertEquals(event.getClass(), RegisteredHearingAgainstApplication.class);
+        Assertions.assertEquals(event.getClass(), RegisteredHearingAgainstApplication.class);
         final RegisteredHearingAgainstApplication typedEvent = (RegisteredHearingAgainstApplication) event;
-        Assert.assertEquals(typedEvent.getHearingId(), registeredHearingAgainstApplication.getHearingId());
-        Assert.assertEquals(typedEvent.getApplicationId(), registeredHearingAgainstApplication.getApplicationId());
-        Assert.assertEquals(registeredHearingAgainstApplication.getHearingId(), applicationAggregate.getHearingIds().get(0));
+        Assertions.assertEquals(typedEvent.getHearingId(), registeredHearingAgainstApplication.getHearingId());
+        Assertions.assertEquals(typedEvent.getApplicationId(), registeredHearingAgainstApplication.getApplicationId());
+        Assertions.assertEquals(registeredHearingAgainstApplication.getHearingId(), applicationAggregate.getHearingIds().get(0));
 
         events = applicationAggregate.registerHearingId(registeredHearingAgainstApplicationTwo.getApplicationId(), registeredHearingAgainstApplicationTwo.getHearingId());
         lEvents = events.collect(Collectors.toList());
-        Assert.assertEquals(1, lEvents.size());
+        Assertions.assertEquals(1, lEvents.size());
         event = lEvents.get(0);
-        Assert.assertEquals(event.getClass(), RegisteredHearingAgainstApplication.class);
+        Assertions.assertEquals(event.getClass(), RegisteredHearingAgainstApplication.class);
         final RegisteredHearingAgainstApplication typedEventTwo = (RegisteredHearingAgainstApplication) event;
-        Assert.assertEquals(typedEventTwo.getHearingId(), registeredHearingAgainstApplicationTwo.getHearingId());
-        Assert.assertEquals(typedEventTwo.getApplicationId(), registeredHearingAgainstApplicationTwo.getApplicationId());
-        Assert.assertEquals(registeredHearingAgainstApplicationTwo.getHearingId(), applicationAggregate.getHearingIds().get(1));
+        Assertions.assertEquals(typedEventTwo.getHearingId(), registeredHearingAgainstApplicationTwo.getHearingId());
+        Assertions.assertEquals(typedEventTwo.getApplicationId(), registeredHearingAgainstApplicationTwo.getApplicationId());
+        Assertions.assertEquals(registeredHearingAgainstApplicationTwo.getHearingId(), applicationAggregate.getHearingIds().get(1));
 
 
     }

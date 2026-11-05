@@ -7,16 +7,44 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.deltaspike.data.api.AbstractEntityRepository;
-import org.apache.deltaspike.data.api.Query;
-import org.apache.deltaspike.data.api.QueryParam;
-import org.apache.deltaspike.data.api.Repository;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 
-@Repository(forEntity = HearingApplication.class)
-public abstract class HearingApplicationRepository extends AbstractEntityRepository<HearingApplication, HearingApplicationKey> {
+@ApplicationScoped
+public class HearingApplicationRepository {
 
-    @Query(value = "from HearingApplication ha where ha.id.applicationId = :applicationId")
-    public abstract List<HearingApplication> findByApplicationId(@QueryParam("applicationId") final UUID applicationId);
+    @PersistenceContext(unitName = "hearing-persistence-unit")
+    EntityManager entityManager;
+
+    public HearingApplication findBy(final HearingApplicationKey id) {
+        return entityManager.find(HearingApplication.class, id);
+    }
+
+    public HearingApplication save(final HearingApplication entity) {
+        return entityManager.merge(entity);
+    }
+
+    public void remove(final HearingApplication entity) {
+        HearingApplication managed = entityManager.contains(entity) ? entity : entityManager.merge(entity);
+        entityManager.remove(managed);
+    }
+
+    public List<HearingApplication> findAll() {
+        return entityManager.createQuery("SELECT ha FROM HearingApplication ha", HearingApplication.class).getResultList();
+    }
+
+    public long count() {
+        return entityManager.createQuery("SELECT COUNT(ha) FROM HearingApplication ha", Long.class).getSingleResult();
+    }
+
+    public List<HearingApplication> findByApplicationId(final UUID applicationId) {
+        return entityManager.createQuery(
+                "SELECT ha FROM HearingApplication ha WHERE ha.id.applicationId = :applicationId",
+                HearingApplication.class)
+                .setParameter("applicationId", applicationId)
+                .getResultList();
+    }
 
 }

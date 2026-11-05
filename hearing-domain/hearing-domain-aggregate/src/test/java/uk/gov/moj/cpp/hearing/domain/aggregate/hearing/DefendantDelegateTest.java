@@ -31,16 +31,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.theories.DataPoints;
-import org.junit.experimental.theories.Theories;
-import org.junit.experimental.theories.Theory;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 
 
-@RunWith(Theories.class)
 public class DefendantDelegateTest {
 
     private UUID offenceId;
@@ -48,8 +45,7 @@ public class DefendantDelegateTest {
     private UUID hearingId;
     private UUID defendantId;
 
-    @DataPoints
-    public static Address[] CHANNELS = {
+    private static final Address[] CHANNELS = {
 
             Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build(), //Line 1
             Address.address().withAddress1("address1").withAddress2("address22").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build(), //Line 2
@@ -65,7 +61,11 @@ public class DefendantDelegateTest {
             Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address55").withPostcode("xyz").build(), //Line 1 and 5
     };
 
-    @Before
+    static Address[] changedAddresses() {
+        return CHANNELS;
+    }
+
+    @BeforeEach
     public void init() {
         offenceId = randomUUID();
         prosecutionCaseId = randomUUID();
@@ -73,7 +73,8 @@ public class DefendantDelegateTest {
         defendantId = randomUUID();
     }
 
-    @Theory
+    @ParameterizedTest
+    @MethodSource("changedAddresses")
     public void shouldListDefendantForDDCHWhenThereIsAChangeInAddressForDefendantHearing(final Address changedAddress) {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
@@ -261,7 +262,8 @@ public class DefendantDelegateTest {
         assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(true));
     }
 
-    @Theory
+    @ParameterizedTest
+    @MethodSource("changedAddresses")
     public void shouldListDefendantForDDCHWhenThereIsAChangeInOrganisationAddressForDefendantHearing(final Address changedAddress) {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
@@ -279,7 +281,8 @@ public class DefendantDelegateTest {
         assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(true));
     }
 
-    @Theory
+    @ParameterizedTest
+    @MethodSource("changedAddresses")
     public void shouldNotListDefendantForDDCHWhenThereIsAnoChangeInOrganisationDetailsForDefendantHearing(final Address changedAddress) {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();

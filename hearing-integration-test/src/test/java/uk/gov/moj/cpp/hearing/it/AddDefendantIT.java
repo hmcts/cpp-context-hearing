@@ -63,7 +63,7 @@ public class AddDefendantIT extends AbstractIT {
                                         .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
                                         .with(ProsecutionCase::getDefendants, hasItem(isBean(Defendant.class)
                                                 .with(Defendant::getMasterDefendantId, is(addNewDefendant.getMasterDefendantId()))
-                                                .with(Defendant::getCourtProceedingsInitiated, is(addNewDefendant.getCourtProceedingsInitiated().withZoneSameLocal(ZoneId.of("UTC"))))
+                                                .with(Defendant::getCourtProceedingsInitiated, is(addNewDefendant.getCourtProceedingsInitiated().withZoneSameLocal(ZoneOffset.UTC)))
                                         ))
                                 )
                         )));

@@ -28,8 +28,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @SuppressWarnings({"squid:S3655"})
 //Warning has been suppressed because CurrentCourtStatus Optional has been checked in the producer

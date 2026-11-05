@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.xhibit;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper; //NOSONAR
+import org.glassfish.jaxb.runtime.marshaller.NamespacePrefixMapper; //NOSONAR
 
 public class XhibitNamespacePrefixMapper extends NamespacePrefixMapper {
 

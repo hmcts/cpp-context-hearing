@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
+import org.junit.jupiter.api.Assertions;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.hearing.courts.ApplicationCourtListRestriction;
@@ -20,7 +21,6 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,12 +48,12 @@ public class ApplicationCourtRestrictionMapperTest {
 
     @Test
     public void testNullField() {
-        Assert.assertFalse(applicationCourtListRestrictionMapper.getCourtListRestriction(null).isPresent());
+        Assertions.assertFalse(applicationCourtListRestrictionMapper.getCourtListRestriction(null).isPresent());
     }
 
     @Test
     public void testEmpty() {
-        Assert.assertFalse(applicationCourtListRestrictionMapper.getCourtListRestriction(" ").isPresent());
+        Assertions.assertFalse(applicationCourtListRestrictionMapper.getCourtListRestriction(" ").isPresent());
     }
 
     @Test

@@ -6,10 +6,14 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.moj.cpp.hearing.query.view.response.SessionTimeResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.SessionTimeService;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.json.JsonObject;
 
 
+// One transaction per query, so the persistence context stays open while the response is built from lazy collections
+// (as Java 17's request-scoped EntityManager did). Replaces hibernate.enable_lazy_load_no_trans (CHD-01).
+@Transactional
 public class SessionTimeQueryView {
 
     @Inject

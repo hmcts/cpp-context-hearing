@@ -22,8 +22,8 @@ import uk.gov.moj.cpp.hearing.xhibit.XmlUtils;
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class EmptyWebPageCourtCentreXmlGenerator implements CourtCentreXmlGenerator {

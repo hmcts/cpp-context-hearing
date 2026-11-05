@@ -13,10 +13,10 @@ import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingServiceResponse;
 import uk.gov.moj.cpp.hearing.event.service.ProvisionalBookingService;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;

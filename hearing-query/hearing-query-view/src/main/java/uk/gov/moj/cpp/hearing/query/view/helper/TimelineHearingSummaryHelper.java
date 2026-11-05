@@ -29,9 +29,9 @@ import uk.gov.moj.cpp.hearing.query.view.response.Application;
 import uk.gov.moj.cpp.hearing.query.view.response.Person;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
+import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

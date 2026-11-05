@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscription;
@@ -15,7 +15,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +27,7 @@ public class SubscriptionAggregateTest {
     @InjectMocks
     private SubscriptionAggregate subscriptionAggregate;
 
-    @After
+    @AfterEach
     public void teardown() {
         try {
             // ensure aggregate is serializable

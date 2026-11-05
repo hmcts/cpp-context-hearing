@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;

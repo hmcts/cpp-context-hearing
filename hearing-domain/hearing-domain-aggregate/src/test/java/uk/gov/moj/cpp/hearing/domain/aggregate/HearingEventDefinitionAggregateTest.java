@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import uk.gov.moj.cpp.hearing.command.logEvent.CreateHearingEventDefinitionsCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
@@ -16,8 +16,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.After;
-import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,7 +41,7 @@ public class HearingEventDefinitionAggregateTest {
     @InjectMocks
     private HearingEventDefinitionAggregate hearingEventDefinitionAggregate;
 
-    @After
+    @AfterEach
     public void teardown() {
         try {
             // ensure aggregate is serializable
@@ -60,28 +60,28 @@ public class HearingEventDefinitionAggregateTest {
 
 
         Object event = lEvents.get(0);
-        Assert.assertEquals(2, lEvents.size());
-        Assert.assertEquals(event.getClass(), HearingEventDefinitionsDeleted.class);
+        Assertions.assertEquals(2, lEvents.size());
+        Assertions.assertEquals(event.getClass(), HearingEventDefinitionsDeleted.class);
         final HearingEventDefinitionsDeleted hearingEventDefinitionsDeleted = (HearingEventDefinitionsDeleted) event;
-        Assert.assertEquals(hearingEventDefinitionsDeleted.getId(), hearingEventDefinitionId);
+        Assertions.assertEquals(hearingEventDefinitionsDeleted.getId(), hearingEventDefinitionId);
 
         event = lEvents.get(1);
-        Assert.assertEquals(event.getClass(), HearingEventDefinitionsCreated.class);
+        Assertions.assertEquals(event.getClass(), HearingEventDefinitionsCreated.class);
         final HearingEventDefinitionsCreated hearingEventDefinitionsCreated = (HearingEventDefinitionsCreated) event;
-        Assert.assertEquals(hearingEventDefinitionsCreated.getId(), hearingEventDefinitionId);
-        Assert.assertEquals(2, hearingEventDefinitionsCreated.getEventDefinitions().size());
+        Assertions.assertEquals(hearingEventDefinitionsCreated.getId(), hearingEventDefinitionId);
+        Assertions.assertEquals(2, hearingEventDefinitionsCreated.getEventDefinitions().size());
 
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getActionLabel(), hearingDefinitions().get(0).getActionLabel());
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getRecordedLabel(), hearingDefinitions().get(0).getRecordedLabel());
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getActionSequence(), hearingDefinitions().get(0).getActionSequence());
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getGroupSequence(), hearingDefinitions().get(0).getGroupSequence());
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).isAlterable(), hearingDefinitions().get(0).isAlterable());
+        Assertions.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getActionLabel(), hearingDefinitions().get(0).getActionLabel());
+        Assertions.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getRecordedLabel(), hearingDefinitions().get(0).getRecordedLabel());
+        Assertions.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getActionSequence(), hearingDefinitions().get(0).getActionSequence());
+        Assertions.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getGroupSequence(), hearingDefinitions().get(0).getGroupSequence());
+        Assertions.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).isAlterable(), hearingDefinitions().get(0).isAlterable());
 
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getActionLabel(), hearingDefinitions().get(1).getActionLabel());
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getRecordedLabel(), hearingDefinitions().get(1).getRecordedLabel());
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getActionSequence(), hearingDefinitions().get(1).getActionSequence());
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getGroupSequence(), hearingDefinitions().get(1).getGroupSequence());
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).isAlterable(), hearingDefinitions().get(1).isAlterable());
+        Assertions.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getActionLabel(), hearingDefinitions().get(1).getActionLabel());
+        Assertions.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getRecordedLabel(), hearingDefinitions().get(1).getRecordedLabel());
+        Assertions.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getActionSequence(), hearingDefinitions().get(1).getActionSequence());
+        Assertions.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getGroupSequence(), hearingDefinitions().get(1).getGroupSequence());
+        Assertions.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).isAlterable(), hearingDefinitions().get(1).isAlterable());
 
     }
 

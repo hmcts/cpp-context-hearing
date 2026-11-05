@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.xhibit;
 
 import java.time.LocalDate;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 public class LocalDateAdapter extends XmlAdapter<String, LocalDate> {
 

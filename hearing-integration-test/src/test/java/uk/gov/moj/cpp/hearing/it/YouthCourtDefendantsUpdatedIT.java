@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.UUID;
 
 
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;

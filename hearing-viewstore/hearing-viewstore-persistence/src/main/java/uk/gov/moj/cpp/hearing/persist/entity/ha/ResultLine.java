@@ -9,9 +9,9 @@ import java.util.Set;
 import java.util.UUID;
 
 
-import javax.persistence.Embedded;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 
 

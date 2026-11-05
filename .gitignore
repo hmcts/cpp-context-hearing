@@ -60,4 +60,7 @@ buildContexts.sh
 lightning-jenkins.properties
 **/.DS_Store
 
- .java-version
+# Maven Shade plugin generated artifact
+dependency-reduced-pom.xml
+
+.java-version

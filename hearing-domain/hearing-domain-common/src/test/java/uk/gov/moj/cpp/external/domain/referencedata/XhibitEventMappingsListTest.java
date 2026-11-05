@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
-import javax.json.JsonArray;
+import jakarta.json.JsonArray;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;

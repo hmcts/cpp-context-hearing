@@ -2,6 +2,11 @@ package uk.gov.moj.cpp.hearing.listing.domain.referencedata;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 @SuppressWarnings("pmd:BeanMembersShouldSerialize")
 public class CourtRoomMapping  {
 
@@ -16,7 +21,17 @@ public class CourtRoomMapping  {
     private String crestCourtRoomName;
     private UUID crestCourtSiteUUID;
 
-    public CourtRoomMapping(UUID id, UUID courtRoomUUID, String crestCourtSiteName, String oucode, Integer courtRoomId, String crestCourtId, String crestCourtSiteId, String crestCourtSiteCode, String crestCourtRoomName, UUID crestCourtSiteUUID) {
+    @JsonCreator
+    public CourtRoomMapping(@JsonProperty("id") final UUID id,
+                            @JsonProperty("courtRoomUUID") final UUID courtRoomUUID,
+                            @JsonProperty("crestCourtSiteName") final String crestCourtSiteName,
+                            @JsonProperty("oucode") final String oucode,
+                            @JsonProperty("courtRoomId") final Integer courtRoomId,
+                            @JsonProperty("crestCourtId") final String crestCourtId,
+                            @JsonProperty("crestCourtSiteId") final String crestCourtSiteId,
+                            @JsonProperty("crestCourtSiteCode") final String crestCourtSiteCode,
+                            @JsonProperty("crestCourtRoomName") final String crestCourtRoomName,
+                            @JsonProperty("crestCourtSiteUUID") final UUID crestCourtSiteUUID) {
         this.id = id;
         this.courtRoomUUID = courtRoomUUID;
         this.crestCourtSiteName = crestCourtSiteName;

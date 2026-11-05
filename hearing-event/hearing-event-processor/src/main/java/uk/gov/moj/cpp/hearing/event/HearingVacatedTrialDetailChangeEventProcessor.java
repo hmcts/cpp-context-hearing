@@ -12,7 +12,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingVacatedTrialDetailsUpdateCommand;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_PROCESSOR)

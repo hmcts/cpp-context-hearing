@@ -4,8 +4,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.AllocationDecision;
 
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class AllocationDecisionJPAMapper {

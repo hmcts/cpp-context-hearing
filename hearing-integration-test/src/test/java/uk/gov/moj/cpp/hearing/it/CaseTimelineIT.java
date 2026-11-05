@@ -7,7 +7,7 @@ import static java.time.ZonedDateTime.now;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static javax.ws.rs.core.Response.Status.OK;
+import static jakarta.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.AllOf.allOf;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
@@ -40,6 +40,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.test.TestUtilities;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -93,7 +94,7 @@ public class CaseTimelineIT extends AbstractIT {
 
     @Test
     public void shouldDisplayCaseTimelineWithBoxHearing() {
-        setUpHearing(now(ZoneId.of("UTC")).plusDays(1L), true);
+        setUpHearing(now(ZoneOffset.UTC).plusDays(1L), true);
         stubCourtRoom(hearing);
         stubProsecutionCases(hearing);
         final String hearingDate = hearingDay.getSittingDay().toLocalDate().format(ofPattern("dd MMM yyyy"));
@@ -102,7 +103,7 @@ public class CaseTimelineIT extends AbstractIT {
 
     @Test
     public void shouldDisplayCaseTimelineWithoutIsBoxHearing() {
-        setUpHearing(now(ZoneId.of("UTC")).plusDays(1L), false);
+        setUpHearing(now(ZoneOffset.UTC).plusDays(1L), false);
         stubCourtRoom(hearing);
         stubProsecutionCases(hearing);
         final String hearingDate = hearingDay.getSittingDay().toLocalDate().format(ofPattern("dd MMM yyyy"));

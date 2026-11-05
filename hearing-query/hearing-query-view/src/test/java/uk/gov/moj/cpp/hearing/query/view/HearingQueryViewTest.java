@@ -27,6 +27,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.transaction.Transactional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -110,7 +112,6 @@ public class HearingQueryViewTest {
         assertThat(idsCaptor.getValue(), contains(accessibleId));
     }
 
-
     /**
      * LPT-2406's enabler. A hearing with nothing saved answers with {@code finalised = false}
      * and null values rather than an error, which is what lets the listing context treat
@@ -163,5 +164,18 @@ public class HearingQueryViewTest {
         return uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom(
                 metadataWithRandomUUIDAndName(),
                 payloadBuilder.build());
+    }
+
+    /**
+     * CHD-01: Java 17's request-scoped EntityManager kept the session open while a query built its response from lazy
+     * collections. Java 25 gets the same by running each query-view entry point in one transaction, which replaced
+     * hibernate.enable_lazy_load_no_trans. The interceptor only runs in the container, so the integration tests prove
+     * the behaviour; this guards the annotations that provide it.
+     */
+    @Test
+    void chd01_queryViewEntryPointsRunInATransaction() {
+        assertThat(HearingQueryView.class.isAnnotationPresent(Transactional.class), is(true));
+        assertThat(HearingEventQueryView.class.isAnnotationPresent(Transactional.class), is(true));
+        assertThat(SessionTimeQueryView.class.isAnnotationPresent(Transactional.class), is(true));
     }
 }

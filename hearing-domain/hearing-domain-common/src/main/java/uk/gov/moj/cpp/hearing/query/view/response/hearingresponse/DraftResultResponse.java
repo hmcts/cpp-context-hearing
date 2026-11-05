@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 @SuppressWarnings("squid:S2384")
 public class DraftResultResponse {
