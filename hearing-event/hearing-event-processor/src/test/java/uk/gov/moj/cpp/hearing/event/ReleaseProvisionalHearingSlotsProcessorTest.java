@@ -52,7 +52,7 @@ public class ReleaseProvisionalHearingSlotsProcessorTest {
 
         processor.handleReleaseProvisionalHearingSlots(event);
 
-        verify(provisionalBookingService, times(1)).releaseUnconfirmedBookings(List.of(bookingA, bookingB));
+        verify(provisionalBookingService, times(1)).releaseUnconfirmedBookings(List.of(bookingA, bookingB), "DROPPED_FROM_DRAFT");
         verifyNoMoreInteractions(provisionalBookingService);
     }
 }

@@ -35,10 +35,11 @@ public class ReleaseProvisionalHearingSlotsProcessor {
         final List<String> bookingIds = payload.getJsonArray("bookingIds").getValuesAs(JsonString.class).stream()
                 .map(JsonString::getString)
                 .collect(toList());
+        final String reason = payload.getString("reason");
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("releasing unconfirmed bookings {} of hearing {}: {}",
-                    bookingIds, payload.getString("hearingId"), payload.getString("reason"));
+                    bookingIds, payload.getString("hearingId"), reason);
         }
-        provisionalBookingService.releaseUnconfirmedBookings(bookingIds);
+        provisionalBookingService.releaseUnconfirmedBookings(bookingIds, reason);
     }
 }

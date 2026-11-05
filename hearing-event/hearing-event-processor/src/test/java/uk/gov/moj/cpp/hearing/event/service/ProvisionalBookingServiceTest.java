@@ -12,6 +12,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
@@ -21,8 +22,11 @@ import uk.gov.moj.cpp.hearing.event.model.ProvisionalBookingServiceResponse;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
@@ -36,7 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * {@link ProvisionalBookingService} is not written to be unit-testable in isolation: it builds
- * its own {@code HttpClientBuilder} inline rather than accepting an injectable client, and its
+ * its own HTTP client per call rather than accepting an injectable one, and its
  * collaborators are plain {@code @Inject} fields rather than constructor parameters. Rather than
  * reshaping the class to suit a test, these tests instantiate it directly and use the framework's
  * {@code ReflectionUtil.setField} (already the convention elsewhere in this module's tests, e.g.
@@ -49,6 +53,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class ProvisionalBookingServiceTest {
 
+    private static final String DROPPED_FROM_DRAFT = "DROPPED_FROM_DRAFT";
+
     @Mock
     private SystemUserProvider systemUserProvider;
 
@@ -56,8 +62,11 @@ public class ProvisionalBookingServiceTest {
 
     private final ProvisionalBookingService provisionalBookingService = new ProvisionalBookingService();
 
+    private final CountDownLatch unblockHungServer = new CountDownLatch(1);
+
     @AfterEach
     public void tearDown() {
+        unblockHungServer.countDown();
         if (httpServer != null) {
             httpServer.stop(0);
         }
@@ -73,14 +82,14 @@ public class ProvisionalBookingServiceTest {
 
         setField(provisionalBookingService, "objectMapper", new ObjectMapper());
 
-        assertDoesNotThrow(() -> provisionalBookingService.releaseUnconfirmedBookings(List.of(randomUUID().toString())));
+        assertDoesNotThrow(() -> provisionalBookingService.releaseUnconfirmedBookings(List.of(randomUUID().toString()), DROPPED_FROM_DRAFT));
     }
 
     @Test
     public void shouldLogRatherThanThrowOnNonAcceptedResponse() throws Exception {
         givenCourtSchedulerReleaseResponds(400);
 
-        assertDoesNotThrow(() -> provisionalBookingService.releaseUnconfirmedBookings(List.of(randomUUID().toString())));
+        assertDoesNotThrow(() -> provisionalBookingService.releaseUnconfirmedBookings(List.of(randomUUID().toString()), DROPPED_FROM_DRAFT));
     }
 
     /**
@@ -93,7 +102,7 @@ public class ProvisionalBookingServiceTest {
         final String bookingA = randomUUID().toString();
         final String bookingB = randomUUID().toString();
 
-        provisionalBookingService.releaseUnconfirmedBookings(List.of(bookingA, bookingB));
+        provisionalBookingService.releaseUnconfirmedBookings(List.of(bookingA, bookingB), DROPPED_FROM_DRAFT);
 
         assertThat(receivedRequests, hasSize(1));
         final ReceivedRequest request = receivedRequests.get(0);
@@ -103,14 +112,14 @@ public class ProvisionalBookingServiceTest {
                 is(new ObjectMapper().readTree("{\"bookingIds\":[\"" + bookingA + "\",\"" + bookingB + "\"],"
                         // LPT-2611: courtscheduler records why, so the booking log can tell a line
                         // dropped from the draft from a hold a share made surplus.
-                        + "\"reason\":\"DROPPED_FROM_DRAFT\"}")));
+                        + "\"reason\":\"" + DROPPED_FROM_DRAFT + "\"}")));
     }
 
     @Test
     public void shouldNotCallCourtSchedulerWithNothingToRelease() throws Exception {
         givenCourtSchedulerReleaseResponds(202);
 
-        provisionalBookingService.releaseUnconfirmedBookings(List.of());
+        provisionalBookingService.releaseUnconfirmedBookings(List.of(), DROPPED_FROM_DRAFT);
 
         assertThat(receivedRequests, is(empty()));
     }
@@ -235,6 +244,32 @@ public class ProvisionalBookingServiceTest {
         assertThat(response.getErrorMessage(), is(notNullValue()));
     }
 
+    /**
+     * A courtscheduler that accepts the connection and never answers. Without a read timeout the
+     * call would hold the event-processor thread for as long as the socket stays open.
+     */
+    @Test
+    public void shouldGiveUpOnABookingCourtSchedulerNeverAnswers() throws Exception {
+        givenCourtSchedulerNeverAnswers("/unconfirmedBooking");
+        when(systemUserProvider.getContextSystemUserId()).thenReturn(of(randomUUID()));
+
+        final ProvisionalBookingServiceResponse response = assertTimeoutPreemptively(Duration.ofSeconds(5),
+                () -> provisionalBookingService.bookSlots(emptyMap()));
+
+        assertThat(response.hasError(), is(true));
+        assertThat(response.getStatus(), is(nullValue()));
+        assertThat(response.getErrorMessage(), is(notNullValue()));
+    }
+
+    @Test
+    public void shouldGiveUpOnAReleaseCourtSchedulerNeverAnswers() throws Exception {
+        givenCourtSchedulerNeverAnswers("/unconfirmedBooking/release");
+        when(systemUserProvider.getContextSystemUserId()).thenReturn(of(randomUUID()));
+
+        assertTimeoutPreemptively(Duration.ofSeconds(5),
+                () -> provisionalBookingService.releaseUnconfirmedBookings(List.of(randomUUID().toString()), DROPPED_FROM_DRAFT));
+    }
+
     private record ReceivedRequest(String method, String contentType, String body) {
     }
 
@@ -258,6 +293,27 @@ public class ProvisionalBookingServiceTest {
         setField(provisionalBookingService, "systemUserProvider", systemUserProvider);
         setField(provisionalBookingService, "objectMapper", new ObjectMapper());
         setField(provisionalBookingService, "baseUri", "http://127.0.0.1:" + httpServer.getAddress().getPort());
+    }
+
+    /** A courtscheduler double that reads the request and then holds the exchange open until tear down. */
+    private void givenCourtSchedulerNeverAnswers(final String path) throws IOException {
+        httpServer = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        httpServer.setExecutor(Executors.newCachedThreadPool());
+        httpServer.createContext(path, exchange -> {
+            exchange.getRequestBody().readAllBytes();
+            try {
+                unblockHungServer.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            exchange.close();
+        });
+        httpServer.start();
+
+        setField(provisionalBookingService, "systemUserProvider", systemUserProvider);
+        setField(provisionalBookingService, "objectMapper", new ObjectMapper());
+        setField(provisionalBookingService, "baseUri", "http://127.0.0.1:" + httpServer.getAddress().getPort());
+        setField(provisionalBookingService, "socketTimeoutMs", "300");
     }
 
     /**

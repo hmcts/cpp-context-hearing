@@ -20,8 +20,11 @@ import javax.ws.rs.core.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -31,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class ProvisionalBookingService {
-    private static final String RELEASE_REASON_DROPPED_FROM_DRAFT = "DROPPED_FROM_DRAFT";
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionalBookingService.class);
     private static final String SERVICE = "/unconfirmedBooking";
     private static final String RELEASE = "/release";
@@ -43,6 +45,15 @@ public class ProvisionalBookingService {
     @Inject
     @Value(key = "courtscheduler.base.url", defaultValue = "http://localhost:8080/listingcourtscheduler-api/rest/courtscheduler")
     protected String baseUri;
+
+    // The initial values are what a test gets when it builds the service without CDI.
+    @Inject
+    @Value(key = "courtscheduler.timeout.connect.ms", defaultValue = "5000")
+    protected String connectTimeoutMs = "5000";
+
+    @Inject
+    @Value(key = "courtscheduler.timeout.ms", defaultValue = "10000")
+    protected String socketTimeoutMs = "10000";
 
     @Inject
     private ObjectMapper objectMapper;
@@ -69,57 +80,10 @@ public class ProvisionalBookingService {
             final StringEntity requestEntity = new StringEntity(this.objectMapper.writeValueAsString(payload));
             httpPost.setEntity(requestEntity);
 
-            final HttpResponse httpResponse = HttpClientBuilder
-                    .create()
-                    .build()
-                    .execute(httpPost);
-
-            final int status = httpResponse.getStatusLine().getStatusCode();
-            // Read the body once, before branching. Both paths need it: on OK it carries the
-            // bookingId, and on a rejection it carries courtscheduler's own explanation
-            // ({"error":["..."]}) - the only thing that says WHY. Logging the status alone made a
-            // 400 indistinguishable from a 500 or a version mismatch, and the public event
-            // downstream only ever showed "has no bookingId". It also cannot be read twice:
-            // EntityUtils.toString consumes the entity stream.
-            //
-            // getEntity() is null for a bodiless response (a gateway 502, a 204), and
-            // EntityUtils.toString(null) throws IllegalArgumentException - unchecked, so it would
-            // escape the IOException catch below and take the DLQ path the JSONException guard
-            // further down exists to prevent.
-            final String body = httpResponse.getEntity() == null
-                    ? ""
-                    : EntityUtils.toString(httpResponse.getEntity());
-
-            if (isOkay(httpResponse)) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("create unconfirmedBooking completed successfully");
-                }
-            } else {
-                LOGGER.error("create unconfirmedBooking failed with status code:{} body:{}", status, body);
+            try (CloseableHttpClient httpClient = newHttpClient();
+                 CloseableHttpResponse httpResponse = httpClient.execute(httpPost)) {
+                return bookingResponse(httpResponse);
             }
-
-            // courtscheduler answers a rejection with a JSON error body, but an infrastructure
-            // failure (gateway, sidecar, empty 503) can answer with HTML or nothing at all.
-            // JSONObject would throw JSONException there - unchecked, so it would escape the
-            // IOException catch below, roll the JMS transaction back and, after the redelivery
-            // attempts, drop the command on the DLQ with no public event at all. The clerk would
-            // see the spinner never resolve. Treat an unparseable body as an ordinary error.
-            final JSONObject responseJson;
-            try {
-                responseJson = new JSONObject(body);
-            } catch (JSONException ex) {
-                LOGGER.error("create unconfirmedBooking returned an unparseable body, status:{} body:{}", status, body, ex);
-                return ProvisionalBookingServiceResponse.error(
-                        status,
-                        String.format("courtscheduler returned %d with an unparseable body: %s", status, body));
-            }
-
-            if (responseJson.has("bookingId")) {
-                return ProvisionalBookingServiceResponse.normal(responseJson.getString("bookingId"));
-            }
-            return ProvisionalBookingServiceResponse.error(
-                    status,
-                    String.format("courtscheduler returned %d: %s", status, responseJson));
         } catch (IOException ex) {
             LOGGER.error("create unconfirmedBooking failed", ex);
             // The call never got an answer at all (connection refused, read timeout, DNS), so
@@ -135,6 +99,56 @@ public class ProvisionalBookingService {
         }
     }
 
+    private ProvisionalBookingServiceResponse bookingResponse(final HttpResponse httpResponse) throws IOException {
+
+        final int status = httpResponse.getStatusLine().getStatusCode();
+        // Read the body once, before branching. Both paths need it: on OK it carries the
+        // bookingId, and on a rejection it carries courtscheduler's own explanation
+        // ({"error":["..."]}) - the only thing that says WHY. Logging the status alone made a
+        // 400 indistinguishable from a 500 or a version mismatch, and the public event
+        // downstream only ever showed "has no bookingId". It also cannot be read twice:
+        // EntityUtils.toString consumes the entity stream.
+        //
+        // getEntity() is null for a bodiless response (a gateway 502, a 204), and
+        // EntityUtils.toString(null) throws IllegalArgumentException - unchecked, so it would
+        // escape the IOException catch in bookSlots and take the DLQ path the JSONException guard
+        // further down exists to prevent.
+        final String body = httpResponse.getEntity() == null
+                ? ""
+                : EntityUtils.toString(httpResponse.getEntity());
+
+        if (isOkay(httpResponse)) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("create unconfirmedBooking completed successfully");
+            }
+        } else {
+            LOGGER.error("create unconfirmedBooking failed with status code:{} body:{}", status, body);
+        }
+
+        // courtscheduler answers a rejection with a JSON error body, but an infrastructure
+        // failure (gateway, sidecar, empty 503) can answer with HTML or nothing at all.
+        // JSONObject would throw JSONException there - unchecked, so it would escape the
+        // IOException catch in bookSlots, roll the JMS transaction back and, after the redelivery
+        // attempts, drop the command on the DLQ with no public event at all. The clerk would
+        // see the spinner never resolve. Treat an unparseable body as an ordinary error.
+        final JSONObject responseJson;
+        try {
+            responseJson = new JSONObject(body);
+        } catch (JSONException ex) {
+            LOGGER.error("create unconfirmedBooking returned an unparseable body, status:{} body:{}", status, body, ex);
+            return ProvisionalBookingServiceResponse.error(
+                    status,
+                    String.format("courtscheduler returned %d with an unparseable body: %s", status, body));
+        }
+
+        if (responseJson.has("bookingId")) {
+            return ProvisionalBookingServiceResponse.normal(responseJson.getString("bookingId"));
+        }
+        return ProvisionalBookingServiceResponse.error(
+                status,
+                String.format("courtscheduler returned %d: %s", status, responseJson));
+    }
+
     private boolean isOkay(HttpResponse httpResponse) {
         return httpResponse.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode();
     }
@@ -147,8 +161,10 @@ public class ProvisionalBookingService {
      *
      * <p>Best effort: a failure is logged and swallowed. Rolling the event back would only retry a
      * release the overnight purge makes anyway, and would hold up the processor in the meantime.
+     *
+     * @param reason why the holds are going, recorded by courtscheduler in its booking log
      */
-    public void releaseUnconfirmedBookings(final List<String> bookingIds) {
+    public void releaseUnconfirmedBookings(final List<String> bookingIds, final String reason) {
         if (bookingIds.isEmpty()) {
             return;
         }
@@ -159,21 +175,34 @@ public class ProvisionalBookingService {
             final HttpPost httpPost = new HttpPost(new URL(baseUri + SERVICE + RELEASE).toString());
             httpPost.addHeader(CONTENT_TYPE, COURTSCHEDULER_RELEASE_UNCONFIRMED_BOOKINGS);
             httpPost.addHeader(CJS_CPP_UID, systemUserId.toString());
-            // LPT-2611: the only caller is hearing's release on draft save, so every booking here was
-            // dropped from the draft; courtscheduler records that reason in its booking log.
             httpPost.setEntity(new StringEntity(objectMapper.writeValueAsString(
-                    Map.of("bookingIds", bookingIds, "reason", RELEASE_REASON_DROPPED_FROM_DRAFT))));
+                    Map.of("bookingIds", bookingIds, "reason", reason))));
 
-            final HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-            final int status = httpResponse.getStatusLine().getStatusCode();
-            if (status == Response.Status.ACCEPTED.getStatusCode()) {
-                LOGGER.info("released unconfirmed bookings {}", bookingIds);
-            } else {
-                final String body = httpResponse.getEntity() == null ? "" : EntityUtils.toString(httpResponse.getEntity());
-                LOGGER.error("release of unconfirmed bookings {} failed with status {} body {}", bookingIds, status, body);
+            try (CloseableHttpClient httpClient = newHttpClient();
+                 CloseableHttpResponse httpResponse = httpClient.execute(httpPost)) {
+                final int status = httpResponse.getStatusLine().getStatusCode();
+                if (status == Response.Status.ACCEPTED.getStatusCode()) {
+                    LOGGER.info("released unconfirmed bookings {}", bookingIds);
+                } else {
+                    final String body = httpResponse.getEntity() == null ? "" : EntityUtils.toString(httpResponse.getEntity());
+                    LOGGER.error("release of unconfirmed bookings {} failed with status {} body {}", bookingIds, status, body);
+                }
             }
         } catch (IOException ex) {
             LOGGER.error("release of unconfirmed bookings {} failed", bookingIds, ex);
         }
+    }
+
+    /**
+     * A client per call, closed with its response. Without timeouts, a courtscheduler that accepts
+     * the connection and never answers would hold the event-processor thread indefinitely.
+     */
+    private CloseableHttpClient newHttpClient() {
+        return HttpClientBuilder.create()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(Integer.parseInt(connectTimeoutMs))
+                        .setSocketTimeout(Integer.parseInt(socketTimeoutMs))
+                        .build())
+                .build();
     }
 }

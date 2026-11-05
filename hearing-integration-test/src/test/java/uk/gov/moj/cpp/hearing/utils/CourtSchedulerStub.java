@@ -18,6 +18,7 @@ public class CourtSchedulerStub {
 
     private static final String UNCONFIRMED_BOOKING = "/unconfirmedBooking";
     private static final String RELEASE_UNCONFIRMED_BOOKINGS = UNCONFIRMED_BOOKING + "/release";
+    private static final String BOOKING_STATUS = UNCONFIRMED_BOOKING + "/status";
 
     public static final String STUB_DATA_UNCONFIRMED_BOOKING_BOOK_SLOTS_RESPONSE = "stub-data/courtscheduler.provisionalbooking-book-slots-response.json";
 
@@ -54,6 +55,33 @@ public class CourtSchedulerStub {
     public static void stubReleaseUnconfirmedBookings() {
         stubFor(post(urlPathEqualTo(COURT_SCHEDULER_BASE_URL + RELEASE_UNCONFIRMED_BOOKINGS))
                 .willReturn(aResponse().withStatus(ACCEPTED.getStatusCode())));
+    }
+
+    /**
+     * courtscheduler's answer to the booking status check hearing makes at share, for a single
+     * booking, in the shape of courtscheduler.query.booking.status.response.
+     */
+    public static void stubBookingStatus(final String bookingId, final String status, final boolean safeToShare) {
+        stubFor(post(urlPathEqualTo(COURT_SCHEDULER_BASE_URL + BOOKING_STATUS))
+                .withRequestBody(matchingJsonPath("$.bookingIds[?(@ == '" + bookingId + "')]"))
+                .willReturn(aResponse().withStatus(OK.getStatusCode())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(format("{\"bookings\":[{\"bookingId\":\"%s\",\"status\":\"%s\",\"safeToShare\":%s}]}",
+                                bookingId, status, safeToShare))));
+    }
+
+    /** courtscheduler failing the booking status check for this booking, so hearing cannot tell whether it is held. */
+    public static void stubBookingStatusFails(final String bookingId) {
+        stubFor(post(urlPathEqualTo(COURT_SCHEDULER_BASE_URL + BOOKING_STATUS))
+                .withRequestBody(matchingJsonPath("$.bookingIds[?(@ == '" + bookingId + "')]"))
+                .willReturn(aResponse().withStatus(503)));
+    }
+
+    /** The bookingIds of every booking status check courtscheduler has received, flattened. */
+    public static List<String> bookingIdsCheckedForStatus() {
+        return findAll(postRequestedFor(urlPathEqualTo(COURT_SCHEDULER_BASE_URL + BOOKING_STATUS))).stream()
+                .flatMap(request -> JsonPath.from(request.getBodyAsString()).<String>getList("bookingIds").stream())
+                .collect(Collectors.toList());
     }
 
     /** The bookingIds of every bulk release courtscheduler has received, flattened. */
