@@ -12,7 +12,8 @@ Risks and the list of non-mechanical changes: `java25-stage2-risk-review.md`.
 
 Each parity test (`chdNN_…`) asserts the **Java 17** behaviour, so a Java 25 failure is a behaviour change. Both copies use
 the same method names and bodies; only the test harness differs. Where Java 25 behaviour was accepted, the Java 25 copy was
-changed to assert it (CHD-04, CHD-06) and the Java 17 copy keeps the original assertion.
+changed to assert it (CHD-06) and the Java 17 copy keeps the original assertion. CHD-04 is framework behaviour and has
+no parity test (see the finding).
 
 ## Results
 
@@ -21,13 +22,17 @@ All numbers below are from actual runs, read from the surefire/failsafe reports 
 | Run | Commit | Classes | Tests | Failures | Errors | Skipped |
 |---|---|---|---|---|---|---|
 | `main`, JDK 17 (baseline, before parity tests) | `6683b26770` | 416 | 2,762 | 0 | 0 | 38 |
-| Java 17 unit tests (`main` + parity tests, JDK 17.0.9) | `d523e25780` | 417 | 2,777 | 0 | 0 | 39 |
-| Java 25 unit tests (JDK 25.0.3, Hibernate 6.6.1) | `f498097729` | 420 | 2,876 | 0 | 0 | 40 |
+| Java 17 unit tests (`main` + parity tests, JDK 17.0.9) | `a7e726c641` | 416 | 2,775 | 0 | 0 | 39 |
+| Java 25 unit tests (JDK 25.0.3, Hibernate 6.6.1) | `516be426c9` | 419 | 2,874 | 0 | 0 | 40 |
 | Java 25 persistence tests on Hibernate 7.3.2 (`-Phibernate-7.3.2`) | `f498097729` | 64 | 236 | 0 | 0 | 4 |
 | Java 17 integration tests (`cpp-developers-docker` `java-17`) | `d523e25780` | 61 | 263 | 0 | 0 | 23 |
 | Java 25 integration tests (`cpp-developers-docker` `java-25`) | `f498097729`* | 61 | 263 | 0 | 0 | 23 |
 
 \* The Java 25 IT run was on `c38e7749a2`; `f498097729` only changes this report.
+
+`516be426c9` and `a7e726c641` are the runs after the CHD-04 framework tests were removed (2 tests, 1 class, from each copy).
+The branch was then rebased onto `496a7c8fb1` (the POM review); hashes older than `516be426c9` in this report are from
+before that rebase (old tip `051e7507c3`), and the same commits now have new hashes with the same titles.
 
 - **Unit tests:** Java 17 has one more skipped test than the baseline (`chd05`, which can't run on Java 17; see CHD-05).
   Java 25 has 3 more classes and 99 more tests than Java 17: the newer JUnit 5 Theories counting, the Java 25-only tests
@@ -48,8 +53,8 @@ All numbers below are from actual runs, read from the surefire/failsafe reports 
 
 | | Pass | Fail | Skipped |
 |---|---|---|---|
-| Java 17 copy (15 tests) | 14 | 0 | 1 (`chd05`) |
-| Java 25 copy (15 tests) | 15 | 0 | 0 |
+| Java 17 copy (13 tests) | 12 | 0 | 1 (`chd05`) |
+| Java 25 copy (13 tests) | 13 | 0 | 0 |
 
 ## Findings
 
@@ -58,7 +63,7 @@ All numbers below are from actual runs, read from the surefire/failsafe reports 
 | CHD-01 | Medium | Lazy collections: Java 17 kept one session open per request (the framework's request-scoped `EntityManager` with DeltaSpike); the upgrade replaced it with `hibernate.enable_lazy_load_no_trans` | `HearingQueryViewTest.chd01_queryViewEntryPointsRunInATransaction` (Java 25); Java 17 copy: `HearingRepositoryTest.chd01_lazyCollectionsOfAHearingAreReadableAfterTheSessionThatLoadedItHasEnded` | **Fixed (design)**, `1f8da5305c`: flag removed; `HearingQueryView`, `HearingEventQueryView` and `SessionTimeQueryView` are `@Transactional`. Java 25 ITs: no `LazyInitializationException`. Needs sign-off as a design change |
 | CHD-02 | Medium | WildFly 40.0.1 runs Hibernate 7.3.2; unit tests use 6.6.1 | Persistence module with `-Phibernate-7.3.2` | **No change needed**: same results on 7.3.2 |
 | CHD-03 | Medium | `UnspecifiedUuidUserType` parses `ha_defendant`'s `text` nationality columns with `UUID.fromString` | Not testable on H2; data check below | **No change needed**: no non-UUID values in NFT or SIT (both counts 0 in each). Re-run the check against production before release if those environments may not be representative |
-| CHD-04 | Low–Medium | Reading `…Z` gives zone `ZoneOffset.UTC`; Java 17 gave `ZoneId.of("UTC")`. Same instant and JSON | `ObjectMapperProducerTest.chd04_writesAUtcZonedDateTimeWithAZSuffix`; `.chd04_readsAZSuffixedTimeAsTheSameInstantWithZoneOffsetUtc` (Java 17 copy: `…WithTheUtcZoneId`) | **Accepted**, `20c3ac50a9`: framework serialisation (BC-08); needs sign-off |
+| CHD-04 | Low–Medium | Reading `…Z` gives zone `ZoneOffset.UTC`; Java 17 gave `ZoneId.of("UTC")`. Same instant and JSON | None: the behaviour is the framework's `ObjectMapperProducer`, not hearing's code. The `ObjectMapperProducerTest` unit tests were removed from both copies, since they only tested the framework. Covered by the ITs, which compare `ZonedDateTime`s parsed from query responses (77 expectations moved from `ZoneId.of("UTC")` to `ZoneOffset.UTC`) | **Accepted**, `20c3ac50a9`: framework serialisation (BC-08). Affects only Java code that compares parsed values with `equals`/`toString`; hearing's production code doesn't. Needs sign-off |
 | CHD-05 | Low–Medium | JSON columns mapped with `@JdbcTypeCode(SqlTypes.JSON)` instead of hibernate-types | `HearingRepositoryTest.chd05_jsonColumnRoundTripsNestedObjectsNumbersAndNullFields` | **No change needed**: passes on Java 25; can't run on Java 17 (hibernate-types' `jsonb` on H2, as for `main`'s own `@Ignore`d case-note tests); ITs green on both |
 | CHD-06 | Low | `save` always merges; DeltaSpike persisted new entities, leaving the passed instance managed | `HearingRepositoryTest.chd06_saveOfANewHearingReturnsAManagedCopyAndLeavesThePassedInstanceDetached` (Java 17 copy: `…LeavesThePassedInstanceManaged`); `.chd06_saveOfANewHearingStoresItsChildren` | **Accepted, provisional**, `ef6dd8a1fc`: no production code uses an entity after `save`. Pending owner review; revert to restore the Java 17 assertion, then make `save` persist new entities |
 | CHD-07 | Low | None: `findByHearingIdAndJurisdictionType` throws `NoResultException` on both | `HearingRepositoryTest.chd07_findByHearingIdAndJurisdictionTypeThrowsNoResultWhenNothingMatches` | **Parity.** Existing bug on `main` (out of scope) |
