@@ -93,11 +93,6 @@ class DefendantRepositoryTest {
     }
 
     @Test
-    void chd17_getDefendantDetailsForSearchingThrowsNoResultWhenTheDefendantIsUnknown() {
-        assertThrows(NoResultException.class, () -> defendantRepository.getDefendantDetailsForSearching(UUID.randomUUID()));
-    }
-
-    @Test
     void chd12_getDefendantDetailsForSearchingMapsTheDefendantIdAndOrganisationName() {
         final Defendant defendant = buildDefendant();
         defendantRepository.save(defendant);

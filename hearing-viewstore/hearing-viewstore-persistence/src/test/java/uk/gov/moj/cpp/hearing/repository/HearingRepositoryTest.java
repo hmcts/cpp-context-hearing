@@ -673,10 +673,6 @@ class HearingRepositoryTest {
         hearingApplicationRepository.save(hearingApplication);
     }
 
-    /**
-     * Builds a JPA Hearing entity from a domain Hearing POJO, mapping the fields needed
-     * by all repository queries exercised in this test class.
-     */
     // ── CHD harness ──────────────────────────────────────────────────────────────────────────────────────────────
 
     private EntityManager entityManager() {
@@ -706,6 +702,10 @@ class HearingRepositoryTest {
         return entityManager().find(HearingCaseNote.class, key);
     }
 
+    /**
+     * Builds a JPA Hearing entity from a domain Hearing POJO, mapping the fields needed
+     * by all repository queries exercised in this test class.
+     */
     private static Hearing buildHearingEntity(final uk.gov.justice.core.courts.Hearing domainHearing) {
         final Hearing hearing = new Hearing();
         hearing.setId(domainHearing.getId());

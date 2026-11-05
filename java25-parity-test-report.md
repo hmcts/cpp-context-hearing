@@ -53,8 +53,8 @@ before that rebase (old tip `051e7507c3`), and the same commits now have new has
 
 | | Pass | Fail | Skipped |
 |---|---|---|---|
-| Java 17 copy (13 tests) | 12 | 0 | 1 (`chd05`) |
-| Java 25 copy (13 tests) | 13 | 0 | 0 |
+| Java 17 copy (12 tests) | 11 | 0 | 1 (`chd05`) |
+| Java 25 copy (12 tests) | 12 | 0 | 0 |
 
 ## Findings
 
@@ -76,7 +76,7 @@ before that rebase (old tip `051e7507c3`), and the same commits now have new has
 | CHD-14 | High | `coredomain` 25.104.0-M4 lacked deleted judicial results, `isDeemedServed`, `crackedIneffectiveSubReasonId` (BC-15) | `DeletedJudicialResultTransformerTest`, `RestructuringHelperV3Test`, `PublishResultsDelegateV3Test`, `ShareResultsIT` | **Fixed** (restored from `main` on 25.104.5, Stage 1) |
 | CHD-15 | Medium | Drools harness could load 0 rules (BC-20) | `AccessControlRuleCountTest` ×2 | **Fixed** (team) |
 | CHD-16 | Medium (coverage) | `HearingSchemaContractValidationTest` (MI's consumer contract test: validates MI's sample payloads for 19 hearing events against hearing's event schemas) doesn't run: the MI jar is still `javax` | — | **Open, external**: re-enable when MI publishes a Jakarta test jar. Checked statically meanwhile: the 19 event schemas in `hearing-event-listener` are unchanged from `main`, and so is every schema they reference (`criminal-court-public-model` 17.104.4 vs 25.104.5: all 389 schemas identical, same 388 catalogue entries; `common-core-domain` `definitions.json` identical; hearing's `target.json`, `hearing.case-details.json`, `hearing.application-details.json` unchanged). The test passed on Java 17 against the same schemas, so it would pass now; the gap only covers future schema changes |
-| CHD-17 | High | `getDefendantDetailsForSearching` returned `null` for an unknown defendant where Java 17 threw `NoResultException`; the outstanding-fines query then failed with a `NullPointerException` instead of returning an empty payload | `DefendantRepositoryTest.chd17_getDefendantDetailsForSearchingThrowsNoResultWhenTheDefendantIsUnknown` | **Fixed**, `5046ba6c4e`: `setMaxResults(1).getSingleResult()`; `main`'s test expectation restored |
+| CHD-17 | High | `getDefendantDetailsForSearching` returned `null` for an unknown defendant where Java 17 threw `NoResultException`; the outstanding-fines query then failed with a `NullPointerException` instead of returning an empty payload | `DefendantRepositoryTest.testDefendantDetailsForSearchingNoResultFound` (`main`'s own test, on both JDKs; the separate `chd17_` test was a duplicate and was removed) | **Fixed**, `5046ba6c4e`: `setMaxResults(1).getSingleResult()`; `main`'s test expectation restored |
 
 ## CHD-03 data check
 
