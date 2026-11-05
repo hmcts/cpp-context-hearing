@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-slots-provisional-booking-refused.json",
+  "description": "courtscheduler refused the booking or the call to it failed (LPT-2590). 'status' is courtscheduler's HTTP status, passed on as is: hearing does not interpret it. It is absent when courtscheduler never answered (connection refused, timeout). 'message' is courtscheduler's own text plus the HTTP status, for logs only - not user-facing and not translated. 'bookingId' is present only when the request carried one: a refused first pick has none. It is a plain string, not a uuid, so that an unexpected id can never make the framework drop this event for failing its schema.",
+  "type": "object",
+  "properties": {
+    "bookingId": {
+      "type": "string"
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "error"
+  ],
+  "additionalProperties": false
+}
