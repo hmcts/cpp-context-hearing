@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.repository;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThrows;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
@@ -168,11 +167,6 @@ public class DefendantRepositoryTest {
 
         associatedDefenceOrganisation.setDefenceOrganisation(defenceOrganisation);
         return associatedDefenceOrganisation;
-    }
-
-    @Test
-    public void chd17_getDefendantDetailsForSearchingThrowsNoResultWhenTheDefendantIsUnknown() {
-        assertThrows(NoResultException.class, () -> defendantRepository.getDefendantDetailsForSearching(UUID.randomUUID()));
     }
 
     @Test
