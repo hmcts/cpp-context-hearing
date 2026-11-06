@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
@@ -70,6 +71,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.CaseRegisteredForExtendedHearing;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
@@ -83,6 +85,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -115,6 +118,7 @@ public class InitiateHearingCommandHandlerTest {
             InheritedVerdictAdded.class,
             RegisteredHearingAgainstApplication.class,
             HearingExtended.class,
+            CaseRegisteredForExtendedHearing.class,
             ExistingHearingUpdated.class,
             RegisteredHearingAgainstDefendant.class
     );
@@ -171,6 +175,46 @@ public class InitiateHearingCommandHandlerTest {
     public void extendHearingProsecutionCases() throws Throwable {
         extendHearingWithProsecutionCases((h) -> {
         });
+    }
+
+    @Test
+    public void extendHearingShouldRegisterHearingAgainstEachExtendedCase() throws Throwable {
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        if (hearingOne.getHearing().getCourtApplications() != null) {
+            setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
+        }
+        this.hearingCommandHandler.initiate(envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it())));
+
+        final UUID firstCaseId = randomUUID();
+        final UUID secondCaseId = randomUUID();
+        final ExtendHearingCommand command = new ExtendHearingCommand();
+        command.setHearingId(hearingOne.getHearingId());
+        command.setProsecutionCases(asList(
+                ProsecutionCase.prosecutionCase().withId(firstCaseId).withDefendants(singletonList(defendant().withId(randomUUID()).build())).build(),
+                ProsecutionCase.prosecutionCase().withId(secondCaseId).withDefendants(singletonList(defendant().withId(randomUUID()).build())).build()));
+        command.getProsecutionCases().forEach(pc -> pc.getDefendants().forEach(defendant ->
+                setupMockedEventStream(defendant.getId(), this.defendantEventStream, new DefendantAggregate())));
+        final EventStream firstCaseEventStream = Mockito.mock(EventStream.class);
+        final EventStream secondCaseEventStream = Mockito.mock(EventStream.class);
+        setupMockedEventStream(firstCaseId, firstCaseEventStream, new CaseAggregate());
+        setupMockedEventStream(secondCaseId, secondCaseEventStream, new CaseAggregate());
+
+        this.hearingCommandHandler.extendHearing(envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command)));
+
+        final List<CaseRegisteredForExtendedHearing> registrations = Stream.of(firstCaseEventStream, secondCaseEventStream)
+                .flatMap(stream -> {
+                    try {
+                        return verifyAppendAndGetArgumentFrom(stream);
+                    } catch (final EventStreamException e) {
+                        throw new IllegalStateException(e);
+                    }
+                })
+                .map(envelope -> asPojo(envelope, CaseRegisteredForExtendedHearing.class))
+                .collect(toList());
+        assertThat(registrations.size(), is(2));
+        assertThat(registrations.stream().map(CaseRegisteredForExtendedHearing::getCaseId).collect(toSet()), is(new HashSet<>(asList(firstCaseId, secondCaseId))));
+        registrations.forEach(registration -> assertThat(registration.getHearingId(), is(hearingOne.getHearingId())));
     }
 
     /**
@@ -230,6 +274,7 @@ public class InitiateHearingCommandHandlerTest {
                 .build());
         setupMockedEventStream(applicationId, this.applicationEventStream, new ApplicationAggregate());
         setupMockedEventStream(ownerDefendantId, this.defendantEventStream, new DefendantAggregate());
+        setupMockedEventStream(caseId, this.caseEventStream, new CaseAggregate());
 
         final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
         this.hearingCommandHandler.extendHearing(commandJson);
@@ -280,6 +325,7 @@ public class InitiateHearingCommandHandlerTest {
                 .build()));
         setupMockedEventStream(applicationId, this.applicationEventStream, new ApplicationAggregate());
         setupMockedEventStream(defendantId, this.defendantEventStream, new DefendantAggregate());
+        setupMockedEventStream(caseId, this.caseEventStream, new CaseAggregate());
 
         final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
         this.hearingCommandHandler.extendHearing(commandJson);
@@ -341,6 +387,7 @@ public class InitiateHearingCommandHandlerTest {
         setupMockedEventStream(applicationId, this.applicationEventStream, new ApplicationAggregate());
         setupMockedEventStream(existingDefendantId, this.defendantEventStream, new DefendantAggregate());
         setupMockedEventStream(movedDefendantId, this.defendantEventStream, new DefendantAggregate());
+        setupMockedEventStream(caseId, this.caseEventStream, new CaseAggregate());
 
         final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
         this.hearingCommandHandler.extendHearing(commandJson);
@@ -476,6 +523,7 @@ public class InitiateHearingCommandHandlerTest {
                 .build()));
         setupMockedEventStream(applicationId, this.applicationEventStream, new ApplicationAggregate());
         setupMockedEventStream(defendantId, this.defendantEventStream, new DefendantAggregate());
+        setupMockedEventStream(caseId, this.caseEventStream, new CaseAggregate());
 
         final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
         this.hearingCommandHandler.extendHearing(commandJson);
@@ -612,6 +660,7 @@ public class InitiateHearingCommandHandlerTest {
 
         assertThat(hearingExtended.getCourtApplication().getId(), is(command.getCourtApplication().getId()));
         assertThat(hearingExtended.getHearingId(), is(command.getHearingId()));
+        Mockito.verify(this.aggregateService, never()).get(any(), eq(CaseAggregate.class));
 
     }
 
@@ -638,6 +687,7 @@ public class InitiateHearingCommandHandlerTest {
 
         command.getProsecutionCases().get(0).getDefendants().forEach(defendant ->
                 setupMockedEventStream(defendant.getId(), this.defendantEventStream, new DefendantAggregate()));
+        setupMockedEventStream(command.getProsecutionCases().get(0).getId(), this.caseEventStream, new CaseAggregate());
 
         final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
 
@@ -658,6 +708,14 @@ public class InitiateHearingCommandHandlerTest {
         Stream.concat(registerHearingAgainstDefendants.get(0), registerHearingAgainstDefendants.get(1))
                 .map(env -> asPojo(env, RegisteredHearingAgainstDefendant.class))
                 .forEach(registration -> assertThat(registration.getHearingId(), is(hearingExtended.getHearingId())));
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.caseEventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(commandJson).withName("hearing.events.case-registered-for-extended-hearing"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.caseId", is(command.getProsecutionCases().get(0).getId().toString())),
+                                withJsonPath("$.hearingId", is(command.getHearingId().toString()))
+                        )))));
     }
 
     private void updateExistingHearingWithProsecutionCases(final Consumer<Hearing> hearingModification) throws EventStreamException {

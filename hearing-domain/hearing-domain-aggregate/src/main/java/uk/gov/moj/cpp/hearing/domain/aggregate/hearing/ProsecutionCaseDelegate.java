@@ -135,6 +135,11 @@ public class ProsecutionCaseDelegate implements Serializable {
             }
             this.momento.getGroupAndMaster().put(groupId, newGroupMaster.getId());
         }
+
+        // CAD-947: keep the group size current so public.hearing.resulted (and next hearings) carry it
+        if (nonNull(casesUpdatedAfterCaseRemovedFromGroupCases.getNumberOfGroupCases())) {
+            this.momento.getHearing().setNumberOfGroupCases(casesUpdatedAfterCaseRemovedFromGroupCases.getNumberOfGroupCases());
+        }
     }
 
     private void setCaseMarkers(final ProsecutionCase prosecutionCase, final List<Marker> markers) {
