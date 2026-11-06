@@ -222,7 +222,53 @@ public class RemoveCaseFromGroupCasesCommandHandlerTest {
         assertThat(registered3.getHearingId(), equalTo(HEARING3_ID));
     }
 
+    @Test
+    public void shouldCarryNumberOfGroupCasesToEveryHearing_WhenSupplied() throws EventStreamException {
+        when(eventSource.getStreamById(CASE1_ID)).thenReturn(case1EventStream);
+        when(aggregateService.get(case1EventStream, CaseAggregate.class)).thenReturn(case1Aggregate);
+        setInitialDataIntoCaseAggregate(MASTER_CASE_ID, asList(HEARING1_ID, HEARING2_ID));
+
+        handler.removeCaseFromGroupCases(getJsonEnvelopeForRemoveCommand(GROUP_ID, MASTER_CASE_ID,
+                getProsecutionCase(GROUP_ID, CASE1_ID, Boolean.FALSE, Boolean.FALSE),
+                null, 2));
+
+        final List<JsonEnvelope> events = verifyAndGetEvents(case1EventStream, 2);
+        final CaseRemovedFromGroupCases removed1 = asPojo(events.get(0), CaseRemovedFromGroupCases.class);
+        final CaseRemovedFromGroupCases removed2 = asPojo(events.get(1), CaseRemovedFromGroupCases.class);
+
+        assertThat(removed1.getHearingId(), equalTo(HEARING1_ID));
+        assertThat(removed1.getNumberOfGroupCases(), equalTo(2));
+        assertThat(removed2.getHearingId(), equalTo(HEARING2_ID));
+        assertThat(removed2.getNumberOfGroupCases(), equalTo(2));
+    }
+
+    @Test
+    public void shouldNotAddNumberOfGroupCases_WhenNotSupplied() throws EventStreamException {
+        when(eventSource.getStreamById(CASE1_ID)).thenReturn(case1EventStream);
+        when(aggregateService.get(case1EventStream, CaseAggregate.class)).thenReturn(case1Aggregate);
+        setInitialDataIntoCaseAggregate(MASTER_CASE_ID, asList(HEARING1_ID));
+
+        handler.removeCaseFromGroupCases(getJsonEnvelopeForRemoveCommand(GROUP_ID, MASTER_CASE_ID,
+                getProsecutionCase(GROUP_ID, CASE1_ID, Boolean.FALSE, Boolean.FALSE),
+                null));
+
+        final Stream<JsonEnvelope> envelopeStream = verifyAppendAndGetArgumentFrom(case1EventStream);
+        assertThat(envelopeStream, streamContaining(
+                jsonEnvelope(
+                        metadata()
+                                .withName("hearing.events.case-removed-from-group-cases"),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(HEARING1_ID.toString())),
+                                withoutJsonPath("$.numberOfGroupCases"))
+                        ))));
+    }
+
     private JsonEnvelope getJsonEnvelopeForRemoveCommand(final UUID groupId, final UUID masterCaseId, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
+        return getJsonEnvelopeForRemoveCommand(groupId, masterCaseId, removedCase, newGroupMaster, null);
+    }
+
+    private JsonEnvelope getJsonEnvelopeForRemoveCommand(final UUID groupId, final UUID masterCaseId, final ProsecutionCase removedCase,
+                                                         final ProsecutionCase newGroupMaster, final Integer numberOfGroupCases) {
         JsonObjectBuilder builder = createObjectBuilder()
                 .add("groupId", groupId.toString())
                 .add("masterCaseId", masterCaseId.toString())
@@ -230,6 +276,9 @@ public class RemoveCaseFromGroupCasesCommandHandlerTest {
 
         if (Objects.nonNull(newGroupMaster)) {
             builder.add("newGroupMaster", objectToJsonObjectConverter.convert(newGroupMaster));
+        }
+        if (Objects.nonNull(numberOfGroupCases)) {
+            builder.add("numberOfGroupCases", numberOfGroupCases);
         }
 
         final JsonEnvelope envelope = JsonEnvelope.envelopeFrom(

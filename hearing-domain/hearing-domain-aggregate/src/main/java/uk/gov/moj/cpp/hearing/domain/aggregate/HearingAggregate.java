@@ -1674,8 +1674,10 @@ public class HearingAggregate implements Aggregate {
         this.momento.getHearing().setDefendantsWithWelshTranslationList(defendantsWelshRequiringList);
     }
 
-    public Stream<Object> updateCasesAfterCaseRemovedFromGroupCases(final UUID hearingId, final UUID groupId, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) {
-        return apply(Stream.of(new CasesUpdatedAfterCaseRemovedFromGroupCases(hearingId, groupId, removedCase, newGroupMaster)));
+    public Stream<Object> updateCasesAfterCaseRemovedFromGroupCases(final UUID hearingId, final UUID groupId, final ProsecutionCase removedCase,
+                                                                    final ProsecutionCase newGroupMaster, final Integer numberOfGroupCases) {
+        return apply(Stream.of(new CasesUpdatedAfterCaseRemovedFromGroupCases(hearingId, groupId, removedCase, newGroupMaster,
+                numberOfGroupCases)));
     }
 
     public Stream<Object> addWitnessToHearing(final UUID hearingId, final String witness) {
