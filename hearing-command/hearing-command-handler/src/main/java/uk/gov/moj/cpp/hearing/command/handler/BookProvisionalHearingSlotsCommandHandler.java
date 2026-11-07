@@ -24,10 +24,10 @@ public class BookProvisionalHearingSlotsCommandHandler extends AbstractCommandHa
     private static final Logger LOGGER =
             LoggerFactory.getLogger(BookProvisionalHearingSlotsCommandHandler.class.getName());
 
-    @Handles("hearing.command.book-provisional-hearing-slots")
+    @Handles("hearing.command.book-unconfirmed-hearing-slots")
     public void bookProvisionalHearingSlots(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.book-provisional-hearing-slots event received {}", envelope.toObfuscatedDebugString());
+            LOGGER.debug("hearing.command.book-unconfirmed-hearing-slots event received {}", envelope.toObfuscatedDebugString());
         }
 
         final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString("hearingId"));
@@ -35,12 +35,13 @@ public class BookProvisionalHearingSlotsCommandHandler extends AbstractCommandHa
         final JsonArray slotsArray = envelope.payloadAsJsonObject().getJsonArray("slots");
         final String bookingType = envelope.payloadAsJsonObject().getString("bookingType", null);
         final String priority = envelope.payloadAsJsonObject().getString("priority", null);
+        final String bookingId = envelope.payloadAsJsonObject().getString("bookingId", null);
         for (int i = 0; i < slotsArray.size(); i++) {
             final ProvisionalHearingSlotInfo provisionalHearingSlotInfo = convertToObject(slotsArray.getJsonObject(i), ProvisionalHearingSlotInfo.class);
             slots.add(provisionalHearingSlotInfo);
         }
 
-        aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate -> hearingAggregate.bookProvisionalHearingSlots(hearingId, slots, bookingType, priority, getSpecialRequirements(envelope)));
+        aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate -> hearingAggregate.bookProvisionalHearingSlots(hearingId, slots, bookingType, priority, getSpecialRequirements(envelope), bookingId));
     }
 
     @SuppressWarnings({"squid:S1168"})

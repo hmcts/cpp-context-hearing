@@ -46,7 +46,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS = "hearing.publish-hearing-lists-for-crown-courts";
     private static final String ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS_WITH_IDS = "hearing.publish-hearing-lists-for-crown-courts-with-ids";
     private static final String ACTION_NAME_RECORD_SESSION_TIME = "hearing.record-session-time";
-    private static final String ACTION_NAME_BOOK_PROVISIONAL_HEARING_SLOTS = "hearing.book-provisional-hearing-slots";
+    private static final String ACTION_NAME_BOOK_PROVISIONAL_HEARING_SLOTS = "hearing.book-unconfirmed-hearing-slots";
     private static final String ACTION_NAME_SET_TRIAL_TYPE = "hearing.set-trial-type";
     private static final String ACTION_NAME_SAVE_TIER_AND_LIST_TYPE = "hearing.save-ptph-detail";
     private static final String ACTION_NAME_FINALISE_TIER_AND_LIST_TYPE = "hearing.finalise-ptph-detail";
