@@ -137,7 +137,7 @@ public class ProvisionalBookingSchemaChainTest {
 
     /**
      * Guards the specific field this test was written for. If {@code bookingId} is ever dropped
-     * from one of the three schemas, the re-pick flow (NEW-15) silently stops releasing the
+     * from one of the three schemas, the re-pick flow silently stops releasing the
      * previous hold, which does not surface as a failure anywhere.
      */
     @Test
