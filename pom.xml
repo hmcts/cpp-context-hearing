@@ -29,7 +29,7 @@
         <results.version>17.104.120</results.version>
         <notification.notify.version>17.104.46</notification.notify.version>
         <stagingenforcement.version>17.104.88</stagingenforcement.version>
-        <progression.version>17.104.306</progression.version>
+        <progression.version>17.104.308</progression.version>
         <jakarta.xml.bind-api.raml.version>2.3.2</jakarta.xml.bind-api.raml.version>
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <usersgroups.version>17.104.50</usersgroups.version>
