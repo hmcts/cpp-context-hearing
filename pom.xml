@@ -4,7 +4,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>25.104.6</version>
+        <version>25.104.7</version>
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
@@ -23,7 +23,7 @@
         <mvn.site.url>file://${project.build.directory}/site</mvn.site.url>
         <junit-dataprovider.version>1.13.1</junit-dataprovider.version>
         <datafactory.version>0.8</datafactory.version>
-        <coredomain.version>25.104.6</coredomain.version>
+        <coredomain.version>25.104.7</coredomain.version>
         <referencedata.version>17.104.140</referencedata.version>
         <material.version>17.0.85</material.version>
         <results.version>17.104.120</results.version>
