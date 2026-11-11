@@ -57,6 +57,8 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtApplicationType;
+import uk.gov.justice.core.courts.CourtOrder;
+import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.InitiationCode;
 import uk.gov.justice.core.courts.Jurisdiction;
@@ -259,6 +261,167 @@ class HearingCheckInIT extends AbstractIT {
     }
 
     @Test
+    void shouldKeepDefendantLinkedByMasterDefendantCaseWhenInactiveApplicationCaseHasNoOffences() {
+        final UUID userId = randomUUID();
+        setupAsMagistrateUser(userId);
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+
+        final UUID inactiveCaseId = randomUUID();
+        final Defendant linkedDefendant = defendantWithOffence("LINKED_DEFENDANT", randomUUID(), inactiveCaseId);
+        initiateHearing(getRequestSpec(), createHearingWithCase(randomUUID(), randomUUID(), randomUUID(), null,
+                inactiveCaseId, ZonedDateTime.now(),
+                linkedDefendant,
+                defendantWithOffence("OTHER_DEFENDANT", randomUUID(), inactiveCaseId)));
+
+        // INACTIVE application case without offences; the defendant is linked only via subject.masterDefendant.defendantCase
+        final CourtApplication base = createCourtApplication(inactiveCaseId, randomUUID());
+        final CourtApplication application = applicationLinkedToDefendant(CourtApplication.courtApplication()
+                .withValuesFrom(base)
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withValuesFrom(base.getCourtApplicationCases().get(0))
+                        .withOffences(null)
+                        .build()))
+                .build(), inactiveCaseId, linkedDefendant.getId());
+
+        final UUID hearingId = randomUUID();
+        final UUID courtCentreId = randomUUID();
+        initiateHearing(getRequestSpec(), createHearingWithApplicationOnly(hearingId, courtCentreId, randomUUID(), application));
+
+        assertSingleCaseWithOnlyDefendant(courtCentreId, hearingId, inactiveCaseId, "LINKED_DEFENDANT");
+    }
+
+    @Test
+    void shouldIncludeCourtOrderCaseWhenApplicationHasNoCourtApplicationCases() {
+        final UUID userId = randomUUID();
+        setupAsMagistrateUser(userId);
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+
+        final UUID caseId = randomUUID();
+        final UUID courtOrderOffenceId = randomUUID();
+        initiateHearing(getRequestSpec(), createHearingWithCase(randomUUID(), randomUUID(), randomUUID(), null,
+                caseId, ZonedDateTime.now(),
+                defendantWithOffence("MATCHING_DEFENDANT", courtOrderOffenceId, caseId),
+                defendantWithOffence("OTHER_DEFENDANT", randomUUID(), caseId)));
+
+        // breach-style application: no courtApplicationCases, case linked only through the court order offences
+        final CourtApplication application = CourtApplication.courtApplication()
+                .withValuesFrom(createCourtApplication(caseId, randomUUID()))
+                .withCourtApplicationCases(null)
+                .withCourtOrder(courtOrderFor(caseId, courtOrderOffenceId))
+                .build();
+
+        final UUID hearingId = randomUUID();
+        final UUID courtCentreId = randomUUID();
+        initiateHearing(getRequestSpec(), createHearingWithApplicationOnly(hearingId, courtCentreId, randomUUID(), application));
+
+        assertSingleCaseWithOnlyDefendant(courtCentreId, hearingId, caseId, "MATCHING_DEFENDANT");
+    }
+
+    @Test
+    void shouldKeepDefendantLinkedByMasterDefendantCaseForCourtOrderCase() {
+        final UUID userId = randomUUID();
+        setupAsMagistrateUser(userId);
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+
+        final UUID caseId = randomUUID();
+        final Defendant linkedDefendant = defendantWithOffence("LINKED_DEFENDANT", randomUUID(), caseId);
+        initiateHearing(getRequestSpec(), createHearingWithCase(randomUUID(), randomUUID(), randomUUID(), null,
+                caseId, ZonedDateTime.now(),
+                linkedDefendant,
+                defendantWithOffence("OTHER_DEFENDANT", randomUUID(), caseId)));
+
+        // court order offence matches no defendant; the defendant is linked via subject.masterDefendant.defendantCase
+        final CourtApplication application = applicationLinkedToDefendant(CourtApplication.courtApplication()
+                .withValuesFrom(createCourtApplication(caseId, randomUUID()))
+                .withCourtApplicationCases(null)
+                .withCourtOrder(courtOrderFor(caseId, randomUUID()))
+                .build(), caseId, linkedDefendant.getId());
+
+        final UUID hearingId = randomUUID();
+        final UUID courtCentreId = randomUUID();
+        initiateHearing(getRequestSpec(), createHearingWithApplicationOnly(hearingId, courtCentreId, randomUUID(), application));
+
+        assertSingleCaseWithOnlyDefendant(courtCentreId, hearingId, caseId, "LINKED_DEFENDANT");
+    }
+
+    private void assertSingleCaseWithOnlyDefendant(final UUID courtCentreId, final UUID hearingId, final UUID caseId, final String defendantFirstName) {
+        getHearingsCheckInPollForMatch(courtCentreId, now().toString(), isBean(GetHearings.class)
+                .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
+                        .with(HearingSummaries::getId, is(hearingId))
+                        .with(HearingSummaries::getProsecutionCaseSummaries, hasSize(1))
+                        .with(hs -> hs.getProsecutionCaseSummaries().get(0).getId(), is(caseId))
+                        .with(hs -> hs.getProsecutionCaseSummaries().get(0).getDefendants(), hasSize(1))
+                        .with(hs -> hs.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getFirstName(), is(defendantFirstName))
+                        .with(HearingSummaries::getCourtApplicationSummaries, hasSize(1))
+                ))
+        );
+    }
+
+    private static CourtApplication applicationLinkedToDefendant(final CourtApplication application, final UUID caseId, final UUID defendantId) {
+        return applicationLinkedToDefendant(application, caseId, defendantId, INACTIVE_CASE_URN);
+    }
+
+    private static CourtApplication applicationLinkedToDefendant(final CourtApplication application, final UUID caseId, final UUID defendantId,
+                                                                 final String caseReference) {
+        return CourtApplication.courtApplication()
+                .withValuesFrom(application)
+                .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withValuesFrom(application.getSubject())
+                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                .withMasterDefendantId(randomUUID())
+                                .withDefendantCase(singletonList(DefendantCase.defendantCase()
+                                        .withCaseId(caseId)
+                                        .withDefendantId(defendantId)
+                                        .withCaseReference(caseReference)
+                                        .build()))
+                                // the schema requires a person or legal-entity defendant on a master defendant
+                                .withPersonDefendant(personDefendant()
+                                        .withPersonDetails(person()
+                                                .withFirstName(DEFENDANT_FIRST_NAME)
+                                                .withLastName(DEFENDANT_LAST_NAME)
+                                                .withGender(MALE)
+                                                .build())
+                                        .build())
+                                .build())
+                        .build())
+                .build();
+    }
+
+    private static CourtOrder courtOrderFor(final UUID caseId, final UUID offenceId) {
+        return CourtOrder.courtOrder()
+                .withId(randomUUID())
+                .withJudicialResultTypeId(randomUUID())
+                .withLabel(STRING.next())
+                .withOrderDate(now())
+                .withStartDate(now())
+                .withOrderingCourt(courtCentre()
+                        .withId(randomUUID())
+                        .withName(STRING.next())
+                        .build())
+                .withOrderingHearingId(randomUUID())
+                .withIsSJPOrder(false)
+                .withCanBeSubjectOfBreachProceedings(false)
+                .withCanBeSubjectOfVariationProceedings(false)
+                .withCourtOrderOffences(singletonList(CourtOrderOffence.courtOrderOffence()
+                        .withProsecutionCaseId(caseId)
+                        .withProsecutionCaseIdentifier(prosecutionCaseIdentifier()
+                                .withProsecutionAuthorityId(randomUUID())
+                                .withProsecutionAuthorityCode(STRING.next())
+                                .withCaseURN(STRING.next())
+                                .build())
+                        .withOffence(uk.gov.justice.core.courts.Offence.offence()
+                                .withId(offenceId)
+                                .withOffenceDefinitionId(randomUUID())
+                                .withOffenceCode("code")
+                                .withStartDate(now())
+                                .withOffenceTitle("OFFENCE_TITLE")
+                                .withWording("OFFENCE_WORDING")
+                                .build())
+                        .build()))
+                .build();
+    }
+
+    @Test
     void shouldCheckInDefenceCounselToApplicationHearingOnInactiveCase() {
         final UUID userId = randomUUID();
         givenAUserHasLoggedInAsADefenceCounsel(userId);
@@ -323,29 +486,11 @@ class HearingCheckInIT extends AbstractIT {
      */
     private InitiateHearingCommand createHearingWithApplicationOnlyForDefendant(final UUID hearingId, final UUID courtCentreId, final UUID roomId,
                                                                                final UUID inactiveCaseId, final UUID defendantId, final String caseUrn) {
-        final CourtApplication application = createCourtApplication(inactiveCaseId, randomUUID());
+        final CourtApplication application = applicationLinkedToDefendant(createCourtApplication(inactiveCaseId, randomUUID()),
+                inactiveCaseId, defendantId, caseUrn);
         final CourtApplication applicationForDefendant = CourtApplication.courtApplication()
                 .withValuesFrom(application)
                 .withApplicationReference(APPLICATION_REFERENCE)
-                .withSubject(CourtApplicationParty.courtApplicationParty()
-                        .withValuesFrom(application.getSubject())
-                        .withMasterDefendant(MasterDefendant.masterDefendant()
-                                .withMasterDefendantId(randomUUID())
-                                .withDefendantCase(singletonList(DefendantCase.defendantCase()
-                                        .withCaseId(inactiveCaseId)
-                                        .withDefendantId(defendantId)
-                                        .withCaseReference(caseUrn)
-                                        .build()))
-                                // the schema requires a person or legal-entity defendant on a master defendant
-                                .withPersonDefendant(personDefendant()
-                                        .withPersonDetails(person()
-                                                .withFirstName(DEFENDANT_FIRST_NAME)
-                                                .withLastName(DEFENDANT_LAST_NAME)
-                                                .withGender(MALE)
-                                                .build())
-                                        .build())
-                                .build())
-                        .build())
                 .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
                         .withValuesFrom(application.getCourtApplicationCases().get(0))
                         .withProsecutionCaseIdentifier(prosecutionCaseIdentifier()
@@ -451,7 +596,12 @@ class HearingCheckInIT extends AbstractIT {
 
     private InitiateHearingCommand createHearingWithApplicationOnly(final UUID hearingId, final UUID courtCentreId, final UUID roomId,
                                                                      final UUID inactiveCaseId, final UUID offenceId) {
-        final InitiateHearingCommand command = createHearingWithCase(hearingId, courtCentreId, roomId, singletonList(createCourtApplication(inactiveCaseId, offenceId)));
+        return createHearingWithApplicationOnly(hearingId, courtCentreId, roomId, createCourtApplication(inactiveCaseId, offenceId));
+    }
+
+    private InitiateHearingCommand createHearingWithApplicationOnly(final UUID hearingId, final UUID courtCentreId, final UUID roomId,
+                                                                     final CourtApplication application) {
+        final InitiateHearingCommand command = createHearingWithCase(hearingId, courtCentreId, roomId, singletonList(application));
         command.getHearing().setProsecutionCases(null);
         return command;
     }

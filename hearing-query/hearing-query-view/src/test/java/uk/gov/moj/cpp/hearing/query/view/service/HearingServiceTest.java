@@ -2812,6 +2812,135 @@ class HearingServiceTest {
         assertThat(result.get(1).getId(), is(keptCaseId));
     }
 
+    @Test
+    void getHearingsForCheckIn_shouldKeepDefendantLinkedByMasterDefendantCaseWhenInactiveCaseHasNoOffences() {
+        final UUID caseId = randomUUID();
+        final uk.gov.justice.core.courts.Defendant linked = defendantWithOffences(randomUUID());
+        final uk.gov.justice.core.courts.Defendant other = defendantWithOffences(randomUUID());
+        final CourtApplication application = courtApplication().withId(randomUUID())
+                .withCourtApplicationCases(singletonList(inactiveCase(caseId)))
+                .withSubject(partyWithDefendantCase(caseId, linked.getId()))
+                .build();
+
+        final List<ProsecutionCase> result = checkInInactiveCase(caseId, singletonList(application),
+                caseWithDefendants(caseId, linked, other));
+
+        assertThat(result, hasSize(1));
+        assertThat(result.get(0).getDefendants(), is(singletonList(linked)));
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldKeepDefendantLinkedByRespondentMasterDefendantCaseOrOffence() {
+        final UUID caseId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final uk.gov.justice.core.courts.Defendant linkedByCase = defendantWithOffences(randomUUID());
+        final uk.gov.justice.core.courts.Defendant linkedByOffence = defendantWithOffences(offenceId);
+        final uk.gov.justice.core.courts.Defendant other = defendantWithOffences(randomUUID());
+        final CourtApplication application = courtApplication().withId(randomUUID())
+                .withCourtApplicationCases(singletonList(inactiveCaseWithOffences(caseId, offenceId)))
+                .withRespondents(singletonList(partyWithDefendantCase(caseId, linkedByCase.getId())))
+                .build();
+
+        final List<ProsecutionCase> result = checkInInactiveCase(caseId, singletonList(application),
+                caseWithDefendants(caseId, linkedByCase, linkedByOffence, other));
+
+        assertThat(result.get(0).getDefendants(), is(asList(linkedByCase, linkedByOffence)));
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldUseCourtOrderOffencesWhenApplicationHasNoCourtApplicationCases() {
+        final UUID caseId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final uk.gov.justice.core.courts.Defendant linkedByOffence = defendantWithOffences(offenceId);
+        final uk.gov.justice.core.courts.Defendant other = defendantWithOffences(randomUUID());
+        final CourtApplication application = courtApplication().withId(randomUUID())
+                .withCourtOrder(courtOrderFor(caseId, offenceId))
+                .build();
+
+        final List<ProsecutionCase> result = checkInInactiveCase(caseId, singletonList(application),
+                caseWithDefendants(caseId, linkedByOffence, other));
+
+        assertThat(result, hasSize(1));
+        assertThat(result.get(0).getDefendants(), is(singletonList(linkedByOffence)));
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldUseCourtOrderWhenCourtApplicationCasesEmptyAndKeepMasterDefendantCaseDefendant() {
+        final UUID caseId = randomUUID();
+        final uk.gov.justice.core.courts.Defendant linked = defendantWithOffences(randomUUID());
+        final uk.gov.justice.core.courts.Defendant other = defendantWithOffences(randomUUID());
+        final CourtApplication application = courtApplication().withId(randomUUID())
+                .withCourtApplicationCases(emptyList())
+                .withCourtOrder(courtOrderFor(caseId, randomUUID()))
+                .withSubject(partyWithDefendantCase(caseId, linked.getId()))
+                .build();
+
+        final List<ProsecutionCase> result = checkInInactiveCase(caseId, singletonList(application),
+                caseWithDefendants(caseId, linked, other));
+
+        assertThat(result.get(0).getDefendants(), is(singletonList(linked)));
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldIgnoreMasterDefendantCaseFromApplicationNotLinkingTheCase() {
+        final UUID caseId = randomUUID();
+        final uk.gov.justice.core.courts.Defendant defendant = defendantWithOffences(randomUUID());
+        final CourtApplication linkingApplication = courtApplication().withId(randomUUID())
+                .withCourtApplicationCases(singletonList(inactiveCase(caseId)))
+                .build();
+        // links no case itself (ACTIVE), but its subject's defendantCase names the defendant on caseId
+        final CourtApplication otherApplication = courtApplication().withId(randomUUID())
+                .withCourtApplicationCases(singletonList(applicationCase(randomUUID(), "ACTIVE")))
+                .withSubject(partyWithDefendantCase(caseId, defendant.getId()))
+                .build();
+
+        final List<ProsecutionCase> result = checkInInactiveCase(caseId, asList(linkingApplication, otherApplication),
+                caseWithDefendants(caseId, defendant));
+
+        assertThat(result, is(empty()));
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldIgnoreCourtOrderWhenApplicationHasCourtApplicationCases() {
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+        final CourtApplication application = courtApplication().withId(randomUUID())
+                .withCourtApplicationCases(singletonList(applicationCase(randomUUID(), "ACTIVE")))
+                .withCourtOrder(courtOrderFor(randomUUID(), randomUUID()))
+                .build();
+
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing()
+                .withCourtApplications(singletonList(application)).build();
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summaryForCheckIn(hearingPojo))
+                .thenReturn(HearingSummaries.hearingSummaries().withId(randomUUID()));
+
+        hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
+
+        verify(prosecutionCaseRepository, never()).findByCaseIds(any());
+    }
+
+    private static uk.gov.justice.core.courts.CourtApplicationParty partyWithDefendantCase(final UUID caseId, final UUID defendantId) {
+        return uk.gov.justice.core.courts.CourtApplicationParty.courtApplicationParty().withId(randomUUID())
+                .withMasterDefendant(uk.gov.justice.core.courts.MasterDefendant.masterDefendant()
+                        .withMasterDefendantId(defendantId)
+                        .withDefendantCase(singletonList(uk.gov.justice.core.courts.DefendantCase.defendantCase()
+                                .withCaseId(caseId).withDefendantId(defendantId).build()))
+                        .build())
+                .build();
+    }
+
+    private static uk.gov.justice.core.courts.CourtOrder courtOrderFor(final UUID caseId, final UUID offenceId) {
+        return uk.gov.justice.core.courts.CourtOrder.courtOrder().withId(randomUUID())
+                .withCourtOrderOffences(singletonList(uk.gov.justice.core.courts.CourtOrderOffence.courtOrderOffence()
+                        .withProsecutionCaseId(caseId)
+                        .withOffence(uk.gov.justice.core.courts.Offence.offence().withId(offenceId).build())
+                        .build()))
+                .build();
+    }
+
     private List<ProsecutionCase> checkInInactiveCase(final UUID caseId, final List<CourtApplication> applications,
                                                 final ProsecutionCase mappedCase) {
         final LocalDate date = START_DATE_1.toLocalDate();
