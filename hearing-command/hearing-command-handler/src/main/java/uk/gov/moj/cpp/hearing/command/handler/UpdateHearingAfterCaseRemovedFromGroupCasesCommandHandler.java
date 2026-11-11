@@ -16,6 +16,8 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.json.JsonObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +25,7 @@ import org.slf4j.LoggerFactory;
 public class UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandler extends AbstractCommandHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandler.class);
+    private static final String NUMBER_OF_GROUP_CASES = "numberOfGroupCases";
 
     @Handles("hearing.command.update-hearing-after-case-removed-from-group-cases")
     public void updateHearingAfterCaseRemovedFromGroupCases(final JsonEnvelope envelope) throws EventStreamException {
@@ -35,9 +38,10 @@ public class UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandler extends A
         final ProsecutionCase removedCase = convertToObject(envelope.payloadAsJsonObject().getJsonObject("removedCase"), ProsecutionCase.class);
         final ProsecutionCase newGroupMaster = envelope.payloadAsJsonObject().containsKey("newGroupMaster") ?
                 convertToObject(envelope.payloadAsJsonObject().getJsonObject("newGroupMaster"), ProsecutionCase.class) : null;
+        final Integer numberOfGroupCases = getNumberOfGroupCases(envelope);
 
         updateProsecutionCounsels(envelope, hearingId, groupId, removedCase, newGroupMaster);
-        updateProsecutionCases(envelope, hearingId, groupId, removedCase, newGroupMaster);
+        updateProsecutionCases(envelope, hearingId, groupId, removedCase, newGroupMaster, numberOfGroupCases);
     }
 
     private void updateProsecutionCounsels(final JsonEnvelope envelope, final UUID hearingId, final UUID groupId,
@@ -59,13 +63,20 @@ public class UpdateHearingAfterCaseRemovedFromGroupCasesCommandHandler extends A
     }
 
     private void updateProsecutionCases(final JsonEnvelope envelope, final UUID hearingId, final UUID groupId,
-                                        final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) throws EventStreamException {
+                                        final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster,
+                                        final Integer numberOfGroupCases) throws EventStreamException {
         final HearingAggregate hearingAggregate = aggregate(HearingAggregate.class, hearingId);
         final Map<UUID, UUID> groupAndMaster = hearingAggregate.getGroupAndMaster();
 
         if (groupAndMaster.containsKey(groupId)) {
             aggregate(HearingAggregate.class, hearingId, envelope, agr ->
-                    agr.updateCasesAfterCaseRemovedFromGroupCases(hearingId, groupId, removedCase, newGroupMaster));
+                    agr.updateCasesAfterCaseRemovedFromGroupCases(hearingId, groupId, removedCase, newGroupMaster, numberOfGroupCases));
         }
+    }
+
+    private static Integer getNumberOfGroupCases(final JsonEnvelope envelope) {
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        return payload.containsKey(NUMBER_OF_GROUP_CASES) && !payload.isNull(NUMBER_OF_GROUP_CASES)
+                ? payload.getInt(NUMBER_OF_GROUP_CASES) : null;
     }
 }
