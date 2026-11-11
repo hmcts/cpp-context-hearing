@@ -14,6 +14,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ReleaseProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.CaseRegisteredForExtendedHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseRemovedFromGroupCases;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
@@ -202,6 +203,7 @@ public class HearingEventListenerYamlConfigTest {
             HearingBreachApplicationsAdded.class.getAnnotation(Event.class).value(),
             HearingBreachApplicationsToBeAddedReceived.class.getAnnotation(Event.class).value(),
             MasterCaseUpdatedForHearing.class.getAnnotation(Event.class).value(),
+            CaseRegisteredForExtendedHearing.class.getAnnotation(Event.class).value(),
             ResultsValidationFailed.class.getAnnotation(Event.class).value()
 
     );
