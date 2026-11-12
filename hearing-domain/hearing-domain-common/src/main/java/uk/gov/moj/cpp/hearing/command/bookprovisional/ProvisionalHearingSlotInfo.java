@@ -10,6 +10,8 @@ public class ProvisionalHearingSlotInfo implements Serializable {
 
     private ZonedDateTime hearingStartTime;
 
+    private Integer duration;
+
     public ProvisionalHearingSlotInfo() {}
 
     public ProvisionalHearingSlotInfo(final UUID courtScheduleId) {
@@ -35,6 +37,15 @@ public class ProvisionalHearingSlotInfo implements Serializable {
 
     public ProvisionalHearingSlotInfo setHearingStartTime(final ZonedDateTime hearingStartTime) {
         this.hearingStartTime = hearingStartTime;
+        return this;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public ProvisionalHearingSlotInfo setDuration(final Integer duration) {
+        this.duration = duration;
         return this;
     }
 }
