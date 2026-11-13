@@ -14,5 +14,6 @@
     "isCivil": true,
     "isGroupMember": true,
     "isGroupMaster": true
-  }
+  },
+  "numberOfGroupCases": 2
 }

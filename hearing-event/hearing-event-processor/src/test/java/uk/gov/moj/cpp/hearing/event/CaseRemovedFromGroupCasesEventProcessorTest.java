@@ -183,6 +183,69 @@ public class CaseRemovedFromGroupCasesEventProcessorTest {
                 ))));
     }
 
+    @Test
+    public void processPublicEventCaseRemovedFromGroup_PassesNumberOfGroupCasesThrough() {
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.case-removed-from-group-cases"),
+                createObjectBuilder()
+                        .add("groupId", GROUP_ID.toString())
+                        .add("masterCaseId", MASTER_CASE_ID.toString())
+                        .add("removedCase", objectToJsonObjectConverter.convert(getProsecutionCase(GROUP_ID, CASE_ID, Boolean.FALSE, Boolean.FALSE)))
+                        .add("numberOfGroupCases", 2)
+                        .build());
+
+        processor.processPublicProgressionCaseRemovedFromGroupCases(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(envelopeArgumentCaptor.getValue(),
+                jsonEnvelope(metadata().withName("hearing.command.remove-case-from-group-cases"), payloadIsJson(allOf(
+                        withJsonPath("$.groupId", is(GROUP_ID.toString())),
+                        withJsonPath("$.removedCase.id", is(CASE_ID.toString())),
+                        withJsonPath("$.numberOfGroupCases", is(2))
+                ))));
+    }
+
+    @Test
+    public void processPublicEventCaseRemovedFromGroup_WithoutNumberOfGroupCases() {
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.case-removed-from-group-cases"),
+                createObjectBuilder()
+                        .add("groupId", GROUP_ID.toString())
+                        .add("masterCaseId", MASTER_CASE_ID.toString())
+                        .add("removedCase", objectToJsonObjectConverter.convert(getProsecutionCase(GROUP_ID, CASE_ID, Boolean.FALSE, Boolean.FALSE)))
+                        .build());
+
+        processor.processPublicProgressionCaseRemovedFromGroupCases(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(envelopeArgumentCaptor.getValue(),
+                jsonEnvelope(metadata().withName("hearing.command.remove-case-from-group-cases"), payloadIsJson(allOf(
+                        withJsonPath("$.groupId", is(GROUP_ID.toString())),
+                        withoutJsonPath("$.numberOfGroupCases")
+                ))));
+    }
+
+    @Test
+    public void processHearingEventCaseRemovedFromGroup_PassesNumberOfGroupCasesThrough() {
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.case-removed-from-group-cases"),
+                createObjectBuilder()
+                        .add("hearingId", HEARING_ID.toString())
+                        .add("groupId", GROUP_ID.toString())
+                        .add("removedCase", objectToJsonObjectConverter.convert(getProsecutionCase(GROUP_ID, CASE_ID, Boolean.FALSE, Boolean.FALSE)))
+                        .add("numberOfGroupCases", 2)
+                        .build());
+
+        processor.processHearingEventsCaseRemovedFromGroupCases(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(envelopeArgumentCaptor.getValue(),
+                jsonEnvelope(metadata().withName("hearing.command.update-hearing-after-case-removed-from-group-cases"), payloadIsJson(allOf(
+                        withJsonPath("$.hearingId", is(HEARING_ID.toString())),
+                        withJsonPath("$.numberOfGroupCases", is(2))
+                ))));
+    }
+
     private ProsecutionCase getProsecutionCase(final UUID groupId, final UUID caseId, final Boolean isGroupMember, final Boolean isGroupMaster) {
         return ProsecutionCase.prosecutionCase()
                 .withId(caseId)
