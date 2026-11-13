@@ -6,6 +6,7 @@ import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CourtCivilApplication;
 import uk.gov.justice.core.courts.CourtOrder;
 import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Defendant;
@@ -99,10 +100,11 @@ public class ValidationRequestMapper {
         final DefendantCase defendantCase = extractFirstDefendantCase(masterDefendant);
         final String defendantId = defendantCase != null ? uuidToString(defendantCase.getDefendantId()) : null;
         final String caseUrn = defendantCase != null ? defendantCase.getCaseReference() : null;
+        final boolean isCivil = isCivilApplication(courtApplication);
 
         defendants.putIfAbsent(defendantId, toDefendantDto(masterDefendant, defendantId));
         extractApplicationOffences(courtApplication)
-                .forEach(offence -> addOffence(offence, caseUrn, defendantId, offences));
+                .forEach(offence -> addOffence(offence, caseUrn, defendantId, isCivil, offences));
     }
 
     private List<Offence> extractApplicationOffences(final CourtApplication courtApplication) {
@@ -147,13 +149,14 @@ public class ValidationRequestMapper {
             return;
         }
         final String caseUrn = extractCaseUrn(prosecutionCase);
+        final boolean isCivil = Boolean.TRUE.equals(prosecutionCase.getIsCivil());
         prosecutionCase.getDefendants()
                 .forEach(defendant -> {
                     final String defendantId = uuidToString(defendant.getId());
                     defendants.putIfAbsent(defendantId, toDefendantDto(defendant));
                     if (defendant.getOffences() != null) {
                         defendant.getOffences()
-                                .forEach(offence -> addOffence(offence, caseUrn, defendantId, offences));
+                                .forEach(offence -> addOffence(offence, caseUrn, defendantId, isCivil, offences));
                     }
                 });
     }
@@ -169,11 +172,12 @@ public class ValidationRequestMapper {
     }
 
     private void addOffence(final Offence offence, final String caseUrn, final String defendantId,
-                            final Map<String, OffenceDto> offences) {
-        offences.putIfAbsent(uuidToString(offence.getId()), toOffenceDto(offence, caseUrn, defendantId));
+                            final boolean isCivil, final Map<String, OffenceDto> offences) {
+        offences.putIfAbsent(uuidToString(offence.getId()), toOffenceDto(offence, caseUrn, defendantId, isCivil));
     }
 
-    private OffenceDto toOffenceDto(final Offence offence, final String caseUrn, final String defendantId) {
+    private OffenceDto toOffenceDto(final Offence offence, final String caseUrn, final String defendantId,
+                                    final boolean isCivil) {
         return new OffenceDto()
                 .offenceId(uuidToString(offence.getId()))
                 .offenceCode(offence.getOffenceCode())
@@ -183,7 +187,13 @@ public class ValidationRequestMapper {
                 .defendantId(defendantId)
                 .bailStatus(toBailStatus(offence.getBailStatus()))
                 .isConvicted(isConvicted(offence))
-                .hasExistingCtlRecord(hasExistingCustodyTimeLimit(offence));
+                .hasExistingCtlRecord(hasExistingCustodyTimeLimit(offence))
+                .isCivil(isCivil);
+    }
+
+    private boolean isCivilApplication(final CourtApplication courtApplication) {
+        final CourtCivilApplication courtCivilApplication = courtApplication.getCourtCivilApplication();
+        return courtCivilApplication != null && Boolean.TRUE.equals(courtCivilApplication.getIsCivil());
     }
 
     private boolean isConvicted(final Offence offence) {

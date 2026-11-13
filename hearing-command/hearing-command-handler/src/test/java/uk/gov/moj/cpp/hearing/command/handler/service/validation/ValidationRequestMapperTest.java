@@ -14,6 +14,7 @@ import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CourtCivilApplication;
 import uk.gov.justice.core.courts.CourtOrder;
 import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
@@ -1026,6 +1027,88 @@ class ValidationRequestMapperTest {
                 buildHearingWithOffenceBailStatus(BailStatus.bailStatus().withId(randomUUID()).withCode("X").build()));
 
         assertThat(request.getOffences().get(0).getBailStatus(), is(nullValue()));
+    }
+
+    @Test
+    void shouldSetIsCivilTrueWhenProsecutionCaseIsCivil() {
+        final Hearing hearing = buildHearingWithProsecutionCaseIsCivil(true);
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
+
+        assertThat(request.getOffences().get(0).getIsCivil(), is(true));
+    }
+
+    @Test
+    void shouldSetIsCivilFalseWhenProsecutionCaseIsNotCivil() {
+        final Hearing hearing = buildHearingWithProsecutionCaseIsCivil(false);
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
+
+        assertThat(request.getOffences().get(0).getIsCivil(), is(false));
+    }
+
+    @Test
+    void shouldSetIsCivilFalseWhenProsecutionCaseIsCivilIsNull() {
+        final Hearing hearing = buildHearingWithProsecutionCaseIsCivil(null);
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()), hearing);
+
+        assertThat(request.getOffences().get(0).getIsCivil(), is(false));
+    }
+
+    @Test
+    void shouldSetIsCivilTrueWhenCourtApplicationIsCivil() {
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                buildHearingWithCourtCivilApplication(CourtCivilApplication.courtCivilApplication()
+                        .withIsCivil(true)
+                        .build()));
+
+        assertThat(request.getOffences().get(0).getIsCivil(), is(true));
+    }
+
+    @Test
+    void shouldSetIsCivilFalseWhenCourtApplicationIsNotCivil() {
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                buildHearingWithCourtCivilApplication(CourtCivilApplication.courtCivilApplication()
+                        .withIsCivil(false)
+                        .build()));
+
+        assertThat(request.getOffences().get(0).getIsCivil(), is(false));
+    }
+
+    @Test
+    void shouldSetIsCivilFalseWhenCourtApplicationHasNoCourtCivilApplication() {
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                buildHearingWithCourtCivilApplication(null));
+
+        assertThat(request.getOffences().get(0).getIsCivil(), is(false));
+    }
+
+    private Hearing buildHearingWithProsecutionCaseIsCivil(final Boolean isCivil) {
+        return Hearing.hearing()
+                .withProsecutionCases(List.of(ProsecutionCase.prosecutionCase()
+                        .withIsCivil(isCivil)
+                        .withDefendants(List.of(Defendant.defendant()
+                                .withId(randomUUID())
+                                .withOffences(List.of(Offence.offence().withId(randomUUID()).build()))
+                                .build()))
+                        .build()))
+                .build();
+    }
+
+    private Hearing buildHearingWithCourtCivilApplication(final CourtCivilApplication courtCivilApplication) {
+        return Hearing.hearing()
+                .withCourtApplications(List.of(CourtApplication.courtApplication()
+                        .withValuesFrom(buildCourtApplication(randomUUID(), randomUUID(), randomUUID(), "URN123"))
+                        .withCourtCivilApplication(courtCivilApplication)
+                        .build()))
+                .build();
     }
 
     private Hearing buildHearingWithOffenceBailStatus(final BailStatus bailStatus) {
