@@ -33,6 +33,7 @@ import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.MasterDefendant;
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
@@ -45,6 +46,7 @@ import uk.gov.justice.hearing.courts.CaseSummaries;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
 import uk.gov.justice.hearing.courts.Defendants;
 import uk.gov.justice.hearing.courts.HearingSummaries;
+import uk.gov.justice.hearing.courts.Offences;
 import uk.gov.justice.hearing.courts.ProsecutionCaseSummaries;
 import uk.gov.justice.hearing.courts.Respondents;
 import uk.gov.justice.hearing.courts.Subject;
@@ -121,6 +123,24 @@ class GetHearingsTransformerTest {
         );
 
 
+    }
+
+    @Test
+    public void shouldIncludeOffenceIdInOffenceSummaryWhenTransformingHearing() {
+        final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
+        final Defendant defendant = hearing.getProsecutionCases().get(0).getDefendants().get(0);
+        final Offence offence = defendant.getOffences().get(0);
+
+        final HearingSummaries hearingSummary = target.summary(hearing).build();
+
+        final Offences offenceSummary = hearingSummary.getProsecutionCaseSummaries().get(0)
+                .getDefendants().get(0).getOffences().get(0);
+
+        assertThat(offenceSummary, isBean(Offences.class)
+                .withValue(Offences::getId, offence.getId())
+                .withValue(Offences::getOffenceTitle, offence.getOffenceTitle())
+                .withValue(Offences::getWordingWelsh, offence.getWordingWelsh())
+        );
     }
 
     @Test
