@@ -173,7 +173,7 @@ public class TimelineHearingSummaryHelper {
     }
 
     private boolean isGroupCivilCaseHearing(final Hearing hearing) {
-        return nonNull(hearing.getIsGroupProceedings()) && TRUE.equals(hearing.getIsGroupProceedings()) && hearing.getNumberOfGroupCases() > 1;
+        return TRUE.equals(hearing.getIsGroupProceedings());
     }
 
     private Optional<String> getPartyName(final CourtApplicationParty applicant) {

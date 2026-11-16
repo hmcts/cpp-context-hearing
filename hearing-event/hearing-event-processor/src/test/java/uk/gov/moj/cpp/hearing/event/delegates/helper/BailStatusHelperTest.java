@@ -6,6 +6,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.core.courts.CourtApplication;
@@ -24,6 +27,7 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.bailstatus.BailStatus;
+import uk.gov.moj.cpp.hearing.event.service.ProgressionService;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.time.LocalDate;
@@ -33,6 +37,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -48,6 +53,9 @@ public class BailStatusHelperTest {
 
     @Mock
     private ReferenceDataService referenceDataService;
+
+    @Mock
+    private ProgressionService progressionService;
 
     @Mock
     private JsonEnvelope context;
@@ -264,6 +272,197 @@ public class BailStatusHelperTest {
                 .build();
     }
 
+    // ── Task 2.3: per-offence bailStatus set independently ──────────────────────────────
+
+    @Test
+    public void shouldSetOffenceBailStatusPerOffenceIndependently() {
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        final Offence offence1 = Offence.offence()
+                .withJudicialResults(singletonList(getJudicialResult("U")))
+                .build();
+        final Offence offence2 = Offence.offence()
+                .withJudicialResults(singletonList(getJudicialResult("C")))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("A").build())
+                .build();
+        final ResultsShared resultsShared = ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                                .withDefendants(singletonList(Defendant.defendant()
+                                        .withOffences(Arrays.asList(offence1, offence2))
+                                        .withPersonDefendant(personDefendant)
+                                        .build()))
+                                .build()))
+                        .build())
+                .build();
+
+        bailStatusHelper.mapBailStatuses(context, resultsShared.getHearing());
+
+        assertThat(offence1.getBailStatus().getCode(), is("U"));
+        assertThat(offence2.getBailStatus().getCode(), is("C"));
+        // defendant-level takes the highest priority (lowest ranking) → Custody
+        assertThat(personDefendant.getBailStatus().getCode(), is("C"));
+    }
+
+    @Test
+    public void shouldSetOffenceBailStatusForAllSixRemandTypes() {
+        final List<BailStatus> allStatuses = buildFullListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(allStatuses);
+
+        final Offence offenceB = Offence.offence().withJudicialResults(singletonList(getJudicialResult("B"))).build();
+        final Offence offenceU = Offence.offence().withJudicialResults(singletonList(getJudicialResult("U"))).build();
+        final Offence offenceC = Offence.offence().withJudicialResults(singletonList(getJudicialResult("C"))).build();
+        final Offence offenceL = Offence.offence().withJudicialResults(singletonList(getJudicialResult("L"))).build();
+        final Offence offenceP = Offence.offence().withJudicialResults(singletonList(getJudicialResult("P"))).build();
+        final Offence offenceS = Offence.offence().withJudicialResults(singletonList(getJudicialResult("S"))).build();
+
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("A").build())
+                .build();
+        final ResultsShared resultsShared = ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                                .withDefendants(singletonList(Defendant.defendant()
+                                        .withOffences(Arrays.asList(offenceB, offenceU, offenceC, offenceL, offenceP, offenceS))
+                                        .withPersonDefendant(personDefendant)
+                                        .build()))
+                                .build()))
+                        .build())
+                .build();
+
+        bailStatusHelper.mapBailStatuses(context, resultsShared.getHearing());
+
+        assertThat(offenceB.getBailStatus().getCode(), is("B"));
+        assertThat(offenceU.getBailStatus().getCode(), is("U"));
+        assertThat(offenceC.getBailStatus().getCode(), is("C"));
+        assertThat(offenceL.getBailStatus().getCode(), is("L"));
+        assertThat(offenceP.getBailStatus().getCode(), is("P"));
+        assertThat(offenceS.getBailStatus().getCode(), is("S"));
+    }
+
+    // ── Task 4.3: NHMC/NHCC as main result suppresses update; as child does not ─────────
+
+    @Test
+    public void shouldNotUpdateOffenceBailStatusWhenNhmcIsMainResult() {
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        // NHMC as main result: parentJudicialResultId is null
+        final JudicialResult nhmcMain = JudicialResult.judicialResult()
+                .withJudicialResultTypeId(UUID.fromString("70c98fa6-804d-11e8-adc0-fa7ae01bbebc"))
+                .withPostHearingCustodyStatus("A")
+                .build();
+
+        final Offence offence = Offence.offence()
+                .withJudicialResults(singletonList(nhmcMain))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("U").build())
+                .build();
+        final ResultsShared resultsShared = ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                                .withDefendants(singletonList(Defendant.defendant()
+                                        .withOffences(singletonList(offence))
+                                        .withPersonDefendant(personDefendant)
+                                        .build()))
+                                .build()))
+                        .build())
+                .build();
+
+        bailStatusHelper.mapBailStatuses(context, resultsShared.getHearing());
+
+        assertNull(offence.getBailStatus());
+        // defendant-level retains existing
+        assertThat(personDefendant.getBailStatus().getCode(), is("U"));
+    }
+
+    @Test
+    public void shouldUpdateOffenceBailStatusWhenNhmcIsChildResultAlongsideQualifyingResult() {
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        // Main result: CCII (Custody) - no parentJudicialResultId
+        final JudicialResult custodyMain = getJudicialResult("C");
+
+        // NHMC as child result: parentJudicialResultId is non-null
+        final JudicialResult nhmcChild = JudicialResult.judicialResult()
+                .withJudicialResultTypeId(UUID.fromString("70c98fa6-804d-11e8-adc0-fa7ae01bbebc"))
+                .withPostHearingCustodyStatus("A")
+                .withParentJudicialResultId(UUID.randomUUID())
+                .build();
+
+        final Offence offence = Offence.offence()
+                .withJudicialResults(Arrays.asList(custodyMain, nhmcChild))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("U").build())
+                .build();
+        final ResultsShared resultsShared = ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                                .withDefendants(singletonList(Defendant.defendant()
+                                        .withOffences(singletonList(offence))
+                                        .withPersonDefendant(personDefendant)
+                                        .build()))
+                                .build()))
+                        .build())
+                .build();
+
+        bailStatusHelper.mapBailStatuses(context, resultsShared.getHearing());
+
+        assertNotNull(offence.getBailStatus());
+        assertThat(offence.getBailStatus().getCode(), is("C"));
+        assertThat(personDefendant.getBailStatus().getCode(), is("C"));
+    }
+
+    @Test
+    public void shouldNotUpdateOffenceBailStatusWhenNhccIsMainResult() {
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        final JudicialResult nhccMain = JudicialResult.judicialResult()
+                .withJudicialResultTypeId(UUID.fromString("fbed768b-ee95-4434-87c8-e81cbc8d24c8"))
+                .withPostHearingCustodyStatus("A")
+                .build();
+
+        final Offence offence = Offence.offence()
+                .withJudicialResults(singletonList(nhccMain))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("C").build())
+                .build();
+        final ResultsShared resultsShared = ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                                .withDefendants(singletonList(Defendant.defendant()
+                                        .withOffences(singletonList(offence))
+                                        .withPersonDefendant(personDefendant)
+                                        .build()))
+                                .build()))
+                        .build())
+                .build();
+
+        bailStatusHelper.mapBailStatuses(context, resultsShared.getHearing());
+
+        assertNull(offence.getBailStatus());
+        assertThat(personDefendant.getBailStatus().getCode(), is("C"));
+    }
+
+    private List<BailStatus> buildFullListOfBailStatuses() {
+        final List<BailStatus> list = new ArrayList<>(buildListOfBailStatuses());
+        final BailStatus bs;
+
+        bs = new BailStatus(); bs.setStatusCode("B"); bs.setStatusDescription("Conditional bail"); bs.setStatusRanking(4); bs.setId(fromString("aaaaaaaa-0001-0000-0000-000000000000")); list.add(bs);
+        final BailStatus bsL = new BailStatus(); bsL.setStatusCode("L"); bsL.setStatusDescription("Remanded into care of Local Authority"); bsL.setStatusRanking(3); bsL.setId(fromString("aaaaaaaa-0002-0000-0000-000000000000")); list.add(bsL);
+        final BailStatus bsP = new BailStatus(); bsP.setStatusCode("P"); bsP.setStatusDescription("Conditional Bail with Pre-Release conditions"); bsP.setStatusRanking(5); bsP.setId(fromString("aaaaaaaa-0003-0000-0000-000000000000")); list.add(bsP);
+        final BailStatus bsS = new BailStatus(); bsS.setStatusCode("S"); bsS.setStatusDescription("Remanded to youth detention accommodation"); bsS.setStatusRanking(1); bsS.setId(fromString("aaaaaaaa-0004-0000-0000-000000000000")); list.add(bsS);
+        return list;
+    }
+
     private ResultsShared buildResultsSharedTemplateWithoutPersonDefendant(final List<String> postHearingCustodyStatuses) {
         final List<JudicialResult> offenceJudicialResults = postHearingCustodyStatuses.stream().map(s -> getJudicialResult(s)).collect(Collectors.toList());
 
@@ -397,6 +596,417 @@ public class BailStatusHelperTest {
                                         .build())
                                 .build()))
                         .build())
+                .build();
+    }
+
+    // ── Task 3.4: cross-hearing defendant remand scenarios ────────────────────────────────
+
+    @Test
+    public void shouldRetainHigherPriorityBailStatusFromOffenceOutsideCurrentHearing() {
+        // Scenario 8: later hearing only includes offence1 (Unconditional bail).
+        // Offence2 from a prior hearing has Custody and is still active.
+        // Defendant remand must remain Custody.
+        final List<BailStatus> allStatuses = buildFullListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(allStatuses);
+
+        final UUID hearingId = UUID.randomUUID();
+        final UUID caseId = UUID.randomUUID();
+        final UUID defendantId = UUID.randomUUID();
+        final UUID offence2Id = UUID.randomUUID();
+
+        // Current hearing: only offence1 with Unconditional bail
+        final Offence offence1Current = Offence.offence()
+                .withId(UUID.randomUUID())
+                .withJudicialResults(singletonList(getJudicialResult("U")))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("C").build())
+                .build();
+        final Defendant defendant = Defendant.defendant()
+                .withId(defendantId)
+                .withOffences(singletonList(offence1Current))
+                .withPersonDefendant(personDefendant)
+                .build();
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(caseId)
+                        .withDefendants(singletonList(defendant))
+                        .build()))
+                .build();
+
+        // Offence2 as currently held by progression: Custody, still active
+        when(progressionService.getProsecutionCaseDetails(context, caseId))
+                .thenReturn(progressionCase(caseId, progressionDefendant(defendantId, null,
+                        progressionOffence(offence2Id, false, "C"))));
+
+        bailStatusHelper.mapBailStatuses(context, hearing);
+
+        // offence1 in current hearing gets Unconditional bail
+        assertThat(offence1Current.getBailStatus().getCode(), is("U"));
+        // defendant-level: offence1=U (rank2), stored offence2=C (rank1) → Custody wins
+        assertThat(personDefendant.getBailStatus().getCode(), is("C"));
+    }
+
+    @Test
+    public void shouldRecalculateDefendantBailStatusWhenHighestPriorityOffenceUpdated() {
+        // Scenario 9: offence2 previously Custody now resulted with Unconditional bail.
+        // Current hearing contains both offences. Offence1=Conditional bail, offence2=Unconditional bail.
+        // No stored higher-priority offences outside current hearing.
+        // Defendant remand should be Conditional bail (next highest among B and U is B at rank4, U at rank2... wait,
+        // rank ordering: S=1, C=1(same), L=3, U=2, B=4, P=5 — so U(rank2) < B(rank4) → defendant = Unconditional bail.
+        // Actually looking at buildFullListOfBailStatuses: C=rank1(custody), S=rank1(youth detention), U=rank2, L=rank3, B=rank4, P=rank5
+        // min by ranking → U wins over B → defendant = U
+        final List<BailStatus> allStatuses = buildFullListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(allStatuses);
+
+        final UUID hearingId = UUID.randomUUID();
+        final UUID defendantId = UUID.randomUUID();
+
+        final Offence offence1 = Offence.offence()
+                .withId(UUID.randomUUID())
+                .withJudicialResults(singletonList(getJudicialResult("B")))
+                .build();
+        final Offence offence2 = Offence.offence()
+                .withId(UUID.randomUUID())
+                .withJudicialResults(singletonList(getJudicialResult("U")))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("C").build())
+                .build();
+        final Defendant defendant = Defendant.defendant()
+                .withId(defendantId)
+                .withOffences(Arrays.asList(offence1, offence2))
+                .withPersonDefendant(personDefendant)
+                .build();
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(singletonList(defendant))
+                        .build()))
+                .build();
+
+        bailStatusHelper.mapBailStatuses(context, hearing);
+
+        assertThat(offence1.getBailStatus().getCode(), is("B"));
+        assertThat(offence2.getBailStatus().getCode(), is("U"));
+        // U(rank2) < B(rank4) → defendant = Unconditional bail
+        assertThat(personDefendant.getBailStatus().getCode(), is("U"));
+    }
+
+    @Test
+    public void shouldCalculateBailStatusIndependentlyForEachDefendant() {
+        // Scenario 10: multi-defendant case, each defendant's remand calculated independently
+        final List<BailStatus> allStatuses = buildFullListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(allStatuses);
+
+        final UUID hearingId = UUID.randomUUID();
+        final UUID caseId = UUID.randomUUID();
+        final UUID defendant1Id = UUID.randomUUID();
+        final UUID defendant2Id = UUID.randomUUID();
+
+        // Defendant 1: Custody offence
+        final Offence def1Offence = Offence.offence()
+                .withId(UUID.randomUUID())
+                .withJudicialResults(singletonList(getJudicialResult("C")))
+                .build();
+        final PersonDefendant personDef1 = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("U").build())
+                .build();
+        final Defendant defendant1 = Defendant.defendant()
+                .withId(defendant1Id)
+                .withOffences(singletonList(def1Offence))
+                .withPersonDefendant(personDef1)
+                .build();
+
+        // Defendant 2: Unconditional bail offence
+        final Offence def2Offence = Offence.offence()
+                .withId(UUID.randomUUID())
+                .withJudicialResults(singletonList(getJudicialResult("U")))
+                .build();
+        final PersonDefendant personDef2 = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("C").build())
+                .build();
+        final Defendant defendant2 = Defendant.defendant()
+                .withId(defendant2Id)
+                .withOffences(singletonList(def2Offence))
+                .withPersonDefendant(personDef2)
+                .build();
+
+        final Hearing hearing = Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(caseId)
+                        .withDefendants(Arrays.asList(defendant1, defendant2))
+                        .build()))
+                .build();
+
+        when(progressionService.getProsecutionCaseDetails(context, caseId)).thenReturn(Optional.empty());
+
+        bailStatusHelper.mapBailStatuses(context, hearing);
+
+        // progression is queried once for the case, not once per defendant
+        verify(progressionService, times(1)).getProsecutionCaseDetails(context, caseId);
+
+        // Defendant 1 → Custody
+        assertThat(def1Offence.getBailStatus().getCode(), is("C"));
+        assertThat(personDef1.getBailStatus().getCode(), is("C"));
+
+        // Defendant 2 → Unconditional bail
+        assertThat(def2Offence.getBailStatus().getCode(), is("U"));
+        assertThat(personDef2.getBailStatus().getCode(), is("U"));
+    }
+
+
+    @Test
+    public void shouldNotLookUpStoredOffencesForCourtApplicationMasterDefendant() {
+        final List<BailStatus> allStatuses = buildFullListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(allStatuses);
+
+        final UUID cpsDefendantId = UUID.randomUUID();
+        final Offence currentOffence = Offence.offence()
+                .withId(UUID.randomUUID())
+                .withJudicialResults(singletonList(getJudicialResult("U")))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("A").build())
+                .build();
+        final MasterDefendant masterDefendant = MasterDefendant.masterDefendant()
+                .withCpsDefendantId(cpsDefendantId)
+                .withPersonDefendant(personDefendant)
+                .build();
+        final Hearing hearing = Hearing.hearing()
+                .withCourtApplications(singletonList(CourtApplication.courtApplication()
+                        .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                                .withOffences(singletonList(currentOffence))
+                                .withCaseStatus("ACTIVE")
+                                .build()))
+                        .withSubject(CourtApplicationParty.courtApplicationParty()
+                                .withMasterDefendant(masterDefendant)
+                                .build())
+                        .build()))
+                .build();
+
+        bailStatusHelper.mapBailStatuses(context, hearing);
+
+        assertThat(currentOffence.getBailStatus().getCode(), is("U"));
+        // only the application's own offences are considered
+        assertThat(masterDefendant.getPersonDefendant().getBailStatus().getCode(), is("U"));
+        verifyNoInteractions(progressionService);
+    }
+
+    @Test
+    public void shouldPreferCurrentHearingOffenceOverStoredOffenceWithSameId() {
+        final List<BailStatus> allStatuses = buildFullListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(allStatuses);
+
+        final UUID caseId = UUID.randomUUID();
+        final UUID defendantId = UUID.randomUUID();
+        final UUID sharedOffenceId = UUID.randomUUID();
+
+        final Offence currentOffence = Offence.offence()
+                .withId(sharedOffenceId)
+                .withJudicialResults(singletonList(getJudicialResult("U")))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("A").build())
+                .build();
+        final Defendant defendant = Defendant.defendant()
+                .withId(defendantId)
+                .withOffences(singletonList(currentOffence))
+                .withPersonDefendant(personDefendant)
+                .build();
+        final Hearing hearing = Hearing.hearing()
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(caseId)
+                        .withDefendants(singletonList(defendant))
+                        .build()))
+                .build();
+
+        when(progressionService.getProsecutionCaseDetails(context, caseId))
+                .thenReturn(progressionCase(caseId, progressionDefendant(defendantId, null,
+                        progressionOffence(sharedOffenceId, false, "C"))));
+
+        bailStatusHelper.mapBailStatuses(context, hearing);
+
+        assertThat(personDefendant.getBailStatus().getCode(), is("U"));
+    }
+
+    @Test
+    public void shouldResolveTiedRankingWithoutErrorWhenMultipleOffencesShareLowestRank() {
+        final List<BailStatus> allStatuses = buildFullListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(allStatuses);
+
+        final UUID defendantId = UUID.randomUUID();
+
+        final Offence offence1 = Offence.offence().withJudicialResults(singletonList(getJudicialResult("C"))).build();
+        final Offence offence2 = Offence.offence().withJudicialResults(singletonList(getJudicialResult("S"))).build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("A").build())
+                .build();
+        final Defendant defendant = Defendant.defendant()
+                .withId(defendantId)
+                .withOffences(Arrays.asList(offence1, offence2))
+                .withPersonDefendant(personDefendant)
+                .build();
+        final Hearing hearing = Hearing.hearing()
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(singletonList(defendant))
+                        .build()))
+                .build();
+
+        bailStatusHelper.mapBailStatuses(context, hearing);
+
+        final String resultCode = personDefendant.getBailStatus().getCode();
+        assertThat(resultCode, org.hamcrest.Matchers.anyOf(is("C"), is("S")));
+    }
+
+    @Test
+    public void shouldKeepExistingDefendantBailStatusWhenDefendantHasNoOffencesAtAll() {
+        final List<BailStatus> allStatuses = buildFullListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(allStatuses);
+
+        final UUID defendantId = UUID.randomUUID();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("U").build())
+                .build();
+        final Defendant defendant = Defendant.defendant()
+                .withId(defendantId)
+                .withOffences(List.of())
+                .withPersonDefendant(personDefendant)
+                .build();
+        final Hearing hearing = Hearing.hearing()
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(singletonList(defendant))
+                        .build()))
+                .build();
+
+        bailStatusHelper.mapBailStatuses(context, hearing);
+
+        // no offences at all → nothing to derive from → existing bail status is retained
+        assertThat(personDefendant.getBailStatus().getCode(), is("U"));
+    }
+
+    @Test
+    public void shouldIgnoreConcludedProgressionOffences() {
+        final List<BailStatus> allStatuses = buildFullListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(allStatuses);
+
+        final UUID caseId = UUID.randomUUID();
+        final UUID defendantId = UUID.randomUUID();
+        final Offence currentOffence = Offence.offence()
+                .withId(UUID.randomUUID())
+                .withJudicialResults(singletonList(getJudicialResult("U")))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("A").build())
+                .build();
+        final Hearing hearing = hearingWithDefendant(caseId, Defendant.defendant()
+                .withId(defendantId)
+                .withOffences(singletonList(currentOffence))
+                .withPersonDefendant(personDefendant)
+                .build());
+
+        when(progressionService.getProsecutionCaseDetails(context, caseId))
+                .thenReturn(progressionCase(caseId, progressionDefendant(defendantId, null,
+                        progressionOffence(UUID.randomUUID(), true, "C"))));
+
+        bailStatusHelper.mapBailStatuses(context, hearing);
+
+        assertThat(personDefendant.getBailStatus().getCode(), is("U"));
+    }
+
+    @Test
+    public void shouldFallBackToProgressionDefendantBailStatusWhenProgressionOffenceHasNone() {
+        final List<BailStatus> allStatuses = buildFullListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(allStatuses);
+
+        final UUID caseId = UUID.randomUUID();
+        final UUID defendantId = UUID.randomUUID();
+        final Offence currentOffence = Offence.offence()
+                .withId(UUID.randomUUID())
+                .withJudicialResults(singletonList(getJudicialResult("U")))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("A").build())
+                .build();
+        final Hearing hearing = hearingWithDefendant(caseId, Defendant.defendant()
+                .withId(defendantId)
+                .withOffences(singletonList(currentOffence))
+                .withPersonDefendant(personDefendant)
+                .build());
+
+        when(progressionService.getProsecutionCaseDetails(context, caseId))
+                .thenReturn(progressionCase(caseId, progressionDefendant(defendantId, "C",
+                        progressionOffence(UUID.randomUUID(), null, null))));
+
+        bailStatusHelper.mapBailStatuses(context, hearing);
+
+        assertThat(personDefendant.getBailStatus().getCode(), is("C"));
+    }
+
+    @Test
+    public void shouldIgnoreOtherDefendantsOffencesOnTheSameProgressionCase() {
+        final List<BailStatus> allStatuses = buildFullListOfBailStatuses();
+        when(referenceDataService.getBailStatuses(context)).thenReturn(allStatuses);
+
+        final UUID caseId = UUID.randomUUID();
+        final UUID defendantId = UUID.randomUUID();
+        final Offence currentOffence = Offence.offence()
+                .withId(UUID.randomUUID())
+                .withJudicialResults(singletonList(getJudicialResult("U")))
+                .build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode("A").build())
+                .build();
+        final Hearing hearing = hearingWithDefendant(caseId, Defendant.defendant()
+                .withId(defendantId)
+                .withOffences(singletonList(currentOffence))
+                .withPersonDefendant(personDefendant)
+                .build());
+
+        when(progressionService.getProsecutionCaseDetails(context, caseId))
+                .thenReturn(progressionCase(caseId, progressionDefendant(UUID.randomUUID(), "C",
+                        progressionOffence(UUID.randomUUID(), false, "C"))));
+
+        bailStatusHelper.mapBailStatuses(context, hearing);
+
+        assertThat(personDefendant.getBailStatus().getCode(), is("U"));
+    }
+
+    private Hearing hearingWithDefendant(final UUID caseId, final Defendant defendant) {
+        return Hearing.hearing()
+                .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(caseId)
+                        .withDefendants(singletonList(defendant))
+                        .build()))
+                .build();
+    }
+
+    private Optional<ProsecutionCase> progressionCase(final UUID caseId, final Defendant... defendants) {
+        return Optional.of(ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withDefendants(Arrays.asList(defendants))
+                .build());
+    }
+
+    private Defendant progressionDefendant(final UUID defendantId, final String defendantBailStatusCode, final Offence... offences) {
+        return Defendant.defendant()
+                .withId(defendantId)
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withBailStatus(defendantBailStatusCode == null ? null
+                                : uk.gov.justice.core.courts.BailStatus.bailStatus().withId(UUID.randomUUID()).withCode(defendantBailStatusCode).build())
+                        .build())
+                .withOffences(Arrays.asList(offences))
+                .build();
+    }
+
+    private Offence progressionOffence(final UUID offenceId, final Boolean proceedingsConcluded, final String bailStatusCode) {
+        return Offence.offence()
+                .withId(offenceId)
+                .withProceedingsConcluded(proceedingsConcluded)
+                .withBailStatus(bailStatusCode == null ? null
+                        : uk.gov.justice.core.courts.BailStatus.bailStatus().withId(UUID.randomUUID()).withCode(bailStatusCode).build())
                 .build();
     }
 

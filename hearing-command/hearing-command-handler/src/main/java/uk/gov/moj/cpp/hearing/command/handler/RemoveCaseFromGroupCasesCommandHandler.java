@@ -14,6 +14,8 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import java.util.List;
 import java.util.UUID;
 
+import javax.json.JsonObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class RemoveCaseFromGroupCasesCommandHandler extends AbstractCommandHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoveCaseFromGroupCasesCommandHandler.class);
+    private static final String NUMBER_OF_GROUP_CASES = "numberOfGroupCases";
 
     @Handles("hearing.command.remove-case-from-group-cases")
     public void removeCaseFromGroupCases(final JsonEnvelope envelope) throws EventStreamException {
@@ -33,12 +36,13 @@ public class RemoveCaseFromGroupCasesCommandHandler extends AbstractCommandHandl
         final ProsecutionCase removedCase = convertToObject(envelope.payloadAsJsonObject().getJsonObject("removedCase"), ProsecutionCase.class);
         final ProsecutionCase newGroupMaster = envelope.payloadAsJsonObject().containsKey("newGroupMaster") ?
                 convertToObject(envelope.payloadAsJsonObject().getJsonObject("newGroupMaster"), ProsecutionCase.class) : null;
+        final Integer numberOfGroupCases = getNumberOfGroupCases(envelope);
 
         final List<UUID> hearingIds = aggregate(CaseAggregate.class, masterCaseId).getHearingIds();
 
         for (final UUID hearingId : hearingIds) {
             aggregate(CaseAggregate.class, removedCase.getId(), envelope,
-                    agr -> agr.removeCaseFromGroupCases(hearingId, groupId, removedCase, newGroupMaster));
+                    agr -> agr.removeCaseFromGroupCases(hearingId, groupId, removedCase, newGroupMaster, numberOfGroupCases));
         }
 
         if (nonNull(newGroupMaster) && !hearingIds.isEmpty()) {
@@ -47,5 +51,11 @@ public class RemoveCaseFromGroupCasesCommandHandler extends AbstractCommandHandl
                         agr -> agr.updateMasterCaseForHearing(newGroupMaster.getId(), hearingId));
             }
         }
+    }
+
+    private static Integer getNumberOfGroupCases(final JsonEnvelope envelope) {
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        return payload.containsKey(NUMBER_OF_GROUP_CASES) && !payload.isNull(NUMBER_OF_GROUP_CASES)
+                ? payload.getInt(NUMBER_OF_GROUP_CASES) : null;
     }
 }

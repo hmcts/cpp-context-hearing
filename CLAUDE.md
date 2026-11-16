@@ -196,7 +196,7 @@ cd hearing-performance-test && mvn jmeter:gui -Pscheduling-performance-test    #
 ## CI/CD
 
 - **Pipeline**: `azure-pipelines.yaml` → Azure DevOps pipeline (ADO Pipeline 460)
-- **Agent pool**: `MDV-ADO-AGENT-AKS-01` (CentOS 8, Java 17)
+- **Agent pool**: `MDV-ADO-AGENT-AKS-01` (Ubuntu 24, Java 17; demand `ubuntu24-j17`)
 - **PR check**: `context-verify` stage
 - **Main branch**: `context-validation` + integration tests
 - **Static analysis**: SonarQube (`sonar.projectKey=uk.gov.moj.cpp.hearing:hearing-parent`)
@@ -226,7 +226,7 @@ cd hearing-performance-test && mvn jmeter:gui -Pscheduling-performance-test    #
 | `referencedata` | `17.103.131` |
 | `material` | `17.0.57` |
 | `results` | `17.0.58` |
-| `progression` | `17.0.249` |
+| `progression` | `17.104.306` |
 | `usersgroups` | `17.104.46` |
 | `stagingenforcement` | `17.103.77` |
 | `junit-dataprovider` | `1.13.1` |

@@ -420,6 +420,46 @@ class OffenceDelegateTest {
         assertThat(hearingAggregateMomento.getAllocationDecision().get(offenceId).getOffenceId(), is(offenceId));
     }
 
+    @Test
+    void shouldRetainConvictionWhenOffenceWithConvictionDateIsMergedIntoExistingHearing() {
+        final UUID hearingId = randomUUID();
+        final UUID caseId1 = randomUUID();
+        final UUID caseId2 = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final LocalDate pleaDate = LocalDate.now().minusDays(1);
+
+        hearingAggregate.apply(new HearingInitiated(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(new ArrayList<>(singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(caseId1)
+                        .withDefendants(new ArrayList<>(singletonList(Defendant.defendant()
+                                .withId(defendantId)
+                                .withOffences(new ArrayList<>(singletonList(Offence.offence()
+                                        .withId(offenceId)
+                                        .build())))
+                                .build())))
+                        .build())))
+                .build()));
+
+        final List<ProsecutionCase> prosecutionCases = singletonList(ProsecutionCase.prosecutionCase()
+                        .withId(caseId2)
+                        .withDefendants(singletonList(
+                                Defendant.defendant()
+                                        .withId(defendantId)
+                                        .withOffences(singletonList(Offence.offence()
+                                                .withId(offenceId)
+                                                .withPlea(Plea.plea().withOffenceId(offenceId).withPleaValue("GUILTY").withPleaDate(pleaDate).build())
+                                                .withConvictionDate(pleaDate)
+                                                .build()))
+                                        .build()))
+                        .build());
+        hearingAggregate.apply(new ExistingHearingUpdated(hearingId, prosecutionCases, Collections.emptyList()));
+
+        assertThat("conviction date should be tracked in the aggregate for an offence merged with a conviction date already set",
+                hearingAggregateMomento.getConvictionDates().get(offenceId), is(pleaDate));
+    }
+
     public void shouldUpdateOffenceIfOffenceExistAlreadyForDefendantV2() {
 
         final UUID hearingId = randomUUID();

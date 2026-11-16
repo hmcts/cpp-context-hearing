@@ -9,6 +9,7 @@ import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.createArrayBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -52,6 +53,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.json.JsonObject;
 
@@ -379,6 +381,112 @@ public class TimelineHearingSummaryHelperTest {
 
         final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null,null, hearingYouthCourtDefendantList, caseId);
         assertThat(timeLineHearingSummary.getOutcome(), is("Vacated"));
+    }
+
+    @Test
+    public void shouldShowOnlySelectedCaseDefendantsForGroupHearingWithSeveralCases() {
+        final UUID selectedCaseDefendantId = randomUUID();
+        final UUID otherCaseDefendantId1 = randomUUID();
+        final UUID otherCaseDefendantId2 = randomUUID();
+        final UUID selectedCaseId = randomUUID();
+        hearing.setProsecutionCases(of(
+                buildProsecutionCase(selectedCaseId, selectedCaseDefendantId),
+                buildProsecutionCase(randomUUID(), otherCaseDefendantId1),
+                buildProsecutionCase(randomUUID(), otherCaseDefendantId2)));
+        hearing.setIsGroupProceedings(true);
+        hearing.setNumberOfGroupCases(3);
+
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList, selectedCaseId);
+
+        assertThat(getDefendantIds(timeLineHearingSummary), containsInAnyOrder(selectedCaseDefendantId));
+    }
+
+    @Test
+    public void shouldShowOnlySelectedCaseDefendantsForGroupHearingWhenGroupHasShrunkToOneCase() {
+        final UUID masterCaseDefendantId = randomUUID();
+        final UUID exMemberCaseDefendantId1 = randomUUID();
+        final UUID exMemberCaseDefendantId2 = randomUUID();
+        final UUID masterCaseId = randomUUID();
+        hearing.setProsecutionCases(of(
+                buildProsecutionCase(masterCaseId, masterCaseDefendantId),
+                buildProsecutionCase(randomUUID(), exMemberCaseDefendantId1),
+                buildProsecutionCase(randomUUID(), exMemberCaseDefendantId2)));
+        hearing.setIsGroupProceedings(true);
+        hearing.setNumberOfGroupCases(1);
+
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList, masterCaseId);
+
+        assertThat(getDefendantIds(timeLineHearingSummary), containsInAnyOrder(masterCaseDefendantId));
+    }
+
+    @Test
+    public void shouldShowOnlySelectedCaseDefendantsForGroupHearingWhenNumberOfGroupCasesIsNull() {
+        final UUID selectedCaseDefendantId = randomUUID();
+        final UUID otherCaseDefendantId = randomUUID();
+        final UUID selectedCaseId = randomUUID();
+        hearing.setProsecutionCases(of(
+                buildProsecutionCase(selectedCaseId, selectedCaseDefendantId),
+                buildProsecutionCase(randomUUID(), otherCaseDefendantId)));
+        hearing.setIsGroupProceedings(true);
+        hearing.setNumberOfGroupCases(null);
+
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList, selectedCaseId);
+
+        assertThat(getDefendantIds(timeLineHearingSummary), containsInAnyOrder(selectedCaseDefendantId));
+    }
+
+    @Test
+    public void shouldShowAllDefendantsForNonGroupHearing() {
+        final UUID selectedCaseDefendantId = randomUUID();
+        final UUID otherCaseDefendantId = randomUUID();
+        final UUID selectedCaseId = randomUUID();
+        hearing.setProsecutionCases(of(
+                buildProsecutionCase(selectedCaseId, selectedCaseDefendantId),
+                buildProsecutionCase(randomUUID(), otherCaseDefendantId)));
+        hearing.setIsGroupProceedings(false);
+        hearing.setNumberOfGroupCases(2);
+
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList, selectedCaseId);
+
+        assertThat(getDefendantIds(timeLineHearingSummary), containsInAnyOrder(selectedCaseDefendantId, otherCaseDefendantId));
+    }
+
+    @Test
+    public void shouldShowAllDefendantsWhenIsGroupProceedingsIsNull() {
+        final UUID selectedCaseDefendantId = randomUUID();
+        final UUID otherCaseDefendantId = randomUUID();
+        final UUID selectedCaseId = randomUUID();
+        hearing.setProsecutionCases(of(
+                buildProsecutionCase(selectedCaseId, selectedCaseDefendantId),
+                buildProsecutionCase(randomUUID(), otherCaseDefendantId)));
+        hearing.setIsGroupProceedings(null);
+        hearing.setNumberOfGroupCases(null);
+
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList, selectedCaseId);
+
+        assertThat(getDefendantIds(timeLineHearingSummary), containsInAnyOrder(selectedCaseDefendantId, otherCaseDefendantId));
+    }
+
+    private ProsecutionCase buildProsecutionCase(final UUID prosecutionCaseId, final UUID defendantId) {
+        final HearingSnapshotKey caseKey = new HearingSnapshotKey();
+        caseKey.setId(prosecutionCaseId);
+        final HearingSnapshotKey defendantKey = new HearingSnapshotKey();
+        defendantKey.setId(defendantId);
+        final Organisation defendantOrganisation = new Organisation();
+        defendantOrganisation.setName(STRING.next());
+        final Defendant defendant = new Defendant();
+        defendant.setId(defendantKey);
+        defendant.setLegalEntityOrganisation(defendantOrganisation);
+        final ProsecutionCase groupProsecutionCase = new ProsecutionCase();
+        groupProsecutionCase.setId(caseKey);
+        groupProsecutionCase.setDefendants(of(defendant));
+        return groupProsecutionCase;
+    }
+
+    private List<UUID> getDefendantIds(final TimelineHearingSummary timelineHearingSummary) {
+        return timelineHearingSummary.getDefendants().stream()
+                .map(uk.gov.moj.cpp.hearing.query.view.response.Defendant::getId)
+                .collect(Collectors.toList());
     }
 
     private JsonObject buildCourtRoomsJson() {

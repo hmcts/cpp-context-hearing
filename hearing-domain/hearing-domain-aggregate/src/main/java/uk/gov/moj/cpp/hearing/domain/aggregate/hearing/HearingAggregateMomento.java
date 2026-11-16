@@ -17,7 +17,7 @@ import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupAllReportingRe
 @SuppressWarnings({"squid:S2384", "PMD.BeanMembersShouldSerialize"})
 public class HearingAggregateMomento implements Serializable {
 
-    private static final long serialVersionUID = -561416825201569300L;
+    private static final long serialVersionUID = -561416825201569301L;
 
     private final Map<UUID, HearingEventDelegate.HearingEvent> hearingEvents = new HashMap<>();
     private final Map<UUID, ProsecutionCounsel> prosecutionCounsels = new HashMap<>();

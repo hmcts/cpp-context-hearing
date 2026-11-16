@@ -177,6 +177,9 @@ public class HearingEventListenerTest {
     private HearingEventListener hearingEventListener;
     @Mock
     private HearingRepository hearingRepository;
+
+    @Mock
+    private PtphDetailRemovalService ptphDetailRemovalService;
     @Mock
     private DraftResultRepository draftResultRepository;
     @Mock
@@ -1210,6 +1213,7 @@ public class HearingEventListenerTest {
                 .build()));
 
         verify(hearingRepository).remove(hearing);
+        verify(ptphDetailRemovalService).removeFor(hearingId);
 
         verifyNoMoreInteractions(offenceRepository);
     }
@@ -1239,6 +1243,7 @@ public class HearingEventListenerTest {
                 .build()));
 
         verify(hearingRepository, never()).remove(Mockito.any(Hearing.class));
+        verify(ptphDetailRemovalService, never()).removeFor(Mockito.any(UUID.class));
 
         verifyNoMoreInteractions(offenceRepository);
 

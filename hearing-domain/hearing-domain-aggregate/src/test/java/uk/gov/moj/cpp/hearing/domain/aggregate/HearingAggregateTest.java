@@ -51,6 +51,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandT
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.guiltyPleaTypes;
 
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
@@ -98,6 +99,7 @@ import uk.gov.moj.cpp.hearing.domain.ResultsError;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
@@ -117,6 +119,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLocked;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLockedByOtherUser;
@@ -296,12 +299,17 @@ public class HearingAggregateTest {
     @Test
     void shouldInitiateHearingOffencePlea() {
 
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        HEARING_AGGREGATE.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        final UUID offenceId = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
+        final LocalDate pleaDate = PAST_LOCAL_DATE.next();
         final UpdateHearingWithInheritedPleaCommand command = new UpdateHearingWithInheritedPleaCommand(
                 randomUUID(),
                 Plea.plea()
                         .withPleaValue(GUILTY)
-                        .withPleaDate(PAST_LOCAL_DATE.next())
-                        .withOffenceId(randomUUID())
+                        .withPleaDate(pleaDate)
+                        .withOffenceId(offenceId)
                         .withOriginatingHearingId(randomUUID())
                         .withDelegatedPowers(DelegatedPowers.delegatedPowers()
                                 .withUserId(randomUUID())
@@ -309,16 +317,10 @@ public class HearingAggregateTest {
                                 .withLastName(STRING.next())
                                 .build())
                         .build());
-        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
-        // Own aggregate, not the shared static HEARING_AGGREGATE: inheritPlea returns an empty
-        // stream when the hearing is shared, deleted or duplicated, so leftover state from an
-        // earlier test in this class made the get(0) below throw IndexOutOfBounds depending only
-        // on method execution order.
-        final HearingAggregate aggregate = new HearingAggregate();
-        aggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        final InheritedPlea event = (InheritedPlea) aggregate.inheritPlea(initiateHearingCommand.getHearing().getId(), command.getPlea()).collect(Collectors.toList()).get(0);
+        final List<Object> events = HEARING_AGGREGATE.inheritPlea(initiateHearingCommand.getHearing().getId(), command.getPlea(), guiltyPleaTypes()).collect(Collectors.toList());
 
+        final InheritedPlea event = (InheritedPlea) events.get(0);
         assertThat(event.getHearingId(), is(initiateHearingCommand.getHearing().getId()));
         assertThat(event.getPlea().getOffenceId(), is(command.getPlea().getOffenceId()));
         assertThat(event.getPlea().getPleaDate(), is(command.getPlea().getPleaDate()));
@@ -326,6 +328,61 @@ public class HearingAggregateTest {
         assertThat(event.getPlea().getDelegatedPowers().getUserId(), is(command.getPlea().getDelegatedPowers().getUserId()));
         assertThat(event.getPlea().getDelegatedPowers().getFirstName(), is(command.getPlea().getDelegatedPowers().getFirstName()));
         assertThat(event.getPlea().getDelegatedPowers().getLastName(), is(command.getPlea().getDelegatedPowers().getLastName()));
+
+        final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) events.get(1);
+        assertThat(convictionDateAdded.getHearingId(), is(initiateHearingCommand.getHearing().getId()));
+        assertThat(convictionDateAdded.getOffenceId(), is(offenceId));
+        assertThat(convictionDateAdded.getConvictionDate(), is(pleaDate));
+    }
+
+    @Test
+    void shouldRemoveConvictionDateWhenInheritingNotGuiltyPlea() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID offenceId = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
+        final LocalDate existingConvictionDate = PAST_LOCAL_DATE.next();
+        initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0)
+                .setConvictionDate(existingConvictionDate);
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        final LocalDate pleaDate = PAST_LOCAL_DATE.next();
+        final Plea plea = Plea.plea()
+                .withPleaValue(NOT_GUILTY)
+                .withPleaDate(pleaDate)
+                .withOffenceId(offenceId)
+                .withOriginatingHearingId(randomUUID())
+                .build();
+
+        final List<Object> events = hearingAggregate.inheritPlea(initiateHearingCommand.getHearing().getId(), plea, guiltyPleaTypes()).collect(Collectors.toList());
+
+        assertThat(events.size(), is(2));
+        assertThat(events.get(0), instanceOf(InheritedPlea.class));
+        assertThat(events.get(1), instanceOf(uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved.class));
+
+        final uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved convictionDateRemoved =
+                (uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved) events.get(1);
+        assertThat(convictionDateRemoved.getHearingId(), is(initiateHearingCommand.getHearing().getId()));
+        assertThat(convictionDateRemoved.getOffenceId(), is(offenceId));
+    }
+
+    @Test
+    void shouldOnlyRaiseInheritedPleaWhenInheritingNotGuiltyWithoutConvictionDate() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        HEARING_AGGREGATE.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        final UUID offenceId = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
+        final Plea plea = Plea.plea()
+                .withPleaValue(NOT_GUILTY)
+                .withPleaDate(PAST_LOCAL_DATE.next())
+                .withOffenceId(offenceId)
+                .withOriginatingHearingId(randomUUID())
+                .build();
+
+        final List<Object> events = HEARING_AGGREGATE.inheritPlea(initiateHearingCommand.getHearing().getId(), plea, guiltyPleaTypes()).collect(Collectors.toList());
+
+        assertThat(events.size(), is(1));
+        assertThat(events.get(0), instanceOf(InheritedPlea.class));
     }
 
     @Test
@@ -347,7 +404,7 @@ public class HearingAggregateTest {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         HEARING_AGGREGATE.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        final Stream<Object> results =  HEARING_AGGREGATE.inheritPlea(initiateHearingCommand.getHearing().getId(), command.getPlea());
+        final Stream<Object> results =  HEARING_AGGREGATE.inheritPlea(initiateHearingCommand.getHearing().getId(), command.getPlea(), guiltyPleaTypes());
 
         assertTrue(results.findAny().isEmpty(), "Should return empty stream for shared hearing state");
 
@@ -401,7 +458,7 @@ public class HearingAggregateTest {
         hearingAggregate.apply(ResultsShared.builder().withHearing(Hearing.hearing().withId(randomUUID()).build()).build());
 
 
-        final Stream<Object> eventStream = hearingAggregate.inheritPlea(hearingId, plea);
+        final Stream<Object> eventStream = hearingAggregate.inheritPlea(hearingId, plea, guiltyPleaTypes());
         final List<Object> events = eventStream.collect(Collectors.toList());
 
         assertThat(events.size(), is(0));
@@ -4205,6 +4262,72 @@ public class HearingAggregateTest {
     }
 
     @Test
+    void shouldRecordGroupMasterWhenGroupMasterCaseExtendedOntoHearing() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        final UUID groupId = randomUUID();
+        final ProsecutionCase groupMaster = groupCase(groupId, Boolean.TRUE);
+
+        hearingAggregate.apply(extendedWith(initiateHearingCommand.getHearing().getId(), groupMaster));
+
+        assertThat(hearingAggregate.getGroupAndMaster().get(groupId), is(groupMaster.getId()));
+    }
+
+    @Test
+    void shouldKeepExistingGroupMasterWhenGroupExtendedOntoHearingAgain() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        final UUID groupId = randomUUID();
+        final ProsecutionCase firstMaster = groupCase(groupId, Boolean.TRUE);
+
+        hearingAggregate.apply(extendedWith(hearingId, firstMaster));
+        hearingAggregate.apply(extendedWith(hearingId, groupCase(groupId, Boolean.TRUE)));
+
+        assertThat(hearingAggregate.getGroupAndMaster().get(groupId), is(firstMaster.getId()));
+    }
+
+    @Test
+    void shouldNotRecordGroupMasterWhenExtendedCaseIsNotGroupMaster() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        final UUID groupId = randomUUID();
+
+        hearingAggregate.apply(extendedWith(initiateHearingCommand.getHearing().getId(), groupCase(groupId, Boolean.FALSE)));
+
+        assertThat(hearingAggregate.getGroupAndMaster().containsKey(groupId), is(false));
+    }
+
+    @Test
+    void shouldNotRecordGroupMasterWhenExtendedGroupMasterHasNoGroupId() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        final Map<UUID, UUID> groupAndMasterBefore = new HashMap<>(hearingAggregate.getGroupAndMaster());
+
+        hearingAggregate.apply(extendedWith(initiateHearingCommand.getHearing().getId(), groupCase(null, Boolean.TRUE)));
+
+        assertThat(hearingAggregate.getGroupAndMaster(), is(groupAndMasterBefore));
+    }
+
+    private static ProsecutionCase groupCase(final UUID groupId, final Boolean isGroupMaster) {
+        final ProsecutionCase template = standardInitiateHearingTemplate().getHearing().getProsecutionCases().get(0);
+        return ProsecutionCase.prosecutionCase()
+                .withValuesFrom(template)
+                .withGroupId(groupId)
+                .withIsGroupMember(Boolean.TRUE)
+                .withIsGroupMaster(isGroupMaster)
+                .build();
+    }
+
+    private static HearingExtended extendedWith(final UUID hearingId, final ProsecutionCase prosecutionCase) {
+        return new HearingExtended(hearingId, emptyList(), null, null, null, new ArrayList<>(singletonList(prosecutionCase)), emptyList());
+    }
+
+    @Test
     void shouldRejectUpdateHearingDetailsWhenHearingNotFound(){
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
@@ -5307,57 +5430,6 @@ public class HearingAggregateTest {
                         .collect(toList()),
                 hearingId,
                 "Rejecting 'hearing.save-ptph-detail' event as tier and list type are finalised and cannot be changed");
-    }
-
-    /**
-     * A fixed date has to be justified. This guard is the only thing enforcing it: the command API
-     * does not schema-validate REST bodies, and putting the rule in the command-handler schema
-     * would dead-letter the message on the JMS queue rather than reject it cleanly.
-     */
-    @Test
-    public void shouldIgnoreRatherThanThrowWhenAFixedListTypeHasNoKeyReason() {
-        final HearingAggregate hearingAggregate = crownAggregateWithPtphState(null, null, false);
-        final UUID hearingId = randomUUID();
-
-        assertIgnoredWithReason(hearingAggregate
-                        .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_3", "TYPE_1_FIXED", "   "))
-                        .collect(toList()),
-                hearingId,
-                "Rejecting 'hearing.save-ptph-detail' event as keyReason is required when listType is TYPE_1_FIXED");
-    }
-
-    /**
-     * The key reason is free text from a court user and lands in an append-only event store and on
-     * the public topic, so it is bounded. 3000 matches the {@code note} fields on the hearing-event
-     * commands. The bound lives here, not in a JSON schema: the command-handler schema is validated
-     * on the JMS queue where a violation dead-letters the message.
-     */
-    @Test
-    public void shouldIgnoreRatherThanThrowWhenTheKeyReasonIsTooLong() {
-        final HearingAggregate hearingAggregate = crownAggregateWithPtphState(null, null, false);
-        final UUID hearingId = randomUUID();
-
-        assertIgnoredWithReason(hearingAggregate
-                        .savePtphDetail(new PtphDetailSaved(hearingId, "TIER_3", "TYPE_1_FIXED", "x".repeat(3001)))
-                        .collect(toList()),
-                hearingId,
-                "Rejecting 'hearing.save-ptph-detail' event as keyReason is longer than 3000 characters");
-    }
-
-    /** The boundary itself is accepted, so the bound is off-by-one safe. */
-    @Test
-    public void shouldSavePtphDetailWhenTheKeyReasonIsExactlyAtTheLimit() {
-        assertSaved(crownAggregateWithPtphState(null, null, false)
-                .savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_3", "TYPE_1_FIXED", "x".repeat(3000)))
-                .collect(toList()));
-    }
-
-    /** A flexible list type needs no reason, so the same absent value must be accepted. */
-    @Test
-    public void shouldSavePtphDetailWhenAFlexibleListTypeHasNoKeyReason() {
-        assertSaved(crownAggregateWithPtphState(null, null, false)
-                .savePtphDetail(new PtphDetailSaved(randomUUID(), "TIER_3", "TYPE_2_FLEXIBLE", null))
-                .collect(toList()));
     }
 
     @Test

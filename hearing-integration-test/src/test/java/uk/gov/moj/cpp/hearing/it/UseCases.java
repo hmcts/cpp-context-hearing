@@ -1126,6 +1126,11 @@ public class UseCases {
     }
 
     public static void removeCaseFromGroupCases(final UUID groupId, final UUID masterCaseId, final ProsecutionCase removedCase, final ProsecutionCase newGroupMaster) throws Exception {
+        removeCaseFromGroupCases(groupId, masterCaseId, removedCase, newGroupMaster, null);
+    }
+
+    public static void removeCaseFromGroupCases(final UUID groupId, final UUID masterCaseId, final ProsecutionCase removedCase,
+                                                final ProsecutionCase newGroupMaster, final Integer numberOfGroupCases) throws Exception {
         final String eventName = "public.progression.case-removed-from-group-cases";
         final JsonObjectBuilder jsonObjectBuilder = createObjectBuilder()
                 .add("groupId", groupId.toString())
@@ -1134,6 +1139,9 @@ public class UseCases {
 
         if (nonNull(newGroupMaster)) {
             jsonObjectBuilder.add("newGroupMaster", objectToJsonObject(newGroupMaster));
+        }
+        if (nonNull(numberOfGroupCases)) {
+            jsonObjectBuilder.add("numberOfGroupCases", numberOfGroupCases);
         }
 
         sendMessage(

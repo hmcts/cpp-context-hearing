@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.command.api;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.stream;
 import static java.util.UUID.randomUUID;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -22,6 +23,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
@@ -235,6 +237,77 @@ public class HearingCommandApiTest {
         hearingCommandApi.savePtphDetail(jsonRequestEnvelope);
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.save-ptph-detail");
+    }
+
+    /**
+     * The three stateless key-reason rules are enforced here, not in a JSON schema: the
+     * command-API schema is not applied to REST bodies in this service, and the command-handler
+     * schema is applied on the JMS queue, where a violation dead-letters the message. Rejecting
+     * before dispatch gives the caller a 400 and keeps the queue clean.
+     */
+    @Test
+    public void shouldRejectAFixedListTypeWithNoKeyReason() {
+        assertThrows(BadRequestException.class, () -> hearingCommandApi.savePtphDetail(
+                ptphEnvelope(createObjectBuilder()
+                        .add("hearingId", randomUUID().toString())
+                        .add("tier", "TIER_3")
+                        .add("listType", "TYPE_1_FIXED")
+                        .build())));
+    }
+
+    @Test
+    public void shouldRejectAWhitespaceOnlyKeyReasonForAFixedListType() {
+        assertThrows(BadRequestException.class, () -> hearingCommandApi.savePtphDetail(
+                ptphEnvelope(createObjectBuilder()
+                        .add("hearingId", randomUUID().toString())
+                        .add("tier", "TIER_3")
+                        .add("listType", "TYPE_1_FIXED")
+                        .add("keyReason", "   ")
+                        .build())));
+    }
+
+    @Test
+    public void shouldRejectAKeyReasonLongerThan500Characters() {
+        assertThrows(BadRequestException.class, () -> hearingCommandApi.savePtphDetail(
+                ptphEnvelope(createObjectBuilder()
+                        .add("hearingId", randomUUID().toString())
+                        .add("tier", "TIER_3")
+                        .add("listType", "TYPE_1_FIXED")
+                        .add("keyReason", "x".repeat(501))
+                        .build())));
+    }
+
+    /** 500 exactly is accepted, so the bound is off-by-one safe. */
+    @Test
+    public void shouldAcceptAKeyReasonOfExactly500Characters() {
+        final JsonEnvelope envelope = ptphEnvelope(createObjectBuilder()
+                .add("hearingId", randomUUID().toString())
+                .add("tier", "TIER_3")
+                .add("listType", "TYPE_1_FIXED")
+                .add("keyReason", "x".repeat(500))
+                .build());
+
+        hearingCommandApi.savePtphDetail(envelope);
+
+        assertEnvelopeIsPassedThroughWithName(envelope.payloadAsJsonObject(), "hearing.command.save-ptph-detail");
+    }
+
+    /** A flexible list type needs no reason at all. */
+    @Test
+    public void shouldAcceptAFlexibleListTypeWithNoKeyReason() {
+        final JsonEnvelope envelope = ptphEnvelope(createObjectBuilder()
+                .add("hearingId", randomUUID().toString())
+                .add("tier", "TIER_3")
+                .add("listType", "TYPE_2_FLEXIBLE")
+                .build());
+
+        hearingCommandApi.savePtphDetail(envelope);
+
+        assertEnvelopeIsPassedThroughWithName(envelope.payloadAsJsonObject(), "hearing.command.save-ptph-detail");
+    }
+
+    private JsonEnvelope ptphEnvelope(final javax.json.JsonObject payload) {
+        return envelopeFrom(metadataWithRandomUUID("hearing.save-ptph-detail"), payload);
     }
 
     @Test

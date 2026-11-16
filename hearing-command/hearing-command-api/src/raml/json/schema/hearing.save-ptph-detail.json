@@ -27,7 +27,7 @@
     },
     "keyReason": {
       "type": "string",
-      "maxLength": 3000
+      "maxLength": 500
     }
   },
   "required": [

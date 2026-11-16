@@ -629,7 +629,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToSavePtphDetail() {
         final Action action = createActionFor(ACTION_NAME_SAVE_TIER_AND_LIST_TYPE);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators"))
                 .willReturn(true);
         final ExecutionResults results = executeRulesWith(action);
         assertSuccessfulOutcome(results);
@@ -646,7 +646,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToFinalisePtphDetail() {
         final Action action = createActionFor(ACTION_NAME_FINALISE_TIER_AND_LIST_TYPE);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators"))
                 .willReturn(true);
         final ExecutionResults results = executeRulesWith(action);
         assertSuccessfulOutcome(results);
@@ -663,7 +663,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToDeletePtphDetail() {
         final Action action = createActionFor(ACTION_NAME_DELETE_TIER_AND_LIST_TYPE);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators"))
                 .willReturn(true);
         final ExecutionResults results = executeRulesWith(action);
         assertSuccessfulOutcome(results);

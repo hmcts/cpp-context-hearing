@@ -120,6 +120,14 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
             for (final Defendant defendant : defendants) {
                 aggregate(DefendantAggregate.class, defendant.getId(), envelope, a -> a.registerHearing(defendant.getId(), hearingId));
             }
+
+            final Set<UUID> caseIds = prosecutionCases.stream()
+                    .map(ProsecutionCase::getId)
+                    .collect(toSet());
+
+            for (final UUID caseId : caseIds) {
+                aggregate(CaseAggregate.class, caseId, envelope, a -> a.registerExtendedHearing(caseId, hearingId));
+            }
         }
     }
 

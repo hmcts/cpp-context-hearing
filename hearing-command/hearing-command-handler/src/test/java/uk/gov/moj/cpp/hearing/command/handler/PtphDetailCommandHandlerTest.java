@@ -151,11 +151,7 @@ class PtphDetailCommandHandlerTest {
     }
 
     /**
-     * A fixed list type with no reason reaches the handler: the command API does not schema-check
-     * REST bodies. The handler must not throw, because it runs inside the JMS transaction for the
-     * hearing stream, so an exception would roll back, redeliver and dead-letter the queue every
-     * hearing command shares. The aggregate drops it as hearing.hearing-change-ignored instead -
-     * asserted here, and in HearingAggregateTest.
+     * A fixed list type with no reason must not make the handler throw.
      */
     @Test
     void doesNotThrowOnFixedListTypeWithoutReason() throws EventStreamException {
@@ -169,11 +165,14 @@ class PtphDetailCommandHandlerTest {
 
         handler.savePtphDetail(envelope);
 
+        // Passed straight through. The rule belongs to HearingCommandApi, which rejects it with a
+        // 400 before dispatch, so by the time a command reaches the handler it has been checked.
+        // What matters here is only that the handler does not throw: it runs inside the JMS
+        // transaction for the hearing stream, so an exception would roll back, redeliver and
+        // dead-letter the queue every hearing command shares.
         final List<JsonEnvelope> appended = verifyAppendAndGetArgumentFrom(eventStream).collect(Collectors.toList());
         assertThat(appended.size(), org.hamcrest.CoreMatchers.is(1));
-        assertThat(appended.get(0).metadata().name(), org.hamcrest.CoreMatchers.is("hearing.hearing-change-ignored"));
-        assertThat(appended.get(0).payloadAsJsonObject().getString("reason"),
-                org.hamcrest.CoreMatchers.is("Rejecting 'hearing.save-ptph-detail' event as keyReason is required when listType is TYPE_1_FIXED"));
+        assertThat(appended.get(0).metadata().name(), org.hamcrest.CoreMatchers.is("hearing.ptph-detail-saved"));
     }
 
     @Test
