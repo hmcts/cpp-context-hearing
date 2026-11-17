@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="138" author="hearing" logicalFilePath="138-alter-primary-key-on-hearing-prosecution-counsel-table.xml">
+
+        <dropPrimaryKey constraintName="pk_ha_hearing_prosecution_counsel" tableName="ha_hearing_prosecution_counsel"/>
+
+        <addPrimaryKey columnNames="id,hearing_id" constraintName="pk_ha_hearing_prosecution_counsel" tableName="ha_hearing_prosecution_counsel"/>
+
+    </changeSet>
+</databaseChangeLog>
