@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
-import static java.util.Arrays.asList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
@@ -20,6 +19,7 @@ import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.FINISH
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.INPROGRESS;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.STARTED;
 
+import org.mockito.Spy;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
@@ -30,13 +30,17 @@ import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JudicialRoleType;
+import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.test.utils.core.converter.JsonObjectToObjectConverterFactory;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
@@ -112,26 +116,30 @@ public class HearingListXhibitResponseTransformerTest {
     @InjectMocks
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
 
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverterFactory().createJsonObjectToObjectConverter();
+    @Spy
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     @InjectMocks
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
     @BeforeEach
-    public void setUp() {
-        setField(this.courtApplicationsSerializer, "jsonObjectToObjectConverter", jsonObjectToObjectConverter);
+    public void setup() {
+        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
-
     @Test
     public void shouldTransformFrom() {
         final UUID courtCentreId = randomUUID();
         final UUID courtRoomId = randomUUID();
         final UUID hearingId = randomUUID();
         final HearingEvent hearingEvent = HearingEvent.hearingEvent().build();
-        final List<Hearing> hearingList = asList(hearing);
-        final List<ProsecutionCase> prosecutionCases = asList(prosecutionCase);
-        final List<Defendant> defendantList = asList(defendant);
-        final List<HearingDay> hearingDays = asList(hearingDay);
+        final List<Hearing> hearingList = List.of(hearing);
+        final List<ProsecutionCase> prosecutionCases = List.of(prosecutionCase);
+        final List<Defendant> defendantList = List.of(defendant);
+        final List<HearingDay> hearingDays = List.of(hearingDay);
         final ProsecutionCaseIdentifier prosecutionCaseIdentifier = ProsecutionCaseIdentifier
                 .prosecutionCaseIdentifier().withCaseURN("caseURN").build();
 
@@ -180,6 +188,52 @@ public class HearingListXhibitResponseTransformerTest {
     }
 
     @Test
+    public void shouldTransformFromWhenCaseHasPersonAndCompanyDefendants() {
+        final UUID courtRoomId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final Defendant companyDefendant = Defendant.defendant()
+                .withLegalEntityDefendant(LegalEntityDefendant.legalEntityDefendant()
+                        .withOrganisation(Organisation.organisation().withName("ACME Ltd").build())
+                        .build())
+                .withOffences(Collections.emptyList())
+                .build();
+
+        when(hearingEventsToHearingMapper.getActiveHearingIds()).thenReturn(new HashSet<>());
+        when(prosecutionCase.getProsecutionCaseIdentifier()).thenReturn(ProsecutionCaseIdentifier
+                .prosecutionCaseIdentifier().withCaseURN("caseURN").build());
+        when(prosecutionCase.getDefendants()).thenReturn(List.of(defendant, companyDefendant));
+        when(defendant.getPersonDefendant()).thenReturn(personDefendant);
+        when(personDefendant.getPersonDetails()).thenReturn(person);
+        when(person.getFirstName()).thenReturn("firstName");
+        when(person.getMiddleName()).thenReturn("middleName");
+        when(person.getLastName()).thenReturn("lastName");
+        when(hearing.getHearingDays()).thenReturn(List.of(hearingDay));
+        when(hearingDay.getSittingDay()).thenReturn(ZonedDateTime.now());
+        when(hearing.getId()).thenReturn(hearingId);
+        when(hearing.getProsecutionCases()).thenReturn(List.of(prosecutionCase));
+        when(hearing.getCourtCentre()).thenReturn(CourtCentre.courtCentre().withName(COURT_NAME).withRoomId(courtRoomId).withId(randomUUID()).build());
+        when(hearingEventsToHearingMapper.getHearingList()).thenReturn(List.of(hearing));
+        when(hearingEventsToHearingMapper.getAllHearingEventBy(hearingId)).thenReturn(Optional.of(HearingEvent.hearingEvent().build()));
+        when(commonXhibitReferenceDataService.getCourtRoomMappingBy(any(), any())).thenReturn(courtRoomMapping);
+        when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");
+        when(courtRoomMapping.getCrestCourtSiteUUID()).thenReturn(randomUUID());
+
+        mockHearingTypeId();
+
+        when(commonXhibitReferenceDataService.getXhibitHearingType(hearingTypeId).getExhibitHearingDescription()).thenReturn("Plea");
+
+        final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
+        final CaseDetail caseDetail = currentCourtStatus.getCourt().getCourtSites().get(0).getCourtRooms().get(0)
+                .getCases().getCasesDetails().get(0);
+
+        assertThat(caseDetail.getDefendants().size(), is(2));
+        assertThat(caseDetail.getDefendants().get(0).getFirstName(), is("firstName"));
+        assertThat(caseDetail.getDefendants().get(0).getLastName(), is("lastName"));
+        assertThat(caseDetail.getDefendants().get(1).getFirstName(), is("ACME Ltd"));
+        assertThat(caseDetail.getDefendants().get(1).getLastName(), is(nullValue()));
+    }
+
+    @Test
     public void shouldUseDayCourtCentreAndRoom_whenHearingDayHasOverrideRoom() {
         final UUID topCentreId = randomUUID();
         final UUID topRoomId = randomUUID();
@@ -190,10 +244,10 @@ public class HearingListXhibitResponseTransformerTest {
         final ZonedDateTime sittingDay = publishDate.atStartOfDay(ZonedDateTime.now().getZone());
 
         final HearingEvent hearingEvent = HearingEvent.hearingEvent().build();
-        final List<Hearing> hearingList = asList(hearing);
-        final List<ProsecutionCase> prosecutionCases = asList(prosecutionCase);
-        final List<Defendant> defendantList = asList(defendant);
-        final List<HearingDay> hearingDays = asList(hearingDay);
+        final List<Hearing> hearingList = List.of(hearing);
+        final List<ProsecutionCase> prosecutionCases = List.of(prosecutionCase);
+        final List<Defendant> defendantList = List.of(defendant);
+        final List<HearingDay> hearingDays = List.of(hearingDay);
         final ProsecutionCaseIdentifier prosecutionCaseIdentifier = ProsecutionCaseIdentifier
                 .prosecutionCaseIdentifier().withCaseURN("caseURN").build();
 
@@ -238,10 +292,10 @@ public class HearingListXhibitResponseTransformerTest {
         final UUID courtCentreId = randomUUID();
         final UUID courtRoomId = randomUUID();
         final UUID hearingId = randomUUID();
-        final List<Hearing> hearingList = asList(hearing);
-        final List<ProsecutionCase> prosecutionCases = asList(prosecutionCase);
-        final List<Defendant> defendantList = asList(defendant);
-        final List<HearingDay> hearingDays = asList(hearingDay);
+        final List<Hearing> hearingList = List.of(hearing);
+        final List<ProsecutionCase> prosecutionCases = List.of(prosecutionCase);
+        final List<Defendant> defendantList = List.of(defendant);
+        final List<HearingDay> hearingDays = List.of(hearingDay);
         final ProsecutionCaseIdentifier prosecutionCaseIdentifier = ProsecutionCaseIdentifier
                 .prosecutionCaseIdentifier().withCaseURN("caseURN").build();
 
@@ -296,10 +350,10 @@ public class HearingListXhibitResponseTransformerTest {
         final UUID courtRoomId = randomUUID();
         final UUID hearingId = randomUUID();
         final HearingEvent hearingEvent = HearingEvent.hearingEvent().withHearingId(hearingId).withHearingEventDefinitionId(eventDefinitionId).build();
-        final List<Hearing> hearingList = asList(hearing);
-        final List<ProsecutionCase> prosecutionCases = asList(prosecutionCase);
-        final List<Defendant> defendantList = asList(defendant);
-        final List<HearingDay> hearingDays = asList(hearingDay);
+        final List<Hearing> hearingList = List.of(hearing);
+        final List<ProsecutionCase> prosecutionCases = List.of(prosecutionCase);
+        final List<Defendant> defendantList = List.of(defendant);
+        final List<HearingDay> hearingDays = List.of(hearingDay);
         final ProsecutionCaseIdentifier prosecutionCaseIdentifier = ProsecutionCaseIdentifier
                 .prosecutionCaseIdentifier().withProsecutionAuthorityReference("ProsecutionAuthorityReference").build();
         final Set<UUID> activeHearingIds = new HashSet<>();
@@ -357,10 +411,10 @@ public class HearingListXhibitResponseTransformerTest {
         final UUID courtRoomId = randomUUID();
         final UUID hearingId = randomUUID();
         final HearingEvent hearingEvent = HearingEvent.hearingEvent().withHearingId(hearingId).withHearingEventDefinitionId(eventDefinitionsId).build();
-        final List<Hearing> hearingList = asList(hearing);
-        final List<ProsecutionCase> prosecutionCases = asList(prosecutionCase);
-        final List<Defendant> defendantList = asList(defendant);
-        final List<HearingDay> hearingDays = asList(hearingDay);
+        final List<Hearing> hearingList = List.of(hearing);
+        final List<ProsecutionCase> prosecutionCases = List.of(prosecutionCase);
+        final List<Defendant> defendantList = List.of(defendant);
+        final List<HearingDay> hearingDays = List.of(hearingDay);
         final ProsecutionCaseIdentifier prosecutionCaseIdentifier = ProsecutionCaseIdentifier
                 .prosecutionCaseIdentifier().withCaseURN("caseURN").build();
         final Map<UUID, UUID> eventDefinitionsIds = new HashMap<>();
@@ -411,9 +465,9 @@ public class HearingListXhibitResponseTransformerTest {
         final UUID courtRoomId = randomUUID();
         final UUID hearingId = randomUUID();
         final HearingEvent hearingEvent = HearingEvent.hearingEvent().build();
-        final List<Hearing> hearingList = asList(hearing);
+        final List<Hearing> hearingList = List.of(hearing);
         final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(FileUtil.getPayload("court-applications.json"));
-        final List<HearingDay> hearingDays = asList(hearingDay);
+        final List<HearingDay> hearingDays = List.of(hearingDay);
 
         final Set<UUID> activeHearingIds = new HashSet<>();
 
@@ -461,9 +515,9 @@ public class HearingListXhibitResponseTransformerTest {
         final UUID courtRoomId = randomUUID();
         final UUID hearingId = randomUUID();
         final HearingEvent hearingEvent = HearingEvent.hearingEvent().build();
-        final List<Hearing> hearingList = asList(hearing);
+        final List<Hearing> hearingList = List.of(hearing);
         final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(FileUtil.getPayload("court-applications-with-organisation.json"));
-        final List<HearingDay> hearingDays = asList(hearingDay);
+        final List<HearingDay> hearingDays = List.of(hearingDay);
 
         final Set<UUID> activeHearingIds = new HashSet<>();
 
@@ -510,25 +564,25 @@ public class HearingListXhibitResponseTransformerTest {
         final UUID hearingId = randomUUID();
         final UUID hearing2Id= randomUUID();
 
-        final List<Hearing> hearingList = Arrays.asList(Hearing.hearing()
+        final List<Hearing> hearingList = List.of(Hearing.hearing()
                 .withId(hearingId)
-                .withHearingDays(asList(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build()))
+                .withHearingDays(List.of(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build()))
                 .withType(HearingType.hearingType().withId(randomUUID()).withDescription("hearingTypeDescription").build())
-                .withJudiciary(asList(JudicialRole.judicialRole().withJudicialId(randomUUID()).withJudicialRoleType(JudicialRoleType.judicialRoleType().withJudiciaryType("circuit").build()).build()))
+                .withJudiciary(List.of(JudicialRole.judicialRole().withJudicialId(randomUUID()).withJudicialRoleType(JudicialRoleType.judicialRoleType().withJudiciaryType("circuit").build()).build()))
                 .withCourtCentre(CourtCentre.courtCentre()
                         .withRoomId(courtRoomId)
                         .withName(COURT_NAME)
                         .withId(courtCentreId)
                         .build())
-                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                .withProsecutionCases(List.of(ProsecutionCase.prosecutionCase()
                         .withId(randomUUID())
                         .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier().withCaseURN("case urn").build())
-                        .withDefendants(asList(Defendant.defendant()
+                        .withDefendants(List.of(Defendant.defendant()
                                 .withId(randomUUID())
                                 .withPersonDefendant(PersonDefendant.personDefendant().withPersonDetails(Person.person().build()).build())
-                                .withOffences(asList(Offence.offence()
+                                .withOffences(List.of(Offence.offence()
                                         .withId(randomUUID())
-                                        .withReportingRestrictions(asList(ReportingRestriction.reportingRestriction().withId(randomUUID()).withLabel(REPORTING_RESTRICTION_LABEL_YES)
+                                        .withReportingRestrictions(List.of(ReportingRestriction.reportingRestriction().withId(randomUUID()).withLabel(REPORTING_RESTRICTION_LABEL_YES)
                                                 .withJudicialResultId(randomUUID()).build()))
                                         .build()))
                                 .build()))
@@ -536,26 +590,26 @@ public class HearingListXhibitResponseTransformerTest {
                 .build(),
                 Hearing.hearing()
                         .withId(hearing2Id)
-                        .withHearingDays(asList(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build()))
+                        .withHearingDays(List.of(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build()))
                         .withType(HearingType.hearingType().withId(randomUUID()).withDescription("hearingTypeDescription").build())
-                        .withJudiciary(asList(JudicialRole.judicialRole().withJudicialId(randomUUID()).withJudicialRoleType(JudicialRoleType.judicialRoleType().withJudiciaryType("circuit").build()).build()))
+                        .withJudiciary(List.of(JudicialRole.judicialRole().withJudicialId(randomUUID()).withJudicialRoleType(JudicialRoleType.judicialRoleType().withJudiciaryType("circuit").build()).build()))
                         .withCourtCentre(CourtCentre.courtCentre()
                                 .withRoomId(courtRoomId)
                                 .withName(COURT_NAME)
                                 .withId(courtCentreId)
                                 .build())
-                        .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                        .withProsecutionCases(List.of(ProsecutionCase.prosecutionCase()
                                 .withId(randomUUID())
                                 .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier().withCaseURN("case urn").build())
-                                .withDefendants(asList(Defendant.defendant()
+                                .withDefendants(List.of(Defendant.defendant()
                                         .withId(randomUUID())
                                         .withPersonDefendant(PersonDefendant.personDefendant().withPersonDetails(Person.person().build()).build())
-                                        .withOffences(asList(Offence.offence()
+                                        .withOffences(List.of(Offence.offence()
                                                 .withId(randomUUID())
-                                                .withJudicialResults(asList(JudicialResult.judicialResult()
+                                                .withJudicialResults(List.of(JudicialResult.judicialResult()
                                                         .withJudicialResultId(randomUUID())
                                                         .build()))
-                                                .withReportingRestrictions(asList(ReportingRestriction.reportingRestriction().withId(randomUUID()).withLabel(REPORTING_RESTRICTION_LABEL_YES)
+                                                .withReportingRestrictions(List.of(ReportingRestriction.reportingRestriction().withId(randomUUID()).withLabel(REPORTING_RESTRICTION_LABEL_YES)
                                                         .withJudicialResultId(randomUUID()).build()))
                                                 .build()))
                                         .build()))
@@ -606,25 +660,25 @@ public class HearingListXhibitResponseTransformerTest {
         final UUID hearingId = randomUUID();
 
 
-        final List<Hearing> hearingList = Arrays.asList(Hearing.hearing()
+        final List<Hearing> hearingList = List.of(Hearing.hearing()
                         .withId(hearingId)
-                        .withHearingDays(asList(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build()))
+                        .withHearingDays(List.of(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build()))
                         .withType(HearingType.hearingType().withId(randomUUID()).withDescription("hearingTypeDescription").build())
-                        .withJudiciary(asList(JudicialRole.judicialRole().withJudicialId(randomUUID()).withJudicialRoleType(JudicialRoleType.judicialRoleType().withJudiciaryType("circuit").build()).build()))
+                        .withJudiciary(List.of(JudicialRole.judicialRole().withJudicialId(randomUUID()).withJudicialRoleType(JudicialRoleType.judicialRoleType().withJudiciaryType("circuit").build()).build()))
                         .withCourtCentre(CourtCentre.courtCentre()
                                 .withRoomId(courtRoomId)
                                 .withName(COURT_NAME)
                                 .withId(courtCentreId)
                                 .build())
-                        .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                        .withProsecutionCases(List.of(ProsecutionCase.prosecutionCase()
                                 .withId(randomUUID())
                                 .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier().withCaseURN("case urn").build())
-                                .withDefendants(asList(Defendant.defendant()
+                                .withDefendants(List.of(Defendant.defendant()
                                         .withId(randomUUID())
                                         .withPersonDefendant(PersonDefendant.personDefendant().withPersonDetails(Person.person().build()).build())
-                                        .withOffences(asList(Offence.offence()
+                                        .withOffences(List.of(Offence.offence()
                                                 .withId(randomUUID())
-                                                .withReportingRestrictions(asList(ReportingRestriction.reportingRestriction().withId(randomUUID()).withLabel(REPORTING_RESTRICTION_LABEL_YES)
+                                                .withReportingRestrictions(List.of(ReportingRestriction.reportingRestriction().withId(randomUUID()).withLabel(REPORTING_RESTRICTION_LABEL_YES)
                                                         .withJudicialResultId(randomUUID()).build()))
                                                 .build()))
                                         .build()))
