@@ -89,6 +89,14 @@ public class PublishCourtListSteps extends AbstractIT {
         waitUntilDataPersist("court_list_publish_status", whereCondition, 1);
     }
 
+    public void verifyNoExportFailed(final String courtCentreId) {
+        final String whereCondition = String.format(" court_centre_id='%s' and publish_status='EXPORT_FAILED'", courtCentreId);
+        final int failedCount = countExportStatus("court_list_publish_status", whereCondition);
+        if (failedCount != 0) {
+            throw new AssertionError(String.format("Expected no EXPORT_FAILED court list status for court centre %s but found %d", courtCentreId, failedCount));
+        }
+    }
+
     private void waitUntilDataPersist(final String tableName, final String criteria, final int count) {
         Awaitility.await()
                 .atMost(FIVE_MINUTES)
