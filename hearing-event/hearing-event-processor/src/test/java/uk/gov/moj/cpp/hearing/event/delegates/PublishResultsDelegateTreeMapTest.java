@@ -198,7 +198,7 @@ public class PublishResultsDelegateTreeMapTest extends AbstractRestructuringTest
                 .map(m ->m.getJudicialResultPromptTypeId().toString())
                 .collect(Collectors.toList());
 
-        assertThat(judicialResultPromptIds.size(), is(20));
+        assertThat(judicialResultPromptIds.size(), is(21));
         assertTrue(judicialResultPromptIds.contains("2493a3a4-918a-4b83-b3c0-d221ff83d6fc"));
 
     }

@@ -182,7 +182,7 @@ public class CustodyTimeLimitCalculatorTest {
     public void shouldMaintainPreviousHeldInCustodyWhenDefendantWasInCustodyAndHasPreviousDaysAndStillCustody() {
         final UtcClock utcClock = new UtcClock();
         final ZonedDateTime hearingDay = utcClock.now();
-        final LocalDate dateHeldInCustodySince = LocalDate.now().minusDays(10);
+        final LocalDate dateHeldInCustodySince = utcClock.now().toLocalDate().minusDays(10);
         final Hearing hearing = Hearing.hearing()
                 .withHearingDays(asList(HearingDay.hearingDay().withSittingDay(hearingDay).build()))
                 .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
@@ -212,7 +212,7 @@ public class CustodyTimeLimitCalculatorTest {
     public void shouldMaintainPreviousHeldInCustodyWhenDefendantWasInCustodyAndStillCustody() {
         final UtcClock utcClock = new UtcClock();
         final ZonedDateTime hearingDay = utcClock.now();
-        final LocalDate dateHeldInCustodySince = LocalDate.now().minusDays(10);
+        final LocalDate dateHeldInCustodySince = utcClock.now().toLocalDate().minusDays(10);
         final Hearing hearing = Hearing.hearing()
                 .withHearingDays(asList(HearingDay.hearingDay().withSittingDay(hearingDay).build()))
                 .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
@@ -241,7 +241,7 @@ public class CustodyTimeLimitCalculatorTest {
     public void shouldCalculateHeldInCustodyWhenDefendantWasInCustodyButNowOnBail() {
         final UtcClock utcClock = new UtcClock();
         final ZonedDateTime hearingDay = utcClock.now();
-        final LocalDate dateHeldInCustodySince = LocalDate.now().minusDays(10);
+        final LocalDate dateHeldInCustodySince = utcClock.now().toLocalDate().minusDays(10);
         final Hearing hearing = Hearing.hearing()
                 .withHearingDays(asList(HearingDay.hearingDay().withSittingDay(hearingDay).build()))
                 .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()

@@ -3,7 +3,10 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 import static net.bytebuddy.matcher.ElementMatchers.anyOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static java.util.UUID.fromString;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,7 +23,9 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 
 import uk.gov.justice.core.courts.DeletedJudicialResults;
 import uk.gov.justice.core.courts.HearingType;
+import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
+import uk.gov.justice.core.courts.NextHearing;
 import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
@@ -32,6 +37,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -143,6 +149,143 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
                         .noneMatch(jrp -> jrp.getValue().contains(ResultQualifier.SEPARATOR)));
             }
         });
+    }
+
+    @Test
+    public void shouldNotFoldHiddenNextHearingPromptsIntoTheParentPromptWhileKeepingThemForTheNextHearing() throws IOException {
+        final UUID nhmcResultDefinitionId = fromString("70c98fa6-804d-11e8-adc0-fa7ae01bbebc");
+        final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(
+                "data/hearing.results-shared-v3-with-nexthearing-magistratescourt-booking-reference.json", ResultsSharedV3.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+
+        // NHMC is published as a prompt of its parent; its booking reference / existing hearing id prompts are hidden in reference data
+        final ResultDefinition nhmcDefinition = resultDefinitions.stream()
+                .filter(resultDefinition -> resultDefinition.getId().equals(nhmcResultDefinitionId)).findFirst().get();
+        nhmcDefinition.setPublishedAsAPrompt(true);
+        nhmcDefinition.getPrompts().add(new uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt()
+                .setId(fromString("a0ec3e68-5210-422f-9959-73c1c7ce495a"))
+                .setReference("existingHearingId")
+                .setLabel("Existing Hearing Id")
+                .setType("TXT")
+                .setHidden(true));
+
+        final List<UUID> resultDefinitionIds = resultsShared.getTargets().stream()
+                .flatMap(t -> t.getResultLines().stream())
+                .map(ResultLine2::getResultDefinitionId)
+                .collect(Collectors.toList());
+
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+        for (UUID resultDefinitionId : resultDefinitionIds) {
+            final TreeNode<ResultDefinition> resultDefinitionTreeNode = new TreeNode(resultDefinitionId, resultDefinitions);
+            resultDefinitionTreeNode.setResultDefinitionId(resultDefinitionId);
+            resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resultDefinitionId)).findFirst().get());
+            treeNodes.add(resultDefinitionTreeNode);
+        }
+
+        final List<TreeNode<ResultLine2>> restructuredTree = target.restructure(envelope, resultsShared, treeNodes);
+
+        final List<JudicialResult> judicialResults = restructuredTree.stream()
+                .map(TreeNode::getJudicialResult)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        final JudicialResultPrompt foldedNextHearingPrompt = judicialResults.stream()
+                .filter(judicialResult -> judicialResult.getJudicialResultPrompts() != null)
+                .flatMap(judicialResult -> judicialResult.getJudicialResultPrompts().stream())
+                .filter(prompt -> nhmcResultDefinitionId.equals(prompt.getJudicialResultPromptTypeId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("NHMC was not folded into its parent as a prompt"));
+
+        assertThat(foldedNextHearingPrompt.getLabel(), is("Next hearing in magistrates' court"));
+        assertThat(foldedNextHearingPrompt.getValue(), containsString("Date of hearing:"));
+        assertThat(foldedNextHearingPrompt.getValue(), containsString("Hearing type:First hearing"));
+        assertThat(foldedNextHearingPrompt.getValue(), not(containsString("Booking reference:")));
+        assertThat(foldedNextHearingPrompt.getValue(), not(containsString("Existing Hearing Id:")));
+
+        final NextHearing nextHearing = judicialResults.stream()
+                .map(JudicialResult::getNextHearing)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("the next hearing built from the hidden prompts must survive the fold"));
+        assertThat(nextHearing.getBookingReference(), is(fromString("b1c2d3e4-f5a6-7890-ab12-cd34ef567890")));
+        assertThat(nextHearing.getExistingHearingId(), is(fromString("02a88544-005b-4209-a192-ad15cd74fd08")));
+    }
+
+    @Test
+    public void shouldRejectBookingReferenceInJudicialResultPromptPredicate() {
+        assertThat(RestructuringHelperV3.JUDICIAL_RESULT_PROMPT_PREDICATE.test(
+                uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt().withPromptReference("bookingReference").build()), is(false));
+        assertThat(RestructuringHelperV3.JUDICIAL_RESULT_PROMPT_PREDICATE.test(
+                uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt().withPromptReference("bookingType").build()), is(true));
+        assertThat(RestructuringHelperV3.JUDICIAL_RESULT_PROMPT_PREDICATE.test(
+                uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt().build()), is(true));
+    }
+
+    @Test
+    public void shouldExcludeBookingReferencePromptFromPublishedJudicialResultPrompts() throws IOException {
+        final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_NEW_REVIEW_HEARING_JSON, ResultsSharedV3.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        final ResultLine2 firstReviewResultLine = resultsShared.getTargets().get(0).getResultLines().stream()
+                .filter(rl3 -> rl3.getResultLabel().equalsIgnoreCase("First Review Hearing – Drug Rehab")).findFirst().get();
+
+        final UUID bookingReferencePromptId = UUID.randomUUID();
+        final UUID bookingTypePromptId = UUID.randomUUID();
+        firstReviewResultLine.getPrompts().add(uk.gov.justice.core.courts.Prompt.prompt()
+                .withId(bookingReferencePromptId)
+                .withLabel("Booking reference")
+                .withPromptRef("bookingReference")
+                .withValue("e1f1f3aa-633b-4180-b12c-c4490b0ecf13")
+                .build());
+        firstReviewResultLine.getPrompts().add(uk.gov.justice.core.courts.Prompt.prompt()
+                .withId(bookingTypePromptId)
+                .withLabel("Booking Type")
+                .withPromptRef("bookingType")
+                .withValue("SENTENCING")
+                .build());
+
+        final ResultDefinition firstReviewDefinition = resultDefinitions.stream()
+                .filter(resultDefinition -> resultDefinition.getId().equals(firstReviewResultLine.getResultDefinitionId())).findFirst().get();
+        firstReviewDefinition.getPrompts().add(new uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt()
+                .setId(bookingReferencePromptId)
+                .setReference("bookingReference")
+                .setLabel("Booking reference")
+                .setType("TXT")
+                .setHidden(true));
+        firstReviewDefinition.getPrompts().add(new uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt()
+                .setId(bookingTypePromptId)
+                .setReference("bookingType")
+                .setLabel("Booking Type")
+                .setType("TXT")
+                .setHidden(false));
+
+        List<UUID> resultDefinitionIds = resultsShared.getTargets().stream()
+                .flatMap(t -> t.getResultLines().stream())
+                .map(ResultLine2::getResultDefinitionId)
+                .collect(Collectors.toList());
+
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+
+        for (UUID resulDefinitionId : resultDefinitionIds) {
+            TreeNode<ResultDefinition> resultDefinitionTreeNode = new TreeNode(resulDefinitionId, resultDefinitions);
+            resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
+            resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
+            treeNodes.add(resultDefinitionTreeNode);
+        }
+        when(hearingTypeReverseLookup.getHearingTypeByName(any(), any())).thenReturn(HearingType.hearingType().withDescription("REV").build());
+        final List<TreeNode<ResultLine2>> restructuredTree = target.restructure(envelope, resultsShared, treeNodes);
+
+        final List<JudicialResultPrompt> allPublishedPrompts = restructuredTree.stream()
+                .map(TreeNode::getJudicialResult)
+                .filter(jr -> jr != null && jr.getJudicialResultPrompts() != null)
+                .flatMap(jr -> jr.getJudicialResultPrompts().stream())
+                .collect(Collectors.toList());
+
+        assertTrue(allPublishedPrompts.stream().noneMatch(p -> "bookingReference".equals(p.getPromptReference())),
+                "bookingReference prompt must not be published into judicialResultPrompts");
+        assertTrue(allPublishedPrompts.stream().noneMatch(p -> "Booking reference".equals(p.getLabel())),
+                "Booking reference label must not be published into judicialResultPrompts");
+        assertTrue(allPublishedPrompts.stream().anyMatch(p -> "Booking Type".equals(p.getLabel())),
+                "Booking Type (visible prompt) must still be published");
     }
 
     @Test

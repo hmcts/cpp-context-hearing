@@ -26348,6 +26348,21 @@
           "courtExtract": "N",
           "financial": "N",
           "jurisdiction": "B"
+        },
+        {
+          "id": "e73e6ab8-9bfe-4135-9fe6-f526544584d6",
+          "label": "Booking reference",
+          "resultPromptRule": "optional",
+          "type": "TXT",
+          "sequence": 800,
+          "hidden": true,
+          "userGroups": [],
+          "courtExtract": "N",
+          "financial": "N",
+          "jurisdiction": "C",
+          "min": "1",
+          "max": "50",
+          "reference": "bookingReference"
         }
       ],
       "startDate": "2019-10-25"
