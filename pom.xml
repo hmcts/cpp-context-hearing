@@ -8,9 +8,8 @@
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
-    <version>17.104.209-CCSPH2-SNAPSHOT</version>
+    <version>17.104.212-ras-SNAPSHOT</version>
     <packaging>pom</packaging>
-
 
     <name>Hearing Context - Parent Module</name>
     <description>Application and Cases has been resulted by Hearing context</description>

@@ -4,6 +4,7 @@ import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.isNull;
@@ -19,6 +20,7 @@ import static uk.gov.moj.cpp.hearing.domain.HearingState.INITIALISED;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_USER_ERROR;
+import static uk.gov.moj.cpp.hearing.domain.event.ReleaseProvisionalHearingSlots.Reason.DROPPED_FROM_DRAFT;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.VALIDATED;
 import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.CANCEL_AMENDMENTS_NOT_PERMITTED;
 import static uk.gov.moj.cpp.hearing.domain.ResultsErrorType.HEARING_LOCKED;
@@ -168,6 +170,7 @@ import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.ReleaseProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselUpdated;
@@ -181,6 +184,7 @@ import uk.gov.moj.cpp.hearing.domain.event.WitnessAddedToHearing;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSavedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResultsSaved;
@@ -211,6 +215,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -218,6 +223,8 @@ import java.util.stream.Stream;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -230,7 +237,8 @@ public class HearingAggregate implements Aggregate {
     // field initialisers, so a snapshot written before those fields existed would restore with a
     // null delegate and NPE on the first PTPH command. A changed id makes the framework discard
     // such a snapshot and rebuild from the event stream instead.
-    private static final long serialVersionUID = -6059812881894748593L;
+    // Bumped again for draftBookingReferences (LPT-2617), for the same reason.
+    private static final long serialVersionUID = -6059812881894748594L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingAggregate.class);
 
@@ -239,6 +247,11 @@ public class HearingAggregate implements Aggregate {
     public static final String SHARE_RESULTS_NOT_PERMITTED_ALL_THE_TARGETS_ALREADY_SHARED_FOR_THE_HEARING_DAY_S = "Share results not permitted! all the targets already shared for the hearingDay %s";
     private static final String OFFENCE_ID = "offenceId";
     private static final String RESULT_LINES = "resultLines";
+    private static final String RESULT_PROMPTS = "resultPrompts";
+    private static final String PROMPT_REF = "promptRef";
+    private static final String PROMPT_VALUE = "value";
+    private static final String BOOKING_REFERENCE_PROMPT_REF = "bookingReference";
+    private static final String DELETED = "deleted";
 
     // PTPH detail command names and the rejection reasons shared across them. Only the reasons
     // that apply to more than one command are named here; the ones specific to a single guard read
@@ -299,6 +312,9 @@ public class HearingAggregate implements Aggregate {
     private Map<LocalDate, Set<UUID>> hearingDaySharedOffencesMap = new HashMap<>();
     private Map<LocalDate, Set<UUID>> hearingDaySharedApplicationsMap = new HashMap<>();
     private Set<UUID> offencesSavedAsDraft = new HashSet<>();
+    // The slot-hold bookingIds each hearing day's last accepted draft carries, so that a save
+    // dropping one can release its hold. See bookingReferencesDroppedBy.
+    private final Map<LocalDate, Set<String>> draftBookingReferences = new HashMap<>();
     private static final String HEARING_STATE_STR = "Hearing is in %s state";
     @Override
     public Object apply(final Object event) {
@@ -366,8 +382,10 @@ public class HearingAggregate implements Aggregate {
                             this.amendingSharedHearingUserId = draftResultSaved.getAmendedByUserId();
                             this.amendedResultHearingDayVersionMap.put(draftResultSaved.getHearingDay(), draftResultSaved.getAmendedResultVersion());
                             this.offencesSavedAsDraft.addAll(getOffenceIdList(draftResultSaved.getDraftResult()));
+                            this.draftBookingReferences.put(draftResultSaved.getHearingDay(), bookingReferencesIn(draftResultSaved.getDraftResult()));
                     }
                 ),
+                when(DraftResultDeletedV2.class).apply(deleted -> this.draftBookingReferences.remove(deleted.getHearingDay())),
                 when(DefendantAttendanceUpdated.class).apply(defendantDelegate::handleDefendantAttendanceUpdated),
                 when(RespondentCounselAdded.class).apply(respondentCounselDelegate::handleRespondentCounselAdded),
                 when(RespondentCounselRemoved.class).apply(respondentCounselDelegate::handleRespondentCounselRemoved),
@@ -943,7 +961,10 @@ public class HearingAggregate implements Aggregate {
                     hearingDay, userId, version, this.amendingSharedHearingUserId, this.amendedResultHearingDayVersionMap.get(hearingDay)));
         }
 
-        return apply(resultsSharedDelegate.saveDraftResultV2(hearingId, hearingDay, draftResult, userId, version));
+        final List<String> droppedBookingIds = bookingReferencesDroppedBy(hearingDay, bookingReferencesIn(draftResult));
+        return apply(Stream.concat(
+                resultsSharedDelegate.saveDraftResultV2(hearingId, hearingDay, draftResult, userId, version),
+                releaseDroppedBookings(hearingId, droppedBookingIds)));
     }
 
     private boolean isNotAValidVersion(final LocalDate hearingDay, final Integer version) {
@@ -953,7 +974,10 @@ public class HearingAggregate implements Aggregate {
     public Stream<Object> deleteDraftResultV2(final UUID userId, final UUID hearingId, LocalDate hearingDay) {
 
         if (!INITIALISED.equals(this.hearingState)) {
-            return apply(resultsSharedDelegate.deleteDraftResultV2(hearingId, hearingDay, userId));
+            final List<String> droppedBookingIds = bookingReferencesDroppedBy(hearingDay, emptySet());
+            return apply(Stream.concat(
+                    resultsSharedDelegate.deleteDraftResultV2(hearingId, hearingDay, userId),
+                    releaseDroppedBookings(hearingId, droppedBookingIds)));
         } else {
             return apply(resultsSharedDelegate.hearingLockedByOtherUser(hearingId));
         }
@@ -1352,7 +1376,7 @@ public class HearingAggregate implements Aggregate {
                 .build()));
     }
 
-    public Stream<Object> bookProvisionalHearingSlots(final UUID hearingId, final List<ProvisionalHearingSlotInfo> slots, final String bookingType, final String priority, final List<String> specialRequirements) {
+    public Stream<Object> bookProvisionalHearingSlots(final UUID hearingId, final List<ProvisionalHearingSlotInfo> slots, final String bookingType, final String priority, final List<String> specialRequirements, final String bookingId) {
 
         return apply(Stream.of(BookProvisionalHearingSlots.bookProvisionalHearingSlots()
                 .withHearingId(hearingId)
@@ -1360,7 +1384,77 @@ public class HearingAggregate implements Aggregate {
                 .withBookingType(bookingType)
                 .withPriority(priority)
                 .withSpecialRequirements(specialRequirements)
+                .withBookingId(bookingId)
                 .build()));
+    }
+
+
+    /**
+     * The bookingIds the last accepted draft of {@code hearingDay} carried that no line of the
+     * draft replacing it carries any more (LPT-2617).
+     *
+     * <p>A hold is taken the moment a session is picked, and from then on the result line's
+     * bookingReference prompt is the only thing pointing at it. Every save carries the whole
+     * draft, shared lines included, so a reference that disappears has been given up - by
+     * attaching the line to an existing hearing, changing its result, deleting it or resetting
+     * the results - and nothing else will ever release that hold before the overnight purge.
+     *
+     * <p>Compared across the whole draft, not line by line: a copied result shares its booking
+     * with the line it was copied from, and that booking stays while either line carries it. A
+     * reference another day's draft still carries is kept too. Whatever is released, courtscheduler
+     * gives back only holds no share has confirmed, so a booking already listed is never touched.
+     */
+    private List<String> bookingReferencesDroppedBy(final LocalDate hearingDay, final Set<String> stillCarried) {
+        final Set<String> dropped = new TreeSet<>(this.draftBookingReferences.getOrDefault(hearingDay, emptySet()));
+        dropped.removeAll(stillCarried);
+        this.draftBookingReferences.forEach((day, bookingIds) -> {
+            if (!day.equals(hearingDay)) {
+                dropped.removeAll(bookingIds);
+            }
+        });
+        return new ArrayList<>(dropped);
+    }
+
+    private static Stream<Object> releaseDroppedBookings(final UUID hearingId, final List<String> droppedBookingIds) {
+        return droppedBookingIds.isEmpty()
+                ? Stream.empty()
+                : Stream.of(new ReleaseProvisionalHearingSlots(hearingId, droppedBookingIds, DROPPED_FROM_DRAFT));
+    }
+
+    /**
+     * The bookingReference prompt values of a saved draft's live lines; resultLines is a map
+     * today, an array in older drafts. A line flagged deleted does not count: a shared line
+     * deleted during an amendment stays in the draft, prompts and all, so the re-share can
+     * withdraw it, but the booking it carries is no longer wanted.
+     */
+    private static Set<String> bookingReferencesIn(final JsonObject draftResult) {
+        if (isNull(draftResult)) {
+            return new HashSet<>();
+        }
+        final JsonValue resultLines = draftResult.get(RESULT_LINES);
+        final Collection<JsonValue> lines;
+        if (resultLines instanceof JsonObject) {
+            lines = ((JsonObject) resultLines).values();
+        } else if (resultLines instanceof JsonArray) {
+            lines = (JsonArray) resultLines;
+        } else {
+            lines = emptyList();
+        }
+        return lines.stream()
+                .filter(JsonObject.class::isInstance)
+                .map(JsonObject.class::cast)
+                .filter(line -> !line.getBoolean(DELETED, false))
+                .map(line -> line.get(RESULT_PROMPTS))
+                .filter(JsonArray.class::isInstance)
+                .flatMap(prompts -> ((JsonArray) prompts).stream())
+                .filter(JsonObject.class::isInstance)
+                .map(JsonObject.class::cast)
+                .filter(prompt -> BOOKING_REFERENCE_PROMPT_REF.equals(prompt.getString(PROMPT_REF, null)))
+                .map(prompt -> prompt.get(PROMPT_VALUE))
+                .filter(JsonString.class::isInstance)
+                .map(value -> ((JsonString) value).getString())
+                .filter(bookingId -> !bookingId.isBlank())
+                .collect(Collectors.toCollection(HashSet::new));
     }
 
 

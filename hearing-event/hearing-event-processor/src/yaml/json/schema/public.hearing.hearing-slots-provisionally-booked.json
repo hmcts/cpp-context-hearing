@@ -1,25 +1,15 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-slots-provisionally-booked.json",
+  "description": "Success only. A refusal is published as public.hearing.hearing-slots-provisional-booking-refused, which is why there is no longer an 'error' branch here: a oneOf could require neither field, so a payload carrying both validated against neither.",
   "type": "object",
   "properties": {
     "bookingId": {
       "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "error": {
-      "type": "string"
     }
   },
-  "oneOf": [
-    {
-      "required": [
-        "bookingId"
-      ]
-    },
-    {
-      "required": [
-        "error"
-      ]
-    }
-  ]
+  "required": [
+    "bookingId"
+  ],
+  "additionalProperties": false
 }
