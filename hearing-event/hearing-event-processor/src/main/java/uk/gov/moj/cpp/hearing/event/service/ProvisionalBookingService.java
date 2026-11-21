@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
+import static java.lang.Math.toIntExact;
 import static javax.ws.rs.core.HttpHeaders.ACCEPT;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
@@ -49,11 +51,13 @@ public class ProvisionalBookingService {
     // The initial values are what a test gets when it builds the service without CDI.
     @Inject
     @Value(key = "courtscheduler.timeout.connect.ms", defaultValue = "5000")
-    protected String connectTimeoutMs = "5000";
+    protected long connectTimeoutMs = 5000;
 
     @Inject
-    @Value(key = "courtscheduler.timeout.ms", defaultValue = "10000")
-    protected String socketTimeoutMs = "10000";
+    @Value(key = "courtscheduler.timeout.ms", defaultValue = "15000")
+    protected long socketTimeoutMs = 15000;
+
+    private RequestConfig requestConfig;
 
     @Inject
     private ObjectMapper objectMapper;
@@ -193,16 +197,21 @@ public class ProvisionalBookingService {
         }
     }
 
+    @PostConstruct
+    void init() {
+        requestConfig = RequestConfig.custom()
+                .setConnectTimeout(toIntExact(connectTimeoutMs))
+                .setSocketTimeout(toIntExact(socketTimeoutMs))
+                .build();
+    }
+
     /**
      * A client per call, closed with its response. Without timeouts, a courtscheduler that accepts
      * the connection and never answers would hold the event-processor thread indefinitely.
      */
     private CloseableHttpClient newHttpClient() {
         return HttpClientBuilder.create()
-                .setDefaultRequestConfig(RequestConfig.custom()
-                        .setConnectTimeout(Integer.parseInt(connectTimeoutMs))
-                        .setSocketTimeout(Integer.parseInt(socketTimeoutMs))
-                        .build())
+                .setDefaultRequestConfig(requestConfig)
                 .build();
     }
 }

@@ -313,7 +313,8 @@ public class ProvisionalBookingServiceTest {
         setField(provisionalBookingService, "systemUserProvider", systemUserProvider);
         setField(provisionalBookingService, "objectMapper", new ObjectMapper());
         setField(provisionalBookingService, "baseUri", "http://127.0.0.1:" + httpServer.getAddress().getPort());
-        setField(provisionalBookingService, "socketTimeoutMs", "300");
+        setField(provisionalBookingService, "socketTimeoutMs", 300L);
+        provisionalBookingService.init();
     }
 
     /**
