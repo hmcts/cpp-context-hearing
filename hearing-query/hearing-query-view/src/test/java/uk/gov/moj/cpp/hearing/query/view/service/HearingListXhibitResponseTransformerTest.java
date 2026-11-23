@@ -30,7 +30,9 @@ import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JudicialRoleType;
+import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -177,6 +179,99 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
         verify(judgeNameMapper).getJudgeName(hearing);
 
+    }
+
+    @Test
+    public void shouldTransformFromWhenCaseHasPersonAndCompanyDefendants() {
+        final CaseDetail caseDetail = transformCaseWithDefendants(null,
+                personDefendant("firstName", "middleName", "lastName"),
+                companyDefendant("ACME Ltd"));
+
+        assertThat(caseDetail.getDefendants().size(), is(2));
+        assertThat(caseDetail.getDefendants().get(0).getFirstName(), is("firstName"));
+        assertThat(caseDetail.getDefendants().get(0).getMiddleName(), is("middleName"));
+        assertThat(caseDetail.getDefendants().get(0).getLastName(), is("lastName"));
+        assertThat(caseDetail.getDefendants().get(1).getFirstName(), is("ACME Ltd"));
+        assertThat(caseDetail.getDefendants().get(1).getMiddleName(), is(nullValue()));
+        assertThat(caseDetail.getDefendants().get(1).getLastName(), is(nullValue()));
+    }
+
+    @Test
+    public void shouldTransformToEmptyDefendantWhenDefendantHasNeitherPersonNorOrganisation() {
+        final Defendant defendantWithoutDetails = Defendant.defendant()
+                .withOffences(Collections.emptyList())
+                .build();
+
+        final CaseDetail caseDetail = transformCaseWithDefendants(null, defendantWithoutDetails);
+
+        assertThat(caseDetail.getDefendants().size(), is(1));
+        assertThat(caseDetail.getDefendants().get(0).getFirstName(), is(nullValue()));
+        assertThat(caseDetail.getDefendants().get(0).getMiddleName(), is(nullValue()));
+        assertThat(caseDetail.getDefendants().get(0).getLastName(), is(nullValue()));
+    }
+
+    @Test
+    public void shouldOmitCompanyDefendantNameWhenHearingHasReportingRestriction() {
+        final CaseDetail caseDetail = transformCaseWithDefendants("Section 45 restriction",
+                personDefendant("firstName", "middleName", "lastName"),
+                companyDefendant("ACME Ltd"));
+
+        assertThat(caseDetail.getDefendants().size(), is(2));
+        caseDetail.getDefendants().forEach(omittedDefendant -> {
+            assertThat(omittedDefendant.getFirstName(), is(nullValue()));
+            assertThat(omittedDefendant.getMiddleName(), is(nullValue()));
+            assertThat(omittedDefendant.getLastName(), is(nullValue()));
+        });
+    }
+
+    private CaseDetail transformCaseWithDefendants(final String reportingRestrictionReason, final Defendant... defendants) {
+        final UUID hearingId = randomUUID();
+
+        when(hearingEventsToHearingMapper.getActiveHearingIds()).thenReturn(new HashSet<>());
+        when(prosecutionCase.getProsecutionCaseIdentifier()).thenReturn(ProsecutionCaseIdentifier
+                .prosecutionCaseIdentifier().withCaseURN("caseURN").build());
+        when(prosecutionCase.getDefendants()).thenReturn(asList(defendants));
+        when(hearing.getReportingRestrictionReason()).thenReturn(reportingRestrictionReason);
+        when(hearing.getHearingDays()).thenReturn(asList(hearingDay));
+        when(hearingDay.getSittingDay()).thenReturn(ZonedDateTime.now());
+        when(hearing.getId()).thenReturn(hearingId);
+        when(hearing.getProsecutionCases()).thenReturn(asList(prosecutionCase));
+        when(hearing.getCourtCentre()).thenReturn(CourtCentre.courtCentre().withName(COURT_NAME).withRoomId(randomUUID()).withId(randomUUID()).build());
+        when(hearingEventsToHearingMapper.getHearingList()).thenReturn(asList(hearing));
+        when(hearingEventsToHearingMapper.getAllHearingEventBy(hearingId)).thenReturn(Optional.of(HearingEvent.hearingEvent().build()));
+        when(commonXhibitReferenceDataService.getCourtRoomMappingBy(any(), any())).thenReturn(courtRoomMapping);
+        when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");
+        when(courtRoomMapping.getCrestCourtSiteUUID()).thenReturn(randomUUID());
+
+        mockHearingTypeId();
+
+        when(commonXhibitReferenceDataService.getXhibitHearingType(hearingTypeId).getExhibitHearingDescription()).thenReturn("Plea");
+
+        final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
+        return currentCourtStatus.getCourt().getCourtSites().get(0).getCourtRooms().get(0)
+                .getCases().getCasesDetails().get(0);
+    }
+
+    private static Defendant personDefendant(final String firstName, final String middleName, final String lastName) {
+        return Defendant.defendant()
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withPersonDetails(Person.person()
+                                .withFirstName(firstName)
+                                .withMiddleName(middleName)
+                                .withLastName(lastName)
+                                .build())
+                        .build())
+                .withOffences(Collections.emptyList())
+                .build();
+    }
+
+    private static Defendant companyDefendant(final String organisationName) {
+        return Defendant.defendant()
+                .withLegalEntityDefendant(LegalEntityDefendant.legalEntityDefendant()
+                        .withOrganisation(Organisation.organisation().withName(organisationName).build())
+                        .build())
+                .withOffences(Collections.emptyList())
+                .build();
     }
 
     @Test

@@ -27,7 +27,9 @@ import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingEvent;
+import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases;
@@ -317,12 +319,26 @@ public class HearingListXhibitResponseTransformer {
 
         return prosecutionCase.getDefendants()
                 .stream()
-                .map(prosecutionCaseDefendant -> needToBeOmitted ? defendant().build() : defendant()
-                        .withFirstName(prosecutionCaseDefendant.getPersonDefendant().getPersonDetails().getFirstName())
-                        .withMiddleName(prosecutionCaseDefendant.getPersonDefendant().getPersonDetails().getMiddleName())
-                        .withLastName(prosecutionCaseDefendant.getPersonDefendant().getPersonDetails().getLastName())
-                        .build())
+                .map(prosecutionCaseDefendant -> needToBeOmitted ? defendant().build() : toXhibitDefendant(prosecutionCaseDefendant))
                 .collect(toList());
+    }
+
+    private Defendant toXhibitDefendant(final uk.gov.justice.core.courts.Defendant prosecutionCaseDefendant) {
+        final PersonDefendant personDefendant = prosecutionCaseDefendant.getPersonDefendant();
+        if (nonNull(personDefendant) && nonNull(personDefendant.getPersonDetails())) {
+            return defendant()
+                    .withFirstName(personDefendant.getPersonDetails().getFirstName())
+                    .withMiddleName(personDefendant.getPersonDetails().getMiddleName())
+                    .withLastName(personDefendant.getPersonDetails().getLastName())
+                    .build();
+        }
+        final LegalEntityDefendant legalEntityDefendant = prosecutionCaseDefendant.getLegalEntityDefendant();
+        if (nonNull(legalEntityDefendant) && nonNull(legalEntityDefendant.getOrganisation())) {
+            // Company defendants have no person details; mirror the standalone application handling and
+            // carry the organisation name in firstName.
+            return defendant().withFirstName(legalEntityDefendant.getOrganisation().getName()).build();
+        }
+        return defendant().build();
     }
 
     private PublicNotices getPublicNotices(final ProsecutionCase prosecutionCase) {
