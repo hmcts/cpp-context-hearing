@@ -11,7 +11,6 @@
     <version>17.104.209-CCSPH2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-
     <name>Hearing Context - Parent Module</name>
     <description>Application and Cases has been resulted by Hearing context</description>
 
@@ -39,7 +38,6 @@
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
         <usersgroups.version>25.104.52</usersgroups.version>
-        <listing.version>17.103.137</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>17.0.96</systemdocgenerator.version>
         <results-validator-api-spec.version>26.32</results-validator-api-spec.version>
