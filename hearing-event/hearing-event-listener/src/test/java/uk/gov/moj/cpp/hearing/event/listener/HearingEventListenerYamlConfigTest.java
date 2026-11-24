@@ -159,8 +159,9 @@ public class HearingEventListenerYamlConfigTest {
             OutstandingFinesQueried.class.getAnnotation(Event.class).value(),
             OutstandingFinesRequested.class.getAnnotation(Event.class).value(),
             BookProvisionalHearingSlots.class.getAnnotation(Event.class).value(),
-            // Only here so hearing streams that already hold this event stay loadable;
-            // no view-store listener handles it, so it is not in the listener yaml.
+            // Consumed by ReleaseProvisionalHearingSlotsProcessor in hearing-event-processor,
+            // not by a view-store listener - same as its sibling above, so it is not in the
+            // listener yaml and must not be expected there.
             ReleaseProvisionalHearingSlots.class.getAnnotation(Event.class).value(),
             SaveDraftResultFailed.class.getAnnotation(Event.class).value(),
             ShareResultsFailed.class.getAnnotation(Event.class).value(),
