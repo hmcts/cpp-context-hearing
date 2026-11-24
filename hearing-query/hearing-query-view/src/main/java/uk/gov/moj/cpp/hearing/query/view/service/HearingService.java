@@ -27,6 +27,7 @@ import static uk.gov.moj.cpp.hearing.mapping.ApplicationAmendmentAllowedResolver
 
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingCasesForDay;
@@ -481,7 +482,8 @@ public class HearingService {
     /**
      * Collects, for one application, the cases it links (case id -> referenced offence ids, possibly empty) and the
      * defendants its parties' masterDefendant.defendantCase name for those same cases.
-     * Linked cases: INACTIVE courtApplicationCases when present; otherwise courtOrder.courtOrderOffences (status not checked).
+     * Linked cases: courtApplicationCases that are INACTIVE or whose listed offences are all concluded, when present;
+     * otherwise courtOrder.courtOrderOffences (status not checked).
      */
     private void collectApplicationLinks(final CourtApplication application,
                                          final Map<UUID, Set<UUID>> offenceIdsByCaseId,
@@ -489,7 +491,7 @@ public class HearingService {
         final Map<UUID, Set<UUID>> linked = new HashMap<>();
         if (isNotEmpty(application.getCourtApplicationCases())) {
             application.getCourtApplicationCases().stream()
-                    .filter(cac -> INACTIVE_CASE_STATUS.equalsIgnoreCase(cac.getCaseStatus()) && nonNull(cac.getProsecutionCaseId()))
+                    .filter(cac -> nonNull(cac.getProsecutionCaseId()) && isCaseOffTheHearing(cac))
                     .forEach(cac -> linkCase(linked, cac.getProsecutionCaseId(), ofNullable(cac.getOffences()).orElse(emptyList()).stream()));
         } else if (nonNull(application.getCourtOrder()) && isNotEmpty(application.getCourtOrder().getCourtOrderOffences())) {
             application.getCourtOrder().getCourtOrderOffences().stream()
@@ -506,6 +508,18 @@ public class HearingService {
                 .flatMap(party -> ofNullable(party.getMasterDefendant().getDefendantCase()).orElse(emptyList()).stream())
                 .filter(dc -> nonNull(dc.getDefendantId()) && linked.containsKey(dc.getCaseId()))
                 .forEach(dc -> defendantIdsByCaseId.computeIfAbsent(dc.getCaseId(), k -> new HashSet<>()).add(dc.getDefendantId()));
+    }
+
+    /**
+     * Progression leaves a case off an application hearing when it is INACTIVE or when every offence the application
+     * lists for it is concluded (the case can stay ACTIVE through another defendant).
+     */
+    private static boolean isCaseOffTheHearing(final CourtApplicationCase courtApplicationCase) {
+        if (INACTIVE_CASE_STATUS.equalsIgnoreCase(courtApplicationCase.getCaseStatus())) {
+            return true;
+        }
+        final List<uk.gov.justice.core.courts.Offence> offences = ofNullable(courtApplicationCase.getOffences()).orElse(emptyList());
+        return !offences.isEmpty() && offences.stream().allMatch(o -> TRUE.equals(o.getProceedingsConcluded()));
     }
 
     private static void linkCase(final Map<UUID, Set<UUID>> linked, final UUID caseId,

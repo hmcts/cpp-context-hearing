@@ -2714,6 +2714,43 @@ class HearingServiceTest {
         assertThat(cases, hasSize(0));
     }
 
+    // CAD-1609: all of D1's application offences concluded while D2 keeps the case ACTIVE —
+    // progression sends the hearing with no case, so check-in must still pull it in.
+    @Test
+    void getHearingsForCheckIn_shouldAddActiveApplicationCaseWhenAllItsOffencesAreConcluded() {
+        final UUID caseId = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+        final uk.gov.justice.core.courts.Defendant d1 = defendantWithOffences(offenceId1, offenceId2);
+        final List<ProsecutionCase> cases = checkInInactiveCase(caseId,
+                singletonList(applicationWithCases(applicationCaseWithOffences(caseId, "ACTIVE",
+                        offence(offenceId1, true), offence(offenceId2, true)))),
+                caseWithDefendants(caseId, d1, defendantWithOffences(randomUUID())));
+
+        assertThat(cases, hasSize(1));
+        assertThat(cases.get(0).getDefendants(), is(singletonList(d1)));
+    }
+
+    @Test
+    void getHearingsForCheckIn_shouldIgnoreActiveApplicationCaseWhenAnyOffenceIsNotConcluded() {
+        final LocalDate date = START_DATE_1.toLocalDate();
+        final Hearing hearingEntity = buildHearing();
+        final UUID courtCentreId = hearingEntity.getCourtCentre().getId();
+
+        when(hearingRepository.findHearings(date, courtCentreId)).thenReturn(asList(hearingEntity));
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing()
+                .withCourtApplications(singletonList(applicationWithCases(applicationCaseWithOffences(randomUUID(), "ACTIVE",
+                        offence(randomUUID(), true), offence(randomUUID(), false)))))
+                .build();
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summaryForCheckIn(hearingPojo))
+                .thenReturn(HearingSummaries.hearingSummaries().withId(randomUUID()));
+
+        hearingService.getHearingsForCheckIn(date, courtCentreId, null, emptyList(), false);
+
+        verify(prosecutionCaseRepository, never()).findByCaseIds(any());
+    }
+
     @Test
     void getHearingsForCheckIn_shouldMatchOffenceIdsStrictlyPerCase() {
         final UUID caseId1 = randomUUID();
@@ -2994,6 +3031,16 @@ class HearingServiceTest {
 
     private static CourtApplicationCase applicationCase(final UUID caseId, final String status) {
         return CourtApplicationCase.courtApplicationCase().withProsecutionCaseId(caseId).withCaseStatus(status).build();
+    }
+
+    private static CourtApplicationCase applicationCaseWithOffences(final UUID caseId, final String status,
+                                                                   final uk.gov.justice.core.courts.Offence... offences) {
+        return CourtApplicationCase.courtApplicationCase().withProsecutionCaseId(caseId).withCaseStatus(status)
+                .withOffences(asList(offences)).build();
+    }
+
+    private static uk.gov.justice.core.courts.Offence offence(final UUID offenceId, final boolean proceedingsConcluded) {
+        return uk.gov.justice.core.courts.Offence.offence().withId(offenceId).withProceedingsConcluded(proceedingsConcluded).build();
     }
 
     private static CourtApplication applicationWithCases(final CourtApplicationCase... cases) {
