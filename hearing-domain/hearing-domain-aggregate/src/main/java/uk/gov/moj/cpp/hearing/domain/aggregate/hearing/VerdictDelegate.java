@@ -167,7 +167,7 @@ public class VerdictDelegate implements Serializable {
 
             if (isGuiltyVerdict(verdict.getVerdictType())) {
                 if (!convictionDateAlreadySetForOffence
-                        || (enteredAtThisHearing && prosecutionCaseId == null && hasInheritedConvictionDate(offenceId, courtApplicationId))) {
+                        || replacesInheritedConvictionDate(enteredAtThisHearing, prosecutionCaseId, offenceId, courtApplicationId)) {
                     events.add(convictionDateAdded()
                             .setCaseId(prosecutionCaseId)
                             .setHearingId(hearingId)
@@ -191,8 +191,9 @@ public class VerdictDelegate implements Serializable {
      * associated hearing (AC8: entered at the hearing), nor when the offence id is also a case offence on this
      * hearing, as the conviction-date event would then change the original case (CHD-3370 AC8).
      */
-    private boolean hasInheritedConvictionDate(final UUID offenceId, final UUID courtApplicationId) {
-        if (offenceId == null || courtApplicationId == null) {
+    private boolean replacesInheritedConvictionDate(final boolean enteredAtThisHearing, final UUID prosecutionCaseId,
+                                                    final UUID offenceId, final UUID courtApplicationId) {
+        if (!enteredAtThisHearing || prosecutionCaseId != null || offenceId == null || courtApplicationId == null) {
             return false;
         }
         return ofNullable(this.momento.getHearing().getCourtApplications()).orElse(emptyList()).stream()
