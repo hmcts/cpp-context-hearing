@@ -7,6 +7,7 @@ import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.DraftValidationResp
 import uk.gov.moj.cpp.hearing.domain.common.resultsvalidator.ValidationErrors;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -14,6 +15,7 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -28,6 +30,7 @@ public class ResultsValidationClient implements ResultsValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultsValidationClient.class);
     private static final String CJSCPPUID = "CJSCPPUID";
+    private static final int MAX_LOGGED_ERROR_BODY_LENGTH = 2000;
 
     @Inject
     @Value(key = "resultsvalidator.base.url", defaultValue = "http://localhost:8080/results-validator/api/validation/validate")
@@ -85,13 +88,17 @@ public class ResultsValidationClient implements ResultsValidator {
                     return objectMapper.readValue(content, DraftValidationResponse.class);
                 }
             } else {
-                LOGGER.error("Results validation service returned status {}, proceeding with share (fail-open)",
-                        httpResponse.getStatusLine().getStatusCode());
-                // The entity must be consumed even when it is not read: an unconsumed body keeps the
-                // connection leased, so a run of 4xx/5xx responses exhausts the pool. Once that
-                // happens every later call blocks until the connection-request timeout and then
-                // fails open here — results would be shared with validation silently skipped.
-                EntityUtils.consumeQuietly(httpResponse.getEntity());
+                final HttpEntity entity = httpResponse.getEntity();
+                try {
+                    LOGGER.error("Results validation service returned status {} for hearingId={}, proceeding with share (fail-open). Response body: {}",
+                            httpResponse.getStatusLine().getStatusCode(), request.getHearingId(), readErrorBody(entity));
+                } finally {
+                    // The entity must always be consumed: an unconsumed body keeps the connection
+                    // leased, so a run of 4xx/5xx responses exhausts the pool. Once that happens every
+                    // later call blocks until the connection-request timeout and then fails open here —
+                    // results would be shared with validation silently skipped.
+                    EntityUtils.consumeQuietly(entity);
+                }
                 return passThrough();
             }
         } catch (final Exception ex) {
@@ -103,6 +110,27 @@ public class ResultsValidationClient implements ResultsValidator {
     @Override
     public boolean isShareBlockingEnabled() {
         return "enabled".equalsIgnoreCase(shareBlocking.trim());
+    }
+
+    /**
+     * Reads a non-200 response body for logging, so a 400 shows which request field the validator
+     * rejected. Never throws: a failure to read the body must not affect the fail-open path.
+     */
+    private static String readErrorBody(final HttpEntity entity) {
+        if (entity == null) {
+            return "<none>";
+        }
+        try {
+            final String body = EntityUtils.toString(entity, StandardCharsets.UTF_8);
+            if (body == null || body.isBlank()) {
+                return "<empty>";
+            }
+            return body.length() > MAX_LOGGED_ERROR_BODY_LENGTH
+                    ? body.substring(0, MAX_LOGGED_ERROR_BODY_LENGTH) + "...<truncated>"
+                    : body;
+        } catch (final Exception ex) {
+            return "<unreadable: " + ex.getClass().getSimpleName() + ">";
+        }
     }
 
     /**
