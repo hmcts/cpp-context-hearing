@@ -1,0 +1,35 @@
+{
+  "hearingId": "6c7ba3c1-1b1e-4d43-9a3b-2b8e4f7a0c11",
+  "hearingDay": "2026-01-15",
+  "sharedTime": "2026-01-15T10:15:30.000Z",
+  "applicationId": "0f4d9a52-7a1c-4b8e-9b6d-3e2a1c5f8d44",
+  "applicationTypeCode": "MC80527",
+  "outcome": "GRANTED",
+  "action": "CLEARED",
+  "offences": [
+    {
+      "offenceId": "9d1e6b7a-2c4f-4e8b-8a3d-5f6c7b8a9e01",
+      "fieldsChanged": ["plea", "verdict", "convictionDate"],
+      "previous": {
+        "plea": {
+          "offenceId": "9d1e6b7a-2c4f-4e8b-8a3d-5f6c7b8a9e01",
+          "originatingHearingId": "3b2a1c0d-9e8f-4a7b-b6c5-d4e3f2a1b0c9",
+          "pleaDate": "2025-01-10",
+          "pleaValue": "GUILTY"
+        },
+        "verdict": {
+          "offenceId": "9d1e6b7a-2c4f-4e8b-8a3d-5f6c7b8a9e01",
+          "originatingHearingId": "3b2a1c0d-9e8f-4a7b-b6c5-d4e3f2a1b0c9",
+          "verdictDate": "2025-01-10",
+          "verdictType": {
+            "id": "c5a4b3d2-e1f0-4a9b-8c7d-6e5f4a3b2c1d",
+            "category": "Guilty",
+            "categoryType": "GUILTY"
+          }
+        },
+        "convictionDate": "2025-01-10"
+      },
+      "adjusted": {}
+    }
+  ]
+}

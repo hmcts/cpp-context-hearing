@@ -178,6 +178,7 @@ import uk.gov.moj.cpp.hearing.domain.event.PtphDetailFinalised;
 import uk.gov.moj.cpp.hearing.domain.event.PtphDetailSaved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAddedToHearing;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationClonedValuesAdjusted;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
@@ -230,7 +231,8 @@ public class HearingAggregate implements Aggregate {
     // field initialisers, so a snapshot written before those fields existed would restore with a
     // null delegate and NPE on the first PTPH command. A changed id makes the framework discard
     // such a snapshot and rebuild from the event stream instead.
-    private static final long serialVersionUID = -6059812881894748593L;
+    // Bumped again for the CHD-3381 application-offence snapshot and cloned-value adjustment state.
+    private static final long serialVersionUID = -6059812881894748594L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingAggregate.class);
 
@@ -342,6 +344,7 @@ public class HearingAggregate implements Aggregate {
                             updateSharedApplicationsByHearingDay(e.getHearingDay(), e.getTargets());
                         }
                 ),
+                when(ApplicationClonedValuesAdjusted.class).apply(resultsSharedDelegate::handleApplicationClonedValuesAdjusted),
                 when(ResultLinesStatusUpdated.class).apply(resultsSharedDelegate::handleResultLinesStatusUpdated),
                 when(DaysResultLinesStatusUpdated.class).apply(resultsSharedDelegate::handleDaysResultLinesStatusUpdated),
                 when(InheritedVerdictAdded.class).apply(verdictDelegate::handleInheritedVerdict),

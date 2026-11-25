@@ -2,10 +2,12 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResultCategory;
 import uk.gov.justice.core.courts.Level;
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.ResultLine2;
@@ -21,11 +23,14 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
+import uk.gov.moj.cpp.hearing.domain.aggregate.util.ClonedValueRule;
 import uk.gov.moj.cpp.hearing.domain.aggregate.util.CustodyTimeLimitUtil;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLocked;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLockedByOtherUser;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationFinalisedOnTargetUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationClonedValuesAdjusted;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationOffenceValues;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
@@ -63,6 +68,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -143,9 +149,118 @@ public class ResultsSharedDelegate implements Serializable {
                 resultsShared.getTargets().stream()
                         .flatMap(target2 -> target2.getResultLines().stream()
                                 .map( resultLine -> convertResultLine2ToSharedResultsCommandResultLineV2(target2,resultLine))).collect(Collectors.toList()));
+        final Map<UUID, Map<UUID, ApplicationOffenceValues>> applicationOffencesAsEntered = shareRuleApplicationOffences(this.momento.getHearing());
+        keepApplicationsJoiningAtShare(resultsShared, applicationOffencesAsEntered);
+        recordLastSharedApplicationOffences(resultsShared, applicationOffencesAsEntered);
         this.momento.setHearing(resultsShared.getHearing());
+        keepApplicationOffencesAsEntered(applicationOffencesAsEntered);
         this.momento.getHearing().setYouthCourt(resultsShared.getHearing().getYouthCourt());
         this.momento.getHearing().setHasSharedResults(true);
+    }
+
+    /**
+     * A STAT DEC application that first arrives with the share (additionalApplications) was never held by the
+     * aggregate, so it has no as-loaded snapshot. This adjustment is applied before the share's results-shared-v3,
+     * and for a first share each adjusted offence's previous values are the values it arrived with: record them
+     * as its snapshot (CHD-3361 AC14).
+     */
+    public void handleApplicationClonedValuesAdjusted(final ApplicationClonedValuesAdjusted applicationClonedValuesAdjusted) {
+        final UUID applicationId = applicationClonedValuesAdjusted.getApplicationId();
+        final boolean heldByAggregate = ofNullable(this.momento.getHearing().getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
+                .anyMatch(courtApplication -> courtApplication.getId().equals(applicationId));
+        if (!heldByAggregate) {
+            final Map<UUID, ApplicationOffenceValues> snapshot = this.momento.getApplicationOffencesAsLoaded()
+                    .computeIfAbsent(applicationId, id -> new HashMap<>());
+            applicationClonedValuesAdjusted.getOffences()
+                    .forEach(adjusted -> snapshot.putIfAbsent(adjusted.getOffenceId(), adjusted.getPrevious()));
+        }
+    }
+
+    /**
+     * A STAT DEC application that first arrives with the share: its values as loaded are the shared values, with
+     * any offence the share adjusted taken from the snapshot recorded by its adjustment. They complete its
+     * snapshot and are kept as entered (CHD-3361 AC14; work order design D1).
+     */
+    private void keepApplicationsJoiningAtShare(final ResultsSharedV3 resultsShared,
+                                                final Map<UUID, Map<UUID, ApplicationOffenceValues>> applicationOffencesAsEntered) {
+        shareRuleApplicationOffences(resultsShared.getHearing()).forEach((applicationId, sharedOffences) -> {
+            if (applicationOffencesAsEntered.containsKey(applicationId)) {
+                return;
+            }
+            final Map<UUID, ApplicationOffenceValues> snapshot = this.momento.getApplicationOffencesAsLoaded()
+                    .computeIfAbsent(applicationId, id -> new HashMap<>());
+            final Map<UUID, ApplicationOffenceValues> asLoaded = new HashMap<>();
+            sharedOffences.forEach((offenceId, shared) -> asLoaded.put(offenceId, snapshot.getOrDefault(offenceId, shared)));
+            applicationOffencesAsEntered.put(applicationId, asLoaded);
+            asLoaded.forEach(snapshot::putIfAbsent);
+        });
+    }
+
+    /**
+     * What this share published for STAT DEC application offences and their values as entered at the time,
+     * so the next share can tell a change the system made from one the adviser made.
+     */
+    private void recordLastSharedApplicationOffences(final ResultsSharedV3 resultsShared,
+                                                     final Map<UUID, Map<UUID, ApplicationOffenceValues>> applicationOffencesAsEntered) {
+        shareRuleApplicationOffences(resultsShared.getHearing()).forEach((applicationId, sharedOffences) -> {
+            this.momento.getLastSharedApplicationOffences().put(applicationId, sharedOffences);
+            this.momento.getLastSharedApplicationOffencesAsEntered().put(applicationId, applicationOffencesAsEntered.get(applicationId));
+        });
+    }
+
+    /**
+     * The shared hearing carries STAT DEC application offences with cloned values cleared or restored.
+     * Aggregate state keeps the values as entered so an amended result re-runs the rule (CHD-3361 AC14;
+     * work order design D1).
+     */
+    private static Map<UUID, Map<UUID, ApplicationOffenceValues>> shareRuleApplicationOffences(final Hearing hearing) {
+        final Map<UUID, Map<UUID, ApplicationOffenceValues>> applicationOffences = new HashMap<>();
+        if (nonNull(hearing) && nonNull(hearing.getCourtApplications())) {
+            hearing.getCourtApplications().stream()
+                    .filter(ClonedValueRule::isShareRuleApplication)
+                    .forEach(courtApplication -> applicationOffences.put(courtApplication.getId(),
+                            applicationCaseOffences(courtApplication)
+                                    .collect(toMap(Offence::getId, ApplicationOffenceValues::of, (first, second) -> first))));
+        }
+        return applicationOffences;
+    }
+
+    private void keepApplicationOffencesAsEntered(final Map<UUID, Map<UUID, ApplicationOffenceValues>> applicationOffencesAsEntered) {
+        final Hearing hearing = this.momento.getHearing();
+        if (applicationOffencesAsEntered.isEmpty() || isNull(hearing.getCourtApplications())) {
+            return;
+        }
+        hearing.setCourtApplications(hearing.getCourtApplications().stream()
+                .map(courtApplication -> ofNullable(applicationOffencesAsEntered.get(courtApplication.getId()))
+                        .map(asEntered -> withOffenceValues(courtApplication, asEntered))
+                        .orElse(courtApplication))
+                .collect(toList()));
+    }
+
+    private static CourtApplication withOffenceValues(final CourtApplication courtApplication, final Map<UUID, ApplicationOffenceValues> offenceValues) {
+        return CourtApplication.courtApplication()
+                .withValuesFrom(courtApplication)
+                .withCourtApplicationCases(ofNullable(courtApplication.getCourtApplicationCases()).map(Collection::stream).orElseGet(Stream::empty)
+                        .map(courtApplicationCase -> CourtApplicationCase.courtApplicationCase()
+                                .withValuesFrom(courtApplicationCase)
+                                .withOffences(ofNullable(courtApplicationCase.getOffences()).map(offences -> offences.stream()
+                                        .map(offence -> ofNullable(offenceValues.get(offence.getId()))
+                                                .map(values -> Offence.offence()
+                                                        .withValuesFrom(offence)
+                                                        .withPlea(values.getPlea())
+                                                        .withVerdict(values.getVerdict())
+                                                        .withConvictionDate(values.getConvictionDate())
+                                                        .build())
+                                                .orElse(offence))
+                                        .collect(toList())).orElse(null))
+                                .build())
+                        .collect(toList()))
+                .build();
+    }
+
+    private static Stream<Offence> applicationCaseOffences(final CourtApplication courtApplication) {
+        return ofNullable(courtApplication.getCourtApplicationCases()).map(Collection::stream).orElseGet(Stream::empty)
+                .flatMap(courtApplicationCase -> ofNullable(courtApplicationCase.getOffences()).map(Collection::stream).orElseGet(Stream::empty));
     }
 
 
@@ -616,6 +731,9 @@ public class ResultsSharedDelegate implements Serializable {
             });
         }
 
+        final List<ApplicationClonedValuesAdjusted> clonedValuesAdjustments = new ApplicationClonedValuesAdjuster(momento)
+                .adjust(hearingId, hearingDay, sharedTime, hearing, resultLines);
+
         final List<Target2> updatedFinalTargets = updateApplicationFinalisedFlag(finalTargets.values());
         final ResultsSharedV3.Builder resultsSharedV3Builder = ResultsSharedV3.builder()
                 .withIsReshare(previouslyShared)
@@ -640,6 +758,7 @@ public class ResultsSharedDelegate implements Serializable {
 
         final ResultsSharedV3 resultsSharedV3 = resultsSharedV3Builder.build();
         streamBuilder.add(resultsSharedSuccess);
+        clonedValuesAdjustments.forEach(streamBuilder::add);
         streamBuilder.add(resultsSharedV3);
 
         isHearingVacatedRequired(hearing, resultsSharedV3, streamBuilder);

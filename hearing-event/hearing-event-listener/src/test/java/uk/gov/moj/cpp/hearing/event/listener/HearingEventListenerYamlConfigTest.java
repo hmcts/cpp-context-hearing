@@ -76,6 +76,7 @@ import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationClonedValuesAdjusted;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestRejected;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
@@ -199,7 +200,8 @@ public class HearingEventListenerYamlConfigTest {
             HearingBreachApplicationsToBeAddedReceived.class.getAnnotation(Event.class).value(),
             MasterCaseUpdatedForHearing.class.getAnnotation(Event.class).value(),
             CaseRegisteredForExtendedHearing.class.getAnnotation(Event.class).value(),
-            ResultsValidationFailed.class.getAnnotation(Event.class).value()
+            ResultsValidationFailed.class.getAnnotation(Event.class).value(),
+            ApplicationClonedValuesAdjusted.class.getAnnotation(Event.class).value()
 
     );
 

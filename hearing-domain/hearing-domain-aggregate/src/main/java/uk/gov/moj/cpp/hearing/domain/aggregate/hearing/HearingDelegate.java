@@ -54,6 +54,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingVacatedTrialDetailUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationOffenceValues;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -123,6 +124,12 @@ public class HearingDelegate implements Serializable {
                     .forEach(this::keepOffence);
         }
 
+        this.momento.getApplicationOffencesAsLoaded().clear();
+        this.momento.getLastSharedApplicationOffences().clear();
+        this.momento.getLastSharedApplicationOffencesAsEntered().clear();
+        ofNullable(this.momento.getHearing().getCourtApplications()).orElse(emptyList())
+                .forEach(this::keepApplicationOffencesAsLoaded);
+
         // When initiating, clear old deletion flags
         this.momento.setDeleted(false);
         this.momento.setDuplicate(false);
@@ -145,6 +152,19 @@ public class HearingDelegate implements Serializable {
         if (nonNull(offence.getIndicatedPlea())) {
             this.momento.getIndicatedPlea().put(offenceId, offence.getIndicatedPlea());
         }
+    }
+
+    /**
+     * Records the plea, verdict and conviction date of an application's offences as the application
+     * first arrives, so a not-granted STAT DEC can restore them at share (CHD-3361 AC6, AC14). Never overwritten
+     * by values entered at this hearing.
+     */
+    private void keepApplicationOffencesAsLoaded(final CourtApplication courtApplication) {
+        final Map<UUID, ApplicationOffenceValues> offences = this.momento.getApplicationOffencesAsLoaded()
+                .computeIfAbsent(courtApplication.getId(), applicationId -> new HashMap<>());
+        ofNullable(courtApplication.getCourtApplicationCases()).orElse(emptyList()).stream()
+                .flatMap(c -> ofNullable(c.getOffences()).map(Collection::stream).orElseGet(Stream::empty))
+                .forEach(offence -> offences.putIfAbsent(offence.getId(), ApplicationOffenceValues.of(offence)));
     }
 
     public void handleHearingExtended(final HearingExtended hearingExtended) {
@@ -248,6 +268,7 @@ public class HearingDelegate implements Serializable {
                             .collect(Collectors.toList());
 
             newCourtApplications.add(hearingExtended.getCourtApplication());
+            keepApplicationOffencesAsLoaded(hearingExtended.getCourtApplication());
             //Adding hearingExtended as we need to reCreate Data again with court details for multiple breach applications
             this.momento.getHearing().setCourtApplications(newCourtApplications);
         }
@@ -520,6 +541,7 @@ public class HearingDelegate implements Serializable {
                     .findFirst();
             previousStoredApplication.ifPresent(courtApplication -> momento.getHearing().getCourtApplications().remove(courtApplication));
             momento.getHearing().getCourtApplications().add(applicationDetailChanged.getCourtApplication());
+            keepApplicationOffencesAsLoaded(applicationDetailChanged.getCourtApplication());
         }
     }
 
