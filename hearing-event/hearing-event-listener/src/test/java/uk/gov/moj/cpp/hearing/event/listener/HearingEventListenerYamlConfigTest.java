@@ -72,6 +72,7 @@ import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffenceV2;
+import uk.gov.moj.cpp.hearing.domain.event.ReleaseProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
@@ -159,6 +160,9 @@ public class HearingEventListenerYamlConfigTest {
             OutstandingFinesQueried.class.getAnnotation(Event.class).value(),
             OutstandingFinesRequested.class.getAnnotation(Event.class).value(),
             BookProvisionalHearingSlots.class.getAnnotation(Event.class).value(),
+            // Only here so hearing streams that already hold this event stay loadable;
+            // no view-store listener handles it, so it is not in the listener yaml.
+            ReleaseProvisionalHearingSlots.class.getAnnotation(Event.class).value(),
             SaveDraftResultFailed.class.getAnnotation(Event.class).value(),
             ShareResultsFailed.class.getAnnotation(Event.class).value(),
             ManageResultsFailed.class.getAnnotation(Event.class).value(),
