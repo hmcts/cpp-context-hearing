@@ -4,6 +4,7 @@ import uk.gov.justice.core.courts.*;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationOffenceValues;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -17,7 +18,7 @@ import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupAllReportingRe
 @SuppressWarnings({"squid:S2384", "PMD.BeanMembersShouldSerialize"})
 public class HearingAggregateMomento implements Serializable {
 
-    private static final long serialVersionUID = -561416825201569301L;
+    private static final long serialVersionUID = -561416825201569302L;
 
     private final Map<UUID, HearingEventDelegate.HearingEvent> hearingEvents = new HashMap<>();
     private final Map<UUID, ProsecutionCounsel> prosecutionCounsels = new HashMap<>();
@@ -51,6 +52,11 @@ public class HearingAggregateMomento implements Serializable {
     private Map<LocalDate, Map<UUID, Target2>> multiDaySavedTargets = new HashMap<>();
     private Map<LocalDate, Map<UUID, CompletedResultLineStatus>> multiDayCompletedResultLinesStatus = new HashMap<>();
     private Map<LocalDate, Boolean> isHearingDayPreviouslyShared = new HashMap<>();
+    // application id -> offence id -> plea, verdict and conviction date as the application arrived (CHD-3361 AC6, AC14)
+    private Map<UUID, Map<UUID, ApplicationOffenceValues>> applicationOffencesAsLoaded = new HashMap<>();
+    // application id -> offence id -> what the last share published, and the values as entered at that share
+    private Map<UUID, Map<UUID, ApplicationOffenceValues>> lastSharedApplicationOffences = new HashMap<>();
+    private Map<UUID, Map<UUID, ApplicationOffenceValues>> lastSharedApplicationOffencesAsEntered = new HashMap<>();
 
     private  List<UUID> breachApplicationsToBeAdded;
 
@@ -253,6 +259,18 @@ public class HearingAggregateMomento implements Serializable {
 
     public boolean isDeletedOrDuplicated()  {
         return this.isDeleted() || this.isDuplicate();
+    }
+
+    public Map<UUID, Map<UUID, ApplicationOffenceValues>> getApplicationOffencesAsLoaded() {
+        return applicationOffencesAsLoaded;
+    }
+
+    public Map<UUID, Map<UUID, ApplicationOffenceValues>> getLastSharedApplicationOffences() {
+        return lastSharedApplicationOffences;
+    }
+
+    public Map<UUID, Map<UUID, ApplicationOffenceValues>> getLastSharedApplicationOffencesAsEntered() {
+        return lastSharedApplicationOffencesAsEntered;
     }
 
     /**

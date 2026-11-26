@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static uk.gov.moj.cpp.hearing.domain.aggregate.util.ApplicationClonedValues.isInheritedConvictionDate;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaVerdictUtil.isGuiltyVerdict;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded.convictionDateAdded;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved.convictionDateRemoved;
@@ -13,6 +14,7 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Verdict;
+import uk.gov.moj.cpp.hearing.domain.aggregate.util.ApplicationClonedValues;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
@@ -101,7 +103,7 @@ public class VerdictDelegate implements Serializable {
 
         events.add(verdictUpsert);
 
-        addOrRemoveConvictionDate(hearingId, verdict, guiltyPleaTypes, events);
+        addOrRemoveConvictionDate(hearingId, verdict, guiltyPleaTypes, events, true);
 
         return events.stream();
     }
@@ -121,12 +123,13 @@ public class VerdictDelegate implements Serializable {
         final List<Object> events = new ArrayList<>();
         events.add(new InheritedVerdictAdded(hearingId, verdict));
 
-        addOrRemoveConvictionDate(hearingId, verdict, guiltyPleaTypes, events);
+        addOrRemoveConvictionDate(hearingId, verdict, guiltyPleaTypes, events, false);
 
         return events.stream();
     }
 
-    private void addOrRemoveConvictionDate(final UUID hearingId, final Verdict verdict, final Set<String> guiltyPleaTypes, final List<Object> events) {
+    private void addOrRemoveConvictionDate(final UUID hearingId, final Verdict verdict, final Set<String> guiltyPleaTypes, final List<Object> events,
+                                           final boolean enteredAtThisHearing) {
 
         final UUID prosecutionCaseId;
         final UUID courtApplicationId;
@@ -163,7 +166,8 @@ public class VerdictDelegate implements Serializable {
             final boolean guiltyPleaForOffenceAlreadySet = nonNull(existingOffencePlea) && guiltyPleaTypes.contains(existingOffencePlea.getPleaValue());
 
             if (isGuiltyVerdict(verdict.getVerdictType())) {
-                if (!convictionDateAlreadySetForOffence) {
+                if (!convictionDateAlreadySetForOffence
+                        || replacesInheritedConvictionDate(enteredAtThisHearing, prosecutionCaseId, offenceId, courtApplicationId)) {
                     events.add(convictionDateAdded()
                             .setCaseId(prosecutionCaseId)
                             .setHearingId(hearingId)
@@ -179,5 +183,22 @@ public class VerdictDelegate implements Serializable {
                         .setCourtApplicationId(courtApplicationId));
             }
         }
+    }
+
+    /**
+     * A conviction date cloned onto a REOPEN application offence from an earlier hearing is replaced by a
+     * guilty verdict entered at this hearing (CHD-3370 AC8, AC10). Not applied to a verdict passed on from an
+     * associated hearing (AC8: entered at the hearing), nor when the offence id is also a case offence on this
+     * hearing, as the conviction-date event would then change the original case (CHD-3370 AC8).
+     */
+    private boolean replacesInheritedConvictionDate(final boolean enteredAtThisHearing, final UUID prosecutionCaseId,
+                                                    final UUID offenceId, final UUID courtApplicationId) {
+        if (!enteredAtThisHearing || prosecutionCaseId != null || offenceId == null || courtApplicationId == null) {
+            return false;
+        }
+        return ofNullable(this.momento.getHearing().getCourtApplications()).orElse(emptyList()).stream()
+                .filter(ca -> ca.getId().equals(courtApplicationId))
+                .filter(ApplicationClonedValues::isReopenApplication)
+                .anyMatch(ca -> isInheritedConvictionDate(momento.getConvictionDates().get(offenceId), ca));
     }
 }

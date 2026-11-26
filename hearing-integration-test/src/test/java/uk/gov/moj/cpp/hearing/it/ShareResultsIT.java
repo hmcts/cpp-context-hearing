@@ -16,11 +16,15 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.justice.core.courts.AssociatedDefenceOrganisation.associatedDefenceOrganisation;
@@ -42,6 +46,12 @@ import static uk.gov.moj.cpp.hearing.it.Queries.getDraftResultsPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.Queries.pollForHearing;
 import static uk.gov.moj.cpp.hearing.it.UseCases.addProsecutionCounsel;
+import static uk.gov.moj.cpp.hearing.it.UseCases.amendHearing;
+import static uk.gov.moj.cpp.hearing.it.UseCases.requestApproval;
+import static uk.gov.moj.cpp.hearing.it.UseCases.validateResultAmendments;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.APPROVAL_REQUESTED;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_USER_ERROR;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.VALIDATED;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.UseCases.setTrialType;
 import static uk.gov.moj.cpp.hearing.it.UseCases.shareResults;
@@ -50,6 +60,7 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.updateDefendants;
 import static uk.gov.moj.cpp.hearing.it.UseCases.updatePlea;
 import static uk.gov.moj.cpp.hearing.it.UseCases.updatePleaNoAdditionalCheck;
 import static uk.gov.moj.cpp.hearing.it.UseCases.updateVerdictNoAdditionalCheck;
+import static uk.gov.moj.cpp.hearing.it.Utilities.RETRY_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
@@ -112,6 +123,8 @@ import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.AttendanceType;
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
+import uk.gov.justice.core.courts.CourtApplicationType;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.core.courts.CustodialEstablishment;
@@ -139,6 +152,8 @@ import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.core.courts.Verdict;
+import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -218,6 +233,15 @@ public class ShareResultsIT extends AbstractIT {
     private static final UUID WITHDRAWN_RESULT_DEF_ID = fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
     private static final UUID REMANDED_ON_CONDITIONAL_BAIL_ID = fromString("3a529001-2f43-45ba-a0a8-d3ced7e9e7ad");
     private static final String GUILTY = "GUILTY";
+    private static final String STAT_DEC_APPLICATION_TYPE_CODE = "MC80527";
+    private static final UUID STAT_DEC_GRANTED_G_RESULT_DEF_ID = fromString("2b3f7c20-8fc1-4fad-9076-df196c24b27e");
+    private static final UUID STAT_DEC_REFUSED_RFSD_RESULT_DEF_ID = fromString("d3902789-4cc8-4753-a15f-7e26dd39f6ae");
+    // the first share-days-results is sent with version 1 and results-shared-v3 records version 2; request-approval
+    // and the amended re-share must carry that last shared version
+    private static final int AMENDED_RESULT_VERSION = 2;
+    private static final String APPLICATION_CLONED_VALUES_ADJUSTED = "hearing.events.application-cloned-values-adjusted";
+    private static final String RESULTS_SHARED_V3 = "hearing.events.results-shared-v3";
+    private static final String HEARING_EVENT_TOPIC = "hearing.event";
     private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
     private static final String PUBLIC_HEARING_MANAGE_RESULTS_FAILED = "public.hearing.manage-results-failed";
     private static final MessageConsumer consumerForCustodyTimeClockStopped = getPublicTopicInstance().createConsumer("public.events.hearing.custody-time-limit-clock-stopped");
@@ -1922,6 +1946,129 @@ public class ShareResultsIT extends AbstractIT {
         assertNotNull(jsonPath.get("hearingId"));
     }
 
+    /**
+     * CHD-3361 AC2 and AC14: a STAT DEC application (MC80527) whose offences carry plea, verdict and conviction date
+     * cloned from an earlier hearing.
+     * <ul>
+     *   <li>Resulted GRANTED (G) and shared: {@code public.events.hearing.hearing-resulted} carries no plea, verdict
+     *   or convictionDate on the application offences, and exactly one private
+     *   {@code hearing.events.application-cloned-values-adjusted} (CLEARED, caused by G) is raised before
+     *   {@code hearing.events.results-shared-v3}.</li>
+     *   <li>Amended to refused (RFSD) through the per-day amend and approval workflow and re-shared: the re-shared
+     *   {@code hearing-resulted} carries the restored cloned values, and the event is raised as RESTORED, caused by
+     *   RFSD.</li>
+     * </ul>
+     */
+    @Test
+    public void shouldClearClonedValuesWhenStatDecGrantedAndRestoreThemWhenAmendedToRefused() {
+        final ClonedStatDecHearing statDec = givenStatDecHearingWithClonedValues();
+        final Hearing hearing = statDec.hearing;
+        final LocalDate hearingDay = statDec.hearingDate;
+
+        final SaveDraftResultCommand grantedDraft = applicationLevelDraftResult(statDec, STAT_DEC_GRANTED_G_RESULT_DEF_ID);
+        saveDaysDraftResult(grantedDraft);
+        final Target grantedTarget = grantedDraft.getTarget();
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        try (final EventListener hearingResultedListener = listenForHearingResulted(hearing.getId(), false);
+             final EventListener clonedValuesAdjustedListener = listenFor(APPLICATION_CLONED_VALUES_ADJUSTED, HEARING_EVENT_TOPIC)
+                     .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString()))));
+             final EventListener resultsSharedV3Listener = listenFor(RESULTS_SHARED_V3, HEARING_EVENT_TOPIC)
+                     .withFilter(isJson(allOf(
+                             withJsonPath("$.hearingId", is(hearing.getId().toString())),
+                             withJsonPath("$.hearingDay", is(hearingDay.toString())))))) {
+
+            shareDaysResultWithCourtClerk(hearing, singletonList(grantedTarget), hearingDay);
+
+            final JsonPath adjusted = clonedValuesAdjustedListener.waitFor();
+            assertThat(adjusted.getString("hearingId"), is(hearing.getId().toString()));
+            assertThat(adjusted.getString("hearingDay"), is(hearingDay.toString()));
+            assertThat(adjusted.getString("sharedTime"), is(notNullValue()));
+            assertThat(adjusted.getString("applicationId"), is(statDec.applicationId.toString()));
+            assertThat(adjusted.getString("applicationTypeCode"), is(STAT_DEC_APPLICATION_TYPE_CODE));
+            assertThat(adjusted.getString("adjustment"), is("CLEARED"));
+            assertThat(adjusted.getString("resultDefinitionId"), is(STAT_DEC_GRANTED_G_RESULT_DEF_ID.toString()));
+            assertThat(adjusted.getList("offences.offenceId", String.class), containsInAnyOrder(statDec.offenceIdStrings()));
+            for (final UUID offenceId : statDec.offenceIds) {
+                final String offencePath = "offences.find { it.offenceId == '" + offenceId + "' }";
+                assertThat(adjusted.getList(offencePath + ".fieldsChanged", String.class), containsInAnyOrder("plea", "verdict", "convictionDate"));
+                assertThat(adjusted.getString(offencePath + ".previous.plea.pleaValue"), is(GUILTY));
+                assertThat(adjusted.getString(offencePath + ".previous.verdict.originatingHearingId"), is(statDec.clonedVerdictOriginatingHearingId.toString()));
+                assertThat(adjusted.getString(offencePath + ".previous.convictionDate"), is(statDec.clonedDate.toString()));
+                final Map<String, Object> adjustedValues = adjusted.getMap(offencePath + ".adjusted");
+                // every value is cleared, so the adjusted block is serialised with no keys (absent or empty)
+                assertThat(adjustedValues == null || adjustedValues.isEmpty(), is(true));
+            }
+
+            final JsonPath resultsSharedV3 = resultsSharedV3Listener.waitFor();
+            // both events are appended to the same hearing aggregate stream; the adjustment must precede results-shared-v3
+            assertThat(adjusted.getLong("_metadata.stream.version"), lessThan(resultsSharedV3.getLong("_metadata.stream.version")));
+
+            final JsonPath hearingResulted = hearingResultedListener.waitFor();
+            for (final UUID offenceId : statDec.offenceIds) {
+                final Map<String, Object> offence = applicationOffence(hearingResulted, statDec.applicationId, offenceId);
+                assertThat(offence, is(notNullValue()));
+                assertThat(offence, not(hasKey("plea")));
+                assertThat(offence, not(hasKey("verdict")));
+                assertThat(offence, not(hasKey("convictionDate")));
+            }
+
+            // exactly one adjustment event for this share
+            clonedValuesAdjustedListener.expectNoneWithin(RETRY_TIMEOUT_IN_MILLIS);
+        }
+
+        // per-day amend workflow: clerk locks the shared hearing for amendment and requests approval, a different
+        // user approves the amendments (VALIDATED), then the amended results for the day can be re-shared
+        final UUID amendingClerk = getLoggedInUser();
+        amendHearing(getRequestSpec(), hearing.getId(), SHARED_AMEND_LOCKED_USER_ERROR);
+        pollForHearing(hearing.getId().toString(), withJsonPath("$.hearingState", is(SHARED_AMEND_LOCKED_USER_ERROR.toString())));
+
+        requestApproval(getRequestSpec(), hearing.getId(), hearingDay, AMENDED_RESULT_VERSION);
+        pollForHearing(hearing.getId().toString(), withJsonPath("$.hearingState", is(APPROVAL_REQUESTED.toString())));
+
+        final UUID approvingUser = randomUUID();
+        givenAUserHasLoggedInAsACourtClerk(approvingUser);
+        validateResultAmendments(getRequestSpec(), hearing.getId(), approvingUser, hearingDay, "APPROVE");
+        pollForHearing(hearing.getId().toString(), withJsonPath("$.hearingState", is(VALIDATED.toString())));
+
+        givenAUserHasLoggedInAsACourtClerk(amendingClerk);
+
+        // amend: the G line is deleted and an amended RFSD line is added to the same application-level target
+        grantedTarget.getResultLines().forEach(resultLine -> resultLine.setIsDeleted(true));
+        final Target refusedTarget = applicationLevelDraftResult(statDec, STAT_DEC_REFUSED_RFSD_RESULT_DEF_ID).getTarget();
+        refusedTarget.setTargetId(grantedTarget.getTargetId());
+        refusedTarget.setResultLines(singletonList(getAmendedResultLine(STAT_DEC_REFUSED_RFSD_RESULT_DEF_ID,
+                findPrompt(statDec.resultDefinitions, STAT_DEC_REFUSED_RFSD_RESULT_DEF_ID), statDec.hearingDate)));
+
+        try (final EventListener reshareHearingResulted = listenForHearingResulted(hearing.getId(), true);
+             final EventListener restoredListener = listenFor(APPLICATION_CLONED_VALUES_ADJUSTED, HEARING_EVENT_TOPIC)
+                     .withFilter(isJson(allOf(
+                             withJsonPath("$.hearingId", is(hearing.getId().toString())),
+                             withJsonPath("$.adjustment", is("RESTORED")))))) {
+
+            shareDaysResultWithCourtClerk(hearing, asList(grantedTarget, refusedTarget), hearingDay, basicShareResultsCommandV2Template(AMENDED_RESULT_VERSION));
+
+            final JsonPath restored = restoredListener.waitFor();
+            assertThat(restored.getString("hearingDay"), is(hearingDay.toString()));
+            assertThat(restored.getString("applicationId"), is(statDec.applicationId.toString()));
+            assertThat(restored.getString("applicationTypeCode"), is(STAT_DEC_APPLICATION_TYPE_CODE));
+            assertThat(restored.getString("adjustment"), is("RESTORED"));
+            assertThat(restored.getString("resultDefinitionId"), is(STAT_DEC_REFUSED_RFSD_RESULT_DEF_ID.toString()));
+            assertThat(restored.getList("offences.offenceId", String.class), containsInAnyOrder(statDec.offenceIdStrings()));
+            for (final UUID offenceId : statDec.offenceIds) {
+                final String offencePath = "offences.find { it.offenceId == '" + offenceId + "' }";
+                assertThat(restored.getString(offencePath + ".adjusted.plea.pleaValue"), is(GUILTY));
+                assertThat(restored.getString(offencePath + ".adjusted.plea.originatingHearingId"), is(statDec.clonedPleaOriginatingHearingId.toString()));
+                assertThat(restored.getString(offencePath + ".adjusted.verdict.originatingHearingId"), is(statDec.clonedVerdictOriginatingHearingId.toString()));
+                assertThat(restored.getString(offencePath + ".adjusted.convictionDate"), is(statDec.clonedDate.toString()));
+            }
+
+            final JsonPath hearingResulted = reshareHearingResulted.waitFor();
+            assertClonedValuesPresent(hearingResulted, statDec);
+        }
+    }
+
     private static List<Target> getTargets(final UUID hearingId, final UUID resultLineId, final String hearingDay) {
         final List<Target> targets = new ArrayList<>();
         targets.add(Target.target()
@@ -2083,10 +2230,14 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     private void shareDaysResultWithCourtClerk(final Hearing hearing, final List<Target> targets, final LocalDate hearingDay) {
+        shareDaysResultWithCourtClerk(hearing, targets, hearingDay, basicShareResultsCommandV2Template());
+    }
+
+    private void shareDaysResultWithCourtClerk(final Hearing hearing, final List<Target> targets, final LocalDate hearingDay,
+                                               final ShareDaysResultsCommand shareDaysResultsCommand) {
         final DelegatedPowers courtClerk1 = delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
                 .withUserId(randomUUID()).build();
-        ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
         shareDaysResultsCommand.setHearingDay(hearingDay);
         shareResultsPerDay(getRequestSpec(), hearing.getId(), with(
                 shareDaysResultsCommand,
@@ -3635,6 +3786,152 @@ public class ShareResultsIT extends AbstractIT {
         );
         return firstProsecutionCounsel;
 
+    }
+
+    private EventListener listenForHearingResulted(final UUID hearingId, final boolean isReshare) {
+        return listenFor("public.events.hearing.hearing-resulted")
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.hearing.id", is(hearingId.toString())),
+                        withJsonPath("$.isReshare", is(isReshare)))));
+    }
+
+    private static String applicationOffencePath(final UUID applicationId, final UUID offenceId) {
+        return "hearing.courtApplications.find { it.id == '" + applicationId + "' }"
+                + ".courtApplicationCases.offences.flatten().find { it.id == '" + offenceId + "' }";
+    }
+
+    private static Map<String, Object> applicationOffence(final JsonPath hearingResulted, final UUID applicationId, final UUID offenceId) {
+        return hearingResulted.getMap(applicationOffencePath(applicationId, offenceId));
+    }
+
+    private static void assertClonedValuesPresent(final JsonPath hearingResulted, final ClonedStatDecHearing statDec) {
+        for (final UUID offenceId : statDec.offenceIds) {
+            final String offencePath = applicationOffencePath(statDec.applicationId, offenceId);
+            assertThat(hearingResulted.getString(offencePath + ".plea.pleaValue"), is(GUILTY));
+            assertThat(hearingResulted.getString(offencePath + ".plea.pleaDate"), is(statDec.clonedDate.toString()));
+            assertThat(hearingResulted.getString(offencePath + ".plea.originatingHearingId"), is(statDec.clonedPleaOriginatingHearingId.toString()));
+            assertThat(hearingResulted.getString(offencePath + ".verdict.verdictDate"), is(statDec.clonedDate.toString()));
+            assertThat(hearingResulted.getString(offencePath + ".verdict.originatingHearingId"), is(statDec.clonedVerdictOriginatingHearingId.toString()));
+            assertThat(hearingResulted.getString(offencePath + ".verdict.verdictType.categoryType"), is(GUILTY));
+            assertThat(hearingResulted.getString(offencePath + ".convictionDate"), is(statDec.clonedDate.toString()));
+        }
+    }
+
+    /**
+     * Initiates a hearing whose first court application is a STAT DEC (MC80527) received 14 days before the
+     * hearing, with every application offence carrying a plea, verdict and conviction date cloned from an earlier
+     * hearing (random originating hearing ids, dated one year before the hearing).
+     */
+    private ClonedStatDecHearing givenStatDecHearingWithClonedValues() {
+        final InitiateHearingCommand initiateHearingCommand = InitiateHearingCommand.initiateHearingCommand()
+                .setHearing(CoreTestTemplates.hearing(
+                        defaultArguments().setStructure(getUuidMapForMultipleCaseStructure())
+                                .setDefendantType(PERSON)
+                                .setHearingLanguage(ENGLISH)
+                                .setJurisdictionType(CROWN)
+                ).build());
+        final Hearing hearingToInitiate = initiateHearingCommand.getHearing();
+        final LocalDate hearingDate = hearingToInitiate.getHearingDays().get(0).getSittingDay().toLocalDate();
+        final LocalDate clonedDate = hearingDate.minusYears(1);
+        final UUID clonedPleaOriginatingHearingId = randomUUID();
+        final UUID clonedVerdictOriginatingHearingId = randomUUID();
+
+        final CourtApplication statDecApplication = hearingToInitiate.getCourtApplications().get(0);
+        statDecApplication.setApplicationReceivedDate(hearingDate.minusDays(14));
+        statDecApplication.setType(CourtApplicationType.courtApplicationType()
+                .withValuesFrom(statDecApplication.getType())
+                .withCode(STAT_DEC_APPLICATION_TYPE_CODE)
+                .build());
+
+        final List<UUID> offenceIds = new ArrayList<>();
+        statDecApplication.getCourtApplicationCases().stream()
+                .flatMap(applicationCase -> applicationCase.getOffences().stream())
+                .forEach(clonedOffence -> {
+                    clonedOffence.setPlea(Plea.plea()
+                            .withOffenceId(clonedOffence.getId())
+                            .withOriginatingHearingId(clonedPleaOriginatingHearingId)
+                            .withPleaDate(clonedDate)
+                            .withPleaValue(GUILTY)
+                            .build());
+                    clonedOffence.setVerdict(Verdict.verdict()
+                            .withOffenceId(clonedOffence.getId())
+                            .withOriginatingHearingId(clonedVerdictOriginatingHearingId)
+                            .withVerdictDate(clonedDate)
+                            .withVerdictType(VerdictType.verdictType()
+                                    .withId(randomUUID())
+                                    .withCategory("Guilty")
+                                    .withCategoryType(GUILTY)
+                                    .build())
+                            .build());
+                    clonedOffence.setConvictionDate(clonedDate);
+                    offenceIds.add(clonedOffence.getId());
+                });
+
+        final InitiateHearingCommandHelper hearingHelper = h(initiateHearing(getRequestSpec(), initiateHearingCommand,
+                true, false, false, true, false, false));
+
+        getHearingPollForMatch(hearingHelper.getHearingId(), isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getCourtApplications, first(isBean(CourtApplication.class)
+                                .with(CourtApplication::getCourtApplicationCases, first(isBean(CourtApplicationCase.class)
+                                        .with(CourtApplicationCase::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(offenceIds.get(0)))
+                                                .with(Offence::getConvictionDate, is(clonedDate))
+                                        ))))))));
+
+        stubCourtRoomForApplication(hearingHelper.getHearing());
+        setupNowsReferenceData(hearingDate);
+        final AllResultDefinitionsReferenceDataHelper resultDefinitions = setupResultDefinitionsReferenceData(hearingDate, asList(
+                STAT_DEC_GRANTED_G_RESULT_DEF_ID,
+                STAT_DEC_REFUSED_RFSD_RESULT_DEF_ID));
+
+        return new ClonedStatDecHearing(hearingHelper, statDecApplication.getId(), offenceIds, hearingDate, clonedDate,
+                clonedPleaOriginatingHearingId, clonedVerdictOriginatingHearingId, resultDefinitions);
+    }
+
+    /**
+     * Draft result for an APPLICATION-level target (applicationId set, offenceId null) on the STAT DEC hearing day.
+     */
+    private SaveDraftResultCommand applicationLevelDraftResult(final ClonedStatDecHearing statDec, final UUID resultDefinitionId) {
+        final SaveDraftResultCommand draft = saveDraftResultCommandTemplateWithApplication(statDec.hearingHelper.it(),
+                statDec.hearingDate, randomUUID(), resultDefinitionId, Boolean.FALSE, statDec.hearingDate);
+        final Target target = draft.getTarget();
+        target.setApplicationId(statDec.applicationId);
+        target.setOffenceId(null);
+        setResultLine(target.getResultLines().get(0), findPrompt(statDec.resultDefinitions, resultDefinitionId),
+                resultDefinitionId, statDec.hearingDate);
+        return draft;
+    }
+
+    private static final class ClonedStatDecHearing {
+        private final InitiateHearingCommandHelper hearingHelper;
+        private final Hearing hearing;
+        private final UUID applicationId;
+        private final List<UUID> offenceIds;
+        private final LocalDate hearingDate;
+        private final LocalDate clonedDate;
+        private final UUID clonedPleaOriginatingHearingId;
+        private final UUID clonedVerdictOriginatingHearingId;
+        private final AllResultDefinitionsReferenceDataHelper resultDefinitions;
+
+        private ClonedStatDecHearing(final InitiateHearingCommandHelper hearingHelper, final UUID applicationId,
+                                     final List<UUID> offenceIds, final LocalDate hearingDate, final LocalDate clonedDate,
+                                     final UUID clonedPleaOriginatingHearingId, final UUID clonedVerdictOriginatingHearingId,
+                                     final AllResultDefinitionsReferenceDataHelper resultDefinitions) {
+            this.hearingHelper = hearingHelper;
+            this.hearing = hearingHelper.getHearing();
+            this.applicationId = applicationId;
+            this.offenceIds = offenceIds;
+            this.hearingDate = hearingDate;
+            this.clonedDate = clonedDate;
+            this.clonedPleaOriginatingHearingId = clonedPleaOriginatingHearingId;
+            this.clonedVerdictOriginatingHearingId = clonedVerdictOriginatingHearingId;
+            this.resultDefinitions = resultDefinitions;
+        }
+
+        private String[] offenceIdStrings() {
+            return offenceIds.stream().map(UUID::toString).toArray(String[]::new);
+        }
     }
 
 }

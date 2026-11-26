@@ -105,6 +105,7 @@ import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -461,6 +462,40 @@ public class UseCases {
                 .executeSuccessfully();
 
         return true;
+    }
+
+    /**
+     * Sends {@code hearing.request-approval} for amended results of a hearing day. Must be sent by the user who
+     * holds the amend lock; {@code version} must match the last shared / saved result version for the day.
+     */
+    public static void requestApproval(final RequestSpecification requestSpec, final UUID hearingId, final LocalDate hearingDay, final int version) {
+        final JSONObject json = new JSONObject();
+        json.put("hearingId", hearingId);
+        json.put("hearingDay", hearingDay.toString());
+        json.put("version", version);
+
+        makeCommand(requestSpec, "hearing.request-approval")
+                .ofType("application/vnd.hearing.request-approval+json")
+                .withPayload(json.toString())
+                .executeSuccessfully();
+    }
+
+    /**
+     * Sends {@code hearing.validate-result-amendments}. Must be sent by a user other than the one who requested
+     * approval; {@code userId} is the validating user and must match the logged-in user.
+     */
+    public static void validateResultAmendments(final RequestSpecification requestSpec, final UUID hearingId, final UUID userId,
+                                                final LocalDate hearingDay, final String validateAction) {
+        final JSONObject json = new JSONObject();
+        json.put("id", hearingId);
+        json.put("userId", userId);
+        json.put("hearingDay", hearingDay.toString());
+        json.put("validateAction", validateAction);
+
+        makeCommand(requestSpec, "hearing.validate-result-amendments")
+                .ofType("application/vnd.hearing.validate-result-amendments+json")
+                .withPayload(json.toString())
+                .executeSuccessfully();
     }
 
     public static boolean amendHearingSupport(final RequestSpecification requestSpec, final UUID hearingId,
