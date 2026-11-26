@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
@@ -35,6 +36,24 @@ public class BookProvisionalHearingSlotsProcessor {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
+    /**
+     * Success and failure are two events, not one event with two payload shapes.
+     *
+     * <p>Both used to be published under the booked name, discriminated only by whether the
+     * payload carried a bookingId or an error. That forced every consumer to re-inspect the
+     * payload to learn whether the command had worked - cpp-ui-hearing's commandSync resolves on
+     * the event NAME, so a refusal arrived as an ordinary success value and had to be converted
+     * back into an error by hand. It also made the published schema a {@code oneOf}, which meant
+     * neither branch could be made required and a payload carrying BOTH fields validated against
+     * neither.
+     *
+     * <p>Splitting the names lets a consumer register the failure name as commandSync's
+     * {@code errorEvent} and get an errored observable for free, and lets each schema state
+     * exactly what its payload must contain.
+     */
+    private static final String HEARING_SLOTS_PROVISIONALLY_BOOKED = "public.hearing.hearing-slots-provisionally-booked";
+    private static final String HEARING_SLOTS_PROVISIONAL_BOOKING_REFUSED = "public.hearing.hearing-slots-provisional-booking-refused";
+
     @Inject
     public BookProvisionalHearingSlotsProcessor(final Sender sender,
                                                 final JsonObjectToObjectConverter jsonObjectToObjectConverter,
@@ -48,7 +67,7 @@ public class BookProvisionalHearingSlotsProcessor {
     public void handleBookProvisionalHearingSlots(final JsonEnvelope event) {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.book-provisional-hearing-slots event received {}", event.toObfuscatedDebugString());
+            LOGGER.debug("hearing.book-unconfirmed-hearing-slots event received {}", event.toObfuscatedDebugString());
         }
 
         final BookProvisionalHearingSlots bookProvisionalHearingSlots = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), BookProvisionalHearingSlots.class);
@@ -57,16 +76,26 @@ public class BookProvisionalHearingSlotsProcessor {
                 bookProvisionalHearingSlotsCommand -> {
                     final String hearingStartTimeStr = Objects.nonNull(bookProvisionalHearingSlotsCommand.getHearingStartTime()) ?
                             bookProvisionalHearingSlotsCommand.getHearingStartTime().format(DATE_TIME_FORMATTER) : StringUtils.EMPTY;
-                    arrayBuilder.add(
-                            createObjectBuilder().add("courtScheduleId", bookProvisionalHearingSlotsCommand.getCourtScheduleId().toString())
-                                    .add("hearingStartTime", hearingStartTimeStr)
-                                    .build()
-                    );
+                    final JsonObjectBuilder slotBuilder = createObjectBuilder()
+                            .add("courtScheduleId", bookProvisionalHearingSlotsCommand.getCourtScheduleId().toString())
+                            .add("hearingStartTime", hearingStartTimeStr);
+                    // Omit rather than send null: JsonObjectBuilder.add rejects nulls, and
+                    // courtscheduler treats an absent duration as "slot-based, none needed".
+                    if (Objects.nonNull(bookProvisionalHearingSlotsCommand.getDuration())) {
+                        slotBuilder.add("duration", bookProvisionalHearingSlotsCommand.getDuration());
+                    }
+                    arrayBuilder.add(slotBuilder.build());
                 }
 
         );
 
-        final JsonObject payload = createObjectBuilder().add("provisionalSlots",arrayBuilder.build()).build();
+        final JsonObjectBuilder payloadBuilder = createObjectBuilder().add("provisionalSlots", arrayBuilder.build());
+        // Omit rather than send null: JsonObjectBuilder.add rejects nulls, and courtscheduler
+        // treats an absent bookingId as "first pick, mint one".
+        if (StringUtils.isNotBlank(bookProvisionalHearingSlots.getBookingId())) {
+            payloadBuilder.add("bookingId", bookProvisionalHearingSlots.getBookingId());
+        }
+        final JsonObject payload = payloadBuilder.build();
 
         final ProvisionalBookingServiceResponse provisionalBookingServiceResponse = provisionalBookingService.bookSlots(payload);
 
@@ -74,11 +103,24 @@ public class BookProvisionalHearingSlotsProcessor {
         //raise public event for UI
         if (!provisionalBookingServiceResponse.hasError()) {
             sender.send(Enveloper.envelop(createObjectBuilder().add("bookingId", provisionalBookingServiceResponse.getBookingId()).build())
-                    .withName("public.hearing.hearing-slots-provisionally-booked")
+                    .withName(HEARING_SLOTS_PROVISIONALLY_BOOKED)
                     .withMetadataFrom(event));
         } else {
-            sender.send(Enveloper.envelop(createObjectBuilder().add("error", provisionalBookingServiceResponse.getErrorMessage()).build())
-                    .withName("public.hearing.hearing-slots-provisionally-booked")
+            // courtscheduler's HTTP status, as is: hearing does not interpret it. Omitted when
+            // courtscheduler never answered, as there is no status to send.
+            final JsonObjectBuilder error = createObjectBuilder();
+            if (Objects.nonNull(provisionalBookingServiceResponse.getStatus())) {
+                error.add("status", provisionalBookingServiceResponse.getStatus());
+            }
+            error.add("message", provisionalBookingServiceResponse.getErrorMessage());
+            final JsonObjectBuilder refused = createObjectBuilder().add("error", error.build());
+            // Only when the request carried one. A refused first pick has no booking id at all:
+            // courtscheduler mints one on success only.
+            if (StringUtils.isNotBlank(bookProvisionalHearingSlots.getBookingId())) {
+                refused.add("bookingId", bookProvisionalHearingSlots.getBookingId());
+            }
+            sender.send(Enveloper.envelop(refused.build())
+                    .withName(HEARING_SLOTS_PROVISIONAL_BOOKING_REFUSED)
                     .withMetadataFrom(event));
         }
     }

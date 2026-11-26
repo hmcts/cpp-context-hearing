@@ -54,6 +54,9 @@ import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubGetProgressionPro
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
+import static uk.gov.moj.cpp.hearing.utils.CourtSchedulerStub.bookingIdsCheckedForStatus;
+import static uk.gov.moj.cpp.hearing.utils.CourtSchedulerStub.stubBookingStatus;
+import static uk.gov.moj.cpp.hearing.utils.CourtSchedulerStub.stubBookingStatusFails;
 import static uk.gov.moj.cpp.hearing.utils.ResultsValidatorStub.capturedValidationRequests;
 import static uk.gov.moj.cpp.hearing.utils.ResultsValidatorStub.stubResultsValidatorValidate;
 import static uk.gov.moj.cpp.hearing.utils.ResultsValidatorStub.stubResultsValidatorValidateWithErrors;
@@ -113,6 +116,10 @@ public class ShareResultsV2IT extends AbstractIT {
     private static final UUID NOTICE_OF_FINANCIAL_PENALTY_NOW_DEFINITION_ID = fromString("66cd749a-1d51-11e8-accf-0ed5f89f718b");
     private static final UUID ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID = fromString("10115268-8efc-49fe-b8e8-feee216a03da");
     private static final UUID RD_FINE = fromString("969f150c-cd05-46b0-9dd9-30891efcc766");
+    // SessionAvailabilityValidator's rule and messages, as the clerk sees them
+    private static final String SESSION_AVAILABILITY_RULE = "SESSION_AVAILABILITY";
+    private static final String SESSION_EXPIRED_MESSAGE = "The session you reserved has expired and been released. Select another session.";
+    private static final String SESSION_NOT_CHECKED_MESSAGE = "The availability of the session you selected could not be checked. Try sharing again.";
 
     @Test
     public void shouldShareResultsForHearingWithMultipleCasesWithApplication() {
@@ -283,6 +290,45 @@ public class ShareResultsV2IT extends AbstractIT {
         }
 
         assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
+    }
+
+    /**
+     * Reserve a slot: a line carrying a bookingReference is shared only once courtscheduler says its
+     * session is still held. Unlike the results validator above, this check needs neither the
+     * ResultsValidation toggle nor resultsvalidator.share.blocking, so it runs in every environment.
+     */
+    @Test
+    public void shouldBlockShareWhenTheReservedSessionHasExpired() {
+        final String bookingId = randomUUID().toString();
+        stubBookingStatus(bookingId, "EXPIRED", false);
+
+        final ShareWithBooking share = givenAResultLineCarryingBooking(bookingId);
+
+        assertShareBlockedBySessionCheck(share, SESSION_EXPIRED_MESSAGE);
+    }
+
+    /** Fails closed: a share whose session nobody could confirm would list a hearing with no session behind it. */
+    @Test
+    public void shouldBlockShareWhenCourtSchedulerCannotCheckTheSession() {
+        final String bookingId = randomUUID().toString();
+        stubBookingStatusFails(bookingId);
+
+        final ShareWithBooking share = givenAResultLineCarryingBooking(bookingId);
+
+        assertShareBlockedBySessionCheck(share, SESSION_NOT_CHECKED_MESSAGE);
+    }
+
+    @Test
+    public void shouldShareWhenTheReservedSessionIsStillHeld() {
+        final String bookingId = randomUUID().toString();
+        stubBookingStatus(bookingId, "RESERVED", true);
+
+        final ShareWithBooking share = givenAResultLineCarryingBooking(bookingId);
+
+        shareDaysResultWithCourtClerk(share.hearing(), share.targets(), share.hearingDay());
+
+        assertHearingResultsAreShared(share.hearing());
+        assertThat(bookingIdsCheckedForStatus(), hasItem(bookingId));
     }
 
     @Test
@@ -613,6 +659,71 @@ public class ShareResultsV2IT extends AbstractIT {
         final CourtCentre courtCentre = hearing.getCourtCentre();
         hearing.getProsecutionCases().forEach(prosecutionCase -> stubLjaDetails(courtCentre, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId(), ljaCode));
         stubGetReferenceDataCourtRooms(courtCentre, hearing.getHearingLanguage(), ouId3, ouId4);
+    }
+
+    private record ShareWithBooking(Hearing hearing, List<Target> targets, LocalDate hearingDay, UUID offenceId) {
+    }
+
+    /** A hearing, and a result line for today whose prompts carry the booking the clerk reserved. */
+    private ShareWithBooking givenAResultLineCarryingBooking(final String bookingId) {
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommand(getUuidMapForMultipleCaseStructure());
+        final Hearing hearing = hearingCommand.getHearing();
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
+
+        stubCourtRoom(hearing);
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), orderedDate);
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
+
+        final Target target = saveDraftResultCommand.getTarget();
+        final List<Prompt> prompts = new ArrayList<>(target.getResultLines().get(0).getPrompts());
+        prompts.add(Prompt.prompt()
+                .withId(randomUUID())
+                .withLabel("Booking reference")
+                .withPromptRef("bookingReference")
+                .withValue(bookingId)
+                .build());
+        target.getResultLines().get(0).setPrompts(prompts);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        return new ShareWithBooking(hearing, singletonList(target), LocalDate.now(), target.getOffenceId());
+    }
+
+    private void assertShareBlockedBySessionCheck(final ShareWithBooking share, final String expectedMessage) {
+        final Hearing hearing = share.hearing();
+        try (final Utilities.EventListener resultsSharedV3Listener = listenFor("hearing.events.results-shared-v3", "hearing.event")
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.hearingId", is(hearing.getId().toString())),
+                        withJsonPath("$.hearingDay", is(share.hearingDay().toString())))));
+             final Utilities.EventListener validationFailedListener = listenFor("hearing.events.results-validation-failed", "hearing.event")
+                     .withFilter(isJson(allOf(
+                             withJsonPath("$.hearingId", is(hearing.getId().toString())),
+                             withJsonPath("$.hearingDay", is(share.hearingDay().toString())))))) {
+
+            shareDaysResultWithCourtClerk(hearing, share.targets(), share.hearingDay());
+
+            final JsonPath validationFailed = validationFailedListener.waitFor();
+
+            assertThat(validationFailed.getBoolean("isValid"), is(false));
+            assertThat(validationFailed.getList("rulesEvaluated"), hasItem(SESSION_AVAILABILITY_RULE));
+            final String sessionIssue = "errors.validationIssues.findAll { it.ruleId == '" + SESSION_AVAILABILITY_RULE + "' }[0]";
+            assertThat(validationFailed.getString(sessionIssue + ".severity"), is("ERROR"));
+            assertThat(validationFailed.getList(sessionIssue + ".affectedOffences.offenceId"), hasItem(share.offenceId().toString()));
+            assertThat(validationFailed.getList(sessionIssue + ".affectedOffences.message"), hasItem(expectedMessage));
+
+            resultsSharedV3Listener.expectNone();
+        }
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
     }
 
     private ShareDaysResultsCommand shareDaysResultWithCourtClerk(final Hearing hearing, final List<Target> targets, final LocalDate hearingDay) {

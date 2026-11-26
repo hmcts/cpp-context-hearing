@@ -87,7 +87,7 @@ All request/response bodies use vendor media types: `application/vnd.hearing.<na
 | `POST /hearings` | `hearing.initiate`, `hearing.generate-nows`, `hearing.update-defendant-attendance-on-hearing-day` |
 | `POST /hearings/{hearingId}` | `hearing.add/remove/update-prosecution-counsel`, `hearing.add/remove/update-defence-counsel`, `hearing.update-plea`, `hearing.update-verdict`, `hearing.save-draft-result`, `hearing.save-multiple-draft-results`, `hearing.amend`, `hearing.mark-as-duplicate`, `hearing.change-hearing-detail`, `hearing.set-trial-type`, `hearing.add-witness`, `hearing.youth-court-defendants`, `hearing.unlock-hearing`, `hearing.replicate-shared-results`, and 30+ more |
 | `POST /hearings/{hearingId}/{hearingDay}` | `hearing.share-days-results`, `hearing.save-days-draft-result`, `hearing.save-draft-result-v2`, `hearing.delete-draft-result-v2` |
-| `POST /hearings/{hearingId}/hearing-slots` | `hearing.book-provisional-hearing-slots` |
+| `POST /hearings/{hearingId}/hearing-slots` | `hearing.book-unconfirmed-hearing-slots` |
 | `POST /hearings/{hearingId}/share-results` | `hearing.share-results`, `hearing.share-results-v2` |
 | `POST /hearings/{hearingId}/event` | `hearing.log-hearing-event` |
 | `POST /hearings/{hearingId}/events` | `hearing.update-hearing-events` |

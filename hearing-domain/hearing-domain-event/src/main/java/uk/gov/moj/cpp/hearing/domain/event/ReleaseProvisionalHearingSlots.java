@@ -11,8 +11,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Written by the reserve-a-slot release. Kept so hearings whose streams carry it still load;
- * the aggregate ignores it.
+ * Gives back the unconfirmed slot holds taken under these bookingIds. courtscheduler releases only
+ * holds that no share has confirmed yet, so a booking a share has already turned into a listing is
+ * left alone whatever this event names.
  */
 @Event("hearing.event.release-provisional-hearing-slots")
 public class ReleaseProvisionalHearingSlots implements Serializable {
