@@ -12,10 +12,16 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Identifies plea, verdict and conviction date values on an application offence that were cloned
- * (inherited) from an earlier hearing rather than entered at the current hearing (CHD-3361 AC2, CHD-3370 AC8).
+ * Plea, verdict and conviction date cloned onto an application's offences from the concluded case. Answers
+ * two questions:
+ * <ul>
+ *   <li>Was a value on an application offence cloned from the case, or entered at this hearing?
+ *   ({@link #isCloned}, {@link #isInheritedConvictionDate}) - CHD-3361 AC2, CHD-3370 AC8.</li>
+ *   <li>Does the application's type fall under these rules? ({@link #isShareRuleApplication} for a
+ *   STAT DEC, {@link #isReopenApplication} for a REOPEN).</li>
+ * </ul>
  */
-public final class ClonedValueRule {
+public final class ApplicationClonedValues {
 
     private static final String REOPEN = "MC80524";
     private static final String STAT_DEC = "MC80527";
@@ -23,7 +29,7 @@ public final class ClonedValueRule {
 
     private static final Set<String> SHARE_RULE_APPLICATION_TYPES = Set.of(STAT_DEC, STAT_DEC_SJP);
 
-    private ClonedValueRule() {
+    private ApplicationClonedValues() {
     }
 
     public static boolean isShareRuleApplication(final CourtApplication courtApplication) {

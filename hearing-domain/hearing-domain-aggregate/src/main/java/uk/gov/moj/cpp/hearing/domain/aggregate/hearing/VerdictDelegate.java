@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static uk.gov.moj.cpp.hearing.domain.aggregate.util.ClonedValueRule.isInheritedConvictionDate;
+import static uk.gov.moj.cpp.hearing.domain.aggregate.util.ApplicationClonedValues.isInheritedConvictionDate;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaVerdictUtil.isGuiltyVerdict;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded.convictionDateAdded;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved.convictionDateRemoved;
@@ -14,7 +14,7 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Verdict;
-import uk.gov.moj.cpp.hearing.domain.aggregate.util.ClonedValueRule;
+import uk.gov.moj.cpp.hearing.domain.aggregate.util.ApplicationClonedValues;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
@@ -198,7 +198,7 @@ public class VerdictDelegate implements Serializable {
         }
         return ofNullable(this.momento.getHearing().getCourtApplications()).orElse(emptyList()).stream()
                 .filter(ca -> ca.getId().equals(courtApplicationId))
-                .filter(ClonedValueRule::isReopenApplication)
+                .filter(ApplicationClonedValues::isReopenApplication)
                 .anyMatch(ca -> isInheritedConvictionDate(momento.getConvictionDates().get(offenceId), ca));
     }
 }

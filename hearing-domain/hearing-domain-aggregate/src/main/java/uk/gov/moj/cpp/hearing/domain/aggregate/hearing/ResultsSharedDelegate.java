@@ -23,7 +23,7 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
-import uk.gov.moj.cpp.hearing.domain.aggregate.util.ClonedValueRule;
+import uk.gov.moj.cpp.hearing.domain.aggregate.util.ApplicationClonedValues;
 import uk.gov.moj.cpp.hearing.domain.aggregate.util.CustodyTimeLimitUtil;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLocked;
@@ -217,7 +217,7 @@ public class ResultsSharedDelegate implements Serializable {
         final Map<UUID, Map<UUID, ApplicationOffenceValues>> applicationOffences = new HashMap<>();
         if (nonNull(hearing) && nonNull(hearing.getCourtApplications())) {
             hearing.getCourtApplications().stream()
-                    .filter(ClonedValueRule::isShareRuleApplication)
+                    .filter(ApplicationClonedValues::isShareRuleApplication)
                     .forEach(courtApplication -> applicationOffences.put(courtApplication.getId(),
                             applicationCaseOffences(courtApplication)
                                     .collect(toMap(Offence::getId, ApplicationOffenceValues::of, (first, second) -> first))));
