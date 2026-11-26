@@ -224,8 +224,8 @@ class ApplicationClonedValuesShareTest {
             assertClonedValuesPresent(fixture, fixture.sharedApplicationOffence(resultsShared(events), 0, 0));
             final List<JsonNode> adjusted = clonedValuesAdjusted(events);
             assertThat(adjusted, hasSize(1));
-            assertThat(adjusted.get(0).path("outcome").asText(), is("NOT_GRANTED"));
-            assertThat(adjusted.get(0).path("action").asText(), is("RESTORED"));
+            assertThat(adjusted.get(0).path("adjustment").asText(), is("RESTORED"));
+            assertThat(adjusted.get(0).path("resultDefinitionId").asText(), is(RFSD.toString()));
             assertThat(indexOfClonedValuesAdjusted(events), lessThan(indexOf(events, ResultsSharedV3.class)));
         }
 
@@ -291,8 +291,8 @@ class ApplicationClonedValuesShareTest {
             assertThat(event.path("sharedTime").isMissingNode(), is(false));
             assertThat(event.path("applicationId").asText(), is(fixture.applicationId(0).toString()));
             assertThat(event.path("applicationTypeCode").asText(), is(STAT_DEC));
-            assertThat(event.path("outcome").asText(), is("GRANTED"));
-            assertThat(event.path("action").asText(), is("CLEARED"));
+            assertThat(event.path("adjustment").asText(), is("CLEARED"));
+            assertThat(event.path("resultDefinitionId").asText(), is(G.toString()));
             assertThat(event.path("offences").size(), is(2));
 
             final JsonNode first = offenceEntry(event, fixture.offenceId(0, 0));
@@ -338,7 +338,7 @@ class ApplicationClonedValuesShareTest {
             assertCleared(fixture.sharedApplicationOffence(resultsShared(events), 0, 0));
             final List<JsonNode> adjusted = clonedValuesAdjusted(events);
             assertThat(adjusted, hasSize(1));
-            assertThat(adjusted.get(0).path("action").asText(), is("CLEARED"));
+            assertThat(adjusted.get(0).path("adjustment").asText(), is("CLEARED"));
             final JsonNode offence = offenceEntry(adjusted.get(0), fixture.offenceId(0, 0));
             assertThat(fieldsChanged(offence), containsInAnyOrder("plea", "verdict", "convictionDate"));
             assertThat(offence.path("previous").path("plea").path("pleaValue").asText(), is(GUILTY));
@@ -356,7 +356,7 @@ class ApplicationClonedValuesShareTest {
             assertCleared(fixture.sharedApplicationOffence(resultsShared(events), 0, 0));
             final List<JsonNode> adjusted = clonedValuesAdjusted(events);
             assertThat(adjusted, hasSize(1));
-            assertThat(adjusted.get(0).path("action").asText(), is("CLEARED"));
+            assertThat(adjusted.get(0).path("adjustment").asText(), is("CLEARED"));
             assertThat(fieldsChanged(offenceEntry(adjusted.get(0), fixture.offenceId(0, 0))), containsInAnyOrder("plea", "verdict", "convictionDate"));
         }
 

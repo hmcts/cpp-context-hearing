@@ -23,8 +23,7 @@ import uk.gov.justice.core.courts.Target2;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.AdjustedApplicationOffence;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationClonedValuesAdjusted;
-import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationClonedValuesAdjusted.Action;
-import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationClonedValuesAdjusted.Outcome;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationClonedValuesAdjusted.Adjustment;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationOffenceValues;
 
 import java.time.LocalDate;
@@ -79,8 +78,8 @@ class ApplicationClonedValuesAdjuster {
                     if (!isShareRuleApplication(courtApplication)) {
                         return courtApplication;
                     }
-                    return outcome(courtApplication.getId(), hearingDay, resultLines)
-                            .map(outcome -> adjust(hearingId, hearingDay, sharedTime, courtApplication, outcome, events))
+                    return decidingResult(courtApplication.getId(), hearingDay, resultLines)
+                            .map(decidingResult -> adjust(hearingId, hearingDay, sharedTime, courtApplication, decidingResult, events))
                             .orElse(courtApplication);
                 })
                 .collect(toList());
@@ -89,7 +88,7 @@ class ApplicationClonedValuesAdjuster {
     }
 
     private CourtApplication adjust(final UUID hearingId, final LocalDate hearingDay, final ZonedDateTime sharedTime,
-                                    final CourtApplication courtApplication, final Outcome outcome,
+                                    final CourtApplication courtApplication, final ApplicationResult decidingResult,
                                     final List<ApplicationClonedValuesAdjusted> events) {
         final Map<UUID, ApplicationOffenceValues> asLoaded = momento.getApplicationOffencesAsLoaded().getOrDefault(courtApplication.getId(), emptyMap());
         final Map<UUID, ApplicationOffenceValues> lastShared = momento.getLastSharedApplicationOffences().getOrDefault(courtApplication.getId(), emptyMap());
@@ -102,7 +101,7 @@ class ApplicationClonedValuesAdjuster {
                         .withOffences(ofNullable(courtApplicationCase.getOffences()).map(offences -> offences.stream()
                                 .map(offence -> {
                                     final ApplicationOffenceValues entered = ApplicationOffenceValues.of(offence);
-                                    final ApplicationOffenceValues shared = outcome == Outcome.GRANTED
+                                    final ApplicationOffenceValues shared = decidingResult.isGranted()
                                             ? withoutClonedValues(offence, hearingId, courtApplication)
                                             : asLoaded.getOrDefault(offence.getId(), entered);
                                     final ApplicationOffenceValues previous = lastShared.getOrDefault(offence.getId(), entered);
@@ -128,8 +127,8 @@ class ApplicationClonedValuesAdjuster {
                     .withSharedTime(sharedTime)
                     .withApplicationId(courtApplication.getId())
                     .withApplicationTypeCode(applicationTypeCode(courtApplication))
-                    .withOutcome(outcome)
-                    .withAction(outcome == Outcome.GRANTED ? Action.CLEARED : Action.RESTORED)
+                    .withAdjustment(decidingResult.isGranted() ? Adjustment.CLEARED : Adjustment.RESTORED)
+                    .withResultDefinitionId(decidingResult.resultDefinitionId)
                     .withOffences(adjustedOffences)
                     .build());
         }
@@ -155,7 +154,7 @@ class ApplicationClonedValuesAdjuster {
 
     /**
      * Fields whose shared value differs from the last share, other than those the adviser changed since
-     * then and that are now shared as entered. Compared with what was shared rather than the outcome, so
+     * then and that are now shared as entered. Compared with what was shared rather than the application result, so
      * a hearing shared before this rule existed records its first clear or restore too.
      */
     private static List<String> systemChanges(final ApplicationOffenceValues previous, final ApplicationOffenceValues shared,
@@ -179,18 +178,18 @@ class ApplicationClonedValuesAdjuster {
     }
 
     /**
-     * The latest non-deleted application-level outcome result: from the lines being shared, otherwise
+     * The latest non-deleted application-level result that grants or refuses: from the lines being shared, otherwise
      * from the most recent other hearing day's saved results (work order MULTI-DAY). G and/or STDEC grant
      * (CHD-3361 AC2, AC7, AC15), RFSD/DISM/WDRN do not (AC5); any other result leaves the values alone (AC8).
      */
-    private Optional<Outcome> outcome(final UUID applicationId, final LocalDate hearingDay, final List<SharedResultsCommandResultLineV2> resultLines) {
-        final Optional<Outcome> sharedNow = latest(resultLines.stream()
+    private Optional<ApplicationResult> decidingResult(final UUID applicationId, final LocalDate hearingDay, final List<SharedResultsCommandResultLineV2> resultLines) {
+        final Optional<ApplicationResult> sharedNow = latest(resultLines.stream()
                 .filter(line -> applicationId.equals(line.getApplicationId()) && isNull(line.getOffenceId()) && !line.getIsDeleted())
-                .map(line -> new OutcomeResult(line.getResultDefinitionId(), line.getAmendmentDate())));
-        return sharedNow.isPresent() ? sharedNow : outcomeOnOtherDays(applicationId, hearingDay);
+                .map(line -> new ApplicationResult(line.getResultDefinitionId(), line.getAmendmentDate())));
+        return sharedNow.isPresent() ? sharedNow : decidingResultOnOtherDays(applicationId, hearingDay);
     }
 
-    private Optional<Outcome> outcomeOnOtherDays(final UUID applicationId, final LocalDate hearingDay) {
+    private Optional<ApplicationResult> decidingResultOnOtherDays(final UUID applicationId, final LocalDate hearingDay) {
         return momento.getMultiDaySavedTargets().entrySet().stream()
                 .filter(day -> !day.getKey().equals(hearingDay))
                 .sorted(Map.Entry.<LocalDate, Map<UUID, Target2>>comparingByKey().reversed())
@@ -199,32 +198,33 @@ class ApplicationClonedValuesAdjuster {
                 .findFirst();
     }
 
-    private static Stream<OutcomeResult> savedApplicationResults(final UUID applicationId, final Map<UUID, Target2> targets) {
+    private static Stream<ApplicationResult> savedApplicationResults(final UUID applicationId, final Map<UUID, Target2> targets) {
         return targets.values().stream()
                 .map(Target2::getResultLines)
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .filter(line -> applicationId.equals(line.getApplicationId()) && isNull(line.getOffenceId()) && !Boolean.TRUE.equals(line.getIsDeleted()))
-                .map(line -> new OutcomeResult(line.getResultDefinitionId(), line.getAmendmentDate()));
+                .map(line -> new ApplicationResult(line.getResultDefinitionId(), line.getAmendmentDate()));
     }
 
-    private static Optional<Outcome> latest(final Stream<OutcomeResult> results) {
-        final List<OutcomeResult> outcomeResults = results
-                .filter(result -> GRANTED_RESULTS.contains(result.resultDefinitionId) || NOT_GRANTED_RESULTS.contains(result.resultDefinitionId))
-                .collect(toList());
+    private static Optional<ApplicationResult> latest(final Stream<ApplicationResult> results) {
         // stable: of equally dated results the last one wins
-        return outcomeResults.stream()
-                .reduce((earlier, later) -> AMENDMENT_ORDER.compare(later.amendmentDate, earlier.amendmentDate) >= 0 ? later : earlier)
-                .map(result -> GRANTED_RESULTS.contains(result.resultDefinitionId) ? Outcome.GRANTED : Outcome.NOT_GRANTED);
+        return results
+                .filter(result -> GRANTED_RESULTS.contains(result.resultDefinitionId) || NOT_GRANTED_RESULTS.contains(result.resultDefinitionId))
+                .reduce((earlier, later) -> AMENDMENT_ORDER.compare(later.amendmentDate, earlier.amendmentDate) >= 0 ? later : earlier);
     }
 
-    private static final class OutcomeResult {
+    private static final class ApplicationResult {
         private final UUID resultDefinitionId;
         private final ZonedDateTime amendmentDate;
 
-        private OutcomeResult(final UUID resultDefinitionId, final ZonedDateTime amendmentDate) {
+        private ApplicationResult(final UUID resultDefinitionId, final ZonedDateTime amendmentDate) {
             this.resultDefinitionId = resultDefinitionId;
             this.amendmentDate = amendmentDate;
+        }
+
+        private boolean isGranted() {
+            return GRANTED_RESULTS.contains(resultDefinitionId);
         }
     }
 }

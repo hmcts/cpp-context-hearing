@@ -13,8 +13,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Records that sharing a STAT DEC application's result cleared (granted) or restored (not granted)
- * the plea, verdict and conviction date cloned onto its offences from an earlier hearing.
- * Private: no listener, processor or view store (no Jira AC).
+ * the plea, verdict and conviction date cloned onto its offences from an earlier hearing:
+ * {@code adjustment} says what the system did, {@code resultDefinitionId} the application result
+ * (G, STDEC, RFSD, DISM or WDRN) that caused it. Private: no listener, processor or view store (no Jira AC).
  */
 @SuppressWarnings({"squid:S2384", "PMD.BeanMembersShouldSerialize"})
 @Event("hearing.events.application-cloned-values-adjusted")
@@ -22,17 +23,15 @@ public class ApplicationClonedValuesAdjusted implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public enum Outcome {GRANTED, NOT_GRANTED}
-
-    public enum Action {CLEARED, RESTORED}
+    public enum Adjustment {CLEARED, RESTORED}
 
     private final UUID hearingId;
     private final LocalDate hearingDay;
     private final ZonedDateTime sharedTime;
     private final UUID applicationId;
     private final String applicationTypeCode;
-    private final Outcome outcome;
-    private final Action action;
+    private final Adjustment adjustment;
+    private final UUID resultDefinitionId;
     private final List<AdjustedApplicationOffence> offences;
 
     @JsonCreator
@@ -41,16 +40,16 @@ public class ApplicationClonedValuesAdjusted implements Serializable {
                                             @JsonProperty("sharedTime") final ZonedDateTime sharedTime,
                                             @JsonProperty("applicationId") final UUID applicationId,
                                             @JsonProperty("applicationTypeCode") final String applicationTypeCode,
-                                            @JsonProperty("outcome") final Outcome outcome,
-                                            @JsonProperty("action") final Action action,
+                                            @JsonProperty("adjustment") final Adjustment adjustment,
+                                            @JsonProperty("resultDefinitionId") final UUID resultDefinitionId,
                                             @JsonProperty("offences") final List<AdjustedApplicationOffence> offences) {
         this.hearingId = hearingId;
         this.hearingDay = hearingDay;
         this.sharedTime = sharedTime;
         this.applicationId = applicationId;
         this.applicationTypeCode = applicationTypeCode;
-        this.outcome = outcome;
-        this.action = action;
+        this.adjustment = adjustment;
+        this.resultDefinitionId = resultDefinitionId;
         this.offences = offences;
     }
 
@@ -74,12 +73,12 @@ public class ApplicationClonedValuesAdjusted implements Serializable {
         return applicationTypeCode;
     }
 
-    public Outcome getOutcome() {
-        return outcome;
+    public Adjustment getAdjustment() {
+        return adjustment;
     }
 
-    public Action getAction() {
-        return action;
+    public UUID getResultDefinitionId() {
+        return resultDefinitionId;
     }
 
     public List<AdjustedApplicationOffence> getOffences() {
@@ -97,8 +96,8 @@ public class ApplicationClonedValuesAdjusted implements Serializable {
         private ZonedDateTime sharedTime;
         private UUID applicationId;
         private String applicationTypeCode;
-        private Outcome outcome;
-        private Action action;
+        private Adjustment adjustment;
+        private UUID resultDefinitionId;
         private List<AdjustedApplicationOffence> offences;
 
         private Builder() {
@@ -129,13 +128,13 @@ public class ApplicationClonedValuesAdjusted implements Serializable {
             return this;
         }
 
-        public Builder withOutcome(final Outcome outcome) {
-            this.outcome = outcome;
+        public Builder withAdjustment(final Adjustment adjustment) {
+            this.adjustment = adjustment;
             return this;
         }
 
-        public Builder withAction(final Action action) {
-            this.action = action;
+        public Builder withResultDefinitionId(final UUID resultDefinitionId) {
+            this.resultDefinitionId = resultDefinitionId;
             return this;
         }
 
@@ -145,7 +144,7 @@ public class ApplicationClonedValuesAdjusted implements Serializable {
         }
 
         public ApplicationClonedValuesAdjusted build() {
-            return new ApplicationClonedValuesAdjusted(hearingId, hearingDay, sharedTime, applicationId, applicationTypeCode, outcome, action, offences);
+            return new ApplicationClonedValuesAdjusted(hearingId, hearingDay, sharedTime, applicationId, applicationTypeCode, adjustment, resultDefinitionId, offences);
         }
     }
 }

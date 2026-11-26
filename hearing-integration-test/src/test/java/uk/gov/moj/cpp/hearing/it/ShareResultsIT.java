@@ -1952,11 +1952,11 @@ public class ShareResultsIT extends AbstractIT {
      * <ul>
      *   <li>Resulted GRANTED (G) and shared: {@code public.events.hearing.hearing-resulted} carries no plea, verdict
      *   or convictionDate on the application offences, and exactly one private
-     *   {@code hearing.events.application-cloned-values-adjusted} (GRANTED / CLEARED) is raised before
+     *   {@code hearing.events.application-cloned-values-adjusted} (CLEARED, caused by G) is raised before
      *   {@code hearing.events.results-shared-v3}.</li>
-     *   <li>Amended to NOT_GRANTED (RFSD) through the per-day amend and approval workflow and re-shared: the re-shared
-     *   {@code hearing-resulted} carries the restored cloned values, and the event is raised with NOT_GRANTED /
-     *   RESTORED.</li>
+     *   <li>Amended to refused (RFSD) through the per-day amend and approval workflow and re-shared: the re-shared
+     *   {@code hearing-resulted} carries the restored cloned values, and the event is raised as RESTORED, caused by
+     *   RFSD.</li>
      * </ul>
      */
     @Test
@@ -1987,8 +1987,8 @@ public class ShareResultsIT extends AbstractIT {
             assertThat(adjusted.getString("sharedTime"), is(notNullValue()));
             assertThat(adjusted.getString("applicationId"), is(statDec.applicationId.toString()));
             assertThat(adjusted.getString("applicationTypeCode"), is(STAT_DEC_APPLICATION_TYPE_CODE));
-            assertThat(adjusted.getString("outcome"), is("GRANTED"));
-            assertThat(adjusted.getString("action"), is("CLEARED"));
+            assertThat(adjusted.getString("adjustment"), is("CLEARED"));
+            assertThat(adjusted.getString("resultDefinitionId"), is(STAT_DEC_GRANTED_G_RESULT_DEF_ID.toString()));
             assertThat(adjusted.getList("offences.offenceId", String.class), containsInAnyOrder(statDec.offenceIdStrings()));
             for (final UUID offenceId : statDec.offenceIds) {
                 final String offencePath = "offences.find { it.offenceId == '" + offenceId + "' }";
@@ -2045,7 +2045,7 @@ public class ShareResultsIT extends AbstractIT {
              final EventListener restoredListener = listenFor(APPLICATION_CLONED_VALUES_ADJUSTED, HEARING_EVENT_TOPIC)
                      .withFilter(isJson(allOf(
                              withJsonPath("$.hearingId", is(hearing.getId().toString())),
-                             withJsonPath("$.action", is("RESTORED")))))) {
+                             withJsonPath("$.adjustment", is("RESTORED")))))) {
 
             shareDaysResultWithCourtClerk(hearing, asList(grantedTarget, refusedTarget), hearingDay, basicShareResultsCommandV2Template(AMENDED_RESULT_VERSION));
 
@@ -2053,8 +2053,8 @@ public class ShareResultsIT extends AbstractIT {
             assertThat(restored.getString("hearingDay"), is(hearingDay.toString()));
             assertThat(restored.getString("applicationId"), is(statDec.applicationId.toString()));
             assertThat(restored.getString("applicationTypeCode"), is(STAT_DEC_APPLICATION_TYPE_CODE));
-            assertThat(restored.getString("outcome"), is("NOT_GRANTED"));
-            assertThat(restored.getString("action"), is("RESTORED"));
+            assertThat(restored.getString("adjustment"), is("RESTORED"));
+            assertThat(restored.getString("resultDefinitionId"), is(STAT_DEC_REFUSED_RFSD_RESULT_DEF_ID.toString()));
             assertThat(restored.getList("offences.offenceId", String.class), containsInAnyOrder(statDec.offenceIdStrings()));
             for (final UUID offenceId : statDec.offenceIds) {
                 final String offencePath = "offences.find { it.offenceId == '" + offenceId + "' }";

@@ -4,8 +4,8 @@
   "sharedTime": "2026-01-15T10:15:30.000Z",
   "applicationId": "0f4d9a52-7a1c-4b8e-9b6d-3e2a1c5f8d44",
   "applicationTypeCode": "MC80527",
-  "outcome": "GRANTED",
-  "action": "CLEARED",
+  "adjustment": "CLEARED",
+  "resultDefinitionId": "2b3f7c20-8fc1-4fad-9076-df196c24b27e",
   "offences": [
     {
       "offenceId": "9d1e6b7a-2c4f-4e8b-8a3d-5f6c7b8a9e01",

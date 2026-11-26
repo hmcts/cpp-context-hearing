@@ -19,13 +19,14 @@
     "applicationTypeCode": {
       "type": "string"
     },
-    "outcome": {
-      "type": "string",
-      "enum": ["GRANTED", "NOT_GRANTED"]
-    },
-    "action": {
+    "adjustment": {
+      "description": "What the system did to the cloned values: CLEARED on a grant, RESTORED when not granted.",
       "type": "string",
       "enum": ["CLEARED", "RESTORED"]
+    },
+    "resultDefinitionId": {
+      "description": "The application result that caused the adjustment (G, STDEC, RFSD, DISM or WDRN).",
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
     },
     "offences": {
       "type": "array",
@@ -40,8 +41,8 @@
     "hearingDay",
     "sharedTime",
     "applicationId",
-    "outcome",
-    "action",
+    "adjustment",
+    "resultDefinitionId",
     "offences"
   ],
   "additionalProperties": false,
