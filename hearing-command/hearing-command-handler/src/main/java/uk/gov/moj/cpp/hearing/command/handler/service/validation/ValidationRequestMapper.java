@@ -109,7 +109,7 @@ public class ValidationRequestMapper {
 
         defendants.putIfAbsent(defendantId, toDefendantDto(masterDefendant, defendantId));
         extractApplicationOffences(courtApplication)
-                .forEach(offence -> addOffence(offence, caseUrn, defendantId, isCivil, offences));
+                .forEach(offence -> addOffence(offence, caseUrn, defendantId, isCivil, null, offences));
     }
 
     private List<Offence> extractApplicationOffences(final CourtApplication courtApplication) {
@@ -153,9 +153,11 @@ public class ValidationRequestMapper {
                 .forEach(defendant -> {
                     final String defendantId = uuidToString(defendant.getId());
                     defendants.putIfAbsent(defendantId, toDefendantDto(defendant));
+                    final BailStatus defendantBailStatus = extractDefendantBailStatus(defendant);
                     if (defendant.getOffences() != null) {
                         defendant.getOffences()
-                                .forEach(offence -> addOffence(offence, caseUrn, defendantId, isCivil, offences));
+                                .forEach(offence -> addOffence(offence, caseUrn, defendantId, isCivil,
+                                        defendantBailStatus, offences));
                     }
                 });
     }
@@ -198,12 +200,14 @@ public class ValidationRequestMapper {
     }
 
     private void addOffence(final Offence offence, final String caseUrn, final String defendantId,
-                            final boolean isCivil, final Map<String, OffenceDto> offences) {
-        offences.putIfAbsent(uuidToString(offence.getId()), toOffenceDto(offence, caseUrn, defendantId, isCivil));
+                            final boolean isCivil, final BailStatus defendantBailStatus,
+                            final Map<String, OffenceDto> offences) {
+        offences.putIfAbsent(uuidToString(offence.getId()),
+                toOffenceDto(offence, caseUrn, defendantId, isCivil, defendantBailStatus));
     }
 
     private OffenceDto toOffenceDto(final Offence offence, final String caseUrn, final String defendantId,
-                                    final boolean isCivil) {
+                                    final boolean isCivil, final BailStatus defendantBailStatus) {
         return new OffenceDto()
                 .offenceId(uuidToString(offence.getId()))
                 .offenceCode(offence.getOffenceCode())
@@ -211,7 +215,7 @@ public class ValidationRequestMapper {
                 .orderIndex(offence.getOrderIndex())
                 .caseUrn(caseUrn)
                 .defendantId(defendantId)
-                .bailStatus(toBailStatus(offence.getBailStatus()))
+                .bailStatus(toBailStatus(resolveBailStatus(offence, defendantBailStatus)))
                 .isConvicted(isConvicted(offence))
                 .hasExistingCtlRecord(hasExistingCustodyTimeLimit(offence))
                 .isCivil(isCivil);
@@ -220,6 +224,21 @@ public class ValidationRequestMapper {
     private boolean isCivilApplication(final CourtApplication courtApplication) {
         final CourtCivilApplication courtCivilApplication = courtApplication.getCourtCivilApplication();
         return courtCivilApplication != null && Boolean.TRUE.equals(courtCivilApplication.getIsCivil());
+    }
+
+    /**
+     * The offence's own bail status, falling back to the defendant-level bail status when the
+     * offence has none — the same precedence as {@code BailStatusHelper.toStoredOffenceBailStatus}.
+     * Without the fallback, offences whose custody status is held only on the defendant are sent
+     * with a null bailStatus and remand-dependent validator rules (e.g. DR-BAIL-016) never fire.
+     */
+    private static BailStatus resolveBailStatus(final Offence offence, final BailStatus defendantBailStatus) {
+        return offence.getBailStatus() != null ? offence.getBailStatus() : defendantBailStatus;
+    }
+
+    private BailStatus extractDefendantBailStatus(final Defendant defendant) {
+        final PersonDefendant personDefendant = defendant.getPersonDefendant();
+        return personDefendant != null ? personDefendant.getBailStatus() : null;
     }
 
     private boolean isConvicted(final Offence offence) {
