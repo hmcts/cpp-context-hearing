@@ -143,9 +143,28 @@ public class ResultsSharedDelegate implements Serializable {
                 resultsShared.getTargets().stream()
                         .flatMap(target2 -> target2.getResultLines().stream()
                                 .map( resultLine -> convertResultLine2ToSharedResultsCommandResultLineV2(target2,resultLine))).collect(Collectors.toList()));
-        this.momento.setHearing(resultsShared.getHearing());
+        this.momento.setHearing(hearingWithMutableProsecutionCases(resultsShared.getHearing()));
         this.momento.getHearing().setYouthCourt(resultsShared.getHearing().getYouthCourt());
         this.momento.getHearing().setHasSharedResults(true);
+    }
+
+    // An empty prosecutionCases array fails the hearing schema. Omit it on the published copy only.
+    private void omitEmptyProsecutionCases(final Hearing hearing) {
+        if (nonNull(hearing) && isEmpty(hearing.getProsecutionCases())) {
+            hearing.setProsecutionCases(null);
+        }
+    }
+
+    // Applying the shared hearing writes that omitted property back as null. Restore an empty list
+    // on a copy so later commands can add a case, and leave the event payload unchanged.
+    private Hearing hearingWithMutableProsecutionCases(final Hearing sharedHearing) {
+        if (isNull(sharedHearing) || nonNull(sharedHearing.getProsecutionCases())) {
+            return sharedHearing;
+        }
+        return Hearing.hearing()
+                .withValuesFrom(sharedHearing)
+                .withProsecutionCases(new ArrayList<>())
+                .build();
     }
 
 
@@ -501,6 +520,7 @@ public class ResultsSharedDelegate implements Serializable {
         final Hearing hearing = dedupAllApplications(this.momento.getHearing());
         hearing.setYouthCourt(youthCourt);
         hearing.setHasSharedResults(true);
+        omitEmptyProsecutionCases(hearing);
 
         final ResultsShared.Builder builder = ResultsShared.builder()
                 .withHearingId(hearingId)
@@ -545,6 +565,7 @@ public class ResultsSharedDelegate implements Serializable {
 
         final Hearing hearing = dedupAllApplications(this.momento.getHearing());
         hearing.setHasSharedResults(true);
+        omitEmptyProsecutionCases(hearing);
 
         final Stream.Builder<Object> streamBuilder = Stream.builder();
 
@@ -615,6 +636,7 @@ public class ResultsSharedDelegate implements Serializable {
                 ca.setApplicationStatus(applicationStatus);
             });
         }
+        omitEmptyProsecutionCases(hearing);
 
         final List<Target2> updatedFinalTargets = updateApplicationFinalisedFlag(finalTargets.values());
         final ResultsSharedV3.Builder resultsSharedV3Builder = ResultsSharedV3.builder()

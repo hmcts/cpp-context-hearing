@@ -8,8 +8,10 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertNotNull;
 import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -18,9 +20,13 @@ import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.core.courts.YouthCourt;
@@ -32,6 +38,7 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
+import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationFinalisedOnTargetUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
@@ -1424,6 +1431,87 @@ public class ResultsSharedDelegateTest {
 
         assertThat(hearingAggregateMomento.getMultiDaySavedTargets().get(hearingDay).get(targetId).getApplicationFinalised(), is(true));
         assertThat(hearingAggregateMomento.getMultiDaySavedTargets().get(hearingDay).get(targetId2).getApplicationFinalised(), is(false));
+    }
+
+    @Test
+    public void shouldOmitEmptyProsecutionCasesFromSharedHearingAndRestoreEmptyListOnApply() {
+        final UUID hearingId = randomUUID();
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final List<ProsecutionCase> prosecutionCases = new ArrayList<>();
+        prosecutionCases.add(prosecutionCaseWithOffence(caseId, defendantId, offenceId));
+        hearingAggregateMomento.getHearing().setProsecutionCases(prosecutionCases);
+
+        new HearingDelegate(hearingAggregateMomento).handleHearingExtended(new HearingExtended(hearingId, null, null, null,
+                CourtApplication.courtApplication()
+                        .withId(randomUUID())
+                        .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                                .withOffences(singletonList(Offence.offence().withId(offenceId).withProceedingsConcluded(true).build()))
+                                .build()))
+                        .build(),
+                null, null));
+
+        final List<ProsecutionCase> casesAfterExtend = hearingAggregateMomento.getHearing().getProsecutionCases();
+        assertThat(casesAfterExtend.isEmpty(), is(true));
+
+        final LocalDate hearingDay = LocalDate.now();
+        final List<Object> eventCollection = resultsSharedDelegate.shareResultForDay(hearingId, getDelegatedPowers(), ZonedDateTime.now(),
+                getSharedResultsCommandResultLineV2s(ZonedDateTime.now()), emptyList(), emptyList(), getYouthCourt(), hearingDay, 1).toList();
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
+
+        assertThat(resultsSharedV3.getHearing().getProsecutionCases(), nullValue());
+        assertThat(hearingAggregateMomento.getHearing().getProsecutionCases(), sameInstance(casesAfterExtend));
+
+        resultsSharedDelegate.handleResultsSharedV3(resultsSharedV3);
+
+        assertThat(resultsSharedV3.getHearing().getProsecutionCases(), nullValue());
+        assertThat(hearingAggregateMomento.getHearing(), not(sameInstance(resultsSharedV3.getHearing())));
+        assertThat(hearingAggregateMomento.getHearing().getProsecutionCases(), notNullValue());
+        assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().isEmpty(), is(true));
+    }
+
+    @Test
+    public void shouldOmitEmptyProsecutionCasesFromResultsSharedV2() {
+        final List<ProsecutionCase> prosecutionCases = new ArrayList<>();
+        hearingAggregateMomento.getHearing().setProsecutionCases(prosecutionCases);
+
+        final LocalDate hearingDay = LocalDate.now();
+        final List<Object> eventCollection = resultsSharedDelegate.shareResultsV2(randomUUID(), getDelegatedPowers(), ZonedDateTime.now(),
+                getSharedResultsCommandResultLineV2s(ZonedDateTime.now()), emptyList(), hearingDay).toList();
+        final ResultsSharedV2 resultsSharedV2 = (ResultsSharedV2) eventCollection.get(0);
+
+        assertThat(resultsSharedV2.getHearing().getProsecutionCases(), nullValue());
+        assertThat(hearingAggregateMomento.getHearing().getProsecutionCases(), sameInstance(prosecutionCases));
+    }
+
+    @Test
+    public void shouldKeepProsecutionCasesOnSharedHearingWhenCasesRemain() {
+        final UUID caseId = randomUUID();
+        hearingAggregateMomento.getHearing().setProsecutionCases(new ArrayList<>(singletonList(
+                prosecutionCaseWithOffence(caseId, randomUUID(), randomUUID()))));
+
+        final LocalDate hearingDay = LocalDate.now();
+        final List<Object> eventCollection = resultsSharedDelegate.shareResultForDay(randomUUID(), getDelegatedPowers(), ZonedDateTime.now(),
+                getSharedResultsCommandResultLineV2s(ZonedDateTime.now()), emptyList(), emptyList(), getYouthCourt(), hearingDay, 1).toList();
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
+
+        assertThat(resultsSharedV3.getHearing().getProsecutionCases().size(), is(1));
+        assertThat(resultsSharedV3.getHearing().getProsecutionCases().get(0).getId(), is(caseId));
+    }
+
+    private ProsecutionCase prosecutionCaseWithOffence(final UUID caseId, final UUID defendantId, final UUID offenceId) {
+        final List<Offence> offences = new ArrayList<>();
+        offences.add(Offence.offence().withId(offenceId).build());
+        final List<Defendant> defendants = new ArrayList<>();
+        defendants.add(Defendant.defendant()
+                .withId(defendantId)
+                .withOffences(offences)
+                .build());
+        return ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withDefendants(defendants)
+                .build();
     }
 
     private YouthCourt getYouthCourt() {
