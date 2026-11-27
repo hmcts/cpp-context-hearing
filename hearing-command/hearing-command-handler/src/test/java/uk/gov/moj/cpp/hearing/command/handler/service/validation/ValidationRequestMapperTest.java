@@ -458,6 +458,62 @@ class ValidationRequestMapperTest {
         assertThat(objectMapper.writeValueAsString(request), not(containsString("bailStatus")));
     }
 
+    @Test
+    void shouldFallBackToDefendantBailStatusWhenOffenceHasNoBailStatus() {
+        final Offence offence = offenceWithBailStatus(null);
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                hearingWithOffence(offence, bailStatusWithCode("C", "Remanded into Custody")));
+
+        assertThat(request.getOffences().get(0).getBailStatus(), is(OffenceDto.BailStatusEnum.C));
+    }
+
+    @Test
+    void shouldPreferOffenceBailStatusOverDefendantBailStatus() {
+        final Offence offence = offenceWithBailStatus(bailStatusWithCode("B", "Conditional Bail"));
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                hearingWithOffence(offence, bailStatusWithCode("C", "Remanded into Custody")));
+
+        assertThat(request.getOffences().get(0).getBailStatus(), is(OffenceDto.BailStatusEnum.B));
+    }
+
+    @Test
+    void shouldSendNullBailStatusWhenNeitherOffenceNorDefendantHasBailStatus() {
+        final Offence offence = offenceWithBailStatus(null);
+
+        final DraftValidationRequest request = mapper.toValidationRequest(
+                buildCommand(randomUUID(), LocalDate.now(), emptyList()),
+                hearingWithOffence(offence, null));
+
+        assertThat(request.getOffences().get(0).getBailStatus(), is(nullValue()));
+    }
+
+    private static BailStatus bailStatusWithCode(final String code, final String description) {
+        return BailStatus.bailStatus()
+                .withId(randomUUID())
+                .withCode(code)
+                .withDescription(description)
+                .build();
+    }
+
+    private static Hearing hearingWithOffence(final Offence offence, final BailStatus defendantBailStatus) {
+        final Defendant defendant = Defendant.defendant()
+                .withId(randomUUID())
+                .withPersonDefendant(PersonDefendant.personDefendant()
+                        .withBailStatus(defendantBailStatus)
+                        .build())
+                .withOffences(List.of(offence))
+                .build();
+        return Hearing.hearing()
+                .withProsecutionCases(List.of(ProsecutionCase.prosecutionCase()
+                        .withDefendants(List.of(defendant))
+                        .build()))
+                .build();
+    }
+
     private static Offence offenceWithBailStatus(final BailStatus bailStatus) {
         return Offence.offence()
                 .withId(randomUUID())
